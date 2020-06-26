@@ -27,6 +27,16 @@ const ambiguousConflict = (suffix: string) => ({
   fail409Param: `ambiguous_conflict_${suffix}`,
 });
 
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  const importable = cases.map(([, val]) => ({ ...val, successParam: 'trueCopy' }));
+  const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const all = [...importable, ...nonImportable];
+  return { importable, nonImportable, all };
+};
+
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
@@ -86,62 +96,88 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+    const singleRequest = true;
+
+    if (trueCopy) {
+      const { importable, nonImportable, all } = createTrueCopyTestCases();
+      return {
+        unauthorized: [
+          createTestDefinitions(importable, true, { trueCopy, spaceId }),
+          createTestDefinitions(nonImportable, false, { trueCopy, spaceId, singleRequest }),
+          createTestDefinitions(all, true, {
+            trueCopy,
+            spaceId,
+            singleRequest,
+            responseBodyOverride: expectForbidden('bulk_create')([
+              'dashboard',
+              'globaltype',
+              'isolatedtype',
+              'sharedtype',
+            ]),
+          }),
+        ].flat(),
+        authorized: createTestDefinitions(all, false, { trueCopy, spaceId, singleRequest }),
+      };
+    }
+
     const { group1Importable, group1NonImportable, group1All, group2, group3 } = createTestCases(
       overwrite,
       spaceId
     );
-    // use singleRequest to reduce execution time and/or test combined cases
     return {
       unauthorized: [
-        createTestDefinitions(group1Importable, true, overwrite, { spaceId }),
-        createTestDefinitions(group1NonImportable, false, overwrite, {
+        createTestDefinitions(group1Importable, true, { overwrite, spaceId }),
+        createTestDefinitions(group1NonImportable, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group1All, true, {
+          overwrite,
           spaceId,
-          singleRequest: true,
-        }),
-        createTestDefinitions(group1All, true, overwrite, {
-          spaceId,
-          singleRequest: true,
+          singleRequest,
           responseBodyOverride: expectForbidden('bulk_create')([
             'dashboard',
             'globaltype',
             'isolatedtype',
           ]),
         }),
-        createTestDefinitions(group2, true, overwrite, { spaceId, singleRequest: true }),
-        createTestDefinitions(group3, true, overwrite, { spaceId, singleRequest: true }),
+        createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group3, true, { overwrite, spaceId, singleRequest }),
       ].flat(),
       authorized: [
-        createTestDefinitions(group1All, false, overwrite, { spaceId, singleRequest: true }),
-        createTestDefinitions(group2, false, overwrite, { spaceId, singleRequest: true }),
-        createTestDefinitions(group3, false, overwrite, { spaceId, singleRequest: true }),
+        createTestDefinitions(group1All, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group3, false, { overwrite, spaceId, singleRequest }),
       ].flat(),
     };
   };
 
   describe('_import', () => {
-    getTestScenarios([false, true]).securityAndSpaces.forEach(
-      ({ spaceId, users, modifier: overwrite }) => {
-        const suffix = ` within the ${spaceId} space${overwrite ? ' with overwrite enabled' : ''}`;
-        const { unauthorized, authorized } = createTests(overwrite!, spaceId);
-        const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
-          addTests(`${user.description}${suffix}`, { user, spaceId, tests });
-        };
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).securityAndSpaces.forEach(({ spaceId, users, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = ` within the ${spaceId} space${
+        overwrite ? ' with overwrite enabled' : trueCopy ? ' with trueCopy enabled' : ''
+      }`;
+      const { unauthorized, authorized } = createTests(overwrite, trueCopy, spaceId);
+      const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
+        addTests(`${user.description}${suffix}`, { user, spaceId, tests });
+      };
 
-        [
-          users.noAccess,
-          users.legacyAll,
-          users.dualRead,
-          users.readGlobally,
-          users.readAtSpace,
-          users.allAtOtherSpace,
-        ].forEach((user) => {
-          _addTests(user, unauthorized);
-        });
-        [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
-          _addTests(user, authorized);
-        });
-      }
-    );
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.dualRead,
+        users.readGlobally,
+        users.readAtSpace,
+        users.allAtOtherSpace,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
+      });
+      [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
+        _addTests(user, authorized);
+      });
+    });
   });
 }

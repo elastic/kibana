@@ -15,6 +15,7 @@ export interface CopyOptions {
   objects: Array<{ type: string; id: string }>;
   overwrite: boolean;
   includeReferences: boolean;
+  trueCopy: boolean;
 }
 
 export interface ResolveConflictsOptions {

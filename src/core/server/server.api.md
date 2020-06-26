@@ -1112,7 +1112,7 @@ export interface ImageValidation {
 }
 
 // @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, trueCopy, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
@@ -2222,9 +2222,12 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportOptions {
     namespace?: string;
     objectLimit: number;
+    // @deprecated (undocumented)
     overwrite: boolean;
     readStream: Readable;
     savedObjectsClient: SavedObjectsClientContract;
+    // @deprecated (undocumented)
+    trueCopy: boolean;
     typeRegistry: ISavedObjectTypeRegistry;
 }
 

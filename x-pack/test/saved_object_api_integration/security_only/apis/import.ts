@@ -21,6 +21,16 @@ const ambiguousConflict = (suffix: string) => ({
   fail409Param: `ambiguous_conflict_${suffix}`,
 });
 
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  const importable = cases.map(([, val]) => ({ ...val, successParam: 'trueCopy' }));
+  const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const all = [...importable, ...nonImportable];
+  return { importable, nonImportable, all };
+};
+
 const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
@@ -65,38 +75,71 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean) => {
+  const createTests = (overwrite: boolean, trueCopy: boolean) => {
+    // use singleRequest to reduce execution time and/or test combined cases
+    const singleRequest = true;
+
+    if (trueCopy) {
+      const { importable, nonImportable, all } = createTrueCopyTestCases();
+      return {
+        unauthorized: [
+          createTestDefinitions(importable, true, { trueCopy }),
+          createTestDefinitions(nonImportable, false, { trueCopy, singleRequest }),
+          createTestDefinitions(all, true, {
+            trueCopy,
+            singleRequest,
+            responseBodyOverride: expectForbidden('bulk_create')([
+              'dashboard',
+              'globaltype',
+              'isolatedtype',
+              'sharedtype',
+            ]),
+          }),
+        ].flat(),
+        authorized: createTestDefinitions(all, false, { trueCopy, singleRequest }),
+      };
+    }
+
     const { group1Importable, group1NonImportable, group1All, group2, group3 } = createTestCases(
       overwrite
     );
-    // use singleRequest to reduce execution time and/or test combined cases
     return {
       unauthorized: [
-        createTestDefinitions(group1Importable, true, overwrite),
-        createTestDefinitions(group1NonImportable, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(group1All, true, overwrite, {
-          singleRequest: true,
+        createTestDefinitions(group1Importable, true, { overwrite }),
+        createTestDefinitions(group1NonImportable, false, { overwrite, singleRequest }),
+        createTestDefinitions(group1All, true, {
+          overwrite,
+          singleRequest,
           responseBodyOverride: expectForbidden('bulk_create')([
             'dashboard',
             'globaltype',
             'isolatedtype',
           ]),
         }),
-        createTestDefinitions(group2, true, overwrite, { singleRequest: true }),
-        createTestDefinitions(group3, true, overwrite, { singleRequest: true }),
+        createTestDefinitions(group2, true, { overwrite, singleRequest }),
+        createTestDefinitions(group3, true, { overwrite, singleRequest }),
       ].flat(),
       authorized: [
-        createTestDefinitions(group1All, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(group2, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(group3, false, overwrite, { singleRequest: true }),
+        createTestDefinitions(group1All, false, { overwrite, singleRequest }),
+        createTestDefinitions(group2, false, { overwrite, singleRequest }),
+        createTestDefinitions(group3, false, { overwrite, singleRequest }),
       ].flat(),
     };
   };
 
   describe('_import', () => {
-    getTestScenarios([false, true]).security.forEach(({ users, modifier: overwrite }) => {
-      const suffix = overwrite ? ' with overwrite enabled' : '';
-      const { unauthorized, authorized } = createTests(overwrite!);
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).security.forEach(({ users, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = overwrite
+        ? ' with overwrite enabled'
+        : trueCopy
+        ? ' with trueCopy enabled'
+        : '';
+      const { unauthorized, authorized } = createTests(overwrite, trueCopy);
       const _addTests = (user: TestUser, tests: ImportTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, tests });
       };

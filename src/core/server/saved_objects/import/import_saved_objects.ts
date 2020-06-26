@@ -27,6 +27,7 @@ import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
+import { regenerateIds } from './regenerate_ids';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -38,6 +39,7 @@ export async function importSavedObjectsFromStream({
   readStream,
   objectLimit,
   overwrite,
+  trueCopy,
   savedObjectsClient,
   typeRegistry,
   namespace,
@@ -61,37 +63,44 @@ export async function importSavedObjectsFromStream({
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
-  // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-  const checkConflictsOptions = {
-    savedObjectsClient,
-    namespace,
-    ignoreRegularConflicts: overwrite,
-  };
-  const checkConflictsResult = await checkConflicts(
-    validateReferencesResult.filteredObjects,
-    checkConflictsOptions
-  );
-  errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
-  importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+  let objectsToCreate = validateReferencesResult.filteredObjects;
+  if (trueCopy) {
+    const regenerateIdsResult = regenerateIds(objectsFromStream);
+    importIdMap = regenerateIdsResult.importIdMap;
+  } else {
+    // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
+    const checkConflictsOptions = {
+      savedObjectsClient,
+      namespace,
+      ignoreRegularConflicts: overwrite,
+    };
+    const checkConflictsResult = await checkConflicts(
+      validateReferencesResult.filteredObjects,
+      checkConflictsOptions
+    );
+    errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
+    importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
 
-  // Check multi-namespace object types for origin conflicts in this namespace
-  const checkOriginConflictsOptions = {
-    savedObjectsClient,
-    typeRegistry,
-    namespace,
-    importIds: checkConflictsResult.importIds,
-  };
-  const checkOriginConflictsResult = await checkOriginConflicts(
-    checkConflictsResult.filteredObjects,
-    checkOriginConflictsOptions
-  );
-  errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
-  importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    // Check multi-namespace object types for origin conflicts in this namespace
+    const checkOriginConflictsOptions = {
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+      importIds: checkConflictsResult.importIds,
+    };
+    const checkOriginConflictsResult = await checkOriginConflicts(
+      checkConflictsResult.filteredObjects,
+      checkOriginConflictsOptions
+    );
+    errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
+    importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    objectsToCreate = checkOriginConflictsResult.filteredObjects;
+  }
 
   // Create objects in bulk
   const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
   const createSavedObjectsResult = await createSavedObjects(
-    checkOriginConflictsResult.filteredObjects,
+    objectsToCreate,
     createSavedObjectsOptions
   );
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

@@ -14,6 +14,7 @@ import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/
 export interface ImportTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string; originId?: string }>;
   overwrite: boolean;
+  trueCopy: boolean;
 }
 export type ImportTestSuite = TestSuite<ImportTestDefinition>;
 export interface ImportTestCase extends TestCase {
@@ -110,6 +111,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
+        } else if (successParam === 'trueCopy') {
+          // the new ID was randomly generated
+          expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
         } else {
           expect(destinationId).to.be(undefined);
         }
@@ -163,8 +167,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   const createTestDefinitions = (
     testCases: ImportTestCase | ImportTestCase[],
     forbidden: boolean,
-    overwrite: boolean,
-    options?: {
+    options: {
+      overwrite?: boolean;
+      trueCopy?: boolean;
       spaceId?: string;
       singleRequest?: boolean;
       responseBodyOverride?: ExpectResponseBody;
@@ -172,17 +177,23 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   ): ImportTestDefinition[] => {
     const cases = Array.isArray(testCases) ? testCases : [testCases];
     const responseStatusCode = forbidden ? 403 : 200;
-    if (!options?.singleRequest) {
+    const {
+      overwrite = false,
+      trueCopy = false,
+      spaceId,
+      singleRequest,
+      responseBodyOverride,
+    } = options;
+    if (!singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
       return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
-        responseBody:
-          options?.responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, options?.spaceId),
+        responseBody: responseBodyOverride || expectResponseBody(x, responseStatusCode, spaceId),
         overwrite,
+        trueCopy,
       }));
     }
     // batch into a single request to save time during test execution
@@ -192,9 +203,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
-          options?.responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, options?.spaceId),
+          responseBodyOverride || expectResponseBody(cases, responseStatusCode, spaceId),
         overwrite,
+        trueCopy,
       },
     ];
   };
@@ -216,7 +227,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           const requestBody = test.request
             .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
-          const query = test.overwrite ? '?overwrite=true' : '';
+          const query = test.overwrite ? '?overwrite=true' : test.trueCopy ? '?trueCopy=true' : '';
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
             .auth(user?.username, user?.password)

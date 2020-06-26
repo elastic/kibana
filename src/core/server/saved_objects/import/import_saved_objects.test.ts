@@ -31,12 +31,14 @@ import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 
 import { collectSavedObjects } from './collect_saved_objects';
+import { regenerateIds } from './regenerate_ids';
 import { validateReferences } from './validate_references';
 import { checkConflicts } from './check_conflicts';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 
 jest.mock('./collect_saved_objects');
+jest.mock('./regenerate_ids');
 jest.mock('./validate_references');
 jest.mock('./check_conflicts');
 jest.mock('./check_origin_conflicts');
@@ -50,6 +52,7 @@ describe('#importSavedObjectsFromStream', () => {
     jest.clearAllMocks();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
     getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
+    getMockFn(regenerateIds).mockReturnValue({ importIdMap: new Map() });
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
@@ -72,11 +75,19 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (): SavedObjectsImportOptions => {
+  const setupOptions = (trueCopy: boolean = false): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
-    return { readStream, objectLimit, overwrite, savedObjectsClient, typeRegistry, namespace };
+    return {
+      readStream,
+      objectLimit,
+      overwrite,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+      trueCopy,
+    };
   };
   const createObject = () => {
     return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObject<{ title: string }>;
@@ -118,63 +129,107 @@ describe('#importSavedObjectsFromStream', () => {
       );
     });
 
-    test('checks conflicts', async () => {
-      const options = setupOptions();
-      const filteredObjects = [createObject()];
-      getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+    describe('with trueCopy disabled', () => {
+      test('does not regenerate object IDs', async () => {
+        const options = setupOptions();
+        const collectedObjects = [createObject()];
+        getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects });
 
-      await importSavedObjectsFromStream(options);
-      const checkConflictsOptions = {
-        savedObjectsClient,
-        namespace,
-        ignoreRegularConflicts: overwrite,
-      };
-      expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+        await importSavedObjectsFromStream(options);
+        expect(regenerateIds).not.toHaveBeenCalled();
+      });
+
+      test('checks conflicts', async () => {
+        const options = setupOptions();
+        const filteredObjects = [createObject()];
+        getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+
+        await importSavedObjectsFromStream(options);
+        const checkConflictsOptions = {
+          savedObjectsClient,
+          namespace,
+          ignoreRegularConflicts: overwrite,
+        };
+        expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+      });
+
+      test('checks origin conflicts', async () => {
+        const options = setupOptions();
+        const filteredObjects = [createObject()];
+        const importIds = new Set<string>();
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects,
+          importIdMap: new Map(),
+          importIds,
+        });
+
+        await importSavedObjectsFromStream(options);
+        const checkOriginConflictsOptions = {
+          savedObjectsClient,
+          typeRegistry,
+          namespace,
+          importIds,
+        };
+        expect(checkOriginConflicts).toHaveBeenCalledWith(
+          filteredObjects,
+          checkOriginConflictsOptions
+        );
+      });
+
+      test('creates saved objects', async () => {
+        const options = setupOptions();
+        const filteredObjects = [createObject()];
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects,
+          importIdMap: new Map().set(`id1`, { id: `newId1` }),
+          importIds: new Set(),
+        });
+        getMockFn(checkOriginConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects,
+          importIdMap: new Map().set(`id2`, { id: `newId2` }),
+        });
+
+        await importSavedObjectsFromStream(options);
+        const importIdMap = new Map().set(`id1`, { id: `newId1` }).set(`id2`, { id: `newId2` });
+        const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
+        expect(createSavedObjects).toHaveBeenCalledWith(filteredObjects, createSavedObjectsOptions);
+      });
     });
 
-    test('checks origin conflicts', async () => {
-      const options = setupOptions();
-      const filteredObjects = [createObject()];
-      const importIds = new Set<string>();
-      getMockFn(checkConflicts).mockResolvedValue({
-        errors: [],
-        filteredObjects,
-        importIdMap: new Map(),
-        importIds,
+    describe('with trueCopy enabled', () => {
+      test('regenerates object IDs', async () => {
+        const options = setupOptions(true);
+        const collectedObjects = [createObject()];
+        getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects });
+
+        await importSavedObjectsFromStream(options);
+        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
       });
 
-      await importSavedObjectsFromStream(options);
-      const checkOriginConflictsOptions = {
-        savedObjectsClient,
-        typeRegistry,
-        namespace,
-        importIds,
-      };
-      expect(checkOriginConflicts).toHaveBeenCalledWith(
-        filteredObjects,
-        checkOriginConflictsOptions
-      );
-    });
+      test('does not check conflicts or check origin conflicts', async () => {
+        const options = setupOptions(true);
+        const filteredObjects = [createObject()];
+        getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
-    test('creates saved objects', async () => {
-      const options = setupOptions();
-      const filteredObjects = [createObject()];
-      getMockFn(checkConflicts).mockResolvedValue({
-        errors: [],
-        filteredObjects,
-        importIdMap: new Map().set(`id1`, { id: `newId1` }),
-        importIds: new Set(),
-      });
-      getMockFn(checkOriginConflicts).mockResolvedValue({
-        errors: [],
-        filteredObjects,
-        importIdMap: new Map().set(`id2`, { id: `newId2` }),
+        await importSavedObjectsFromStream(options);
+        expect(checkConflicts).not.toHaveBeenCalled();
+        expect(checkOriginConflicts).not.toHaveBeenCalled();
       });
 
-      await importSavedObjectsFromStream(options);
-      const importIdMap = new Map().set(`id1`, { id: `newId1` }).set(`id2`, { id: `newId2` });
-      const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
-      expect(createSavedObjects).toHaveBeenCalledWith(filteredObjects, createSavedObjectsOptions);
+      test('creates saved objects', async () => {
+        const options = setupOptions(true);
+        const filteredObjects = [createObject()];
+        getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+        const importIdMap = new Map().set(`id1`, { id: `newId1` });
+        getMockFn(regenerateIds).mockReturnValue({ importIdMap });
+
+        await importSavedObjectsFromStream(options);
+        const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
+        expect(createSavedObjects).toHaveBeenCalledWith(filteredObjects, createSavedObjectsOptions);
+      });
     });
   });
 

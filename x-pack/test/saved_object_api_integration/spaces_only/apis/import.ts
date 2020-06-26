@@ -22,6 +22,16 @@ const ambiguousConflict = (suffix: string) => ({
   fail409Param: `ambiguous_conflict_${suffix}`,
 });
 
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  return [
+    ...cases.map(([, val]) => ({ ...val, successParam: 'trueCopy' })),
+    { ...CASES.HIDDEN, ...fail400() },
+  ];
+};
+
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
@@ -74,18 +84,33 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
 
   const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
-  const createTests = (overwrite: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+    const singleRequest = true;
+    if (trueCopy) {
+      const cases = createTrueCopyTestCases();
+      return createTestDefinitions(cases, false, { trueCopy, spaceId, singleRequest });
+    }
+
     const { group1, group2 } = createTestCases(overwrite, spaceId);
     return [
-      createTestDefinitions(group1, false, overwrite, { spaceId, singleRequest: true }),
-      createTestDefinitions(group2, false, overwrite, { spaceId, singleRequest: true }),
+      createTestDefinitions(group1, false, { overwrite, spaceId, singleRequest }),
+      createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
     ].flat();
   };
 
   describe('_import', () => {
-    getTestScenarios([false, true]).spaces.forEach(({ spaceId, modifier: overwrite }) => {
-      const suffix = overwrite ? ' with overwrite enabled' : '';
-      const tests = createTests(overwrite!, spaceId);
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).spaces.forEach(({ spaceId, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = overwrite
+        ? ' with overwrite enabled'
+        : trueCopy
+        ? ' with trueCopy enabled'
+        : '';
+      const tests = createTests(overwrite, trueCopy, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });
   });
