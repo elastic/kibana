@@ -10,6 +10,7 @@ exports[`Transform: Transform List Actions <StartAction /> Minimal initializatio
     <EuiButtonEmpty
       aria-label="Start"
       color="text"
+      data-test-subj="transformActionStart"
       disabled={true}
       iconType="play"
       onClick={[Function]}

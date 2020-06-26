@@ -10,7 +10,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'header']);
+  const PageObjects = getPageObjects([
+    'common',
+    'settings',
+    'security',
+    'error',
+    'header',
+    'savedObjects',
+  ]);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -66,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
             'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
@@ -77,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can view all saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
               title: 'Advanced Settings [6.0.0]',
@@ -103,8 +110,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can delete all saved objects', async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(true);
         });
       });
@@ -185,7 +192,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
             'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
@@ -196,7 +203,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('cannot view any saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
               title: 'Advanced Settings [6.0.0]',
@@ -222,8 +229,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can't delete all saved objects`, async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(false);
         });
       });

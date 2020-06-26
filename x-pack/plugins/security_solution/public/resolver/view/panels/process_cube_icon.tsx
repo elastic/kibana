@@ -5,7 +5,6 @@
  */
 
 import React, { memo } from 'react';
-import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
 
 /**
@@ -13,12 +12,14 @@ import { useResolverTheme } from '../assets';
  * Nodes on the graph and what's in the table. Using the same symbol in both places (as below) could help with that.
  */
 export const CubeForProcess = memo(function CubeForProcess({
-  processEvent,
+  isProcessTerminated,
+  isProcessOrigin,
 }: {
-  processEvent: ResolverEvent;
+  isProcessTerminated: boolean;
+  isProcessOrigin: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol, descriptionText } = cubeAssetsForNode(processEvent);
+  const { cubeSymbol, descriptionText } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
 
   return (
     <>
