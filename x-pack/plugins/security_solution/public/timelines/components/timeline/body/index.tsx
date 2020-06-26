@@ -98,7 +98,7 @@ export const Body = React.memo<BodyProps>(
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
     const timelineActions = useMemo(
-      () => getManageTimelineById(id).timelineRowActions(data[0].ecs),
+      () => (data.length > 0 ? getManageTimelineById(id).timelineRowActions(data[0].ecs) : []),
       [data, getManageTimelineById, id]
     );
 
