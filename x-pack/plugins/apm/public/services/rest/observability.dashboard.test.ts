@@ -53,10 +53,12 @@ describe('Observability dashboard data', () => {
         appLink: '/app/apm',
         stats: {
           services: {
+            type: 'number',
             label: 'Services',
             value: 10,
           },
           transactions: {
+            type: 'number',
             label: 'Transactions',
             value: 6,
             color: '#6092c0',
@@ -95,10 +97,12 @@ describe('Observability dashboard data', () => {
         appLink: '/app/apm',
         stats: {
           services: {
+            type: 'number',
             label: 'Services',
             value: 0,
           },
           transactions: {
+            type: 'number',
             label: 'Transactions',
             value: 0,
             color: '#6092c0',
