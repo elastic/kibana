@@ -215,7 +215,7 @@ describe('resolver graph with too much lineage', () => {
   beforeEach(() => {
     generator = new EndpointDocGenerator('seed');
     allEvents = generator.generateTree({ ancestors: 1, generations: 2, children: 2 }).allEvents;
-    childrenCursor = 'aValidChildursor';
+    childrenCursor = 'aValidChildCursor';
     ancestorCursor = 'aValidAncestorCursor';
     store = createStore(dataReducer, undefined);
   });
