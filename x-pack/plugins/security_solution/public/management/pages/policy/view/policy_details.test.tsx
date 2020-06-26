@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
 
@@ -20,23 +20,38 @@ describe('Policy Details', () => {
   const policyListPathUrl = getPoliciesPath();
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
-  const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
-  const http = coreStart.http;
-  const render = (ui: Parameters<typeof mount>[0]) => mount(ui, { wrappingComponent: AppWrapper });
+  let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
+  let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let http: typeof coreStart.http;
+  let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
   let policyDatasource: ReturnType<typeof generator.generatePolicyDatasource>;
   let policyView: ReturnType<typeof render>;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    const appContextMockRenderer = createAppRootMockRenderer();
+    const AppWrapper = appContextMockRenderer.AppWrapper;
+
+    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
+    render = (ui) => mount(ui, { wrappingComponent: AppWrapper });
+    http = coreStart.http;
+  });
 
   afterEach(() => {
     if (policyView) {
       policyView.unmount();
     }
+    jest.clearAllMocks();
   });
 
   describe('when displayed with invalid id', () => {
+    let releaseApiFailure: () => void;
     beforeEach(() => {
-      http.get.mockReturnValue(Promise.reject(new Error('policy not found')));
+      http.get.mockImplementationOnce(async () => {
+        await new Promise((_, reject) => {
+          releaseApiFailure = reject.bind(null, new Error('policy not found'));
+        });
+      });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
     });
@@ -45,8 +60,10 @@ describe('Policy Details', () => {
       expect(policyView.find('flyoutOverlay')).toHaveLength(0);
     });
 
-    it('should show loader followed by error message', () => {
+    it('should show loader followed by error message', async () => {
       expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
+      releaseApiFailure();
+      await middlewareSpy.waitForAction('serverFailedToReturnPolicyDetailsData');
       policyView.update();
       const callout = policyView.find('EuiCallOut');
       expect(callout).toHaveLength(1);
