@@ -43,12 +43,15 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request, index) => {
-        const params = getSearchParamsFromRequest(request, {
-          uiSettings: this.dependencies.uiSettings,
-          injectedMetadata: this.dependencies.injectedMetadata,
-        });
+        const searchRequest = {
+          params: getSearchParamsFromRequest(request, {
+            uiSettings: this.dependencies.uiSettings,
+            injectedMetadata: this.dependencies.injectedMetadata,
+          }),
+          indexType: request.indexType,
+        };
 
-        return search({ params }, { signal: this.abortSignal }).pipe(
+        return search(searchRequest, { signal: this.abortSignal }).pipe(
           map((data) => ({
             id: index,
             rawResponse: data.rawResponse,
