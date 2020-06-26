@@ -17,6 +17,15 @@ exports[`should render error for dupes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -50,15 +59,6 @@ exports[`should render error for dupes 1`] = `
           ]
         }
         valueOfSelected="String"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -77,6 +77,15 @@ exports[`should render error for dupes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -112,15 +121,6 @@ exports[`should render error for dupes 1`] = `
         valueOfSelected="String"
       />
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
-      />
-    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="xs"
@@ -137,6 +137,15 @@ exports[`should render error for dupes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -170,15 +179,6 @@ exports[`should render error for dupes 1`] = `
           ]
         }
         valueOfSelected="Number"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -212,6 +212,15 @@ exports[`should render error for empty name 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -245,15 +254,6 @@ exports[`should render error for empty name 1`] = `
           ]
         }
         valueOfSelected="String"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -272,6 +272,15 @@ exports[`should render error for empty name 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -307,15 +316,6 @@ exports[`should render error for empty name 1`] = `
         valueOfSelected="String"
       />
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
-      />
-    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="xs"
@@ -332,6 +332,15 @@ exports[`should render error for empty name 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -365,15 +374,6 @@ exports[`should render error for empty name 1`] = `
           ]
         }
         valueOfSelected="Number"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -407,6 +407,15 @@ exports[`should render field editor 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -440,15 +449,6 @@ exports[`should render field editor 1`] = `
           ]
         }
         valueOfSelected="String"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -467,6 +467,15 @@ exports[`should render field editor 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -502,15 +511,6 @@ exports[`should render field editor 1`] = `
         valueOfSelected="String"
       />
     </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
-      />
-    </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
     gutterSize="xs"
@@ -527,6 +527,15 @@ exports[`should render field editor 1`] = `
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiSuperSelect
+        append={
+          <EuiButtonIcon
+            aria-label="Remove field"
+            color="danger"
+            iconType="trash"
+            onClick={[Function]}
+            title="Remove field"
+          />
+        }
         compressed={false}
         fullWidth={false}
         hasDividers={false}
@@ -560,15 +569,6 @@ exports[`should render field editor 1`] = `
           ]
         }
         valueOfSelected="Number"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiButtonIcon
-        aria-label="Remove field"
-        color="danger"
-        iconType="trash"
-        onClick={[Function]}
-        title="Remove field"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

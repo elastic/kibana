@@ -122,11 +122,27 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       this._fieldChange(newFields);
     };
 
+    const addButton = (
+      <EuiButtonIcon
+        iconType="trash"
+        color="danger"
+        onClick={() => {
+          this._removeField(index);
+        }}
+        title={i18n.translate('xpack.maps.mvtSource.trashButtonTitle', {
+          defaultMessage: 'Remove field',
+        })}
+        aria-label={i18n.translate('xpack.maps.mvtSource.trashButtonAriaLabel', {
+          defaultMessage: 'Remove field',
+        })}
+      />
+    );
     return (
       <EuiSuperSelect
         options={FIELD_TYPE_OPTIONS}
         valueOfSelected={mvtFieldConfig.type}
         onChange={(value) => onChange(value)}
+        append={addButton}
       />
     );
   }
@@ -174,21 +190,6 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         <EuiFlexGroup key={index} gutterSize="xs">
           <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
           <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              onClick={() => {
-                this._removeField(index);
-              }}
-              title={i18n.translate('xpack.maps.mvtSource.trashButtonTitle', {
-                defaultMessage: 'Remove field',
-              })}
-              aria-label={i18n.translate('xpack.maps.mvtSource.trashButtonAriaLabel', {
-                defaultMessage: 'Remove field',
-              })}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       );
     });
