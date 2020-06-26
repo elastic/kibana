@@ -44,7 +44,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
         },
-        agent_stream: {
+        compiled_stream: {
           fooKey: 'fooValue1',
           fooKey2: ['fooValue2'],
         },

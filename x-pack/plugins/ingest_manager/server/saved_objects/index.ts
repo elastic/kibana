@@ -185,6 +185,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
+        enabled: { type: 'boolean' },
         config_id: { type: 'keyword' },
         output_id: { type: 'keyword' },
         package: {
@@ -198,6 +199,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
           type: 'nested',
           properties: {
             type: { type: 'keyword' },
+            enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },
             streams: {

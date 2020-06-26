@@ -135,12 +135,14 @@ export const StepDefineDatasource: React.FunctionComponent<{
         />
       </EuiButtonEmpty>
       {/* Todo: Populate list of existing namespaces */}
-      {isShowingAdvancedDefine ? (
+      {isShowingAdvancedDefine || !!validationResults.namespace ? (
         <Fragment>
           <EuiSpacer size="m" />
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
               <EuiFormRow
+                isInvalid={!!validationResults.namespace}
+                error={validationResults.namespace}
                 label={
                   <FormattedMessage
                     id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNamespaceInputLabel"

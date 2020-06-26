@@ -38,15 +38,12 @@ export const storedDatasourcesToAgentInputs = (
             const fullStream: FullAgentConfigInputStream = {
               id: stream.id,
               dataset: stream.dataset,
-              ...stream.agent_stream,
+              ...stream.compiled_stream,
               ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                 acc[key] = value;
                 return acc;
               }, {} as { [k: string]: any }),
             };
-            if (stream.processors) {
-              fullStream.processors = stream.processors;
-            }
             return fullStream;
           }),
       };

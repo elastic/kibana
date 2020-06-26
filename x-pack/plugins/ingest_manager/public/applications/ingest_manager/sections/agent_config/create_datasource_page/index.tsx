@@ -94,6 +94,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const [datasource, setDatasource] = useState<NewPackageConfig>({
     name: '',
     description: '',
+    namespace: '',
     config_id: '',
     enabled: true,
     output_id: '', // TODO: Blank for now as we only support default output

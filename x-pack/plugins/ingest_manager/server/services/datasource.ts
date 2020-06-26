@@ -291,7 +291,7 @@ async function _assignPackageStreamToStream(
   stream: PackageConfigInputStream
 ) {
   if (!stream.enabled) {
-    return { ...stream, agent_stream: undefined };
+    return { ...stream, compiled_stream: undefined };
   }
   const datasetPath = getDataset(stream.dataset.name);
   const packageDatasets = pkgInfo.datasets;
@@ -335,7 +335,7 @@ async function _assignPackageStreamToStream(
     pkgStream.buffer.toString()
   );
 
-  stream.agent_stream = yaml;
+  stream.compiled_stream = yaml;
 
   return { ...stream };
 }

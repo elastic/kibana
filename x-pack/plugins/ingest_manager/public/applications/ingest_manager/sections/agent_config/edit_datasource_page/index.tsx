@@ -72,6 +72,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const [datasource, setDatasource] = useState<NewPackageConfig>({
     name: '',
     description: '',
+    namespace: '',
     config_id: '',
     enabled: true,
     output_id: '',
@@ -102,7 +103,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             updated_at,
             ...restOfDatasource
           } = datasourceData.item;
-          // Remove `agent_stream` from all stream info, we assign this after saving
+          // Remove `compiled_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
             inputs: inputs.map((input) => {
@@ -110,7 +111,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
               return {
                 ...restOfInput,
                 streams: streams.map((stream) => {
-                  const { agent_stream, ...restOfStream } = stream;
+                  const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
               };

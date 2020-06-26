@@ -127,6 +127,7 @@ export const createAgentConfigHandler: RequestHandler<
     // Create the system monitoring datasource and add it to config.
     if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {
       newSysDatasource.config_id = agentConfig.id;
+      newSysDatasource.namespace = agentConfig.namespace;
       const sysDatasource = await datasourceService.create(soClient, newSysDatasource, { user });
 
       if (sysDatasource) {

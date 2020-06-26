@@ -120,8 +120,8 @@ export const packageToConfigDatasource = (
   packageInfo: PackageInfo,
   configId: string,
   outputId: string,
+  namespace: string = '',
   datasourceName?: string,
-  namespace?: string,
   description?: string
 ): NewPackageConfig => {
   return {

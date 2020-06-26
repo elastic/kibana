@@ -89,7 +89,7 @@ describe('Datasource service', () => {
                   value: ['/var/log/set.log'],
                 },
               },
-              agent_stream: {
+              compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',
@@ -150,7 +150,7 @@ describe('Datasource service', () => {
               id: 'dataset01',
               dataset: { name: 'package.dataset1', type: 'logs' },
               enabled: true,
-              agent_stream: {
+              compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',

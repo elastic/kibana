@@ -143,6 +143,7 @@ describe('Ingest Manager - validateDatasource()', () => {
 
   const validDatasource: NewPackageConfig = {
     name: 'datasource1-1',
+    namespace: 'default',
     config_id: 'test-config',
     enabled: true,
     output_id: 'test-output',
@@ -315,6 +316,7 @@ describe('Ingest Manager - validateDatasource()', () => {
   const noErrorsValidationResults = {
     name: null,
     description: null,
+    namespace: null,
     inputs: {
       foo: {
         vars: {
@@ -356,6 +358,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     expect(validateDatasource(invalidDatasource, mockPackage)).toEqual({
       name: ['Name is required'],
       description: null,
+      namespace: null,
       inputs: {
         foo: {
           vars: {
@@ -412,6 +415,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ).toEqual({
       name: ['Name is required'],
       description: null,
+      namespace: null,
       inputs: {
         foo: {
           vars: {
@@ -458,6 +462,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ).toEqual({
       name: null,
       description: null,
+      namespace: null,
       inputs: null,
     });
     expect(
@@ -468,6 +473,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ).toEqual({
       name: null,
       description: null,
+      namespace: null,
       inputs: null,
     });
   });
@@ -481,6 +487,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ).toEqual({
       name: null,
       description: null,
+      namespace: null,
       inputs: null,
     });
     expect(
@@ -491,6 +498,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ).toEqual({
       name: null,
       description: null,
+      namespace: null,
       inputs: null,
     });
   });
@@ -542,6 +550,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
       validationHasErrors({
         name: ['name error'],
         description: null,
+        namespace: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },
@@ -554,6 +563,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        namespace: null,
         inputs: {
           input1: {
             vars: { foo: ['foo error'], bar: null },
@@ -566,6 +576,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        namespace: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },
@@ -581,6 +592,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        namespace: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },

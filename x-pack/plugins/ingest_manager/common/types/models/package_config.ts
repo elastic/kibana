@@ -24,21 +24,19 @@ export interface NewPackageConfigInputStream {
     name: string;
     type: string;
   };
-  processors?: string[];
-  config?: PackageConfigConfigRecord;
   vars?: PackageConfigConfigRecord;
+  config?: PackageConfigConfigRecord;
 }
 
 export interface PackageConfigInputStream extends NewPackageConfigInputStream {
-  agent_stream?: any;
+  compiled_stream?: any;
 }
 
 export interface NewPackageConfigInput {
   type: string;
   enabled: boolean;
-  processors?: string[];
-  config?: PackageConfigConfigRecord;
   vars?: PackageConfigConfigRecord;
+  config?: PackageConfigConfigRecord;
   streams: NewPackageConfigInputStream[];
 }
 
@@ -49,11 +47,11 @@ export interface PackageConfigInput extends Omit<NewPackageConfigInput, 'streams
 export interface NewPackageConfig {
   name: string;
   description?: string;
-  namespace?: string;
-  config_id: string;
+  namespace: string;
   enabled: boolean;
-  package?: PackageConfigPackage;
+  config_id: string;
   output_id: string;
+  package?: PackageConfigPackage;
   inputs: NewPackageConfigInput[];
 }
 

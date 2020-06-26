@@ -31,7 +31,6 @@ const PackageConfigBaseSchema = {
     schema.object({
       type: schema.string(),
       enabled: schema.boolean(),
-      processors: schema.maybe(schema.arrayOf(schema.string())),
       vars: schema.maybe(ConfigRecordSchema),
       config: schema.maybe(
         schema.recordOf(
@@ -47,7 +46,6 @@ const PackageConfigBaseSchema = {
           id: schema.string(),
           enabled: schema.boolean(),
           dataset: schema.object({ name: schema.string(), type: schema.string() }),
-          processors: schema.maybe(schema.arrayOf(schema.string())),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
             schema.recordOf(

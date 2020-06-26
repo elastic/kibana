@@ -317,6 +317,7 @@ describe('Ingest Manager - packageToConfig', () => {
     it('returns datasource with default name', () => {
       expect(packageToConfigDatasource(mockPackage, '1', '2')).toEqual({
         config_id: '1',
+        namespace: '',
         enabled: true,
         inputs: [],
         name: 'mock-package-1',
@@ -329,8 +330,9 @@ describe('Ingest Manager - packageToConfig', () => {
       });
     });
     it('returns datasource with custom name', () => {
-      expect(packageToConfigDatasource(mockPackage, '1', '2', 'ds-1')).toEqual({
+      expect(packageToConfigDatasource(mockPackage, '1', '2', 'default', 'ds-1')).toEqual({
         config_id: '1',
+        namespace: 'default',
         enabled: true,
         inputs: [],
         name: 'ds-1',
@@ -348,8 +350,8 @@ describe('Ingest Manager - packageToConfig', () => {
           mockPackage,
           '1',
           '2',
-          'ds-1',
           'mock-namespace',
+          'ds-1',
           'Test description'
         )
       ).toEqual({
@@ -373,8 +375,11 @@ describe('Ingest Manager - packageToConfig', () => {
         config_templates: [{ inputs: [{ type: 'foo' }] }],
       } as unknown) as PackageInfo;
 
-      expect(packageToConfigDatasource(mockPackageWithDatasources, '1', '2', 'ds-1')).toEqual({
+      expect(
+        packageToConfigDatasource(mockPackageWithDatasources, '1', '2', 'default', 'ds-1')
+      ).toEqual({
         config_id: '1',
+        namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],
         name: 'ds-1',

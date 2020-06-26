@@ -32,6 +32,7 @@ export type DatasourceInputValidationResults = DatasourceConfigValidationResults
 export interface DatasourceValidationResults {
   name: Errors;
   description: Errors;
+  namespace: Errors;
   inputs: Record<PackageConfigInput['type'], DatasourceInputValidationResults> | null;
 }
 
@@ -46,6 +47,7 @@ export const validateDatasource = (
   const validationResults: DatasourceValidationResults = {
     name: null,
     description: null,
+    namespace: null,
     inputs: {},
   };
 
@@ -53,6 +55,14 @@ export const validateDatasource = (
     validationResults.name = [
       i18n.translate('xpack.ingestManager.datasourceValidation.nameRequiredErrorMessage', {
         defaultMessage: 'Name is required',
+      }),
+    ];
+  }
+
+  if (!datasource.namespace.trim()) {
+    validationResults.namespace = [
+      i18n.translate('xpack.ingestManager.datasourceValidation.namespaceRequiredErrorMessage', {
+        defaultMessage: 'Namespace is required',
       }),
     ];
   }

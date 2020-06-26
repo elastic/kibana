@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, PackageConfigPackage, PackageConfigInputStream } from './package_config';
+import { PackageConfig, PackageConfigPackage } from './package_config';
 import { Output } from './output';
 
 export enum AgentConfigStatus {
@@ -13,7 +13,7 @@ export enum AgentConfigStatus {
 
 export interface NewAgentConfig {
   name: string;
-  namespace?: string;
+  namespace: string;
   description?: string;
   is_default?: boolean;
   monitoring_enabled?: Array<'logs' | 'metrics'>;
@@ -30,10 +30,14 @@ export interface AgentConfig extends NewAgentConfig {
 
 export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
 
-export type FullAgentConfigInputStream = Pick<PackageConfigInputStream, 'id' | 'processors'> & {
-  dataset: { name: string };
+export interface FullAgentConfigInputStream {
+  id: string;
+  dataset: {
+    name: string;
+    type: string;
+  };
   [key: string]: any;
-};
+}
 
 export interface FullAgentConfigInput {
   id: string;

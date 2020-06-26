@@ -175,7 +175,6 @@ async function addPackageToConfig(
     packageInfo,
     config.id,
     defaultOutput.id,
-    undefined,
     config.namespace
   );
   newDatasource.inputs = await datasourceService.assignPackageStream(
