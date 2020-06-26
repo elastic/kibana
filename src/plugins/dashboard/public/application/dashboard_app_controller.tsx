@@ -60,6 +60,7 @@ import {
   ViewMode,
   SavedObjectEmbeddableInput,
   ContainerOutput,
+  EmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -431,11 +432,11 @@ export class DashboardAppController {
               .getIncomingEmbeddablePackage();
             if (incomingState) {
               if ('id' in incomingState) {
-                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+                container.addNewEmbeddable<EmbeddableInput>(
                   incomingState.type,
                   incomingState.input
                 );

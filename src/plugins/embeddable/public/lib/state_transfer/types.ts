@@ -16,43 +16,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EmbeddableInput } from '../embeddables';
+import { EmbeddableInput } from '..';
 
 /**
  * Represents a state package that contains the last active app id.
  * @public
  */
-export interface EmbeddableOriginatingAppState {
+export interface EmbeddableEditorState {
   originatingApp: string;
+  byValueMode?: boolean;
+  valueInput?: EmbeddableInput;
 }
 
-export function isEmbeddableOriginatingAppState(
-  state: unknown
-): state is EmbeddableOriginatingAppState {
+export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
   return ensureFieldOfTypeExists('originatingApp', state, 'string');
 }
-
-export interface EmbeddableByReference {
+/**
+ * Represents a state package that contains all fields necessary to create an embeddable by reference in a container.
+ * @public
+ */
+export interface EmbeddablePackageByReferenceState {
   type: string;
   id: string;
 }
 
-export interface EmbeddableByValue {
+/**
+ * Represents a state package that contains all fields necessary to create an embeddable by value in a container.
+ * @public
+ */
+export interface EmbeddablePackageByValueState {
   type: string;
   input: EmbeddableInput;
 }
 
-/**
- * Represents a state package that contains all fields necessary to create an embeddable in a container.
- * @public
- */
-export type EmbeddablePackageState = EmbeddableByValue | EmbeddableByReference;
+export type EmbeddablePackageState =
+  | EmbeddablePackageByReferenceState
+  | EmbeddablePackageByValueState;
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
   return (
-    ensureFieldOfTypeExists('type', state, 'string') &&
-    (ensureFieldOfTypeExists('id', state, 'string') || ensureFieldOfTypeExists('input', state))
+    (ensureFieldOfTypeExists('type', state, 'string') &&
+      ensureFieldOfTypeExists('id', state, 'string')) ||
+    ensureFieldOfTypeExists('input', state, 'object')
   );
 }
 

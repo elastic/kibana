@@ -62,7 +62,7 @@ export class Listing extends PureComponent {
           return (
             <div>
               <div>
-                <EuiLink href={getSafeForExternalLink(`/logstash/node/${node.logstash.uuid}`)}>
+                <EuiLink href={getSafeForExternalLink(`#/logstash/node/${node.logstash.uuid}`)}>
                   {name}
                 </EuiLink>
               </div>

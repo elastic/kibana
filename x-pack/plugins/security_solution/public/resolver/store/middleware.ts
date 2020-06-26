@@ -12,7 +12,7 @@ import {
   ResolverEvent,
   ResolverChildren,
   ResolverAncestry,
-  LifecycleNode,
+  ResolverLifecycleNode,
   ResolverNodeStats,
   ResolverRelatedEvents,
 } from '../../../common/endpoint/types';
@@ -25,10 +25,10 @@ type MiddlewareFactory<S = ResolverState> = (
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
 function getLifecycleEventsAndStats(
-  nodes: LifecycleNode[],
+  nodes: ResolverLifecycleNode[],
   stats: Map<string, ResolverNodeStats>
 ): ResolverEvent[] {
-  return nodes.reduce((flattenedEvents: ResolverEvent[], currentNode: LifecycleNode) => {
+  return nodes.reduce((flattenedEvents: ResolverEvent[], currentNode: ResolverLifecycleNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
     }
@@ -77,6 +77,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           }
           const nodeStats: Map<string, ResolverNodeStats> = new Map();
           nodeStats.set(entityId, stats);
+          const lineageLimits = { children: children.nextChild, ancestors: ancestry.nextAncestor };
+
           const events = [
             ...lifecycle,
             ...getLifecycleEventsAndStats(children.childNodes, nodeStats),
@@ -84,8 +86,11 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
-            events,
-            stats: nodeStats,
+            payload: {
+              events,
+              stats: nodeStats,
+              lineageLimits,
+            },
           });
         } catch (error) {
           api.dispatch({

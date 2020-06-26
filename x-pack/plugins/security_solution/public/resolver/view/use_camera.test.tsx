@@ -176,8 +176,11 @@ describe('useCamera on an unpainted element', () => {
         }
         const serverResponseAction: ResolverAction = {
           type: 'serverReturnedResolverData',
-          events,
-          stats: new Map(),
+          payload: {
+            events,
+            stats: new Map(),
+            lineageLimits: { children: null, ancestors: null },
+          },
         };
         act(() => {
           store.dispatch(serverResponseAction);

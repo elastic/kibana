@@ -118,7 +118,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   };
 
   const { originatingApp } =
-    embeddable.getStateTransfer(scopedHistory()).getIncomingOriginatingApp() || {};
+    embeddable.getStateTransfer(scopedHistory()).getIncomingEditorState() || {};
   $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
