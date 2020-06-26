@@ -10,8 +10,10 @@ import { CreateListSchema } from './create_list_schema';
 
 export const getCreateListSchemaMock = (): CreateListSchema => ({
   description: DESCRIPTION,
+  deserializer: undefined,
   id: LIST_ID,
   meta: META,
   name: NAME,
+  serializer: undefined,
   type: TYPE,
 });

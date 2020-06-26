@@ -37,9 +37,11 @@ export const createListItemRoute = (router: IRouter): void => {
           });
         } else {
           const createdListItem = await lists.createListItem({
+            deserializer: list.deserializer,
             id,
             listId,
             meta,
+            serializer: list.serializer,
             type: list.type,
             value,
           });

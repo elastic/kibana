@@ -45,7 +45,11 @@ export const updateListItem = async ({
       meta,
       updated_at: updatedAt,
       updated_by: user,
-      ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
+      ...transformListItemToElasticQuery({
+        serializer: listItem.serializer,
+        type: listItem.type,
+        value: value ?? listItem.value,
+      }),
     };
 
     const response = await callCluster<CreateDocumentResponse>('update', {
@@ -58,9 +62,11 @@ export const updateListItem = async ({
     return {
       created_at: listItem.created_at,
       created_by: listItem.created_by,
+      deserializer: listItem.deserializer,
       id: response._id,
       list_id: listItem.list_id,
       meta: meta ?? listItem.meta,
+      serializer: listItem.serializer,
       tie_breaker_id: listItem.tie_breaker_id,
       type: listItem.type,
       updated_at: updatedAt,

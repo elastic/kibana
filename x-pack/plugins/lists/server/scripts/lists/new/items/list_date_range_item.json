@@ -1,6 +1,5 @@
 {
   "id": "hand_inserted_date_range_item_id",
   "list_id": "list-date-range",
-  "format": "${lte}-${gte}",
   "value": "2015-10-31 12:00:00/2015-11-01"
 }

@@ -1,6 +1,5 @@
 {
   "id": "hand_inserted_geo_point_item_id",
   "list_id": "list-geo-point",
-  "format": "${lat},${lon}",
   "value": "41.12,-71.34"
 }

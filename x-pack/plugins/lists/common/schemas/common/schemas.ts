@@ -155,13 +155,23 @@ export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
+export const esDataTypeDateRange = t.exact(t.type({ gte: t.string, lte: t.string }));
+export type EsDataTypeDateRange = t.TypeOf<typeof esDataTypeDateRange>;
+
+export const esDataTypeDateRangeTerm = t.exact(
+  t.type({
+    date_range: esDataTypeDateRange,
+  })
+);
+export type EsDataTypeDateRangeTerm = t.TypeOf<typeof esDataTypeDateRangeTerm>;
+
 export const esDataTypeUnion = t.union([
   t.type({ binary }),
   t.type({ boolean }),
   t.type({ byte }),
   t.type({ date }),
   t.type({ date_nanos }),
-  t.type({ date_range }),
+  esDataTypeDateRangeTerm,
   t.type({ double }),
   t.type({ double_range }),
   t.type({ flattened }),
@@ -267,3 +277,15 @@ export enum OperatorTypeEnum {
   EXISTS = 'exists',
   LIST = 'list',
 }
+
+export const serializer = t.string;
+export type Serializer = t.TypeOf<typeof serializer>;
+
+export const serializerOrUndefined = t.union([serializer, t.undefined]);
+export type SerializerOrUndefined = t.TypeOf<typeof serializerOrUndefined>;
+
+export const deserializer = t.string;
+export type Deserializer = t.TypeOf<typeof deserializer>;
+
+export const deserializerOrUndefined = t.union([deserializer, t.undefined]);
+export type DeserializerOrUndefined = t.TypeOf<typeof deserializerOrUndefined>;

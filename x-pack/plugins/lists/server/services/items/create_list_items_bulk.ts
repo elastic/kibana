@@ -10,12 +10,16 @@ import { APICaller } from 'kibana/server';
 import { transformListItemToElasticQuery } from '../utils';
 import {
   CreateEsBulkTypeSchema,
+  DeserializerOrUndefined,
   IndexEsListItemSchema,
   MetaOrUndefined,
+  SerializerOrUndefined,
   Type,
 } from '../../../common/schemas';
 
 export interface CreateListItemsBulkOptions {
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string[];
@@ -30,6 +34,8 @@ export interface CreateListItemsBulkOptions {
 export const createListItemsBulk = async ({
   listId,
   type,
+  deserializer,
+  serializer,
   value,
   callCluster,
   listItemIndex,
@@ -50,12 +56,14 @@ export const createListItemsBulk = async ({
       const elasticBody: IndexEsListItemSchema = {
         created_at: createdAt,
         created_by: user,
+        deserializer,
         list_id: listId,
         meta,
+        serializer,
         tie_breaker_id: tieBreakerId,
         updated_at: createdAt,
         updated_by: user,
-        ...transformListItemToElasticQuery({ type, value: singleValue }),
+        ...transformListItemToElasticQuery({ serializer, type, value: singleValue }),
       };
       const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
       return [...accum, createBody, elasticBody];

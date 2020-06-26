@@ -8,12 +8,19 @@ import { Readable } from 'stream';
 
 import { APICaller } from 'kibana/server';
 
-import { MetaOrUndefined, Type } from '../../../common/schemas';
+import {
+  DeserializerOrUndefined,
+  MetaOrUndefined,
+  SerializerOrUndefined,
+  Type,
+} from '../../../common/schemas';
 
 import { BufferLines } from './buffer_lines';
 import { createListItemsBulk } from './create_list_items_bulk';
 
 export interface ImportListItemsToStreamOptions {
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   stream: Readable;
   callCluster: APICaller;
@@ -24,6 +31,8 @@ export interface ImportListItemsToStreamOptions {
 }
 
 export const importListItemsToStream = ({
+  deserializer,
+  serializer,
   listId,
   stream,
   callCluster,
@@ -38,9 +47,11 @@ export const importListItemsToStream = ({
       await writeBufferToItems({
         buffer: lines,
         callCluster,
+        deserializer,
         listId,
         listItemIndex,
         meta,
+        serializer,
         type,
         user,
       });
@@ -55,6 +66,8 @@ export const importListItemsToStream = ({
 export interface WriteBufferToItemsOptions {
   listId: string;
   callCluster: APICaller;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listItemIndex: string;
   buffer: string[];
   type: Type;
@@ -69,6 +82,8 @@ export interface LinesResult {
 export const writeBufferToItems = async ({
   listId,
   callCluster,
+  deserializer,
+  serializer,
   listItemIndex,
   buffer,
   type,
@@ -77,9 +92,11 @@ export const writeBufferToItems = async ({
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   await createListItemsBulk({
     callCluster,
+    deserializer,
     listId,
     listItemIndex,
     meta,
+    serializer,
     type,
     user,
     value: buffer,

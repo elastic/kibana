@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchEsListItemSchema, type } from '../../../common/schemas';
+import Mustache from 'mustache';
+
+import { SearchEsListItemSchema, esDataTypeDateRange, type } from '../../../common/schemas';
 
 export const findSourceValue = (
   hit: SearchEsListItemSchema,
@@ -13,8 +15,18 @@ export const findSourceValue = (
   const foundEntry = Object.entries(hit).find(
     ([key, value]) => types.includes(key) && value != null
   );
-  if (foundEntry != null && typeof foundEntry[1] === 'string') {
-    return foundEntry[1];
+  if (foundEntry != null) {
+    const [typeFound, value] = foundEntry;
+    if (typeFound === 'date_range' && esDataTypeDateRange.is(value)) {
+      const template = hit.deserializer ?? '{{gte}},{{lte}}';
+      const variables = { gte: value.gte, lte: value.lte };
+      return Mustache.render(template, variables);
+    } else if (typeof value === 'string') {
+      // TODO: Add the formatter ability here with {{value}}
+      return value;
+    } else {
+      return null;
+    }
   } else {
     return null;
   }

@@ -11,9 +11,11 @@ import * as t from 'io-ts';
 import {
   created_at,
   created_by,
+  deserializerOrUndefined,
   esDataTypeUnion,
   list_id,
   metaOrUndefined,
+  serializerOrUndefined,
   tie_breaker_id,
   updated_at,
   updated_by,
@@ -24,8 +26,10 @@ export const indexEsListItemSchema = t.intersection([
     t.type({
       created_at,
       created_by,
+      deserializer: deserializerOrUndefined,
       list_id,
       meta: metaOrUndefined,
+      serializer: serializerOrUndefined,
       tie_breaker_id,
       updated_at,
       updated_by,

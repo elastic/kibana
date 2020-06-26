@@ -19,6 +19,7 @@ describe('transform_elastic_to_elastic_query', () => {
 
   test('it transforms a ip type and value to a union', () => {
     const elasticQuery = transformListItemToElasticQuery({
+      serializer: undefined,
       type: 'ip',
       value: '127.0.0.1',
     });
@@ -28,6 +29,7 @@ describe('transform_elastic_to_elastic_query', () => {
 
   test('it transforms a keyword type and value to a union', () => {
     const elasticQuery = transformListItemToElasticQuery({
+      serializer: undefined,
       type: 'keyword',
       value: 'host-name',
     });

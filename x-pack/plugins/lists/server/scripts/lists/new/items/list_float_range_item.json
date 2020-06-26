@@ -1,6 +1,5 @@
 {
   "id": "hand_inserted_float_range_item_id",
   "list_id": "list-float-range",
-  "format": "${lte}-${gte}",
   "value": "10-12.3"
 }

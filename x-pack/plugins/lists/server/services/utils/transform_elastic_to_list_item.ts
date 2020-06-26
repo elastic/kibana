@@ -23,7 +23,17 @@ export const transformElasticToListItem = ({
   return response.hits.hits.map((hit) => {
     const {
       _id,
-      _source: { created_at, updated_at, updated_by, created_by, list_id, tie_breaker_id, meta },
+      _source: {
+        created_at,
+        deserializer,
+        serializer,
+        updated_at,
+        updated_by,
+        created_by,
+        list_id,
+        tie_breaker_id,
+        meta,
+      },
     } = hit;
     const value = findSourceValue(hit._source);
     if (value == null) {
@@ -32,9 +42,11 @@ export const transformElasticToListItem = ({
       return {
         created_at,
         created_by,
+        deserializer,
         id: _id,
         list_id,
         meta,
+        serializer,
         tie_breaker_id,
         type,
         updated_at,
