@@ -14,9 +14,9 @@ checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scr
 echo ""
 echo ""
 
-echo " -> Running SIEM cyclic dependency test"
+echo " -> Running Security Solution cyclic dependency test"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/security_solution/scripts/check_circular_deps
+checks-reporter-with-killswitch "X-Pack Security Solution cyclic dependency test" node plugins/security_solution/scripts/check_circular_deps
 echo ""
 echo ""
 
