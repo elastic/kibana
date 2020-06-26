@@ -34,11 +34,4 @@ export {
   IIndexPatternFieldList,
 } from '../../common/index_patterns';
 
-// TODO: figure out how to replace IndexPatterns in get_inner_angular.
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  IndexPattern,
-  TypeMeta,
-  AggregationRestrictions,
-} from './index_patterns';
+export { IndexPatternsService, IndexPatternsContract, IndexPattern } from './index_patterns';
