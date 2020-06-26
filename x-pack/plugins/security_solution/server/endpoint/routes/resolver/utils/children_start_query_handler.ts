@@ -8,16 +8,21 @@ import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ChildrenQuery } from '../queries/children';
-import { TotalsPaginationBuilder } from './totals_pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { QueryHandler } from './fetch';
 import { ChildrenNodesHelper } from './children_helper';
+import { PaginationBuilder } from './pagination';
 
+/**
+ * Retrieve the start lifecycle events for the children of a resolver tree.
+ *
+ * If using msearch you should loop over hasMore() because the results are limited to the size of the ancestry array.
+ */
 export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelper> {
   private readonly childrenHelper: ChildrenNodesHelper;
   private limitLeft: number;
   private query: ChildrenQuery;
-  private nodeToQuery: string[] | undefined;
+  private nodesToQuery: Set<string>;
 
   constructor(
     private readonly limit: number,
@@ -27,67 +32,70 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
     private readonly legacyEndpointID: string | undefined
   ) {
     this.query = new ChildrenQuery(
-      TotalsPaginationBuilder.createBuilder(limit, after),
+      PaginationBuilder.createBuilder(limit, after),
       indexPattern,
       legacyEndpointID
     );
-    this.childrenHelper = new ChildrenNodesHelper(entityID);
+    this.childrenHelper = new ChildrenNodesHelper(entityID, this.limit);
     this.limitLeft = this.limit;
-    this.nodeToQuery = [entityID];
+    this.nodesToQuery = new Set([entityID]);
   }
 
   private setNoMore() {
-    this.nodeToQuery = undefined;
+    this.nodesToQuery = new Set();
     this.limitLeft = 0;
   }
 
-  handleResponse = (response: SearchResponse<ResolverEvent>) => {
-    const { totals, results } = this.query.formatResponse(response);
+  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+    const results = this.query.formatResponse(response);
+    this.nodesToQuery = this.childrenHelper.addStartEvents(this.nodesToQuery, results) ?? new Set();
+
     if (results.length === 0) {
-      // this would happen if an invalid entity ID is passed in
-      // in that case just return nothing
       this.setNoMore();
       return;
     }
 
-    console.log('results: ', JSON.stringify(results, null, 2));
-
-    this.childrenHelper.addPagination(totals, results);
     this.limitLeft = this.limit - this.childrenHelper.getNumNodes();
-
-    // need to rethink this
-    this.nodeToQuery = Array.from(this.childrenHelper.getIncompleteNodes().values());
-    console.log('node to query ', this.nodeToQuery);
-    console.log('limit left ', this.limitLeft);
-    console.log('results ', results.length);
     this.query = new ChildrenQuery(
-      // TODO create new method that takes the raw cursor information to ensure that we don't refind the last set of results
-      // just pass in the result set and have it pull the information for the last event because it should be sorting by timestamp asc
-      TotalsPaginationBuilder.createBuilder(this.limitLeft),
+      PaginationBuilder.createBuilder(this.limitLeft),
       this.indexPattern,
       this.legacyEndpointID
     );
   };
 
+  /**
+   * Check if there are more results to retrieve based on the limit that was passed in.
+   */
   hasMore(): boolean {
-    return this.limitLeft > 0 && this.nodeToQuery !== undefined && this.nodeToQuery.length > 0;
+    return this.limitLeft > 0 && this.nodesToQuery.size > 0;
   }
 
+  /**
+   * Get a query to retrieve the next set of results.
+   */
   nextQuery(): QueryInfo | undefined {
     if (this.hasMore()) {
       return {
         query: this.query,
         // This should never be undefined because the check above
-        ids: this.nodeToQuery || '',
+        ids: Array.from(this.nodesToQuery.values()),
         handler: this.handleResponse,
       };
     }
   }
 
+  /**
+   * Get the cached results from the ES responses.
+   */
   getResults(): ChildrenNodesHelper {
     return this.childrenHelper;
   }
 
+  /**
+   * Perform a regular search and return the helper.
+   *
+   * @param client the elasticsearch client
+   */
   async search(client: IScopedClusterClient) {
     while (this.hasMore()) {
       const info = this.nextQuery();

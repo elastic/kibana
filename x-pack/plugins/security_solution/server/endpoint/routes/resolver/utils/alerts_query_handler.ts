@@ -13,6 +13,9 @@ import { PaginationBuilder } from './pagination';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 
+/**
+ * Requests related alerts for the given node.
+ */
 export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRelatedAlerts> {
   private relatedAlerts: ResolverRelatedAlerts | undefined;
   private readonly query: AlertsQuery;
@@ -30,7 +33,7 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     );
   }
 
-  handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(response);
     this.relatedAlerts = createRelatedAlerts(
       this.entityID,
@@ -39,6 +42,11 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     );
   };
 
+  /**
+   * Builds a QueryInfo object that defines the related alerts to search for and how to handle the response.
+   *
+   * This will return undefined onces the results have been retrieved from ES.
+   */
   nextQuery(): QueryInfo | undefined {
     if (this.getResults()) {
       return;
@@ -51,10 +59,18 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     };
   }
 
+  /**
+   * Get the results after an msearch.
+   */
   getResults() {
     return this.relatedAlerts;
   }
 
+  /**
+   * Perform a regular search and return the results.
+   *
+   * @param client the elasticsearch client
+   */
   async search(client: IScopedClusterClient) {
     const results = this.getResults();
     if (results) {
@@ -62,6 +78,6 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
     }
 
     this.handleResponse(await this.query.search(client, this.entityID));
-    return this.getResults() || createRelatedAlerts(this.entityID);
+    return this.getResults() ?? createRelatedAlerts(this.entityID);
   }
 }

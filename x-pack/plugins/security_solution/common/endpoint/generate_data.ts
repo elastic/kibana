@@ -263,7 +263,7 @@ export interface Tree {
    * An array of levels of the children, that doesn't include the origin or any ancestors
    * childrenLevels[0] are the direct children of the origin node. The next level would be those children's descendants
    */
-  childrenLevels: TreeNode[][];
+  childrenLevels: Array<Map<string, TreeNode>>;
   /**
    * Map of entity_id to node
    */
@@ -630,17 +630,17 @@ export class EndpointDocGenerator {
     };
 
     const groupNodesByParent = (children: Map<string, TreeNode>) => {
-      const nodesByParent: Map<string, TreeNode[]> = new Map();
+      const nodesByParent: Map<string, Map<string, TreeNode>> = new Map();
       for (const node of children.values()) {
         const parentID = parentEntityId(node.lifecycle[0]);
         if (parentID) {
           let groupedNodes = nodesByParent.get(parentID);
 
           if (!groupedNodes) {
-            groupedNodes = [];
+            groupedNodes = new Map();
             nodesByParent.set(parentID, groupedNodes);
           }
-          groupedNodes.push(node);
+          groupedNodes.set(node.id, node);
         }
       }
 
@@ -648,19 +648,21 @@ export class EndpointDocGenerator {
     };
 
     const createLevels = (
-      childrenByParent: Map<string, TreeNode[]>,
-      levels: TreeNode[][],
-      currentNodes: TreeNode[] | undefined
-    ): TreeNode[][] => {
-      if (!currentNodes || currentNodes.length === 0) {
+      childrenByParent: Map<string, Map<string, TreeNode>>,
+      levels: Array<Map<string, TreeNode>>,
+      currentNodes: Map<string, TreeNode> | undefined
+    ): Array<Map<string, TreeNode>> => {
+      if (!currentNodes || currentNodes.size === 0) {
         return levels;
       }
       levels.push(currentNodes);
-      const nextLevel: TreeNode[] = [];
-      for (const node of currentNodes) {
+      const nextLevel: Map<string, TreeNode> = new Map();
+      for (const node of currentNodes.values()) {
         const children = childrenByParent.get(node.id);
         if (children) {
-          nextLevel.push(...children);
+          for (const child of children.values()) {
+            nextLevel.set(child.id, child);
+          }
         }
       }
       return createLevels(childrenByParent, levels, nextLevel);

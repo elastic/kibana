@@ -246,7 +246,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     ancestryArraySize: 2,
   };
 
-  describe.only('Resolver', () => {
+  describe('Resolver', () => {
     before(async () => {
       await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);
@@ -540,7 +540,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('returns multiple levels of child process lifecycle events', async () => {
           const { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}`)
+            .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&children=10`)
             .expect(200);
           expect(body.childNodes.length).to.eql(10);
           expect(body.nextChild).to.be(null);
@@ -600,7 +600,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
       });
 
-      describe.only('endpoint events', () => {
+      describe('endpoint events', () => {
         it('returns all children for the origin', async () => {
           const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=100`)
@@ -610,22 +610,27 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.childNodes.length).to.eql(12);
           // there will be 4 parents, the origin of the tree, and it's 3 children
           verifyChildren(body.childNodes, tree, 4, 3);
+          expect(body.nextChild).to.eql(null);
         });
 
         it('returns a single generation of children', async () => {
           // this gets a node should have 3 children which were created in succession so that the timestamps
           // are ordered correctly to be retrieved in a single call
-          const distantChildEntityID = tree.childrenLevels[0][0].id;
+          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
           const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
           verifyChildren(body.childNodes, tree, 1, 3);
+          expect(body.nextChild).to.not.eql(null);
         });
 
-        it('paginates the children of the origin node', async () => {
+        it('paginates the children', async () => {
+          // this gets a node should have 3 children which were created in succession so that the timestamps
+          // are ordered correctly to be retrieved in a single call
+          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
           let { body }: { body: ResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=1`)
+            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
           verifyChildren(body.childNodes, tree, 1, 1);
@@ -633,12 +638,20 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
           ({ body } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}/children?children=2&afterChild=${body.nextChild}`
+              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
             )
             .expect(200));
           expect(body.childNodes.length).to.eql(2);
           verifyChildren(body.childNodes, tree, 1, 2);
           expect(body.nextChild).to.not.be(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
+            )
+            .expect(200));
+          expect(body.childNodes.length).to.eql(0);
+          expect(body.nextChild).to.be(null);
         });
 
         it('gets all children in two queries', async () => {
@@ -648,15 +661,17 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
           verifyChildren(body.childNodes, tree);
-          expect(body.nextChild).to.be(null);
+          expect(body.nextChild).to.not.be(null);
+          const firstNodes = [...body.childNodes];
 
           ({ body } = await supertest
             .get(
-              `/api/endpoint/resolver/${tree.origin.id}/children?children=9&afterChild=${body.nextChild}`
+              `/api/endpoint/resolver/${tree.origin.id}/children?children=10&afterChild=${body.nextChild}`
             )
             .expect(200));
           expect(body.childNodes.length).to.eql(9);
-          verifyChildren(body.childNodes, tree, 3, 3);
+          // put all the results together and we should have all the children
+          verifyChildren([...firstNodes, ...body.childNodes], tree, 4, 3);
           expect(body.nextChild).to.be(null);
         });
       });

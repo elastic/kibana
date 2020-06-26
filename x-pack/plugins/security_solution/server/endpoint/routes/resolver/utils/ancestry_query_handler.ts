@@ -7,9 +7,9 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import {
-  ancestryArray,
   parentEntityId,
   entityId,
+  getAncestryAsArray,
 } from '../../../../../common/endpoint/models/event';
 import {
   ResolverAncestry,
@@ -21,6 +21,9 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { QueryHandler } from './fetch';
 
+/**
+ * Retrieve the ancestry portion of a resolver tree.
+ */
 export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
   private readonly ancestry: ResolverAncestry = createAncestry();
   private ancestorsToFind: string[];
@@ -32,10 +35,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     legacyEndpointID: string | undefined,
     originNode: LifecycleNode | undefined
   ) {
-    this.ancestorsToFind = AncestryQueryHandler.getAncestryAsArray(originNode?.lifecycle[0]).slice(
-      0,
-      levels
-    );
+    this.ancestorsToFind = getAncestryAsArray(originNode?.lifecycle[0]).slice(0, levels);
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
 
     // add the origin node to the response if it exists
@@ -43,24 +43,6 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
       this.ancestry.ancestors.push(originNode);
       this.ancestry.nextAncestor = parentEntityId(originNode.lifecycle[0]) || null;
     }
-  }
-
-  private static getAncestryAsArray(event: ResolverEvent | undefined): string[] {
-    if (!event) {
-      return [];
-    }
-
-    const ancestors = ancestryArray(event);
-    if (ancestors) {
-      return ancestors;
-    }
-
-    const parentID = parentEntityId(event);
-    if (parentID) {
-      return [parentID];
-    }
-
-    return [];
   }
 
   private toMapOfNodes(results: ResolverEvent[]) {
@@ -82,7 +64,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     this.levels = 0;
   }
 
-  handleResponse = (searchResp: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (searchResp: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(searchResp);
     if (results.length === 0) {
       this.setNoMore();
@@ -99,16 +81,20 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     this.levels = this.levels - ancestryNodes.size;
     // the results come back in ascending order on timestamp so the first entry in the
     // results should be the further ancestor (most distant grandparent)
-    this.ancestorsToFind = AncestryQueryHandler.getAncestryAsArray(results[0]).slice(
-      0,
-      this.levels
-    );
+    this.ancestorsToFind = getAncestryAsArray(results[0]).slice(0, this.levels);
   };
 
+  /**
+   * Returns whether there are more results to retrieve based on the limit that is passed in and the results that
+   * have already been received from ES.
+   */
   hasMore(): boolean {
     return this.levels > 0 && this.ancestorsToFind.length > 0;
   }
 
+  /**
+   * Get a query info for retrieving the next set of results.
+   */
   nextQuery(): QueryInfo | undefined {
     if (this.hasMore()) {
       return {
@@ -119,10 +105,18 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     }
   }
 
+  /**
+   * Return the results after using msearch to find them.
+   */
   getResults() {
     return this.ancestry;
   }
 
+  /**
+   * Perform a regular search and return the results.
+   *
+   * @param client the elasticsearch client.
+   */
   async search(client: IScopedClusterClient) {
     while (this.hasMore()) {
       const info = this.nextQuery();

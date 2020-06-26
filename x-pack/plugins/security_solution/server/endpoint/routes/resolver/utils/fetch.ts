@@ -12,7 +12,6 @@ import {
   ResolverRelatedAlerts,
   LifecycleNode,
 } from '../../../../../common/endpoint/types';
-import { ancestryArray } from '../../../../../common/endpoint/models/event';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
@@ -22,8 +21,13 @@ import { AncestryQueryHandler } from './ancestry_query_handler';
 import { RelatedEventsQueryHandler } from './events_query_handler';
 import { RelatedAlertsQueryHandler } from './alerts_query_handler';
 import { ChildrenStartQueryHandler } from './children_start_query_handler';
-import { LifecycleQueryHandler } from './children_lifecycle_query_handler';
+import { ChildrenLifecycleQueryHandler } from './children_lifecycle_query_handler';
+import { LifecycleQueryHandler } from './lifecycle_query_handler';
 
+/**
+ * The query parameters passed in from the request. These define the limits for the ES requests for retrieving the
+ * resolver tree.
+ */
 export interface TreeOptions {
   children: number;
   ancestors: number;
@@ -38,12 +42,28 @@ interface QueryBuilder {
   nextQuery(): QueryInfo | undefined;
 }
 
+/**
+ * This interface defines the contract for a query handler that will only be used once in an msearch call.
+ */
 export interface SingleQueryHandler<T> extends QueryBuilder {
+  /**
+   * This method returns the results if the query has been used in an msearch call or undefined if not.
+   */
   getResults(): T | undefined;
+  /**
+   * Do a regular search instead of msearch.
+   * @param client the elasticsearch client
+   */
   search(client: IScopedClusterClient): Promise<T>;
 }
 
+/**
+ * This interface defines the contract for a query handler that can be used multiple times by msearch.
+ */
 export interface QueryHandler<T> extends SingleQueryHandler<T> {
+  /**
+   * Returns whether additional msearch are required to retrieve the rest of the expected data from ES.
+   */
   hasMore(): boolean;
 }
 
@@ -71,40 +91,12 @@ export class Fetcher {
     private readonly endpointID?: string
   ) {}
 
+  /**
+   * This method retrieves the resolver tree starting from the `id` during construction of the class.
+   *
+   * @param options the options for retrieving the structure of the tree.
+   */
   public async tree(options: TreeOptions) {
-    const originNode = await this.getNode(this.id);
-    if (!originNode) {
-      // empty tree
-      return new Tree(this.id);
-    }
-    const hasAncestryArray = ancestryArray(originNode.lifecycle[0]);
-
-    if (!hasAncestryArray) {
-      return this.searchWithoutAncestryArray(options, originNode);
-    } else {
-      return this.searchWithAncestryArray(options, originNode);
-    }
-  }
-
-  private async searchWithoutAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
-    const [childrenNodes, ancestry, relatedEvents, relatedAlerts] = await Promise.all([
-      this.children(options.children, options.afterChild),
-      this.doAncestors(options.ancestors, originNode),
-      this.events(options.events, options.afterEvent),
-      this.alerts(options.alerts, options.afterAlert),
-    ]);
-
-    const tree = new Tree(this.id, {
-      ancestry,
-      children: childrenNodes,
-      relatedEvents,
-      relatedAlerts,
-    });
-
-    return this.stats(tree);
-  }
-
-  private async searchWithAncestryArray(options: TreeOptions, originNode: LifecycleNode) {
     const addQueryToList = (queryHandler: QueryBuilder, queries: QueryInfo[]) => {
       const queryInfo = queryHandler.nextQuery();
       if (queryInfo !== undefined) {
@@ -112,11 +104,10 @@ export class Fetcher {
       }
     };
 
-    const ancestryHandler = new AncestryQueryHandler(
-      options.ancestors,
+    const originHandler = new LifecycleQueryHandler(
+      this.id,
       this.eventsIndexPattern,
-      this.endpointID,
-      originNode
+      this.endpointID
     );
 
     const eventsHandler = new RelatedEventsQueryHandler(
@@ -135,6 +126,8 @@ export class Fetcher {
       this.endpointID
     );
 
+    // we need to get the start events first because the API request defines how many nodes to return and we don't want
+    // to count or limit ourselves based on the other lifecycle events (end, etc)
     const childrenHandler = new ChildrenStartQueryHandler(
       options.children,
       this.id,
@@ -149,12 +142,20 @@ export class Fetcher {
     addQueryToList(eventsHandler, queries);
     addQueryToList(alertsHandler, queries);
     addQueryToList(childrenHandler, queries);
+    addQueryToList(originHandler, queries);
 
-    if (ancestryHandler.hasMore()) {
-      addQueryToList(ancestryHandler, queries);
-    }
+    // get the related events, related alerts, the first pass of children start events, and the origin node
+    // the origin node is needed so we can get the ancestry array for the additional ancestor calls
     await msearch.search(queries);
 
+    const ancestryHandler = new AncestryQueryHandler(
+      options.ancestors,
+      this.eventsIndexPattern,
+      this.endpointID,
+      originHandler.getResults()
+    );
+
+    // get the remaining ancestors and children start events
     while (ancestryHandler.hasMore() || childrenHandler.hasMore()) {
       queries = [];
       addQueryToList(ancestryHandler, queries);
@@ -164,12 +165,13 @@ export class Fetcher {
 
     const childrenTotalsHelper = childrenHandler.getResults();
 
-    const childrenLifecycleHandler = new LifecycleQueryHandler(
+    const childrenLifecycleHandler = new ChildrenLifecycleQueryHandler(
       childrenTotalsHelper,
       this.eventsIndexPattern,
       this.endpointID
     );
 
+    // now that we have all the start events get the full lifecycle nodes
     childrenLifecycleHandler.search(this.client);
 
     const tree = new Tree(this.id, {
@@ -179,6 +181,7 @@ export class Fetcher {
       children: childrenLifecycleHandler.getResults(),
     });
 
+    // add the stats to the tree
     return this.stats(tree);
   }
 
@@ -213,7 +216,7 @@ export class Fetcher {
       this.endpointID
     );
     const helper = await childrenHandler.search(this.client);
-    const childrenLifecycleHandler = new LifecycleQueryHandler(
+    const childrenLifecycleHandler = new ChildrenLifecycleQueryHandler(
       helper,
       this.eventsIndexPattern,
       this.endpointID
@@ -278,18 +281,6 @@ export class Fetcher {
     return createLifecycle(entityID, results);
   }
 
-  private async doAncestors(limit: number, originNode: LifecycleNode) {
-    const ancestryHandler = new AncestryQueryHandler(
-      limit,
-      this.eventsIndexPattern,
-      this.endpointID,
-      originNode
-    );
-    return ancestryHandler.search(this.client);
-  }
-
-  // TODO have this take an array of entity ids and have the tree accept the format this function returns so the tree
-  // doesn't have to be instantiated before calling this function
   private async doStats(tree: Tree) {
     const statsQuery = new StatsQuery(
       [this.eventsIndexPattern, this.alertsIndexPattern],

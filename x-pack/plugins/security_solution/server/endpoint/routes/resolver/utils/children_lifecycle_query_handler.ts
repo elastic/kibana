@@ -13,8 +13,10 @@ import { SingleQueryHandler } from './fetch';
 import { ChildrenNodesHelper } from './children_helper';
 import { createChildren } from './node';
 
-// TODO change the name to reflect children nodes
-export class LifecycleQueryHandler implements SingleQueryHandler<ResolverChildren> {
+/**
+ * Returns the children of a resolver tree.
+ */
+export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<ResolverChildren> {
   private lifecycle: ResolverChildren | undefined;
   private readonly query: LifecycleQuery;
   constructor(
@@ -25,11 +27,14 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverChildre
     this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
-  handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
     this.childrenHelper.addLifecycleEvents(this.query.formatResponse(response));
     this.lifecycle = this.childrenHelper.getNodes();
   };
 
+  /**
+   * Get the query for msearch. Once the results are set this will return undefined.
+   */
   nextQuery(): QueryInfo | undefined {
     if (this.getResults()) {
       return;
@@ -42,10 +47,18 @@ export class LifecycleQueryHandler implements SingleQueryHandler<ResolverChildre
     };
   }
 
+  /**
+   * Return the results from the search.
+   */
   getResults(): ResolverChildren | undefined {
     return this.lifecycle;
   }
 
+  /**
+   * Perform a regular search and return the results.
+   *
+   * @param client the elasticsearch client
+   */
   async search(client: IScopedClusterClient) {
     const results = this.getResults();
     if (results) {

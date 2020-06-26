@@ -6,44 +6,35 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { ResolverRelatedEvents, ResolverEvent } from '../../../../../common/endpoint/types';
-import { createRelatedEvents } from './node';
-import { EventsQuery } from '../queries/events';
-import { PaginationBuilder } from './pagination';
+import { ResolverEvent, LifecycleNode } from '../../../../../common/endpoint/types';
+import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
+import { createLifecycle } from './node';
 
 /**
- * This retrieves the related events for the origin node of a resolver tree.
+ * Retrieve the lifecycle events for a node.
  */
-export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRelatedEvents> {
-  private relatedEvents: ResolverRelatedEvents | undefined;
-  private readonly query: EventsQuery;
+export class LifecycleQueryHandler implements SingleQueryHandler<LifecycleNode> {
+  private lifecycle: LifecycleNode | undefined;
+  private readonly query: LifecycleQuery;
   constructor(
-    private readonly limit: number,
     private readonly entityID: string,
-    after: string | undefined,
     indexPattern: string,
     legacyEndpointID: string | undefined
   ) {
-    this.query = new EventsQuery(
-      PaginationBuilder.createBuilder(limit, after),
-      indexPattern,
-      legacyEndpointID
-    );
+    this.query = new LifecycleQuery(indexPattern, legacyEndpointID);
   }
 
   private handleResponse = (response: SearchResponse<ResolverEvent>) => {
     const results = this.query.formatResponse(response);
-    this.relatedEvents = createRelatedEvents(
-      this.entityID,
-      results,
-      PaginationBuilder.buildCursorRequestLimit(this.limit, results)
-    );
+    if (results.length !== 0) {
+      this.lifecycle = createLifecycle(this.entityID, results);
+    }
   };
 
   /**
-   * Get a query to use in a msearch.
+   * Build the query for retrieving the lifecycle events. This will return undefined once the results have been found.
    */
   nextQuery(): QueryInfo | undefined {
     if (this.getResults()) {
@@ -58,16 +49,16 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
   }
 
   /**
-   * Get the results after an msearch.
+   * Get the results from the msearch.
    */
-  getResults() {
-    return this.relatedEvents;
+  getResults(): LifecycleNode | undefined {
+    return this.lifecycle;
   }
 
   /**
-   * Perform a normal search and return the related events results.
+   * Do a regular search and return the results.
    *
-   * @param client the elasticsearch client
+   * @param client the elasticsearch client.
    */
   async search(client: IScopedClusterClient) {
     const results = this.getResults();
@@ -76,6 +67,6 @@ export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRel
     }
 
     this.handleResponse(await this.query.search(client, this.entityID));
-    return this.getResults() ?? createRelatedEvents(this.entityID);
+    return this.getResults() ?? createLifecycle(this.entityID, []);
   }
 }

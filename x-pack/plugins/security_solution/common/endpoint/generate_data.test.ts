@@ -192,7 +192,7 @@ describe('data generator', () => {
     it('creates the right number childrenLevels', () => {
       let totalChildren = 0;
       for (const level of tree.childrenLevels) {
-        totalChildren += level.length;
+        totalChildren += level.size;
       }
       expect(totalChildren).toEqual(tree.children.size);
       expect(tree.childrenLevels.length).toEqual(generations);
@@ -200,7 +200,7 @@ describe('data generator', () => {
 
     it('has the right nodes in both the childrenLevels and children map', () => {
       for (const level of tree.childrenLevels) {
-        for (const node of level) {
+        for (const node of level.values()) {
           expect(tree.children.get(node.id)).toEqual(node);
         }
       }

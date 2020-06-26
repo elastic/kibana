@@ -54,7 +54,6 @@ export function createChild(entityID: string): ChildNode {
   const lifecycle = createLifecycle(entityID, []);
   return {
     ...lifecycle,
-    nextChild: null,
   };
 }
 
@@ -75,6 +74,12 @@ export function createLifecycle(entityID: string, lifecycle: ResolverEvent[]): L
   return { entityID, lifecycle };
 }
 
+/**
+ * Creates a resolver children response.
+ *
+ * @param nodes the child nodes to add to the ResolverChildren response
+ * @param nextChild the cursor for the response
+ */
 export function createChildren(
   nodes: ChildNode[] = [],
   nextChild: string | null = null
