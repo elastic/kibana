@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './filter_manager';
-export * from './types';
-export * from './is_query';
+export { isTimeRange } from './is_time_range';

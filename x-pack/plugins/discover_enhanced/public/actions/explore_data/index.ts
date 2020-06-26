@@ -5,3 +5,4 @@
  */
 
 export * from './explore_data_context_menu_action';
+export * from './explore_data_chart_action';

@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export * from './filter_manager';
-export * from './types';
-export * from './is_query';
+import { Query } from './types';
+
+export const isQuery = (x: unknown): x is Query =>
+  !!x &&
+  typeof x === 'object' &&
+  typeof (x as Query).language === 'string' &&
+  (typeof (x as Query).query === 'string' ||
+    (typeof (x as Query).query === 'object' && !!(x as Query).query));
