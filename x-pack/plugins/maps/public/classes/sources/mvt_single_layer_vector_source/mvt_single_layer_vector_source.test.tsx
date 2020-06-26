@@ -29,6 +29,31 @@ describe('getUrlTemplateWithMeta', () => {
   });
 });
 
+describe('canFormatFeatureProperties', () => {
+  it('false if no tooltips', async () => {
+    const source = new MVTSingleLayerVectorSource(descriptor);
+    expect(source.canFormatFeatureProperties()).toEqual(false);
+  });
+  it('true if at least one matching tooltip', async () => {
+    const descriptorWithTooltips = {
+      ...descriptor,
+      fields: [{ name: 'foobar', type: MVTFieldType.STRING }],
+      tooltipProperties: ['foo', 'foobar', 'bar'],
+    };
+    const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
+    expect(source.canFormatFeatureProperties()).toEqual(true);
+  });
+  it('false if no matching tooltip', async () => {
+    const descriptorWithTooltips = {
+      ...descriptor,
+      fields: [{ name: 'foobar', type: MVTFieldType.STRING }],
+      tooltipProperties: ['foo', 'bar'],
+    };
+    const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
+    expect(source.canFormatFeatureProperties()).toEqual(false);
+  });
+});
+
 describe('filterAndFormatPropertiesToHtml', () => {
   const descriptorWithFields = {
     ...descriptor,

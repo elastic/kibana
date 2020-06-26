@@ -193,7 +193,19 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   canFormatFeatureProperties() {
-    return true;
+    if (!this._tooltipFields.length) {
+      return false;
+    }
+
+    for (let i = 0; i < this._tooltipFields.length; i++) {
+      const tooltip: MVTField = this._tooltipFields[i];
+      for (let j = 0; j < this._descriptor.fields.length; j++) {
+        if (tooltip.getName() === this._descriptor.fields[j].name) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   getMinZoom() {
