@@ -4,29 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewDatasourceSchema } from '../models';
+import { NewPackageConfigSchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
-export const GetDatasourcesRequestSchema = {
+export const GetPackageConfigsRequestSchema = {
   query: ListWithKuerySchema,
 };
 
-export const GetOneDatasourceRequestSchema = {
+export const GetOnePackageConfigRequestSchema = {
   params: schema.object({
     datasourceId: schema.string(),
   }),
 };
 
-export const CreateDatasourceRequestSchema = {
-  body: NewDatasourceSchema,
+export const CreatePackageConfigRequestSchema = {
+  body: NewPackageConfigSchema,
 };
 
-export const UpdateDatasourceRequestSchema = {
-  ...GetOneDatasourceRequestSchema,
-  body: NewDatasourceSchema,
+export const UpdatePackageConfigRequestSchema = {
+  ...GetOnePackageConfigRequestSchema,
+  body: NewPackageConfigSchema,
 };
 
-export const DeleteDatasourcesRequestSchema = {
+export const DeletePackageConfigsRequestSchema = {
   body: schema.object({
     datasourceIds: schema.arrayOf(schema.string()),
   }),

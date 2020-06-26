@@ -12,7 +12,7 @@ import { xpackMocks } from '../../../../../mocks';
 import { appContextService } from '../../services';
 import { createAppContextStartContractMock } from '../../mocks';
 import { DatasourceServiceInterface, ExternalCallback } from '../..';
-import { CreateDatasourceRequestSchema } from '../../types/rest_spec';
+import { CreatePackageConfigRequestSchema } from '../../types/rest_spec';
 import { datasourceService } from '../../services';
 
 const datasourceServiceMock = datasourceService as jest.Mocked<DatasourceServiceInterface>;
@@ -77,12 +77,12 @@ describe('When calling datasource', () => {
 
   describe('create api handler', () => {
     const getCreateKibanaRequest = (
-      newData?: typeof CreateDatasourceRequestSchema.body
-    ): KibanaRequest<undefined, undefined, typeof CreateDatasourceRequestSchema.body> => {
+      newData?: typeof CreatePackageConfigRequestSchema.body
+    ): KibanaRequest<undefined, undefined, typeof CreatePackageConfigRequestSchema.body> => {
       return httpServerMock.createKibanaRequest<
         undefined,
         undefined,
-        typeof CreateDatasourceRequestSchema.body
+        typeof CreatePackageConfigRequestSchema.body
       >({
         path: routeConfig.path,
         method: 'post',

@@ -6,21 +6,21 @@
 import { sendRequest, useRequest } from './use_request';
 import { datasourceRouteService } from '../../services';
 import {
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
-  UpdateDatasourceRequest,
-  UpdateDatasourceResponse,
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  UpdatePackageConfigRequest,
+  UpdatePackageConfigResponse,
 } from '../../types';
 import {
-  DeleteDatasourcesRequest,
-  DeleteDatasourcesResponse,
-  GetDatasourcesRequest,
-  GetDatasourcesResponse,
-  GetOneDatasourceResponse,
+  DeletePackageConfigsRequest,
+  DeletePackageConfigsResponse,
+  GetPackageConfigsRequest,
+  GetPackageConfigsResponse,
+  GetOnePackageConfigResponse,
 } from '../../../../../common/types/rest_spec';
 
-export const sendCreateDatasource = (body: CreateDatasourceRequest['body']) => {
-  return sendRequest<CreateDatasourceResponse>({
+export const sendCreateDatasource = (body: CreatePackageConfigRequest['body']) => {
+  return sendRequest<CreatePackageConfigResponse>({
     path: datasourceRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
@@ -29,25 +29,25 @@ export const sendCreateDatasource = (body: CreateDatasourceRequest['body']) => {
 
 export const sendUpdateDatasource = (
   datasourceId: string,
-  body: UpdateDatasourceRequest['body']
+  body: UpdatePackageConfigRequest['body']
 ) => {
-  return sendRequest<UpdateDatasourceResponse>({
+  return sendRequest<UpdatePackageConfigResponse>({
     path: datasourceRouteService.getUpdatePath(datasourceId),
     method: 'put',
     body: JSON.stringify(body),
   });
 };
 
-export const sendDeleteDatasource = (body: DeleteDatasourcesRequest['body']) => {
-  return sendRequest<DeleteDatasourcesResponse>({
+export const sendDeleteDatasource = (body: DeletePackageConfigsRequest['body']) => {
+  return sendRequest<DeletePackageConfigsResponse>({
     path: datasourceRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
   });
 };
 
-export function useGetDatasources(query: GetDatasourcesRequest['query']) {
-  return useRequest<GetDatasourcesResponse>({
+export function useGetDatasources(query: GetPackageConfigsRequest['query']) {
+  return useRequest<GetPackageConfigsResponse>({
     method: 'get',
     path: datasourceRouteService.getListPath(),
     query,
@@ -55,7 +55,7 @@ export function useGetDatasources(query: GetDatasourcesRequest['query']) {
 }
 
 export const sendGetOneDatasource = (datasourceId: string) => {
-  return sendRequest<GetOneDatasourceResponse>({
+  return sendRequest<GetOnePackageConfigResponse>({
     path: datasourceRouteService.getInfoPath(datasourceId),
     method: 'get',
   });

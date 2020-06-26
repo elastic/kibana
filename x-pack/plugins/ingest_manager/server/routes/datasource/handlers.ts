@@ -9,18 +9,18 @@ import { RequestHandler } from 'src/core/server';
 import { appContextService, datasourceService } from '../../services';
 import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
 import {
-  GetDatasourcesRequestSchema,
-  GetOneDatasourceRequestSchema,
-  CreateDatasourceRequestSchema,
-  UpdateDatasourceRequestSchema,
-  DeleteDatasourcesRequestSchema,
+  GetPackageConfigsRequestSchema,
+  GetOnePackageConfigRequestSchema,
+  CreatePackageConfigRequestSchema,
+  UpdatePackageConfigRequestSchema,
+  DeletePackageConfigsRequestSchema,
   NewPackageConfig,
 } from '../../types';
-import { CreateDatasourceResponse, DeleteDatasourcesResponse } from '../../../common';
+import { CreatePackageConfigResponse, DeletePackageConfigsResponse } from '../../../common';
 
 export const getDatasourcesHandler: RequestHandler<
   undefined,
-  TypeOf<typeof GetDatasourcesRequestSchema.query>
+  TypeOf<typeof GetPackageConfigsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
@@ -43,7 +43,7 @@ export const getDatasourcesHandler: RequestHandler<
 };
 
 export const getOneDatasourceHandler: RequestHandler<TypeOf<
-  typeof GetOneDatasourceRequestSchema.params
+  typeof GetOnePackageConfigRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
@@ -72,7 +72,7 @@ export const getOneDatasourceHandler: RequestHandler<TypeOf<
 export const createDatasourceHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof CreateDatasourceRequestSchema.body>
+  TypeOf<typeof CreatePackageConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
@@ -88,7 +88,7 @@ export const createDatasourceHandler: RequestHandler<
       for (const callback of externalCallbacks) {
         try {
           // ensure that the returned value by the callback passes schema validation
-          updatedNewData = CreateDatasourceRequestSchema.body.validate(
+          updatedNewData = CreatePackageConfigRequestSchema.body.validate(
             await callback(updatedNewData)
           );
         } catch (error) {
@@ -98,12 +98,12 @@ export const createDatasourceHandler: RequestHandler<
         }
       }
 
-      // The type `NewPackageConfig` and the `DatasourceBaseSchema` are incompatible.
-      // `NewDatasrouce` defines `namespace` as optional string, which means that `undefined` is a
+      // The type `NewPackageConfig` and the `PackageConfigBaseSchema` are incompatible.
+      // `NewDatasource` defines `namespace` as optional string, which means that `undefined` is a
       // valid value, however, the schema defines it as string with a minimum length of 1.
       // Here, we need to cast the value back to the schema type and ignore the TS error.
       // @ts-ignore
-      newData = updatedNewData as typeof CreateDatasourceRequestSchema.body;
+      newData = updatedNewData as typeof CreatePackageConfigRequestSchema.body;
     }
 
     // Make sure the datasource package is installed
@@ -121,12 +121,12 @@ export const createDatasourceHandler: RequestHandler<
       newData.inputs = (await datasourceService.assignPackageStream(
         pkgInfo,
         newData.inputs
-      )) as TypeOf<typeof CreateDatasourceRequestSchema.body>['inputs'];
+      )) as TypeOf<typeof CreatePackageConfigRequestSchema.body>['inputs'];
     }
 
     // Create datasource
     const datasource = await datasourceService.create(soClient, newData, { user });
-    const body: CreateDatasourceResponse = { item: datasource, success: true };
+    const body: CreatePackageConfigResponse = { item: datasource, success: true };
     return response.ok({
       body,
     });
@@ -140,9 +140,9 @@ export const createDatasourceHandler: RequestHandler<
 };
 
 export const updateDatasourceHandler: RequestHandler<
-  TypeOf<typeof UpdateDatasourceRequestSchema.params>,
+  TypeOf<typeof UpdatePackageConfigRequestSchema.params>,
   unknown,
-  TypeOf<typeof UpdateDatasourceRequestSchema.body>
+  TypeOf<typeof UpdatePackageConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
@@ -163,7 +163,7 @@ export const updateDatasourceHandler: RequestHandler<
         pkgVersion: pkg.version,
       });
       newData.inputs = (await datasourceService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
-        typeof CreateDatasourceRequestSchema.body
+        typeof CreatePackageConfigRequestSchema.body
       >['inputs'];
     }
 
@@ -187,12 +187,12 @@ export const updateDatasourceHandler: RequestHandler<
 export const deleteDatasourceHandler: RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof DeleteDatasourcesRequestSchema.body>
+  TypeOf<typeof DeletePackageConfigsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const body: DeleteDatasourcesResponse = await datasourceService.delete(
+    const body: DeletePackageConfigsResponse = await datasourceService.delete(
       soClient,
       request.body.datasourceIds,
       { user }

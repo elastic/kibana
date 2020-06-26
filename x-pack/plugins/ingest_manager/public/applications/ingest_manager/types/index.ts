@@ -36,10 +36,10 @@ export {
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
   // API schemas - Datasource
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
-  UpdateDatasourceRequest,
-  UpdateDatasourceResponse,
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  UpdatePackageConfigRequest,
+  UpdatePackageConfigResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents

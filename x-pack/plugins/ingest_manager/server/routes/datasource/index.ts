@@ -6,11 +6,11 @@
 import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, DATASOURCE_API_ROUTES } from '../../constants';
 import {
-  GetDatasourcesRequestSchema,
-  GetOneDatasourceRequestSchema,
-  CreateDatasourceRequestSchema,
-  UpdateDatasourceRequestSchema,
-  DeleteDatasourcesRequestSchema,
+  GetPackageConfigsRequestSchema,
+  GetOnePackageConfigRequestSchema,
+  CreatePackageConfigRequestSchema,
+  UpdatePackageConfigRequestSchema,
+  DeletePackageConfigsRequestSchema,
 } from '../../types';
 import {
   getDatasourcesHandler,
@@ -25,7 +25,7 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: DATASOURCE_API_ROUTES.LIST_PATTERN,
-      validate: GetDatasourcesRequestSchema,
+      validate: GetPackageConfigsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getDatasourcesHandler
@@ -35,7 +35,7 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: DATASOURCE_API_ROUTES.INFO_PATTERN,
-      validate: GetOneDatasourceRequestSchema,
+      validate: GetOnePackageConfigRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneDatasourceHandler
@@ -45,7 +45,7 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: DATASOURCE_API_ROUTES.CREATE_PATTERN,
-      validate: CreateDatasourceRequestSchema,
+      validate: CreatePackageConfigRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createDatasourceHandler
@@ -55,7 +55,7 @@ export const registerRoutes = (router: IRouter) => {
   router.put(
     {
       path: DATASOURCE_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdateDatasourceRequestSchema,
+      validate: UpdatePackageConfigRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateDatasourceHandler
@@ -65,7 +65,7 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: DATASOURCE_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteDatasourcesRequestSchema,
+      validate: DeletePackageConfigsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     deleteDatasourceHandler

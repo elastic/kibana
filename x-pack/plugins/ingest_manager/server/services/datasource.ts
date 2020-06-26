@@ -6,7 +6,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
-  DeleteDatasourcesResponse,
+  DeletePackageConfigsResponse,
   packageToConfigDatasource,
   PackageConfigInput,
   PackageConfigInputStream,
@@ -200,8 +200,8 @@ class DatasourceService {
     soClient: SavedObjectsClientContract,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentConfigs?: boolean }
-  ): Promise<DeleteDatasourcesResponse> {
-    const result: DeleteDatasourcesResponse = [];
+  ): Promise<DeletePackageConfigsResponse> {
+    const result: DeletePackageConfigsResponse = [];
 
     for (const id of ids) {
       try {

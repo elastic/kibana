@@ -5,7 +5,7 @@
  */
 import { PackageConfig, NewPackageConfig } from '../models';
 
-export interface GetDatasourcesRequest {
+export interface GetPackageConfigsRequest {
   query: {
     page: number;
     perPage: number;
@@ -13,7 +13,7 @@ export interface GetDatasourcesRequest {
   };
 }
 
-export interface GetDatasourcesResponse {
+export interface GetPackageConfigsResponse {
   items: PackageConfig[];
   total: number;
   page: number;
@@ -21,39 +21,39 @@ export interface GetDatasourcesResponse {
   success: boolean;
 }
 
-export interface GetOneDatasourceRequest {
+export interface GetOnePackageConfigRequest {
   params: {
     datasourceId: string;
   };
 }
 
-export interface GetOneDatasourceResponse {
+export interface GetOnePackageConfigResponse {
   item: PackageConfig;
   success: boolean;
 }
 
-export interface CreateDatasourceRequest {
+export interface CreatePackageConfigRequest {
   body: NewPackageConfig;
 }
 
-export interface CreateDatasourceResponse {
+export interface CreatePackageConfigResponse {
   item: PackageConfig;
   success: boolean;
 }
 
-export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
+export type UpdatePackageConfigRequest = GetOnePackageConfigRequest & {
   body: NewPackageConfig;
 };
 
-export type UpdateDatasourceResponse = CreateDatasourceResponse;
+export type UpdatePackageConfigResponse = CreatePackageConfigResponse;
 
-export interface DeleteDatasourcesRequest {
+export interface DeletePackageConfigsRequest {
   body: {
     datasourceIds: string[];
   };
 }
 
-export type DeleteDatasourcesResponse = Array<{
+export type DeletePackageConfigsResponse = Array<{
   id: string;
   success: boolean;
 }>;

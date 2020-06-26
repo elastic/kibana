@@ -13,7 +13,7 @@ const ConfigRecordSchema = schema.recordOf(
   })
 );
 
-const DatasourceBaseSchema = {
+const PackageConfigBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.string({ minLength: 1 }),
@@ -64,11 +64,11 @@ const DatasourceBaseSchema = {
   ),
 };
 
-export const NewDatasourceSchema = schema.object({
-  ...DatasourceBaseSchema,
+export const NewPackageConfigSchema = schema.object({
+  ...PackageConfigBaseSchema,
 });
 
-export const DatasourceSchema = schema.object({
-  ...DatasourceBaseSchema,
+export const PackageConfigSchema = schema.object({
+  ...PackageConfigBaseSchema,
   id: schema.string(),
 });
