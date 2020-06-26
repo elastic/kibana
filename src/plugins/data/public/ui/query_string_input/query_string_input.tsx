@@ -29,6 +29,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiLink,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -469,6 +470,8 @@ export class QueryStringInputUI extends Component<Props, State> {
     this.setState({ index });
   };
 
+  textareaId = htmlIdGenerator()();
+
   public componentDidMount() {
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
@@ -503,7 +506,7 @@ export class QueryStringInputUI extends Component<Props, State> {
         selectionStart: null,
         selectionEnd: null,
       });
-      if (document.activeElement !== null && document.activeElement.id === 'kqlbar_id') {
+      if (document.activeElement !== null && document.activeElement.id === this.textareaId) {
         this.handleAutoHeight();
       } else {
         this.handleRemoveHeight();
@@ -536,10 +539,12 @@ export class QueryStringInputUI extends Component<Props, State> {
   };
 
   handleOnFocus = () => {
-    this.handleAutoHeight();
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(true);
     }
+    requestAnimationFrame(() => {
+      this.handleAutoHeight();
+    });
   };
 
   public render() {
@@ -583,7 +588,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 className="kbnQueryBar__textarea"
                 fullWidth
                 rows={1}
-                id="kqlbar_id"
+                id={this.textareaId}
                 autoFocus={
                   this.props.onChangeQueryInputFocus ? false : !this.props.disableAutoFocus
                 }
