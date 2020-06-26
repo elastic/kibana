@@ -25,6 +25,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
+import { forceUnenrollAgent } from './unenroll';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -62,6 +63,12 @@ export async function acknowledgeAgentActions(
   if (actions.length === 0) {
     return [];
   }
+
+  const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
+  if (isAgentUnenrolled) {
+    await forceUnenrollAgent(soClient, agent.id);
+  }
+
   const configRevision = getLatestConfigRevison(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([

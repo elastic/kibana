@@ -14,7 +14,7 @@ export type AgentType =
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
 export interface NewAgentAction {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
   data?: any;
   sent_at?: string;
 }
@@ -73,6 +73,8 @@ interface AgentBase {
   type: AgentType;
   active: boolean;
   enrolled_at: string;
+  unenrolled_at: string;
+  unenrollement_started_at: string;
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
