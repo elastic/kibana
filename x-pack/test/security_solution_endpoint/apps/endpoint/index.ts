@@ -17,6 +17,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./policy_details'));
 
     // loadTestFile(require.resolve('./alerts'));
-    // loadTestFile(require.resolve('./resolver'));
+    loadTestFile(require.resolve('./resolver'));
   });
 }
