@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { pickBy, isBoolean } from 'lodash';
+import { pickBy } from 'lodash';
 import React, { Fragment, useMemo, useReducer } from 'react';
 import { useDelayedVisibility } from '../components/shared/useDelayedVisibility';
 
@@ -28,7 +28,7 @@ function reducer(statuses: State, action: Action) {
   // the object.
   return pickBy(
     { ...statuses, [action.id.toString()]: action.isLoading },
-    isBoolean
+    Boolean
   );
 }
 
