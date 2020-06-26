@@ -131,21 +131,9 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              plugin_a: Plugins.valid('pluginA'),
-            },
-          },
-          plugins: {
-            plugin_b: Plugins.valid('pluginB'),
-          },
-          'x-pack': {
-            plugins: {
-              plugin_c: Plugins.valid('pluginC'),
-            },
-          },
-        },
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+        [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
       },
       { createCwd: false }
     );
@@ -162,16 +150,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              plugin_a: Plugins.invalid(),
-              plugin_b: Plugins.incomplete(),
-              plugin_c: Plugins.incompatible(),
-              plugin_d: Plugins.missingManifest(),
-            },
-          },
-        },
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
       },
       { createCwd: false }
     );
@@ -206,16 +188,12 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: mockFs.directory({
-              mode: 0, // 0000
-              items: {
-                plugin_a: Plugins.valid('pluginA'),
-              },
-            }),
+        [`${KIBANA_ROOT}/src/plugins`]: mockFs.directory({
+          mode: 0, // 0000
+          items: {
+            plugin_a: Plugins.valid('pluginA'),
           },
-        },
+        }),
       },
       { createCwd: false }
     );
@@ -245,15 +223,9 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              plugin_a: {
-                ...Plugins.inaccessibleManifest(),
-                nested_plugin: Plugins.valid('nestedPlugin'),
-              },
-            },
-          },
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+          ...Plugins.inaccessibleManifest(),
+          nested_plugin: Plugins.valid('nestedPlugin'),
         },
       },
       { createCwd: false }
@@ -282,20 +254,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              plugin_a: Plugins.valid('pluginA'),
-              sub1: {
-                plugin_b: Plugins.valid('pluginB'),
-                sub2: {
-                  plugin_c: Plugins.valid('pluginC'),
-                  plugin_d: Plugins.incomplete(),
-                },
-              },
-            },
-          },
-        },
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.incomplete(),
       },
       { createCwd: false }
     );
@@ -329,15 +291,9 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              plugin_a: {
-                ...Plugins.valid('pluginA'),
-                nested_plugin: Plugins.valid('nestedPlugin'),
-              },
-            },
-          },
+        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+          ...Plugins.valid('pluginA'),
+          nested_plugin: Plugins.valid('nestedPlugin'),
         },
       },
       { createCwd: false }
@@ -354,30 +310,14 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {
-              sub1: {
-                plugin: Plugins.valid('plugin1'),
-                sub2: {
-                  plugin: Plugins.valid('plugin2'),
-                  sub3: {
-                    plugin: Plugins.valid('plugin3'),
-                    sub4: {
-                      plugin: Plugins.valid('plugin4'),
-                      sub5: {
-                        plugin: Plugins.valid('plugin5'),
-                        sub6: {
-                          plugin: Plugins.valid('plugin6'),
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        [`${KIBANA_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
+        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]: Plugins.valid(
+          'plugin6'
+        ),
       },
       { createCwd: false }
     );
@@ -398,17 +338,9 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [KIBANA_ROOT]: {
-          src: {
-            plugins: {},
-          },
-          plugins: mockFs.symlink({
-            path: '../ext-plugins',
-          }),
-          'x-pack': {
-            plugins: {},
-          },
-        },
+        [`${KIBANA_ROOT}/plugins`]: mockFs.symlink({
+          path: '../ext-plugins',
+        }),
         [pluginFolder]: {
           plugin_a: Plugins.valid('pluginA'),
           plugin_b: Plugins.valid('pluginB'),
