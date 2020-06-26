@@ -7,7 +7,7 @@
 import { ObservabilityFetchDataResponse, FetchDataResponse } from './typings/fetch_data_response';
 import { ObservabilityApp } from '../typings/common';
 
-interface FetchDataParams {
+export interface FetchDataParams {
   // The start timestamp in milliseconds of the queried time interval
   startTime: string;
   // The end timestamp in milliseconds of the queried time interval
