@@ -10,7 +10,6 @@ import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreStart } from '../../../../../src/core/public';
 
-import { CoreStart } from '../../../../../src/core/public';
 import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';

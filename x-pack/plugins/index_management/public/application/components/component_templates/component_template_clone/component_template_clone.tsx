@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SectionLoading } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateCreate } from '../component_template_create';
+import { attemptToDecodeURI } from '../lib';
 
 export interface Params {
   sourceComponentTemplateName: string;
@@ -19,6 +20,8 @@ export interface Params {
 
 export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
+  const decodedSourceComponentTemplateName = attemptToDecodeURI(sourceComponentTemplateName);
+
   const { toasts, api } = useComponentTemplatesContext();
 
   const {
@@ -26,7 +29,7 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
     data: componentTemplateToClone,
     isLoading,
     isInitialRequest,
-  } = api.useLoadComponentTemplate(sourceComponentTemplateName);
+  } = api.useLoadComponentTemplate(decodedSourceComponentTemplateName);
 
   useEffect(() => {
     if (error && !isLoading) {

@@ -10,6 +10,7 @@ import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@e
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateDeserialized, SectionLoading } from '../shared_imports';
 import { ComponentTemplateForm } from '../shared';
+import { attemptToDecodeURI } from '../lib';
 
 interface MatchParams {
   name: string;
@@ -26,7 +27,9 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(name);
+  const decodedName = attemptToDecodeURI(name);
+
+  const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
 
   useEffect(() => {
     breadcrumbs.setEditBreadcrumbs();
@@ -103,7 +106,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
               defaultMessage="Edit component template '{name}'"
-              values={{ name }}
+              values={{ name: decodedName }}
             />
           </h1>
         </EuiTitle>

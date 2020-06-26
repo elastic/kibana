@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
+export const attemptToDecodeURI = (value: string) => {
+  let result: string;
 
-export * from './request';
+  try {
+    result = decodeURIComponent(value);
+  } catch (e) {
+    result = value;
+  }
 
-export * from './documentation';
-
-export * from './breadcrumbs';
-
-export { attemptToDecodeURI } from './utils';
+  return result;
+};
