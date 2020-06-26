@@ -12,7 +12,7 @@ import {
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
-import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
@@ -113,7 +113,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         layerList,
         title: savedMap.title,
-        editUrl: getHttp().basePath.prepend(createMapPath(savedObjectId)),
+        editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
         indexPatterns,
         editable: await this.isEditable(),
         settings,

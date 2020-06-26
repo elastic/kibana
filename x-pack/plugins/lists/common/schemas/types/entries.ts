@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { operator } from '../common/schemas';
+import { operator, type } from '../common/schemas';
 import { DefaultStringArray } from '../../siem_common_deps';
 
 export const entriesMatch = t.exact(
@@ -34,9 +34,9 @@ export type EntryMatchAny = t.TypeOf<typeof entriesMatchAny>;
 export const entriesList = t.exact(
   t.type({
     field: t.string,
+    list: t.exact(t.type({ id: t.string, type })),
     operator,
     type: t.keyof({ list: null }),
-    value: DefaultStringArray,
   })
 );
 export type EntryList = t.TypeOf<typeof entriesList>;
@@ -52,7 +52,7 @@ export type EntryExists = t.TypeOf<typeof entriesExists>;
 
 export const entriesNested = t.exact(
   t.type({
-    entries: t.array(t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists])),
+    entries: t.array(entriesMatch),
     field: t.string,
     type: t.keyof({ nested: null }),
   })

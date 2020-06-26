@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore (elastic/eui#1557) EuiFilePicker is not exported yet
   EuiFilePicker,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -26,7 +25,6 @@ import React, { FunctionComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
 
-// @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
