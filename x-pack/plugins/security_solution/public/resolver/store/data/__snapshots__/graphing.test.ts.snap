@@ -36,6 +36,9 @@ exports[`resolver graph layout when rendering two forks, and one fork has an ext
 Object {
   "edgeLineSegments": Array [
     Object {
+      "metadata": Object {
+        "uniqueId": "parentToMid",
+      },
       "points": Array [
         Array [
           0,
@@ -48,6 +51,9 @@ Object {
       ],
     },
     Object {
+      "metadata": Object {
+        "uniqueId": "midway",
+      },
       "points": Array [
         Array [
           0,
@@ -60,7 +66,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "",
+      },
       "points": Array [
         Array [
           0,
@@ -73,7 +81,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "",
+      },
       "points": Array [
         Array [
           395.9797974644666,
@@ -86,6 +96,9 @@ Object {
       ],
     },
     Object {
+      "metadata": Object {
+        "uniqueId": "parentToMid13",
+      },
       "points": Array [
         Array [
           197.9898987322333,
@@ -98,6 +111,9 @@ Object {
       ],
     },
     Object {
+      "metadata": Object {
+        "uniqueId": "midway13",
+      },
       "points": Array [
         Array [
           296.98484809834997,
@@ -110,7 +126,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "13",
+      },
       "points": Array [
         Array [
           296.98484809834997,
@@ -123,7 +141,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "14",
+      },
       "points": Array [
         Array [
           494.9747468305833,
@@ -136,6 +156,9 @@ Object {
       ],
     },
     Object {
+      "metadata": Object {
+        "uniqueId": "parentToMid25",
+      },
       "points": Array [
         Array [
           593.9696961966999,
@@ -148,6 +171,9 @@ Object {
       ],
     },
     Object {
+      "metadata": Object {
+        "uniqueId": "midway25",
+      },
       "points": Array [
         Array [
           692.9646455628166,
@@ -160,7 +186,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "25",
+      },
       "points": Array [
         Array [
           692.9646455628166,
@@ -173,7 +201,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "26",
+      },
       "points": Array [
         Array [
           890.9545442950499,
@@ -186,7 +216,9 @@ Object {
       ],
     },
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "67",
+      },
       "points": Array [
         Array [
           1088.9444430272833,
@@ -344,7 +376,9 @@ exports[`resolver graph layout when rendering two nodes, one being the parent of
 Object {
   "edgeLineSegments": Array [
     Object {
-      "metadata": Object {},
+      "metadata": Object {
+        "uniqueId": "",
+      },
       "points": Array [
         Array [
           0,
