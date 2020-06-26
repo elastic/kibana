@@ -26,7 +26,7 @@ async function getApmAnomalyDetectionJobs(
     const { jobs } = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP_NAME);
     return jobs;
   } catch (error) {
-    if (error.statusCode === 404) {
+    if (error.statusCode === 404 || error.statusCode === 403) {
       return [];
     }
     throw error;
@@ -131,7 +131,7 @@ export async function getServiceAnomalies(
   };
 
   const response = (await ml.mlSystem.mlSearch(params)) as {
-    aggregations: {
+    aggregations?: {
       jobs: {
         buckets: Array<{
           key: string;
@@ -151,6 +151,11 @@ export async function getServiceAnomalies(
       };
     };
   };
+
+  if (!response.aggregations) {
+    return [];
+  }
+
   const anomalyScores = response.aggregations.jobs.buckets.map((jobBucket) => {
     const jobId = jobBucket.key;
     const bucketSource = jobBucket.top_score_hits.hits.hits?.[0]?._source;
