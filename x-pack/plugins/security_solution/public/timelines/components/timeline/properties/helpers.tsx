@@ -20,7 +20,6 @@ import {
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { APP_ID } from '../../../../../common/constants';
@@ -28,11 +27,10 @@ import {
   TimelineTypeLiteral,
   TimelineStatus,
   TimelineType,
+  TimelineId,
 } from '../../../../../common/types/timeline';
-import { navTabs } from '../../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
-import { useGetUrlSearch } from '../../../../common/components/navigation/use_get_url_search';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
 import { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -44,7 +42,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline } from '../../../store/timeline/actions';
+import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
@@ -139,6 +137,8 @@ export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) =
 Name.displayName = 'Name';
 
 interface NewCaseProps {
+  compact?: boolean;
+  graphEventId?: string;
   onClosePopover: () => void;
   timelineId: string;
   timelineStatus: TimelineStatus;
@@ -146,44 +146,50 @@ interface NewCaseProps {
 }
 
 export const NewCase = React.memo<NewCaseProps>(
-  ({ onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
-    const history = useHistory();
-    const urlSearch = useGetUrlSearch(navTabs.case);
+  ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
     const { savedObjectId } = useSelector((state: State) =>
       timelineSelectors.selectTimeline(state, timelineId)
     );
     const { navigateToApp } = useKibana().services.application;
+    const buttonText = compact ? i18n.ATTACH_TO_NEW_CASE : i18n.ATTACH_TIMELINE_TO_NEW_CASE;
 
     const handleClick = useCallback(() => {
       onClosePopover();
       dispatch(
         setInsertTimeline({
+          graphEventId,
           timelineId,
           timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
         })
       );
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCreateCaseUrl(urlSearch),
-      });
-      history.push({
-        pathname: `/${SecurityPageName.case}/create`,
-      });
+      dispatch(showTimeline({ id: TimelineId.active, show: false }));
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, navigateToApp, onClosePopover, history, timelineId, timelineTitle, urlSearch]);
+      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+        path: getCreateCaseUrl(),
+      });
+    }, [
+      dispatch,
+      graphEventId,
+      navigateToApp,
+      onClosePopover,
+      savedObjectId,
+      timelineId,
+      timelineTitle,
+    ]);
 
     return (
       <EuiButtonEmpty
         data-test-subj="attach-timeline-case"
-        color="text"
+        color={compact ? undefined : 'text'}
         iconSide="left"
         iconType="paperClip"
         disabled={timelineStatus === TimelineStatus.draft}
         onClick={handleClick}
+        size={compact ? 'xs' : undefined}
       >
-        {i18n.ATTACH_TIMELINE_TO_NEW_CASE}
+        {buttonText}
       </EuiButtonEmpty>
     );
   }
@@ -191,28 +197,33 @@ export const NewCase = React.memo<NewCaseProps>(
 NewCase.displayName = 'NewCase';
 
 interface ExistingCaseProps {
+  compact?: boolean;
   onClosePopover: () => void;
   onOpenCaseModal: () => void;
   timelineStatus: TimelineStatus;
 }
 export const ExistingCase = React.memo<ExistingCaseProps>(
-  ({ onClosePopover, onOpenCaseModal, timelineStatus }) => {
+  ({ compact, onClosePopover, onOpenCaseModal, timelineStatus }) => {
     const handleClick = useCallback(() => {
       onClosePopover();
       onOpenCaseModal();
     }, [onOpenCaseModal, onClosePopover]);
+    const buttonText = compact
+      ? i18n.ATTACH_TO_EXISTING_CASE
+      : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
 
     return (
       <>
         <EuiButtonEmpty
           data-test-subj="attach-timeline-existing-case"
-          color="text"
+          color={compact ? undefined : 'text'}
           iconSide="left"
           iconType="paperClip"
           disabled={timelineStatus === TimelineStatus.draft}
           onClick={handleClick}
+          size={compact ? 'xs' : undefined}
         >
-          {i18n.ATTACH_TIMELINE_TO_EXISTING_CASE}
+          {buttonText}
         </EuiButtonEmpty>
       </>
     );
