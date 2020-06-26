@@ -5,7 +5,6 @@
  */
 
 import { get, set } from 'lodash';
-import { CursorDirection } from '../../../../common/runtime_types';
 import { QueryContext } from './query_context';
 
 /**
