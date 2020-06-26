@@ -21,7 +21,7 @@ import { XJsonEditor } from '../field_components';
 const customConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel', {
-    defaultMessage: 'Configuration options',
+    defaultMessage: 'Configuration',
   }),
   serializer: (value: string) => {
     try {
@@ -43,7 +43,7 @@ const customConfig: FieldConfig = {
         i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.customForm.configurationRequiredError',
           {
-            defaultMessage: 'Configuration options are required.',
+            defaultMessage: 'Configuration is required.',
           }
         )
       ),
@@ -82,7 +82,7 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',
             {
-              defaultMessage: 'Configuration options JSON editor',
+              defaultMessage: 'Configuration JSON editor',
             }
           ),
         },

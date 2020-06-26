@@ -130,13 +130,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    duplicateProcessor(processorSelector: string) {
-      find(`${processorSelector}.moreMenu.button`).simulate('click');
-      act(() => {
-        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
-      });
-    },
-
     startAndCancelMove(processorSelector: string) {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
@@ -144,6 +137,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
       act(() => {
         find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+      });
+    },
+
+    duplicateProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      act(() => {
+        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
       });
     },
 

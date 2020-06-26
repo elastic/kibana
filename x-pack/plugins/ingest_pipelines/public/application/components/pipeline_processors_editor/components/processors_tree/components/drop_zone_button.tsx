@@ -54,10 +54,10 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
     </div>
   );
 
-  return isVisible ? (
+  return isUnavailable ? (
     <EuiToolTip
       className="pipelineProcessorsEditor__tree__dropZoneContainer__toolTip"
-      content={isUnavailable ? cannotMoveHereLabel : moveHereLabel}
+      content={cannotMoveHereLabel}
     >
       {content}
     </EuiToolTip>

@@ -1,4 +1,5 @@
 @import '@elastic/eui/src/global_styling/variables/size';
+@import '../shared';
 
 .pipelineProcessorsEditor__tree {
   &__container {
@@ -30,16 +31,18 @@
       pointer-events: none;
     }
   }
+  $dropZoneButtonHeight: 60px;
+  $dropZoneButtonOffsetY: $dropZoneButtonHeight * -0.5;
 
   &__dropZoneButton {
     position: absolute;
     padding: 0;
-    height: 60px;
+    height: $dropZoneButtonHeight;
+    margin-top: $dropZoneButtonOffsetY;
     width: 100%;
-    margin-top: -30px;
     opacity: 0;
     text-decoration: none !important;
-    z-index: 1; /* Prevent the next item down from obscuring the button */
+    z-index: $dropZoneZIndex;
 
     &--visible {
       pointer-events: visible !important;
