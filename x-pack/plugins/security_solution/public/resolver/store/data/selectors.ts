@@ -529,3 +529,15 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     };
   }
 );
+
+/**
+ * Returns the `children` and `ancestors` limits for the current graph, if any.
+ *
+ * @param state {DataState} the DataState from the reducer
+ */
+export const limitsReached = (state: DataState): { children: boolean; ancestors: boolean } => {
+  return {
+    children: state.lineageLimits.children !== null,
+    ancestors: state.lineageLimits.ancestors !== null,
+  };
+};
