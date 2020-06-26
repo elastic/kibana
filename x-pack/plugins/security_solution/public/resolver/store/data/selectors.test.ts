@@ -103,8 +103,8 @@ describe('data state', () => {
     });
   });
   describe('when there is a pending request for the current databaseDocumentID', () => {
+    const databaseDocumentID = 'databaseDocumentID';
     beforeEach(() => {
-      const databaseDocumentID = '';
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
@@ -131,6 +131,30 @@ describe('data state', () => {
         document to fetch: null
         requires a pending request to be aborted: null"
       `);
+    });
+    describe('when the pending request fails', () => {
+      beforeEach(() => {
+        actions.push({
+          type: 'serverFailedToReturnResolverData',
+          payload: databaseDocumentID,
+        });
+      });
+      it('should not be loading', () => {
+        expect(selectors.isLoading(state())).toBe(false);
+      });
+      it('should have an error', () => {
+        expect(selectors.hasError(state())).toBe(true);
+      });
+      it('should not be loading, have more children, have more ancestors, have a document to fetch, or have a pending request that needs to be aborted.', () => {
+        expect(viewAsAString(state())).toMatchInlineSnapshot(`
+          "is loading: false
+          has an error: true
+          has more children: false
+          has more ancestors: false
+          document to fetch: null
+          requires a pending request to be aborted: null"
+        `);
+      });
     });
   });
   describe('when there is a pending request for a different databaseDocumentID than the current one', () => {

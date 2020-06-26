@@ -60,6 +60,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     if (state.pendingRequestDatabaseDocumentID !== undefined) {
       const nextState: DataState = {
         ...state,
+        pendingRequestDatabaseDocumentID: undefined,
         lastResponse: {
           databaseDocumentID: state.pendingRequestDatabaseDocumentID,
           successful: false,
