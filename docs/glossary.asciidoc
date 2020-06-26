@@ -397,7 +397,7 @@ properties for data-driven styling and rich tooltip content in maps.
 
 [[glossary-time-filter]] time filter ::
 // tag::time-filter-def[]
-A control that constrains the search results to a particular time period.
+A {kib} control that constrains the search results to a particular time period.
 // end::time-filter-def[]
 
 [[glossary-timelion]] Timelion ::
