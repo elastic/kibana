@@ -8,10 +8,7 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-} from '../../../../../../maps/public/embeddable';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../maps/public/embeddable';
 import * as i18n from './translations';
 import { GeoPoint } from '../../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
