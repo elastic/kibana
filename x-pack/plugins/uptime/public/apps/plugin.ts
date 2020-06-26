@@ -11,6 +11,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
+import { UptimeFetchDataResponse } from '../../../observability/public/typings/fetch_data_response';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
@@ -27,9 +28,8 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { kibanaService } from '../state/kibana_service';
-import { UptimeFetchDataResponse } from 'x-pack/plugins/observability/public/typings/fetch_data_response';
 import { fetchSnapshotCount, fetchIndexStatus, fetchPingHistogram } from '../state/api';
-import { ObservabilityPluginSetup } from 'x-pack/plugins/observability/public';
+import { ObservabilityPluginSetup } from '../../../observability/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -74,12 +74,15 @@ export class UptimePlugin
         const status = await fetchIndexStatus();
         return status.docCount > 0;
       },
-      fetchData: async ({startTime, endTime, bucketSize}) => {
-        const snapshot = await fetchSnapshotCount({dateRangeStart: startTime, dateRangeEnd: endTime});
-        const pings = await fetchPingHistogram({dateStart: startTime, dateEnd: endTime});
+      fetchData: async ({ startTime, endTime, bucketSize }) => {
+        const snapshot = await fetchSnapshotCount({
+          dateRangeStart: startTime,
+          dateRangeEnd: endTime,
+        });
+        const pings = await fetchPingHistogram({ dateStart: startTime, dateEnd: endTime });
         const response: UptimeFetchDataResponse = {
           title: 'Uptime',
-          appLink: "/app/uptime#/", // Todo is there some sort of helper that handles subpaths?
+          appLink: '/app/uptime#/', // Todo is there some sort of helper that handles subpaths?
           stats: {
             monitors: {
               type: 'number',
@@ -94,19 +97,23 @@ export class UptimePlugin
             down: {
               type: 'number',
               label: 'Down',
-              value: snapshot.down
-            }
+              value: snapshot.down,
+            },
           },
           series: {
             up: {
               label: 'Up',
-              coordinates: pings.histogram.map(p => { return {x: p.x!, y: p.upCount || 0}})
+              coordinates: pings.histogram.map((p) => {
+                return { x: p.x!, y: p.upCount || 0 };
+              }),
             },
             down: {
               label: 'Down',
-              coordinates: pings.histogram.map(p => { return {x: p.x!, y: p.downCount || 0}})
-            }
-          }
+              coordinates: pings.histogram.map((p) => {
+                return { x: p.x!, y: p.downCount || 0 };
+              }),
+            },
+          },
         };
         return response;
       },
