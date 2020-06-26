@@ -57,27 +57,31 @@ export function SavedViewsToolbarControls<ViewState extends { id: string; name: 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const openViewListModal = useCallback(() => {
+    hideSavedViewMenu();
     find();
     setViewListModalOpen(true);
-  }, [setViewListModalOpen, find]);
+  }, [setViewListModalOpen, find, hideSavedViewMenu]);
   const closeViewListModal = useCallback(() => {
     setViewListModalOpen(false);
   }, [setViewListModalOpen]);
   const openSaveModal = useCallback(() => {
+    hideSavedViewMenu();
     setIsInvalid(false);
     setCreateModalOpen(true);
-  }, []);
+  }, [hideSavedViewMenu]);
   const openUpdateModal = useCallback(() => {
+    hideSavedViewMenu();
     setIsInvalid(false);
     setUpdateModalOpen(true);
-  }, []);
+  }, [hideSavedViewMenu]);
   const closeModal = useCallback(() => setModalOpen(false), []);
   const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
   const closeUpdateModal = useCallback(() => setUpdateModalOpen(false), []);
   const loadViews = useCallback(() => {
+    hideSavedViewMenu();
     find();
     setModalOpen(true);
-  }, [find]);
+  }, [find, hideSavedViewMenu]);
   const showSavedViewMenu = useCallback(() => {
     setIsSavedViewMenuOpen(true);
   }, [setIsSavedViewMenuOpen]);
