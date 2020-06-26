@@ -40,7 +40,7 @@ exports[`share url panel content render 1`] = `
             Object {
               "data-test-subj": "exportAsSnapshot",
               "id": "snapshot",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -71,13 +71,13 @@ exports[`share url panel content render 1`] = `
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
             Object {
               "data-test-subj": "exportAsSavedObject",
               "disabled": true,
               "id": "savedObject",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -108,7 +108,7 @@ exports[`share url panel content render 1`] = `
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
           ]
         }
@@ -202,7 +202,7 @@ exports[`share url panel content should enable saved object export option when o
             Object {
               "data-test-subj": "exportAsSnapshot",
               "id": "snapshot",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -233,13 +233,13 @@ exports[`share url panel content should enable saved object export option when o
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
             Object {
               "data-test-subj": "exportAsSavedObject",
               "disabled": false,
               "id": "savedObject",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -270,7 +270,7 @@ exports[`share url panel content should enable saved object export option when o
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
           ]
         }
@@ -364,7 +364,7 @@ exports[`share url panel content should hide short url section when allowShortUr
             Object {
               "data-test-subj": "exportAsSnapshot",
               "id": "snapshot",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -395,13 +395,13 @@ exports[`share url panel content should hide short url section when allowShortUr
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
             Object {
               "data-test-subj": "exportAsSavedObject",
               "disabled": false,
               "id": "savedObject",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -432,7 +432,7 @@ exports[`share url panel content should hide short url section when allowShortUr
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
           ]
         }
@@ -481,7 +481,7 @@ exports[`should show url param extensions 1`] = `
             Object {
               "data-test-subj": "exportAsSnapshot",
               "id": "snapshot",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -512,13 +512,13 @@ exports[`should show url param extensions 1`] = `
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
             Object {
               "data-test-subj": "exportAsSavedObject",
               "disabled": false,
               "id": "savedObject",
-              "label": <ForwardRef
+              "label": <EuiFlexGroup
                 gutterSize="none"
                 responsive={false}
               >
@@ -549,7 +549,7 @@ exports[`should show url param extensions 1`] = `
                     position="bottom"
                   />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
             },
           ]
         }

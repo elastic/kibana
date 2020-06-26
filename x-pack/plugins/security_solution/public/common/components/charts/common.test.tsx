@@ -21,8 +21,10 @@ import {
 jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/charts', () => {
+  const original = jest.requireActual('@elastic/charts');
+
   return {
-    ...jest.requireActual('@elastic/charts'),
+    ...original,
     getSpecId: jest.fn(() => {}),
   };
 });

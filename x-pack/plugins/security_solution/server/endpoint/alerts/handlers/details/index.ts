@@ -5,7 +5,7 @@
  */
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
-import { eventsIndexPattern } from '../../../../../common/endpoint/constants';
+import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { AlertEvent } from '../../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../../../../../common/endpoint_alerts/types';
@@ -34,7 +34,7 @@ export const alertDetailsHandlerWrapper = function (
         ctx,
         req.params,
         response,
-        eventsIndexPattern
+        alertsIndexPattern
       );
 
       const currentHostInfo = await getHostData(

@@ -27,8 +27,8 @@ export const DefaultCommentsArray: DefaultCommentsArrayC = new t.Type<
 >(
   'DefaultCommentsArray',
   t.array(comment).is,
-  (input): Either<t.Errors, CommentsArray> =>
-    input == null ? t.success([]) : t.array(comment).decode(input),
+  (input, context): Either<t.Errors, CommentsArray> =>
+    input == null ? t.success([]) : t.array(comment).validate(input, context),
   t.identity
 );
 
@@ -43,7 +43,7 @@ export const DefaultCommentsPartialArray: DefaultCommentsPartialArrayC = new t.T
 >(
   'DefaultCommentsPartialArray',
   t.array(commentPartial).is,
-  (input): Either<t.Errors, CommentsPartialArray> =>
-    input == null ? t.success([]) : t.array(commentPartial).decode(input),
+  (input, context): Either<t.Errors, CommentsPartialArray> =>
+    input == null ? t.success([]) : t.array(commentPartial).validate(input, context),
   t.identity
 );

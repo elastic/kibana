@@ -5,15 +5,19 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
+import { SavedObjectsServiceStart, HttpServiceSetup, Logger, KibanaRequest } from 'src/core/server';
+import {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
-import { IngestManagerAppContext } from '../plugin';
+import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
+  private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
@@ -23,9 +27,11 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
+  private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: IngestManagerAppContext) {
-    this.encryptedSavedObjects = appContext.encryptedSavedObjects?.getClient();
+    this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
+    this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
@@ -42,7 +48,9 @@ class AppContextService {
     }
   }
 
-  public stop() {}
+  public stop() {
+    this.externalCallbacks.clear();
+  }
 
   public getEncryptedSavedObjects() {
     if (!this.encryptedSavedObjects) {
@@ -84,6 +92,13 @@ class AppContextService {
     return this.savedObjects;
   }
 
+  public getInternalUserSOClient(request: KibanaRequest) {
+    // soClient as kibana internal users, be carefull on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(request, {
+      excludedWrappers: ['security'],
+    });
+  }
+
   public getIsProductionMode() {
     return this.isProductionMode;
   }
@@ -95,11 +110,32 @@ class AppContextService {
     return this.httpSetup;
   }
 
+  public getEncryptedSavedObjectsSetup() {
+    if (!this.encryptedSavedObjectsSetup) {
+      throw new Error('encryptedSavedObjectsSetup is not set');
+    }
+
+    return this.encryptedSavedObjectsSetup;
+  }
+
   public getKibanaVersion() {
     if (!this.kibanaVersion) {
       throw new Error('Kibana version is not set.');
     }
     return this.kibanaVersion;
+  }
+
+  public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
+    if (!this.externalCallbacks.has(type)) {
+      this.externalCallbacks.set(type, new Set());
+    }
+    this.externalCallbacks.get(type)!.add(callback);
+  }
+
+  public getExternalCallbacks(type: ExternalCallback[0]) {
+    if (this.externalCallbacks) {
+      return this.externalCallbacks.get(type);
+    }
   }
 }
 
