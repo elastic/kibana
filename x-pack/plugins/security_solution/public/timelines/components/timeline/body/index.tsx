@@ -98,18 +98,7 @@ export const Body = React.memo<BodyProps>(
     const containerElementRef = useRef<HTMLDivElement>(null);
     const { getManageTimelineById } = useManageTimeline();
     const timelineActions = useMemo(
-      () =>
-        data.reduce((acc: TimelineRowAction[], rowData) => {
-          const rowActions = getManageTimelineById(id).timelineRowActions({
-            ecsData: rowData.ecs,
-            nonEcsData: rowData.data,
-          });
-          return rowActions &&
-            rowActions.filter((v) => v.displayType === 'icon').length >
-              acc.filter((v) => v.displayType === 'icon').length
-            ? rowActions
-            : acc;
-        }, []),
+      () => getManageTimelineById(id).timelineRowActions(data[0].ecs),
       [data, getManageTimelineById, id]
     );
 

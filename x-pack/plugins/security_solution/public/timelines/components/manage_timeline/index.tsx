@@ -25,11 +25,6 @@ interface ManageTimelineInit {
   unit?: (totalCount: number) => string;
 }
 
-export interface TimelineRowActionArgs {
-  ecsData: Ecs;
-  nonEcsData: TimelineNonEcsData[];
-}
-
 interface ManageTimeline {
   documentType: string;
   filterManager?: FilterManager;
@@ -40,7 +35,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+  timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -65,7 +60,7 @@ type ActionManageTimeline =
       id: string;
       payload: {
         queryFields?: string[];
-        timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+        timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
       };
     };
 
@@ -122,7 +117,7 @@ interface UseTimelineManager {
   setTimelineRowActions: (actionsArgs: {
     id: string;
     queryFields?: string[];
-    timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+    timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
   }) => void;
 }
 
@@ -148,7 +143,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     }: {
       id: string;
       queryFields?: string[];
-      timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+      timelineRowActions: (ecsData: Ecs) => TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',

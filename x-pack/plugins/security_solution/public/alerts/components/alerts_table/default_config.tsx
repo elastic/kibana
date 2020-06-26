@@ -16,7 +16,6 @@ import {
   TimelineRowAction,
   TimelineRowActionOnClick,
 } from '../../../timelines/components/timeline/body/actions';
-import { TimelineRowActionArgs } from '../../../timelines/components/manage_timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -34,6 +33,7 @@ import {
   SetEventsLoadingProps,
   UpdateTimelineLoading,
 } from './types';
+import { Ecs } from '../../../graphql/types';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
   {
@@ -171,10 +171,11 @@ export const requiredFieldsForActions = [
   'signal.rule.id',
 ];
 
-interface AlertActionArgs extends TimelineRowActionArgs {
+interface AlertActionArgs {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
+  ecsRowData: Ecs;
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
   onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
@@ -188,9 +189,8 @@ export const getAlertActions = ({
   apolloClient,
   canUserCRUD,
   createTimeline,
-  ecsData: ecsRowData,
+  ecsRowData,
   hasIndexWrite,
-  nonEcsData,
   onAlertStatusUpdateFailure,
   onAlertStatusUpdateSuccess,
   setEventsDeleted,

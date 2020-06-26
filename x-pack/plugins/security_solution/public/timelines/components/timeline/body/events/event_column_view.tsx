@@ -89,8 +89,8 @@ export const EventColumnView = React.memo<Props>(
   }) => {
     const { getManageTimelineById } = useManageTimeline();
     const timelineActions = useMemo(
-      () => getManageTimelineById(timelineId).timelineRowActions({ nonEcsData: data, ecsData }),
-      [data, ecsData, getManageTimelineById, timelineId]
+      () => getManageTimelineById(timelineId).timelineRowActions(ecsData),
+      [ecsData, getManageTimelineById, timelineId]
     );
     const [isPopoverOpen, setPopover] = useState(false);
 

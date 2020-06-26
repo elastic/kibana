@@ -291,14 +291,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Send to Timeline / Update Alert Status Actions for each table row
   const additionalActions = useMemo(
-    () => ({ ecsData, nonEcsData }: TimelineRowActionArgs) =>
+    () => (ecsRowData: Ecs) =>
       getAlertActions({
         apolloClient,
         canUserCRUD,
         createTimeline: createTimelineCallback,
-        ecsData,
+        ecsRowData,
         hasIndexWrite,
-        nonEcsData,
         onAlertStatusUpdateFailure,
         onAlertStatusUpdateSuccess,
         setEventsDeleted: setEventsDeletedCallback,
