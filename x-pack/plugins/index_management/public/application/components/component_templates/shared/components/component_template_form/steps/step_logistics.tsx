@@ -179,9 +179,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                       target="_blank"
                       external
                     >
-                      {i18n.translate('xpack.ingestPipelines.form.metaDocumentionLink', {
-                        defaultMessage: 'Learn more',
-                      })}
+                      {i18n.translate(
+                        'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
+                        {
+                          defaultMessage: 'Learn more',
+                        }
+                      )}
                     </EuiLink>
                   ),
                 }}
