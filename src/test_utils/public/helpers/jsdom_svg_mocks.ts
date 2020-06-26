@@ -17,12 +17,35 @@
  * under the License.
  */
 
-export { findTestSubject } from './find_test_subject';
+export const setSVGElementGetBBox = (width: number, height: number, x: number = 0, y: number = 0) =>
+  Object.defineProperties(window.SVGElement.prototype, {
+    getBBox: {
+      get: () =>
+        function () {
+          return {
+            x,
+            y,
+            width,
+            height,
+          };
+        },
+      configurable: true,
+    },
+  });
 
-export { WithStore } from './redux_helpers';
-
-export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
-
-export * from './utils';
-
-export * from './jsdom_svg_mocks';
+export const setHTMLElementOffset = (width: number, height: number) => {
+  Object.defineProperties(window.HTMLElement.prototype, {
+    offsetWidth: {
+      get() {
+        return width;
+      },
+      configurable: true,
+    },
+    offsetHeight: {
+      get() {
+        return height;
+      },
+      configurable: true,
+    },
+  });
+};

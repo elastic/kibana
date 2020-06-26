@@ -17,48 +17,18 @@
  * under the License.
  */
 
-// import expect from '@kbn/expect';
 import _ from 'lodash';
 import d3 from 'd3';
 import 'jest-canvas-mock';
 
 import { fromNode, delay } from 'bluebird';
-import { ImageComparator } from 'test_utils/image_comparator';
-import simpleloadPng from '../../../../legacy/core_plugins/kibana/public/__tests__/vis_type_tagcloud/simpleload.png';
-
 // Replace with mock when converting to jest tests
 import { seedColors } from '../../../charts/public/services/colors/seed_colors';
 import { TagCloud } from './tag_cloud';
+import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
 
 describe('tag cloud tests', function () {
-  Object.defineProperties(window.HTMLElement.prototype, {
-    offsetHeight: {
-      get: function () {
-        return 512;
-      },
-      configurable: true,
-    },
-    offsetWidth: {
-      get: function () {
-        return 512;
-      },
-      configurable: true,
-    },
-  });
-  Object.defineProperties(window.SVGElement.prototype, {
-    getBBox: {
-      get: () =>
-        function () {
-          return {
-            x: 0,
-            y: 0,
-            width: 512,
-            height: 512,
-          };
-        },
-      configurable: true,
-    },
-  });
+  setSVGElementGetBBox(512, 512);
 
   const minValue = 1;
   const maxValue = 9;
@@ -131,12 +101,7 @@ describe('tag cloud tests', function () {
 
   function setupDOM() {
     domNode = document.createElement('div');
-    domNode.style.top = '0';
-    domNode.style.left = '0';
-    domNode.style.width = '512px';
-    domNode.style.height = '512px';
-    domNode.style.position = 'fixed';
-    domNode.style['pointer-events'] = 'none';
+    setHTMLElementOffset(512, 512);
     document.body.appendChild(domNode);
   }
 
@@ -331,8 +296,7 @@ describe('tag cloud tests', function () {
       tagCloud.setOptions(logScaleTest.options);
 
       await delay(1000); //let layout run
-      domNode.style.width = '600px';
-      domNode.style.height = '600px';
+      setSVGElementGetBBox(600, 600);
       tagCloud.resize(); //triggers new layout
       setTimeout(() => {
         //change the options at the very end too
@@ -359,41 +323,11 @@ describe('tag cloud tests', function () {
     );
   });
 
-  describe.only(`should not put elements in view when container is too small`, function () {
+  describe(`should not put elements in view when container is too small`, function () {
     beforeEach(async function () {
-      Object.defineProperties(window.SVGElement.prototype, {
-        getBBox: {
-          get: () =>
-            function () {
-              return {
-                x: 0,
-                y: 0,
-                width: 1,
-                height: 1,
-              };
-            },
-          configurable: true,
-        },
-      });
-
-      Object.defineProperties(window.HTMLElement.prototype, {
-        offsetHeight: {
-          get: function () {
-            return 1;
-          },
-          configurable: true,
-        },
-        offsetWidth: {
-          get: function () {
-            return 1;
-          },
-          configurable: true,
-        },
-      });
+      setHTMLElementOffset(1, 1);
 
       setupDOM();
-      domNode.style.width = '1px';
-      domNode.style.height = '1px';
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
@@ -417,17 +351,13 @@ describe('tag cloud tests', function () {
   describe(`tags should fit after making container bigger`, function () {
     beforeEach(async function () {
       setupDOM();
-      domNode.style.width = '1px';
-      domNode.style.height = '1px';
-
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       await fromNode((cb) => tagCloud.once('renderComplete', cb));
 
       //make bigger
-      domNode.style.width = '512px';
-      domNode.style.height = '512px';
+      tagCloud._size = [600, 600];
       tagCloud.resize();
       await fromNode((cb) => tagCloud.once('renderComplete', cb));
     });
@@ -444,6 +374,7 @@ describe('tag cloud tests', function () {
 
   describe(`tags should no longer fit after making container smaller`, function () {
     beforeEach(async function () {
+      setHTMLElementOffset(1, 1);
       setupDOM();
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
@@ -451,8 +382,7 @@ describe('tag cloud tests', function () {
       await fromNode((cb) => tagCloud.once('renderComplete', cb));
 
       //make smaller
-      domNode.style.width = '1px';
-      domNode.style.height = '1px';
+      tagCloud._size = [];
       tagCloud.resize();
       await fromNode((cb) => tagCloud.once('renderComplete', cb));
     });
@@ -465,16 +395,11 @@ describe('tag cloud tests', function () {
   });
 
   describe('tagcloudscreenshot', function () {
-    let imageComparator;
     beforeEach(async function () {
       setupDOM();
-      imageComparator = new ImageComparator();
     });
 
-    afterEach(() => {
-      imageComparator.destroy();
-      teardownDOM();
-    });
+    afterEach(teardownDOM);
 
     test('should render simple image', async function () {
       tagCloud = new TagCloud(domNode, colorScale);
@@ -483,15 +408,7 @@ describe('tag cloud tests', function () {
 
       await fromNode((cb) => tagCloud.once('renderComplete', cb));
 
-      const mismatchedPixels = await imageComparator.compareDOMContents(
-        domNode.innerHTML,
-        512,
-        512,
-        simpleloadPng,
-        0.5
-      );
-
-      expect(mismatchedPixels).toBeLessThan(64);
+      expect(domNode.innerHTML).toMatchSnapshot();
     });
   });
 

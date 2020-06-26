@@ -29,21 +29,10 @@ import { createTagCloudVisTypeDefinition } from '../tag_cloud_type';
 import { createTagCloudVisualization } from './tag_cloud_visualization';
 import { setFormatService } from '../services';
 import { fieldFormatsServiceMock } from '../../../data/public/field_formats/mocks';
+import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
 
 describe('TagCloudVisualizationTest', function () {
-  Object.defineProperties(window.SVGElement.prototype, {
-    getBBox: {
-      get: () =>
-        function () {
-          return {
-            x: 0,
-            y: 0,
-            width: 512,
-            height: 512,
-          };
-        },
-    },
-  });
+  setSVGElementGetBBox(512, 512);
 
   let domNode;
   let vis;
@@ -81,7 +70,7 @@ describe('TagCloudVisualizationTest', function () {
   describe('TagCloudVisualization - basics', function () {
     beforeEach(async function () {
       const visType = new BaseVisType(createTagCloudVisTypeDefinition({ colors: seedColors }));
-      setupDOM('512px', '512px');
+      setupDOM(512, 512);
       imageComparator = new ImageComparator();
       vis = new ExprVis({
         type: visType,
@@ -147,8 +136,21 @@ describe('TagCloudVisualizationTest', function () {
         uiState: false,
       });
 
-      domNode.style.width = '256px';
-      domNode.style.height = '368px';
+      setSVGElementGetBBox(256, 368);
+
+      Object.defineProperties(window.SVGElement.prototype, {
+        transform: {
+          get: () => ({
+            baseVal: {
+              consolidate: () => {},
+            },
+          }),
+          configurable: true,
+        },
+      });
+
+      setHTMLElementOffset(256, 386);
+
       vis.params.orientation = 'right angled';
       vis.params.minFontSize = 70;
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
@@ -166,13 +168,7 @@ describe('TagCloudVisualizationTest', function () {
 
   function setupDOM(width, height) {
     domNode = document.createElement('div');
-    domNode.style.top = '0';
-    domNode.style.left = '0';
-    domNode.style.width = width;
-    domNode.style.height = height;
-    domNode.style.position = 'fixed';
-    domNode.style.border = '1px solid blue';
-    domNode.style['pointer-events'] = 'none';
+    setHTMLElementOffset(width, height);
     document.body.appendChild(domNode);
   }
 
