@@ -32,7 +32,6 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
     <I18nProvider>
       <EuiSkipLink
         size="s"
-        iconType="arrowDown"
         // @ts-ignore
         onClick={(event) => {
           // prevent the anchor to reload the page on click
