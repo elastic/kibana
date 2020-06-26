@@ -74,8 +74,8 @@ export async function setupIngestManager(
     throw new Error('Config not found');
   }
   if (
-    configWithDatasource.datasources.length &&
-    typeof configWithDatasource.datasources[0] === 'string'
+    configWithDatasource.package_configs.length &&
+    typeof configWithDatasource.package_configs[0] === 'string'
   ) {
     throw new Error('Config not found');
   }
@@ -87,7 +87,7 @@ export async function setupIngestManager(
       continue;
     }
 
-    const isInstalled = configWithDatasource.datasources.some((d: PackageConfig | string) => {
+    const isInstalled = configWithDatasource.package_configs.some((d: PackageConfig | string) => {
       return typeof d !== 'string' && d.package?.name === installedPackage.name;
     });
 

@@ -22,7 +22,7 @@ export interface NewAgentConfig {
 export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
-  datasources: string[] | PackageConfig[];
+  package_configs: string[] | PackageConfig[];
   updated_at: string;
   updated_by: string;
   revision: number;

@@ -40,7 +40,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
     if (currentPkgKey !== pkgKey) {
       // Existing datasources on the agent config using the package name, retrieve highest number appended to datasource name
       const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-      const dsWithMatchingNames = (agentConfig.datasources as PackageConfig[])
+      const dsWithMatchingNames = (agentConfig.package_configs as PackageConfig[])
         .filter((ds) => Boolean(ds.name.match(dsPackageNamePattern)))
         .map((ds) => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
         .sort();

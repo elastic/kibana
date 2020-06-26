@@ -181,7 +181,8 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Data sources',
         }),
         dataType: 'number',
-        render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
+        render: (datasources: AgentConfig['package_configs']) =>
+          datasources ? datasources.length : 0,
       },
       {
         name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {

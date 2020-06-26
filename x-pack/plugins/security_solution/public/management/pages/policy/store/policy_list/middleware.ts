@@ -15,8 +15,8 @@ import { endpointPackageInfo, isOnPolicyListPage, urlSearchParams } from './sele
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
 import {
-  DeleteDatasourcesResponse,
-  DeleteDatasourcesRequest,
+  DeletePackageConfigsResponse,
+  DeletePackageConfigsRequest,
   GetAgentStatusResponse,
 } from '../../../../../../../ingest_manager/common';
 
@@ -81,8 +81,8 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       });
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
-      const datasourceIds: DeleteDatasourcesRequest['body']['datasourceIds'] = [policyId];
-      let apiResponse: DeleteDatasourcesResponse;
+      const datasourceIds: DeletePackageConfigsRequest['body']['datasourceIds'] = [policyId];
+      let apiResponse: DeletePackageConfigsResponse;
       try {
         apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });
       } catch (err) {

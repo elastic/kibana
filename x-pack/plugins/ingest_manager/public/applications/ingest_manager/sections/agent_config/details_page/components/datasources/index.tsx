@@ -10,11 +10,14 @@ import { NoDatasources } from './no_datasources';
 import { DatasourcesTable } from './datasources_table';
 
 export const ConfigDatasourcesView = memo<{ config: AgentConfig }>(({ config }) => {
-  if (config.datasources.length === 0) {
+  if (config.package_configs.length === 0) {
     return <NoDatasources configId={config.id} />;
   }
 
   return (
-    <DatasourcesTable config={config} datasources={(config.datasources || []) as PackageConfig[]} />
+    <DatasourcesTable
+      config={config}
+      datasources={(config.package_configs || []) as PackageConfig[]}
+    />
   );
 });

@@ -129,10 +129,10 @@ class AgentConfigService {
     const agentConfig = { id: agentConfigSO.id, ...agentConfigSO.attributes };
 
     if (withDatasources) {
-      agentConfig.datasources =
+      agentConfig.package_configs =
         (await datasourceService.getByIDs(
           soClient,
-          (agentConfigSO.attributes.datasources as string[]) || []
+          (agentConfigSO.attributes.package_configs as string[]) || []
         )) || [];
     }
 
@@ -201,8 +201,8 @@ class AgentConfigService {
     );
 
     // Copy all datasources
-    if (baseAgentConfig.datasources.length) {
-      const newDatasources = (baseAgentConfig.datasources as PackageConfig[]).map(
+    if (baseAgentConfig.package_configs.length) {
+      const newDatasources = (baseAgentConfig.package_configs as PackageConfig[]).map(
         (datasource: PackageConfig) => {
           const { id: datasourceId, ...newDatasource } = datasource;
           return newDatasource;
@@ -244,8 +244,8 @@ class AgentConfigService {
       soClient,
       id,
       {
-        datasources: uniq(
-          [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds)
+        package_configs: uniq(
+          [...((oldAgentConfig.package_configs || []) as string[])].concat(datasourceIds)
         ),
       },
       options?.user
@@ -269,8 +269,8 @@ class AgentConfigService {
       id,
       {
         ...oldAgentConfig,
-        datasources: uniq(
-          [...((oldAgentConfig.datasources || []) as string[])].filter(
+        package_configs: uniq(
+          [...((oldAgentConfig.package_configs || []) as string[])].filter(
             (dsId) => !datasourceIds.includes(dsId)
           )
         ),
@@ -318,8 +318,8 @@ class AgentConfigService {
       throw new Error('Cannot delete agent config that is assigned to agent(s)');
     }
 
-    if (config.datasources && config.datasources.length) {
-      await datasourceService.delete(soClient, config.datasources as string[], {
+    if (config.package_configs && config.package_configs.length) {
+      await datasourceService.delete(soClient, config.package_configs as string[], {
         skipUnassignFromAgentConfigs: true,
       });
     }
@@ -373,7 +373,7 @@ class AgentConfigService {
           {} as FullAgentConfig['outputs']
         ),
       },
-      inputs: storedDatasourcesToAgentInputs(config.datasources as PackageConfig[]),
+      inputs: storedDatasourcesToAgentInputs(config.package_configs as PackageConfig[]),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {

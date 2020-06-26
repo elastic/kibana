@@ -120,13 +120,16 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
           { isDivider: true },
           {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.datasources', {
+            label: i18n.translate('xpack.ingestManager.configDetails.summary.package_configs', {
               defaultMessage: 'Data sources',
             }),
             content: (
               <EuiI18nNumber
                 value={
-                  (agentConfig && agentConfig.datasources && agentConfig.datasources.length) || 0
+                  (agentConfig &&
+                    agentConfig.package_configs &&
+                    agentConfig.package_configs.length) ||
+                  0
                 }
               />
             ),

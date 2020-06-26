@@ -28,13 +28,13 @@ export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ ag
           id="xpack.ingestManager.agentReassignConfig.configDescription"
           defaultMessage="The selected agent configuration will collect data for {count, plural, one {{countValue} data source} other {{countValue} data sources}}:"
           values={{
-            count: agentConfig.datasources.length,
-            countValue: <b>{agentConfig.datasources.length}</b>,
+            count: agentConfig.package_configs.length,
+            countValue: <b>{agentConfig.package_configs.length}</b>,
           }}
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {(agentConfig.datasources as PackageConfig[]).map((datasource, idx) => {
+      {(agentConfig.package_configs as PackageConfig[]).map((datasource, idx) => {
         if (!datasource.package) {
           return null;
         }

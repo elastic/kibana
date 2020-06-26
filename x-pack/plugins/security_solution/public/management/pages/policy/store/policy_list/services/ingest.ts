@@ -6,10 +6,10 @@
 
 import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
-  GetDatasourcesRequest,
+  GetPackageConfigsRequest,
   GetAgentStatusResponse,
-  DeleteDatasourcesResponse,
-  DeleteDatasourcesRequest,
+  DeletePackageConfigsResponse,
+  DeletePackageConfigsRequest,
   PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
 } from '../../../../../../../../ingest_manager/common';
@@ -31,7 +31,7 @@ const INGEST_API_DELETE_DATASOURCE = `${INGEST_API_DATASOURCES}/delete`;
  */
 export const sendGetEndpointSpecificDatasources = (
   http: HttpStart,
-  options: HttpFetchOptions & Partial<GetDatasourcesRequest> = {}
+  options: HttpFetchOptions & Partial<GetPackageConfigsRequest> = {}
 ): Promise<GetPolicyListResponse> => {
   return http.get<GetPolicyListResponse>(INGEST_API_DATASOURCES, {
     ...options,
@@ -66,10 +66,10 @@ export const sendGetDatasource = (
  */
 export const sendDeleteDatasource = (
   http: HttpStart,
-  body: DeleteDatasourcesRequest,
+  body: DeletePackageConfigsRequest,
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeleteDatasourcesResponse>(INGEST_API_DELETE_DATASOURCE, {
+  return http.post<DeletePackageConfigsResponse>(INGEST_API_DELETE_DATASOURCE, {
     ...options,
     body: JSON.stringify(body.body),
   });

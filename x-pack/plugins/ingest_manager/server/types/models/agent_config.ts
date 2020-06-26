@@ -27,7 +27,10 @@ export const AgentConfigSchema = schema.object({
     schema.literal(AgentConfigStatus.Active),
     schema.literal(AgentConfigStatus.Inactive),
   ]),
-  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(PackageConfigSchema)]),
+  package_configs: schema.oneOf([
+    schema.arrayOf(schema.string()),
+    schema.arrayOf(PackageConfigSchema),
+  ]),
   updated_at: schema.string(),
   updated_by: schema.string(),
 });
