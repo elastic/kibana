@@ -22,11 +22,11 @@ export type MVTSettings = {
 };
 
 export interface State {
-  currentLayerName: 'string';
+  currentLayerName: string;
   currentMinSourceZoom: number;
   currentMaxSourceZoom: number;
   currentFields: MVTFieldDescriptor[];
-  previousLayerName: 'string';
+  previousLayerName: string;
   previousMinSourceZoom: number;
   previousMaxSourceZoom: number;
   previousFields: MVTFieldDescriptor[];

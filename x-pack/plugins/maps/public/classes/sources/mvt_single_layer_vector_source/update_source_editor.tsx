@@ -30,28 +30,30 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _handleChange = (settings: MVTSettings) => {
-    const changes: OnSourceChangeArgs = [];
-    if (settings.layerName !== this.props.layerName) {
+    const changes: OnSourceChangeArgs[] = [];
+    if (settings.layerName !== this.props.source.getLayerName()) {
       changes.push({ propName: 'layerName', value: settings.layerName });
     }
-    if (settings.minSourceZoom !== this.props.minSourceZoom) {
+    if (settings.minSourceZoom !== this.props.source.getMinZoom()) {
       changes.push({ propName: 'minSourceZoom', value: settings.minSourceZoom });
     }
-    if (settings.maxSourceZoom !== this.props.maxSourceZoom) {
+    if (settings.maxSourceZoom !== this.props.source.getMaxZoom()) {
       changes.push({ propName: 'maxSourceZoom', value: settings.maxSourceZoom });
     }
-    if (!_.isEqual(settings.fields, this.props.fields)) {
+    if (!_.isEqual(settings.fields, this._getFieldDescriptors())) {
       changes.push({ propName: 'fields', value: settings.fields });
     }
     this.props.onChange(...changes);
   };
 
+  _getFieldDescriptors(): MVTFieldDescriptor[] {
+    return this.props.source.getMVTFields().map((field: MVTField) => {
+      return field.getMVTFieldDescriptor();
+    });
+  }
+
   _renderSourceSettingsCard() {
-    const fieldDescriptors: MVTFieldDescriptor[] = this.props.source
-      .getMVTFields()
-      .map((field: MVTField) => {
-        return field.getMVTFieldDescriptor();
-      });
+    const fieldDescriptors: MVTFieldDescriptor[] = this._getFieldDescriptors();
     return (
       <Fragment>
         <EuiPanel>
