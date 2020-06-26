@@ -12,3 +12,4 @@ export { enqueueJobFactory } from './enqueue_job';
 export { getExportTypesRegistry } from './export_types_registry';
 export { runValidations } from './validate';
 export { startTrace } from './trace';
+export { ReportingStore } from './store';

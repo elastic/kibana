@@ -34,6 +34,12 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
+  it('should NOT display timeline', async () => {
+    const renderResult = render();
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
   it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
     // Initially, there are no endpoints or policies, so we prompt to add policies first.
