@@ -228,6 +228,26 @@ export const updateTimelineShowTimeline = ({
   };
 };
 
+export const updateGraphEventId = ({
+  id,
+  graphEventId,
+  timelineById,
+}: {
+  id: string;
+  graphEventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      graphEventId,
+    },
+  };
+};
+
 interface ApplyDeltaToCurrentWidthParams {
   id: string;
   delta: number;

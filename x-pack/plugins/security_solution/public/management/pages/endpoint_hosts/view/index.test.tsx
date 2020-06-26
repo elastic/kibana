@@ -40,10 +40,58 @@ describe('when on the hosts page', () => {
     expect(timelineFlyout).toBeNull();
   });
 
-  it('should show a table', async () => {
+  it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('hostListTable');
+    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
+  });
+
+  describe('when there are policies, but no hosts', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const hostListData = mockHostResultList({ total: 0 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(hostListData));
+        const hostAction: AppAction = {
+          type: 'serverReturnedHostList',
+          payload: hostListData,
+        };
+        store.dispatch(hostAction);
+
+        jest.clearAllMocks();
+
+        const policyListData = mockPolicyResultList({ total: 3 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(policyListData));
+        const policyAction: AppAction = {
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyListData.items,
+          },
+        };
+        store.dispatch(policyAction);
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show the no hosts empty state', async () => {
+      const renderResult = render();
+      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
+      expect(emptyEndpointsTable).not.toBeNull();
+    });
+
+    it('should display the onboarding steps', async () => {
+      const renderResult = render();
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+
+    it('should show policy selection', async () => {
+      const renderResult = render();
+      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
+      expect(onboardingPolicySelect).not.toBeNull();
+    });
   });
 
   describe('when there is no selected host in the url', () => {

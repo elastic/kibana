@@ -3571,6 +3571,14 @@
             "deprecationReason": null
           },
           {
+            "name": "agent",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "AgentEcsField", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "auditd",
             "description": "",
             "args": [],
@@ -3751,6 +3759,25 @@
             "description": "",
             "args": [],
             "type": { "kind": "OBJECT", "name": "SystemEcsField", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "AgentEcsField",
+        "description": "",
+        "fields": [
+          {
+            "name": "type",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -5722,6 +5749,14 @@
           },
           {
             "name": "args",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "entity_id",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
