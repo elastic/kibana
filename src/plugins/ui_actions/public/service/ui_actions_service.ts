@@ -220,7 +220,6 @@ export class UiActionsService {
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-
     return new UiActionsService({ triggers, actions, triggerToActions });
   };
 }
