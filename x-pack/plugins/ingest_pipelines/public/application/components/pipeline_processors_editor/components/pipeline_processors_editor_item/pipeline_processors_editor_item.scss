@@ -13,6 +13,11 @@
     box-shadow: none;
   }
 
+  // Remove the box-shadow on all nested items
+  .pipelineProcessorsEditor__item {
+    box-shadow: none !important;
+  }
+
   &__textContainer {
     padding: 4px;
     border-radius: 2px;
