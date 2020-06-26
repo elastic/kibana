@@ -156,11 +156,13 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformMessagesTab');
       await testSubjects.click('transformMessagesTab');
       await testSubjects.existOrFail('~transformMessagesTabContent');
-      const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
-      expect(actualText.includes(expectedText)).to.eql(
-        true,
-        `Transform messages text should include '${expectedText}'`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
+        expect(actualText.includes(expectedText)).to.eql(
+          true,
+          `Expected transform messages text to include '${expectedText}'`
+        );
+      });
     }
 
     public async assertTransformRowActions(isJobRunning = false) {
