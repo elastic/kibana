@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cytoscape from 'cytoscape';
 import React, {
   createContext,
   CSSProperties,
@@ -13,11 +12,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
+import { useTheme } from '../../../hooks/useTheme';
 import {
-  animationOptions,
-  cytoscapeOptions,
-  nodeHeight,
+  getAnimationOptions,
+  getCytoscapeOptions,
+  getNodeHeight,
 } from './cytoscapeOptions';
 import { useUiTracker } from '../../../../../observability/public';
 
@@ -73,7 +74,8 @@ function rotatePoint(
 function getLayoutOptions(
   selectedRoots: string[],
   height: number,
-  width: number
+  width: number,
+  nodeHeight: number
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
@@ -111,10 +113,13 @@ export function Cytoscape({
   serviceName,
   style,
 }: CytoscapeProps) {
+  const theme = useTheme();
   const [ref, cy] = useCytoscape({
-    ...cytoscapeOptions,
+    ...getCytoscapeOptions(theme),
     elements,
   });
+
+  const nodeHeight = getNodeHeight(theme);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
@@ -149,7 +154,7 @@ export function Cytoscape({
 
         const selectedRoots = selectRoots(event.cy);
         const layout = cy.layout(
-          getLayoutOptions(selectedRoots, height, width)
+          getLayoutOptions(selectedRoots, height, width, nodeHeight)
         );
 
         layout.run();
@@ -162,7 +167,7 @@ export function Cytoscape({
       layoutstopDelayTimeout = setTimeout(() => {
         if (serviceName) {
           event.cy.animate({
-            ...animationOptions,
+            ...getAnimationOptions(theme),
             fit: {
               eles: event.cy.elements(),
               padding: nodeHeight,
@@ -237,7 +242,16 @@ export function Cytoscape({
       }
       clearTimeout(layoutstopDelayTimeout);
     };
-  }, [cy, elements, height, serviceName, trackApmEvent, width]);
+  }, [
+    cy,
+    elements,
+    height,
+    serviceName,
+    trackApmEvent,
+    width,
+    nodeHeight,
+    theme,
+  ]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

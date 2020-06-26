@@ -5,5 +5,6 @@
  */
 export * from './default_comments_array';
 export * from './default_entries_array';
+export * from './default_namespace';
 export * from './comments';
 export * from './entries';

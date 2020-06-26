@@ -13,6 +13,9 @@
     "alerts",
     "triggers_actions_ui"
   ],
+  "optionalPlugins": [
+    "ml"
+  ],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"]

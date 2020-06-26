@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { InventoryColorPaletteRT } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
@@ -120,6 +121,13 @@ export const useWaffleOptions = () => {
     },
     [setState]
   );
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+  useEffect(() => {
+    const { setNodeType, setMetric } = inventoryPrefill;
+    setNodeType(state.nodeType);
+    setMetric(state.metric);
+  }, [state, inventoryPrefill]);
 
   return {
     ...DEFAULT_WAFFLE_OPTIONS_STATE,

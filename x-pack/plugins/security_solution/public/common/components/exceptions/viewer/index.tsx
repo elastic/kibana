@@ -243,7 +243,7 @@ const ExceptionsViewerComponent = ({
   // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
-      `security#/detections/rules/id/${encodeURI(ruleId)}/edit`
+      `security/detections/rules/id/${encodeURI(ruleId)}/edit`
     );
   }, [ruleId, services.application]);
 
