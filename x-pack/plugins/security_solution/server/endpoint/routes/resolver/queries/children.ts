@@ -6,13 +6,13 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
-import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
+import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 /**
  * Builds a query for retrieving descendants of a node.
  */
-export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
+export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
   constructor(
     private readonly pagination: PaginationBuilder,
     indexPattern: string | string[],
@@ -53,11 +53,7 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(
-        uniquePIDs.length,
-        'endgame.serial_event_id',
-        'endgame.unique_ppid'
-      ),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id'),
     };
   }
 
@@ -67,7 +63,16 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
         bool: {
           filter: [
             {
-              terms: { 'process.parent.entity_id': entityIDs },
+              bool: {
+                should: [
+                  {
+                    terms: { 'process.parent.entity_id': entityIDs },
+                  },
+                  {
+                    terms: { 'process.Ext.ancestry': entityIDs },
+                  },
+                ],
+              },
             },
             {
               term: { 'event.category': 'process' },
@@ -81,14 +86,11 @@ export class ChildrenQuery extends ResolverQuery<PaginatedResults> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.parent.entity_id'),
+      ...this.pagination.buildQueryFields('event.id'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
-    return {
-      results: ResolverQuery.getResults(response),
-      totals: PaginationBuilder.getTotals(response.aggregations),
-    };
+  formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+    return this.getResults(response);
   }
 }

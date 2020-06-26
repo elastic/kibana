@@ -7,14 +7,15 @@ import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
 import { ResolverEvent, EventStats } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
-import { AggBucket } from '../utils/pagination';
 
 export interface StatsResult {
   alerts: Record<string, number>;
   events: Record<string, EventStats>;
 }
 
-interface CategoriesAgg extends AggBucket {
+interface CategoriesAgg {
+  key: string;
+  doc_count: number;
   /**
    * The reason categories is optional here is because if no data was returned in the query the categories aggregation
    * will not be defined on the response (because it's a sub aggregation).
