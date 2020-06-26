@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { useAsyncFn } from 'react-use';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 // Params can be generalized to a ...rest parameter extending unknown[] once https://github.com/microsoft/TypeScript/pull/39094 is available.
 // for now, the task must still receive unknown as a second argument, and an argument must be passed to start()
