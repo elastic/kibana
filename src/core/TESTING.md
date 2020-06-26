@@ -532,8 +532,7 @@ import { renderApp } from './application';
 describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
     const params = coreMock.createAppMountParamters('/fake/base/path');
-    const core = 
-coreMock.createStart();
+    const core = coreMock.createStart();
 
     // Verify some expected DOM element is rendered into the element
     const unmount = renderApp(params, core, {});
