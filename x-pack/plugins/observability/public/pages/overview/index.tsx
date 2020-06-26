@@ -50,21 +50,18 @@ export const Overview = ({ routeParams }: Props) => {
         minInterval: 'auto',
       });
       const params = { startTime, endTime, bucketSize: intervalString };
-      const apmDataPromise = state.hasData.apm && getDataHandler('apm')?.fetchData(params);
-      const logsDataPromise =
-        state.hasData.infra_logs && getDataHandler('infra_logs')?.fetchData(params);
-      const metricsDataPromise =
-        state.hasData.infra_metrics && getDataHandler('infra_metrics')?.fetchData(params);
-      const uptimeDataPromise = state.hasData.uptime && getDataHandler('uptime')?.fetchData(params);
+      const apmDataPromise = getDataHandler('apm')?.fetchData(params);
+      const logsDataPromise = getDataHandler('infra_logs')?.fetchData(params);
+      const metricsDataPromise = getDataHandler('infra_metrics')?.fetchData(params);
+      const uptimeDataPromise = getDataHandler('uptime')?.fetchData(params);
 
-      // TODO: caue fix it
       return Promise.all([apmDataPromise, logsDataPromise, metricsDataPromise, uptimeDataPromise]);
     }
   }, [rangeFrom, rangeTo]);
 
   const [apmData, logsData, metricsData, uptimeData] = data;
 
-  const emptySections = appsSection.filter(({ id }) => !state.hasData[id]);
+  const emptySections = appsSection.filter(({ id }) => state && !state.hasData[id]);
 
   return (
     <WithHeaderLayout
