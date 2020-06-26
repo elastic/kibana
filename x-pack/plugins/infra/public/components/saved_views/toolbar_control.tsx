@@ -28,9 +28,7 @@ interface Props<ViewState> {
   viewState: ViewState;
 }
 
-export function SavedViewsToolbarControls<ViewState extends { id: string; name: string }>(
-  props: Props<ViewState>
-) {
+export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   const kibana = useKibana();
   const {
     views,
@@ -56,6 +54,9 @@ export function SavedViewsToolbarControls<ViewState extends { id: string; name: 
   const [isSavedViewMenuOpen, setIsSavedViewMenuOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const hideSavedViewMenu = useCallback(() => {
+    setIsSavedViewMenuOpen(false);
+  }, [setIsSavedViewMenuOpen]);
   const openViewListModal = useCallback(() => {
     hideSavedViewMenu();
     find();
@@ -85,16 +86,13 @@ export function SavedViewsToolbarControls<ViewState extends { id: string; name: 
   const showSavedViewMenu = useCallback(() => {
     setIsSavedViewMenuOpen(true);
   }, [setIsSavedViewMenuOpen]);
-  const hideSavedViewMenu = useCallback(() => {
-    setIsSavedViewMenuOpen(false);
-  }, [setIsSavedViewMenuOpen]);
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {
         ...props.viewState,
         ...(!hasTime ? { time: undefined } : {}),
       };
-      saveView({ name, ...currentState });
+      saveView({ ...currentState, name });
     },
     [props.viewState, saveView]
   );
@@ -105,7 +103,7 @@ export function SavedViewsToolbarControls<ViewState extends { id: string; name: 
         ...props.viewState,
         ...(!hasTime ? { time: undefined } : {}),
       };
-      updateView(currentView.id, { name, ...currentState });
+      updateView(currentView.id, { ...currentState, name });
     },
     [props.viewState, updateView, currentView]
   );
@@ -236,7 +234,7 @@ export function SavedViewsToolbarControls<ViewState extends { id: string; name: 
       )}
 
       {viewListModalOpen && (
-        <SavedViewListModal<ViewState>
+        <SavedViewListModal<any>
           currentView={currentView}
           views={views}
           close={closeViewListModal}

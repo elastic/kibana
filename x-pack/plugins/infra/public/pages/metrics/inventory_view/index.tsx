@@ -7,7 +7,6 @@
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Location } from 'history';
 
 import { FilterBar } from './components/filter_bar';
 
