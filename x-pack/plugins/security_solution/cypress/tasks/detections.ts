@@ -5,25 +5,34 @@
  */
 
 import {
-  CLOSED_ALERTS_BTN,
+  CLOSED_ALERTS_FILTER_BTN,
   EXPAND_ALERT_BTN,
   LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
-  OPEN_CLOSE_ALERT_BTN,
-  OPEN_CLOSE_ALERTS_BTN,
-  OPENED_ALERTS_BTN,
+  OPENED_ALERTS_FILTER_BTN,
   SEND_ALERT_TO_TIMELINE_BTN,
   ALERTS,
   ALERT_CHECKBOX,
+  TIMELINE_CONTEXT_MENU_BTN,
+  CLOSE_ALERT_BTN,
+  TAKE_ACTION_POPOVER_BTN,
+  CLOSE_SELECTED_ALERTS_BTN,
+  IN_PROGRESS_ALERTS_FILTER_BTN,
+  OPEN_ALERT_BTN,
+  OPEN_SELECTED_ALERTS_BTN,
+  MARK_ALERT_IN_PROGRESS_BTN,
+  MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
 } from '../screens/detections';
 import { REFRESH_BUTTON } from '../screens/security_header';
 
 export const closeFirstAlert = () => {
-  cy.get(OPEN_CLOSE_ALERT_BTN).first().click({ force: true });
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(CLOSE_ALERT_BTN).click();
 };
 
 export const closeAlerts = () => {
-  cy.get(OPEN_CLOSE_ALERTS_BTN).click({ force: true });
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(CLOSE_SELECTED_ALERTS_BTN).click();
 };
 
 export const expandFirstAlert = () => {
@@ -31,7 +40,7 @@ export const expandFirstAlert = () => {
 };
 
 export const goToClosedAlerts = () => {
-  cy.get(CLOSED_ALERTS_BTN).click({ force: true });
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click({ force: true });
 };
 
 export const goToManageAlertDetectionRules = () => {
@@ -39,15 +48,31 @@ export const goToManageAlertDetectionRules = () => {
 };
 
 export const goToOpenedAlerts = () => {
-  cy.get(OPENED_ALERTS_BTN).click({ force: true });
+  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
 };
 
 export const openFirstAlert = () => {
-  cy.get(OPEN_CLOSE_ALERT_BTN).first().click({ force: true });
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(OPEN_ALERT_BTN).click();
 };
 
 export const openAlerts = () => {
-  cy.get(OPEN_CLOSE_ALERTS_BTN).click({ force: true });
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(OPEN_SELECTED_ALERTS_BTN).click();
+};
+
+export const goToInProgressAlerts = () => {
+  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click({ force: true });
+};
+
+export const markInProgressFirstAlert = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
+  cy.get(MARK_ALERT_IN_PROGRESS_BTN).click();
+};
+
+export const markInProgressAlerts = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click({ force: true });
+  cy.get(MARK_SELECTED_ALERTS_IN_PROGRESS_BTN).click();
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {

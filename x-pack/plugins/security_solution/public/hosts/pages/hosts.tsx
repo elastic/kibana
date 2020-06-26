@@ -8,8 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
-
 import { useParams } from 'react-router-dom';
+
+import { SecurityPageName } from '../../app/types';
 import { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -21,10 +22,7 @@ import { manageQuery } from '../../common/components/page/manage_query';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiHostsQuery } from '../containers/kpi_hosts';
-import {
-  indicesExistOrDataTemporarilyUnavailable,
-  WithSource,
-} from '../../common/containers/source';
+import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -76,89 +74,86 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       },
       [setAbsoluteRangeDatePicker]
     );
+    const { indicesExist, indexPattern } = useWithSource();
+    const filterQuery = convertToBuildEsQuery({
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      indexPattern,
+      queries: [query],
+      filters,
+    });
+    const tabsFilterQuery = convertToBuildEsQuery({
+      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+      indexPattern,
+      queries: [query],
+      filters: tabsFilters,
+    });
 
     return (
       <>
-        <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) => {
-            const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters,
-            });
-            const tabsFilterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters: tabsFilters,
-            });
-            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-              <StickyContainer>
-                <FiltersGlobal>
-                  <SiemSearchBar indexPattern={indexPattern} id="global" />
-                </FiltersGlobal>
+        {indicesExist ? (
+          <StickyContainer>
+            <FiltersGlobal>
+              <SiemSearchBar indexPattern={indexPattern} id="global" />
+            </FiltersGlobal>
 
-                <WrapperPage>
-                  <HeaderPage
-                    border
-                    subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                    title={i18n.PAGE_TITLE}
-                  />
+            <WrapperPage>
+              <HeaderPage
+                border
+                subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                title={i18n.PAGE_TITLE}
+              />
 
-                  <KpiHostsQuery
-                    endDate={to}
-                    filterQuery={filterQuery}
-                    skip={isInitializing}
-                    sourceId="default"
-                    startDate={from}
-                  >
-                    {({ kpiHosts, loading, id, inspect, refetch }) => (
-                      <KpiHostsComponentManage
-                        data={kpiHosts}
-                        from={from}
-                        id={id}
-                        inspect={inspect}
-                        loading={loading}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        to={to}
-                        narrowDateRange={narrowDateRange}
-                      />
-                    )}
-                  </KpiHostsQuery>
-
-                  <EuiSpacer />
-
-                  <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
-
-                  <EuiSpacer />
-
-                  <HostsTabs
-                    deleteQuery={deleteQuery}
-                    to={to}
-                    filterQuery={tabsFilterQuery}
-                    isInitializing={isInitializing}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                    setQuery={setQuery}
+              <KpiHostsQuery
+                endDate={to}
+                filterQuery={filterQuery}
+                skip={isInitializing}
+                sourceId="default"
+                startDate={from}
+              >
+                {({ kpiHosts, loading, id, inspect, refetch }) => (
+                  <KpiHostsComponentManage
+                    data={kpiHosts}
                     from={from}
-                    type={hostsModel.HostsType.page}
-                    indexPattern={indexPattern}
-                    hostsPagePath={hostsPagePath}
+                    id={id}
+                    inspect={inspect}
+                    loading={loading}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    to={to}
+                    narrowDateRange={narrowDateRange}
                   />
-                </WrapperPage>
-              </StickyContainer>
-            ) : (
-              <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                )}
+              </KpiHostsQuery>
 
-                <HostsEmptyPage />
-              </WrapperPage>
-            );
-          }}
-        </WithSource>
+              <EuiSpacer />
 
-        <SpyRoute />
+              <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+
+              <EuiSpacer />
+
+              <HostsTabs
+                deleteQuery={deleteQuery}
+                to={to}
+                filterQuery={tabsFilterQuery}
+                isInitializing={isInitializing}
+                setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                setQuery={setQuery}
+                from={from}
+                type={hostsModel.HostsType.page}
+                indexPattern={indexPattern}
+                hostsPagePath={hostsPagePath}
+              />
+            </WrapperPage>
+          </StickyContainer>
+        ) : (
+          <WrapperPage>
+            <HeaderPage border title={i18n.PAGE_TITLE} />
+
+            <HostsEmptyPage />
+          </WrapperPage>
+        )}
+
+        <SpyRoute pageName={SecurityPageName.hosts} />
       </>
     );
   }

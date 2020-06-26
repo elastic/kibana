@@ -22,7 +22,7 @@ let encryptedSavedObjectsServiceMockInstance: jest.Mocked<EncryptedSavedObjectsS
 beforeEach(() => {
   mockBaseClient = savedObjectsClientMock.create();
   mockBaseTypeRegistry = savedObjectsTypeRegistryMock.create();
-  encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.create([
+  encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.createWithTypes([
     {
       type: 'known-type',
       attributesToEncrypt: new Set([
@@ -689,12 +689,14 @@ describe('#find', () => {
           id: 'some-id',
           type: 'unknown-type',
           attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          score: 1,
           references: [],
         },
         {
           id: 'some-id-2',
           type: 'unknown-type',
           attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          score: 1,
           references: [],
         },
       ],
@@ -735,6 +737,7 @@ describe('#find', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
         {
@@ -746,6 +749,7 @@ describe('#find', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
       ],
@@ -806,6 +810,7 @@ describe('#find', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
         {
@@ -817,6 +822,7 @@ describe('#find', () => {
             attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
+          score: 1,
           references: [],
         },
       ],

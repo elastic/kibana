@@ -12,6 +12,7 @@ import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
+import { assignHandlers } from '../../lib/create_handlers';
 import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 
@@ -46,7 +47,7 @@ const branches = [
 export const ElementContent = compose(
   pure,
   ...branches
-)(({ renderable, renderFunction, size, handlers }) => {
+)(({ renderable, renderFunction, width, height, handlers }) => {
   const {
     getFilter,
     setFilter,
@@ -62,7 +63,7 @@ export const ElementContent = compose(
     <div
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
-      style={{ ...renderable.containerStyle, ...size }}
+      style={{ ...renderable.containerStyle, width, height }}
       data-test-subj="canvasWorkpadPageElementContent"
     >
       <ElementShareContainer
@@ -76,15 +77,16 @@ export const ElementContent = compose(
           reuseNode={renderFunction.reuseDomNode}
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-          size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-          handlers={{
+          width={width}
+          height={height}
+          handlers={assignHandlers({
             getFilter,
             setFilter,
             done,
             onEmbeddableInputChange,
             onEmbeddableDestroyed,
             getElementId,
-          }}
+          })}
         />
       </ElementShareContainer>
     </div>

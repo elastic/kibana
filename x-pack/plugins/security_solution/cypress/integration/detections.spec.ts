@@ -5,10 +5,10 @@
  */
 import {
   NUMBER_OF_ALERTS,
-  OPEN_CLOSE_ALERTS_BTN,
   SELECTED_ALERTS,
   SHOWING_ALERTS,
   ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
 } from '../screens/detections';
 
 import {
@@ -22,17 +22,19 @@ import {
   waitForAlertsPanelToBeLoaded,
   waitForAlerts,
   waitForAlertsToBeLoaded,
+  markInProgressFirstAlert,
+  goToInProgressAlerts,
 } from '../tasks/detections';
 import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
-import { DETECTIONS } from '../urls/navigation';
+import { ALERTS_URL } from '../urls/navigation';
 
 describe('Detections', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
-      loginAndWaitForPage(DETECTIONS);
+      loginAndWaitForPage(ALERTS_URL);
     });
 
     it('Closes and opens alerts', () => {
@@ -128,9 +130,9 @@ describe('Detections', () => {
           const numberOfAlertsToBeClosed = 1;
           const numberOfAlertsToBeSelected = 3;
 
-          cy.get(OPEN_CLOSE_ALERTS_BTN).should('have.attr', 'disabled');
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
           selectNumberOfAlerts(numberOfAlertsToBeSelected);
-          cy.get(OPEN_CLOSE_ALERTS_BTN).should('not.have.attr', 'disabled');
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           closeFirstAlert();
           cy.reload();
@@ -159,7 +161,7 @@ describe('Detections', () => {
   context('Opening alerts', () => {
     beforeEach(() => {
       esArchiverLoad('closed_alerts');
-      loginAndWaitForPage(DETECTIONS);
+      loginAndWaitForPage(ALERTS_URL);
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -173,9 +175,9 @@ describe('Detections', () => {
           const numberOfAlertsToBeOpened = 1;
           const numberOfAlertsToBeSelected = 3;
 
-          cy.get(OPEN_CLOSE_ALERTS_BTN).should('have.attr', 'disabled');
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
           selectNumberOfAlerts(numberOfAlertsToBeSelected);
-          cy.get(OPEN_CLOSE_ALERTS_BTN).should('not.have.attr', 'disabled');
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           openFirstAlert();
           cy.reload();
@@ -199,6 +201,51 @@ describe('Detections', () => {
             .invoke('text')
             .should('eql', `Showing ${numberOfAlertsToBeOpened.toString()} alert`);
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
+        });
+    });
+  });
+  context('Marking alerts as in-progress', () => {
+    beforeEach(() => {
+      esArchiverLoad('alerts');
+      loginAndWaitForPage(ALERTS_URL);
+    });
+
+    it('Mark one alert in progress when more than one open alerts are selected', () => {
+      waitForAlerts();
+      waitForAlertsToBeLoaded();
+
+      cy.get(NUMBER_OF_ALERTS)
+        .invoke('text')
+        .then((numberOfAlerts) => {
+          const numberOfAlertsToBeMarkedInProgress = 1;
+          const numberOfAlertsToBeSelected = 3;
+
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
+          selectNumberOfAlerts(numberOfAlertsToBeSelected);
+          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
+
+          markInProgressFirstAlert();
+          cy.reload();
+          goToOpenedAlerts();
+          waitForAlertsToBeLoaded();
+          waitForAlerts();
+
+          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
+          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS)
+            .invoke('text')
+            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+
+          goToInProgressAlerts();
+          waitForAlerts();
+
+          cy.get(NUMBER_OF_ALERTS)
+            .invoke('text')
+            .should('eql', numberOfAlertsToBeMarkedInProgress.toString());
+          cy.get(SHOWING_ALERTS)
+            .invoke('text')
+            .should('eql', `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`);
+          cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
         });
     });
   });

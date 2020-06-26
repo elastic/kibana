@@ -116,8 +116,11 @@ async function fetchObjectsToExport({
     }
 
     // sorts server-side by _id, since it's only available in fielddata
-    return findResponse.saved_objects.sort((a: SavedObject, b: SavedObject) =>
-      a.id > b.id ? 1 : -1
+    return (
+      findResponse.saved_objects
+        // exclude the find-specific `score` property from the exported objects
+        .map(({ score, ...obj }) => obj)
+        .sort((a: SavedObject, b: SavedObject) => (a.id > b.id ? 1 : -1))
     );
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');

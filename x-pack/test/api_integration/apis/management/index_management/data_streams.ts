@@ -25,9 +25,16 @@ export default function ({ getService }: FtrProviderContext) {
       .saveComposableIndexTemplate({
         name,
         body: {
-          index_patterns: ['*'],
+          // We need to match the names of backing indices with this template
+          index_patterns: [name + '*'],
           template: {
-            settings: {},
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+              },
+            },
           },
           data_stream: {
             timestamp_field: '@timestamp',
@@ -43,17 +50,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   const deleteDataStream = (name: string) => {
     return es.dataManagement
-      .deleteComposableIndexTemplate({
+      .deleteDataStream({
         name,
       })
       .then(() =>
-        es.dataManagement.deleteDataStream({
+        es.dataManagement.deleteComposableIndexTemplate({
           name,
         })
       );
   };
 
-  describe('Data streams', function () {
+  // Unskip once ES snapshot has been promoted that updates the data stream response
+  describe.skip('Data streams', function () {
     const testDataStreamName = 'test-data-stream';
 
     describe('Get', () => {
@@ -72,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(dataStreams).to.eql([
             {
               name: testDataStreamName,
-              timeStampField: '@timestamp',
+              timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
               indices: [
                 {
                   name: indexName,

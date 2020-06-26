@@ -30,21 +30,15 @@ export function apmInit(config) {
   return apmEnabled ? `init(${config})` : '';
 }
 
-export function getApmConfig(app) {
+export function getApmConfig(requestPath) {
   if (!apmEnabled) {
     return null;
   }
-  /**
-   * we use the injected app metadata from the server to extract the
-   * app id to be used for page-load transaction
-   */
-  const appId = app.getId();
-
   const config = {
     ...getConfig('kibana-frontend'),
     ...{
       active: true,
-      pageLoadTransactionName: appId,
+      pageLoadTransactionName: requestPath,
     },
   };
   /**
