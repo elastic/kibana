@@ -370,7 +370,7 @@ A feature that allows you to organize your saved objects into meaningful categor
 
 [[glossary-stack-monitoring]] Stack Monitoring ::
 // tag::stack-monitoring-def[]
-Features that enable you to monitor the Elastic Stack, including health and
+A {kib} app that enables you to monitor the {stack}, including health and
 performance data for {es}, Logstash, and Beats. You can also monitor {kib}
 and route that data to the monitoring cluster. See
 {kibana-ref}/xpack-monitoring.html[Stack Monitoring].
