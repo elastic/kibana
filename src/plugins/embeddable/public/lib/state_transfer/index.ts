@@ -18,4 +18,4 @@
  */
 
 export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export { EmbeddableOriginatingAppState, EmbeddablePackageState } from './types';
+export { EmbeddableEditorState, EmbeddablePackageState } from './types';
