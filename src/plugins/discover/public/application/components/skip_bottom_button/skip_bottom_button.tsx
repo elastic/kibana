@@ -33,6 +33,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
       <EuiSkipLink
         size="s"
         iconType="arrowDown"
+        // @ts-ignore
         onClick={(event) => {
           // prevent the anchor to reload the page on click
           event.preventDefault();
