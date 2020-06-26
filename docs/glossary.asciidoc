@@ -176,7 +176,7 @@ that are essential for visualizing geospatial data.
 
 [[glossary-element]] element ::
 // tag::element-def[]
-A <<glossary-canvas,Canvas>> workpad object that enables you to display images, text, and visualizations.
+A <<glossary-canvas,Canvas>> workpad object that displays an image, text, or visualization.
 // end::element-def[]
 
 
