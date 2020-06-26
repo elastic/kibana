@@ -319,8 +319,7 @@ retrieve the data you want to interact with.
 
 [[glossary-query-profiler]] Query Profiler ::
 // tag::query-profiler-def[]
-A tool for inspecting and analyzing search queries,
-so you can diagnose and debug poorly performing queries.
+A tool that enables you to inspect and analyze search queries to diagnose and debug poorly performing queries. 
 Refer to {kibana-ref}/xpack-profiler.html[Query Profiler].
 // end::query-profiler-def[]
 
