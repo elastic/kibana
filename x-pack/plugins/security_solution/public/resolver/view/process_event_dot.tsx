@@ -637,14 +637,16 @@ const ProcessEventDotComponents = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              <NodeSubMenu
-                count={grandTotal}
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuAction={handleRelatedEventRequest}
-                menuTitle={subMenuAssets.relatedEvents.title}
-                optionsWithActions={relatedEventStatusOrOptions}
-              />
+              {grandTotal > 0 && (
+                <NodeSubMenu
+                  count={grandTotal}
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuAction={handleRelatedEventRequest}
+                  menuTitle={subMenuAssets.relatedEvents.title}
+                  optionsWithActions={relatedEventStatusOrOptions}
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <NodeSubMenu
