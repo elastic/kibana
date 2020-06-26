@@ -54,22 +54,23 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       state: { editor, processorsDispatch },
     } = usePipelineProcessorsContext();
 
-    const disabled = editor.mode.id !== 'idle';
-    const moving = editor.mode.id === 'movingProcessor';
-    const selected = processor.id === movingProcessor?.id;
-    const isBeingEdited =
+    const isDisabled = editor.mode.id !== 'idle';
+    const isMovingThisProcessor = editor.mode.id === 'movingProcessor';
+    const isThisProcessorSelected = processor.id === movingProcessor?.id;
+    const isEditingThisProcessor =
       editor.mode.id === 'editingProcessor' && processor.id === editor.mode.arg.processor.id;
-    const isDimmed =
-      (editor.mode.id === 'editingProcessor' && !isBeingEdited) ||
-      (editor.mode.id === 'movingProcessor' && !selected);
+    const isEditingOtherProcessor =
+      editor.mode.id === 'editingProcessor' && !isEditingThisProcessor;
+    const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isThisProcessorSelected;
+    const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
     const panelClasses = classNames({
-      'pipelineProcessorsEditor__item--selected': selected || isBeingEdited,
+      'pipelineProcessorsEditor__item--selected': isThisProcessorSelected || isEditingThisProcessor,
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
     const buttonClasses = classNames({
-      'pipelineProcessorsEditor__item--displayNone': moving,
+      'pipelineProcessorsEditor__item--displayNone': isMovingThisProcessor,
     });
 
     return (
@@ -91,7 +92,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   className={buttonClasses}
-                  disabled={disabled}
+                  disabled={isDisabled}
                   aria-label={editorItemMessages.editorButtonLabel}
                   iconType="pencil"
                   size="s"
@@ -104,13 +105,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {!selected && (
+                {!isThisProcessorSelected && (
                   <EuiToolTip content={editorItemMessages.moveButtonLabel}>
                     <EuiButtonIcon
                       className={buttonClasses}
                       data-test-subj="moveItemButton"
                       size="s"
-                      disabled={disabled}
+                      disabled={isDisabled}
                       aria-label={editorItemMessages.moveButtonLabel}
                       onClick={onMove}
                       iconType="sortable"
@@ -120,7 +121,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <InlineTextInput
-                  disabled={disabled}
+                  disabled={isDisabled}
                   onChange={(nextDescription) => {
                     let nextOptions: Record<string, any>;
                     if (!nextDescription) {
@@ -153,8 +154,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           <EuiFlexItem grow={false}>
             <ContextMenu
               data-test-subj="moreMenu"
-              disabled={disabled}
-              hidden={moving}
+              disabled={isDisabled}
+              hidden={isMovingThisProcessor}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {
                 editor.setMode({ id: 'creatingProcessor', arg: { selector } });
