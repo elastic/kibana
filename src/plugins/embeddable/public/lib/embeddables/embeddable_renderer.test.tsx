@@ -20,7 +20,6 @@
 import React from 'react';
 import { wait } from '@testing-library/dom';
 import { cleanup, render } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect';
 import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,

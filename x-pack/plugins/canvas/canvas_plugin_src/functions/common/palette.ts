@@ -5,8 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-// @ts-ignore untyped local
-import { palettes } from '../../../common/lib/palettes';
+import { paulTor14 } from '../../../common/lib/palettes';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -52,7 +51,7 @@ export function palette(): ExpressionFunctionDefinition<'palette', null, Argumen
     },
     fn: (input, args) => {
       const { color, reverse, gradient } = args;
-      const colors = ([] as string[]).concat(color || palettes.paul_tor_14.colors);
+      const colors = ([] as string[]).concat(color || paulTor14.colors);
 
       return {
         type: 'palette',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -28,6 +28,7 @@ import {
 } from './anomaly_swimlane_embeddable';
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -54,10 +55,13 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     chartWidth
   );
 
-  const onResize = throttle((e: { width: number; height: number }) => {
-    const labelWidth = 200;
-    setChartWidth(e.width - labelWidth);
-  }, RESIZE_THROTTLE_TIME_MS);
+  const onResize = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      const labelWidth = 200;
+      setChartWidth(e.width - labelWidth);
+    }, RESIZE_THROTTLE_TIME_MS),
+    []
+  );
 
   if (error) {
     return (
@@ -65,7 +69,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         title={
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.errorMessage"
-            defaultMessage="Unable to load the ML swimlane data"
+            defaultMessage="Unable to load the ML swim lane data"
           />
         }
         color="danger"
@@ -91,14 +95,14 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             <EuiSpacer size="m" />
 
             {chartWidth > 0 && swimlaneData && swimlaneType ? (
-              <EuiText color="subdued" size="s">
+              <EuiText color="subdued" size="s" data-test-subj="mlAnomalySwimlaneEmbeddableWrapper">
                 <MlTooltipComponent>
                   {(tooltipService) => (
                     <ExplorerSwimlane
                       chartWidth={chartWidth}
                       timeBuckets={timeBuckets}
                       swimlaneData={swimlaneData}
-                      swimlaneType={swimlaneType}
+                      swimlaneType={swimlaneType as SwimlaneType}
                       tooltipService={tooltipService}
                     />
                   )}

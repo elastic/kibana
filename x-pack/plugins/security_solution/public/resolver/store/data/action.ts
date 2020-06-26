@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import {
+  ResolverEvent,
+  ResolverNodeStats,
+  ResolverRelatedEvents,
+} from '../../../../common/endpoint/types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
-  readonly events: ResolverEvent[];
-  readonly stats: Map<string, ResolverNodeStats>;
+  readonly payload: {
+    readonly events: Readonly<ResolverEvent[]>;
+    readonly stats: Readonly<Map<string, ResolverNodeStats>>;
+    readonly lineageLimits: { readonly children: string | null; readonly ancestors: string | null };
+  };
 }
 
 interface ServerFailedToReturnResolverData {
@@ -21,10 +28,19 @@ interface ServerFailedToReturnResolverData {
  */
 interface ServerFailedToReturnRelatedEventData {
   readonly type: 'serverFailedToReturnRelatedEventData';
-  readonly payload: ResolverEvent;
+  readonly payload: string;
+}
+
+/**
+ * When related events are returned from the server
+ */
+interface ServerReturnedRelatedEventData {
+  readonly type: 'serverReturnedRelatedEventData';
+  readonly payload: ResolverRelatedEvents;
 }
 
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
-  | ServerFailedToReturnRelatedEventData;
+  | ServerFailedToReturnRelatedEventData
+  | ServerReturnedRelatedEventData;

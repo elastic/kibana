@@ -29,6 +29,7 @@ import {
   readProviderSpec,
   setupMocha,
   runTests,
+  DockerServersService,
   Config,
   SuiteTracker,
 } from './lib';
@@ -130,12 +131,19 @@ export class FunctionalTestRunner {
         throw new Error('No tests defined.');
       }
 
+      const dockerServers = new DockerServersService(
+        config.get('dockerServers'),
+        this.log,
+        this.lifecycle
+      );
+
       // base level services that functional_test_runner exposes
       const coreProviders = readProviderSpec('Service', {
         lifecycle: () => this.lifecycle,
         log: () => this.log,
         failureMetadata: () => this.failureMetadata,
         config: () => config,
+        dockerServers: () => dockerServers,
       });
 
       return await handler(config, coreProviders);

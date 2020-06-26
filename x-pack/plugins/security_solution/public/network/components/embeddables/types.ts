@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RenderTooltipContentParams } from '../../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderTooltipContentParams } from '../../../../../maps/public/classes/tooltips/tooltip_property';
 import { inputsModel } from '../../../common/store/inputs';
 
 export interface IndexPatternMapping {
