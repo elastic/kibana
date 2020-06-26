@@ -15,7 +15,8 @@ import { actions, Actions } from '../common/schemas';
 export const DefaultActionsArray = new t.Type<Actions, Actions, unknown>(
   'DefaultActionsArray',
   actions.is,
-  (input): Either<t.Errors, Actions> => (input == null ? t.success([]) : actions.decode(input)),
+  (input, context): Either<t.Errors, Actions> =>
+    input == null ? t.success([]) : actions.validate(input, context),
   t.identity
 );
 

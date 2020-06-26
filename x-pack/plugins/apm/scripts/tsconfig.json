@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [],
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  }
+}

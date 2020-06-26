@@ -14,8 +14,8 @@ import { Either } from 'fp-ts/lib/Either';
 export const DefaultFromString = new t.Type<string, string, unknown>(
   'DefaultFromString',
   t.string.is,
-  (input): Either<t.Errors, string> =>
-    input == null ? t.success('now-6m') : t.string.decode(input),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success('now-6m') : t.string.validate(input, context),
   t.identity
 );
 

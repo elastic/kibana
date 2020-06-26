@@ -11,6 +11,7 @@ import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { TimelineId } from '../../../common/types/timeline';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import {
@@ -27,12 +28,8 @@ import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query
 import { EventType } from '../../timelines/store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../timelines/store/timeline';
-import {
-  ALERTS_TIMELINE_ID as DETECTION_ENGINE_TIMELINE_ID,
-  ALERTS_RULES_DETAILS_PAGE_TIMELINE_ID as DETECTION_ENGINE_RULES_TIMELINE_ID,
-} from '../../alerts/constants';
 
-const timelineIds = [DETECTION_ENGINE_TIMELINE_ID, DETECTION_ENGINE_RULES_TIMELINE_ID];
+const timelineIds = [TimelineId.alertsPage, TimelineId.alertsRulesDetailsPage];
 
 export interface TimelineArgs {
   events: TimelineItem[];
