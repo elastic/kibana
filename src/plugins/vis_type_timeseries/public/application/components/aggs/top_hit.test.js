@@ -20,7 +20,8 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TopHitAgg } from './top_hit';
-import { FIELDS, SERIES, PANEL, SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { SCRIPTED_FIELD_VALUE } from '../../../../common/constants';
+import { FIELDS, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
 
 describe('TopHitAgg', () => {
