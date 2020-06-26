@@ -16,6 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 import { MVTFieldType } from '../../../../common/constants';
@@ -26,7 +27,11 @@ const FIELD_TYPE_OPTIONS = [
     inputDisplay: (
       <span>
         <FieldIcon type={'string'} />
-        <span>String</span>
+        <span>
+          {i18n.translate('xpack.maps.mvtSource.stringFieldLabel', {
+            defaultMessage: 'string',
+          })}
+        </span>
       </span>
     ),
   },
@@ -35,7 +40,11 @@ const FIELD_TYPE_OPTIONS = [
     inputDisplay: (
       <span>
         <FieldIcon type={'number'} />
-        <span>Number</span>
+        <span>
+          {i18n.translate('xpack.maps.mvtSource.numberFieldLabel', {
+            defaultMessage: 'number',
+          })}
+        </span>
       </span>
     ),
   },
@@ -47,32 +56,66 @@ export interface Props {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface State {}
+interface State {
+  previousFields: MVTFieldDescriptor[];
+  currentFields: MVTFieldDescriptor[];
+}
 
 export class MVTFieldConfigEditor extends Component<Props, State> {
-  state = {};
+  state = {
+    currentFields: [],
+    previousFields: [],
+  };
+
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (_.isEqual(nextProps.fields, prevState.previousFields)) {
+      return null;
+    }
+    return {
+      currentFields: nextProps.fields,
+      previousFields: nextProps.fields,
+    };
+  }
+
+  _notifyChange = () => {
+    const invalid = this.state.currentFields.some((field) => {
+      return field.name === '';
+    });
+
+    if (!invalid) {
+      this.props.onChange(this.state.currentFields);
+    }
+  };
+
+  _fieldChange(newFields) {
+    this.setState(
+      {
+        currentFields: newFields,
+      },
+      this._notifyChange
+    );
+  }
 
   _removeField(index: number) {
-    const newFields = this.props.fields.slice();
+    const newFields = this.state.currentFields.slice();
     newFields.splice(index, 1);
-
-    this.props.onChange(newFields);
+    this._fieldChange(newFields);
   }
 
   _addField = () => {
-    const newFields = this.props.fields.slice();
+    const newFields = this.state.currentFields.slice();
     newFields.push({
       type: MVTFieldType.STRING,
-      name: 'Foobar',
+      name: '',
     });
-    this.props.onChange(newFields);
+    this._fieldChange(newFields);
   };
 
   _renderFieldTypeDropDown(mvtFieldConfig: MVTFieldDescriptor, index: number) {
     const onChange = (type: MVTFieldType) => {
-      const newFields = this.props.fields.slice();
+      const newFields = this.state.currentFields.slice();
       newFields[index].type = type;
-      this.props.onChange(newFields);
+      this._fieldChange(newFields);
     };
 
     return (
@@ -87,17 +130,31 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldNameInput(mvtFieldConfig: MVTFieldDescriptor, index: number) {
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
       const name = e.target.value;
-      const newFields = this.props.fields.slice();
+      const newFields = this.state.currentFields.slice();
       newFields[index].name = name;
-      this.props.onChange(newFields);
+      this._fieldChange(newFields);
     };
+
+    const isInvalid = mvtFieldConfig.name === '';
+    const placeholderText = isInvalid
+      ? i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
+          defaultMessage: 'Field name',
+        })
+      : '';
+
     return (
-      <EuiFieldText value={mvtFieldConfig.name} onChange={onChange} aria-label={'Fieldname'} />
+      <EuiFieldText
+        value={mvtFieldConfig.name}
+        onChange={onChange}
+        aria-label={'Fieldname'}
+        placeholder={placeholderText}
+        isInvalid={isInvalid}
+      />
     );
   }
 
   _renderFieldConfig() {
-    return this.props.fields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
+    return this.state.currentFields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
         <EuiFlexGroup key={index} gutterSize="xs">
           <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>

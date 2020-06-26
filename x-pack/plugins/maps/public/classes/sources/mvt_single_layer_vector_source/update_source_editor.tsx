@@ -53,12 +53,12 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _handleChange = (state: MVTSettings) => {
+  _handleChange = (settings: MVTSettings) => {
     this.props.onChange(
-      { propName: 'layerName', value: state.layerName },
-      { propName: 'fields', value: state.fields },
-      { propName: 'minSourceZoom', value: state.minSourceZoom },
-      { propName: 'maxSourceZoom', value: state.maxSourceZoom }
+      { propName: 'layerName', value: settings.layerName },
+      { propName: 'fields', value: settings.fields },
+      { propName: 'minSourceZoom', value: settings.minSourceZoom },
+      { propName: 'maxSourceZoom', value: settings.maxSourceZoom }
     );
   };
 
