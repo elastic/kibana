@@ -46,10 +46,8 @@ export const EXISTS = 'exists';
 export const NESTED = 'nested';
 export const ENTRIES: EntriesArray = [
   {
-    entries: [
-      { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
-    ],
-    field: 'some.field',
+    entries: [{ field: 'nested.field', operator: 'included', type: 'match', value: 'some value' }],
+    field: 'some.parentField',
     type: 'nested',
   },
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },

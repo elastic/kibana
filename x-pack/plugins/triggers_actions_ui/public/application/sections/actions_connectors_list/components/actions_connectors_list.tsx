@@ -279,6 +279,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
                 setSelectedItems(updatedSelectedItemsList);
               },
+              selectable: ({ isPreconfigured }: ActionConnectorTableItem) => !isPreconfigured,
             }
           : undefined
       }

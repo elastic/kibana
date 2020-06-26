@@ -9,6 +9,7 @@ import {
   deleteEventsStream,
   deleteMetadataStream,
   deletePolicyStream,
+  deleteAlertsStream,
 } from '../data_stream_helper';
 import { indexHostsAndAlerts } from '../../../../../plugins/security_solution/common/endpoint/index_data';
 
@@ -42,9 +43,10 @@ export default function ({ getService }: FtrProviderContext) {
           'alerts-seed',
           numberOfHosts,
           1,
-          'metrics-endpoint.metadata-default-1',
-          'metrics-endpoint.policy-default-1',
-          'events-endpoint-1',
+          'metrics-endpoint.metadata-default',
+          'metrics-endpoint.policy-default',
+          'logs-endpoint.events.process-default',
+          'logs-endpoint.alerts-default',
           numberOfAlertsPerHost
         );
       });
@@ -54,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         // to do it manually
         await Promise.all([
           deleteEventsStream(getService),
+          deleteAlertsStream(getService),
           deleteMetadataStream(getService),
           deletePolicyStream(getService),
         ]);
