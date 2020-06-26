@@ -11,7 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { debounceTime, mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
 import {
@@ -24,14 +24,13 @@ import {
   loadDataForCharts,
   loadFilteredTopInfluencers,
   loadTopInfluencers,
-  loadViewByTopFieldValuesForSelectedTime,
   AppStateSelectedCells,
   ExplorerJob,
   TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
-import { ExplorerService } from '../../services/explorer_service';
+import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 
 // Memoize the data fetching methods.
@@ -73,6 +72,8 @@ export interface LoadExplorerDataConfig {
   tableInterval: string;
   tableSeverity: number;
   viewBySwimlaneFieldName: string;
+  viewByFromPage: number;
+  viewByPerPage: number;
   swimlaneContainerWidth: number;
 }
 
@@ -89,7 +90,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
-const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
+const loadExplorerDataProvider = (explorerDataService: AnomalyTimelineService) => (
   config: LoadExplorerDataConfig
 ): Observable<Partial<ExplorerState>> => {
   if (!isLoadExplorerDataConfig(config)) {
@@ -109,6 +110,8 @@ const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
     tableSeverity,
     viewBySwimlaneFieldName,
     swimlaneContainerWidth,
+    viewByFromPage,
+    viewByPerPage,
   } = config;
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
@@ -167,13 +170,15 @@ const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
     ),
     topFieldValues:
       selectedCells !== undefined && selectedCells.showTopFieldValues === true
-        ? loadViewByTopFieldValuesForSelectedTime(
+        ? explorerDataService.loadViewByTopFieldValuesForSelectedTime(
             timerange.earliestMs,
             timerange.latestMs,
             selectedJobs,
             viewBySwimlaneFieldName,
             swimlaneLimit,
-            noInfluencersConfigured
+            viewByPerPage,
+            viewByFromPage,
+            swimlaneContainerWidth
           )
         : Promise.resolve([]),
   }).pipe(
@@ -232,6 +237,8 @@ const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
             selectedJobs,
             viewBySwimlaneFieldName,
             swimlaneLimit,
+            viewByPerPage,
+            viewByFromPage,
             swimlaneContainerWidth,
             influencersFilterQuery
           ),
@@ -256,6 +263,7 @@ const loadExplorerDataProvider = (explorerDataService: ExplorerService) => (
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
   const timefilter = useTimefilter();
+
   const {
     services: {
       mlServices: { mlApiServices },
@@ -263,7 +271,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     },
   } = useMlKibana();
   const loadExplorerData = useMemo(() => {
-    const service = new ExplorerService(
+    const service = new AnomalyTimelineService(
       timefilter,
       uiSettings,
       mlResultsServiceProvider(mlApiServices)
@@ -280,5 +288,10 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     []
   );
   const explorerData = useObservable(explorerData$);
-  return [explorerData, (c) => loadExplorerData$.next(c)];
+
+  const update = useCallback((c) => {
+    loadExplorerData$.next(c);
+  }, []);
+
+  return [explorerData, update];
 };

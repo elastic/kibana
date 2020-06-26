@@ -19,6 +19,7 @@ import {
   TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
+  ViewBySwimLaneData,
 } from '../../explorer_utils';
 
 export interface ExplorerState {
@@ -42,13 +43,14 @@ export interface ExplorerState {
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;
-  swimlaneLimit: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData | OverallSwimlaneData;
+  viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
+  viewByPerPage?: number;
+  viewByFromPage?: number;
   viewBySwimlaneOptions: string[];
 }
 
@@ -78,7 +80,6 @@ export function getExplorerDefaultState(): ExplorerState {
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,
-    swimlaneLimit: 10,
     tableData: {
       anomalies: [],
       examplesByJobId: [''],
@@ -92,5 +93,7 @@ export function getExplorerDefaultState(): ExplorerState {
     viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
+    viewByPerPage: 10,
+    viewByFromPage: 1,
   };
 }

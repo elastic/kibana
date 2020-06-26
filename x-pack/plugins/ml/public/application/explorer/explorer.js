@@ -12,8 +12,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -41,7 +39,6 @@ import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
   ExplorerQueryBar,
@@ -141,19 +138,6 @@ export class Explorer extends React.Component {
   };
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
-
-  _unsubscribeAll = new Subject();
-
-  componentDidMount() {
-    limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
-  }
-
-  componentWillUnmount() {
-    this._unsubscribeAll.next();
-    this._unsubscribeAll.complete();
-  }
-
-  viewByChangeHandler = (e) => explorerService.setViewBySwimlaneFieldName(e.target.value);
 
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues

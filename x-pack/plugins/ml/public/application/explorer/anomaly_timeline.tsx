@@ -27,7 +27,6 @@ import { AddToDashboardControl } from './add_to_dashboard_control';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { SelectLimit } from './select_limit';
 import {
   ALLOW_CELL_RANGE_SELECTION,
   dragSelect$,
@@ -132,8 +131,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
       viewBySwimlaneOptions,
-      swimlaneLimit,
       selectedJobs,
+      viewByFromPage,
+      viewByPerPage,
     } = explorerState;
 
     const setSwimlaneSelectActive = useCallback((active: boolean) => {
@@ -233,21 +233,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       value={viewBySwimlaneFieldName}
                       onChange={(e) => explorerService.setViewBySwimlaneFieldName(e.target.value)}
                     />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
-                    label={
-                      <span className="eui-textNoWrap">
-                        <FormattedMessage
-                          id="xpack.ml.explorer.limitLabel"
-                          defaultMessage="Limit"
-                        />
-                      </span>
-                    }
-                    display={'columnCompressed'}
-                  >
-                    <SelectLimit />
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
@@ -352,6 +337,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       selection={selectedCells}
                       swimlaneRenderDoneListener={swimlaneRenderDoneListener}
                       onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+                      fromPage={viewByFromPage}
+                      perPage={viewByPerPage}
                     />
                   </div>
                 </>
@@ -380,7 +367,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
-            limit={swimlaneLimit}
           />
         )}
       </>

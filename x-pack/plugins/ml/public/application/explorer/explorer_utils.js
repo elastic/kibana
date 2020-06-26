@@ -34,7 +34,6 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { getSwimlaneContainerWidth } from './legacy_utils';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -263,58 +262,6 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   }
 
   return buckets.getInterval();
-}
-
-export function loadViewByTopFieldValuesForSelectedTime(
-  earliestMs,
-  latestMs,
-  selectedJobs,
-  viewBySwimlaneFieldName,
-  swimlaneLimit,
-  noInfluencersConfigured
-) {
-  const selectedJobIds = selectedJobs.map((d) => d.id);
-
-  // Find the top field values for the selected time, and then load the 'view by'
-  // swimlane over the full time range for those specific field values.
-  return new Promise((resolve) => {
-    if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
-      mlResultsService
-        .getTopInfluencers(selectedJobIds, earliestMs, latestMs, swimlaneLimit)
-        .then((resp) => {
-          if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
-            resolve([]);
-          }
-
-          const topFieldValues = [];
-          const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
-          if (Array.isArray(topInfluencers)) {
-            topInfluencers.forEach((influencerData) => {
-              if (influencerData.maxAnomalyScore > 0) {
-                topFieldValues.push(influencerData.influencerFieldValue);
-              }
-            });
-          }
-          resolve(topFieldValues);
-        });
-    } else {
-      mlResultsService
-        .getScoresByBucket(
-          selectedJobIds,
-          earliestMs,
-          latestMs,
-          getSwimlaneBucketInterval(
-            selectedJobs,
-            getSwimlaneContainerWidth(noInfluencersConfigured)
-          ).asSeconds() + 's',
-          swimlaneLimit
-        )
-        .then((resp) => {
-          const topFieldValues = Object.keys(resp.results);
-          resolve(topFieldValues);
-        });
-    }
-  });
 }
 
 // Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
@@ -638,6 +585,8 @@ export async function loadTopInfluencers(
           earliestMs,
           latestMs,
           MAX_INFLUENCER_FIELD_VALUES,
+          10,
+          1,
           influencers,
           influencersFilterQuery
         )

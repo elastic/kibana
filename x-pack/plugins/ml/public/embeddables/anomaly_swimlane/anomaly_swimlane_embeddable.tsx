@@ -19,7 +19,7 @@ import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ExplorerService } from '../../application/services/explorer_service';
+import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
 import {
   Filter,
   Query,
@@ -63,7 +63,7 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
-  explorerService: ExplorerService;
+  explorerService: AnomalyTimelineService;
 }
 
 export type AnomalySwimlaneEmbeddableServices = [

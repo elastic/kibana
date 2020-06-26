@@ -130,6 +130,8 @@ export function useSwimlaneInputResolver(
                     explorerJobs,
                     viewBy!,
                     limit!,
+                    10,
+                    0,
                     swimlaneContainerWidth,
                     appliedFilters
                   )

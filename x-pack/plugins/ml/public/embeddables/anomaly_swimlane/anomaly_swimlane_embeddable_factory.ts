@@ -22,7 +22,7 @@ import {
 import { MlStartDependencies } from '../../plugin';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { ExplorerService } from '../../application/services/explorer_service';
+import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../application/services/results_service';
 import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
@@ -62,7 +62,7 @@ export class AnomalySwimlaneEmbeddableFactory
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
-    const explorerService = new ExplorerService(
+    const explorerService = new AnomalyTimelineService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
       mlResultsServiceProvider(mlApiServicesProvider(httpService))

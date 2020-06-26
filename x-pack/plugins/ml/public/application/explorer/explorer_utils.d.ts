@@ -33,6 +33,10 @@ export declare interface OverallSwimlaneData extends SwimlaneData {
   latest: number;
 }
 
+export interface ViewBySwimLaneData extends OverallSwimlaneData {
+  cardinality: number;
+}
+
 export declare const getDateFormatTz: () => any;
 
 export declare const getDefaultSwimlaneData: () => SwimlaneData;
