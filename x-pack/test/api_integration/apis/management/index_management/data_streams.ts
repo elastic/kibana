@@ -60,8 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
   };
 
-  // Unskip once ES snapshot has been promoted that updates the data stream response
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     const testDataStreamName = 'test-data-stream';
 
     describe('Get', () => {
