@@ -244,10 +244,10 @@ describe('PluginsService', () => {
             "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [\\"missing-plugin\\"]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [\\"another-explicitly-disabled-plugin\\"]",
           ],
           Array [
             "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",

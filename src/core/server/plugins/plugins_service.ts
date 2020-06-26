@@ -239,14 +239,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
+      const { enabled: shouldEnablePlugin, missingDependencies } = this.shouldEnablePlugin(
+        pluginName,
+        pluginEnableStatuses
+      );
+
+      if (shouldEnablePlugin) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
-        const unmetPlugins = this.getUnmetPluginDependencies(pluginName, pluginEnableStatuses);
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled. Unmet dependencies: [${unmetPlugins.join(
-            ','
-          )}]`
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: ${JSON.stringify(
+            missingDependencies
+          )}`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
@@ -256,35 +260,32 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
   }
 
-  private getUnmetPluginDependencies(
-    pluginName: PluginName,
-    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
-    parents: PluginName[] = []
-  ): string[] {
-    const requiredPlugins = pluginEnableStatuses.get(pluginName)?.plugin.requiredPlugins ?? [];
-    return requiredPlugins
-      .filter((dep) => !parents.includes(dep))
-      .filter(
-        (dependencyName) =>
-          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-      );
-  }
-
   private shouldEnablePlugin(
     pluginName: PluginName,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
     parents: PluginName[] = []
-  ): boolean {
+  ): { enabled: boolean; missingDependencies: string[] } {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
-    return (
-      pluginInfo !== undefined &&
-      pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins
-        .filter((dep) => !parents.includes(dep))
-        .every((dependencyName) =>
-          this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-        )
-    );
+
+    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+      return {
+        enabled: false,
+        missingDependencies: [],
+      };
+    }
+
+    const missingDependencies = pluginInfo.plugin.requiredPlugins
+      .filter((dep) => !parents.includes(dep))
+      .filter(
+        (dependencyName) =>
+          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+            .enabled
+      );
+
+    return {
+      enabled: missingDependencies.length === 0,
+      missingDependencies,
+    };
   }
 
   private registerPluginStaticDirs(deps: PluginsServiceSetupDeps) {
