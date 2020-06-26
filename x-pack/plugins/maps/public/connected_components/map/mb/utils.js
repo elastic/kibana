@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
@@ -43,126 +42,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
     }
   }
   mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
-}
-
-export function moveLayerToTop(mbMap, layer) {
-  const mbStyle = mbMap.getStyle();
-
-  if (!mbStyle.layers || mbStyle.layers.length === 0) {
-    return;
-  }
-
-  layer.getMbLayerIds().forEach((mbLayerId) => {
-    const mbLayer = mbMap.getLayer(mbLayerId);
-    if (mbLayer) {
-      mbMap.moveLayer(mbLayerId);
-    }
-  });
-}
-
-function isTextLayer(mbLayer) {
-  if (mbLayer.type !== 'symbol') {
-    return false;
-  }
-
-  const styleNames = [];
-  if (mbLayer.paint) {
-    styleNames.push(...Object.keys(mbLayer.paint));
-  }
-  if (mbLayer.layout) {
-    styleNames.push(...Object.keys(mbLayer.layout));
-  }
-  return styleNames.some((styleName) => {
-    return styleName.startsWith('text-');
-  });
-}
-
-export function moveLabelsToTop(mbMap, layerList, spatialFiltersLayer) {
-  const mbStyle = mbMap.getStyle();
-  if (!mbStyle.layers || mbStyle.layers.length === 0) {
-    return;
-  }
-  const reversedMbStyleLayers = mbStyle.layers.reverse();
-
-  // Start placing layers beneath spatial filters layer (which is always the layer on top)
-  let beneathLayerId = spatialFiltersLayer.getMbLayerIds()[0];
-
-  layerList
-    .filter((layer) => {
-      return layer.bubbleLabelsToTop();
-    })
-    .forEach((layer) => {
-      reversedMbStyleLayers.forEach((mbLayer) => {
-        if (layer.ownsMbLayerId(mbLayer.id) && isTextLayer(mbLayer)) {
-          mbMap.moveLayer(mbLayer.id, beneathLayerId);
-          // advance beneathLayerId so next moved layer will be beneath previously moved layer.
-          beneathLayerId = mbLayer.id;
-        }
-      });
-    });
-}
-
-/**
- * This is function assumes only a single layer moved in the layerList, compared to mbMap
- * It is optimized to minimize the amount of mbMap.moveLayer calls.
- * @param mbMap
- * @param layerList
- */
-export function syncLayerOrderForSingleLayer(mbMap, layerList) {
-  if (!layerList || layerList.length === 0) {
-    return;
-  }
-
-  const mbLayers = mbMap.getStyle().layers.slice();
-  const layerIds = [];
-  mbLayers.forEach((mbLayer) => {
-    const layer = layerList.find((layer) => layer.ownsMbLayerId(mbLayer.id));
-    if (layer) {
-      layerIds.push(layer.getId());
-    }
-  });
-
-  const currentLayerOrderLayerIds = _.uniq(layerIds);
-
-  const newLayerOrderLayerIdsUnfiltered = layerList.map((l) => l.getId());
-  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter((layerId) =>
-    currentLayerOrderLayerIds.includes(layerId)
-  );
-
-  let netPos = 0;
-  let netNeg = 0;
-  const movementArr = currentLayerOrderLayerIds.reduce((accu, id, idx) => {
-    const movement = newLayerOrderLayerIds.findIndex((newOId) => newOId === id) - idx;
-    movement > 0 ? netPos++ : movement < 0 && netNeg++;
-    accu.push({ id, movement });
-    return accu;
-  }, []);
-  if (netPos === 0 && netNeg === 0) {
-    return;
-  }
-  const movedLayerId =
-    (netPos >= netNeg && movementArr.find((l) => l.movement < 0).id) ||
-    (netPos < netNeg && movementArr.find((l) => l.movement > 0).id);
-  const nextLayerIdx = newLayerOrderLayerIds.findIndex((layerId) => layerId === movedLayerId) + 1;
-
-  let nextMbLayerId;
-  if (nextLayerIdx === newLayerOrderLayerIds.length) {
-    nextMbLayerId = null;
-  } else {
-    const foundLayer = mbLayers.find(({ id: mbLayerId }) => {
-      const layerId = newLayerOrderLayerIds[nextLayerIdx];
-      const layer = layerList.find((layer) => layer.getId() === layerId);
-      return layer.ownsMbLayerId(mbLayerId);
-    });
-    nextMbLayerId = foundLayer.id;
-  }
-
-  const movedLayer = layerList.find((layer) => layer.getId() === movedLayerId);
-  mbLayers.forEach(({ id: mbLayerId }) => {
-    if (movedLayer.ownsMbLayerId(mbLayerId)) {
-      mbMap.moveLayer(mbLayerId, nextMbLayerId);
-    }
-  });
 }
 
 export async function addSpritesheetToMap(json, imgUrl, mbMap) {
