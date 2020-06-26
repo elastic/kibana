@@ -98,7 +98,6 @@ export class UiActionsServiceEnhancements {
         getDisplayName: () => serializedAction.name,
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
-        enhancements: {},
       }),
     } as ActionFactoryDefinition<Config, object, ExecutionContext>;
 
