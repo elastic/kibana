@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { throwIfAbsent, throwIfIsntContained } from './value_validators';
+import { throwIfAbsent, throwIfIsntContained, isUrlInvalid } from './value_validators';
 import uuid from 'uuid';
 
 describe('throwIfAbsent', () => {
@@ -77,5 +77,15 @@ describe('throwIfIsntContained', () => {
         (val: { id: string }) => val.id
       )(values)
     ).toEqual(values);
+  });
+});
+
+describe('isUrlInvalid', () => {
+  test('verifies invalid url', () => {
+    expect(isUrlInvalid('this is not a url')).toBeTruthy();
+  });
+
+  test('verifies valid url', () => {
+    expect(isUrlInvalid('https://www.elastic.co/')).toBeFalsy();
   });
 });

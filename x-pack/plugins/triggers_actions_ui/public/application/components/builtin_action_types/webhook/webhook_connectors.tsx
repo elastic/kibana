@@ -246,6 +246,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               isInvalid={errors.url.length > 0 && url !== undefined}
               fullWidth
               value={url || ''}
+              placeholder="https://<site-url> or http://<site-url>"
               data-test-subj="webhookUrlText"
               onChange={(e) => {
                 editActionConfig('url', e.target.value);

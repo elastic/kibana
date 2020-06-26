@@ -77,6 +77,31 @@ describe('webhook connector validation', () => {
       },
     });
   });
+
+  test('connector validation fails when url in config is not valid', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'invalid.url',
+      },
+    } as WebhookActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        url: ['URL is invalid.'],
+        method: [],
+        user: [],
+        password: [],
+      },
+    });
+  });
 });
 
 describe('webhook action params validation', () => {
