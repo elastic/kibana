@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { warnAndSkipTest } from '../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -32,10 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect('Content-Type', 'image/svg+xml')
           .expect(200);
       } else {
-        log.warning(
-          'disabling tests because DockerServers service is not enabled, set INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT to run them'
-        );
-        this.skip();
+        warnAndSkipTest(this, log);
       }
     });
 
