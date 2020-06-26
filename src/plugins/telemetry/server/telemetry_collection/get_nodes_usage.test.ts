@@ -68,7 +68,7 @@ describe('get_nodes_usage', () => {
   it('calls fetchNodesUsage', async () => {
     const callCluster = jest.fn();
     callCluster.mockResolvedValueOnce(mockedNodesFetchResponse);
-    const fetchNodesUsage = jest.fn(async () => ({
+    jest.fn(async () => ({
       cluster_name: 'test',
       nodes: mockedNodesResponse,
     }));
@@ -84,7 +84,7 @@ describe('get_nodes_usage', () => {
   it('returns a modified array of node usage data', async () => {
     const callCluster = jest.fn();
     callCluster.mockResolvedValueOnce(mockedNodesFetchResponse);
-    const fetchNodesUsage = jest.fn(async () => ({
+    jest.fn(async () => ({
       cluster_name: 'test',
       nodes: mockedNodesResponse,
     }));
