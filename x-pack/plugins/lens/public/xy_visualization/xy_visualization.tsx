@@ -9,20 +9,11 @@ import _ from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu } from './xy_config_panel';
+import { DimensionEditor, LayerContextMenu } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
-import {
-  State,
-  PersistableState,
-  SeriesType,
-  visualizationTypes,
-  YAxisMode,
-  LayerConfig,
-} from './types';
+import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
 import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
@@ -32,19 +23,6 @@ const defaultIcon = chartBarStackedSVG;
 const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
-
-// TODO move into xy_config_panel
-const idPrefix = htmlIdGenerator()();
-type UnwrapArray<T> = T extends Array<infer P> ? P : T;
-function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: number): State {
-  const newLayers = [...state.layers];
-  newLayers[index] = layer;
-
-  return {
-    ...state,
-    layers: newLayers,
-  };
-}
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -288,68 +266,11 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     );
   },
 
-  renderDimensionEditor(domElement, { state, layerId, setState, accessor }) {
+  renderDimensionEditor(domElement, props) {
     // TODO move this in xy_config_panel
-    const index = state.layers.findIndex((l) => l.layerId === layerId);
-    const layer = state.layers[index];
-    const axisMode =
-      (layer.yAxisConfig &&
-        layer.yAxisConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.mode) ||
-      'auto';
     render(
       <I18nProvider>
-        <EuiFormRow
-          display="columnCompressed"
-          label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-            defaultMessage: 'Axis side',
-          })}
-        >
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-              defaultMessage: 'Axis side',
-            })}
-            name="axisSide"
-            buttonSize="compressed"
-            className="eui-displayInlineBlock"
-            options={[
-              {
-                id: `${idPrefix}auto`,
-                label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
-                  defaultMessage: 'Auto',
-                }),
-              },
-              {
-                id: `${idPrefix}left`,
-                label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-                  defaultMessage: 'Left',
-                }),
-              },
-              {
-                id: `${idPrefix}right`,
-                label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
-                  defaultMessage: 'Right',
-                }),
-              },
-            ]}
-            idSelected={`${idPrefix}${axisMode}`}
-            onChange={(id) => {
-              const newMode = id.replace(idPrefix, '') as YAxisMode;
-              const newYAxisConfigs = [...(layer.yAxisConfig || [])];
-              const existingIndex = newYAxisConfigs.findIndex(
-                (yAxisConfig) => yAxisConfig.forAccessor === accessor
-              );
-              if (existingIndex !== -1) {
-                newYAxisConfigs[existingIndex].mode = newMode;
-              } else {
-                newYAxisConfigs.push({
-                  forAccessor: accessor,
-                  mode: newMode,
-                });
-              }
-              setState(updateLayer(state, { ...layer, yAxisConfig: newYAxisConfigs }, index));
-            }}
-          />
-        </EuiFormRow>
+        <DimensionEditor {...props} />
       </I18nProvider>,
       domElement
     );
