@@ -51,7 +51,7 @@ const defaultFreeze: <T>(value: T) => T = isProduction
 export interface CreateStateContainerOptions {
   /**
    * Function to use when freezing state. Supply identity function.
-   * If not provided, default deepFreeze is use.
+   * If not provided, default `deepFreeze` is used.
    *
    * @example
    * If you expect that your state will be mutated externally an you cannot
@@ -75,7 +75,7 @@ export function createStateContainer<State extends BaseState>(
   defaultState: State
 ): ReduxLikeStateContainer<State>;
 /**
- * Creates a state container with transitions, but without selectors
+ * Creates a state container with transitions, but without selectors.
  * @param defaultState - initial state
  * @param pureTransitions - state transitions configuration object. Map of {@link PureTransition}.
  * @typeParam State - shape of state
@@ -87,7 +87,7 @@ export function createStateContainer<State extends BaseState, PureTransitions ex
 ): ReduxLikeStateContainer<State, PureTransitions>;
 
 /**
- * Creates a state container with transitions and selectors
+ * Creates a state container with transitions and selectors.
  * @param defaultState - initial state
  * @param pureTransitions - state transitions configuration object. Map of {@link PureTransition}.
  * @param pureSelectors - state selectors configuration object. Map of {@link PureSelectors}.

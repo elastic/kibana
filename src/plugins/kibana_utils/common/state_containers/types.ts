@@ -83,7 +83,7 @@ export interface BaseStateContainer<State extends BaseState> {
 }
 
 /**
- * Fully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}
+ * Fully featured state container with {@link Selector | Selectors} and {@link Transition | Transitions}. Extends {@link BaseStateContainer}.
  * @typeParam State - Shape of state in the container. Has to match {@link BaseState} constraint
  * @typeParam PureTransitions - map of {@link PureTransition | transitions} to provide on state container
  * @typeParam PureSelectors - map of {@link PureSelector | selectors} to provide on state container
@@ -99,8 +99,8 @@ export interface StateContainer<
 }
 
 /**
- * Fully featured state container which matches Redux store interface. Extends {@link StateContainer}
- * Allows to use state container with redux libraries
+ * Fully featured state container which matches Redux store interface. Extends {@link StateContainer}.
+ * Allows to use state container with redux libraries.
  * @public
  */
 export interface ReduxLikeStateContainer<
@@ -182,7 +182,7 @@ export type PureSelectorsToSelectors<T extends object> = {
 };
 
 /**
- * Used to compare state. see {@link useContainerSelector}
+ * Used to compare state, see {@link useContainerSelector}.
  * @public
  */
 export type Comparator<Result> = (previous: Result, current: Result) => boolean;
@@ -196,7 +196,7 @@ export type MapStateToProps<State extends BaseState, StateProps extends object> 
 ) => StateProps;
 /**
  * Similar to `connect` from react-redux,
- * allows to map state from state container to component's props
+ * allows to map state from state container to component's props.
  * @public
  */
 export type Connect<State extends BaseState> = <

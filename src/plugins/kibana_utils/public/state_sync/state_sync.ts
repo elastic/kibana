@@ -93,7 +93,7 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
  * ```
  *
  * @example
- * transform state before serialising
+ * transforming state before serialising
  *  Useful for:
  *  * Migration / backward compatibility
  *  * Syncing part of state

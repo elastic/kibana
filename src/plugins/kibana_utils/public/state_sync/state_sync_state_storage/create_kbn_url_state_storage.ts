@@ -33,7 +33,7 @@ import {
  * 1. Keeps state in sync with the URL.
  * 2. Serializes data and stores it in the URL in one of the supported formats:
  *   * Rison encoded.
- *   * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See kibana's advanced option for more context state:storeInSessionStorage
+ *   * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.
  * 3. Takes care of listening to the URL updates and notifies state about the updates.
  * 4. Takes care of batching URL updates to prevent redundant browser history records.
  *
@@ -55,8 +55,7 @@ export interface IKbnUrlStateStorage extends IStateStorage {
   cancel: () => void;
 
   /**
-   * synchronously runs any pending url updates
-   * returned boolean indicates if change occurred
+   * Synchronously runs any pending url updates, returned boolean indicates if change occurred.
    * @param opts: {replace? boolean} - allows to specify if push or replace should be used for flushing update
    * @returns boolean - indicates if there was an update to flush
    */

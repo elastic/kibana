@@ -19,7 +19,7 @@
 
 /**
  * State syncing utilities are a set of helpers for syncing your application state
- * with URL or browser storage.
+ * with browser URL or browser storage.
  *
  * They are designed to work together with {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers | state containers}. But state containers are not required.
  *
@@ -28,7 +28,7 @@
  * *{@link syncState} util which:
  *   * Subscribes to state changes and pushes them to state storage.
  *   * Optionally subscribes to state storage changes and pushes them to state.
- *   * Two types of storage compatible with `syncState`:
+ *   * Two types of storages compatible with `syncState`:
  *   * {@link IKbnUrlStateStorage} - Serializes state and persists it to URL's query param in rison or hashed format.
  * Listens for state updates in the URL and pushes them back to state.
  *   * {@link ISessionStorageStateStorage} - Serializes state and persists it to browser storage.

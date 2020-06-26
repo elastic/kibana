@@ -23,10 +23,10 @@ import { IStateStorage } from './state_sync_state_storage';
 /**
  * Extension of {@link BaseStateContainer} with one constraint: set state should handle `null` as incoming state
  * @remarks
- * State container for stateSync() have to accept "null"
- * for example, set() implementation could handle null and fallback to some default state
+ * State container for `stateSync()` have to accept `null`
+ * for example, `set()` implementation could handle null and fallback to some default state
  * this is required to handle edge case, when state in storage becomes empty and syncing is in progress.
- * state container will be notified about about storage becoming empty with null passed in
+ * State container will be notified about about storage becoming empty with null passed in.
  * @public
  */
 export interface INullableBaseStateContainer<State extends BaseState>
