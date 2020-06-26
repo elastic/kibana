@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertQueryValue('');
         });
 
-        it('should show the group-by configuration', async () => {
+        it('should show the pre-filled group-by configuration', async () => {
           await transform.wizard.assertGroupByEntryExists(
             testData.expected.groupBy.index,
             testData.expected.groupBy.label
