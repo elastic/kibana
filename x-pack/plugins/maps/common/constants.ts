@@ -26,14 +26,17 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 
-export const MAP_APP_PATH = `app/${APP_ID}`;
+export const MAPS_APP_PATH = `app/${APP_ID}`;
+export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
-export const MAP_BASE_URL = `/${MAP_APP_PATH}/${MAP_SAVED_OBJECT_TYPE}`;
-
-export function createMapPath(id: string) {
+const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
+export function getNewMapPath() {
+  return MAP_BASE_URL;
+}
+export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
@@ -231,4 +234,16 @@ export enum LAYER_WIZARD_CATEGORY {
   ELASTICSEARCH = 'ELASTICSEARCH',
   REFERENCE = 'REFERENCE',
   SOLUTIONS = 'SOLUTIONS',
+}
+
+export enum VECTOR_SHAPE_TYPE {
+  POINT = 'POINT',
+  LINE = 'LINE',
+  POLYGON = 'POLYGON',
+}
+
+// https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#data-expressions
+export enum MB_LOOKUP_FUNCTION {
+  GET = 'get',
+  FEATURE_STATE = 'feature-state',
 }
