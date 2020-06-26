@@ -5,6 +5,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 
 import {
   registerTestBed,
@@ -34,6 +35,8 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
   };
+  findDataStreamDetailPanel: () => ReactWrapper;
+  findDataStreamDetailPanelTitle: () => string;
 }
 
 export const setup = async (): Promise<IndicesTestBed> => {
@@ -77,6 +80,16 @@ export const setup = async (): Promise<IndicesTestBed> => {
     component.update();
   };
 
+  const findDataStreamDetailPanel = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanel');
+  };
+
+  const findDataStreamDetailPanelTitle = () => {
+    const { find } = testBed;
+    return find('dataStreamDetailPanelTitle').text();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -85,5 +98,7 @@ export const setup = async (): Promise<IndicesTestBed> => {
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
     },
+    findDataStreamDetailPanel,
+    findDataStreamDetailPanelTitle,
   };
 };

@@ -1975,8 +1975,6 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
-    dynamic?: string;
-    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
