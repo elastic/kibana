@@ -37,7 +37,7 @@ function getMockDatasource() {
 
 // TODO
 // eslint-disable-next-line max-classes-per-file
-class DatasourceServiceMock extends DatasourceServiceInterface {
+class DatasourceServiceMock {
   public create = jest.fn().mockResolvedValue(getMockDatasource());
   public get = jest.fn().mockResolvedValue(getMockDatasource());
   public getByIds = jest.fn().mockResolvedValue([getMockDatasource()]);

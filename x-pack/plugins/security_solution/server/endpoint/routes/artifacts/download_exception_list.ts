@@ -40,11 +40,20 @@ export function registerDownloadExceptionListRoute(
       options: { tags: [] },
     },
     async (context, req, res) => {
-      const soClient = context.core.savedObjects.client;
+      let scopedSOClient;
       const logger = endpointContext.logFactory.get('download_exception_list');
 
-      // TODO: authenticate api key
-      // https://github.com/elastic/kibana/issues/69329
+      // The ApiKey must be associated with an enrolled Fleet agent
+      try {
+        scopedSOClient = endpointContext.service.getScopedSavedObjects(req);
+        await authenticateAgentWithAccessToken(scopedSOClient, req);
+      } catch (err) {
+        if (err.output.statusCode === 401) {
+          return res.unauthorized();
+        } else {
+          return res.notFound();
+        }
+      }
 
       const buildAndValidateResponse = (artName: string, body: string): object => {
         const artifact = {
@@ -62,16 +71,6 @@ export function registerDownloadExceptionListRoute(
         }
       };
 
-      try {
-        const scopedSOClient = endpointContext.service.getScopedSavedObjects(req);
-        await authenticateAgentWithAccessToken(scopedSOClient, req);
-      } catch (err) {
-        if (err.output.statusCode === 401) {
-          return res.unauthorized();
-        } else {
-          return res.notFound();
-        }
-      }
 
       const id = `${req.params.identifier}-${req.params.sha256}`;
       const cacheResp = cache.get(id);
@@ -81,7 +80,7 @@ export function registerDownloadExceptionListRoute(
         return buildAndValidateResponse(req.params.identifier, cacheResp);
       } else {
         logger.debug(`Cache MISS artifact ${id}`);
-        return soClient
+        return scopedSOClient
           .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
           .then((artifact) => {
             cache.set(id, artifact.attributes.body);
