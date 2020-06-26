@@ -22,3 +22,5 @@ DetectionEngineHeaderPageComponent.defaultProps = {
 };
 
 export const DetectionEngineHeaderPage = React.memo(DetectionEngineHeaderPageComponent);
+
+DetectionEngineHeaderPage.displayName = 'DetectionEngineHeaderPage';

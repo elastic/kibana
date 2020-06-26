@@ -56,6 +56,6 @@ describe('RuleDetailsPageComponent', () => {
       }
     );
 
-    expect(wrapper.find('GlobalTime')).toHaveLength(1);
+    expect(wrapper.find('DetectionEngineHeaderPage')).toHaveLength(1);
   });
 });
