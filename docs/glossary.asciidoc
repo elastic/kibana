@@ -451,7 +451,7 @@ Points, lines, and polygons used to represent a map.
 
 [[glossary-visualization]] visualization ::
 // tag::visualization-def[]
-A graphical representation of query results (e.g., a histogram, line graph, pie chart, or heat map).
+A graphical representation of query results in {kib} (e.g., a histogram, line graph, pie chart, or heat map).
 // end::visualization-def[]
 
 [float]
