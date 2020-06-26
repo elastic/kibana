@@ -165,14 +165,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertTransformRowActions(isJobRunning = false) {
+    public async assertTransformRowActions(isTransformRunning = false) {
       await testSubjects.click('euiCollapsedItemActionsButton');
 
       await testSubjects.existOrFail('transformActionClone');
       await testSubjects.existOrFail('transformActionDelete');
       await testSubjects.existOrFail('transformActionEdit');
 
-      if (isJobRunning) {
+      if (isTransformRunning) {
         await testSubjects.missingOrFail('transformActionStart');
         await testSubjects.existOrFail('transformActionStop');
       } else {
