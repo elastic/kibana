@@ -353,8 +353,8 @@ Scripted field data is shown in Discover and used in visualizations.
 
 [[glossary-shareable]] shareable ::
 // tag::shareable-def[]
-A Canvas workpad that can be embedded outside of Kibana
-(e.g. on an internal wiki or public website) using HTML and JavaScript.
+A Canvas workpad that can be embedded on any webpage. 
+Shareables enable you to display Canvas visualizations on internal wiki pages or public websites.
 // end::shareable-def[]
 
 [[glossary-space]] space ::
