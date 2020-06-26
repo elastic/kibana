@@ -128,14 +128,10 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getRowTitles() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAllByTestSubject('savedObjectsTableRowTitle');
-
-      const objects = [];
-      for (const cell of cells) {
-        objects.push(await cell.getVisibleText());
-      }
-
-      return objects;
+      const $ = await table.parseDomContent();
+      return $.findTestSubjects('savedObjectsTableRowTitle')
+        .toArray()
+        .map((cell) => $(cell).find('.euiTableCellContent').text());
     }
 
     async getRelationshipFlyout() {
@@ -162,7 +158,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         .toArray()
         .map((row) => {
           return {
-            title: $(row).find('td:nth-child(3)').text().replace('Title', '').trim(),
+            title: $(row).find('td:nth-child(3) .euiTableCellContent').text(),
             canViewInApp: Boolean($(row).find('td:nth-child(3) a').length),
           };
         });
