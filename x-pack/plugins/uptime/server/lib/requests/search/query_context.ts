@@ -158,4 +158,10 @@ export class QueryContext {
       return this.pagination.sortOrder === SortOrder.DESC;
     }
   }
+
+  cursorOrder(): 'asc' | 'desc' {
+    return CursorDirection[this.pagination.cursorDirection] === CursorDirection.AFTER
+      ? 'asc'
+      : 'desc';
+  }
 }

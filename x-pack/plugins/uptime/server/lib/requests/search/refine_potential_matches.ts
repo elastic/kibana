@@ -118,7 +118,7 @@ export const query = async (
           terms: {
             field: 'monitor.id',
             size: potentialMatchMonitorIDs.length,
-            order: { _key: 'desc' },
+            order: { _key: queryContext.cursorOrder() },
           },
           aggs: {
             location: {
