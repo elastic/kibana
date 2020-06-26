@@ -61,7 +61,7 @@ describe('#checkOriginConflicts', () => {
     page: 1,
     per_page: 10,
     total: objects.length,
-    saved_objects: objects,
+    saved_objects: objects.map((object) => ({ ...object, score: 0 })),
   });
 
   const setupOptions = (
