@@ -10,10 +10,10 @@ import { compose, withProps } from 'recompose';
 import { Dispatch } from 'redux';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { State, ElementSpec } from '../../../../types';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { elementsRegistry } from '../../../lib/elements_registry';
 import { ElementMenu as Component, Props as ComponentProps } from './element_menu';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { addElement } from '../../../state/actions/elements';
 import { getSelectedPage } from '../../../state/selectors/workpad';
 import { AddEmbeddablePanel } from '../../embeddable_flyout';

@@ -353,7 +353,7 @@ describe('OIDCAuthenticationProvider', () => {
             state: {
               state: 'statevalue',
               nonce: 'noncevalue',
-              nextURL: '/base-path/s/foo/some-path',
+              nextURL: '/mock-server-basepath/s/foo/some-path',
               realm: 'oidc1',
             },
           }
@@ -575,7 +575,7 @@ describe('OIDCAuthenticationProvider', () => {
             state: {
               state: 'statevalue',
               nonce: 'noncevalue',
-              nextURL: '/base-path/s/foo/some-path',
+              nextURL: '/mock-server-basepath/s/foo/some-path',
               realm: 'oidc1',
             },
           }
@@ -702,7 +702,7 @@ describe('OIDCAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /logged_out if `redirect` field in OpenID Connect logout response is null.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in OpenID Connect logout response is null.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
@@ -711,9 +711,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {

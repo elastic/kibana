@@ -8,7 +8,13 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, ReportingConfigType } from './config';
-import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
+import {
+  createQueueFactory,
+  enqueueJobFactory,
+  LevelLogger,
+  runValidations,
+  ReportingStore,
+} from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
@@ -86,9 +92,9 @@ export class ReportingPlugin
       const config = reportingCore.getConfig();
 
       const browserDriverFactory = await initializeBrowserDriverFactory(config, logger);
-
-      const esqueue = await createQueueFactory(reportingCore, logger); // starts polling for pending jobs
-      const enqueueJob = enqueueJobFactory(reportingCore, logger); // called from generation routes
+      const store = new ReportingStore(reportingCore, logger);
+      const esqueue = await createQueueFactory(reportingCore, store, logger); // starts polling for pending jobs
+      const enqueueJob = enqueueJobFactory(reportingCore, store, logger); // called from generation routes
 
       reportingCore.pluginStart({
         browserDriverFactory,
@@ -96,6 +102,7 @@ export class ReportingPlugin
         uiSettings: core.uiSettings,
         esqueue,
         enqueueJob,
+        store,
       });
 
       // run self-check validations

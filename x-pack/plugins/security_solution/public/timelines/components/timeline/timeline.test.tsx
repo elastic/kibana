@@ -32,19 +32,15 @@ jest.mock('use-resize-observer/polyfilled');
 
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        application: {
+          navigateToApp: jest.fn(),
+        },
         uiSettings: {
           get: jest.fn(),
         },
