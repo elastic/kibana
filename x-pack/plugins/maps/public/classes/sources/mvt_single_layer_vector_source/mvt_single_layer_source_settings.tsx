@@ -42,6 +42,17 @@ export interface Props {
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
+  state = {
+    currentLayerName: '',
+    currentMinSourceZoom: MIN_ZOOM,
+    currentMaxSourceZoom: MAX_ZOOM,
+    currentFields: [],
+    previousLayerName: '',
+    previousMinSourceZoom: MIN_ZOOM,
+    previousMaxSourceZoom: MAX_ZOOM,
+    previousFields: [],
+  };
+
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const newSettings = {
       layerName: nextProps.layerName,
@@ -90,7 +101,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     if (layerName === this.state.currentLayerName) {
       return;
     }
-    this.setState({ currentLayerName: e.targetValue }, this._handleChange);
+    this.setState({ currentLayerName: layerName }, this._handleChange);
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
@@ -110,7 +121,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
       return;
     }
     this.setState(
-      { currentMaxSourceZoom: minSourceZoom, currentMaxSourceZoom: maxSourceZoom },
+      { currentMinSourceZoom: minSourceZoom, currentMaxSourceZoom: maxSourceZoom },
       this._handleChange
     );
   };
