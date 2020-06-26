@@ -266,7 +266,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (this.exceptionsPackagerTask) {
       this.exceptionsPackagerTask
-        .getTaskRunner({
+        .getTaskScheduler({
           taskManager: plugins.taskManager,
         })
         .run();

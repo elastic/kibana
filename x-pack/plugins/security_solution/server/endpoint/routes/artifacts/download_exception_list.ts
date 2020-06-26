@@ -71,7 +71,6 @@ export function registerDownloadExceptionListRoute(
         }
       };
 
-
       const id = `${req.params.identifier}-${req.params.sha256}`;
       const cacheResp = cache.get(id);
 

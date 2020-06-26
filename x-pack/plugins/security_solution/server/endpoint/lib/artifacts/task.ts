@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../../../../src/kibana/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -18,10 +19,10 @@ const PackagerTaskConstants = {
 };
 
 export interface PackagerTask {
-  getTaskRunner: (context: PackagerTaskRunnerContext) => PackagerTaskRunner;
+  getTaskScheduler: (context: PackagerTaskSchedulerContext) => PackagerTaskScheduler;
 }
 
-interface PackagerTaskRunner {
+interface PackagerTaskScheduler {
   run: () => void;
 }
 
@@ -30,55 +31,62 @@ interface PackagerTaskContext {
   taskManager: TaskManagerSetupContract;
 }
 
-interface PackagerTaskRunnerContext {
+interface PackagerTaskSchedulerContext {
   taskManager: TaskManagerStartContract;
 }
 
-export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
-  const getTaskId = (): string => {
-    return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
-  };
+interface PackagerTaskRunnerContext extends PackagerTaskContext {
+  logger: Logger;
+  taskId: string;
+}
 
+const getTaskId = (): string => {
+  return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
+};
+
+export const runPackagerTask = async (context: PackagerTaskRunnerContext) => {
+  // Check that this task is current
+  if (context.taskId !== getTaskId()) {
+    // old task, return
+    context.logger.debug(`Outdated task running: ${context.taskId}`);
+    return;
+  }
+
+  const manifestManager = context.endpointAppContext.service.getManifestManager();
+
+  if (manifestManager === undefined) {
+    context.logger.debug('Manifest Manager not available.');
+    return;
+  }
+
+  manifestManager
+    .refresh()
+    .then((wrappedManifest) => {
+      if (wrappedManifest !== null) {
+        return manifestManager.dispatch(wrappedManifest);
+      }
+    })
+    .then((wrappedManifest) => {
+      if (wrappedManifest !== null) {
+        return manifestManager.commit(wrappedManifest);
+      }
+    })
+    .catch((err) => {
+      context.logger.error(err);
+    });
+};
+
+export const setupPackagerTask = (context: PackagerTaskContext): PackagerTask => {
   const logger = context.endpointAppContext.logFactory.get(getTaskId());
+  const taskId = getTaskId();
 
-  const run = async (taskId: string) => {
-    // Check that this task is current
-    if (taskId !== getTaskId()) {
-      // old task, return
-      logger.debug(`Outdated task running: ${taskId}`);
-      return;
-    }
-
-    const manifestManager = context.endpointAppContext.service.getManifestManager();
-
-    if (manifestManager === undefined) {
-      logger.debug('Manifest Manager not available.');
-      return;
-    }
-
-    manifestManager
-      .refresh()
-      .then((wrappedManifest) => {
-        if (wrappedManifest !== null) {
-          return manifestManager.dispatch(wrappedManifest);
-        }
-      })
-      .then((wrappedManifest) => {
-        if (wrappedManifest !== null) {
-          return manifestManager.commit(wrappedManifest);
-        }
-      })
-      .catch((err) => {
-        logger.error(err);
-      });
-  };
-
-  const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
+  const getTaskScheduler = (
+    schedulerContext: PackagerTaskSchedulerContext
+  ): PackagerTaskScheduler => {
     return {
       run: async () => {
-        const taskId = getTaskId();
         try {
-          await runnerContext.taskManager.ensureScheduled({
+          await schedulerContext.taskManager.ensureScheduled({
             id: taskId,
             taskType: PackagerTaskConstants.TYPE,
             scope: ['securitySolution'],
@@ -104,7 +112,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
         return {
           run: async () => {
-            await run(taskInstance.id);
+            await runPackagerTask({ ...context, logger, taskId: taskInstance.id });
           },
           cancel: async () => {},
         };
@@ -113,6 +121,6 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
   });
 
   return {
-    getTaskRunner,
+    getTaskScheduler,
   };
-}
+};

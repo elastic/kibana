@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectsServiceMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 
 import { xpackMocks } from '../../../../mocks';
 import {
@@ -13,12 +13,24 @@ import {
   IngestManagerStartContract,
   ExternalCallback,
 } from '../../../ingest_manager/server';
-import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 
 /**
- * Crates a mocked input contract for the `EndpointAppContextService#start()` method
+ * Creates a mocked EndpointAppContext.
+ */
+export const createMockEndpointAppContext = () => {
+  return {
+    logFactory: loggingSystemMock.create(),
+    config: createMockConfig(),
+    service: createMockEndpointAppContextServiceStartContract(),
+  };
+};
+
+/**
+ * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   EndpointAppContextServiceStartContract

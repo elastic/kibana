@@ -6,6 +6,9 @@
 
 const DEFAULT_MAX_SIZE = 10;
 
+/**
+ * FIFO cache implementation for artifact downloads.
+ */
 export class ExceptionsCache {
   private cache: Map<string, string>;
   private queue: string[];

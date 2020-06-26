@@ -18,41 +18,41 @@ describe('manifest_entry', () => {
       manifestEntry = new ManifestEntry(artifact);
     });
 
-    test('Can create manifest entry', async () => {
+    test('Can create manifest entry', () => {
       expect(manifestEntry).toBeInstanceOf(ManifestEntry);
     });
 
-    test('Correct doc_id is returned', async () => {
+    test('Correct doc_id is returned', () => {
       expect(manifestEntry.getDocId()).toEqual(
         'endpoint-allowlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
       );
     });
 
-    test('Correct identifier is returned', async () => {
+    test('Correct identifier is returned', () => {
       expect(manifestEntry.getIdentifier()).toEqual('endpoint-allowlist-windows-1.0.0');
     });
 
-    test('Correct sha256 is returned', async () => {
+    test('Correct sha256 is returned', () => {
       expect(manifestEntry.getSha256()).toEqual(
         '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
       );
     });
 
-    test('Correct size is returned', async () => {
+    test('Correct size is returned', () => {
       expect(manifestEntry.getSize()).toEqual(268);
     });
 
-    test('Correct url is returned', async () => {
+    test('Correct url is returned', () => {
       expect(manifestEntry.getUrl()).toEqual(
         '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
       );
     });
 
-    test('Correct artifact is returned', async () => {
+    test('Correct artifact is returned', () => {
       expect(manifestEntry.getArtifact()).toEqual(artifact);
     });
 
-    test('Correct record is returned', async () => {
+    test('Correct record is returned', () => {
       expect(manifestEntry.getRecord()).toEqual({
         sha256: '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
         size: 268,
