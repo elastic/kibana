@@ -48,13 +48,13 @@ export const I18LABELS = {
   overall: i18n.translate('xpack.apm.rum.dashboard.overall.label', {
     defaultMessage: 'Overall',
   }),
-  selectBreakdown: i18n.translate('xpack.rum.filterGroup.selectBreakdown', {
+  selectBreakdown: i18n.translate('xpack.apm.rum.filterGroup.selectBreakdown', {
     defaultMessage: 'Select breakdown',
   }),
-  breakdown: i18n.translate('xpack.rum.filterGroup.breakdown', {
+  breakdown: i18n.translate('xpack.apm.rum.filterGroup.breakdown', {
     defaultMessage: 'Breakdown',
   }),
-  seconds: i18n.translate('xpack.rum.filterGroup.seconds', {
+  seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
     defaultMessage: 'seconds',
   }),
 };

@@ -63,7 +63,7 @@ export function ClientMetrics() {
           titleSize="s"
           title={
             <EuiToolTip content={data?.pageViews?.value}>
-              <> {numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
+              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
             </EuiToolTip>
           }
           description={I18LABELS.pageViews}
