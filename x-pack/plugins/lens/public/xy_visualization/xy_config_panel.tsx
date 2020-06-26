@@ -115,6 +115,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           anchorPosition="downRight"
         >
           <EuiFormRow
+            display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
               defaultMessage: 'Fitting function',
             })}
@@ -126,6 +127,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             }
           >
             <EuiSuperSelect
+              compressed
               disabled={!hasNonBarSeries}
               options={(Object.entries(fittingFunctionDescriptions) as Array<
                 [FittingFunction, string]
