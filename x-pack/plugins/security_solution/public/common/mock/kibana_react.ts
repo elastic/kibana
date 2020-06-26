@@ -27,6 +27,7 @@ import {
 } from '../../../common/constants';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 import { StartServices } from '../../types';
+import { createSecuritySolutionStorageMock } from './mock_local_storage';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mockUiSettings: Record<string, any> = {
@@ -77,6 +78,7 @@ export const createUseKibanaMock = () => {
   const core = createKibanaCoreStartMock();
   const plugins = createKibanaPluginsStartMock();
   const useUiSetting = createUseUiSettingMock();
+  const { storage } = createSecuritySolutionStorageMock();
 
   const services = {
     ...core,
@@ -85,6 +87,7 @@ export const createUseKibanaMock = () => {
       ...core.uiSettings,
       get: useUiSetting,
     },
+    storage,
   };
 
   return () => ({ services });
