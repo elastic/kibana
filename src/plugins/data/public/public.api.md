@@ -1291,6 +1291,26 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
     search: ISearch<T>;
 }
 
+// Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isFilter: (x: unknown) => x is Filter;
+
+// Warning: (ae-missing-release-tag) "isFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isFilters: (x: unknown) => x is Filter[];
+
+// Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isQuery: (x: unknown) => x is Query;
+
+// Warning: (ae-missing-release-tag) "isTimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isTimeRange: (x: unknown) => x is TimeRange;
+
 // Warning: (ae-missing-release-tag) "ISyncSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)

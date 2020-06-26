@@ -26,5 +26,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts_space1'));
     loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./builtin_alert_types'));
+    loadTestFile(require.resolve('./migrations'));
   });
 }
