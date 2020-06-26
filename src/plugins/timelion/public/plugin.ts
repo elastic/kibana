@@ -21,6 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import {
   CoreSetup,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
@@ -28,7 +29,7 @@ import {
   AppUpdater,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
-import { initAngularBootstrap } from '../../kibana_legacy/public';
+import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
@@ -112,7 +113,9 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     });
   }
 
-  public start() {}
+  public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
+    kibanaLegacy.loadFontAwesome();
+  }
 
   public stop(): void {
     if (this.stopUrlTracking) {

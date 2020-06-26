@@ -146,7 +146,7 @@ export function initTimelionApp(app, deps) {
       kbnUrlStateStorage,
     });
 
-    $scope.state = stateContainer.getState();
+    $scope.state = _.cloneDeep(stateContainer.getState());
     $scope.expression = _.clone($scope.state.sheet[$scope.state.selected]);
 
     const savedVisualizations = deps.plugins.visualizations.savedVisualizationsLoader;
@@ -348,8 +348,8 @@ export function initTimelionApp(app, deps) {
       };
 
       const unsubscribeStateUpdates = stateContainer.subscribe((state) => {
-        $scope.state = state;
-        $scope.opts.state = _.cloneDeep(state);
+        $scope.state = _.cloneDeep(state);
+        $scope.opts.state = $scope.state;
         $scope.expression = _.clone($scope.state.sheet[$scope.state.selected]);
       });
 
@@ -407,6 +407,7 @@ export function initTimelionApp(app, deps) {
         ...dateRange,
       };
       timefilter.setTime(dateRange);
+      if (!$scope.running) $scope.search();
     };
 
     $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
@@ -456,6 +457,7 @@ export function initTimelionApp(app, deps) {
       const state = stateContainer.getState();
       const newSheet = state.sheet.filter((el, index) => index !== removedIndex);
       stateContainer.transitions.set('sheet', newSheet);
+      $scope.search();
     };
 
     $scope.newCell = function () {
@@ -546,25 +548,27 @@ export function initTimelionApp(app, deps) {
     }
 
     function saveExpression(title) {
-      savedVisualizations.get({ type: 'timelion' }).then(function (savedExpression) {
-        const state = stateContainer.getState();
-        savedExpression.visState.params = {
-          expression: state.sheet[state.selected],
-          interval: state.interval,
-        };
-        savedExpression.title = title;
-        savedExpression.visState.title = title;
-        savedExpression.save().then(function (id) {
-          if (id) {
-            deps.core.notifications.toasts.addSuccess(
-              i18n.translate('timelion.saveExpression.successNotificationText', {
-                defaultMessage: `Saved expression '{title}'`,
-                values: { title: savedExpression.title },
-              })
-            );
-          }
+      savedVisualizations
+        .get({ type: 'timelion', searchSource: true })
+        .then(function (savedExpression) {
+          const state = stateContainer.getState();
+          savedExpression.visState.params = {
+            expression: state.sheet[state.selected],
+            interval: state.interval,
+          };
+          savedExpression.title = title;
+          savedExpression.visState.title = title;
+          savedExpression.save().then(function (id) {
+            if (id) {
+              deps.core.notifications.toasts.addSuccess(
+                i18n.translate('timelion.saveExpression.successNotificationText', {
+                  defaultMessage: `Saved expression '{title}'`,
+                  values: { title: savedExpression.title },
+                })
+              );
+            }
+          });
         });
-      });
     }
 
     init();
