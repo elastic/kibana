@@ -92,13 +92,14 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       }
     >
       <EuiSpacer size="s" />
-      {!!fieldsCount ? (
-        <div className="lnsInnerIndexPatternDataPanel__fieldItems">
-          {paginatedFields && paginatedFields.map(renderField)}
-        </div>
-      ) : (
-        renderCallout
-      )}
+      {hasLoaded &&
+        (!!fieldsCount ? (
+          <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+            {paginatedFields && paginatedFields.map(renderField)}
+          </div>
+        ) : (
+          renderCallout
+        ))}
     </EuiAccordion>
   );
 };
