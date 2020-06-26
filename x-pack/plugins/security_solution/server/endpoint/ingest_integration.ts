@@ -25,8 +25,8 @@ export const getDatasourceCreateCallback = (
     // follow the types/schema expected
     let updatedDatasource = newDatasource as NewPolicyData;
 
-    const manifestState = await manifestManager.refresh({ initialize: true });
-    if (manifestState !== null) {
+    const wrappedManifest = await manifestManager.refresh({ initialize: true });
+    if (wrappedManifest !== null) {
       // Until we get the Default Policy Configuration in the Endpoint package,
       // we will add it here manually at creation time.
       // @ts-ignore
@@ -40,7 +40,7 @@ export const getDatasourceCreateCallback = (
               streams: [],
               config: {
                 artifact_manifest: {
-                  value: manifestState.manifest.toEndpointFormat(),
+                  value: wrappedManifest.manifest.toEndpointFormat(),
                 },
                 policy: {
                   value: policyConfigFactory(),
@@ -55,7 +55,7 @@ export const getDatasourceCreateCallback = (
     try {
       return updatedDatasource;
     } finally {
-      await manifestManager.commit(manifestState);
+      await manifestManager.commit(wrappedManifest);
     }
   };
 

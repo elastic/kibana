@@ -39,9 +39,7 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
     return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
   };
 
-  const logger = context.endpointAppContext.logFactory.get(
-    `endpoint_manifest_refresh_${getTaskId()}`
-  );
+  const logger = context.endpointAppContext.logFactory.get(getTaskId());
 
   const run = async (taskId: string) => {
     // Check that this task is current
@@ -58,17 +56,21 @@ export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
       return;
     }
 
-    try {
-      const manifestState = await manifestManager.refresh();
-      if (manifestState !== null) {
-        if (await manifestManager.dispatch(manifestState)) {
-          await manifestManager.commit(manifestState);
-          logger.debug(`Committed manifest ${manifestState.manifest.getVersion()}`);
+    manifestManager
+      .refresh()
+      .then((wrappedManifest) => {
+        if (wrappedManifest !== null) {
+          return manifestManager.dispatch(wrappedManifest);
         }
-      }
-    } catch (err) {
-      logger.error(err);
-    }
+      })
+      .then((wrappedManifest) => {
+        if (wrappedManifest !== null) {
+          return manifestManager.commit(wrappedManifest);
+        }
+      })
+      .catch((err) => {
+        logger.error(err);
+      });
   };
 
   const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
