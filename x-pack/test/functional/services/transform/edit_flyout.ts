@@ -12,11 +12,11 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertTransfromEditFlyoutExists() {
+    async assertTransformEditFlyoutExists() {
       await testSubjects.existOrFail('transformEditFlyout');
     },
 
-    async assertTransfromEditFlyoutMissing() {
+    async assertTransformEditFlyoutMissing() {
       await testSubjects.missingOrFail('transformEditFlyout');
     },
 
@@ -44,13 +44,13 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
 
     async openTransformEditFlyout() {
       await testSubjects.click('transformActionEdit');
-      await this.assertTransfromEditFlyoutExists();
+      await this.assertTransformEditFlyoutExists();
     },
 
     async updateTransform() {
       await testSubjects.click('transformEditFlyoutUpdateButton');
       await retry.tryForTime(5000, async () => {
-        await this.assertTransfromEditFlyoutMissing();
+        await this.assertTransformEditFlyoutMissing();
       });
     },
   };
