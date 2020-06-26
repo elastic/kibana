@@ -18,12 +18,12 @@
  */
 
 import { createAction } from '../../../ui_actions/public';
-import { ActionType } from '../types';
+import { ActionFactoryId } from '../types';
 
 const sayHelloAction = createAction({
   // Casting to ActionType is a hack - in a real situation use
   // declare module and add this id to ActionContextMapping.
-  factoryId: 'test' as ActionType,
+  factoryId: 'test' as ActionFactoryId,
   isCompatible: ({ amICompatible }: { amICompatible: boolean }) => Promise.resolve(amICompatible),
   execute: () => Promise.resolve(),
 });

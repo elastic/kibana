@@ -19,17 +19,17 @@
 
 import { ActionInternal, Action } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
-import { TriggerId, ActionType } from '../types';
+import { TriggerId, ActionFactoryId } from '../types';
 
 const action1: Action = {
   id: 'action1',
   order: 1,
-  type: 'type1' as ActionType,
+  type: 'type1' as ActionFactoryId,
 } as any;
 const action2: Action = {
   id: 'action2',
   order: 2,
-  type: 'type2' as ActionType,
+  type: 'type2' as ActionFactoryId,
 } as any;
 
 test('returns actions set on trigger', () => {

@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { createAction, IncompatibleActionError, ActionType } from '../../ui_actions';
+import { createAction, IncompatibleActionError, ActionFactoryId } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
@@ -27,7 +27,7 @@ import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action'
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE' as ActionType;
+export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE' as ActionFactoryId;
 
 interface ActionContext {
   embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;

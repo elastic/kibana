@@ -21,14 +21,14 @@ import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { Action, createAction } from '../actions';
 import { Trigger } from '../triggers';
-import { TriggerId, ActionType } from '../types';
+import { TriggerId, ActionFactoryId } from '../types';
 
-let action: Action<{ name: string }, ActionType>;
+let action: Action<{ name: string }, ActionFactoryId>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 beforeEach(() => {
   uiActions = uiActionsPluginMock.createPlugin();
   action = createAction({
-    factoryId: 'test' as ActionType,
+    factoryId: 'test' as ActionFactoryId,
     execute: () => Promise.resolve(),
   });
 
@@ -70,7 +70,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 test('filters out actions not applicable based on the context', async () => {
   const { setup, doStart } = uiActions;
   const action1 = createAction({
-    factoryId: 'test1' as ActionType,
+    factoryId: 'test1' as ActionFactoryId,
     isCompatible: async (context: { accept: boolean }) => {
       return Promise.resolve(context.accept);
     },

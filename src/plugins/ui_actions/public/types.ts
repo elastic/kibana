@@ -46,7 +46,7 @@ export interface TriggerContextMapping {
 }
 
 const DEFAULT_ACTION = '';
-export type ActionType = keyof ActionContextMapping;
+export type ActionFactoryId = keyof ActionContextMapping;
 
 export interface ActionContextMapping {
   [DEFAULT_ACTION]: BaseContext;

@@ -21,7 +21,7 @@ import { Action, createAction } from '../actions';
 import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
-import { TriggerId, ActionType } from '../types';
+import { TriggerId, ActionFactoryId } from '../types';
 
 jest.mock('../context_menu');
 
@@ -32,14 +32,14 @@ const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionType;
+const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionFactoryId;
 
 function createTestAction<C extends object>(
   type: string,
   checkCompatibility: (context: C) => boolean
 ): Action<object> {
   return createAction<typeof TEST_ACTION_TYPE>({
-    factoryId: type as ActionType,
+    factoryId: type as ActionFactoryId,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: (context) => executeFn(context),

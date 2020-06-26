@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ActionByType, IncompatibleActionError, ActionType } from '../../ui_actions';
+import { ActionByType, IncompatibleActionError, ActionFactoryId } from '../../ui_actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION' as ActionType;
+export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION' as ActionFactoryId;
 
 export interface FullNameEmbeddableOutput extends EmbeddableOutput {
   fullName: string;

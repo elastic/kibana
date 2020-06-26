@@ -18,12 +18,12 @@
  */
 
 import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { ActionType, ActionContextMapping } from '../types';
+import { ActionFactoryId, ActionContextMapping } from '../types';
 import { Presentable } from '../util/presentable';
 
-export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
+export type ActionByType<T extends ActionFactoryId> = Action<ActionContextMapping[T], T>;
 
-export interface Action<Context extends {} = {}, T = ActionType>
+export interface Action<Context extends {} = {}, T = ActionFactoryId>
   extends Partial<Presentable<Context>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -83,7 +83,7 @@ export interface ActionDefinition<Context extends object = object>
   /**
    * ID of the factory for this action. Used to construct dynamic actions.
    */
-  readonly factoryId?: ActionType;
+  readonly factoryId?: ActionFactoryId;
 
   /**
    * Executes the action.

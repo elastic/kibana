@@ -22,7 +22,7 @@ import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
 import { createAction, ActionByType } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
-import { ActionType } from '../../types';
+import { ActionFactoryId } from '../../types';
 
 const ReactMenuItem: React.FC = () => {
   return (
@@ -39,7 +39,7 @@ const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
 // Casting to ActionType is a hack - in a real situation use
 // declare module and add this id to ActionContextMapping.
-export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD' as ActionType;
+export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD' as ActionFactoryId;
 
 export function createHelloWorldAction(
   overlays: CoreStart['overlays']

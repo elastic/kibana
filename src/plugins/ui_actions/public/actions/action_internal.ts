@@ -22,14 +22,14 @@ import React from 'react';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { ActionType } from '../types';
+import { ActionFactoryId } from '../types';
 
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
-  public readonly factoryId: ActionType = this.definition.factoryId || '';
+  public readonly factoryId: ActionFactoryId = this.definition.factoryId || '';
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;

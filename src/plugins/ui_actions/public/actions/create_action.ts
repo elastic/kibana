@@ -19,15 +19,15 @@
 
 import { ActionContextMapping } from '../types';
 import { ActionByType } from './action';
-import { ActionType } from '../types';
+import { ActionFactoryId } from '../types';
 import { ActionDefinition } from './action';
 
-interface ActionDefinitionByType<T extends ActionType>
+interface ActionDefinitionByType<T extends ActionFactoryId>
   extends Omit<ActionDefinition<ActionContextMapping[T]>, 'id'> {
   id?: string;
 }
 
-export function createAction<T extends ActionType>(
+export function createAction<T extends ActionFactoryId>(
   action: ActionDefinitionByType<T>
 ): ActionByType<T> {
   return {

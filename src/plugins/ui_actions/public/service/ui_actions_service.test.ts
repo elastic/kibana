@@ -20,7 +20,7 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
+import { ActionRegistry, TriggerRegistry, TriggerId, ActionFactoryId } from '../types';
 import { Trigger } from '../triggers';
 
 // Casting to ActionType or TriggerId is a hack - in a real situation use
@@ -32,7 +32,7 @@ const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
 const testAction1: Action = {
   id: 'action1',
   order: 1,
-  factoryId: 'type1' as ActionType,
+  factoryId: 'type1' as ActionFactoryId,
   execute: async () => {},
   getDisplayName: () => 'test1',
   getIconType: () => '',
@@ -42,7 +42,7 @@ const testAction1: Action = {
 const testAction2: Action = {
   id: 'action2',
   order: 2,
-  factoryId: 'type2' as ActionType,
+  factoryId: 'type2' as ActionFactoryId,
   execute: async () => {},
   getDisplayName: () => 'test2',
   getIconType: () => '',
@@ -99,7 +99,7 @@ describe('UiActionsService', () => {
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
-        type: 'test' as ActionType,
+        type: 'test' as ActionFactoryId,
       });
     });
 
@@ -111,7 +111,7 @@ describe('UiActionsService', () => {
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
-        type: 'test' as ActionType,
+        type: 'test' as ActionFactoryId,
       });
 
       expect(action).toBeInstanceOf(ActionInternal);
@@ -123,7 +123,7 @@ describe('UiActionsService', () => {
     const action1: Action = {
       id: 'action1',
       order: 1,
-      factoryId: 'type1' as ActionType,
+      factoryId: 'type1' as ActionFactoryId,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -132,7 +132,7 @@ describe('UiActionsService', () => {
     const action2: Action = {
       id: 'action2',
       order: 2,
-      factoryId: 'type2' as ActionType,
+      factoryId: 'type2' as ActionFactoryId,
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -207,7 +207,7 @@ describe('UiActionsService', () => {
     test('filters out actions not applicable based on the context', async () => {
       const service = new UiActionsService();
       const action = createAction({
-        factoryId: 'test' as ActionType,
+        factoryId: 'test' as ActionFactoryId,
         isCompatible: ({ accept }: { accept: boolean }) => Promise.resolve(accept),
         execute: () => Promise.resolve(),
       });
