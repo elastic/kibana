@@ -290,6 +290,12 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
+export interface VisualizationToolbarProps<T = unknown> {
+  setState: (newState: T) => void;
+  frame: FramePublicAPI;
+  state: T;
+}
+
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
@@ -454,6 +460,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * for extra configurability, such as for styling the legend or axis
    */
   renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
+  /**
+   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
+   * settings for the visualization.
+   */
+  renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
   /**
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default

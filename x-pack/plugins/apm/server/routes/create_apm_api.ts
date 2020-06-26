@@ -77,6 +77,10 @@ import {
   rumPageLoadDistributionRoute,
   rumPageLoadDistBreakdownRoute,
 } from './rum_client';
+import {
+  observabilityDashboardHasDataRoute,
+  observabilityDashboardDataRoute,
+} from './observability_dashboard';
 
 const createApmApi = () => {
   const api = createApi()
@@ -162,7 +166,12 @@ const createApmApi = () => {
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
     .add(rumPageLoadDistBreakdownRoute)
-    .add(rumClientMetricsRoute);
+    .add(rumClientMetricsRoute)
+    .add(rumClientMetricsRoute)
+
+    // Observability dashboard
+    .add(observabilityDashboardHasDataRoute)
+    .add(observabilityDashboardDataRoute);
 
   return api;
 };
