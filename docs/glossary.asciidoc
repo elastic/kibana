@@ -118,7 +118,7 @@ See {kibana-ref}/action-types.html[Action and connector types].
 [[glossary-console]] Console ::
 // tag::console-def[]
 A tool for interacting with the {es} REST API.
-You can send requests to Elasticsearch, view responses,
+You can send requests to {es}, view responses,
 view API documentation, and get your request history.
 See {kibana-ref}/console-kibana.html[Console].
 // end::console-def[]
