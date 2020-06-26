@@ -22,8 +22,8 @@ import { createDashboardUrlGenerator } from '../../../../../../../src/plugins/da
 import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/public/url_generators';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
+  RangeSelectContext,
+  ValueClickContext,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../plugin';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
@@ -136,8 +136,8 @@ describe('.execute() & getHref', () => {
     const context = ({
       data: {
         ...(useRangeEvent
-          ? ({ range: {} } as RangeSelectTriggerContext['data'])
-          : ({ data: [] } as ValueClickTriggerContext['data'])),
+          ? ({ range: {} } as RangeSelectContext['data'])
+          : ({ data: [] } as ValueClickContext['data'])),
         timeFieldName: 'order_date',
       },
       embeddable: {

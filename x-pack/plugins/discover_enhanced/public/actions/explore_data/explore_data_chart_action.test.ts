@@ -10,8 +10,8 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
 import {
   EmbeddableStart,
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
+  RangeSelectContext,
+  ValueClickContext,
   ChartActionContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
@@ -85,8 +85,8 @@ const setup = ({ useRangeEvent = false }: { useRangeEvent?: boolean } = {}) => {
 
   const data: ChartActionContext<typeof embeddable>['data'] = {
     ...(useRangeEvent
-      ? ({ range: {} } as RangeSelectTriggerContext['data'])
-      : ({ data: [] } as ValueClickTriggerContext['data'])),
+      ? ({ range: {} } as RangeSelectContext['data'])
+      : ({ data: [] } as ValueClickContext['data'])),
     timeFieldName: 'order_date',
   };
 

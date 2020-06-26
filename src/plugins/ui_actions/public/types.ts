@@ -22,7 +22,7 @@ import { TriggerInternal } from './triggers/trigger_internal';
 import { Filter } from '../../data/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
 import { IEmbeddable } from '../../embeddable/public';
-import { RangeSelectTriggerContext, ValueClickTriggerContext } from '../../embeddable/public';
+import { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
@@ -37,8 +37,8 @@ export type TriggerContext = BaseContext;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
-  [SELECT_RANGE_TRIGGER]: RangeSelectTriggerContext;
-  [VALUE_CLICK_TRIGGER]: ValueClickTriggerContext;
+  [SELECT_RANGE_TRIGGER]: RangeSelectContext;
+  [VALUE_CLICK_TRIGGER]: ValueClickContext;
   [APPLY_FILTER_TRIGGER]: {
     embeddable: IEmbeddable;
     filters: Filter[];
