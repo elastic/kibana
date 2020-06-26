@@ -11,6 +11,7 @@ import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
+import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
@@ -80,9 +81,16 @@ describe('Policy Details', () => {
               success: true,
             });
           }
+
+          // Get package data
+          // Used in tests that route back to the list
+          if (apiPathMockResponseProviders[path]) {
+            asyncActions = asyncActions.then(async () => sleep());
+            return apiPathMockResponseProviders[path]();
+          }
         }
 
-        return Promise.reject(new Error('unknown API call!'));
+        return Promise.reject(new Error(`unknown API call (not MOCKED): ${path}`));
       });
       history.push(policyDetailsPathUrl);
       policyView = render(<PolicyDetails />);
