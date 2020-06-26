@@ -88,7 +88,11 @@ export interface SelectableTimelineProps {
     searchTimelineValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
-  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  onTimelineChange: (
+    timelineTitle: string,
+    timelineId: string | null,
+    graphEventId?: string
+  ) => void;
   timelineType: TimelineTypeLiteral;
 }
 
@@ -202,7 +206,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           isEmpty(selectedTimeline[0].title)
             ? i18nTimeline.UNTITLED_TIMELINE
             : selectedTimeline[0].title,
-          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id,
+          selectedTimeline[0].graphEventId ?? ''
         );
       }
       onClosePopover();

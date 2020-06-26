@@ -18,25 +18,31 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Form, useForm, FormDataProvider } from '../../../../../shared_imports';
+import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../../context';
 import { ProcessorInternal } from '../../types';
 
 import { DocumentationButton } from './documentation_button';
-import { ProcessorSettingsFromOnSubmitArg } from './processor_settings_form.container';
 import { getProcessorFormDescriptor } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
 
-export type OnSubmitHandler = (processor: ProcessorSettingsFromOnSubmitArg) => void;
-
 export interface Props {
   isOnFailure: boolean;
   processor?: ProcessorInternal;
-  form: ReturnType<typeof useForm>['form'];
+  form: FormHook;
   onClose: () => void;
   onOpen: () => void;
 }
+
+const updateButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
+  { defaultMessage: 'Update' }
+);
+const addButtonLabel = i18n.translate(
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.addButtonLabel',
+  { defaultMessage: 'Add' }
+);
 
 export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen }) => {
@@ -123,10 +129,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
                     <>
                       {formContent}
                       <EuiButton data-test-subj="submitButton" onClick={form.submit}>
-                        {i18n.translate(
-                          'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
-                          { defaultMessage: 'Submit' }
-                        )}
+                        {processor ? updateButtonLabel : addButtonLabel}
                       </EuiButton>
                     </>
                   );
