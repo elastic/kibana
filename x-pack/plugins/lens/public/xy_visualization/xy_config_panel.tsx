@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -95,8 +94,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiPopover
-          panelStyle={{ width: 400 }}
-          panelClassName=""
+          panelClassName="lnsXyToolbar__popover"
           button={
             <EuiButtonEmpty
               iconType="arrowDown"
