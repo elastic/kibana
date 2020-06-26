@@ -201,6 +201,7 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
+          exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
           legacy: false,
@@ -236,6 +237,7 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute,
           appBasePath,
+          exactRoute: false,
           mount,
           unmountBeforeMounting: true,
           legacy: true,
