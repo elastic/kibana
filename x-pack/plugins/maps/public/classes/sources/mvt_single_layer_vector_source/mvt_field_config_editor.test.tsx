@@ -31,3 +31,43 @@ test('should render field editor', async () => {
 
   expect(component).toMatchSnapshot();
 });
+
+test('should render error for empty name', async () => {
+  const fields = [
+    {
+      name: 'foo',
+      type: MVTFieldType.STRING,
+    },
+    {
+      name: '',
+      type: MVTFieldType.STRING,
+    },
+    {
+      name: 'fooz',
+      type: MVTFieldType.NUMBER,
+    },
+  ];
+  const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);
+
+  expect(component).toMatchSnapshot();
+});
+
+test('should render error for dupes', async () => {
+  const fields = [
+    {
+      name: 'foo',
+      type: MVTFieldType.STRING,
+    },
+    {
+      name: 'bar',
+      type: MVTFieldType.STRING,
+    },
+    {
+      name: 'foo',
+      type: MVTFieldType.NUMBER,
+    },
+  ];
+  const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);
+
+  expect(component).toMatchSnapshot();
+});

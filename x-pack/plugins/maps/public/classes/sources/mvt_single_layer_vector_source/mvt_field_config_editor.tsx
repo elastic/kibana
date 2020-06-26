@@ -142,7 +142,15 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       this._fieldChange(newFields);
     };
 
-    const isInvalid = mvtFieldConfig.name === '';
+    const emptyName = mvtFieldConfig.name === '';
+    let hasDupes = false;
+    for (let i = 0; i < this.state.currentFields.length; i++) {
+      if (i !== index && mvtFieldConfig.name === this.state.currentFields[i].name) {
+        hasDupes = true;
+        break;
+      }
+    }
+    const isInvalid = emptyName || hasDupes;
     const placeholderText = isInvalid
       ? i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
           defaultMessage: 'Field name',
