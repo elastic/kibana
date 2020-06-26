@@ -119,6 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // The Delete API only deletes the data streams, so we still need to manually delete their
+        // related index patterns to clean up.
         await Promise.all([
           deleteComposableIndexTemplate(testDataStreamName1),
           deleteComposableIndexTemplate(testDataStreamName2),
