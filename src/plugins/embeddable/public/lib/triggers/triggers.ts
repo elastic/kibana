@@ -39,10 +39,6 @@ export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
-export const isValueClickTriggerContext = (
-  context: ValueClickTriggerContext | RangeSelectTriggerContext
-): context is ValueClickTriggerContext => context.data && 'data' in context.data;
-
 export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
@@ -53,8 +49,16 @@ export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> 
   };
 }
 
+export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
+  | ValueClickTriggerContext<T>
+  | RangeSelectTriggerContext<T>;
+
+export const isValueClickTriggerContext = (
+  context: ChartActionContext
+): context is ValueClickTriggerContext => context.data && 'data' in context.data;
+
 export const isRangeSelectTriggerContext = (
-  context: ValueClickTriggerContext | RangeSelectTriggerContext
+  context: ChartActionContext
 ): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
