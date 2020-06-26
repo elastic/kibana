@@ -68,7 +68,7 @@ The background detail necessary to orient the location of a map.
 
 [[glossary-bucket]] bucket ::
 // tag::bucket-def[]
-A set of documents that have certain characteristics in common.
+A set of documents in {kib} that have certain characteristics in common.
 For example, matching documents might be bucketed by color, distance, or date range.
 // end::bucket-def[]
 
