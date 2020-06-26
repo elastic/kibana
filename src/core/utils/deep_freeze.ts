@@ -38,5 +38,3 @@ export function deepFreeze<T extends Freezable>(object: T) {
 
   return Object.freeze(object) as RecursiveReadonly<T>;
 }
-
-export { RecursiveReadonly };

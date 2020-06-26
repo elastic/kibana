@@ -21,8 +21,9 @@ import { Url } from 'url';
 import { Request, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
