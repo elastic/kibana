@@ -30,7 +30,7 @@ import {
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
 import { UuidServiceSetup } from './uuid';
-import { InternalMetricsServiceSetup } from './metrics';
+import { InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
@@ -43,7 +43,6 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  metrics: InternalMetricsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
@@ -61,6 +60,7 @@ export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
   elasticsearch: ElasticsearchServiceStart;
   http: InternalHttpServiceStart;
+  metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   auditTrail: AuditTrailStart;

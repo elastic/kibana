@@ -47,6 +47,7 @@ export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+export { migrationMocks } from './saved_objects/migrations/mocks';
 export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
@@ -129,7 +130,6 @@ function createCoreSetupMock({
     http: httpMock,
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
-    metrics: metricsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     auditTrail: auditTrailServiceMock.createSetupContract(),
@@ -148,6 +148,7 @@ function createCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
+    metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -161,7 +162,6 @@ function createInternalCoreSetupMock() {
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
-    metrics: metricsServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
@@ -179,6 +179,7 @@ function createInternalCoreStartMock() {
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createInternalStartContract(),
+    metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     auditTrail: auditTrailServiceMock.createStartContract(),

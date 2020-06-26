@@ -154,7 +154,7 @@ export class Server {
       savedObjects: savedObjectsSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    await this.metrics.setup({ http: httpSetup });
 
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
@@ -185,7 +185,6 @@ export class Server {
       status: statusSetup,
       uiSettings: uiSettingsSetup,
       uuid: uuidSetup,
-      metrics: metricsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
       auditTrail: auditTrailSetup,
@@ -220,12 +219,14 @@ export class Server {
     });
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
       http: httpStart,
+      metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
@@ -246,7 +247,6 @@ export class Server {
     await this.rendering.start({
       legacy: this.legacy,
     });
-    await this.metrics.start();
 
     return this.coreStart;
   }

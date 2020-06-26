@@ -47,19 +47,22 @@ import {
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-import { DefaultStringArray } from '../types/default_string_array';
-import { DefaultActionsArray } from '../types/default_actions_array';
-import { DefaultBooleanTrue } from '../types/default_boolean_true';
-import { DefaultFromString } from '../types/default_from_string';
-import { DefaultIntervalString } from '../types/default_interval_string';
-import { DefaultMaxSignalsNumber } from '../types/default_max_signals_number';
-import { DefaultToString } from '../types/default_to_string';
-import { DefaultThreatArray } from '../types/default_threat_array';
-import { DefaultThrottleNull } from '../types/default_throttle_null';
-import { DefaultVersionNumber } from '../types/default_version_number';
-import { ListsDefaultArray, ListsDefaultArraySchema } from '../types/lists_default_array';
-import { OnlyFalseAllowed } from '../types/only_false_allowed';
-import { DefaultStringBooleanFalse } from '../types/default_string_boolean_false';
+import {
+  DefaultStringArray,
+  DefaultActionsArray,
+  DefaultBooleanTrue,
+  DefaultFromString,
+  DefaultIntervalString,
+  DefaultMaxSignalsNumber,
+  DefaultToString,
+  DefaultThreatArray,
+  DefaultThrottleNull,
+  DefaultVersionNumber,
+  OnlyFalseAllowed,
+  DefaultStringBooleanFalse,
+  DefaultListArray,
+  ListArray,
+} from '../types';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -111,7 +114,7 @@ export const importRulesSchema = t.intersection([
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
       version: DefaultVersionNumber, // defaults to 1 if not set during decode
-      exceptions_list: ListsDefaultArray, // defaults to empty array if not set during decode
+      exceptions_list: DefaultListArray, // defaults to empty array if not set during decode
       created_at, // defaults "undefined" if not set during decode
       updated_at, // defaults "undefined" if not set during decode
       created_by, // defaults "undefined" if not set during decode
@@ -153,7 +156,7 @@ export type ImportRulesSchemaDecoded = Omit<
   threat: Threat;
   throttle: ThrottleOrNull;
   version: Version;
-  exceptions_list: ListsDefaultArraySchema;
+  exceptions_list: ListArray;
   rule_id: RuleId;
   immutable: false;
 };
