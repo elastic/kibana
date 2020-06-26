@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
 import { LicenseType } from '../../../licensing/public';
-import { ActionEnhancedDefinition } from '../actions';
+import {
+  UiActionsActionDefinition as ActionDefinition,
+  UiActionsPresentable as Presentable,
+} from '../../../../../src/plugins/ui_actions/public';
 
 /**
  * This is a convenience interface for registering new action factories.
@@ -39,5 +41,5 @@ export interface ActionFactoryDefinition<
    */
   create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionEnhancedDefinition<ActionContext>;
+  ): ActionDefinition<ActionContext>;
 }

@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import React from 'react';
-import { Action, ActionContext as Context, ActionDefinition, ActionHook } from './action';
+import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
@@ -29,11 +29,10 @@ import { ActionType } from '../types';
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
-  constructor(public readonly definition: A, private readonly getActionHooks: () => ActionHook[]) {}
+  constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
   public readonly type: ActionType = this.definition.type || '';
-  public readonly enhancements: unknown = this.definition.enhancements;
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
@@ -58,10 +57,6 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   }
 
   public async isCompatible(context: Context<A>): Promise<boolean> {
-    for (const { onIsCompatible } of this.getActionHooks()) {
-      if (onIsCompatible && !onIsCompatible(this, context)) return false;
-    }
-
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
   }

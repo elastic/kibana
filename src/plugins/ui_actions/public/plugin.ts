@@ -29,10 +29,9 @@ export type UiActionsSetup = Pick<
   | 'registerAction'
   | 'registerTrigger'
   | 'unregisterAction'
-  | 'registerActionHook'
 >;
 
-export type UiActionsStart = Omit<PublicMethodsOf<UiActionsService>, 'registerActionHook'>;
+export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   private readonly service = new UiActionsService();

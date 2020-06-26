@@ -34,7 +34,6 @@ const createSetupContract = (): Setup => {
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
     unregisterAction: jest.fn(),
-    registerActionHook: jest.fn(),
   };
   return setupContract;
 };

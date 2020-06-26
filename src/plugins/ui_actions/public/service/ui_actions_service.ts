@@ -23,9 +23,8 @@ import {
   TriggerToActionsRegistry,
   TriggerId,
   TriggerContextMapping,
-  ActionHooksRegistry,
 } from '../types';
-import { ActionInternal, Action, ActionDefinition, ActionContext, ActionHook } from '../actions';
+import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -38,26 +37,21 @@ export interface UiActionsServiceParams {
    * A 1-to-N mapping from `Trigger` to zero or more `Action`.
    */
   readonly triggerToActions?: TriggerToActionsRegistry;
-
-  readonly actionHooks?: ActionHooksRegistry;
 }
 
 export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
-  protected readonly actionHooksRegistry: ActionHooksRegistry;
 
   constructor({
     triggers = new Map(),
     actions = new Map(),
     triggerToActions = new Map(),
-    actionHooks = [],
   }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
     this.triggerToActions = triggerToActions;
-    this.actionHooksRegistry = actionHooks;
   }
 
   public readonly registerTrigger = (trigger: Trigger) => {
@@ -88,7 +82,7 @@ export class UiActionsService {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    const action = new ActionInternal(definition, () => this.actionHooksRegistry);
+    const action = new ActionInternal(definition);
 
     this.actions.set(action.id, action);
 
@@ -150,10 +144,6 @@ export class UiActionsService {
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
-  };
-
-  public readonly registerActionHook = (hook: ActionHook) => {
-    this.actionHooksRegistry.push(hook);
   };
 
   public readonly getAction = <T extends ActionDefinition>(

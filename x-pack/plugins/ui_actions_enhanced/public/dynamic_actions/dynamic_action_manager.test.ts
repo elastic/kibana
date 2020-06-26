@@ -23,7 +23,6 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
-    enhancements: {},
   }),
 };
 
@@ -36,7 +35,6 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     id: '',
     execute: async () => {},
     getDisplayName: () => name,
-    enhancements: {},
   }),
 };
 
@@ -70,7 +68,12 @@ const event3: SerializedEvent = {
   },
 };
 
-const setup = (events: readonly SerializedEvent[] = []) => {
+const setup = (
+  events: readonly SerializedEvent[] = [],
+  { getLicenseInfo = () => licensingMock.createLicense() } = {
+    getLicenseInfo: () => licensingMock.createLicense(),
+  }
+) => {
   const isCompatible = async () => true;
   const storage: ActionStorage = new MemoryActionStorage(events);
   const actions: ActionRegistry = new Map();
@@ -78,7 +81,7 @@ const setup = (events: readonly SerializedEvent[] = []) => {
     actions,
   });
   const uiActionsEnhancements = new UiActionsServiceEnhancements({
-    getLicenseInfo: () => licensingMock.createLicense(),
+    getLicenseInfo,
   });
   const manager = new DynamicActionManager({
     isCompatible,
@@ -637,5 +640,43 @@ describe('DynamicActionManager', () => {
         expect(manager.state.get().events).toEqual([]);
       });
     });
+  });
+
+  test('revived actions incompatible when license is not enough', async () => {
+    const getLicenseInfo = jest.fn(() =>
+      licensingMock.createLicense({ license: { type: 'basic' } })
+    );
+    const { manager, uiActions } = setup([event1, event3], { getLicenseInfo });
+    const basicActionFactory: ActionFactoryDefinition = {
+      ...actionFactoryDefinition1,
+      minimalLicense: 'basic',
+    };
+
+    const goldActionFactory: ActionFactoryDefinition = {
+      ...actionFactoryDefinition2,
+      minimalLicense: 'gold',
+    };
+
+    uiActions.registerActionFactory(basicActionFactory);
+    uiActions.registerActionFactory(goldActionFactory);
+
+    await manager.start();
+
+    const basicActions = await uiActions.getTriggerCompatibleActions(
+      'VALUE_CLICK_TRIGGER',
+      {} as any
+    );
+    expect(basicActions).toHaveLength(1);
+
+    getLicenseInfo.mockImplementation(() =>
+      licensingMock.createLicense({ license: { type: 'gold' } })
+    );
+
+    const basicAndGoldActions = await uiActions.getTriggerCompatibleActions(
+      'VALUE_CLICK_TRIGGER',
+      {} as any
+    );
+
+    expect(basicAndGoldActions).toHaveLength(2);
   });
 });

@@ -10,7 +10,7 @@ import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
 import { ILicense } from '../../../licensing/public';
-import { ActionEnhancedDefinition } from '../actions';
+import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export class ActionFactory<
   Config extends object = object,
@@ -63,13 +63,14 @@ export class ActionFactory<
 
   public create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionEnhancedDefinition<ActionContext> {
+  ): ActionDefinition<ActionContext> {
     const action = this.def.create(serializedAction);
     return {
       ...action,
-      enhancements: {
-        minimalLicense: this.minimalLicense, // actions created with action factory inherit it's license requirements
-        ...action.enhancements,
+      isCompatible: async (context: ActionContext): Promise<boolean> => {
+        if (!this.isCompatibleLicence()) return false;
+        if (!action.isCompatible) return true;
+        return action.isCompatible(context);
       },
     };
   }

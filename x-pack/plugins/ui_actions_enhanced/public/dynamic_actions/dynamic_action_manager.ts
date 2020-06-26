@@ -74,13 +74,16 @@ export class DynamicActionManager {
     const actionId = this.generateActionId(eventId);
 
     const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = {
-      ...factory.create(action as SerializedAction<object>),
+    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction<object>);
+    uiActions.registerAction({
+      ...actionDefinition,
       id: actionId,
-      isCompatible,
-    };
-
-    uiActions.registerAction(actionDefinition);
+      isCompatible: async (context) => {
+        if (!(await isCompatible(context))) return false;
+        if (!actionDefinition.isCompatible) return true;
+        return actionDefinition.isCompatible(context);
+      },
+    });
     for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
   }
 

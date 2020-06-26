@@ -42,11 +42,6 @@ export interface Action<Context extends {} = {}, T = ActionType>
   readonly type: T;
 
   /**
-   * Extension point for extra information on Action
-   */
-  readonly enhancements?: unknown;
-
-  /**
    * Optional EUI icon type that can be displayed along with the title.
    */
   getIconType(context: Context): string | undefined;
@@ -91,28 +86,9 @@ export interface ActionDefinition<Context extends object = object>
   readonly type?: ActionType;
 
   /**
-   * Extension point for extra information on Action
-   */
-  readonly enhancements?: unknown;
-
-  /**
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;
-
-/**
- * Extension point allows to hook into {@link Action} methods
- */
-export interface ActionHook {
-  /**
-   * onIsCompatible hook allows to extend action.isCompatible with additional compatibility checks
-   * It doesn't override original isCompatible checks, so it isn't possible to _force_ compatibility with this hook.
-   *
-   * @param action
-   * @param context
-   */
-  onIsCompatible?: (action: Action, context: unknown) => boolean;
-}
