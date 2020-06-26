@@ -81,7 +81,7 @@ export class ElasticsearchErrorHelpers {
 
   public static decorateNotAuthorizedError(error: Error, reason?: string) {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
-    const wwwAuthHeader = (error as any).body?.header?.['WWW-Authenticate'] as string;
+    const wwwAuthHeader = get(error, 'body.error.header[WWW-Authenticate]') as string;
 
     decoratedError.output.headers['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
