@@ -23,8 +23,8 @@ experimental[]
 To visualize data in a CSV, JSON, or log file, you can upload it using the File 
 Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and 
 then drag your file into the File Data Visualizer. Alternatively, you can open 
-it by navigating to the Machine Learning app page from the sidebar menu and 
-selecting the Data Visualizer from the top navigation bar on the opening page.
+it by navigating to *Machine Learning* from the side navigation and selecting 
+*Data Visualizer*.
 
 [role="screenshot"]
 image::images/data-viz-homepage.jpg[File Data Visualizer on the home page]

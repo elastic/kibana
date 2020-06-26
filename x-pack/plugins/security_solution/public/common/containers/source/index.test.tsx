@@ -17,6 +17,24 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Index Fields & Browser Fields', () => {
+  test('At initialization the value of indicesExists should be true', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
+    const initialResult = result.current;
+
+    await waitForNextUpdate();
+
+    return expect(initialResult).toEqual({
+      browserFields: {},
+      errorMessage: null,
+      indexPattern: {
+        fields: [],
+        title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+      },
+      indicesExist: true,
+      loading: true,
+    });
+  });
+
   test('returns memoized value', async () => {
     const { result, waitForNextUpdate, rerender } = renderHook(() => useWithSource());
     await waitForNextUpdate();
