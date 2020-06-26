@@ -145,7 +145,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('~transformPivotPreview');
     }
 
-    public async assertTransformRowActions(isJobRunning = false, clickId?: string) {
+    public async assertTransformRowActions(isJobRunning = false) {
       await testSubjects.click('euiCollapsedItemActionsButton');
 
       await testSubjects.existOrFail('transformActionClone');
@@ -159,10 +159,10 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         await testSubjects.existOrFail('transformActionStart');
         await testSubjects.missingOrFail('transformActionStop');
       }
+    }
 
-      if (clickId !== undefined) {
-        await testSubjects.click(clickId);
-      }
+    public async clickTransformRowAction(action: string) {
+      await testSubjects.click(`transformAction${action}`);
     }
 
     public async waitForTransformsExpandedRowPreviewTabToLoad() {
@@ -170,7 +170,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('transformPivotPreview loaded', { timeout: 30 * 1000 });
     }
 
-    async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
+    public async assertTransformsExpandedRowPreviewColumnValues(column: number, values: string[]) {
       await this.waitForTransformsExpandedRowPreviewTabToLoad();
       await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
     }

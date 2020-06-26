@@ -60,6 +60,11 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       await this.assertTransformEditFlyoutInputValue(input, value);
     },
 
+    async openTransformEditFlyout() {
+      await testSubjects.click('transformActionEdit');
+      await this.assertTransfromEditFlyoutExists();
+    },
+
     async updateTransform() {
       await testSubjects.click('transformEditFlyoutUpdateButton');
       await retry.tryForTime(5000, async () => {

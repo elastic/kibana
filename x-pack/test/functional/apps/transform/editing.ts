@@ -82,11 +82,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should show the actions popover', async () => {
-        await transform.table.assertTransformRowActions(false, 'transformActionEdit');
+        await transform.table.assertTransformRowActions(false);
       });
 
       it('should show the edit flyout', async () => {
-        await transform.editFlyout.assertTransfromEditFlyoutExists();
+        await transform.editFlyout.openTransformEditFlyout();
       });
 
       it('should update the transform description', async () => {

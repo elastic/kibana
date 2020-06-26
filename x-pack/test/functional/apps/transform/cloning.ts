@@ -103,10 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should show the actions popover', async () => {
-          await transform.table.assertTransformRowActions(false, 'transformActionClone');
+          await transform.table.assertTransformRowActions(false);
         });
 
         it('should display the define pivot step', async () => {
+          await transform.table.clickTransformRowAction('Clone');
           await transform.wizard.assertDefineStepActive();
         });
 
