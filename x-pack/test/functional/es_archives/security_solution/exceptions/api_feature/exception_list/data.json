@@ -1,22 +1,21 @@
 {
   "type": "doc",
   "value": {
-    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-linux-1.0.0-0fa0ba277627f7cc116e198bac3e524e9a8befdca1591a1dd4830dc7952b2103",
-    "index": ".kibana_1",
+    "id": "securitySolution:endpoint:exceptions-artifact:endpoint-allowlist-macos-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+    "index": ".kibana",
     "source": {
       "references": [
       ],
-      "securitySolution-exceptions-artifact": {
-        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£à\u0000ÿ\u0000©]\u0000=§Ã{\u0000&W{Wï¶=\fsöÊ\u001eæõ\u0014WI1dÛtÂ\u00185ý\u0012[.?=ÃB#­òWì¦\u0006)äÕVkÌâ\b´Ï; ãÍ¥ÁÊèÕ£ÅuÜ0ê\t\u0001\u0002ÿmQ\u001b«Ï_°+Ræ­H¦,x¶½OÂ\u0004P\u001f*YP#Ð.<vC£©Ói?µ¥p\u0013ãö \r\u0001c÷y:!ã¯#»KÑ{¨\u0012jáP»°ç|²H\u0000\u0000\u0000\u0000îÍ¸Q\u0000\u0001Á\u0001\u0002\u0000\u0000)R\\Ê>0\r\u0002\u0000\u0000\u0000\u0000\u0001YZ",
-        "created": 1592414128607,
+      "securitySolution:endpoint:exceptions-artifact": {
+        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£\u0001\u0000\u0015{\"exceptions_list\":[]}\u0000\u0000\u000052¤\u0000\u0001*\u0016RÌ9»B\r\u0001\u0000\u0000\u0000\u0000\u0001YZ",
+        "created": 1593016187465,
         "encoding": "xz",
-        "name": "endpoint-allowlist-linux-1.0.0",
-        "schemaVersion": "1.0.0",
-        "sha256": "0fa0ba277627f7cc116e198bac3e524e9a8befdca1591a1dd4830dc7952b2103",
-        "size": 256
+        "identifier": "endpoint-allowlist-macos-1.0.0",
+        "sha256": "1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+        "size": 22
       },
-      "type": "securitySolution-exceptions-artifact",
-      "updated_at": "2020-06-17T17:15:28.607Z"
+      "type": "securitySolution:endpoint:exceptions-artifact",
+      "updated_at": "2020-06-24T16:29:47.584Z"
     }
   }
 }
@@ -24,22 +23,157 @@
 {
   "type": "doc",
   "value": {
-    "id": "securitySolution-exceptions-artifact:endpoint-allowlist-windows-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
-    "index": ".kibana_1",
+    "id": "securitySolution:endpoint:exceptions-manifest:endpoint-manifest-1.0.0",
+    "index": ".kibana",
     "source": {
       "references": [
       ],
-      "securitySolution-exceptions-artifact": {
-        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£\u0001\u0000\u0015{\"exceptions_list\":[]}\u0000\u0000\u000052¤\u0000\u0001*\u0016RÌ9»B\r\u0001\u0000\u0000\u0000\u0000\u0001YZ",
-        "created": 1592414129763,
-        "encoding": "xz",
-        "name": "endpoint-allowlist-windows-1.0.0",
-        "schemaVersion": "1.0.0",
-        "sha256": "1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
-        "size": 22
+      "securitySolution:endpoint:exceptions-manifest": {
+        "created": 1593183699663,
+        "ids": [
+          "endpoint-allowlist-linux-1.0.0-6b065fbf5d9ae82039ca20e2f3f1629d2cd9d8d3f3517d0f295f879bf939a269",
+          "endpoint-allowlist-macos-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+          "endpoint-allowlist-windows-1.0.0-dbba762118dadd31597eb2cf6a39ff5a45aa31b27c1671f8b4d1e403d2102a77"
+        ]
       },
-      "type": "securitySolution-exceptions-artifact",
-      "updated_at": "2020-06-17T17:15:29.763Z"
+      "type": "securitySolution:endpoint:exceptions-manifest",
+      "updated_at": "2020-06-26T15:01:39.704Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "exception-list-agnostic:13a7ef40-b63b-11ea-ace9-591c8e572c76",
+    "index": ".kibana",
+    "source": {
+      "exception-list-agnostic": {
+        "_tags": [
+          "endpoint",
+          "process",
+          "malware",
+          "os:linux"
+        ],
+        "created_at": "2020-06-24T16:52:23.689Z",
+        "created_by": "akahan",
+        "description": "This is a sample agnostic endpoint type exception",
+        "list_id": "endpoint_list",
+        "list_type": "list",
+        "name": "Sample Endpoint Exception List",
+        "tags": [
+          "user added string for a tag",
+          "malware"
+        ],
+        "tie_breaker_id": "e3b20e6e-c023-4575-a033-47990115969c",
+        "type": "endpoint",
+        "updated_by": "akahan"
+      },
+      "references": [
+      ],
+      "type": "exception-list-agnostic",
+      "updated_at": "2020-06-24T16:52:23.732Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "exception-list-agnostic:679b95a0-b714-11ea-a4c9-0963ae39bc3d",
+    "index": ".kibana",
+    "source": {
+      "exception-list-agnostic": {
+        "_tags": [
+          "os:windows"
+        ],
+        "comments": [
+        ],
+        "created_at": "2020-06-25T18:48:05.326Z",
+        "created_by": "akahan",
+        "description": "This is a sample endpoint type exception",
+        "entries": [
+          {
+            "field": "actingProcess.file.signer",
+            "operator": "included",
+            "type": "match",
+            "value": "Elastic, N.V."
+          },
+          {
+            "field": "event.category",
+            "operator": "included",
+            "type": "match_any",
+            "value": [
+              "process",
+              "malware"
+            ]
+          }
+        ],
+        "item_id": "61142b8f-5876-4709-9952-95160cd58f2f",
+        "list_id": "endpoint_list",
+        "list_type": "item",
+        "name": "Sample Endpoint Exception List",
+        "tags": [
+          "user added string for a tag",
+          "malware"
+        ],
+        "tie_breaker_id": "b36176d2-bc75-4641-a8e3-e811c6bc30d8",
+        "type": "endpoint",
+        "updated_by": "akahan"
+      },
+      "references": [
+      ],
+      "type": "exception-list-agnostic",
+      "updated_at": "2020-06-25T18:48:05.369Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agents:a34d87c1-726e-4c30-b2ff-1b4b95f59d2a",
+    "index": ".kibana",
+    "source": {
+      "fleet-agents": {
+        "access_api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
+        "active": true,
+        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "enrolled_at": "2020-06-25T18:52:47.290Z",
+        "local_metadata": {
+          "os": "macos"
+        },
+        "type": "PERMANENT",
+        "user_provided_metadata": {
+          "region": "us-east"
+        }
+      },
+      "references": [
+      ],
+      "type": "fleet-agents",
+      "updated_at": "2020-06-25T18:52:48.464Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-enrollment-api-keys:8178eb66-392f-4b76-9dc9-704ed1a5c56e",
+    "index": ".kibana",
+    "source": {
+      "fleet-enrollment-api-keys": {
+        "active": true,
+        "api_key": "8ZnT7HIBwLFvkUEPQaT3",
+        "api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
+        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "created_at": "2020-06-25T17:25:30.065Z",
+        "name": "Default (93aa98c8-d650-422e-aa7b-663dae3dff83)"
+      },
+      "references": [
+      ],
+      "type": "fleet-enrollment-api-keys",
+      "updated_at": "2020-06-25T17:25:30.114Z"
     }
   }
 }
