@@ -43,12 +43,6 @@ export function getAxesConfiguration(
     right: [],
   };
 
-  // restructure state
-  // const series = {
-  //   auto: [{ layer: <id>, accessor: <id>, formatter: {} }],
-  //   left: [{ layer: <id>, accessor: <id>, formatter: {} }]
-  //   right: [{ layer: <id>, accessor: <id>, formatter: {} }]
-  // }
   layers.forEach((layer) => {
     const table = tables[layer.layerId];
     layer.accessors.forEach((accessor) => {
@@ -81,7 +75,7 @@ export function getAxesConfiguration(
       )
     ) {
       series.right.push(currentSeries);
-    } else if (series.right.length > series.left.length) {
+    } else if (series.right.length >= series.left.length) {
       series.left.push(currentSeries);
     } else {
       series.right.push(currentSeries);
