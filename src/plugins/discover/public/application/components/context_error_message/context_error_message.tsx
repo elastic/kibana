@@ -19,7 +19,7 @@
 import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
 
 export interface ContextErrorMessageProps {
@@ -34,7 +34,7 @@ export interface ContextErrorMessageProps {
   /**
    * parameters used for invalid tieBreakerFields realted errors
    */
-  queryParameters?: { indexPatternId: string };
+  queryParameters: { indexPatternId: string };
 }
 
 export function ContextErrorMessage({ status, reason, queryParameters }: ContextErrorMessageProps) {

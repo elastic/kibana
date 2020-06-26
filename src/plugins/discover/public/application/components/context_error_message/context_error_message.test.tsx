@@ -20,6 +20,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
+// @ts-ignore
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -28,17 +29,32 @@ describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('ContextErrorMessage does not render on loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADING} />);
+    component = mountWithIntl(
+      <ContextErrorMessage
+        status={LOADING_STATUS.LOADING}
+        queryParameters={{ indexPatternId: 'index-pattern-id' }}
+      />
+    );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage does not render on success loading', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADED} />);
+    component = mountWithIntl(
+      <ContextErrorMessage
+        status={LOADING_STATUS.LOADED}
+        queryParameters={{ indexPatternId: 'index-pattern-id' }}
+      />
+    );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage renders just the title if the reason is not specifically handled', () => {
-    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.FAILED} />);
+    component = mountWithIntl(
+      <ContextErrorMessage
+        status={LOADING_STATUS.FAILED}
+        queryParameters={{ indexPatternId: 'index-pattern-id' }}
+      />
+    );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').text()).toBe('');
   });
@@ -59,7 +75,11 @@ describe('loading spinner', function () {
 
   it('ContextErrorMessage renders the reason for unknown errors', () => {
     component = mountWithIntl(
-      <ContextErrorMessage status={LOADING_STATUS.FAILED} reason={FAILURE_REASONS.UNKNOWN} />
+      <ContextErrorMessage
+        status={LOADING_STATUS.FAILED}
+        reason={FAILURE_REASONS.UNKNOWN}
+        queryParameters={{ indexPatternId: 'index-pattern-id' }}
+      />
     );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').length).toBe(1);
