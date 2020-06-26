@@ -35,24 +35,6 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
-    async assertTransformExpandedRowMessages(expectedText: string) {
-      await testSubjects.click('transformListRowDetailsToggle');
-
-      // The expanded row should show the details tab content by default
-      await testSubjects.existOrFail('transformDetailsTab');
-      await testSubjects.existOrFail('~transformDetailsTabContent');
-
-      // Click on the messages tab and assert the messages
-      await testSubjects.existOrFail('transformMessagesTab');
-      await testSubjects.click('transformMessagesTab');
-      await testSubjects.existOrFail('~transformMessagesTabContent');
-      const actualText = await testSubjects.getVisibleText('~transformMessagesTabContent');
-      expect(actualText.includes(expectedText)).to.eql(
-        true,
-        `Transform messages text should include '${expectedText}'`
-      );
-    },
-
     async setTransformEditFlyoutInputValue(input: string, value: string) {
       await testSubjects.setValue(`transformEditFlyout${input}Input`, value, {
         clearWithKeyboard: true,

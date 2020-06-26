@@ -145,9 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should display the messages tab and include an update message', async () => {
-        await transform.editFlyout.assertTransformExpandedRowMessages(
-          testData.expected.messageText
-        );
+        await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);
       });
     });
   });
