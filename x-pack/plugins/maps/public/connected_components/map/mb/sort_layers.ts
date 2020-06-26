@@ -38,7 +38,7 @@ function doesMbLayerBelongToMapLayerAndClass(mapLayer: ILayer, mbLayer, layerCla
     return true;
   }
   const isTextLayer = getIsTextLayer(mbLayer);
-  return layerClass.LABEL ? isTextLayer : !isTextLayer;
+  return layerClass === LAYER_CLASS.LABEL ? isTextLayer : !isTextLayer;
 }
 
 enum LAYER_CLASS {
@@ -47,89 +47,92 @@ enum LAYER_CLASS {
   NON_LABEL = 'NON_LABEL',
 }
 
+function moveMapLayer(
+  mbMap: MbMap,
+  mapLayer: ILayer,
+  layerClass: LAYER_CLASS,
+  beneathLayerId: string | null
+) {
+  const mbLayers = mbMap.getStyle().layers;
+  mbLayers
+    .filter((mbLayer) => {
+      if (!doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass)) {
+        return false;
+      }
+
+      // TODO handle case where beneathLayerId is not provided. Then check if layer is top layer and skip if it is
+
+      // Only move layer when its not in correct order.
+      const nextMbLayerId = getNextMapLayerBottomMbLayerId(mbLayers, mapLayer, layerClass);
+      return nextMbLayerId !== beneathLayerId;
+    })
+    .forEach((mbLayer) => {
+      console.log(`Move mbLayer: ${mbLayer.id}, beneathLayerId: ${beneathLayerId}`);
+      mbMap.moveLayer(mbLayer.id, beneathLayerId);
+    });
+}
+
+function getBottomMbLayerId(mbLayers: unknown[], mapLayer: ILayer, layerClass: LAYER_CLASS) {
+  const mbLayer = mbLayers.find((mbLayer) => {
+    return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
+  });
+  return mbLayer ? mbLayer.id : null;
+}
+
+function getNextMapLayerBottomMbLayerId(
+  mbLayers: unknown[],
+  mapLayer: ILayer,
+  layerClass: LAYER_CLASS
+) {
+  let bottomMbLayerFound = false;
+  let nextMbLayerId = null;
+  for (let i = 0; i < mbLayers.length; i++) {
+    if (!bottomMbLayerFound) {
+      if (doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayers[i], layerClass)) {
+        bottomMbLayerFound = true;
+      }
+    } else {
+      // Next mbLayer not belonging to map layer is the mapbox layer we are looking for
+      if (!doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayers[i], layerClass)) {
+        nextMbLayerId = mbLayers[i].id;
+        break;
+      }
+    }
+  }
+
+  return nextMbLayerId;
+}
+
 export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerList: ILayer) {
   const mbStyle = mbMap.getStyle();
   if (!mbStyle.layers || mbStyle.layers.length === 0) {
     return;
   }
 
-  console.log('before', mbMap.getStyle());
-
-  // mapbox stores layers in draw order so layers with higher index are drawn on-top of layers with lower index
-  // Need to reverse order because layer ordering starts from the top and work its way down.
-  const reversedMbLayers = [...mbStyle.layers].reverse();
-  let index = 0;
-  let beneathLayerId;
-  // track sorted mbLayers so when/if they are encounted later, they can be skipped
-  const processedMbLayerIds = new Map<string, boolean>();
-
-  function moveMapLayer(mapLayer: ILayer, layerClass: LAYER_CLASS) {
-    mbStyle.layers
-      .filter((mbLayer) => {
-        return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
-      })
-      .forEach((mbLayer) => {
-        mbMap.moveLayer(mbLayer.id, beneathLayerId);
-        processedMbLayerIds.set(mbLayer.id, true);
-      });
-  }
-
-  function advanceIndexToNextMapLayer(mapLayer: ILayer, layerClass: LAYER_CLASS) {
-    while (
-      index < reversedMbLayers.length - 1 &&
-      (doesMbLayerBelongToMapLayerAndClass(mapLayer, reversedMbLayers[index], layerClass) ||
-        processedMbLayerIds.has(reversedMbLayers[index].id))
-    ) {
-      index++;
-    }
-  }
-
-  function getBottomMbLayerIdForMapLayer(mapLayer: ILayer, layerClass: LAYER_CLASS) {
-    const mbLayer = mbStyle.layers.find((mbLayer) => {
-      return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
-    });
-    return mbLayer ? mbLayer.id : null;
-  }
-
   // Ensure spatial filters layer is the top layer.
-  if (
-    !doesMbLayerBelongToMapLayerAndClass(
-      spatialFiltersLayer,
-      reversedMbLayers[index],
-      LAYER_CLASS.ANY
-    )
-  ) {
-    moveMapLayer(spatialFiltersLayer, LAYER_CLASS.ANY);
-  } else {
-    advanceIndexToNextMapLayer(spatialFiltersLayer, LAYER_CLASS.ANY);
-  }
-  beneathLayerId = getBottomMbLayerIdForMapLayer(spatialFiltersLayer, LAYER_CLASS.ANY);
+  moveMapLayer(mbMap, spatialFiltersLayer, LAYER_CLASS.ANY);
+  let beneathLayerId = getBottomMbLayerId(mbStyle.layers, spatialFiltersLayer, LAYER_CLASS.ANY);
 
   // Move map layer labels to top
-  /* [...layerList].reverse()
-    .filter((mapLayer => {
+  [...layerList]
+    .reverse()
+    .filter((mapLayer) => {
       return mapLayer.bubbleLabelsToTop();
-    }))
+    })
     .forEach((mapLayer: ILayer) => {
-      if (!doesMbLayerBelongToMapLayerAndClass(mapLayer, reversedMbLayers[index], LAYER_CLASS.LABEL)) {
-        moveMapLayer(mapLayer, LAYER_CLASS.LABEL);
-      } else {
-        advanceIndexToNextMapLayer(mapLayer, LAYER_CLASS.LABEL);
-      }
-      beneathLayerId = getBottomMbLayerIdForMapLayer(mapLayer, LAYER_CLASS.LABEL);
-    });*/
+      moveMapLayer(mbMap, mapLayer, LAYER_CLASS.LABEL, beneathLayerId);
+      beneathLayerId = getBottomMbLayerId(
+        mbStyle.layers,
+        mapLayer,
+        LAYER_CLASS.LABEL,
+        beneathLayerId
+      );
+    });
 
   // Move map layers to top
   [...layerList].reverse().forEach((mapLayer: ILayer) => {
-    // const layerClass = mapLayer.bubbleLabelsToTop() ? LAYER_CLASS.NON_LABEL : LAYER_CLASS.ANY;
-    const layerClass = LAYER_CLASS.ANY;
-    if (!doesMbLayerBelongToMapLayerAndClass(mapLayer, reversedMbLayers[index], layerClass)) {
-      moveMapLayer(mapLayer, layerClass);
-    } else {
-      advanceIndexToNextMapLayer(mapLayer, layerClass);
-    }
-    beneathLayerId = getBottomMbLayerIdForMapLayer(mapLayer, layerClass);
+    const layerClass = mapLayer.bubbleLabelsToTop() ? LAYER_CLASS.NON_LABEL : LAYER_CLASS.ANY;
+    moveMapLayer(mbMap, mapLayer, layerClass, beneathLayerId);
+    beneathLayerId = getBottomMbLayerId(mbStyle.layers, mapLayer, layerClass, beneathLayerId);
   });
-
-  console.log('after', mbMap.getStyle());
 }
