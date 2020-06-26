@@ -34,6 +34,12 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
+  it('should NOT display timeline', async () => {
+    const renderResult = render();
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
   it('should show a table', async () => {
     const renderResult = render();
     const table = await renderResult.findByTestId('hostListTable');
