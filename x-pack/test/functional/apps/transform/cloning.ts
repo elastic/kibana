@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('should show the aggs configuration', async () => {
+        it('should show the pre-filled aggs configuration', async () => {
           await transform.wizard.assertAggregationEntryExists(
             testData.expected.aggs.index,
             testData.expected.aggs.label
