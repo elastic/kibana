@@ -13,6 +13,7 @@ import { MVTField } from '../../fields/mvt_field';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
 import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 export interface Props {
   tooltipFields: MVTField[];
@@ -29,18 +30,28 @@ export class UpdateSourceEditor extends Component<Props, State> {
   };
 
   _handleChange = (settings: MVTSettings) => {
-    this.props.onChange(
-      { propName: 'layerName', value: settings.layerName },
-      { propName: 'fields', value: settings.fields },
-      { propName: 'minSourceZoom', value: settings.minSourceZoom },
-      { propName: 'maxSourceZoom', value: settings.maxSourceZoom }
-    );
+    const changes: OnSourceChangeArgs = [];
+    if (settings.layerName !== this.props.layerName) {
+      changes.push({ propName: 'layerName', value: settings.layerName });
+    }
+    if (settings.minSourceZoom !== this.props.minSourceZoom) {
+      changes.push({ propName: 'minSourceZoom', value: settings.minSourceZoom });
+    }
+    if (settings.maxSourceZoom !== this.props.maxSourceZoom) {
+      changes.push({ propName: 'maxSourceZoom', value: settings.maxSourceZoom });
+    }
+    if (!_.isEqual(settings.fields !== this.props.fields)) {
+      changes.push({ propName: 'fields', value: settings.fields });
+    }
+    this.props.onChange(...changes);
   };
 
   _renderSourceSettingsCard() {
-    const fieldDescriptors = this.props.source.getMVTFields().map((field: MVTField) => {
-      return field.getMVTFieldDescriptor();
-    });
+    const fieldDescriptors: MVTFieldDescriptor[] = this.props.source
+      .getMVTFields()
+      .map((field: MVTField) => {
+        return field.getMVTFieldDescriptor();
+      });
     return (
       <Fragment>
         <EuiPanel>
