@@ -71,6 +71,14 @@ function isSAMLRequestQuery(query: any): query is { SAMLRequest: string } {
 }
 
 /**
+ * Checks whether request query includes SAML response from IdP.
+ * @param query Parsed HTTP request query.
+ */
+function isSAMLResponseQuery(query: any): query is { SAMLResponse: string } {
+  return query && query.SAMLResponse;
+}
+
+/**
  * Checks whether current request can initiate new session.
  * @param request Request instance.
  */
@@ -247,22 +255,36 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
-    // and user will eventually be redirected to the home page to log in. But when SAML is enabled
-    // there is a special case when logout is initiated by the IdP or another SP, then IdP will
-    // request _every_ SP associated with the current user session to do the logout. So if Kibana,
-    // without an active session, receives such request it shouldn't redirect user to the home page,
-    // but rather redirect back to IdP with correct logout response and only Elasticsearch knows how
-    // to do that.
-    const isIdPInitiatedSLO = isSAMLRequestQuery(request.query);
-    if (!state?.accessToken && !isIdPInitiatedSLO) {
+    // and user will eventually be redirected to the home page to log in. But when SAML SLO is
+    // supported there are two special cases that we need to handle even if there is no active
+    // Kibana session:
+    //
+    // 1. When IdP or another SP initiates logout, then IdP will request _every_ SP associated with
+    // the current user session to do the logout. So if Kibana receives such request it shouldn't
+    // redirect user to the home page, but rather redirect back to IdP with correct logout response
+    // and only Elasticsearch knows how to do that.
+    //
+    // 2. When Kibana initiates logout, then IdP may eventually respond with the logout response. So
+    // if Kibana receives such response it shouldn't redirect user to the home page, but rather
+    // redirect to the `loggedOut` URL instead.
+    const isIdPInitiatedSLORequest = isSAMLRequestQuery(request.query);
+    const isSPInitiatedSLOResponse = isSAMLResponseQuery(request.query);
+    if (!state?.accessToken && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
       this.logger.debug('There is no SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     try {
-      const redirect = isIdPInitiatedSLO
+      // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
+      // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
+      // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
+      // for the new session as well.
+      const redirect = isIdPInitiatedSLORequest
         ? await this.performIdPInitiatedSingleLogout(request)
-        : await this.performUserInitiatedSingleLogout(state?.accessToken!, state?.refreshToken!);
+        : state
+        ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
+        : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
+          null;
 
       // Having non-null `redirect` field within logout response means that IdP
       // supports SAML Single Logout and we should redirect user to the specified
@@ -272,9 +294,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(
-        `${this.options.basePath.serverBasePath}/security/logged_out`
-      );
+      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
