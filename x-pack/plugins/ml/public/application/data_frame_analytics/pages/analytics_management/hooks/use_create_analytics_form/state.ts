@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
-  FieldSelectionItem,
   isClassificationAnalysis,
   isRegressionAnalysis,
   DataFrameAnalyticsId,
@@ -52,8 +50,6 @@ export interface State {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
-    dependentVariableFetchFail: boolean;
-    dependentVariableOptions: EuiComboBoxOptionOption[];
     description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
@@ -62,11 +58,8 @@ export interface State {
     destinationIndexPatternTitleExists: boolean;
     eta: undefined | number;
     excludes: string[];
-    excludesTableItems: FieldSelectionItem[];
-    excludesOptions: EuiComboBoxOptionOption[];
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
-    fieldOptionsFetchFail: boolean;
     gamma: undefined | number;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
@@ -77,9 +70,7 @@ export interface State {
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
-    loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
-    maxDistinctValuesError: string | undefined;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -124,8 +115,6 @@ export const getInitialState = (): State => ({
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
     dependentVariable: '',
-    dependentVariableFetchFail: false,
-    dependentVariableOptions: [],
     description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
@@ -136,10 +125,7 @@ export const getInitialState = (): State => ({
     excludes: [],
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
-    fieldOptionsFetchFail: false,
     gamma: undefined,
-    excludesTableItems: [],
-    excludesOptions: [],
     jobId: '',
     jobIdExists: false,
     jobIdEmpty: true,
@@ -149,9 +135,7 @@ export const getInitialState = (): State => ({
     jobConfigQuery: { match_all: {} },
     jobConfigQueryString: undefined,
     lambda: undefined,
-    loadingDepVarOptions: false,
     loadingFieldOptions: false,
-    maxDistinctValuesError: undefined,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -311,6 +295,9 @@ export const getJobConfigFromFormState = (
         n_neighbors: formState.nNeighbors,
       },
       formState.outlierFraction && { outlier_fraction: formState.outlierFraction },
+      formState.featureInfluenceThreshold && {
+        feature_influence_threshold: formState.featureInfluenceThreshold,
+      },
       formState.standardizationEnabled && {
         standardization_enabled: formState.standardizationEnabled,
       }
