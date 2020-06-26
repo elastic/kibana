@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 
 import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
 import { CallOut } from './callout';
@@ -32,12 +32,18 @@ interface CalloutVisibility {
 
 const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
   const { getMessages, addMessage } = useMessagesStorage();
-  const dismissedCallouts = getMessages('case').reduce<CalloutVisibility>(
-    (acc, id) => ({
-      ...acc,
-      [id]: false,
-    }),
-    {}
+
+  const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
+  const dismissedCallouts = useMemo(
+    () =>
+      caseMessages.reduce<CalloutVisibility>(
+        (acc, id) => ({
+          ...acc,
+          [id]: false,
+        }),
+        {}
+      ),
+    [caseMessages]
   );
 
   const [calloutVisibility, setCalloutVisibility] = useState(dismissedCallouts);
@@ -51,18 +57,22 @@ const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
     [setCalloutVisibility, addMessage]
   );
 
-  const groupedByTypeErrorMessages = messages.reduce<GroupByTypeMessages>(
-    (acc: GroupByTypeMessages, currentMessage: ErrorMessage) => {
-      const type = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
-      return {
-        ...acc,
-        [type]: {
-          messagesId: [...(acc[type]?.messagesId ?? []), currentMessage.id],
-          messages: [...(acc[type]?.messages ?? []), currentMessage],
+  const groupedByTypeErrorMessages = useMemo(
+    () =>
+      messages.reduce<GroupByTypeMessages>(
+        (acc: GroupByTypeMessages, currentMessage: ErrorMessage) => {
+          const type = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
+          return {
+            ...acc,
+            [type]: {
+              messagesId: [...(acc[type]?.messagesId ?? []), currentMessage.id],
+              messages: [...(acc[type]?.messages ?? []), currentMessage],
+            },
+          };
         },
-      };
-    },
-    {} as GroupByTypeMessages
+        {} as GroupByTypeMessages
+      ),
+    [messages]
   );
 
   return (

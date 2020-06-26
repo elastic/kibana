@@ -147,7 +147,7 @@ describe('CaseCallOut ', () => {
           id: 'message-one',
           title: 'title one',
           description: <p>{'we have two messages'}</p>,
-          errorType: 'danger' as 'primary' | 'success' | 'warning' | 'danger',
+          errorType: 'danger',
         },
       ],
     };
@@ -172,7 +172,7 @@ describe('CaseCallOut ', () => {
           id: 'message-one',
           title: 'title one',
           description: <p>{'we have two messages'}</p>,
-          errorType: 'warning' as 'primary' | 'success' | 'warning' | 'danger',
+          errorType: 'warning',
         },
       ],
     };
@@ -197,7 +197,7 @@ describe('CaseCallOut ', () => {
           id: 'message-one',
           title: 'title one',
           description: <p>{'we have two messages'}</p>,
-          errorType: 'success' as 'primary' | 'success' | 'warning' | 'danger',
+          errorType: 'success',
         },
       ],
     };

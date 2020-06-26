@@ -46,21 +46,36 @@ describe('Callout', () => {
     expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeFalsy();
   });
 
-  it('transform the button color correctly', () => {
-    let wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('color')).toBe(
-      'primary'
-    );
+  it('transform the button color correctly - primary', () => {
+    const wrapper = mount(<CallOut {...defaultProps} />);
+    const className =
+      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      '';
+    expect(className.includes('euiButton--primary')).toBeTruthy();
+  });
 
-    wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('color')).toBe(
-      'secondary'
-    );
+  it('transform the button color correctly - success', () => {
+    const wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
+    const className =
+      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      '';
+    expect(className.includes('euiButton--secondary')).toBeTruthy();
+  });
 
-    wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('color')).toBe(
-      'danger'
-    );
+  it('transform the button color correctly - warning', () => {
+    const wrapper = mount(<CallOut {...defaultProps} type={'warning'} />);
+    const className =
+      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      '';
+    expect(className.includes('euiButton--warning')).toBeTruthy();
+  });
+
+  it('transform the button color correctly - danger', () => {
+    const wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
+    const className =
+      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      '';
+    expect(className.includes('euiButton--danger')).toBeTruthy();
   });
 
   it('dismiss the callout correctly', () => {
