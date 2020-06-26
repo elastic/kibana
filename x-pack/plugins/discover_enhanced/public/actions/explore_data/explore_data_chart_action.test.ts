@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExploreDataContextMenuAction,
-  ACTION_EXPLORE_DATA,
-  Params,
-  PluginDeps,
-} from './explore_data_context_menu_action';
+import { ExploreDataChartAction } from './explore_data_chart_action';
+import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
+import {
+  EmbeddableStart,
+  RangeSelectTriggerContext,
+  ValueClickTriggerContext,
+  ChartActionContext,
+} from '../../../../../../src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
+import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 const i18nTranslateSpy = (i18n.translate as unknown) as jest.SpyInstance;
 
@@ -31,19 +34,25 @@ afterEach(() => {
   i18nTranslateSpy.mockClear();
 });
 
-const setup = () => {
+const setup = ({ useRangeEvent = false }: { useRangeEvent?: boolean } = {}) => {
   type UrlGenerator = UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
   const core = coreMock.createStart();
 
   const urlGenerator: UrlGenerator = ({
-    id: ACTION_EXPLORE_DATA,
     createUrl: jest.fn(() => Promise.resolve('/xyz/app/discover/foo#bar')),
   } as unknown) as UrlGenerator;
+
+  const filtersAndTimeRangeFromContext = jest.fn((async () => ({
+    filters: [],
+  })) as EmbeddableStart['filtersAndTimeRangeFromContext']);
 
   const plugins: PluginDeps = {
     discover: {
       urlGenerator,
+    },
+    embeddable: {
+      filtersAndTimeRangeFromContext,
     },
   };
 
@@ -54,7 +63,7 @@ const setup = () => {
       core,
     }),
   };
-  const action = new ExploreDataContextMenuAction(params);
+  const action = new ExploreDataChartAction(params);
 
   const input = {
     viewMode: ViewMode.VIEW,
@@ -74,28 +83,37 @@ const setup = () => {
     getOutput: () => output,
   } as unknown) as VisualizeEmbeddableContract;
 
-  const context = {
-    embeddable,
+  const data: ChartActionContext<typeof embeddable>['data'] = {
+    ...(useRangeEvent
+      ? ({ range: {} } as RangeSelectTriggerContext['data'])
+      : ({ data: [] } as ValueClickTriggerContext['data'])),
+    timeFieldName: 'order_date',
   };
 
-  return { core, plugins, urlGenerator, params, action, input, output, embeddable, context };
+  const context = {
+    embeddable,
+    data,
+  } as ChartActionContext<typeof embeddable>;
+
+  return { core, plugins, urlGenerator, params, action, input, output, embeddable, data, context };
 };
 
 describe('"Explore underlying data" panel action', () => {
   test('action has Discover icon', () => {
-    const { action } = setup();
-    expect(action.getIconType()).toBe('discoverApp');
+    const { action, context } = setup();
+    expect(action.getIconType(context)).toBe('discoverApp');
   });
 
   test('title is "Explore underlying data"', () => {
-    const { action } = setup();
-    expect(action.getDisplayName()).toBe('Explore underlying data');
+    const { action, context } = setup();
+    expect(action.getDisplayName(context)).toBe('Explore underlying data');
   });
 
   test('translates title', () => {
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(0);
 
-    setup().action.getDisplayName();
+    const { action, context } = setup();
+    action.getDisplayName(context);
 
     expect(i18nTranslateSpy).toHaveBeenCalledTimes(1);
     expect(i18nTranslateSpy.mock.calls[0][0]).toBe(
@@ -176,7 +194,54 @@ describe('"Explore underlying data" panel action', () => {
 
       expect(urlGenerator.createUrl).toHaveBeenCalledTimes(1);
       expect(urlGenerator.createUrl).toHaveBeenCalledWith({
+        filters: [],
         indexPatternId: 'index-ptr-foo',
+        timeRange: undefined,
+      });
+    });
+
+    test('applies chart event filters', async () => {
+      const { action, context, urlGenerator, plugins } = setup();
+
+      ((plugins.embeddable
+        .filtersAndTimeRangeFromContext as unknown) as jest.SpyInstance).mockImplementation(() => {
+        const filters: Filter[] = [
+          {
+            meta: {
+              alias: 'alias',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ];
+        const timeRange: TimeRange = {
+          from: 'from',
+          to: 'to',
+        };
+        return { filters, timeRange };
+      });
+
+      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledTimes(0);
+
+      await action.getHref(context);
+
+      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledTimes(1);
+      expect(plugins.embeddable.filtersAndTimeRangeFromContext).toHaveBeenCalledWith(context);
+      expect(urlGenerator.createUrl).toHaveBeenCalledWith({
+        filters: [
+          {
+            meta: {
+              alias: 'alias',
+              disabled: false,
+              negate: false,
+            },
+          },
+        ],
+        indexPatternId: 'index-ptr-foo',
+        timeRange: {
+          from: 'from',
+          to: 'to',
+        },
       });
     });
   });
