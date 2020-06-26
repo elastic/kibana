@@ -53,7 +53,11 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={1} className="eui-textTruncate">
               <EuiText
-                title={bucket.display === '' ? emptyTxt : bucket.display}
+                title={
+                  bucket.display === ''
+                    ? emptyTxt
+                    : `${bucket.display}: ${bucket.count} (${bucket.percent}%)`
+                }
                 size="xs"
                 className="eui-textTruncate"
               >
@@ -77,7 +81,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
             <div>
               <EuiButtonIcon
                 iconSize="s"
-                iconType="magnifyWithPlus"
+                iconType="plusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
                 aria-label={addLabel}
                 data-test-subj={`plus-${field.name}-${bucket.value}`}
@@ -92,7 +96,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
               />
               <EuiButtonIcon
                 iconSize="s"
-                iconType="magnifyWithMinus"
+                iconType="minusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '-')}
                 aria-label={removeLabel}
                 data-test-subj={`minus-${field.name}-${bucket.value}`}

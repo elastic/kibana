@@ -26,9 +26,9 @@ interface Props {
 }
 
 export function StringFieldProgressBar({ value, percent, count }: Props) {
-  const tooltipContent = `${value}: ${count} (${percent}%)`;
+  const ariaLabel = `${value}: ${count} (${percent}%)`;
 
   return (
-    <EuiProgress value={percent} max={100} color="secondary" aria-label={tooltipContent} size="s" />
+    <EuiProgress value={percent} max={100} color="secondary" aria-label={ariaLabel} size="s" />
   );
 }
