@@ -146,6 +146,9 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 10,
               },
             },
+            _kbnMeta: {
+              usedBy: [],
+            },
           })
           .expect(200);
 
@@ -162,6 +165,9 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: REQUIRED_FIELDS_COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+            },
           })
           .expect(200);
 
@@ -177,6 +183,9 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+            },
           })
           .expect(409);
 
@@ -233,7 +242,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: COMPONENT_NAME,
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+            },
           })
           .expect(200);
 
@@ -250,7 +263,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: 'component_does_not_exist',
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+            },
           })
           .expect(404);
 
