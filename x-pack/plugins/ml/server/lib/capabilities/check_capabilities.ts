@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
 import {
   MlCapabilities,
   adminMlCapabilities,
   MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+  MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
 
 export function capabilitiesProvider(
-  callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'],
+  callAsCurrentUser: LegacyAPICaller,
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
@@ -46,4 +48,19 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
   });
   capabilities.canCreateAnnotation = false;
   capabilities.canDeleteAnnotation = false;
+}
+
+export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
+  return (request: KibanaRequest) => {
+    return async (capabilities: MlCapabilitiesKey[]) => {
+      const mlCapabilities = await resolveMlCapabilities(request);
+      if (mlCapabilities === null) {
+        throw Error('ML capabilities have not been initialized');
+      }
+
+      if (capabilities.every((c) => mlCapabilities[c] === true) === false) {
+        throw Error('Insufficient privileges to access feature');
+      }
+    };
+  };
 }

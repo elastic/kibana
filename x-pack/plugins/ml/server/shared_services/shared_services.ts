@@ -19,6 +19,7 @@ import {
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
 import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
+import { hasMlCapabilitiesProvider } from '../lib/capabilities';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -52,22 +53,5 @@ export function createSharedServices(
     ...getModulesProvider(checks),
     ...getResultsServiceProvider(checks),
     ...getMlSystemProvider(checks, mlLicense, spaces, cloud, resolveMlCapabilities),
-  };
-}
-
-export type MlCapabilitiesProvider = (request: KibanaRequest) => any;
-
-function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
-  return (request: KibanaRequest) => {
-    return async (capabilities: MlCapabilitiesKey[]) => {
-      const mlCapabilities = await resolveMlCapabilities(request);
-      if (mlCapabilities === null) {
-        throw Error('Something went really wrong');
-      }
-
-      if (capabilities.every((c) => mlCapabilities[c] === true) === false) {
-        throw Error('Nope');
-      }
-    };
   };
 }
