@@ -15,11 +15,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('alerting');
+      await esArchiver.load('alerts');
     });
 
     after(async () => {
-      await esArchiver.unload('alerting');
+      await esArchiver.unload('alerts');
     });
 
     it('7.9.0 migrates the `alerting` consumer to be the `alerts`', async () => {

@@ -30,7 +30,7 @@ function changeAlertingConsumer(
   consumerMigration.set('alerting', 'alerts');
 
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-    function shouldbeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+    function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
       return consumerMigration.has(doc.attributes.consumer);
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
