@@ -6,8 +6,8 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import {
-  ChildNode,
-  LifecycleNode,
+  ResolverChildNode,
+  ResolverLifecycleNode,
   ResolverAncestry,
   ResolverEvent,
   ResolverRelatedEvents,
@@ -35,7 +35,7 @@ import { Options, GeneratedTrees } from '../../services/resolver';
  * @param node a lifecycle node containing the start and end events for a node
  * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
  */
-const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, TreeNode>) => {
+const expectLifecycleNodeInMap = (node: ResolverLifecycleNode, nodeMap: Map<string, TreeNode>) => {
   const genNode = nodeMap.get(node.entityID);
   expect(genNode).to.be.ok();
   compareArrays(genNode!.lifecycle, node.lifecycle, true);
@@ -49,7 +49,11 @@ const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, Tree
  * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
  *  does not contain all the ancestors, the last one will not have the parent
  */
-const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent: boolean) => {
+const verifyAncestry = (
+  ancestors: ResolverLifecycleNode[],
+  tree: Tree,
+  verifyLastParent: boolean
+) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   // group by parent entity_id
@@ -97,7 +101,7 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
  *
  * @param ancestors an array of ancestor nodes
  */
-const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
+const retrieveDistantAncestor = (ancestors: ResolverLifecycleNode[]) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   let node = ancestors[0];
@@ -124,7 +128,7 @@ const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
  * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
  */
 const verifyChildren = (
-  children: ChildNode[],
+  children: ResolverChildNode[],
   tree: Tree,
   numberOfParents?: number,
   childrenPerParent?: number
@@ -210,7 +214,7 @@ const verifyStats = (
  * @param categories the related event info used when generating the resolver tree
  */
 const verifyLifecycleStats = (
-  nodes: LifecycleNode[],
+  nodes: ResolverLifecycleNode[],
   categories: RelatedEventInfo[],
   relatedAlerts: number
 ) => {
