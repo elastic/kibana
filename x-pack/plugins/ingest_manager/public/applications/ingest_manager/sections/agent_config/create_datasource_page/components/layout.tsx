@@ -23,14 +23,14 @@ import { CreateDatasourceFrom } from '../types';
 export const CreateDatasourcePageLayout: React.FunctionComponent<{
   from: CreateDatasourceFrom;
   cancelUrl: string;
-  cancelOnClick?: React.ReactEventHandler;
+  onCancel?: React.ReactEventHandler;
   agentConfig?: AgentConfig;
   packageInfo?: PackageInfo;
   'data-test-subj'?: string;
 }> = ({
   from,
   cancelUrl,
-  cancelOnClick,
+  onCancel,
   agentConfig,
   packageInfo,
   children,
@@ -45,7 +45,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           iconType="arrowLeft"
           flush="left"
           href={cancelUrl}
-          onClick={cancelOnClick}
+          onClick={onCancel}
           data-test-subj={`${dataTestSubj}_cancelBackLink`}
         >
           <FormattedMessage

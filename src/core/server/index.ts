@@ -60,8 +60,14 @@ import {
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
-import { MetricsServiceSetup } from './metrics';
+import { MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
+import {
+  LoggingServiceSetup,
+  appendersSchema,
+  loggerContextConfigSchema,
+  loggerSchema,
+} from './logging';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -187,7 +193,17 @@ export {
 } from './http_resources';
 
 export { IRenderOptions } from './rendering';
-export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+export {
+  Logger,
+  LoggerFactory,
+  LogMeta,
+  LogRecord,
+  LogLevel,
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from './logging';
 
 export {
   DiscoveredPlugin,
@@ -385,8 +401,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     /** {@link HttpResources} */
     resources: HttpResources;
   };
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
+  /** {@link LoggingServiceSetup} */
+  logging: LoggingServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -424,6 +440,8 @@ export interface CoreStart {
   elasticsearch: ElasticsearchServiceStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
+  /** {@link MetricsServiceStart} */
+  metrics: MetricsServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
@@ -449,5 +467,10 @@ export {
 export const config = {
   elasticsearch: {
     schema: elasticsearchConfigSchema,
+  },
+  logging: {
+    appenders: appendersSchema,
+    loggers: loggerSchema,
+    loggerContext: loggerContextConfigSchema,
   },
 };

@@ -6,7 +6,7 @@
 
 import { reload } from '../tasks/common';
 import { loginAndWaitForPage } from '../tasks/login';
-import { HOSTS_PAGE } from '../urls/navigation';
+import { HOSTS_URL } from '../urls/navigation';
 import { openEvents } from '../tasks/hosts/main';
 import { DRAGGABLE_HEADER } from '../screens/timeline';
 import { TABLE_COLUMN_EVENTS_MESSAGE } from '../screens/hosts/external_events';
@@ -15,7 +15,7 @@ import { removeColumn, resetFields } from '../tasks/timeline';
 
 describe('persistent timeline', () => {
   before(() => {
-    loginAndWaitForPage(HOSTS_PAGE);
+    loginAndWaitForPage(HOSTS_URL);
     openEvents();
     waitsForEventsToBeLoaded();
   });
