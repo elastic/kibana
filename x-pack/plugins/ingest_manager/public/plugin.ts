@@ -22,7 +22,11 @@ import { registerDatasource } from './applications/ingest_manager/sections/agent
 
 export { IngestManagerConfigType } from '../common/types';
 
-export type IngestManagerSetup = void;
+// We need to provide an object instead of void so that dependent plugins know when Ingest Manager
+// is disabled.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IngestManagerSetup {}
+
 /**
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
@@ -72,6 +76,8 @@ export class IngestManagerPlugin
         };
       },
     });
+
+    return {};
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
