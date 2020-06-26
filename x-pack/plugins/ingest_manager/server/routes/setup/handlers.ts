@@ -84,14 +84,7 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const logger = appContextService.getLogger();
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
-    // kick off 3 parallel calls to setupIngestManager
-    // this is ridiculous but I want to ensure multiple calls after one is pending
-    // will remove in favor of a real test if this passes CI
-    await Promise.all([
-      setupIngestManager(soClient, callCluster),
-      setupIngestManager(soClient, callCluster),
-      setupIngestManager(soClient, callCluster),
-    ]);
+    await setupIngestManager(soClient, callCluster);
     return response.ok({
       body,
     });
