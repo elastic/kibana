@@ -145,10 +145,14 @@ export interface SavedObjectsCoreFieldMapping {
 /**
  * See {@link SavedObjectsFieldMapping} for documentation.
  *
+ * Note: this type intentially doesn't include a type definition for defining
+ * the `dynamic` mapping parameter. Saved Object fields should always inherit
+ * the `dynamic: 'strict'` paramater. If you are unsure of the shape of your
+ * data use `type: 'object', enabled: false` instead.
+ *
  * @public
  */
 export interface SavedObjectsComplexFieldMapping {
-  dynamic?: string;
   type?: string;
   properties: SavedObjectsMappingProperties;
 }

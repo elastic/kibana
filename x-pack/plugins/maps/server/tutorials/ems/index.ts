@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { TutorialsCategory } from '../../../../../../src/plugins/home/server';
-import { MAP_BASE_URL } from '../../../common/constants';
+import { getNewMapPath } from '../../../common/constants';
 
 export function emsBoundariesSpecProvider({
   emsLandingPageUrl,
@@ -64,7 +64,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\
 3. Upload the GeoJSON file and click `Import file`.',
                     values: {
-                      newMapUrl: prependBasePath(MAP_BASE_URL),
+                      newMapUrl: prependBasePath(getNewMapPath()),
                     },
                   }),
                 },
