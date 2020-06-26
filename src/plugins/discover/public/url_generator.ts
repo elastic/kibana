@@ -98,11 +98,13 @@ export class DiscoverUrlGenerator
     const queryState: QueryState = {};
 
     if (query) appState.query = query;
-    if (filters) appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+    if (filters && filters.length)
+      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
 
     if (timeRange) queryState.time = timeRange;
-    if (filters) queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (filters && filters.length)
+      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let url = `${this.params.appBasePath}#/${savedSearchPath}`;
