@@ -213,5 +213,19 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
       await testSubjects.click('saveNewTitleButton');
       await this.toggleContextMenu(panel);
     }
+
+    async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
+      log.debug(`getActionWebElement: "${text}"`);
+      const menu = await testSubjects.find('multipleActionsContextMenu');
+      const items = await menu.findAllByCssSelector('[data-test-subj*="embeddablePanelAction-"]');
+      for (const item of items) {
+        const currentText = await item.getVisibleText();
+        if (currentText === text) {
+          return item;
+        }
+      }
+
+      throw new Error(`No action matching text "${text}"`);
+    }
   })();
 }
