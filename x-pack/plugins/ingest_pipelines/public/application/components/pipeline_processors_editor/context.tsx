@@ -9,8 +9,7 @@ import { EditorMode } from './types';
 import { ProcessorsDispatch } from './processors_reducer';
 
 interface Links {
-  learnMoreAboutProcessorsUrl: string;
-  learnMoreAboutOnFailureProcessorsUrl: string;
+  esDocsBasePath: string;
 }
 
 const PipelineProcessorsContext = createContext<{

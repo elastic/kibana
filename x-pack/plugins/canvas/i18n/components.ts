@@ -586,6 +586,16 @@ export const ComponentStrings = {
         defaultMessage: 'Delete',
       }),
   },
+  PalettePicker: {
+    getEmptyPaletteLabel: () =>
+      i18n.translate('xpack.canvas.palettePicker.emptyPaletteLabel', {
+        defaultMessage: 'None',
+      }),
+    getNoPaletteFoundErrorTitle: () =>
+      i18n.translate('xpack.canvas.palettePicker.noPaletteFoundErrorTitle', {
+        defaultMessage: 'Color palette not found',
+      }),
+  },
   SavedElementsModal: {
     getAddNewElementDescription: () =>
       i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {

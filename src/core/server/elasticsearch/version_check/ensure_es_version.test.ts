@@ -17,12 +17,12 @@
  * under the License.
  */
 import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { take, delay } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
 
-const mockLoggerFactory = loggingServiceMock.create();
+const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
@@ -118,7 +118,7 @@ describe('pollEsNodesVersion', () => {
     });
 
   beforeEach(() => {
-    callWithInternalUser.mockClear();
+    callWithInternalUser.mockReset();
   });
 
   it('returns iscCompatible=false and keeps polling when a poll request throws', (done) => {

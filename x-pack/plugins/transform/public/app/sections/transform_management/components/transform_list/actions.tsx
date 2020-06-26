@@ -19,7 +19,6 @@ import { StopAction } from './action_stop';
 export const getActions = ({ forceDisable }: { forceDisable: boolean }) => {
   return [
     {
-      isPrimary: true,
       render: (item: TransformListRow) => {
         if (item.stats.state === TRANSFORM_STATE.STOPPED) {
           return <StartAction items={[item]} forceDisable={forceDisable} />;

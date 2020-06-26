@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { inputsSelectors } from '../../store';
@@ -13,7 +13,6 @@ import { inputsActions } from '../../store/actions';
 export const useGlobalTime = () => {
   const dispatch = useDispatch();
   const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
-
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
@@ -22,8 +21,10 @@ export const useGlobalTime = () => {
       inspect,
       loading,
       refetch,
-    }: Omit<Parameters<typeof inputsActions.setQuery>[0], 'inputId'>) =>
-      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    }: Pick<
+      Parameters<typeof inputsActions.setQuery>[0],
+      'id' | 'inspect' | 'loading' | 'refetch'
+    >) => dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
     [dispatch]
   );
 
@@ -42,13 +43,18 @@ export const useGlobalTime = () => {
     };
   }, [dispatch, isInitializing]);
 
-  return {
-    isInitializing,
-    from,
-    to,
-    setQuery,
-    deleteQuery,
-  };
+  const memoizedReturn = useMemo(
+    () => ({
+      isInitializing,
+      from,
+      to,
+      setQuery,
+      deleteQuery,
+    }),
+    [deleteQuery, from, isInitializing, setQuery, to]
+  );
+
+  return memoizedReturn;
 };
 
 export type GlobalTimeArgs = Omit<ReturnType<typeof useGlobalTime>, 'deleteQuery'> &

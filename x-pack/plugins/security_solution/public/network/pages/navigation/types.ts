@@ -67,11 +67,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'alerts',
+  alerts = 'external-alerts',
 }
 
 export type GetNetworkRoutePath = (
-  pagePath: string,
   capabilitiesFetched: boolean,
   hasMlUserPermission: boolean
 ) => string;

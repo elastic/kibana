@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -19,12 +18,13 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
 jest.mock('../../../common/containers/source', () => ({
-  indicesExistOrDataTemporarilyUnavailable: () => true,
-  WithSource: ({
-    children,
-  }: {
-    children: (args: { indicesExist: boolean; indexPattern: IIndexPattern }) => React.ReactNode;
-  }) => children({ indicesExist: true, indexPattern: mockIndexPattern }),
+  useWithSource: jest.fn().mockReturnValue({ indicesExist: true, indexPattern: mockIndexPattern }),
+}));
+
+jest.mock('../../../common/containers/use_global_time', () => ({
+  useGlobalTime: jest
+    .fn()
+    .mockReturnValue({ from: 0, isInitializing: false, to: 0, setQuery: jest.fn() }),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
@@ -71,7 +71,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
             <HostDetailsTabs
               from={0}
               isInitializing={false}

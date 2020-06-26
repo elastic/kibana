@@ -5,17 +5,17 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
-import { SiemPageName } from '../../app/types';
+import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
 
-const getHostsTabPath = (pagePath: string) =>
-  `${pagePath}/:tabName(` +
+const getHostsTabPath = () =>
+  `/:tabName(` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
@@ -33,36 +33,52 @@ const getHostDetailsTabPath = (pagePath: string) =>
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const HostsContainer = React.memo<Props>(({ url }) => (
-  <Switch>
-    <Route strict exact path={getHostsTabPath(hostsPagePath)}>
-      <Hosts hostsPagePath={hostsPagePath} />
-    </Route>
-    <Route
-      strict
-      path={getHostDetailsTabPath(hostsPagePath)}
-      render={({
-        match: {
-          params: { detailName },
-        },
-      }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
-    />
-    <Route
-      path={hostDetailsPagePath}
-      render={({
-        match: {
-          params: { detailName },
-        },
-        location: { search = '' },
-      }) => <Redirect to={`${url}/${detailName}/${HostsTableType.authentications}${search}`} />}
-    />
-    <Route
-      path={`${hostsPagePath}/`}
-      render={({ location: { search = '' } }) => (
-        <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.hosts}${search}`} />
-      )}
-    />
-  </Switch>
-));
+export const HostsContainer = React.memo<Props>(({ url }) => {
+  const history = useHistory();
+
+  return (
+    <Switch>
+      <Route
+        path="/ml-hosts"
+        render={({ location, match }) => (
+          <MlHostConditionalContainer location={location} url={match.url} />
+        )}
+      />
+      <Route path={getHostsTabPath()}>
+        <Hosts hostsPagePath={hostsPagePath} />
+      </Route>
+      <Route
+        path={getHostDetailsTabPath(hostsPagePath)}
+        render={({
+          match: {
+            params: { detailName },
+          },
+        }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
+      />
+      <Route
+        path={hostDetailsPagePath}
+        render={({
+          match: {
+            params: { detailName },
+          },
+          location: { search = '' },
+        }) => {
+          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
+          return null;
+        }}
+      />
+
+      <Route
+        exact
+        strict
+        path=""
+        render={({ location: { search = '' } }) => {
+          history.replace(`${HostsTableType.hosts}${search}`);
+          return null;
+        }}
+      />
+    </Switch>
+  );
+});
 
 HostsContainer.displayName = 'HostsContainer';
