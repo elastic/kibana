@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiModalFooter, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,9 +24,15 @@ interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
   close(): void;
   setView(viewState: ViewState): void;
+  currentView?: ViewState;
 }
 
-export function SavedViewListModal<ViewState>({ close, views, setView }: Props<ViewState>) {
+export function SavedViewListModal<ViewState extends { id: string; name: string }>({
+  close,
+  views,
+  setView,
+  currentView,
+}: Props<ViewState>) {
   const [options, setOptions] = useState<EuiSelectableOption[] | null>(null);
 
   const onChange = useCallback((opts: EuiSelectableOption[]) => {
@@ -48,6 +54,14 @@ export function SavedViewListModal<ViewState>({ close, views, setView }: Props<V
     close();
   }, [options, views, setView, close]);
 
+  const defaultOptions = useMemo<EuiSelectableOption[]>(() => {
+    return views.map((v) => ({
+      label: v.name,
+      key: v.id,
+      checked: currentView?.id === v.id ? 'on' : undefined,
+    }));
+  }, [views, currentView]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <EuiOverlayMask>
       <EuiModal onClose={close}>
@@ -63,7 +77,7 @@ export function SavedViewListModal<ViewState>({ close, views, setView }: Props<V
           <EuiSelectable
             singleSelection={true}
             searchable={true}
-            options={options || views.map((v) => ({ label: v.name, key: v.id }))}
+            options={options || defaultOptions}
             onChange={onChange}
             searchProps={{
               placeholder: i18n.translate('xpack.infra.savedView.searchPlaceholder', {

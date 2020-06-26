@@ -22,14 +22,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-interface Props {
+interface Props<ViewState> {
   isInvalid: boolean;
   close(): void;
   save(name: string, shouldIncludeTime: boolean): void;
+  currentView: ViewState;
 }
 
-export const SavedViewUpdateModal = ({ close, save, isInvalid }: Props) => {
-  const [viewName, setViewName] = useState('');
+export function SavedViewUpdateModal<ViewState extends { id: string; name: string }>({
+  close,
+  save,
+  isInvalid,
+  currentView,
+}: Props<ViewState>) {
+  const [viewName, setViewName] = useState(currentView.name);
   const [includeTime, setIncludeTime] = useState(false);
   const onCheckChange = useCallback((e) => setIncludeTime(e.target.checked), []);
   const textChange = useCallback((e) => setViewName(e.target.value), []);
@@ -104,4 +110,4 @@ export const SavedViewUpdateModal = ({ close, save, isInvalid }: Props) => {
       </EuiModal>
     </EuiOverlayMask>
   );
-};
+}

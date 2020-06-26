@@ -25,6 +25,7 @@ interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
   loading: boolean;
   defaultViewId: string;
+  sourceIsLoading: boolean;
   close(): void;
   makeDefault(id: string): void;
   setView(viewState: ViewState): void;
@@ -76,7 +77,9 @@ export function SavedViewManageViewsFlyout<ViewState>({
   makeDefault,
   deleteView,
   loading,
+  sourceIsLoading,
 }: Props<ViewState>) {
+  const [inProgressView, setInProgressView] = useState<string | null>(null);
   const renderName = useCallback(
     (name: string, item: SavedView<ViewState>) => (
       <EuiButtonEmpty
@@ -111,13 +114,17 @@ export function SavedViewManageViewsFlyout<ViewState>({
       return (
         <>
           <EuiButtonEmpty
+            isLoading={inProgressView === item.id && sourceIsLoading}
             iconType={isDefault ? 'starFilled' : 'starEmpty'}
-            onClick={() => makeDefault(item.id)}
+            onClick={() => {
+              setInProgressView(item.id);
+              makeDefault(item.id);
+            }}
           />
         </>
       );
     },
-    [makeDefault, defaultViewId]
+    [makeDefault, defaultViewId, sourceIsLoading, inProgressView]
   );
 
   const columns = [

@@ -38,9 +38,13 @@ interface Props {
 }
 
 export const useSavedView = (props: Props) => {
-  const { source, sourceExists, createSourceConfiguration, updateSourceConfiguration } = useContext(
-    Source.Context
-  );
+  const {
+    source,
+    isLoading: sourceIsLoading,
+    sourceExists,
+    createSourceConfiguration,
+    updateSourceConfiguration,
+  } = useContext(Source.Context);
   const { viewType, defaultViewState } = props;
   type ViewState = typeof defaultViewState;
   const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
@@ -115,8 +119,8 @@ export const useSavedView = (props: Props) => {
   const updateView = useCallback(
     (id, d: { [p: string]: any }) => {
       const doSave = async () => {
-        const exists = await hasView(d.name);
-        if (exists) {
+        const view = await hasView(d.name);
+        if (view && view.id !== id) {
           setCreateError(
             i18n.translate('xpack.infra.savedView.errorOnCreate.duplicateViewName', {
               defaultMessage: `A view with that name already exists.`,
@@ -244,6 +248,7 @@ export const useSavedView = (props: Props) => {
     errorOnCreate: createError,
     shouldLoadDefault: props.shouldLoadDefault,
     makeDefault,
+    sourceIsLoading,
     deleteView,
     loadingDefaultView,
     setCurrentView,

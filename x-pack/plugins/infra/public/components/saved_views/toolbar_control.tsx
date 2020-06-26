@@ -28,7 +28,9 @@ interface Props<ViewState> {
   viewState: ViewState;
 }
 
-export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
+export function SavedViewsToolbarControls<ViewState extends { id: string; name: string }>(
+  props: Props<ViewState>
+) {
   const kibana = useKibana();
   const {
     views,
@@ -39,6 +41,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     deleteView,
     defaultViewId,
     makeDefault,
+    sourceIsLoading,
     find,
     errorOnFind,
     errorOnCreate,
@@ -220,11 +223,17 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
       )}
 
       {updateModalOpen && (
-        <SavedViewUpdateModal isInvalid={isInvalid} close={closeUpdateModal} save={update} />
+        <SavedViewUpdateModal
+          currentView={currentView}
+          isInvalid={isInvalid}
+          close={closeUpdateModal}
+          save={update}
+        />
       )}
 
       {viewListModalOpen && (
         <SavedViewListModal<ViewState>
+          currentView={currentView}
           views={views}
           close={closeViewListModal}
           setView={setCurrentView}
@@ -233,6 +242,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
 
       {modalOpen && (
         <SavedViewManageViewsFlyout<ViewState>
+          sourceIsLoading={sourceIsLoading}
           loading={loading}
           views={views}
           defaultViewId={defaultViewId}
