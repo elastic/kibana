@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -16,9 +16,10 @@ import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
+import { entityId } from '../../../common/endpoint/models/event';
 import { ResolverAction } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
-import * as eventModel from '../../../common/endpoint/models/event';
+import { SideEffectContext } from './side_effect_context';
 
 interface StyledResolver {
   backgroundColor: string;
@@ -74,17 +75,20 @@ export const Resolver = React.memo(function Resolver({
   className?: string;
   selectedEvent?: ResolverEvent;
 }) {
-  const { processNodePositions, edgeLineSegments } = useSelector(
-    selectors.processNodePositionsAndEdgeLineSegments
-  );
+  const { timestamp } = useContext(SideEffectContext);
+
+  const { processNodePositions, connectingEdgeLineSegments } = useSelector(
+    selectors.visibleProcessNodePositionsAndEdgeLineSegments
+  )(timestamp());
 
   const dispatch: (action: ResolverAction) => unknown = useDispatch();
   const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-  const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
   const isLoading = useSelector(selectors.isLoading);
   const hasError = useSelector(selectors.hasError);
+  const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { colorMap } = useResolverTheme();
 
   useLayoutEffect(() => {
@@ -123,10 +127,10 @@ export const Resolver = React.memo(function Resolver({
           tabIndex={0}
           aria-activedescendant={activeDescendantId || undefined}
         >
-          {edgeLineSegments.map(({ points: [startPosition, endPosition], metadata }, index) => (
+          {connectingEdgeLineSegments.map(({ points: [startPosition, endPosition], metadata }) => (
             <EdgeLine
               edgeLineMetadata={metadata}
-              key={index}
+              key={metadata.uniqueId}
               startPosition={startPosition}
               endPosition={endPosition}
               projectionMatrix={projectionMatrix}
@@ -134,6 +138,7 @@ export const Resolver = React.memo(function Resolver({
           ))}
           {[...processNodePositions].map(([processEvent, position], index) => {
             const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+            const processEntityId = entityId(processEvent);
             if (!adjacentNodeMap) {
               // This should never happen
               throw new Error('Issue calculating adjacency node map.');
@@ -145,7 +150,9 @@ export const Resolver = React.memo(function Resolver({
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
                 adjacentNodeMap={adjacentNodeMap}
-                relatedEventsStats={relatedEventsStats.get(eventModel.entityId(processEvent))}
+                relatedEventsStats={relatedEventsStats.get(entityId(processEvent))}
+                isProcessTerminated={terminatedProcesses.has(processEntityId)}
+                isProcessOrigin={false}
               />
             );
           })}

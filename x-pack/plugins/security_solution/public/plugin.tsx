@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
@@ -35,6 +36,7 @@ import {
   APP_CASES_PATH,
   SHOW_ENDPOINT_ALERTS_NAV,
   APP_ENDPOINT_ALERTS_PATH,
+  APP_PATH,
 } from '../common/constants';
 import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
 
@@ -86,18 +88,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       return { coreStart, startPlugins, services, store: this.store, storage };
     };
 
-    // Waiting for https://github.com/elastic/kibana/issues/69110
-    // core.application.register({
-    //   id: APP_ID,
-    //   title: 'Security',
-    //   appRoute: APP_PATH,
-    //   navLinkStatus: AppNavLinkStatus.hidden,
-    //   mount: async (params: AppMountParameters) => {
-    //     const [{ application }] = await core.getStartServices();
-    //     application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
-    //     return () => true;
-    //   },
-    // });
+    core.application.register({
+      exactRoute: true,
+      id: APP_ID,
+      title: 'Security',
+      appRoute: APP_PATH,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (params: AppMountParameters) => {
+        const [{ application }] = await core.getStartServices();
+        application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
+        return () => true;
+      },
+    });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.overview}`,
