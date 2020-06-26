@@ -16,9 +16,7 @@ import { FeatureConfig } from '../../common';
 function createContextMock(licenseType: LicenseType = 'gold') {
   return {
     core: coreMock.createRequestHandlerContext(),
-    licensing: {
-      license: licensingMock.createLicense({ license: { type: licenseType } }),
-    },
+    licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
   };
 }
 

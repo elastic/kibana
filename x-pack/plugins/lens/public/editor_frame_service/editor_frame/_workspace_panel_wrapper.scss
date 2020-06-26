@@ -10,9 +10,12 @@
   .lnsWorkspacePanelWrapper__pageContentHeader {
     @include euiTitle('xs');
     padding: $euiSizeM;
-    border-bottom: $euiBorderThin;
     // override EuiPage
     margin-bottom: 0 !important; // sass-lint:disable-line no-important
+  }
+
+  .lnsWorkspacePanelWrapper__pageContentHeader--unsaved {
+    color: $euiTextSubduedColor;
   }
 
   .lnsWorkspacePanelWrapper__pageContentBody {

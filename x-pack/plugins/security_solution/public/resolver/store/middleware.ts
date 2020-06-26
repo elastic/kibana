@@ -12,7 +12,7 @@ import {
   ResolverEvent,
   ResolverChildren,
   ResolverAncestry,
-  LifecycleNode,
+  ResolverLifecycleNode,
   ResolverNodeStats,
   ResolverRelatedEvents,
 } from '../../../common/endpoint/types';
@@ -25,10 +25,10 @@ type MiddlewareFactory<S = ResolverState> = (
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
 function getLifecycleEventsAndStats(
-  nodes: LifecycleNode[],
+  nodes: ResolverLifecycleNode[],
   stats: Map<string, ResolverNodeStats>
 ): ResolverEvent[] {
-  return nodes.reduce((flattenedEvents: ResolverEvent[], currentNode: LifecycleNode) => {
+  return nodes.reduce((flattenedEvents: ResolverEvent[], currentNode: ResolverLifecycleNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
     }
@@ -112,7 +112,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
             query: { events: 100 },
           }
         );
-
         api.dispatch({
           type: 'serverReturnedRelatedEventData',
           payload: result,
