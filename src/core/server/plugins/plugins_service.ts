@@ -242,8 +242,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
+        const unmetPlugins = this.getUnmetPluginDependencies(pluginName, pluginEnableStatuses);
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled.`
+          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled. Unmet dependencies: [${unmetPlugins.join(
+            ','
+          )}]`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
@@ -251,6 +254,20 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+  }
+
+  private getUnmetPluginDependencies(
+    pluginName: PluginName,
+    pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
+    parents: PluginName[] = []
+  ): string[] {
+    const requiredPlugins = pluginEnableStatuses.get(pluginName)?.plugin.requiredPlugins ?? [];
+    return requiredPlugins
+      .filter((dep) => !parents.includes(dep))
+      .filter(
+        (dependencyName) =>
+          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+      );
   }
 
   private shouldEnablePlugin(
