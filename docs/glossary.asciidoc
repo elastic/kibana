@@ -378,7 +378,7 @@ and route that data to the monitoring cluster. See
 
 [[glossary-management]] Stack Management ::
 // tag::management-def[]
-The home for managing the Elastic Stack&mdash;indices, clusters, licenses, UI settings,
+A {kib} app for managing the {stack} &mdash;indices, clusters, licenses, UI settings,
 index patterns, spaces, and more.  See
 {kibana-ref}/management.html[Stack Management].
 // end::management-def[]
