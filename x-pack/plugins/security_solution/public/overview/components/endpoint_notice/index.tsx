@@ -11,13 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useManagementFormatUrl } from '../../../management/components/hooks/use_management_format_url';
+import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 const EMPTY_PROMPT_STYLE = Object.freeze({ maxWidth: '100%' });
 
 export const EndpointNotice = memo(() => {
   const endpointsPath = getEndpointListPath({ name: 'endpointList' });
   const endpointsLink = useManagementFormatUrl(endpointsPath);
-  const handleGetStartedClick = useNavigateToAppEventHandler('securitySolution:management', {
+  const handleGetStartedClick = useNavigateToAppEventHandler(MANAGEMENT_APP_ID, {
     path: endpointsPath,
   });
 

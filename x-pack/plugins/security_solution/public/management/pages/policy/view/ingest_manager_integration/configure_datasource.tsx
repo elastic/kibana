@@ -14,6 +14,7 @@ import {
   CustomConfigureDatasourceProps,
 } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath } from '../../../../common/routing';
+import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 
 /**
  * Exports Endpoint-specific datasource configuration instructions
@@ -36,12 +37,10 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
               {from === 'edit' ? (
                 <LinkToApp
                   data-test-subj="editLinkToPolicyDetails"
-                  appId="securitySolution:management"
+                  appId={MANAGEMENT_APP_ID}
                   appPath={policyUrl}
                   // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
-                  href={`${services.application.getUrlForApp(
-                    'securitySolution:management'
-                  )}${policyUrl}`}
+                  href={`${services.application.getUrlForApp(MANAGEMENT_APP_ID)}${policyUrl}`}
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"
