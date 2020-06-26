@@ -58,9 +58,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   } = useUrlParams();
 
   const renderedItems = useMemo(() => {
-    // TODO: Use _.orderBy once we upgrade to lodash 4+
     const sortedItems = sortItems
-      ? orderBy(items, sortField, sortDirection as any)
+      ? orderBy(items, sortField, sortDirection as 'asc' | 'desc')
       : items;
 
     return sortedItems.slice(page * pageSize, (page + 1) * pageSize);

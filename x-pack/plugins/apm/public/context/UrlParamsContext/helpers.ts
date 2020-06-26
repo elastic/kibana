@@ -61,8 +61,8 @@ export function getPathAsArray(pathname: string = '') {
   return compact(pathname.split('/'));
 }
 
-export function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return pickBy(obj as any, (value) => value !== undefined) as any;
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
 }
 
 export function getPathParams(pathname: string = ''): PathParams {

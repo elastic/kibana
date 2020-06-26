@@ -79,7 +79,7 @@ interface StackframesGroup {
 
 export function getGroupedStackframes(stackframes: IStackframe[]) {
   return stackframes.reduce((acc, stackframe) => {
-    const prevGroup = last(acc) as any;
+    const prevGroup = last(acc);
     const shouldAppend =
       prevGroup &&
       prevGroup.isLibraryFrame === stackframe.library_frame &&
@@ -87,7 +87,7 @@ export function getGroupedStackframes(stackframes: IStackframe[]) {
       !stackframe.exclude_from_grouping;
 
     // append to group
-    if (shouldAppend) {
+    if (prevGroup && shouldAppend) {
       prevGroup.stackframes.push(stackframe);
       return acc;
     }
