@@ -414,13 +414,6 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [dispatch, selfId]);
 
-    const handleRelatedAlertsRequest = useCallback(() => {
-      dispatch({
-        type: 'userSelectedRelatedAlerts',
-        payload: event,
-      });
-    }, [dispatch, event]);
-
     const history = useHistory();
     const urlSearch = history.location.search;
 
@@ -647,14 +640,6 @@ const ProcessEventDotComponents = React.memo(
                   optionsWithActions={relatedEventStatusOrOptions}
                 />
               )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NodeSubMenu
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuTitle={subMenuAssets.relatedAlerts.title}
-                menuAction={handleRelatedAlertsRequest}
-              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledActionsContainer>
