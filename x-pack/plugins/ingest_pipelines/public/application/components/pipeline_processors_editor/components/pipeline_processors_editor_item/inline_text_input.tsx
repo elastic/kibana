@@ -25,7 +25,7 @@ export const InlineTextInput: FunctionComponent<Props> = ({
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
   const [textValue, setTextValue] = useState<string>(text ?? '');
 
-  const containerClasses = classNames({
+  const containerClasses = classNames('pipelineProcessorsEditor__item__textContainer', {
     'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput && !disabled,
   });
 
@@ -70,11 +70,7 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       />
     </div>
   ) : (
-    <div
-      className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}
-      tabIndex={0}
-      onFocus={() => setIsShowingTextInput(true)}
-    >
+    <div className={containerClasses} tabIndex={0} onFocus={() => setIsShowingTextInput(true)}>
       <EuiText size="s" color="subdued">
         <div className="pipelineProcessorsEditor__item__description">
           {text || <em>{placeholder}</em>}

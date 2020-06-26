@@ -64,7 +64,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isThisProcessorSelected;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
-    const panelClasses = classNames({
+    const panelClasses = classNames('pipelineProcessorsEditor__item', {
       'pipelineProcessorsEditor__item--selected': isThisProcessorSelected || isEditingThisProcessor,
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
@@ -74,7 +74,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     });
 
     return (
-      <EuiPanel className={`pipelineProcessorsEditor__item ${panelClasses}`} paddingSize="s">
+      <EuiPanel className={panelClasses} paddingSize="s">
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
