@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { AgentConfig, Datasource } from '../../../../../../../../common/types/models';
+import { AgentConfig, PackageConfig } from '../../../../../types';
 import { NoDatasources } from './no_datasources';
 import { DatasourcesTable } from './datasources_table';
 
@@ -15,6 +15,6 @@ export const ConfigDatasourcesView = memo<{ config: AgentConfig }>(({ config }) 
   }
 
   return (
-    <DatasourcesTable config={config} datasources={(config.datasources || []) as Datasource[]} />
+    <DatasourcesTable config={config} datasources={(config.datasources || []) as PackageConfig[]} />
   );
 });

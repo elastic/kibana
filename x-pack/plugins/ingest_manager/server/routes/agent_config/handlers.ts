@@ -20,7 +20,7 @@ import {
   GetFullAgentConfigRequestSchema,
   AgentConfig,
   DefaultPackages,
-  NewDatasource,
+  NewPackageConfig,
 } from '../../types';
 import {
   GetAgentConfigsResponse,
@@ -107,21 +107,22 @@ export const createAgentConfigHandler: RequestHandler<
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
     // eslint-disable-next-line prefer-const
-    let [agentConfig, newSysDatasource] = await Promise.all<AgentConfig, NewDatasource | undefined>(
-      [
-        agentConfigService.create(soClient, request.body, {
-          user,
-        }),
-        // If needed, retrieve System package information and build a new Datasource for the system package
-        // NOTE: we ignore failures in attempting to create datasource, since config might have been created
-        // successfully
-        withSysMonitoring
-          ? datasourceService
-              .buildDatasourceFromPackage(soClient, DefaultPackages.system)
-              .catch(() => undefined)
-          : undefined,
-      ]
-    );
+    let [agentConfig, newSysDatasource] = await Promise.all<
+      AgentConfig,
+      NewPackageConfig | undefined
+    >([
+      agentConfigService.create(soClient, request.body, {
+        user,
+      }),
+      // If needed, retrieve System package information and build a new Datasource for the system package
+      // NOTE: we ignore failures in attempting to create datasource, since config might have been created
+      // successfully
+      withSysMonitoring
+        ? datasourceService
+            .buildDatasourceFromPackage(soClient, DefaultPackages.system)
+            .catch(() => undefined)
+        : undefined,
+    ]);
 
     // Create the system monitoring datasource and add it to config.
     if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {

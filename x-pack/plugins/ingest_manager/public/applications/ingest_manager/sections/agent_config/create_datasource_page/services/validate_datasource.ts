@@ -7,10 +7,10 @@ import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 import { getFlattenedObject } from '../../../../services';
 import {
-  NewDatasource,
-  DatasourceInput,
-  DatasourceInputStream,
-  DatasourceConfigRecordEntry,
+  NewPackageConfig,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  PackageConfigConfigRecordEntry,
   PackageInfo,
   RegistryInput,
   RegistryStream,
@@ -26,13 +26,13 @@ export interface DatasourceConfigValidationResults {
 }
 
 export type DatasourceInputValidationResults = DatasourceConfigValidationResults & {
-  streams?: Record<DatasourceInputStream['id'], DatasourceConfigValidationResults>;
+  streams?: Record<PackageConfigInputStream['id'], DatasourceConfigValidationResults>;
 };
 
 export interface DatasourceValidationResults {
   name: Errors;
   description: Errors;
-  inputs: Record<DatasourceInput['type'], DatasourceInputValidationResults> | null;
+  inputs: Record<PackageConfigInput['type'], DatasourceInputValidationResults> | null;
 }
 
 /*
@@ -40,7 +40,7 @@ export interface DatasourceValidationResults {
  * Note: this method assumes that `datasource` is correctly structured for the given package
  */
 export const validateDatasource = (
-  datasource: NewDatasource,
+  datasource: NewPackageConfig,
   packageInfo: PackageInfo
 ): DatasourceValidationResults => {
   const validationResults: DatasourceValidationResults = {
@@ -162,7 +162,7 @@ export const validateDatasource = (
 };
 
 const validateDatasourceConfig = (
-  configEntry: DatasourceConfigRecordEntry,
+  configEntry: PackageConfigConfigRecordEntry,
   varDef: RegistryVarsEntry
 ): string[] | null => {
   const errors = [];

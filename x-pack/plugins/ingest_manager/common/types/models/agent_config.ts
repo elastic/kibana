@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, DatasourcePackage, DatasourceInputStream } from './datasource';
+import { PackageConfig, PackageConfigPackage, PackageConfigInputStream } from './package_config';
 import { Output } from './output';
 
 export enum AgentConfigStatus {
@@ -22,7 +22,7 @@ export interface NewAgentConfig {
 export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
-  datasources: string[] | Datasource[];
+  datasources: string[] | PackageConfig[];
   updated_at: string;
   updated_by: string;
   revision: number;
@@ -30,7 +30,7 @@ export interface AgentConfig extends NewAgentConfig {
 
 export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
 
-export type FullAgentConfigInputStream = Pick<DatasourceInputStream, 'id' | 'processors'> & {
+export type FullAgentConfigInputStream = Pick<PackageConfigInputStream, 'id' | 'processors'> & {
   dataset: { name: string };
   [key: string]: any;
 };
@@ -42,7 +42,7 @@ export interface FullAgentConfigInput {
   dataset: { namespace: string };
   use_output: string;
   meta?: {
-    package?: Pick<DatasourcePackage, 'name' | 'version'>;
+    package?: Pick<PackageConfigPackage, 'name' | 'version'>;
     [key: string]: unknown;
   };
   streams: FullAgentConfigInputStream[];

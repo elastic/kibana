@@ -20,8 +20,8 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import {
-  DatasourceInput,
-  DatasourceInputStream,
+  PackageConfigInput,
+  PackageConfigInputStream,
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
@@ -38,8 +38,8 @@ const FlushHorizontalRule = styled(EuiHorizontalRule)`
 export const DatasourceInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>;
-  datasourceInput: DatasourceInput;
-  updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
+  datasourceInput: PackageConfigInput;
+  updateDatasourceInput: (updatedInput: Partial<PackageConfigInput>) => void;
   inputValidationResults: DatasourceInputValidationResults;
   forceShowErrors?: boolean;
 }> = ({
@@ -184,7 +184,9 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                 <DatasourceInputStreamConfig
                   packageInputStream={packageInputStream}
                   datasourceInputStream={datasourceInputStream}
-                  updateDatasourceInputStream={(updatedStream: Partial<DatasourceInputStream>) => {
+                  updatePackageConfigInputStream={(
+                    updatedStream: Partial<PackageConfigInputStream>
+                  ) => {
                     const indexOfUpdatedStream = datasourceInput.streams.findIndex(
                       (stream) => stream.dataset.name === packageInputStream.dataset.name
                     );
@@ -194,7 +196,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                       ...updatedStream,
                     };
 
-                    const updatedInput: Partial<DatasourceInput> = {
+                    const updatedInput: Partial<PackageConfigInput> = {
                       streams: newStreams,
                     };
 

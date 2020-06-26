@@ -8,16 +8,16 @@ import { AuthenticatedUser } from '../../../security/server';
 import {
   DeleteDatasourcesResponse,
   packageToConfigDatasource,
-  DatasourceInput,
-  DatasourceInputStream,
+  PackageConfigInput,
+  PackageConfigInputStream,
   PackageInfo,
 } from '../../common';
 import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  NewDatasource,
-  Datasource,
+  NewPackageConfig,
+  PackageConfig,
   ListWithKuery,
-  DatasourceSOAttributes,
+  PackageConfigSOAttributes,
   RegistryPackage,
 } from '../types';
 import { agentConfigService } from './agent_config';
@@ -36,11 +36,11 @@ function getDataset(st: string) {
 class DatasourceService {
   public async create(
     soClient: SavedObjectsClientContract,
-    datasource: NewDatasource,
+    datasource: NewPackageConfig,
     options?: { id?: string; user?: AuthenticatedUser }
-  ): Promise<Datasource> {
+  ): Promise<PackageConfig> {
     const isoDate = new Date().toISOString();
-    const newSo = await soClient.create<DatasourceSOAttributes>(
+    const newSo = await soClient.create<PackageConfigSOAttributes>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
@@ -66,12 +66,12 @@ class DatasourceService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
-    datasources: NewDatasource[],
+    datasources: NewPackageConfig[],
     configId: string,
     options?: { user?: AuthenticatedUser }
-  ): Promise<Datasource[]> {
+  ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
-    const { saved_objects: newSos } = await soClient.bulkCreate<Omit<Datasource, 'id'>>(
+    const { saved_objects: newSos } = await soClient.bulkCreate<Omit<PackageConfig, 'id'>>(
       datasources.map((datasource) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
@@ -102,8 +102,11 @@ class DatasourceService {
     }));
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<Datasource | null> {
-    const datasourceSO = await soClient.get<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id);
+  public async get(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<PackageConfig | null> {
+    const datasourceSO = await soClient.get<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!datasourceSO) {
       return null;
     }
@@ -121,8 +124,8 @@ class DatasourceService {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[]
-  ): Promise<Datasource[] | null> {
-    const datasourceSO = await soClient.bulkGet<DatasourceSOAttributes>(
+  ): Promise<PackageConfig[] | null> {
+    const datasourceSO = await soClient.bulkGet<PackageConfigSOAttributes>(
       ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
@@ -141,10 +144,10 @@ class DatasourceService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: Datasource[]; total: number; page: number; perPage: number }> {
+  ): Promise<{ items: PackageConfig[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
 
-    const datasources = await soClient.find<DatasourceSOAttributes>({
+    const datasources = await soClient.find<PackageConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -158,7 +161,7 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<Datasource>((datasourceSO) => ({
+      items: datasources.saved_objects.map<PackageConfig>((datasourceSO) => ({
         id: datasourceSO.id,
         ...datasourceSO.attributes,
       })),
@@ -171,16 +174,16 @@ class DatasourceService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasource: NewDatasource,
+    datasource: NewPackageConfig,
     options?: { user?: AuthenticatedUser }
-  ): Promise<Datasource> {
+  ): Promise<PackageConfig> {
     const oldDatasource = await this.get(soClient, id);
 
     if (!oldDatasource) {
       throw new Error('Datasource not found');
     }
 
-    await soClient.update<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id, {
+    await soClient.update<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
       updated_at: new Date().toISOString(),
@@ -190,7 +193,7 @@ class DatasourceService {
     // Bump revision of associated agent config
     await agentConfigService.bumpRevision(soClient, datasource.config_id, { user: options?.user });
 
-    return (await this.get(soClient, id)) as Datasource;
+    return (await this.get(soClient, id)) as PackageConfig;
   }
 
   public async delete(
@@ -235,7 +238,7 @@ class DatasourceService {
   public async buildDatasourceFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string
-  ): Promise<NewDatasource | undefined> {
+  ): Promise<NewPackageConfig | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
       const [pkgInfo, defaultOutputId] = await Promise.all([
@@ -257,8 +260,8 @@ class DatasourceService {
 
   public async assignPackageStream(
     pkgInfo: PackageInfo,
-    inputs: DatasourceInput[]
-  ): Promise<DatasourceInput[]> {
+    inputs: PackageConfigInput[]
+  ): Promise<PackageConfigInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map((input) =>
       _assignPackageStreamToInput(registryPkgInfo, pkgInfo, input)
@@ -271,7 +274,7 @@ class DatasourceService {
 async function _assignPackageStreamToInput(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
-  input: DatasourceInput
+  input: PackageConfigInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
     _assignPackageStreamToStream(registryPkgInfo, pkgInfo, input, stream)
@@ -284,8 +287,8 @@ async function _assignPackageStreamToInput(
 async function _assignPackageStreamToStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
-  input: DatasourceInput,
-  stream: DatasourceInputStream
+  input: PackageConfigInput,
+  stream: PackageConfigInputStream
 ) {
   if (!stream.enabled) {
     return { ...stream, agent_stream: undefined };

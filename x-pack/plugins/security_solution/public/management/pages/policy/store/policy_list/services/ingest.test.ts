@@ -11,7 +11,7 @@ import {
   sendGetEndpointSpecificDatasources,
 } from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
+import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
 import { apiPathMockResponseProviders } from '../test_mock_utils';
 
 describe('ingest service', () => {
@@ -26,7 +26,7 @@ describe('ingest service', () => {
       await sendGetEndpointSpecificDatasources(http);
       expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
       });
     });
@@ -36,7 +36,7 @@ describe('ingest service', () => {
       });
       expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
         query: {
-          kuery: `someValueHere and ${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `someValueHere and ${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           perPage: 10,
           page: 1,
         },

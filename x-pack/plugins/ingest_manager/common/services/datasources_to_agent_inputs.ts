@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, FullAgentConfigInput, FullAgentConfigInputStream } from '../types';
+import { PackageConfig, FullAgentConfigInput, FullAgentConfigInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
 export const storedDatasourcesToAgentInputs = (
-  datasources: Datasource[]
+  datasources: PackageConfig[]
 ): FullAgentConfigInput[] => {
   const fullInputs: FullAgentConfigInput[] = [];
 

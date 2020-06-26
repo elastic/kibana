@@ -6,7 +6,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { Datasource } from '../../../types';
+import { PackageConfig } from '../../../types';
 import { useGetOneAgentConfig } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
@@ -34,7 +34,7 @@ export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ ag
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {(agentConfig.datasources as Datasource[]).map((datasource, idx) => {
+      {(agentConfig.datasources as PackageConfig[]).map((datasource, idx) => {
         if (!datasource.package) {
           return null;
         }

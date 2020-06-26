@@ -15,14 +15,14 @@ import {
   EuiTitle,
   EuiIconTip,
 } from '@elastic/eui';
-import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
+import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
 import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
-  datasourceInput: DatasourceInput;
-  updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
+  datasourceInput: PackageConfigInput;
+  updateDatasourceInput: (updatedInput: Partial<PackageConfigInput>) => void;
   inputVarsValidationResults: DatasourceConfigValidationResults;
   forceShowErrors?: boolean;
 }> = ({

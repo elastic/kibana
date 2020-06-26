@@ -8,7 +8,7 @@ import { PolicyListState } from '../../types';
 import { Store, applyMiddleware, createStore } from 'redux';
 
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manager/common';
+import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manager/common';
 
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';
@@ -167,7 +167,7 @@ describe('policy list store concerns', () => {
     await waitForAction('serverReturnedPolicyListData');
     expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
       query: {
-        kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         page: 1,
         perPage: 10,
       },
@@ -190,7 +190,7 @@ describe('policy list store concerns', () => {
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
           perPage: 50,
         },
@@ -213,7 +213,7 @@ describe('policy list store concerns', () => {
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
           perPage: 10,
         },
@@ -224,7 +224,7 @@ describe('policy list store concerns', () => {
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
           perPage: 10,
         },
@@ -235,7 +235,7 @@ describe('policy list store concerns', () => {
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 11,
           perPage: 10,
         },
@@ -264,7 +264,7 @@ describe('policy list store concerns', () => {
       dispatchUserChangedUrl('?page_size=10&page_index=11');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
         query: {
-          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 12,
           perPage: 10,
         },

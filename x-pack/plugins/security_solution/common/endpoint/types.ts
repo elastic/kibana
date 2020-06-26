@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datasource, NewDatasource } from '../../../ingest_manager/common';
+import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -670,14 +670,14 @@ export enum ProtectionModes {
 }
 
 /**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
+ * Endpoint Policy data, which extends Ingest's `PackageConfig` type
  */
-export type PolicyData = Datasource & NewPolicyData;
+export type PolicyData = PackageConfig & NewPolicyData;
 
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewDatasource & {
+export type NewPolicyData = NewPackageConfig & {
   inputs: [
     {
       type: 'endpoint';

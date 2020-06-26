@@ -16,20 +16,20 @@ import {
   EuiTextColor,
   EuiIconTip,
 } from '@elastic/eui';
-import { DatasourceInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
+import { PackageConfigInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
 import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
-  datasourceInputStream: DatasourceInputStream;
-  updateDatasourceInputStream: (updatedStream: Partial<DatasourceInputStream>) => void;
+  datasourceInputStream: PackageConfigInputStream;
+  updatePackageConfigInputStream: (updatedStream: Partial<PackageConfigInputStream>) => void;
   inputStreamValidationResults: DatasourceConfigValidationResults;
   forceShowErrors?: boolean;
 }> = ({
   packageInputStream,
   datasourceInputStream,
-  updateDatasourceInputStream,
+  updatePackageConfigInputStream,
   inputStreamValidationResults,
   forceShowErrors,
 }) => {
@@ -83,7 +83,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
           checked={datasourceInputStream.enabled}
           onChange={(e) => {
             const enabled = e.target.checked;
-            updateDatasourceInputStream({
+            updatePackageConfigInputStream({
               enabled,
             });
           }}
@@ -108,7 +108,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                   varDef={varDef}
                   value={value}
                   onChange={(newValue: any) => {
-                    updateDatasourceInputStream({
+                    updatePackageConfigInputStream({
                       vars: {
                         ...datasourceInputStream.vars,
                         [varName]: {
@@ -152,7 +152,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                           varDef={varDef}
                           value={value}
                           onChange={(newValue: any) => {
-                            updateDatasourceInputStream({
+                            updatePackageConfigInputStream({
                               vars: {
                                 ...datasourceInputStream.vars,
                                 [varName]: {

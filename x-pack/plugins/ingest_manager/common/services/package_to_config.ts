@@ -8,12 +8,12 @@ import {
   RegistryConfigTemplate,
   RegistryVarsEntry,
   RegistryStream,
-  Datasource,
-  DatasourceConfigRecord,
-  DatasourceConfigRecordEntry,
-  DatasourceInput,
-  DatasourceInputStream,
-  NewDatasource,
+  PackageConfig,
+  PackageConfigConfigRecord,
+  PackageConfigConfigRecordEntry,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  NewPackageConfig,
 } from '../types';
 
 const getStreamsForInputType = (
@@ -42,8 +42,10 @@ const getStreamsForInputType = (
 /*
  * This service creates a datasource inputs definition from defaults provided in package info
  */
-export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datasource['inputs'] => {
-  const inputs: Datasource['inputs'] = [];
+export const packageToConfigDatasourceInputs = (
+  packageInfo: PackageInfo
+): PackageConfig['inputs'] => {
+  const inputs: PackageConfig['inputs'] = [];
 
   // Assume package will only ever ship one datasource for now
   const packageDatasource: RegistryConfigTemplate | null =
@@ -57,10 +59,10 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
     packageDatasource.inputs.forEach((packageInput) => {
       // Reduces registry var def into config object entry
       const varsReducer = (
-        configObject: DatasourceConfigRecord,
+        configObject: PackageConfigConfigRecord,
         registryVar: RegistryVarsEntry
-      ): DatasourceConfigRecord => {
-        const configEntry: DatasourceConfigRecordEntry = {
+      ): PackageConfigConfigRecord => {
+        const configEntry: PackageConfigConfigRecordEntry = {
           value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
         };
         if (registryVar.type) {
@@ -71,11 +73,11 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
       };
 
       // Map each package input stream into datasource input stream
-      const streams: DatasourceInputStream[] = getStreamsForInputType(
+      const streams: PackageConfigInputStream[] = getStreamsForInputType(
         packageInput.type,
         packageInfo
       ).map((packageStream) => {
-        const stream: DatasourceInputStream = {
+        const stream: PackageConfigInputStream = {
           id: `${packageInput.type}-${packageStream.dataset.name}`,
           enabled: packageStream.enabled === false ? false : true,
           dataset: {
@@ -89,7 +91,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
         return stream;
       });
 
-      const input: DatasourceInput = {
+      const input: PackageConfigInput = {
         type: packageInput.type,
         enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
         streams,
@@ -107,7 +109,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
 };
 
 /**
- * Builds a `NewDatasource` structure based on a package
+ * Builds a `NewPackageConfig` structure based on a package
  *
  * @param packageInfo
  * @param configId
@@ -121,7 +123,7 @@ export const packageToConfigDatasource = (
   datasourceName?: string,
   namespace?: string,
   description?: string
-): NewDatasource => {
+): NewPackageConfig => {
   return {
     name: datasourceName || `${packageInfo.name}-1`,
     namespace,

@@ -6,7 +6,7 @@
 import {
   PackageInfo,
   InstallationStatus,
-  NewDatasource,
+  NewPackageConfig,
   RegistryConfigTemplate,
 } from '../../../../types';
 import { validateDatasource, validationHasErrors } from './validate_datasource';
@@ -141,7 +141,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ],
   } as unknown) as PackageInfo;
 
-  const validDatasource: NewDatasource = {
+  const validDatasource: NewPackageConfig = {
     name: 'datasource1-1',
     config_id: 'test-config',
     enabled: true,
@@ -225,7 +225,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     ],
   };
 
-  const invalidDatasource: NewDatasource = {
+  const invalidDatasource: NewPackageConfig = {
     ...validDatasource,
     name: '',
     inputs: [

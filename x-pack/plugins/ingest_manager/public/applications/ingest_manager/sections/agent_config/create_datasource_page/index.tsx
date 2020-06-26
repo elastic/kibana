@@ -20,7 +20,7 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import {
   AgentConfig,
   PackageInfo,
-  NewDatasource,
+  NewPackageConfig,
   CreateDatasourceRouteState,
 } from '../../../types';
 import {
@@ -91,7 +91,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const [agentCount, setAgentCount] = useState<number>(0);
 
   // New datasource state
-  const [datasource, setDatasource] = useState<NewDatasource>({
+  const [datasource, setDatasource] = useState<NewPackageConfig>({
     name: '',
     description: '',
     config_id: '',
@@ -147,7 +147,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update datasource method
-  const updateDatasource = (updatedFields: Partial<NewDatasource>) => {
+  const updateDatasource = (updatedFields: Partial<NewPackageConfig>) => {
     const newDatasource = {
       ...datasource,
       ...updatedFields,
@@ -167,7 +167,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     }
   };
 
-  const updateDatasourceValidation = (newDatasource?: NewDatasource) => {
+  const updateDatasourceValidation = (newDatasource?: NewPackageConfig) => {
     if (packageInfo) {
       const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
       setValidationResults(newValidationResult);

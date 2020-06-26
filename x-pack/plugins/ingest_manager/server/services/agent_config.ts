@@ -12,7 +12,7 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
-  Datasource,
+  PackageConfig,
   NewAgentConfig,
   AgentConfig,
   AgentConfigSOAttributes,
@@ -202,8 +202,8 @@ class AgentConfigService {
 
     // Copy all datasources
     if (baseAgentConfig.datasources.length) {
-      const newDatasources = (baseAgentConfig.datasources as Datasource[]).map(
-        (datasource: Datasource) => {
+      const newDatasources = (baseAgentConfig.datasources as PackageConfig[]).map(
+        (datasource: PackageConfig) => {
           const { id: datasourceId, ...newDatasource } = datasource;
           return newDatasource;
         }
@@ -373,7 +373,7 @@ class AgentConfigService {
           {} as FullAgentConfig['outputs']
         ),
       },
-      inputs: storedDatasourcesToAgentInputs(config.datasources as Datasource[]),
+      inputs: storedDatasourcesToAgentInputs(config.datasources as PackageConfig[]),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {

@@ -14,7 +14,7 @@ import {
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
   DeleteDatasourcesRequestSchema,
-  NewDatasource,
+  NewPackageConfig,
 } from '../../types';
 import { CreateDatasourceResponse, DeleteDatasourcesResponse } from '../../../common';
 
@@ -83,7 +83,7 @@ export const createDatasourceHandler: RequestHandler<
     // If we have external callbacks, then process those now before creating the actual datasource
     const externalCallbacks = appContextService.getExternalCallbacks('datasourceCreate');
     if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewDatasource = newData;
+      let updatedNewData: NewPackageConfig = newData;
 
       for (const callback of externalCallbacks) {
         try {
@@ -98,7 +98,7 @@ export const createDatasourceHandler: RequestHandler<
         }
       }
 
-      // The type `NewDatasource` and the `DatasourceBaseSchema` are incompatible.
+      // The type `NewPackageConfig` and the `DatasourceBaseSchema` are incompatible.
       // `NewDatasrouce` defines `namespace` as optional string, which means that `undefined` is a
       // valid value, however, the schema defines it as string with a minimum length of 1.
       // Here, we need to cast the value back to the schema type and ignore the TS error.

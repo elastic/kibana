@@ -5,7 +5,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { Datasource } from '../../../../common/types/models';
+import { PackageConfig } from './';
 
 /**
  * Supported routing state for the create datasource page routes
@@ -14,7 +14,7 @@ export interface CreateDatasourceRouteState {
   /** On a successful save of the datasource, use navigate to the given app */
   onSaveNavigateTo?:
     | Parameters<ApplicationStart['navigateToApp']>
-    | ((newDatasource: Datasource) => Parameters<ApplicationStart['navigateToApp']>);
+    | ((newDatasource: PackageConfig) => Parameters<ApplicationStart['navigateToApp']>);
   /** On cancel, navigate to the given app */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */

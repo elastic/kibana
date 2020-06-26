@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
+import { AgentConfig, PackageInfo, NewPackageConfig } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
@@ -69,7 +69,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [datasource, setDatasource] = useState<NewDatasource>({
+  const [datasource, setDatasource] = useState<NewPackageConfig>({
     name: '',
     description: '',
     config_id: '',
@@ -156,7 +156,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update datasource method
-  const updateDatasource = (updatedFields: Partial<NewDatasource>) => {
+  const updateDatasource = (updatedFields: Partial<NewPackageConfig>) => {
     const newDatasource = {
       ...datasource,
       ...updatedFields,
@@ -174,7 +174,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
   };
 
-  const updateDatasourceValidation = (newDatasource?: NewDatasource) => {
+  const updateDatasourceValidation = (newDatasource?: NewPackageConfig) => {
     if (packageInfo) {
       const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
       setValidationResults(newValidationResult);

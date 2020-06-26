@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, DatasourceInput } from '../types';
+import { PackageConfig, PackageConfigInput } from '../types';
 import { storedDatasourcesToAgentInputs } from './datasources_to_agent_inputs';
 
 describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
-  const mockDatasource: Datasource = {
+  const mockDatasource: PackageConfig = {
     id: 'some-uuid',
     name: 'mock-datasource',
     description: '',
@@ -23,7 +23,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
     revision: 1,
   };
 
-  const mockInput: DatasourceInput = {
+  const mockInput: PackageConfigInput = {
     type: 'test-logs',
     enabled: true,
     vars: {

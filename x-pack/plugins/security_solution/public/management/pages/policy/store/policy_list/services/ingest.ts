@@ -10,7 +10,7 @@ import {
   GetAgentStatusResponse,
   DeleteDatasourcesResponse,
   DeleteDatasourcesRequest,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
@@ -39,7 +39,7 @@ export const sendGetEndpointSpecificDatasources = (
       ...options.query,
       kuery: `${
         options?.query?.kuery ? `${options.query.kuery} and ` : ''
-      }${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+      }${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };

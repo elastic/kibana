@@ -45,7 +45,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewDatasource } from '../common';
+import { IngestManagerConfigType, NewPackageConfig } from '../common';
 import {
   appContextService,
   licenseService,
@@ -103,7 +103,7 @@ const allSavedObjectTypes = [
  */
 export type ExternalCallback = [
   'datasourceCreate',
-  (newDatasource: NewDatasource) => Promise<NewDatasource>
+  (newDatasource: NewPackageConfig) => Promise<NewPackageConfig>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

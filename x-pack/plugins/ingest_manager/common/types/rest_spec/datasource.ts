@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, NewDatasource } from '../models';
+import { PackageConfig, NewPackageConfig } from '../models';
 
 export interface GetDatasourcesRequest {
   query: {
@@ -14,7 +14,7 @@ export interface GetDatasourcesRequest {
 }
 
 export interface GetDatasourcesResponse {
-  items: Datasource[];
+  items: PackageConfig[];
   total: number;
   page: number;
   perPage: number;
@@ -28,21 +28,21 @@ export interface GetOneDatasourceRequest {
 }
 
 export interface GetOneDatasourceResponse {
-  item: Datasource;
+  item: PackageConfig;
   success: boolean;
 }
 
 export interface CreateDatasourceRequest {
-  body: NewDatasource;
+  body: NewPackageConfig;
 }
 
 export interface CreateDatasourceResponse {
-  item: Datasource;
+  item: PackageConfig;
   success: boolean;
 }
 
 export type UpdateDatasourceRequest = GetOneDatasourceRequest & {
-  body: NewDatasource;
+  body: NewPackageConfig;
 };
 
 export type UpdateDatasourceResponse = CreateDatasourceResponse;

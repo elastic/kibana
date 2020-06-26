@@ -6,13 +6,13 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { NewDatasource } from '../../../../types';
+import { NewPackageConfig } from '../../../../types';
 import { CreateDatasourceFrom } from '../types';
 
 export interface CustomConfigureDatasourceProps {
   packageName: string;
   from: CreateDatasourceFrom;
-  datasource: NewDatasource;
+  datasource: NewPackageConfig;
   datasourceId?: string;
 }
 

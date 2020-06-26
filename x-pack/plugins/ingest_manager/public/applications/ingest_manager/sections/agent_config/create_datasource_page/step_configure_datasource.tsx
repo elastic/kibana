@@ -7,7 +7,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PackageInfo, RegistryStream, NewDatasource, DatasourceInput } from '../../../types';
+import { PackageInfo, RegistryStream, NewPackageConfig, PackageConfigInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
 import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
@@ -38,9 +38,9 @@ const findStreamsForInputType = (
 export const StepConfigureDatasource: React.FunctionComponent<{
   from?: CreateDatasourceFrom;
   packageInfo: PackageInfo;
-  datasource: NewDatasource;
+  datasource: NewPackageConfig;
   datasourceId?: string;
-  updateDatasource: (fields: Partial<NewDatasource>) => void;
+  updateDatasource: (fields: Partial<NewPackageConfig>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
 }> = ({
@@ -73,7 +73,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
                 packageInput={packageInput}
                 packageInputStreams={packageInputStreams}
                 datasourceInput={datasourceInput}
-                updateDatasourceInput={(updatedInput: Partial<DatasourceInput>) => {
+                updateDatasourceInput={(updatedInput: Partial<PackageConfigInput>) => {
                   const indexOfUpdatedInput = datasource.inputs.findIndex(
                     (input) => input.type === packageInput.type
                   );

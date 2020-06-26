@@ -14,7 +14,7 @@ import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToConfigDatasource,
-  Datasource,
+  PackageConfig,
   AgentConfig,
   Installation,
   Output,
@@ -87,7 +87,7 @@ export async function setupIngestManager(
       continue;
     }
 
-    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
+    const isInstalled = configWithDatasource.datasources.some((d: PackageConfig | string) => {
       return typeof d !== 'string' && d.package?.name === installedPackage.name;
     });
 

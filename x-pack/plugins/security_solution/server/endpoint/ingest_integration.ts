@@ -6,15 +6,15 @@
 
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
-import { NewDatasource } from '../../../ingest_manager/common/types/models';
+import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 
 /**
  * Callback to handle creation of Datasources in Ingest Manager
  * @param newDatasource
  */
 export const handleDatasourceCreate = async (
-  newDatasource: NewDatasource
-): Promise<NewDatasource> => {
+  newDatasource: NewPackageConfig
+): Promise<NewPackageConfig> => {
   // We only care about Endpoint datasources
   if (newDatasource.package?.name !== 'endpoint') {
     return newDatasource;

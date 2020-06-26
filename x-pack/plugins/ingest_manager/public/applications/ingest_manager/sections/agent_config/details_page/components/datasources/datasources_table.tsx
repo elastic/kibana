@@ -16,13 +16,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig, Datasource } from '../../../../../types';
+import { AgentConfig, PackageConfig } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { DatasourceDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
 import { useConfigRefresh } from '../../hooks';
 
-interface InMemoryDatasource extends Datasource {
+interface InMemoryDatasource extends PackageConfig {
   streams: { total: number; enabled: number };
   inputTypes: string[];
   packageName?: string;
@@ -31,7 +31,7 @@ interface InMemoryDatasource extends Datasource {
 }
 
 interface Props {
-  datasources: Datasource[];
+  datasources: PackageConfig[];
   config: AgentConfig;
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryDatasource>['loading'];

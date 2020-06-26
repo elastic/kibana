@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+export interface PackageConfigPackage {
+  name: string;
+  title: string;
+  version: string;
+}
+
+export interface PackageConfigConfigRecordEntry {
+  type?: string;
+  value?: any;
+}
+
+export type PackageConfigConfigRecord = Record<string, PackageConfigConfigRecordEntry>;
+
+export interface NewPackageConfigInputStream {
+  id: string;
+  enabled: boolean;
+  dataset: {
+    name: string;
+    type: string;
+  };
+  processors?: string[];
+  config?: PackageConfigConfigRecord;
+  vars?: PackageConfigConfigRecord;
+}
+
+export interface PackageConfigInputStream extends NewPackageConfigInputStream {
+  agent_stream?: any;
+}
+
+export interface NewPackageConfigInput {
+  type: string;
+  enabled: boolean;
+  processors?: string[];
+  config?: PackageConfigConfigRecord;
+  vars?: PackageConfigConfigRecord;
+  streams: NewPackageConfigInputStream[];
+}
+
+export interface PackageConfigInput extends Omit<NewPackageConfigInput, 'streams'> {
+  streams: PackageConfigInputStream[];
+}
+
+export interface NewPackageConfig {
+  name: string;
+  description?: string;
+  namespace?: string;
+  config_id: string;
+  enabled: boolean;
+  package?: PackageConfigPackage;
+  output_id: string;
+  inputs: NewPackageConfigInput[];
+}
+
+export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
+  id: string;
+  inputs: PackageConfigInput[];
+  revision: number;
+  updated_at: string;
+  updated_by: string;
+  created_at: string;
+  created_by: string;
+}
+
+export type PackageConfigSOAttributes = Omit<PackageConfig, 'id'>;
