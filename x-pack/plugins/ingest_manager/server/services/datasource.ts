@@ -12,7 +12,7 @@ import {
   DatasourceInputStream,
   PackageInfo,
 } from '../../common';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
+import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
   NewDatasource,
   Datasource,
@@ -27,7 +27,7 @@ import { getPackageInfo, getInstallation } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
-const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
+const SAVED_OBJECT_TYPE = PACKAGE_CONFIG_SAVED_OBJECT_TYPE;
 
 function getDataset(st: string) {
   return st.split('.')[1];

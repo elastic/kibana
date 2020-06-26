@@ -9,7 +9,7 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -17,14 +17,13 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
-import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
+
 /*
  * Saved object types and mappings
  *
- * Please update typings in `/common/types` if mappings are updated.
+ * Please update typings in `/common/types` as well as
+ * schemas in `/server/types` if mappings are updated.
  */
-
 const savedObjectTypes: { [key: string]: SavedObjectsType } = {
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -121,19 +120,16 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         id: { type: 'keyword' },
         name: { type: 'text' },
-        is_default: { type: 'boolean' },
-        namespace: { type: 'keyword' },
         description: { type: 'text' },
+        namespace: { type: 'keyword' },
+        is_default: { type: 'boolean' },
         status: { type: 'keyword' },
-        datasources: { type: 'keyword' },
+        package_configs: { type: 'keyword' },
+        revision: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
-        revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword' },
       },
-    },
-    migrations: {
-      '7.9.0': migrateAgentConfigToV790,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -177,8 +173,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       },
     },
   },
-  [DATASOURCE_SAVED_OBJECT_TYPE]: {
-    name: DATASOURCE_SAVED_OBJECT_TYPE,
+  [PACKAGE_CONFIG_SAVED_OBJECT_TYPE]: {
+    name: PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -190,7 +186,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         config_id: { type: 'keyword' },
-        enabled: { type: 'boolean' },
+        output_id: { type: 'keyword' },
         package: {
           properties: {
             name: { type: 'keyword' },
@@ -198,15 +194,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             version: { type: 'keyword' },
           },
         },
-        output_id: { type: 'keyword' },
         inputs: {
           type: 'nested',
           properties: {
             type: { type: 'keyword' },
-            enabled: { type: 'boolean' },
-            processors: { type: 'keyword' },
-            config: { type: 'flattened' },
             vars: { type: 'flattened' },
+            config: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
@@ -218,10 +211,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
                     type: { type: 'keyword' },
                   },
                 },
-                processors: { type: 'keyword' },
-                config: { type: 'flattened' },
-                agent_stream: { type: 'flattened' },
                 vars: { type: 'flattened' },
+                config: { type: 'flattened' },
+                compiled_stream: { type: 'flattened' },
               },
             },
           },
@@ -232,9 +224,6 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
       },
-    },
-    migrations: {
-      '7.9.0': migrateDatasourcesToV790,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

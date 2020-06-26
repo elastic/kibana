@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
-import { PACKAGES_SAVED_OBJECT_TYPE, DATASOURCE_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
@@ -28,7 +28,7 @@ export async function removeInstallation(options: {
   const installedObjects = installation.installed || [];
 
   const { total } = await datasourceService.list(savedObjectsClient, {
-    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 0,
     perPage: 0,
   });

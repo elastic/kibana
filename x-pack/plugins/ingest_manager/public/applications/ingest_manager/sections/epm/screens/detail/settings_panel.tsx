@@ -11,7 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { InstallStatus, PackageInfo } from '../../../../types';
 import { useGetDatasources } from '../../../../hooks';
-import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { UpdateIcon } from '../../components/icons';
@@ -49,7 +49,7 @@ export const SettingsPanel = (
   const { data: datasourcesData } = useGetDatasources({
     perPage: 0,
     page: 1,
-    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
+    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
   const packageHasDatasources = !!datasourcesData?.total;
