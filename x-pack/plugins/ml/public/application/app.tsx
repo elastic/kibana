@@ -13,7 +13,6 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
-import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
 
 import { MlRouter } from './routing';
@@ -80,14 +79,11 @@ export const renderApp = (
 
   deps.kibanaLegacy.loadFontAwesome();
 
-  const mlLicense = setLicenseCache(deps.licensing);
-
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
 
   return () => {
-    mlLicense.unsubscribe();
     clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
   };
