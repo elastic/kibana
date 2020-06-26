@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiSkipLink } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 export interface SkipBottomButtonProps {
@@ -30,9 +30,24 @@ export interface SkipBottomButtonProps {
 export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
   return (
     <I18nProvider>
-      <EuiButton onClick={onClick} iconType="arrowDown" className="dscSkipButton">
-        <FormattedMessage id="discover.skipToBottomButtonLabel" defaultMessage="Skip to bottom" />
-      </EuiButton>
+      <EuiSkipLink
+        size="s"
+        iconType="arrowDown"
+        onClick={(event) => {
+          // prevent the anchor to reload the page on click
+          event.preventDefault();
+          // The destinationId prop cannot be leveraged here as the table needs
+          // to be updated first (angular logic)
+          onClick();
+        }}
+        className="dscSkipButton"
+        destinationId=""
+      >
+        <FormattedMessage
+          id="discover.skipToBottomButtonLabel"
+          defaultMessage="Skip to end of table"
+        />
+      </EuiSkipLink>
     </I18nProvider>
   );
 }
