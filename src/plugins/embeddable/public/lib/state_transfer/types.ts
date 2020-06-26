@@ -26,6 +26,7 @@ import { EmbeddableInput } from '..';
 export interface EmbeddableEditorState {
   originatingApp: string;
   byValueMode?: boolean;
+  valueInput?: EmbeddableInput;
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
@@ -42,6 +43,7 @@ export interface EmbeddablePackageByReferenceState {
 }
 
 export interface EmbeddablePackageByValueState {
+  type: string;
   input: EmbeddableInput;
 }
 

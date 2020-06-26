@@ -60,6 +60,7 @@ import {
   ViewMode,
   SavedObjectEmbeddableInput,
   ContainerOutput,
+  EmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -428,11 +429,18 @@ export class DashboardAppController {
 
             const incomingState = embeddable
               .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage();
+              .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
             if (incomingState) {
-              container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
-                savedObjectId: incomingState.id,
-              });
+              if ('id' in incomingState) {
+                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                  savedObjectId: incomingState.id,
+                });
+              } else if ('input' in incomingState) {
+                container.addOrUpdateEmbeddable<EmbeddableInput>(
+                  incomingState.type,
+                  incomingState.input
+                );
+              }
             }
           }
 

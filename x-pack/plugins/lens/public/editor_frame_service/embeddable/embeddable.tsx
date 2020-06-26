@@ -137,7 +137,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       id: 'test',
     };
     this.initializeOutput();
-    this.render(this.domNode!);
+    if (this.domNode) {
+      this.render(this.domNode!);
+    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {

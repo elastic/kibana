@@ -5,6 +5,8 @@
  */
 import React from 'react';
 
+import uuid from 'uuid';
+
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -18,7 +20,7 @@ import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_te
 import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { SavedObjectIndexStore } from '../persistence';
+import { Document, SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
@@ -52,21 +54,34 @@ export async function mountApp(
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
     id?: string,
+    documentByValue?: Document,
     returnToOrigin?: boolean,
     newlyCreated?: boolean
   ) => {
-    if (!id) {
+    if (!id && !embeddableEditorIncomingState?.byValueMode) {
       routeProps.history.push('/');
     } else if (!embeddableEditorIncomingState?.originatingApp) {
       routeProps.history.push(`/edit/${id}`);
-    } else if (!!embeddableEditorIncomingState?.originatingApp && id && returnToOrigin) {
+    } else if (!!embeddableEditorIncomingState?.originatingApp && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
 
-      if (newlyCreated && stateTransfer) {
+      if (newlyCreated && id) {
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
             state: { id, type: LENS_EMBEDDABLE_TYPE },
+          }
+        );
+      } else if (documentByValue) {
+        const { type, ...rest } = documentByValue;
+        const idToUse = id ? id : uuid.v4();
+        stateTransfer.navigateToWithEmbeddablePackage(
+          embeddableEditorIncomingState?.originatingApp,
+          {
+            state: {
+              type: LENS_EMBEDDABLE_TYPE,
+              input: { id: idToUse, attributes: rest },
+            },
           }
         );
       } else {
@@ -77,7 +92,6 @@ export async function mountApp(
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-
     return (
       <App
         core={coreStart}
@@ -87,8 +101,8 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, id, returnToOrigin, newlyCreated)
+        redirectTo={(id, documentByValue, returnToOrigin, newlyCreated) =>
+          redirectTo(routeProps, id, documentByValue, returnToOrigin, newlyCreated)
         }
         embeddableEditorIncomingState={embeddableEditorIncomingState}
         onAppLeave={params.onAppLeave}

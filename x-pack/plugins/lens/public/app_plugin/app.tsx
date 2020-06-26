@@ -39,6 +39,7 @@ import {
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
+import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable';
 
 interface State {
   isLoading: boolean;
@@ -57,6 +58,25 @@ interface State {
   savedQuery?: SavedQuery;
 }
 
+interface LensAppProps {
+  editorFrame: EditorFrameInstance;
+  data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
+  core: AppMountContext['core'];
+  storage: IStorageWrapper;
+  docId?: string;
+  docStorage: SavedObjectStore;
+  redirectTo: (
+    id?: string,
+    documentByValue?: Document,
+    returnToOrigin?: boolean,
+    newlyCreated?: boolean
+  ) => void;
+  embeddableEditorIncomingState?: EmbeddableEditorState;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  history: History;
+}
+
 export function App({
   editorFrame,
   data,
@@ -69,19 +89,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
-}: {
-  editorFrame: EditorFrameInstance;
-  data: DataPublicPluginStart;
-  navigation: NavigationPublicPluginStart;
-  core: AppMountContext['core'];
-  storage: IStorageWrapper;
-  docId?: string;
-  docStorage: SavedObjectStore;
-  redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
-  embeddableEditorIncomingState?: EmbeddableEditorState;
-  onAppLeave: AppMountParameters['onAppLeave'];
-  history: History;
-}) {
+}: LensAppProps) {
   const language =
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
@@ -155,6 +163,7 @@ export function App({
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
+        !embeddableEditorIncomingState?.byValueMode &&
         core.application.capabilities.visualize.save &&
         (state.persistedDoc?.expression
           ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
@@ -189,41 +198,24 @@ export function App({
       },
       {
         text: state.persistedDoc
-          ? state.persistedDoc.title
+          ? embeddableEditorIncomingState?.byValueMode
+            ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'By Value' })
+            : state.persistedDoc.title
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
   }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
 
   useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
+    if (
+      !embeddableEditorIncomingState?.byValueMode &&
+      docId &&
+      (!state.persistedDoc || state.persistedDoc.id !== docId)
+    ) {
       setState((s) => ({ ...s, isLoading: true }));
       docStorage
         .load(docId)
-        .then((doc) => {
-          getAllIndexPatterns(
-            doc.state.datasourceMetaData.filterableIndexPatterns,
-            data.indexPatterns,
-            core.notifications
-          )
-            .then((indexPatterns) => {
-              // Don't overwrite any pinned filters
-              data.query.filterManager.setAppFilters(doc.state.filters);
-              setState((s) => ({
-                ...s,
-                isLoading: false,
-                persistedDoc: doc,
-                lastKnownDoc: doc,
-                query: doc.state.query,
-                indexPatternsForTopNav: indexPatterns,
-              }));
-            })
-            .catch(() => {
-              setState((s) => ({ ...s, isLoading: false }));
-
-              redirectTo();
-            });
-        })
+        .then((doc) => updateDoc(doc))
         .catch(() => {
           setState((s) => ({ ...s, isLoading: false }));
 
@@ -235,6 +227,16 @@ export function App({
 
           redirectTo();
         });
+    } else if (
+      embeddableEditorIncomingState?.byValueMode &&
+      embeddableEditorIncomingState?.valueInput
+    ) {
+      const doc = {
+        ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
+        id: embeddableEditorIncomingState?.valueInput.id,
+      };
+      updateDoc(doc);
+      redirectTo();
     }
   }, [
     core.notifications,
@@ -246,6 +248,31 @@ export function App({
     // redirectTo,
     // state.persistedDoc,
   ]);
+
+  const updateDoc = async (doc: Document) => {
+    getAllIndexPatterns(
+      doc.state.datasourceMetaData.filterableIndexPatterns,
+      data.indexPatterns,
+      core.notifications
+    )
+      .then((indexPatterns) => {
+        // Don't overwrite any pinned filters
+        data.query.filterManager.setAppFilters(doc.state.filters);
+        setState((s) => ({
+          ...s,
+          isLoading: false,
+          persistedDoc: doc,
+          lastKnownDoc: doc,
+          query: doc.state.query,
+          indexPatternsForTopNav: indexPatterns,
+        }));
+      })
+      .catch(() => {
+        setState((s) => ({ ...s, isLoading: false }));
+
+        redirectTo();
+      });
+  };
 
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -279,27 +306,30 @@ export function App({
       title: saveProps.newTitle,
     };
 
-    await checkForDuplicateTitle(
-      {
-        ...doc,
-        copyOnSave: saveProps.newCopyOnSave,
-        lastSavedTitle: lastKnownDoc?.title,
-        getEsType: () => 'lens',
-        getDisplayName: () =>
-          i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          }),
-      },
-      saveProps.isTitleDuplicateConfirmed,
-      saveProps.onTitleDuplicate,
-      {
-        savedObjectsClient: core.savedObjects.client,
-        overlays: core.overlays,
-      }
-    );
-
     const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
-    if (!embeddableEditorIncomingState?.byValueMode) {
+
+    if (embeddableEditorIncomingState?.byValueMode) {
+      redirectTo(doc.id, doc, saveProps.returnToOrigin, newlyCreated);
+    } else {
+      await checkForDuplicateTitle(
+        {
+          ...doc,
+          copyOnSave: saveProps.newCopyOnSave,
+          lastSavedTitle: lastKnownDoc?.title,
+          getEsType: () => 'lens',
+          getDisplayName: () =>
+            i18n.translate('xpack.lens.app.saveModalType', {
+              defaultMessage: 'Lens visualization',
+            }),
+        },
+        saveProps.isTitleDuplicateConfirmed,
+        saveProps.onTitleDuplicate,
+        {
+          savedObjectsClient: core.savedObjects.client,
+          overlays: core.overlays,
+        }
+      );
+
       docStorage
         .save(doc)
         .then(({ id }) => {
@@ -312,7 +342,7 @@ export function App({
             lastKnownDoc: newDoc,
           }));
           if (docId !== id || saveProps.returnToOrigin) {
-            redirectTo(id, saveProps.returnToOrigin, newlyCreated);
+            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated);
           }
         })
         .catch((e) => {
