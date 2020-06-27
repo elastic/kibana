@@ -47,7 +47,7 @@ const options: ListTypeOptions[] = [
 const defaultListType: Type = 'keyword';
 
 export interface ValueListsFormProps {
-  onError: (error: Error) => void;
+  onError: (reason: unknown) => void;
   onSuccess: (response: ListSchema) => void;
 }
 
@@ -82,28 +82,32 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
     [resetForm, onSuccess]
   );
   const handleError = useCallback(
-    (error: Error) => {
-      onError(error);
+    (reason: unknown) => {
+      onError(reason);
     },
     [onError]
   );
 
   const handleImport = useCallback(() => {
     if (!importState.loading && files && files.length) {
-      try {
-        importList({
-          file: files[0],
-          listId: undefined,
-          http,
-          type,
-        })
-          .then(handleSuccess)
-          .catch(handleError);
-      } catch (error) {
-        handleError(error);
-      }
+      importList({
+        file: files[0],
+        listId: undefined,
+        http,
+        type,
+      });
     }
-  }, [importState.loading, files, importList, http, type, handleSuccess, handleError]);
+  }, [importState.loading, files, importList, http, type]);
+
+  useEffect(() => {
+    const { error, loading, result } = importState;
+
+    if (!loading && result) {
+      handleSuccess(result);
+    } else if (!loading && error) {
+      handleError(error);
+    }
+  }, [handleError, handleSuccess, importState]);
 
   useEffect(() => {
     return handleCancel;

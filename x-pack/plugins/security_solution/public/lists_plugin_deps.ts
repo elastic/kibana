@@ -5,13 +5,13 @@
  */
 
 export {
+  exportList,
   useApi,
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
   useFindLists,
   useDeleteList,
-  useExportList,
   useImportList,
   ExceptionIdentifiers,
   ExceptionList,

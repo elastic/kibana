@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ListSchema, useExportList, useFindLists, useDeleteList } from '../../../lists_plugin_deps';
+import { ListSchema, exportList, useFindLists, useDeleteList } from '../../../lists_plugin_deps';
 import { useToasts, useKibana } from '../../../common/lib/kibana';
 import { GenericDownloader } from '../../../common/components/generic_downloader';
 import * as i18n from './translations';
@@ -37,7 +37,6 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList } = useDeleteList();
-  const { start: exportList } = useExportList();
   const [exportListId, setExportListId] = useState<string>();
   const toasts = useToasts();
 
@@ -54,8 +53,9 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   );
 
   const handleExport = useCallback(
-    async ({ ids }: { ids: string[] }) => exportList({ http, listId: ids[0] }),
-    [http, exportList]
+    async ({ ids }: { ids: string[] }) =>
+      exportList({ http, listId: ids[0], signal: new AbortController().signal }),
+    [http]
   );
   const handleExportClick = useCallback(({ id }: { id: string }) => setExportListId(id), []);
   const handleExportComplete = useCallback(() => setExportListId(undefined), []);
@@ -68,9 +68,10 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     [setPageIndex, setPageSize]
   );
   const handleUploadError = useCallback(
-    (error: Error) => {
-      if (error.name !== 'AbortError') {
-        toasts.addError(error, { title: i18n.UPLOAD_ERROR });
+    (error: unknown) => {
+      if (!String(error).includes('AbortError')) {
+        const reportedError = error instanceof Error ? error : new Error(String(error));
+        toasts.addError(reportedError, { title: i18n.UPLOAD_ERROR });
       }
     },
     [toasts]
