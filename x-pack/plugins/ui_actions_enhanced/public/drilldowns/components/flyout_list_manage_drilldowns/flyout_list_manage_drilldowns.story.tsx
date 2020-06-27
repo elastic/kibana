@@ -15,7 +15,7 @@ storiesOf('components/FlyoutListManageDrilldowns', module).add('default', () => 
       drilldowns={[
         { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
         { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
-        { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3' },
+        { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3', error: 'Some error...' },
       ]}
     />
   </EuiFlyout>

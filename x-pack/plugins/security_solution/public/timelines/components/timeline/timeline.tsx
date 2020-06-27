@@ -40,6 +40,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
+import { TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -110,6 +111,7 @@ export interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -141,6 +143,7 @@ export const TimelineComponent: React.FC<Props> = ({
   show,
   showCallOutUnauthorizedMsg,
   start,
+  status,
   sort,
   toggleColumn,
   usersViewing,
@@ -214,6 +217,7 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            status={status}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
