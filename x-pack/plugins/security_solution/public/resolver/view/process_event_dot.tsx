@@ -15,7 +15,7 @@ import querystring from 'querystring';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
-import { SymbolIds, useResolverTheme, calculateResolverFontSize, nodeType } from './assets';
+import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
@@ -239,6 +239,8 @@ const ProcessEventDotComponents = React.memo(
     event,
     projectionMatrix,
     adjacentNodeMap,
+    isProcessTerminated,
+    isProcessOrigin,
     relatedEventsStats,
   }: {
     /**
@@ -262,6 +264,16 @@ const ProcessEventDotComponents = React.memo(
      */
     adjacentNodeMap: AdjacentProcessMap;
     /**
+     * Whether or not to show the process as terminated.
+     */
+    isProcessTerminated: boolean;
+    /**
+     * Whether or not to show the process as the originating event.
+     */
+    isProcessOrigin: boolean;
+    /**
+     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
+     * to provide the user some visibility regarding the contents thereof.
      * Statistics for the number of related events and alerts for this process node
      */
     relatedEventsStats?: ResolverNodeStats;
@@ -363,7 +375,7 @@ const ProcessEventDotComponents = React.memo(
           })
         | null;
     } = React.createRef();
-    const { colorMap, nodeAssets } = useResolverTheme();
+    const { colorMap, cubeAssetsForNode } = useResolverTheme();
     const {
       backingFill,
       cubeSymbol,
@@ -371,7 +383,8 @@ const ProcessEventDotComponents = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = nodeAssets[nodeType(event)];
+    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+
     const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
     const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -400,13 +413,6 @@ const ProcessEventDotComponents = React.memo(
         payload: selfId,
       });
     }, [dispatch, selfId]);
-
-    const handleRelatedAlertsRequest = useCallback(() => {
-      dispatch({
-        type: 'userSelectedRelatedAlerts',
-        payload: event,
-      });
-    }, [dispatch, event]);
 
     const history = useHistory();
     const urlSearch = history.location.search;
@@ -624,22 +630,16 @@ const ProcessEventDotComponents = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              <NodeSubMenu
-                count={grandTotal}
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuAction={handleRelatedEventRequest}
-                menuTitle={subMenuAssets.relatedEvents.title}
-                optionsWithActions={relatedEventStatusOrOptions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NodeSubMenu
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuTitle={subMenuAssets.relatedAlerts.title}
-                menuAction={handleRelatedAlertsRequest}
-              />
+              {grandTotal > 0 && (
+                <NodeSubMenu
+                  count={grandTotal}
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuAction={handleRelatedEventRequest}
+                  menuTitle={subMenuAssets.relatedEvents.title}
+                  optionsWithActions={relatedEventStatusOrOptions}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledActionsContainer>

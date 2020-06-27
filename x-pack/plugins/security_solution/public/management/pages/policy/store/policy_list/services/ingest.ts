@@ -20,7 +20,7 @@ const INGEST_API_ROOT = `/api/ingest_manager`;
 export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
-const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
+export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 const INGEST_API_DELETE_DATASOURCE = `${INGEST_API_DATASOURCES}/delete`;
 
 /**
