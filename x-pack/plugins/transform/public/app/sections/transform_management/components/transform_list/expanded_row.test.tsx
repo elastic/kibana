@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
-
 import { TransformListRow } from '../../../../common';
 import { ExpandedRow } from './expanded_row';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
+import { within } from '@testing-library/dom';
 
-jest.mock('../../../../../shared_imports');
-
+jest.mock('../../../../../shared_imports', () => ({
+  formatHumanReadableDateTimeSeconds: jest.fn(),
+}));
 describe('Transform: Transform List <ExpandedRow />', () => {
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {
@@ -25,11 +26,25 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     moment.tz.setDefault('Browser');
   });
 
-  test('Minimal initialization', () => {
+  test('Minimal initialization', async () => {
     const item: TransformListRow = transformListRow;
 
-    const wrapper = shallow(<ExpandedRow item={item} />);
+    const { getByText, getByTestId } = render(<ExpandedRow item={item} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(getByText('Details')).toBeInTheDocument();
+    expect(getByText('Stats')).toBeInTheDocument();
+    expect(getByText('JSON')).toBeInTheDocument();
+    expect(getByText('Messages')).toBeInTheDocument();
+    expect(getByText('Preview')).toBeInTheDocument();
+
+    const tabContent = getByTestId('transformDetailsTabContent');
+    expect(tabContent).toBeInTheDocument();
+
+    expect(getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
+    expect(within(tabContent).getByText('General')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('transformStatsTab'));
+    expect(getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
+    expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
   });
 });

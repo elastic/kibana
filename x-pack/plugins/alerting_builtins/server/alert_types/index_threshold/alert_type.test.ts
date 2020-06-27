@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { Params } from './alert_type_params';
 
@@ -13,7 +13,7 @@ describe('alertType', () => {
     indexThreshold: {
       timeSeriesQuery: jest.fn(),
     },
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
   };
 
   const alertType = getAlertType(service);
