@@ -130,6 +130,15 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
+export type TileJsonVectorSourceSettings = {
+  url: string;
+  layerName: string;
+};
+export type TileJsonVectorSourceDescriptor = AbstractSourceDescriptor &
+  TileJsonVectorSourceSettings & {
+    tooltipProperties: string[];
+  };
+
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
@@ -149,6 +158,7 @@ export type SourceDescriptor =
   | EMSFileSourceDescriptor
   | ESPewPewSourceDescriptor
   | TiledSingleLayerVectorSourceDescriptor
+  | TileJsonVectorSourceDescriptor
   | EMSTMSSourceDescriptor
   | EMSFileSourceDescriptor;
 

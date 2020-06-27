@@ -27,6 +27,7 @@ import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { getEnableVectorTiles } from '../../kibana_services';
+import {tileJsonLayerWizardConfig} from "../sources/tilejson_source/tilejson_layer_wizard";
 
 let registered = false;
 export function registerLayerWizards() {
@@ -62,6 +63,7 @@ export function registerLayerWizards() {
     // eslint-disable-next-line no-console
     console.warn('Vector tiles are an experimental feature and should not be used in production.');
     registerLayerWizard(mvtVectorSourceWizardConfig);
+    registerLayerWizard(tileJsonLayerWizardConfig);
   }
   registered = true;
 }
