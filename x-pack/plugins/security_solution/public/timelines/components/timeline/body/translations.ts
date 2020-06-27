@@ -13,6 +13,13 @@ export const NOTES_TOOLTIP = i18n.translate(
   }
 );
 
+export const NOTES_DISABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
+  {
+    defaultMessage: 'Add notes for event filtered by a timeline template is not allowed',
+  }
+);
+
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.timeline.body.copyToClipboardButtonLabel',
   {
@@ -35,6 +42,13 @@ export const PINNED_WITH_NOTES = i18n.translate(
   'xpack.securitySolution.timeline.body.pinning.pinnnedWithNotesTooltip',
   {
     defaultMessage: 'This event cannot be unpinned because it has notes',
+  }
+);
+
+export const DISABLE_PIN = i18n.translate(
+  'xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip',
+  {
+    defaultMessage: 'This event cannot be pinned because it is filtered by a timeline template',
   }
 );
 
