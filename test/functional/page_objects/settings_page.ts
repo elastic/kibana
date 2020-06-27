@@ -197,10 +197,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       // passing in zero-based index, but adding 1 for css 1-based indexes
       return await find.byCssSelector(
         'table.euiTable tbody tr:nth-child(' +
-        (rowNumber + 1) +
-        ') td.euiTableRowCell:nth-child(' +
-        (colNumber + 1) +
-        ')'
+          (rowNumber + 1) +
+          ') td.euiTableRowCell:nth-child(' +
+          (colNumber + 1) +
+          ')'
       );
     }
 
@@ -248,8 +248,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setScriptedFieldLanguageFilter(language: string) {
       await find.clickByCssSelector(
         'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
-        language +
-        '"]'
+          language +
+          '"]'
       );
     }
 
