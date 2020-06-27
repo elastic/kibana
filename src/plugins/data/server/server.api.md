@@ -39,6 +39,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { ErrorToastOptions } from 'src/core/public/notifications';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -92,6 +93,7 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType as KibanaConfigType_2 } from 'src/core/server/kibana_config';
+import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
@@ -116,6 +118,7 @@ import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
@@ -139,6 +142,7 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { ToastInputFields } from 'src/core/public/notifications';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { Unit } from '@elastic/datemath';
@@ -652,7 +656,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
             fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
         };
         indexPatterns: {
-            IndexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
+            indexPatternsServiceFactory: (kibanaRequest: import("../../../core/server").KibanaRequest<unknown, unknown, unknown, any>) => Promise<import("../common").IndexPatternsService>;
         };
     };
     // (undocumented)
@@ -682,6 +686,10 @@ export interface PluginStart {
     //
     // (undocumented)
     fieldFormats: FieldFormatsStart;
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStart" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    indexPatterns: IndexPatternsServiceStart;
     // (undocumented)
     search: ISearchStart;
 }

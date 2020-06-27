@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export * from './utils';
-export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
-export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';
+
+// @ts-expect-error
+export default function ({ loadTestFile }) {
+  describe('data plugin', () => {
+    loadTestFile(require.resolve('./index_patterns'));
+  });
+}

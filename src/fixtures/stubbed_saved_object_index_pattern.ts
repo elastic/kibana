@@ -17,12 +17,12 @@
  * under the License.
  */
 
+// @ts-expect-error
 import stubbedLogstashFields from './logstash_fields';
-//import { SimpleSavedObject } from '../core/public';
 
 const mockLogstashFields = stubbedLogstashFields();
 
-export function stubbedSavedObjectIndexPattern(id) {
+export function stubbedSavedObjectIndexPattern(id: string | null = null) {
   return {
     id,
     type: 'index-pattern',

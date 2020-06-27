@@ -28,7 +28,7 @@ import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 
 export interface IndexPatternsServiceStart {
-  IndexPatternsServiceFactory: (
+  indexPatternsServiceFactory: (
     kibanaRequest: KibanaRequest
   ) => Promise<IndexPatternsCommonService>;
 }
@@ -50,7 +50,7 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
     const { uiSettings, savedObjects } = core;
 
     return {
-      IndexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
+      indexPatternsServiceFactory: async (kibanaRequest: KibanaRequest) => {
         const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);

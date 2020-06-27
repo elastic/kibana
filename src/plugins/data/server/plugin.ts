@@ -25,7 +25,7 @@ import {
   Logger,
 } from '../../../core/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService } from './index_patterns';
+import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -44,6 +44,7 @@ export interface DataPluginSetup {
 export interface DataPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 export interface DataPluginSetupDependencies {
