@@ -294,7 +294,6 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'a',
@@ -361,7 +360,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'b',
@@ -414,7 +412,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: savedState.layers,
-        showEmptyFields: false,
       });
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
@@ -432,7 +429,6 @@ describe('loader', () => {
         indexPatterns: {},
         existingFields: {},
         layers: {},
-        showEmptyFields: true,
       };
       const storage = createMockStorage({ indexPatternId: 'b' });
 
@@ -467,7 +463,6 @@ describe('loader', () => {
         existingFields: {},
         indexPatterns: {},
         layers: {},
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
@@ -525,7 +520,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'a' });
@@ -594,7 +588,6 @@ describe('loader', () => {
             indexPatternId: 'a',
           },
         },
-        showEmptyFields: true,
       };
 
       const storage = createMockStorage({ indexPatternId: 'b' });
