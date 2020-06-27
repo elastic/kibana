@@ -41,7 +41,6 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
-    // return map<SimpleSavedObject<T>, SavedObject<T>>(response, simpleSavedObjectToSavedObject);
     return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
   }
 

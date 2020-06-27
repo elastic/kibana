@@ -40,7 +40,7 @@ export class IndexPatternsTestPlugin
       { path: '/api/index-patterns-plugin/get-all', validate: false },
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
-        const service = await data.indexPatterns.IndexPatternsServiceFactory(req);
+        const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ids = await service.getIds();
         return res.ok({ body: ids });
       }
@@ -58,7 +58,7 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const id = (req.params as Record<string, string>).id;
         const [, { data }] = await core.getStartServices();
-        const service = await data.indexPatterns.IndexPatternsServiceFactory(req);
+        const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ip = await service.get(id);
         return res.ok({ body: ip.toSpec() });
       }
@@ -76,7 +76,7 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
-        const service = await data.indexPatterns.IndexPatternsServiceFactory(req);
+        const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ip = await service.get(id);
         await ip.save();
         return res.ok();
@@ -95,7 +95,7 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
-        const service = await data.indexPatterns.IndexPatternsServiceFactory(req);
+        const service = await data.indexPatterns.indexPatternsServiceFactory(req);
         const ip = await service.get(id);
         await ip.destroy();
         return res.ok();

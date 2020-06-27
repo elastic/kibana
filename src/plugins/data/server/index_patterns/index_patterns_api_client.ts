@@ -24,6 +24,6 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     throw new Error('IndexPatternsApiServer - getFieldsForTimePattern not defined');
   }
   async getFieldsForWildcard(options: GetFieldsOptions = {}) {
-    throw new Error('IndexPatternsApiServer - getFieldsForWildcard');
+    throw new Error('IndexPatternsApiServer - getFieldsForWildcard not defined');
   }
 }
