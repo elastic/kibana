@@ -31,7 +31,7 @@ export function defineCommonRoutes({
       {
         path,
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
-        // set of query string parameters (e.g. SAML/OIDC logout request parameters).
+        // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
         options: { authRequired: false },
       },

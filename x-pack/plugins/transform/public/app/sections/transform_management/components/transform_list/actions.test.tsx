@@ -13,7 +13,6 @@ describe('Transform: Transform List Actions', () => {
     const actions = getActions({ forceDisable: false });
 
     expect(actions).toHaveLength(4);
-    expect(actions[0].isPrimary).toBeTruthy();
     expect(typeof actions[0].render).toBe('function');
     expect(typeof actions[1].render).toBe('function');
     expect(typeof actions[2].render).toBe('function');

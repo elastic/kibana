@@ -11,7 +11,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 
 const mockRouteContext = ({
@@ -30,7 +30,7 @@ describe('DELETE custom element', () => {
     const router = httpService.createRouter();
     initializeDeleteCustomElementRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.delete.mock.calls[0][1];

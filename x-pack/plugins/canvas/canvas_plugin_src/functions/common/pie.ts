@@ -5,11 +5,11 @@
  */
 
 import { get, map, groupBy } from 'lodash';
-// @ts-ignore lodash.keyby imports invalid member from @types/lodash
+// @ts-expect-error lodash.keyby imports invalid member from @types/lodash
 import keyBy from 'lodash.keyby';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../../i18n';
 import {
