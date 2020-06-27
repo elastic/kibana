@@ -5,16 +5,33 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import supertestAsPromised from 'supertest-as-promised';
-import { format } from 'url';
-import { APM_READ_USER, APM_TEST_PASSWORD } from './authentication';
+import { format, UrlObject } from 'url';
+import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
+import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 
 interface Settings {
   license: 'basic' | 'trial';
   testFiles: string[];
   name: string;
 }
+
+const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
+  context: InheritedFtrProviderContext
+) => {
+  const security = context.getService('security');
+  await security.init();
+
+  await createApmUser(security, apmUser);
+
+  const url = format({
+    ...kibanaServer,
+    auth: `${apmUser}:${APM_TEST_PASSWORD}`,
+  });
+
+  return supertestAsPromised(url);
+};
 
 export function createTestConfig(settings: Settings) {
   const { testFiles, license, name } = settings;
@@ -24,38 +41,19 @@ export function createTestConfig(settings: Settings) {
       require.resolve('../../api_integration/config.ts')
     );
 
-    const services = xPackAPITestsConfig.get('services');
+    const services = xPackAPITestsConfig.get('services') as InheritedServices;
     const servers = xPackAPITestsConfig.get('servers');
 
-    servers.kibana = {
-      ...servers.kibana,
-    };
+    const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.APM_READ_USER);
 
     return {
       testFiles,
       servers,
       services: {
         ...services,
-        supertest: async (context: FtrProviderContext) => {
-          const security = context.getService('security');
-
-          await security.init();
-
-          await security.user.create(APM_READ_USER.name, {
-            password: APM_TEST_PASSWORD,
-            full_name: APM_READ_USER.name,
-            roles: APM_READ_USER.roles,
-          });
-
-          const url = format({
-            ...servers.kibana,
-            auth: `${APM_READ_USER.name}:${APM_TEST_PASSWORD}`,
-            username: APM_READ_USER.name,
-            password: APM_TEST_PASSWORD,
-          });
-
-          return supertestAsPromised(url);
-        },
+        supertest: supertestAsApmReadUser,
+        supertestAsApmReadUser,
+        supertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.APM_WRITE_USER),
       },
       junit: {
         reportName: name,
@@ -68,3 +66,5 @@ export function createTestConfig(settings: Settings) {
     };
   };
 }
+
+export type ApmServices = PromiseReturnType<ReturnType<typeof createTestConfig>>['services'];
