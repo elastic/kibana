@@ -9,8 +9,9 @@ import {
   sendGetEndpointSpecificDatasources,
   sendDeleteDatasource,
   sendGetFleetAgentStatusForConfig,
+  sendGetEndpointSecurityPackage,
 } from './services/ingest';
-import { isOnPolicyListPage, urlSearchParams } from './selectors';
+import { endpointPackageInfo, isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 import { initialPolicyListState } from './reducer';
 import {
@@ -32,6 +33,25 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) ||
       action.type === 'serverDeletedPolicy'
     ) {
+      if (!endpointPackageInfo(state)) {
+        // We only need the package information to retrieve the version number,
+        // and even if we don't have the version, the UI is still ok because we
+        // handle that condition. Because of this, we retrieve the package information
+        // in a non-blocking way here and also ignore any API failures (only log it
+        // to the console)
+        sendGetEndpointSecurityPackage(http)
+          .then((packageInfo) => {
+            dispatch({
+              type: 'serverReturnedEndpointPackageInfo',
+              payload: packageInfo,
+            });
+          })
+          .catch((error) => {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          });
+      }
+
       const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
       let response: GetPolicyListResponse;
 

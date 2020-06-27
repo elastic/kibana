@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
           const expectedUrl =
             baseUrl +
             '/app/discover#' +
-            '/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
+            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
             '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
             "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
             "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
