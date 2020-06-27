@@ -390,6 +390,8 @@ async function runTimersUntilResolved(fn: () => Promise<any>) {
   const p = fn();
   p.finally(() => (isResolved = true));
 
+  // wont-fix: https://github.com/typescript-eslint/typescript-eslint/issues/1984
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (isResolved === false) {
     // tick
     await new Promise((resolve) => setImmediate(resolve));

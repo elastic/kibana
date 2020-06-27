@@ -20,7 +20,7 @@ export async function apiRequestV3<T>(config: AxiosRequestConfig) {
 
     logger.info(
       `${config.method?.toUpperCase()} ${config.url} (status: ${
-        response?.status
+        response.status
       })`
     );
     logger.debug('Response headers:', response.headers);

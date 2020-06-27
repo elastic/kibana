@@ -26,19 +26,13 @@ let winstonInstance: winston.Logger;
 export type Logger = typeof logger;
 export const logger = {
   info: (message: string, meta?: string | Record<string, unknown>) => {
-    if (winstonInstance) {
-      winstonInstance.info(message, { meta });
-    }
+    winstonInstance.info(message, { meta });
   },
   verbose: (message: string, meta?: unknown) => {
-    if (winstonInstance) {
-      winstonInstance.verbose(message, { meta });
-    }
+    winstonInstance.verbose(message, { meta });
   },
   debug: (message: string, meta?: unknown) => {
-    if (winstonInstance) {
-      winstonInstance.debug(message, { meta });
-    }
+    winstonInstance.debug(message, { meta });
   },
 };
 

@@ -219,8 +219,8 @@ function getSourcePullRequest({
 }) {
   if (
     pullRequestEdge?.node.repository.name === options.repoName &&
-    pullRequestEdge?.node.repository.owner.login === options.repoOwner &&
-    pullRequestEdge?.node.mergeCommit.oid === sha
+    pullRequestEdge.node.repository.owner.login === options.repoOwner &&
+    pullRequestEdge.node.mergeCommit.oid === sha
   ) {
     return pullRequestEdge;
   }
@@ -260,11 +260,7 @@ export function getExistingTargetPullRequests(
         sourcePullRequest.node.number.toString()
       );
 
-      return (
-        isPullRequest &&
-        isMergedOrOpen &&
-        (commitMatch || (prTitleMatch && prNumberMatch))
-      );
+      return commitMatch || (prTitleMatch && prNumberMatch);
     })
     .map((item) => {
       const { source } = item.node;

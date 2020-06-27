@@ -6,6 +6,11 @@ module.exports = {
   ignorePatterns: ['dist/', 'node_modules/'],
   plugins: ['@typescript-eslint', 'jest', 'import'],
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
+  parserOptions: {
+    // This setting is required if you want to use rules which require type information
+    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/parser#parseroptionsproject
+    project: ['./tsconfig.eslint.json'],
+  },
   extends: [
     'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     'prettier/@typescript-eslint', // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
@@ -30,6 +35,7 @@ module.exports = {
       },
     ],
     'no-console': 'error',
+    '@typescript-eslint/no-unnecessary-condition': 'error',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',

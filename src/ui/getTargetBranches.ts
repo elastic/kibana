@@ -42,11 +42,11 @@ function getTargetBranchChoices(
   sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
-  const targetBranchChoices = options.targetBranchChoices?.filter(
+  const targetBranchChoices = options.targetBranchChoices.filter(
     (choice) => choice.name !== sourceBranch
   );
 
-  if (!targetBranchChoices || isEmpty(targetBranchChoices)) {
+  if (isEmpty(targetBranchChoices)) {
     throw new HandledError('Missing target branch choices');
   }
 
