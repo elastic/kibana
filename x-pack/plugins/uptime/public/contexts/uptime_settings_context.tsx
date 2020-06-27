@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useMemo } from 'react';
+import React, { createContext, useMemo, useEffect, useState } from 'react';
 import { UptimeAppProps } from '../uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
@@ -42,6 +42,17 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
   const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges } = props;
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
+
+  const {
+    licensing: { license$ },
+  } = plugins;
+
+  useEffect(() => {
+    const subscription = license$.subscribe(setLicense);
+    return () => subscription.unsubscribe();
+  }, [license$, setLicense]);
 
   const value = useMemo(() => {
     return {

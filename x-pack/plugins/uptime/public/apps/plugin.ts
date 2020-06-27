@@ -27,16 +27,19 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { kibanaService } from '../state/kibana_service';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
+  licensing: LicensingPluginStart;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
