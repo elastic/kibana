@@ -46,6 +46,7 @@ interface Props {
   createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
@@ -79,6 +80,7 @@ export const Properties = React.memo<Props>(
     createTimeline,
     description,
     getNotesByIds,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
     isFavorite,
@@ -120,18 +122,21 @@ export const Properties = React.memo<Props>(
     const onRowClick = useCallback(
       (id: string) => {
         onCloseCaseModal();
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-          path: getCaseDetailsUrl({ id }),
-        });
+
         dispatch(
           setInsertTimeline({
+            graphEventId,
             timelineId,
             timelineSavedObjectId: currentTimeline.savedObjectId,
             timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
           })
         );
+
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id }),
+        });
       },
-      [navigateToApp, onCloseCaseModal, currentTimeline, dispatch, timelineId, title]
+      [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
     );
 
     const datePickerWidth = useMemo(
@@ -174,6 +179,7 @@ export const Properties = React.memo<Props>(
           associateNote={associateNote}
           description={description}
           getNotesByIds={getNotesByIds}
+          graphEventId={graphEventId}
           isDataInTimeline={isDataInTimeline}
           noteIds={noteIds}
           onButtonClick={onButtonClick}
