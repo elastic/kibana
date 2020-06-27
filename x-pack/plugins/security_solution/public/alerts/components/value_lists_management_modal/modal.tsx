@@ -106,7 +106,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   };
 
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onClose}>
       <EuiModal onClose={onClose} maxWidth={750}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
