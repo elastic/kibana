@@ -25,11 +25,9 @@ export type ServicesItemsSetup = Setup & SetupTimeRange & SetupUIFilters;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems(setup: ServicesItemsSetup) {
-  const projection = getServicesProjection({ setup });
-
   const params = {
+    projection: getServicesProjection({ setup, noEvents: true }),
     setup,
-    projection,
   };
 
   const [

@@ -32,11 +32,12 @@ export const getTransactionDurationAvg = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client } = setup;
+  const { client, indices } = setup;
 
   const response = await client.search(
     mergeProjection(projection, {
       size: 0,
+      index: indices['apm_oss.transactionIndices'],
       body: {
         query: {
           bool: {
@@ -82,20 +83,30 @@ export const getAgentName = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const response = await setup.client.search(
+  const { client, indices } = setup;
+  const response = await client.search(
     mergeProjection(projection, {
+      index: [
+        indices['apm_oss.metricsIndices'],
+        indices['apm_oss.errorIndices'],
+        indices['apm_oss.transactionIndices'],
+      ],
       body: {
+        size: 0,
         query: {
           bool: {
-            filter: projection.body.query.bool.filter.concat({
-              terms: {
-                [PROCESSOR_EVENT]: [
-                  ProcessorEvent.metric,
-                  ProcessorEvent.error,
-                  ProcessorEvent.transaction,
-                ],
+            filter: [
+              ...projection.body.query.bool.filter,
+              {
+                terms: {
+                  [PROCESSOR_EVENT]: [
+                    ProcessorEvent.metric,
+                    ProcessorEvent.error,
+                    ProcessorEvent.transaction,
+                  ],
+                },
               },
-            }),
+            ],
           },
         },
         aggs: {
@@ -114,7 +125,6 @@ export const getAgentName = async ({
             },
           },
         },
-        size: 0,
       },
     })
   );
@@ -139,8 +149,10 @@ export const getTransactionRate = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const response = await setup.client.search(
+  const { client, indices } = setup;
+  const response = await client.search(
     mergeProjection(projection, {
+      index: indices['apm_oss.transactionIndices'],
       body: {
         size: 0,
         query: {
@@ -188,8 +200,10 @@ export const getErrorRate = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const response = await setup.client.search(
+  const { client, indices } = setup;
+  const response = await client.search(
     mergeProjection(projection, {
+      index: indices['apm_oss.errorIndices'],
       body: {
         size: 0,
         query: {
@@ -229,8 +243,14 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const response = await setup.client.search(
+  const { client, indices } = setup;
+  const response = await client.search(
     mergeProjection(projection, {
+      index: [
+        indices['apm_oss.metricsIndices'],
+        indices['apm_oss.errorIndices'],
+        indices['apm_oss.metricsIndices'],
+      ],
       body: {
         size: 0,
         query: {

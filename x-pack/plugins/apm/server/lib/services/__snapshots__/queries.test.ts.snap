@@ -135,15 +135,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -167,11 +158,7 @@ Array [
       },
       "size": 0,
     },
-    "index": Array [
-      "myIndex",
-      "myIndex",
-      "myIndex",
-    ],
+    "index": "myIndex",
     "size": 0,
   },
   Object {
@@ -198,15 +185,6 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
-            Object {
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
@@ -253,15 +231,6 @@ Array [
       "query": Object {
         "bool": Object {
           "filter": Array [
-            Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
             Object {
               "range": Object {
                 "@timestamp": Object {
@@ -286,11 +255,7 @@ Array [
       },
       "size": 0,
     },
-    "index": Array [
-      "myIndex",
-      "myIndex",
-      "myIndex",
-    ],
+    "index": "myIndex",
   },
   Object {
     "body": Object {
@@ -304,15 +269,6 @@ Array [
       "query": Object {
         "bool": Object {
           "filter": Array [
-            Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
             Object {
               "range": Object {
                 "@timestamp": Object {
@@ -337,11 +293,7 @@ Array [
       },
       "size": 0,
     },
-    "index": Array [
-      "myIndex",
-      "myIndex",
-      "myIndex",
-    ],
+    "index": "myIndex",
   },
   Object {
     "body": Object {
@@ -363,15 +315,6 @@ Array [
       "query": Object {
         "bool": Object {
           "filter": Array [
-            Object {
-              "terms": Object {
-                "processor.event": Array [
-                  "transaction",
-                  "error",
-                  "metric",
-                ],
-              },
-            },
             Object {
               "range": Object {
                 "@timestamp": Object {
