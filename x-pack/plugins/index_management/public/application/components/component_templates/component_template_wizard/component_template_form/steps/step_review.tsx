@@ -23,16 +23,9 @@ import {
   ComponentTemplateDeserialized,
   serializers,
   serializeComponentTemplate,
-} from '../../../../shared_imports';
+} from '../../../shared_imports';
 
 const { stripEmptyFields } = serializers;
-
-const NoneDescriptionText = () => (
-  <FormattedMessage
-    id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.noneDescriptionText"
-    defaultMessage="None"
-  />
-);
 
 const getDescriptionText = (data: any) => {
   const hasEntries = data && Object.entries(data).length > 0;
@@ -80,37 +73,19 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             {/* Version */}
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
-                defaultMessage="Version"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {version ? version : <NoneDescriptionText />}
-            </EuiDescriptionListDescription>
+            {version && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
+                    defaultMessage="Version"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{version}</EuiDescriptionListDescription>
+              </>
+            )}
 
-            {/* Metadata */}
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
-                defaultMessage="Metadata"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {serializedMeta ? (
-                <EuiCodeBlock language="json">
-                  {JSON.stringify(serializedMeta, null, 2)}
-                </EuiCodeBlock>
-              ) : (
-                <NoneDescriptionText />
-              )}
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
+            {/* Index settings */}
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.settingsLabel"
@@ -120,6 +95,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
             <EuiDescriptionListDescription>
               {getDescriptionText(serializedSettings)}
             </EuiDescriptionListDescription>
+
+            {/* Mappings */}
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.mappingLabel"
@@ -129,6 +106,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
             <EuiDescriptionListDescription>
               {getDescriptionText(serializedMappings)}
             </EuiDescriptionListDescription>
+
+            {/* Aliases */}
             <EuiDescriptionListTitle>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.aliasesLabel"
@@ -139,6 +118,25 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
               {getDescriptionText(serializedAliases)}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          {/* Metadata */}
+          {serializedMeta && (
+            <EuiDescriptionList textStyle="reverse">
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
+                  defaultMessage="Metadata"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiCodeBlock language="json">
+                  {JSON.stringify(serializedMeta, null, 2)}
+                </EuiCodeBlock>
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

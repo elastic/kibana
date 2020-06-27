@@ -23,10 +23,9 @@ import {
   Field,
   Forms,
   JsonEditorField,
-} from '../../../../shared_imports';
-
+} from '../../../shared_imports';
+import { useComponentTemplatesContext } from '../../../component_templates_context';
 import { logisticsFormSchema } from './step_logistics_schema';
-import { useComponentTemplatesContext } from '../../../../component_templates_context';
 
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
@@ -99,6 +98,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               href={documentation.componentTemplates}
               target="_blank"
               iconType="help"
+              data-test-subj="documentationLink"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.docsButtonLabel"
@@ -171,7 +171,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
-                defaultMessage="A user-defined map that can contain any data. {learnMoreLink}"
+                defaultMessage="Arbitrary metadata that is stored in cluster state. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink

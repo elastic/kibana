@@ -8,15 +8,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { serializers, Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
-import { StepLogisticsContainer, StepReviewContainer } from './steps';
 import {
+  serializers,
+  Forms,
+  ComponentTemplateDeserialized,
   CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
-} from '../../../../shared';
-import { useComponentTemplatesContext } from '../../../component_templates_context';
+} from '../../shared_imports';
+import { useComponentTemplatesContext } from '../../component_templates_context';
+import { StepLogisticsContainer, StepReviewContainer } from './steps';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -64,7 +66,7 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
   review: {
     id: 'review',
     label: i18n.translate('xpack.idxMgmt.componentTemplateForm.steps.summaryStepName', {
-      defaultMessage: 'Review component template',
+      defaultMessage: 'Review',
     }),
   },
 };

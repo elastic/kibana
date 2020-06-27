@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { Forms } from '../../../../shared_imports';
+import { Forms } from '../../../shared_imports';
 import { WizardContent } from '../component_template_form';
 import { StepLogistics } from './step_logistics';
 

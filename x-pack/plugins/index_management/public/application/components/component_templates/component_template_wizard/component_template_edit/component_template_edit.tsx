@@ -7,10 +7,11 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { useComponentTemplatesContext } from '../component_templates_context';
-import { ComponentTemplateDeserialized, SectionLoading } from '../shared_imports';
-import { ComponentTemplateForm } from '../shared';
-import { attemptToDecodeURI } from '../lib';
+
+import { useComponentTemplatesContext } from '../../component_templates_context';
+import { ComponentTemplateDeserialized, SectionLoading } from '../../shared_imports';
+import { attemptToDecodeURI } from '../../lib';
+import { ComponentTemplateForm } from '../component_template_form';
 
 interface MatchParams {
   name: string;

@@ -45,7 +45,15 @@ export {
 
 export { isJSON } from '../../../../../../../src/plugins/es_ui_shared/static/validators/string';
 
-export { TabMappings, TabSettings, TabAliases } from '../shared';
+export {
+  TabMappings,
+  TabSettings,
+  TabAliases,
+  CommonWizardSteps,
+  StepSettingsContainer,
+  StepMappingsContainer,
+  StepAliasesContainer,
+} from '../shared';
 
 export {
   ComponentTemplateSerialized,

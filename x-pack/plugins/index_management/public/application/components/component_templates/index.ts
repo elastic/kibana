@@ -10,8 +10,8 @@ export { ComponentTemplateList } from './component_template_list';
 
 export { ComponentTemplateDetailsFlyout } from './component_template_details';
 
-export { ComponentTemplateCreate } from './component_template_create';
-
-export { ComponentTemplateEdit } from './component_template_edit';
-
-export { ComponentTemplateClone } from './component_template_clone';
+export {
+  ComponentTemplateCreate,
+  ComponentTemplateEdit,
+  ComponentTemplateClone,
+} from './component_template_wizard';

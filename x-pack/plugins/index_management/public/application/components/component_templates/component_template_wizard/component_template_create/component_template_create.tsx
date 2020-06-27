@@ -7,9 +7,10 @@ import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ComponentTemplateDeserialized } from '../shared_imports';
-import { ComponentTemplateForm } from '../shared';
-import { useComponentTemplatesContext } from '../component_templates_context';
+
+import { ComponentTemplateDeserialized } from '../../shared_imports';
+import { useComponentTemplatesContext } from '../../component_templates_context';
+import { ComponentTemplateForm } from '../component_template_form';
 
 interface Props {
   /**

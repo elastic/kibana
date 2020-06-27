@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ComponentTemplateForm } from './component_template_form';
+export { ComponentTemplateCreate } from './component_template_create';
+
+export { ComponentTemplateEdit } from './component_template_edit';
+
+export { ComponentTemplateClone } from './component_template_clone';

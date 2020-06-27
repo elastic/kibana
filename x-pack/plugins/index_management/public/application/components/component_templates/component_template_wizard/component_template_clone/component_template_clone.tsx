@@ -9,10 +9,10 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SectionLoading } from '../shared_imports';
-import { useComponentTemplatesContext } from '../component_templates_context';
+import { SectionLoading } from '../../shared_imports';
+import { useComponentTemplatesContext } from '../../component_templates_context';
+import { attemptToDecodeURI } from '../../lib';
 import { ComponentTemplateCreate } from '../component_template_create';
-import { attemptToDecodeURI } from '../lib';
 
 export interface Params {
   sourceComponentTemplateName: string;

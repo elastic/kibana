@@ -5,7 +5,7 @@
  */
 import React from 'react';
 
-import { Forms, ComponentTemplateDeserialized } from '../../../../shared_imports';
+import { Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
 import { WizardContent } from '../component_template_form';
 import { StepReview } from './step_review';
 
