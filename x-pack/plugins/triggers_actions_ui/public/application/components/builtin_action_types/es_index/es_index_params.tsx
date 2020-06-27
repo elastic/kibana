@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow, EuiCodeEditor, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useXJsonMode } from '../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 import { ActionParamsProps } from '../../../../types';
@@ -73,6 +73,21 @@ export const IndexParamsFields = ({
           }}
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiLink
+        target="_blank"
+        href={
+          'https://github.com/elastic/kibana/tree/master/x-pack/plugins/triggers_actions_ui#index'
+        }
+        external
+      >
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.indexActionParams.helpIndexDocLink',
+          {
+            defaultMessage: 'Example of indexed document',
+          }
+        )}
+      </EuiLink>
     </Fragment>
   );
 };

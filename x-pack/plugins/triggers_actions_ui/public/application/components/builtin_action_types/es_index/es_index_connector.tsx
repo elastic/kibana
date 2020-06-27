@@ -13,6 +13,7 @@ import {
   EuiSelect,
   EuiTitle,
   EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,7 @@ import {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+>> = ({ action, editActionConfig, errors, http, docLinks }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -186,9 +187,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </>
         }
       />
-      <EuiSpacer size="m" />
       {hasTimeFieldCheckbox ? (
         <>
+          <EuiSpacer size="m" />
           <EuiFormRow
             id="executionTimeField"
             fullWidth
@@ -217,6 +218,32 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </EuiFormRow>
         </>
       ) : null}
+      <EuiSpacer size="m" />
+      <EuiLink
+        target="_blank"
+        href={'https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#index'}
+        external
+      >
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.indexAction.helpConfigureIndexLink',
+          {
+            defaultMessage: 'How to configure Index connector README',
+          }
+        )}
+      </EuiLink>
+      <EuiSpacer size="m" />
+      <EuiLink
+        target="_blank"
+        href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/getting-started-index.html#getting-started-batch-processing`}
+        external
+      >
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.indexAction.helpIndexDocLink',
+          {
+            defaultMessage: 'How to index some documents',
+          }
+        )}
+      </EuiLink>
     </>
   );
 };

@@ -200,9 +200,37 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       <EuiSpacer size="m" />
       <EuiLink target="_blank" href={'https://support.google.com/a/answer/176600?hl=en'} external>
         {i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpLink',
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpGmailLink',
           {
             defaultMessage: 'How to configure Gmail',
+          }
+        )}
+      </EuiLink>
+      <EuiSpacer size="m" />
+      <EuiLink
+        target="_blank"
+        href={
+          'https://support.microsoft.com/en-us/office/pop-and-imap-email-settings-for-outlook-8361e398-8af4-4e97-b147-6c6c4ac95353?ui=en-us&rs=en-us&ad=us'
+        }
+        external
+      >
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpOutlookLink',
+          {
+            defaultMessage: 'How to configure Outlook',
+          }
+        )}
+      </EuiLink>
+      <EuiSpacer size="m" />
+      <EuiLink
+        target="_blank"
+        href={'https://docs.aws.amazon.com/ses/latest/DeveloperGuide/smtp-connect.html'}
+        external
+      >
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.helpAmazonLink',
+          {
+            defaultMessage: 'How to configure the Amazon SES SMTP Endpoint',
           }
         )}
       </EuiLink>

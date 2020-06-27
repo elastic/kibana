@@ -22,7 +22,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-slack.html#configuring-slack"
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/actions-slack.html#configuring-slack`}
             target="_blank"
           >
             <FormattedMessage

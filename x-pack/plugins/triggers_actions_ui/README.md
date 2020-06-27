@@ -900,10 +900,23 @@ export function getActionType(): ActionTypeModel {
 
 ![Index connector card](https://i.imgur.com/fflsmu5.png)
 
-![Index connector form](https://i.imgur.com/tbgyvAL.png)
+![Index connector form](https://i.imgur.com/IkixGMV.png)
 
 and action params form available in Create Alert form:
-![Index action form](https://i.imgur.com/VsWMLeU.png)
+![Index action form](https://i.imgur.com/mpxnPOF.png)
+
+Example of the index document for Index Threshold Alert:
+
+```
+{
+    "alert_id": "{{alertId}}",
+    "alert_name": "{{alertName}}",
+    "alert_instance_id": "{{alertInstanceId}}",
+    "context_title": "{{context.title}}",
+    "context_value": "{{context.value}}",
+    "context_message": "{{context.message}}"
+} 
+```
 
 ### Webhook
 
