@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rt from 'io-ts';
-
-export const exportTimelinesQuerySchema = rt.type({
-  file_name: rt.string,
-});
-
-export const exportTimelinesRequestBodySchema = rt.type({
-  ids: rt.array(rt.string),
-});
+export interface PostIngestSetupResponse {
+  isInitialized: boolean;
+}
