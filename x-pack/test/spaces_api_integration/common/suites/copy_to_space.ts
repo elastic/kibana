@@ -352,13 +352,12 @@ export function copyToSpaceTestSuiteFactory(
 
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
     const expectForbiddenResponse = (response: TestResponse) => {
-      const action = outcome === 'unauthorizedRead' ? 'find' : 'bulk_create';
       expect(response.body).to.eql({
         space_2: {
           success: false,
           successCount: 0,
           errors: [
-            { statusCode: 403, error: 'Forbidden', message: `Unable to ${action} sharedtype` },
+            { statusCode: 403, error: 'Forbidden', message: `Unable to bulk_create sharedtype` },
           ],
         },
       });
@@ -458,9 +457,7 @@ export function copyToSpaceTestSuiteFactory(
         objects: [{ type, id: ambiguousConflictId }],
         statusCode,
         response: async (response: TestResponse) => {
-          if (outcome === 'authorized' || outcome === 'unauthorizedWrite') {
-            // when an ambiguous conflict is encountered, the import function never actually attempts to create the object --
-            // because of that, a consumer who is authorized to read (but not write) will see the same response as a user who is authorized
+          if (outcome === 'authorized') {
             const { success, successCount, successResults, errors } = getResult(response);
             const updatedAt = '2017-09-21T18:59:16.270Z';
             const destinations = [
@@ -482,7 +479,7 @@ export function copyToSpaceTestSuiteFactory(
           } else if (outcome === 'noAccess') {
             expectNotFoundResponse(response);
           } else {
-            // unauthorized read
+            // unauthorized read/write
             expectForbiddenResponse(response);
           }
         },
