@@ -40,14 +40,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))
         .body;
       indexPatternId = body[0];
-      expect(body.length).to.eql(1);
+      expect(body.length > 0).to.equal(true);
     });
 
     it('can get index pattern by id', async () => {
       const body = await (
         await supertest.get(`/api/index-patterns-plugin/get/${indexPatternId}`).expect(200)
       ).body;
-      expect(body.fields.length).to.eql(15);
+      expect(body.fields.length > 0).to.equal(true);
     });
 
     it('can update index pattern', async () => {
