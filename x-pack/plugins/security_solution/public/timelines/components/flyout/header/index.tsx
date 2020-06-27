@@ -41,6 +41,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
     notesById,
     status,
     timelineId,
+    timelineType,
     title,
     toggleLock,
     updateDescription,
@@ -66,6 +67,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         noteIds={noteIds}
         status={status}
         timelineId={timelineId}
+        timelineType={timelineType}
         title={title}
         toggleLock={toggleLock}
         updateDescription={updateDescription}
@@ -100,6 +102,7 @@ const makeMapStateToProps = () => {
       title = '',
       noteIds = emptyNotesId,
       status,
+      timelineType,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -116,6 +119,7 @@ const makeMapStateToProps = () => {
       notesById: getNotesByIds(state),
       status,
       title,
+      timelineType,
     };
   };
   return mapStateToProps;

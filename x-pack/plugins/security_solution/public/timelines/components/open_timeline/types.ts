@@ -8,7 +8,12 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineTypeLiteralWithNull,
+  TimelineStatus,
+  TemplateTimelineTypeLiteral,
+} from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -46,6 +51,7 @@ export interface OpenTimelineResult {
   notes?: TimelineResultNote[] | null;
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   savedObjectId?: string | null;
+  status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
   type?: TimelineTypeLiteral;
@@ -118,6 +124,8 @@ export interface OpenTimelineProps {
   deleteTimelines?: DeleteTimelines;
   /** The default requested size of each page of search results */
   defaultPageSize: number;
+  /** The number of favorite timeline*/
+  favoriteCount?: number | null | undefined;
   /** Displays an indicator that data is loading when true */
   isLoading: boolean;
   /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
@@ -160,8 +168,12 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
+  /** this affects timeline's behaviour like editable / duplicatible */
+  timelineType: TimelineTypeLiteralWithNull;
+  /** when timelineType === template, templatetimelineFilter is a JSX.Element */
+  templateTimelineFilter: JSX.Element[] | null;
   /** timeline / template timeline */
-  tabs?: JSX.Element;
+  timelineFilter?: JSX.Element | JSX.Element[] | null;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */
@@ -196,9 +208,19 @@ export enum TimelineTabsStyle {
 }
 
 export interface TimelineTab {
-  id: TimelineTypeLiteral;
-  name: string;
+  count: number | undefined;
   disabled: boolean;
   href: string;
+  id: TimelineTypeLiteral;
+  name: string;
   onClick: (ev: { preventDefault: () => void }) => void;
+  withNext: boolean;
+}
+
+export interface TemplateTimelineFilter {
+  id: TemplateTimelineTypeLiteral;
+  name: string;
+  disabled: boolean;
+  withNext: boolean;
+  count: number | undefined;
 }
