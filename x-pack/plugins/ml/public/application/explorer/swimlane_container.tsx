@@ -5,7 +5,13 @@
  */
 
 import React, { FC, useCallback, useState } from 'react';
-import { EuiResizeObserver, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiText,
+} from '@elastic/eui';
 
 import { throttle } from 'lodash';
 import {
@@ -15,7 +21,7 @@ import {
 
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { SwimLanePagination } from './swimlane_pagination';
-import { SWIMLANE_TYPE } from './explorer_constants';
+import { RESIZE_IGNORED_DIFF_PX, SWIMLANE_TYPE } from './explorer_constants';
 import { ViewBySwimLaneData } from './explorer_utils';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
@@ -36,11 +42,28 @@ export const SwimlaneContainer: FC<
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       const labelWidth = 200;
-      setChartWidth(e.width - labelWidth);
-      onResize(e.width);
+      const resultNewWidth = e.width - labelWidth;
+      if (Math.abs(resultNewWidth - chartWidth) > RESIZE_IGNORED_DIFF_PX) {
+        setChartWidth(resultNewWidth);
+        onResize(resultNewWidth);
+      }
     }, RESIZE_THROTTLE_TIME_MS),
-    []
+    [chartWidth]
   );
+
+  const showSwimlane =
+    props.swimlaneData !== null &&
+    props.swimlaneData.laneLabels &&
+    props.swimlaneData.laneLabels.length > 0;
+
+  const isPaginationVisible =
+    (props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
+      isViewBySwimLaneData(props.swimlaneData) &&
+      fromPage &&
+      perPage &&
+      // only render pagination when there is more than 1 page
+      props.swimlaneData.cardinality > perPage * fromPage) ||
+    (fromPage && fromPage > 1);
 
   return (
     <>
@@ -53,21 +76,29 @@ export const SwimlaneContainer: FC<
           >
             <div style={{ width: '100%' }}>
               <EuiText color="subdued" size="s">
-                <MlTooltipComponent>
-                  {(tooltipService) => (
-                    <ExplorerSwimlane
-                      chartWidth={chartWidth}
-                      tooltipService={tooltipService}
-                      {...props}
-                    />
-                  )}
-                </MlTooltipComponent>
+                {showSwimlane ? (
+                  <MlTooltipComponent>
+                    {(tooltipService) => (
+                      <ExplorerSwimlane
+                        chartWidth={chartWidth}
+                        tooltipService={tooltipService}
+                        {...props}
+                      />
+                    )}
+                  </MlTooltipComponent>
+                ) : (
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingChart size="xl" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </EuiText>
             </div>
           </div>
         )}
       </EuiResizeObserver>
-      {props.swimlaneType === SWIMLANE_TYPE.VIEW_BY && isViewBySwimLaneData(props.swimlaneData) && (
+      {isPaginationVisible && (
         <SwimLanePagination
           cardinality={props.swimlaneData.cardinality}
           fromPage={fromPage}

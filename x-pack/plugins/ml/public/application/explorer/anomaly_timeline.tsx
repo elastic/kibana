@@ -35,7 +35,6 @@ import {
 import { ExplorerState } from './reducers/explorer_reducer';
 import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
-import { LoadingIndicator } from '../components/loading_indicator';
 import { SwimlaneContainer } from './swimlane_container';
 import { OverallSwimlaneData } from './explorer_utils';
 
@@ -169,11 +168,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
     }, []);
 
-    const showOverallSwimlane =
-      overallSwimlaneData !== null &&
-      overallSwimlaneData.laneLabels &&
-      overallSwimlaneData.laneLabels.length > 0;
-
     const showViewBySwimlane =
       viewBySwimlaneData !== null &&
       viewBySwimlaneData.laneLabels &&
@@ -295,56 +289,50 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             onMouseLeave={onSwimlaneLeaveHandler}
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
           >
-            {showOverallSwimlane && (
-              <SwimlaneContainer
-                filterActive={filterActive}
-                maskAll={maskAll}
-                timeBuckets={timeBuckets}
-                swimlaneCellClick={swimlaneCellClick}
-                swimlaneData={overallSwimlaneData as OverallSwimlaneData}
-                swimlaneType={'overall'}
-                selection={selectedCells}
-                swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-                onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-              />
-            )}
+            <SwimlaneContainer
+              filterActive={filterActive}
+              maskAll={maskAll}
+              timeBuckets={timeBuckets}
+              swimlaneCellClick={swimlaneCellClick}
+              swimlaneData={overallSwimlaneData as OverallSwimlaneData}
+              swimlaneType={'overall'}
+              selection={selectedCells}
+              swimlaneRenderDoneListener={swimlaneRenderDoneListener}
+              onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+            />
           </div>
 
           {viewBySwimlaneOptions.length > 0 && (
             <>
-              {showViewBySwimlane && (
-                <>
-                  <EuiSpacer size="m" />
-                  <div
-                    className="ml-explorer-swimlane euiText"
-                    onMouseEnter={onSwimlaneEnterHandler}
-                    onMouseLeave={onSwimlaneLeaveHandler}
-                    data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
-                  >
-                    <SwimlaneContainer
-                      filterActive={filterActive}
-                      maskAll={
-                        maskAll &&
-                        !hasMatchingPoints({
-                          filteredFields,
-                          swimlaneData: viewBySwimlaneData,
-                        })
-                      }
-                      timeBuckets={timeBuckets}
-                      swimlaneCellClick={swimlaneCellClick}
-                      swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
-                      swimlaneType={'viewBy'}
-                      selection={selectedCells}
-                      swimlaneRenderDoneListener={swimlaneRenderDoneListener}
-                      onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
-                      fromPage={viewByFromPage}
-                      perPage={viewByPerPage}
-                    />
-                  </div>
-                </>
-              )}
-
-              {viewBySwimlaneDataLoading && <LoadingIndicator />}
+              <>
+                <EuiSpacer size="m" />
+                <div
+                  className="ml-explorer-swimlane euiText"
+                  onMouseEnter={onSwimlaneEnterHandler}
+                  onMouseLeave={onSwimlaneLeaveHandler}
+                  data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
+                >
+                  <SwimlaneContainer
+                    filterActive={filterActive}
+                    maskAll={
+                      maskAll &&
+                      !hasMatchingPoints({
+                        filteredFields,
+                        swimlaneData: viewBySwimlaneData,
+                      })
+                    }
+                    timeBuckets={timeBuckets}
+                    swimlaneCellClick={swimlaneCellClick}
+                    swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
+                    swimlaneType={'viewBy'}
+                    selection={selectedCells}
+                    swimlaneRenderDoneListener={swimlaneRenderDoneListener}
+                    onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+                    fromPage={viewByFromPage}
+                    perPage={viewByPerPage}
+                  />
+                </div>
+              </>
 
               {!showViewBySwimlane &&
                 !viewBySwimlaneDataLoading &&

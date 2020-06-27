@@ -39,6 +39,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...state,
         ...getClearedSelectedAnomaliesState(),
         loading: false,
+        viewByFromPage: 1,
         selectedJobs: [],
       };
       break;
@@ -102,6 +103,8 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         ...getClearedSelectedAnomaliesState(),
         maskAll,
         viewBySwimlaneFieldName,
+        viewBySwimlaneData: getDefaultSwimlaneData(),
+        viewByFromPage: 1,
       };
       break;
 
@@ -129,6 +132,8 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
     case EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE:
       nextState = {
         ...state,
+        // reset current page on the page size change
+        viewByFromPage: 1,
         viewByPerPage: payload,
       };
       break;

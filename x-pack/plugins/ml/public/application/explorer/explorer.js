@@ -34,7 +34,6 @@ import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wra
 import { InfluencersList } from '../components/influencers_list';
 import { explorerService } from './explorer_dashboard_service';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
-import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
@@ -223,28 +222,6 @@ export class Explorer extends React.Component {
 
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
-
-    if (loading === true) {
-      return (
-        <ExplorerPage
-          jobSelectorProps={jobSelectorProps}
-          noInfluencersConfigured={noInfluencersConfigured}
-          influencers={influencers}
-          filterActive={filterActive}
-          filterPlaceHolder={filterPlaceHolder}
-          filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
-          indexPattern={indexPattern}
-          queryString={queryString}
-          updateLanguage={this.updateLanguage}
-        >
-          <LoadingIndicator
-            label={i18n.translate('xpack.ml.explorer.loadingLabel', {
-              defaultMessage: 'Loading',
-            })}
-          />
-        </ExplorerPage>
-      );
-    }
 
     if (noJobsFound) {
       return (

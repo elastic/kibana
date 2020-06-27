@@ -176,13 +176,16 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     undefined;
 
   useEffect(() => {
-    loadExplorerData({
-      ...loadExplorerDataConfig,
-      swimlaneLimit:
-        explorerState?.viewBySwimlaneData &&
-        isViewBySwimLaneData(explorerState?.viewBySwimlaneData) &&
-        explorerState?.viewBySwimlaneData.cardinality,
-    });
+    if (explorerState && explorerState.swimlaneContainerWidth > 0) {
+      loadExplorerData({
+        ...loadExplorerDataConfig,
+        swimlaneLimit:
+          explorerState?.viewBySwimlaneData &&
+          isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
+            ? explorerState?.viewBySwimlaneData.cardinality
+            : undefined,
+      });
+    }
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
