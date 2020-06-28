@@ -1,6 +1,0 @@
-{
-  "id": "list-ip",
-  "name": "Simple list with flattened values",
-  "description": "This list has flattened values",
-  "type": "flattened"
-}

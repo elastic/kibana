@@ -47,7 +47,7 @@ export const createListItem = async ({
   meta,
   dateNow,
   tieBreaker,
-}: CreateListItemOptions): Promise<ListItemSchema> => {
+}: CreateListItemOptions): Promise<ListItemSchema | null> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const tieBreakerId = tieBreaker ?? uuid.v4();
   const baseBody = {
@@ -61,20 +61,25 @@ export const createListItem = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const body: IndexEsListItemSchema = {
-    ...baseBody,
-    ...transformListItemToElasticQuery({ serializer, type, value }),
-  };
-  const response = await callCluster<CreateDocumentResponse>('index', {
-    body,
-    id,
-    index: listItemIndex,
-  });
+  const elasticQuery = transformListItemToElasticQuery({ serializer, type, value });
+  if (elasticQuery != null) {
+    const body: IndexEsListItemSchema = {
+      ...baseBody,
+      ...elasticQuery,
+    };
+    const response = await callCluster<CreateDocumentResponse>('index', {
+      body,
+      id,
+      index: listItemIndex,
+    });
 
-  return {
-    id: response._id,
-    type,
-    value,
-    ...baseBody,
-  };
+    return {
+      id: response._id,
+      type,
+      value,
+      ...baseBody,
+    };
+  } else {
+    return null;
+  }
 };

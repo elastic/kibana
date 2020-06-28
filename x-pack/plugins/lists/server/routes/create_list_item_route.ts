@@ -45,11 +45,18 @@ export const createListItemRoute = (router: IRouter): void => {
             type: list.type,
             value,
           });
-          const [validated, errors] = validate(createdListItem, listItemSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (createdListItem != null) {
+            const [validated, errors] = validate(createdListItem, listItemSchema);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           } else {
-            return response.ok({ body: validated ?? {} });
+            return siemResponse.error({
+              body: 'list item invalid',
+              statusCode: 400,
+            });
           }
         }
       } catch (err) {

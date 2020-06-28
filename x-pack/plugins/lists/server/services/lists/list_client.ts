@@ -365,7 +365,7 @@ export class ListClient {
     value,
     type,
     meta,
-  }: CreateListItemOptions): Promise<ListItemSchema> => {
+  }: CreateListItemOptions): Promise<ListItemSchema | null> => {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({

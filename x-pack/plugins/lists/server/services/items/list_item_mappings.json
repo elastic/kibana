@@ -97,12 +97,6 @@
     },
     "shape": {
       "type": "shape"
-    },
-    "histogram": {
-      "type": "histogram"
-    },
-    "flattened": {
-      "type": "flattened"
     }
   }
 }

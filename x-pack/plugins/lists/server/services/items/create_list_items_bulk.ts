@@ -53,20 +53,30 @@ export const createListItemsBulk = async ({
       const createdAt = dateNow ?? new Date().toISOString();
       const tieBreakerId =
         tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid.v4();
-      const elasticBody: IndexEsListItemSchema = {
-        created_at: createdAt,
-        created_by: user,
-        deserializer,
-        list_id: listId,
-        meta,
+      const elasticQuery = transformListItemToElasticQuery({
         serializer,
-        tie_breaker_id: tieBreakerId,
-        updated_at: createdAt,
-        updated_by: user,
-        ...transformListItemToElasticQuery({ serializer, type, value: singleValue }),
-      };
-      const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
-      return [...accum, createBody, elasticBody];
+        type,
+        value: singleValue,
+      });
+      if (elasticQuery != null) {
+        const elasticBody: IndexEsListItemSchema = {
+          created_at: createdAt,
+          created_by: user,
+          deserializer,
+          list_id: listId,
+          meta,
+          serializer,
+          tie_breaker_id: tieBreakerId,
+          updated_at: createdAt,
+          updated_by: user,
+          ...elasticQuery,
+        };
+        const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
+        return [...accum, createBody, elasticBody];
+      } else {
+        // TODO: Report errors with return values from the bulk insert
+        return accum;
+      }
     },
     []
   );

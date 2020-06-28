@@ -12,7 +12,6 @@ set -e
 # Uses a defaults if no argument is specified
 TYPE=${1:-ip}
 FILE=${2:-./lists/files/ips.txt}
-FORMAT=${3:+"&format=$3"}
 
 # Example to import ips from ./lists/files/ips.txt
 # ./import_list_items_by_filename.sh ip ./lists/files/ips.txt
@@ -20,6 +19,6 @@ FORMAT=${3:+"&format=$3"}
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_import?type=${TYPE}${FORMAT}" \
+  -X POST "${KIBANA_URL}${SPACE_URL}/api/lists/items/_import?type=${TYPE}" \
   --form file=@${FILE} \
   | jq .;
