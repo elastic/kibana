@@ -25,7 +25,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings']);
+  const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
   const browser = getService('browser');
   const find = getService('find');
 
@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
 
-      let objects = await PageObjects.settings.getSavedObjectsInTable();
+      let objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(true);
 
       await PageObjects.common.navigateToUrl(
@@ -99,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await focusAndClickButton('savedObjectEditSave');
 
-      objects = await PageObjects.settings.getSavedObjectsInTable();
+      objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(false);
       expect(objects.includes('Edited Dashboard')).to.be(true);
 
@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await focusAndClickButton('savedObjectEditDelete');
       await PageObjects.common.clickConfirmOnModal();
 
-      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Dashboard')).to.be(false);
     });
 
@@ -145,7 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
 
-      const objects = await PageObjects.settings.getSavedObjectsInTable();
+      const objects = await PageObjects.savedObjects.getRowTitles();
       expect(objects.includes('A Pie')).to.be(true);
 
       await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
@@ -160,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await focusAndClickButton('savedObjectEditSave');
 
-      await PageObjects.settings.getSavedObjectsInTable();
+      await PageObjects.savedObjects.getRowTitles();
 
       await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
         shouldUseHashForSubUrl: false,
@@ -173,7 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await focusAndClickButton('savedObjectEditSave');
 
-      await PageObjects.settings.getSavedObjectsInTable();
+      await PageObjects.savedObjects.getRowTitles();
 
       await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
         shouldUseHashForSubUrl: false,
