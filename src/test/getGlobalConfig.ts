@@ -4,10 +4,13 @@ async function init() {
   const username = process.env.username || 'sqren';
   const accessToken = process.env.accessToken;
 
-  if (username && accessToken) {
+  // get credentials from env vars
+  if (accessToken) {
     process.stdout.write(
       JSON.stringify({ username, accessToken, isConfigFile: false })
     );
+
+    // get credentials from config file
   } else {
     const config = await getGlobalConfig();
     process.stdout.write(JSON.stringify({ ...config, isConfigFile: true }));

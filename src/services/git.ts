@@ -254,7 +254,7 @@ export async function createBackportBranch({
 
     const isBranchInvalid =
       e.stderr?.toLowerCase().includes(`couldn't find remote ref`) ||
-      e.stderr?.toLowerCase().includes(`Invalid refspec`);
+      e.stderr?.toLowerCase().includes(`invalid refspec`);
 
     if (isBranchInvalid) {
       throw new HandledError(

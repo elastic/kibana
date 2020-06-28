@@ -12,7 +12,7 @@ export async function getGlobalConfig() {
 export async function createGlobalConfigAndFolderIfNotExist() {
   const reposPath = getReposPath();
   const globalConfigPath = getGlobalConfigPath();
-  const configTemplate = await getConfigTemplate();
+  const configTemplate = getConfigTemplate();
   await makeDir(reposPath);
   const didCreate = await createGlobalConfigIfNotExist(
     globalConfigPath,
