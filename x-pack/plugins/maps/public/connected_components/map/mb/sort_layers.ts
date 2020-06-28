@@ -78,7 +78,7 @@ function isLayerInOrder(
   mbMap: MbMap,
   mapLayer: ILayer,
   layerClass: LAYER_CLASS,
-  beneathMbLayerId: string | null
+  beneathMbLayerId?: string
 ) {
   const mbLayers = mbMap.getStyle().layers!; // check ordering against mapbox to account for any upstream moves.
 
@@ -113,7 +113,7 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
   }
 
   // Ensure spatial filters layer is the top layer.
-  if (!isLayerInOrder(mbMap, spatialFiltersLayer, LAYER_CLASS.ANY, null)) {
+  if (!isLayerInOrder(mbMap, spatialFiltersLayer, LAYER_CLASS.ANY)) {
     moveMapLayer(mbMap, mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
   }
   let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
