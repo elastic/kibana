@@ -15,6 +15,10 @@ export class ArtifactClient {
     this.savedObjectsClient = savedObjectsClient;
   }
 
+  public getArtifactId(artifact: InternalArtifactSchema) {
+    return `${artifact.identifier}-${artifact.sha256}`;
+  }
+
   public async getArtifact(id: string): Promise<SavedObject<InternalArtifactSchema>> {
     return this.savedObjectsClient.get<InternalArtifactSchema>(
       ArtifactConstants.SAVED_OBJECT_TYPE,
@@ -28,7 +32,7 @@ export class ArtifactClient {
     return this.savedObjectsClient.create<InternalArtifactSchema>(
       ArtifactConstants.SAVED_OBJECT_TYPE,
       artifact,
-      { id: `${artifact.identifier}-${artifact.sha256}` }
+      { id: this.getArtifactId(artifact) }
     );
   }
 

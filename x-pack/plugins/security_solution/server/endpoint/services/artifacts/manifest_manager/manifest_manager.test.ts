@@ -11,6 +11,10 @@ describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
     beforeAll(async () => {});
 
-    test('Can do a test', () => {});
+    test('ManifestManager can refresh manifest', () => {});
+
+    test('ManifestManager can dispatch manifest', () => {});
+
+    test('ManifestManager can commit manifest', () => {});
   });
 });
