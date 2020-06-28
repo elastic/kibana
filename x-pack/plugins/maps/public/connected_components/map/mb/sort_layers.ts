@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
 import { ILayer } from '../../../classes/layers/layer';
 
 // "Layer" is overloaded.
-// 1) Map layer: ILayer implemenation. A single map layer consists of one to many mapbox layers.
-// 2) Mapbox layer: Individual unit of rendering such as text, circles, polygons, or lines.
+// 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.
+// 2) Mapbox layer (MbLayer): Individual unit of rendering such as text, circles, polygons, or lines.
 
-function getIsTextLayer(mbLayer) {
+export function getIsTextLayer(mbLayer: MbLayer) {
   if (mbLayer.type !== 'symbol') {
     return false;
   }
@@ -28,7 +28,11 @@ function getIsTextLayer(mbLayer) {
   });
 }
 
-function doesMbLayerBelongToMapLayerAndClass(mapLayer: ILayer, mbLayer, layerClass: LAYER_CLASS) {
+function doesMbLayerBelongToMapLayerAndClass(
+  mapLayer: ILayer,
+  mbLayer: MbLayer,
+  layerClass: LAYER_CLASS
+) {
   if (!mapLayer.ownsMbLayerId(mbLayer.id)) {
     return false;
   }
@@ -49,10 +53,10 @@ enum LAYER_CLASS {
 
 function moveMapLayer(
   mbMap: MbMap,
-  mbLayers: unknown[],
+  mbLayers: MbLayer[],
   mapLayer: ILayer,
   layerClass: LAYER_CLASS,
-  beneathMbLayerId: string | null
+  beneathMbLayerId?: string
 ) {
   mbLayers
     .filter((mbLayer) => {
@@ -63,11 +67,11 @@ function moveMapLayer(
     });
 }
 
-function getBottomMbLayerId(mbLayers: unknown[], mapLayer: ILayer, layerClass: LAYER_CLASS) {
+function getBottomMbLayerId(mbLayers: MbLayer[], mapLayer: ILayer, layerClass: LAYER_CLASS) {
   const bottomMbLayer = mbLayers.find((mbLayer) => {
     return doesMbLayerBelongToMapLayerAndClass(mapLayer, mbLayer, layerClass);
   });
-  return bottomMbLayer ? bottomMbLayer.id : null;
+  return bottomMbLayer ? bottomMbLayer.id : undefined;
 }
 
 function isLayerInOrder(
@@ -76,7 +80,7 @@ function isLayerInOrder(
   layerClass: LAYER_CLASS,
   beneathMbLayerId: string | null
 ) {
-  const mbLayers = mbMap.getStyle().layers; // check ordering against mapbox to account for any upstream moves.
+  const mbLayers = mbMap.getStyle().layers!; // check ordering against mapbox to account for any upstream moves.
 
   if (!beneathMbLayerId) {
     // Check that map layer is top layer
@@ -102,17 +106,17 @@ function isLayerInOrder(
   return nextMbLayerId === beneathMbLayerId;
 }
 
-export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerList: ILayer) {
-  const mbStyle = mbMap.getStyle();
-  if (!mbStyle.layers || mbStyle.layers.length === 0) {
+export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerList: ILayer[]) {
+  const mbLayers = mbMap.getStyle().layers;
+  if (!mbLayers || mbLayers.length === 0) {
     return;
   }
 
   // Ensure spatial filters layer is the top layer.
   if (!isLayerInOrder(mbMap, spatialFiltersLayer, LAYER_CLASS.ANY, null)) {
-    moveMapLayer(mbMap, mbStyle.layers, spatialFiltersLayer, LAYER_CLASS.ANY);
+    moveMapLayer(mbMap, mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
   }
-  let beneathMbLayerId = getBottomMbLayerId(mbStyle.layers, spatialFiltersLayer, LAYER_CLASS.ANY);
+  let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
 
   // Sort map layer labels
   [...layerList]
@@ -122,22 +126,17 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
     })
     .forEach((mapLayer: ILayer) => {
       if (!isLayerInOrder(mbMap, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId)) {
-        moveMapLayer(mbMap, mbStyle.layers, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId);
+        moveMapLayer(mbMap, mbLayers, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId);
       }
-      beneathMbLayerId = getBottomMbLayerId(
-        mbStyle.layers,
-        mapLayer,
-        LAYER_CLASS.LABEL,
-        beneathMbLayerId
-      );
+      beneathMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, LAYER_CLASS.LABEL);
     });
 
   // Sort map layers
   [...layerList].reverse().forEach((mapLayer: ILayer) => {
     const layerClass = mapLayer.bubbleLabelsToTop() ? LAYER_CLASS.NON_LABEL : LAYER_CLASS.ANY;
     if (!isLayerInOrder(mbMap, mapLayer, layerClass, beneathMbLayerId)) {
-      moveMapLayer(mbMap, mbStyle.layers, mapLayer, layerClass, beneathMbLayerId);
+      moveMapLayer(mbMap, mbLayers, mapLayer, layerClass, beneathMbLayerId);
     }
-    beneathMbLayerId = getBottomMbLayerId(mbStyle.layers, mapLayer, layerClass, beneathMbLayerId);
+    beneathMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, layerClass);
   });
 }
