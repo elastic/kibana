@@ -266,17 +266,21 @@ export async function createBackportBranch({
   }
 }
 
-export function deleteBackportBranch({
+export async function deleteBackportBranch({
   options,
   backportBranch,
 }: {
   options: BackportOptions;
   backportBranch: string;
 }) {
-  return exec(
+  const spinner = ora().start();
+
+  await exec(
     `git checkout ${options.sourceBranch} && git branch -D ${backportBranch}`,
     { cwd: getRepoPath(options) }
   );
+
+  spinner.stop();
 }
 
 export function getRemoteName(options: BackportOptions) {

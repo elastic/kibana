@@ -96,15 +96,15 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           Array [
             "Cherry-picking: myOtherCommitMessage (#2000)",
           ],
-          Array [],
           Array [
             "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
           ],
+          Array [],
           Array [
             "Creating pull request",
           ],
           Array [
-            "Adding labels to #1337: backport",
+            "Adding labels: backport",
           ],
         ]
       `);
@@ -298,15 +298,15 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           Array [
             "Finalizing cherrypick",
           ],
-          Array [],
           Array [
             "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
           ],
+          Array [],
           Array [
             "Creating pull request",
           ],
           Array [
-            "Adding labels to #1337: backport",
+            "Adding labels: backport",
           ],
         ]
       `);

@@ -16,7 +16,6 @@ import {
   addUnstagedFiles,
   finalizeCherrypick,
   getFilesWithConflicts,
-  getFullBackportBranch,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -46,13 +45,15 @@ export async function cherrypickAndCreateTargetPullRequest({
     await setCommitAuthor(options, options.username);
   }
 
-  const spinner = ora().start();
   await pushBackportBranch({ options, backportBranch });
   await deleteBackportBranch({ options, backportBranch });
-  spinner.stop();
 
-  const payload = getPullRequestPayload(options, targetBranch, commits);
-  const targetPullRequest = await createPullRequest(options, payload);
+  const targetPullRequest = await createPullRequest({
+    options,
+    commits,
+    targetBranch,
+    backportBranch,
+  });
 
   // add assignees to target pull request
   if (options.assignees.length > 0) {
@@ -88,14 +89,6 @@ export async function cherrypickAndCreateTargetPullRequest({
 
   consoleLog(`View pull request: ${targetPullRequest.html_url}`);
 
-  // output PR summary in dry run mode
-  if (options.dryRun) {
-    consoleLog(chalk.bold('\nPull request summary:'));
-    consoleLog(`Branch: ${payload.head} -> ${payload.base}`);
-    consoleLog(`Title: ${payload.title}`);
-    consoleLog(`Body: ${payload.body}\n`);
-  }
-
   return targetPullRequest;
 }
 
@@ -107,7 +100,10 @@ export async function cherrypickAndCreateTargetPullRequest({
  * For a single commit: `backport/7.x/commit-abcdef`
  * For multiple: `backport/7.x/pr-1234_commit-abcdef`
  */
-function getBackportBranch(targetBranch: string, commits: CommitSelected[]) {
+export function getBackportBranch(
+  targetBranch: string,
+  commits: CommitSelected[]
+) {
   const refValues = commits
     .map((commit) =>
       commit.pullNumber
@@ -258,38 +254,4 @@ async function listUnstagedFiles(options: BackportOptions) {
     throw new HandledError('Aborted');
   }
   consoleLog(''); // linebreak
-}
-
-function getPullRequestTitle(
-  targetBranch: string,
-  commits: CommitSelected[],
-  prTitle: string
-) {
-  const commitMessages = commits
-    .map((commit) => commit.formattedMessage)
-    .join(' | ');
-  return prTitle
-    .replace('{targetBranch}', targetBranch)
-    .replace('{commitMessages}', commitMessages)
-    .slice(0, 240);
-}
-
-function getPullRequestPayload(
-  options: BackportOptions,
-  targetBranch: string,
-  commits: CommitSelected[]
-) {
-  const { prDescription, prTitle } = options;
-  const backportBranch = getBackportBranch(targetBranch, commits);
-  const commitMessages = commits
-    .map((commit) => ` - ${commit.formattedMessage}`)
-    .join('\n');
-  const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
-
-  return {
-    title: getPullRequestTitle(targetBranch, commits, prTitle),
-    body: `Backports the following commits to ${targetBranch}:\n${commitMessages}${bodySuffix}`,
-    head: getFullBackportBranch(options, backportBranch),
-    base: targetBranch,
-  };
 }

@@ -15,7 +15,7 @@ export async function addLabelsToPullRequest(
   pullNumber: number,
   labels: string[]
 ): Promise<void> {
-  const text = `Adding labels to #${pullNumber}: ${labels.join(', ')}`;
+  const text = `Adding labels: ${labels.join(', ')}`;
   logger.info(text);
   const spinner = ora(text).start();
 
