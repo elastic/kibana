@@ -5322,7 +5322,7 @@
     "@types/node" "*"
     "@types/webpack" "*"
 
-"@types/lodash3@npm:@types/lodash@^3.10.1":
+"@types/lodash3@npm:@types/lodash@^3.10.1", "@types/lodash@^3.10.1":
   version "3.10.3"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-3.10.3.tgz#aaddec6a3c93bf03b402db3acf5d4c77bce8bdff"
   integrity sha512-b9zScBKmB/RJqETbxu3YRya61vJOik89/lR+NdxjZAFMDcMSjwX6IhQoP4terJkhsa9TE1C+l6XwxCkhhsaZXg==
@@ -20863,7 +20863,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
 
-"lodash3@npm:@elastic/lodash@3.10.1-kibana4":
+"lodash3@npm:@elastic/lodash@3.10.1-kibana4", "lodash@npm:@elastic/lodash@3.10.1-kibana4":
   version "3.10.1-kibana4"
   resolved "https://registry.yarnpkg.com/@elastic/lodash/-/lodash-3.10.1-kibana4.tgz#d491228fd659b4a1b0dfa08ba9c67a4979b9746d"
   integrity sha512-geQqXd9ZedRCL+kq5cpeahYWYaYRV0BMXhCwzq4DpnGCVs430FTMS3Wcot3XChZZhCvkwHm15bpNjB312vPxaA==
