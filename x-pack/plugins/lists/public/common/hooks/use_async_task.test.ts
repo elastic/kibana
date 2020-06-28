@@ -61,7 +61,6 @@ describe('useAsyncTask', () => {
   });
 
   it('populates error if task rejects', async () => {
-    expect.assertions(3);
     task.mockRejectedValue(new Error('whoops'));
     const { result, waitForNextUpdate } = renderHook(() => useAsyncTask(task));
 
