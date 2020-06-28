@@ -190,7 +190,7 @@ export class AbstractLayer implements ILayer {
 
   async getDisplayName(source?: ISource): Promise<string> {
     if (this._descriptor.label) {
-      return `${this._descriptor.label} ${this._descriptor.id}`;
+      return this._descriptor.label;
     }
 
     const sourceDisplayName = source

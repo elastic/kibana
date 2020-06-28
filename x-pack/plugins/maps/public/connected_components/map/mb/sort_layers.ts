@@ -7,7 +7,7 @@
 import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
 import { ILayer } from '../../../classes/layers/layer';
 
-// "Layer" is overloaded.
+// "Layer" is overloaded and can mean the following
 // 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.
 // 2) Mapbox layer (MbLayer): Individual unit of rendering such as text, circles, polygons, or lines.
 
