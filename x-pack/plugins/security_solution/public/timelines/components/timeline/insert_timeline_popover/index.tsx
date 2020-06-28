@@ -19,7 +19,11 @@ import { setInsertTimeline } from '../../../store/timeline/actions';
 interface InsertTimelinePopoverProps {
   isDisabled: boolean;
   hideUntitled?: boolean;
-  onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  onTimelineChange: (
+    timelineTitle: string,
+    timelineId: string | null,
+    graphEventId?: string
+  ) => void;
 }
 
 type Props = InsertTimelinePopoverProps;
@@ -38,7 +42,11 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
   useEffect(() => {
     if (insertTimeline != null) {
       dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
-      onTimelineChange(insertTimeline.timelineTitle, insertTimeline.timelineSavedObjectId);
+      onTimelineChange(
+        insertTimeline.timelineTitle,
+        insertTimeline.timelineSavedObjectId,
+        insertTimeline.graphEventId
+      );
       dispatch(setInsertTimeline(null));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
