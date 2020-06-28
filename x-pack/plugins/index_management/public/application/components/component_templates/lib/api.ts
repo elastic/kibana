@@ -13,6 +13,7 @@ import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
   UIM_COMPONENT_TEMPLATE_DELETE,
   UIM_COMPONENT_TEMPLATE_CREATE,
+  UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
 
@@ -72,7 +73,7 @@ export const getApi = (
       body: JSON.stringify(componentTemplate),
     });
 
-    // trackMetric('count', UIM_TEMPLATE_UPDATE);
+    trackMetric('count', UIM_COMPONENT_TEMPLATE_UPDATE);
 
     return result;
   }
