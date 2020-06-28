@@ -38,7 +38,7 @@ describe('Search service', () => {
         packageInfo: { version: '8' },
         expressions: expressionsPluginMock.createSetupContract(),
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategy');
+      expect(setup).toHaveProperty('setInterceptor');
     });
   });
 });

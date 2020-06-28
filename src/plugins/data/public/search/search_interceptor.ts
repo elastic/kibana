@@ -30,7 +30,7 @@ import {
 import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
 import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
@@ -104,11 +104,15 @@ export class SearchInterceptor {
    * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
    */
   public search(
-    request: IKibanaSearchRequest,
+    request: IEsSearchRequest,
     options?: ISearchOptions
-  ): Observable<IKibanaSearchResponse> {
+  ): Observable<IEsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
+      if (options?.signal?.aborted) {
+        return throwError(new AbortError());
+      }
+
       const { combinedSignal, cleanup } = this.getCombinedSignal(options);
 
       // If the request timed out, throw a `RequestTimeoutError`

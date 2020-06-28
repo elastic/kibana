@@ -10,14 +10,11 @@ import { getLongQueryNotification } from './long_query_notification';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 import { AbortError } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
-import { IAsyncSearchResponse } from './types';
-import { EnhancedSearchParams } from '../../common';
+import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
@@ -66,13 +63,13 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   };
 
   public search(
-    request: IKibanaSearchRequest,
+    request: IAsyncSearchRequest,
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-  ): Observable<IKibanaSearchResponse> {
+  ): Observable<IAsyncSearchResponse> {
     let { id } = request;
     const syncSearch = super.search;
 
-    const params: EnhancedSearchParams = {
+    request.params = {
       ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
       ...request.params,
     };
@@ -91,15 +88,16 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         )
       : NEVER;
 
-    return syncSearch.call(this, request, options).pipe(
-      expand((response: IAsyncSearchResponse) => {
+    return (syncSearch.call(this, request, options) as Observable<IAsyncSearchResponse>).pipe(
+      expand((response) => {
+        const { is_partial: isPartial, is_running: isRunning } = response;
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (response.is_partial && !response.is_running)) {
+        if (!response || (isPartial && !isRunning)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) return EMPTY;
+        if (!isRunning) return EMPTY;
 
         id = response.id;
 
@@ -107,7 +105,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return syncSearch.call(this, { id }, options);
+            return syncSearch.call(this, { id }, options) as Observable<IAsyncSearchResponse>;
           })
         );
       }),

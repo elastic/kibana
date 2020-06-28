@@ -21,8 +21,12 @@ describe('EnhancedSearchInterceptor', () => {
     mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
     searchInterceptor = new EnhancedSearchInterceptor(
-      mockCoreStart.notifications.toasts,
-      mockCoreStart.application,
+      {
+        toasts: mockCoreStart.notifications.toasts,
+        application: mockCoreStart.application,
+        http: mockCoreStart.http,
+        uiSettings: mockCoreStart.uiSettings,
+      },
       1000
     );
   });
@@ -31,8 +35,8 @@ describe('EnhancedSearchInterceptor', () => {
     test('should abort all pending requests', async () => {
       mockSearch.mockReturnValue(new Observable());
 
-      searchInterceptor.search(mockSearch, {});
-      searchInterceptor.search(mockSearch, {});
+      searchInterceptor.search({});
+      searchInterceptor.search({});
       searchInterceptor.cancelPending();
 
       await flushPromises();
@@ -45,8 +49,7 @@ describe('EnhancedSearchInterceptor', () => {
   describe('runBeyondTimeout', () => {
     test('should prevent the request from timing out', () => {
       const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
+      const response = searchInterceptor.search({});
 
       setTimeout(searchInterceptor.runBeyondTimeout, 500);
       setTimeout(() => mockResponse.next('hi'), 250);

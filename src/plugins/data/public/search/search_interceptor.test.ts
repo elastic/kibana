@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, from, throwError } from 'rxjs';
 import { CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IKibanaSearchRequest } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { SearchInterceptor } from './search_interceptor';
+import { AbortError } from '../../common';
+import { delay, switchMap } from 'rxjs/operators';
 
 jest.useFakeTimers();
 
@@ -46,56 +48,87 @@ describe('SearchInterceptor', () => {
   });
 
   describe('search', () => {
-    test('should invoke `search` with the request', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const mockRequest: IKibanaSearchRequest = {};
+    test('should invoke `fetch` with the request', () => {
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
       const response = searchInterceptor.search(mockRequest);
-      mockResponse.complete();
-
       response.subscribe();
-      expect(mockSearch.mock.calls[0][0]).toBe(mockRequest);
+      const respArgs: any = mockCoreStart.http.fetch.mock.calls[0][0];
+      expect(JSON.parse(respArgs.body)).toStrictEqual(mockRequest);
+      expect(respArgs.method).toBe('POST');
     });
 
-    test('should mirror the observable to completion if the request does not time out', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search({});
+    test('Observable should resolve if fetch is successful', async (done) => {
+      const mockResponse: any = { result: 200 };
+      mockCoreStart.http.fetch.mockResolvedValue(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      setTimeout(() => mockResponse.next('hi'), 250);
-      setTimeout(() => mockResponse.complete(), 500);
-
-      const next = jest.fn();
-      const complete = jest.fn();
-      response.subscribe({ next, complete });
-
-      jest.advanceTimersByTime(1000);
-
-      expect(next).toHaveBeenCalledWith('hi');
-      expect(complete).toHaveBeenCalled();
+      const next = (result: IEsSearchResponse) => {
+        expect(result).toBe(mockResponse);
+        done();
+      };
+      response.subscribe({ next });
     });
 
-    test('should mirror the observable to error if the request does not time out', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search({});
+    test('Observable should fail if fetch fails', async (done) => {
+      const mockResponse: any = { result: 500 };
+      mockCoreStart.http.fetch.mockRejectedValue(mockResponse);
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest);
 
-      setTimeout(() => mockResponse.next('hi'), 250);
-      setTimeout(() => mockResponse.error('error'), 500);
+      const error = (e: any) => {
+        expect(e).toBe(mockResponse);
+        done();
+      };
+      response.subscribe({ error });
+    });
 
-      const next = jest.fn();
-      const error = jest.fn();
-      response.subscribe({ next, error });
+    test('Immediatelly aborts if passed an aborted abort signal', async (done) => {
+      mockCoreStart.http.fetch.mockRejectedValue(new Observable());
+      const abort = new AbortController();
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
+      abort.abort();
 
-      jest.advanceTimersByTime(1000);
+      const error = (e: any) => {
+        expect(e).toBeInstanceOf(AbortError);
+        done();
+      };
+      response.subscribe({ error });
+    });
 
-      expect(next).toHaveBeenCalledWith('hi');
-      expect(error).toHaveBeenCalledWith('error');
+    test('Aborts if signal is aborted', async (done) => {
+      mockCoreStart.http.fetch.mockRejectedValue(new Observable());
+      const abort = new AbortController();
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+      const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
+
+      setTimeout(() => abort.abort(), 250);
+
+      abort.abort();
+
+      const error = (e: any) => {
+        expect(e).toBeInstanceOf(AbortError);
+        done();
+      };
+      response.subscribe({ error });
     });
 
     test('should return a `RequestTimeoutError` if the request times out', () => {
-      mockSearch.mockReturnValue(new Observable());
-      const response = searchInterceptor.search({});
+      mockCoreStart.http.fetch.mockResolvedValueOnce(new Observable());
+      const response = searchInterceptor.search({
+        params: {},
+      });
 
       const error = jest.fn();
       response.subscribe({ error });
@@ -119,11 +152,27 @@ describe('SearchInterceptor', () => {
       pendingCount$.subscribe(next);
 
       const error = jest.fn();
-      searchInterceptor.search({}).subscribe({ error });
-      searchInterceptor.search({}).subscribe({ error });
 
-      setTimeout(() => mockResponses[0].complete(), 250);
-      setTimeout(() => mockResponses[1].error('error'), 500);
+      const delayedSuccess = from([{ result: 200 }]).pipe(delay(250));
+      delayedSuccess.subscribe(() => {});
+
+      const delayedError = from([{ result: 500 }]).pipe(
+        delay(500),
+        switchMap(() => throwError('error'))
+      );
+
+      mockCoreStart.http.fetch.mockResolvedValueOnce(delayedSuccess);
+      searchInterceptor
+        .search({
+          params: {},
+        })
+        .subscribe({ error });
+      mockCoreStart.http.fetch.mockResolvedValueOnce(delayedError);
+      searchInterceptor
+        .search({
+          params: {},
+        })
+        .subscribe({ error });
 
       jest.advanceTimersByTime(500);
 

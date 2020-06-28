@@ -23,7 +23,12 @@ import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../common/search';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../../common/search';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
@@ -40,9 +45,9 @@ export interface IStrategyOptions extends ISearchOptions {
 }
 
 export type ISearchGeneric = (
-  request: IKibanaSearchRequest,
+  request: IEsSearchRequest,
   options?: IStrategyOptions
-) => Observable<IKibanaSearchResponse>;
+) => Observable<IEsSearchResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
