@@ -76,6 +76,7 @@ describe('StatefulTimeline', () => {
       graphEventId: undefined,
       id: 'foo',
       isLive: false,
+      isSaving: false,
       isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],

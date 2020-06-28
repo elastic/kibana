@@ -136,12 +136,10 @@ export const getProviderActions = ({
         name: i18n.FILTER_FOR_FIELD_PRESENT,
         onClick: onFilterForFieldPresent,
       },
-      !(timelineType === TimelineType.default && type === DataProviderType.default)
+      timelineType === TimelineType.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
-            disabled:
-              isLoading ||
-              (type === DataProviderType.default && timelineType === TimelineType.default),
+            disabled: isLoading || type === DataProviderType.default,
             icon: 'visText',
             name:
               type === DataProviderType.template

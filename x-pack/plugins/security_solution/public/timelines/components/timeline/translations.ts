@@ -33,3 +33,10 @@ export const INSERT_TIMELINE = i18n.translate(
     defaultMessage: 'Insert timeline link',
   }
 );
+
+export const TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.flyoutTimelineTemplateLabel',
+  {
+    defaultMessage: 'Timeline template',
+  }
+);

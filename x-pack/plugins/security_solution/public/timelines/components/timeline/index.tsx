@@ -46,6 +46,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     graphEventId,
     id,
     isLive,
+    isSaving,
     isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
@@ -185,6 +186,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         indexPattern={indexPattern}
         indexToAdd={indexToAdd}
         isLive={isLive}
+        isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
         kqlMode={kqlMode}
@@ -215,6 +217,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
+      prevProps.isSaving === nextProps.isSaving &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -251,6 +254,7 @@ const makeMapStateToProps = () => {
       graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
+      isSaving,
       kqlMode,
       show,
       sort,
@@ -272,6 +276,7 @@ const makeMapStateToProps = () => {
       graphEventId,
       id,
       isLive: input.policy.kind === 'interval',
+      isSaving,
       isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,

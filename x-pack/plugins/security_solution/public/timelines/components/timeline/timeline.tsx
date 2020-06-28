@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -34,6 +34,7 @@ import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
+import { TIMELINE_TEMPLATE } from './translations';
 import {
   esQuery,
   Filter,
@@ -47,6 +48,8 @@ const TimelineContainer = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  padding-top: 4px; // to fix saving progress bar
 `;
 
 const TimelineHeaderContainer = styled.div`
@@ -85,8 +88,8 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
-const TemplateTimelineBadge = styled.div`
-  background: #dd0a73;
+const TimelineTemplateBadge = styled.div`
+  background: #a987d1;
   color: #fff;
   padding: 10px 15px;
   font-size: 0.8em;
@@ -104,6 +107,7 @@ export interface Props {
   indexPattern: IIndexPattern;
   indexToAdd: string[];
   isLive: boolean;
+  isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
@@ -139,6 +143,7 @@ export const TimelineComponent: React.FC<Props> = ({
   indexPattern,
   indexToAdd,
   isLive,
+  isSaving,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
@@ -209,8 +214,9 @@ export const TimelineComponent: React.FC<Props> = ({
 
   return (
     <TimelineContainer data-test-subj="timeline">
+      {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
       {timelineType === TimelineType.template && (
-        <TemplateTimelineBadge>{'Timeline Template'}</TemplateTimelineBadge>
+        <TimelineTemplateBadge>{TIMELINE_TEMPLATE}</TimelineTemplateBadge>
       )}
       <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
         <FlyoutHeaderWithCloseButton

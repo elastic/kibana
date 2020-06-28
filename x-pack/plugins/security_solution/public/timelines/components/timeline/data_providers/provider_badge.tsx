@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useHover } from '../../../../common/hooks/use_hover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
@@ -30,21 +31,28 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
       padding: 0px 3px;
     }
   }
+
   &.globalFilterItem {
     white-space: nowrap;
+    min-width: 140px;
+    display: flex;
+
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
       font-style: italic;
     }
+
     &.globalFilterItem-isError {
       box-shadow: 0 1px 1px -1px rgba(152, 162, 179, 0.2), 0 3px 2px -2px rgba(152, 162, 179, 0.2),
         inset 0 0 0 1px #bd271e;
     }
   }
+
   .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
     flex-direction: row;
   }
+
   .euiBadge.euiBadge--iconLeft
     &.euiBadge.euiBadge--iconRight
     .euiBadge__content
@@ -52,13 +60,6 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
     margin-right: 0;
     margin-left: 4px;
   }
-  ${({ type }) =>
-    type === DataProviderType.template &&
-    `
-      &.globalFilterItem {
-        background: #f8e9e9
-      }
-  `}
 `;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
@@ -66,21 +67,48 @@ ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 const ProviderFieldBadge = styled.div`
   display: block;
   color: #fff;
-  padding: 4px 0 4px 6px;
+  padding: 6px 8px;
   font-size: 0.6em;
+`;
+
+const StyledTemplateFieldBadge = styled(ProviderFieldBadge)`
+  background: #a987d1;
   text-transform: uppercase;
 `;
 
-const TemplateFieldBadge = styled(ProviderFieldBadge)`
-  background: #dd0a73;
-  padding: 4px 0 4px 6px;
-  font-size: 0.6em;
-  text-transform: uppercase;
+interface TemplateFieldBadgeProps {
+  type: DataProviderType;
+  toggleType: () => void;
+}
+
+const ConvertFieldBadge = styled(ProviderFieldBadge)`
+  background: grey;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    background: #a987d1;
+  }
 `;
 
-const TimelineFieldBadge = styled(ProviderFieldBadge)`
-  background: #98a2b3;
-`;
+const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
+  const [hoverRef, isHovered] = useHover();
+
+  const content = useMemo(() => {
+    const convertTo =
+      type === DataProviderType.template ? i18n.CONVERT_TO_FIELD : i18n.CONVERT_TO_TEMPLATE_FIELD;
+
+    if (type === DataProviderType.default || isHovered) {
+      return <ConvertFieldBadge onClick={toggleType}>{convertTo}</ConvertFieldBadge>;
+    }
+
+    return (
+      <StyledTemplateFieldBadge onClick={toggleType}>{'TEMPLATE FIELD'}</StyledTemplateFieldBadge>
+    );
+  }, [isHovered, toggleType, type]);
+
+  return <div ref={hoverRef}>{content}</div>;
+};
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -163,10 +191,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
     );
 
     return (
-      <ProviderContainer>
+      <ProviderContainer id={`${providerId}-${field}-${val}`}>
         <>
           <ProviderBadgeStyled
-            id={`${providerId}-${field}-${val}`}
             className={classes}
             color="hollow"
             title=""
@@ -182,17 +209,9 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
           >
             {content}
           </ProviderBadgeStyled>
-          {type === DataProviderType.template && (
-            <TemplateFieldBadge>{'Template field'}</TemplateFieldBadge>
-          )}
+
           {timelineType === TimelineType.template && (
-            <TimelineFieldBadge>
-              <EuiButtonEmpty onClick={toggleType} size="xs">
-                {type === DataProviderType.template
-                  ? i18n.CONVERT_TO_FIELD
-                  : i18n.CONVERT_TO_TEMPLATE_FIELD}
-              </EuiButtonEmpty>
-            </TimelineFieldBadge>
+            <TemplateFieldBadge toggleType={toggleType} type={type} />
           )}
         </>
       </ProviderContainer>

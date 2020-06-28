@@ -11,6 +11,7 @@ import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
+import deepMerge from 'deepmerge';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import {
   TimelineResult,
@@ -19,9 +20,10 @@ import {
   FilterTimelineResult,
   ColumnHeaderResult,
   PinnedEvent,
+  DataProviderResult,
 } from '../../../graphql/types';
 
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -49,6 +51,7 @@ import {
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
 import { getTimeRangeSettings } from '../../../common/utils/default_date_settings';
 import { createNote } from '../notes/helpers';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -184,6 +187,30 @@ const getTemplateTimelineId = (
   return uuid.v4();
 };
 
+const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) =>
+  deepMerge(dataProvider, {
+    type: DataProviderType.default,
+    queryMatch: {
+      value:
+        dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
+    },
+  });
+
+const getDataProviders = (
+  duplicate: boolean,
+  dataProviders: TimelineResult['dataProviders'],
+  timelineType?: TimelineType
+) => {
+  if (duplicate && dataProviders && timelineType === TimelineType.default) {
+    return dataProviders.map((dataProvider) => ({
+      ...convertToDefaultField(dataProvider),
+      and: dataProvider.and?.map(convertToDefaultField) ?? [],
+    }));
+  }
+
+  return dataProviders;
+};
+
 // eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
@@ -194,6 +221,7 @@ export const defaultTimelineToTimelineModel = (
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
