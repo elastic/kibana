@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   AGENT_NAME,
@@ -12,28 +12,40 @@ import {
   TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { ESClient } from '../../helpers/es_client';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
-  const { start, end, client } = setup;
+export async function getServicesItems({
+  start,
+  end,
+  uiFiltersES,
+  indices,
+  client,
+}: {
+  start: number;
+  end: number;
+  uiFiltersES: ESFilter[];
+  indices: ApmIndicesConfig;
+  client: ESClient;
+}) {
+  const projection = getServicesProjection({
+    start,
+    end,
+    uiFiltersES,
+    indices,
+  });
 
-  const projection = getServicesProjection({ setup });
-
-  const params = mergeProjection(projection, {
+  const params = {
     body: {
+      index: projection.index,
       size: 0,
+      query: projection.body.query,
       aggs: {
         services: {
           terms: {
-            ...projection.body.aggs.services.terms,
+            field: projection.body.aggs.services.terms.field,
             size: 500,
           },
           aggs: {
@@ -53,7 +65,7 @@ export async function getServicesItems(
         },
       },
     },
-  });
+  };
 
   const resp = await client.search(params);
   const aggs = resp.aggregations;

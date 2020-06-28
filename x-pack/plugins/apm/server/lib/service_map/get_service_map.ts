@@ -10,7 +10,6 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../../common/projections/services';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
@@ -76,21 +75,17 @@ async function getServicesData(options: IEnvOptions) {
     setup: { ...setup, uiFiltersES: [] },
   });
 
-  const { filter } = projection.body.query.bool;
+  const serviceNameFilter = options.serviceName
+    ? [{ term: { [SERVICE_NAME]: options.serviceName } }]
+    : [];
 
-  const params = mergeProjection(projection, {
+  const params = {
     body: {
+      index: projection.index,
       size: 0,
       query: {
         bool: {
-          ...projection.body.query.bool,
-          filter: options.serviceName
-            ? filter.concat({
-                term: {
-                  [SERVICE_NAME]: options.serviceName,
-                },
-              })
-            : filter,
+          filter: [...projection.body.query.bool.filter, ...serviceNameFilter],
         },
       },
       aggs: {
@@ -109,7 +104,7 @@ async function getServicesData(options: IEnvOptions) {
         },
       },
     },
-  });
+  };
 
   const { client } = setup;
 

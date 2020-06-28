@@ -4,23 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Setup,
-  SetupUIFilters,
-  SetupTimeRange,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME, PROCESSOR_EVENT } from '../elasticsearch_fieldnames';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { rangeFilter } from '../utils/range_filter';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ApmIndicesConfig } from '../../server/lib/settings/apm_indices/get_apm_indices';
+import { ESFilter } from '../../typings/elasticsearch';
 
 export function getServicesProjection({
-  setup,
+  start,
+  end,
+  uiFiltersES,
+  indices,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  start: number;
+  end: number;
+  uiFiltersES: ESFilter[];
+  indices: ApmIndicesConfig;
 }) {
-  const { start, end, uiFiltersES, indices } = setup;
-
   return {
     index: [
       indices['apm_oss.metricsIndices'],
