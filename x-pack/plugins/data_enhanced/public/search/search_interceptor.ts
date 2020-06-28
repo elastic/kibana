@@ -85,7 +85,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) return EMPTY;
+        if (!isRunning) return EMPTY;
 
         id = response.id;
         // Delay by the given poll interval
