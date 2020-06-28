@@ -24,11 +24,12 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `siemTimeline__body ${className}`,
-}))<{ bodyHeight?: number }>`
+}))<{ bodyHeight?: number; visible: boolean }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
+  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -89,10 +90,9 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number; justifyContent: string }>`
+}))<{ actionsColumnWidth: number }>`
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
-  justify-content: ${({ justifyContent }) => justifyContent};
   min-width: 0;
 `;
 
@@ -139,14 +139,17 @@ export const EventsTh = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thContent ${className}`,
-}))<{ textAlign?: string }>`
+}))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 
 /* EVENTS BODY */
@@ -202,7 +205,6 @@ export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
 }))<{ actionsColumnWidth: number }>`
   display: flex;
-  justify-content: space-between;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;
 `;
@@ -234,14 +236,17 @@ export const EventsTd = styled.div.attrs<WidthProp>(({ className = '', width }) 
 `;
 
 export const EventsTdContent = styled.div.attrs(({ className }) => ({
-  className: `siemEventsTable__tdContent ${className}`,
-}))<{ textAlign?: string }>`
+  className: `siemEventsTable__tdContent ${className != null ? className : ''}`,
+}))<{ textAlign?: string; width?: number }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 
 /**
