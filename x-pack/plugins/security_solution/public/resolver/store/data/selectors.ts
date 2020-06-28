@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import rbush from 'rbush';
 import { createSelector } from 'reselect';
 import {
   DataState,
@@ -16,11 +17,20 @@ import {
   AdjacentProcessMap,
   Vector2,
   EdgeLineMetadata,
+  IndexedEntity,
+  IndexedEdgeLineSegment,
+  IndexedProcessNode,
+  AABB,
+  VisibleEntites,
 } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import { eventTimestamp } from '../../../../common/endpoint/models/event';
+import * as event from '../../../../common/endpoint/models/event';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
+import {
+  isGraphableProcess,
+  isTerminatedProcess,
+  uniquePidForProcess,
+} from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
@@ -29,6 +39,7 @@ import {
   levelOrder,
 } from '../../models/indexed_process_tree';
 import { getFriendlyElapsedTime } from '../../lib/date';
+import { isEqual } from '../../lib/aabb';
 
 const unit = 140;
 const distanceBetweenNodesInUnits = 2;
@@ -78,6 +89,20 @@ export const graphableProcesses = createSelector(
   ({ results }: DataState) => results,
   function (results: DataState['results']) {
     return results.filter(isGraphableProcess);
+  }
+);
+
+/**
+ * Process events that will be displayed as terminated.
+ */
+export const terminatedProcesses = createSelector(
+  ({ results }: DataState) => results,
+  function (results: DataState['results']) {
+    return new Set(
+      results.filter(isTerminatedProcess).map((terminatedEvent) => {
+        return uniquePidForProcess(terminatedEvent);
+      })
+    );
   }
 );
 
@@ -157,7 +182,7 @@ function processEdgeLineSegments(
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
   for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
-    const edgeLineMetadata: EdgeLineMetadata = {};
+    const edgeLineMetadata: EdgeLineMetadata = { uniqueId: '' };
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -168,6 +193,9 @@ function processEdgeLineSegments(
     const { process, parent, parentWidth } = metadata;
     const position = positions.get(process);
     const parentPosition = positions.get(parent);
+    const parentId = event.entityId(parent);
+    const processEntityId = event.entityId(process);
+    const edgeLineId = parentId ? parentId + processEntityId : parentId;
 
     if (position === undefined || parentPosition === undefined) {
       /**
@@ -176,12 +204,13 @@ function processEdgeLineSegments(
       throw new Error();
     }
 
-    const parentTime = eventTimestamp(parent);
-    const processTime = eventTimestamp(process);
+    const parentTime = event.eventTimestamp(parent);
+    const processTime = event.eventTimestamp(process);
     if (parentTime && processTime) {
       const elapsedTime = getFriendlyElapsedTime(parentTime, processTime);
       if (elapsedTime) edgeLineMetadata.elapsedTime = elapsedTime;
     }
+    edgeLineMetadata.uniqueId = edgeLineId;
 
     /**
      * The point halfway between the parent and child on the y axis, we sometimes have a hard angle here in the edge line
@@ -226,6 +255,7 @@ function processEdgeLineSegments(
 
       const lineFromParentToMidwayLine: EdgeLineSegment = {
         points: [parentPosition, [parentPosition[0], midwayY]],
+        metadata: { uniqueId: `parentToMid${edgeLineId}` },
       };
 
       const widthOfMidline = parentWidth - firstChildWidth / 2 - lastChildWidth / 2;
@@ -246,6 +276,7 @@ function processEdgeLineSegments(
             midwayY,
           ],
         ],
+        metadata: { uniqueId: `midway${edgeLineId}` },
       };
 
       edgeLineSegments.push(
@@ -508,17 +539,15 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
     for (const edgeLineSegment of edgeLineSegments) {
       const {
         points: [startPoint, endPoint],
-        metadata,
       } = edgeLineSegment;
 
       const transformedSegment: EdgeLineSegment = {
+        ...edgeLineSegment,
         points: [
           applyMatrix3(startPoint, isometricTransformMatrix),
           applyMatrix3(endPoint, isometricTransformMatrix),
         ],
       };
-
-      if (metadata) transformedSegment.metadata = metadata;
 
       transformedEdgeLineSegments.push(transformedSegment);
     }
@@ -530,6 +559,96 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
   }
 );
 
+const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
+  processNodePositionsAndEdgeLineSegments,
+  function visibleProcessNodePositionsAndEdgeLineSegments({
+    /* eslint-disable no-shadow */
+    processNodePositions,
+    edgeLineSegments,
+    /* eslint-enable no-shadow */
+  }) {
+    const tree: rbush<IndexedEntity> = new rbush();
+    const processesToIndex: IndexedProcessNode[] = [];
+    const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
+
+    // Make sure these numbers are big enough to cover the process nodes at all zoom levels.
+    // The process nodes don't extend equally in all directions from their center point.
+    const processNodeViewWidth = 720;
+    const processNodeViewHeight = 240;
+    const lineSegmentPadding = 30;
+    for (const [processEvent, position] of processNodePositions) {
+      const [nodeX, nodeY] = position;
+      const indexedEvent: IndexedProcessNode = {
+        minX: nodeX - 0.5 * processNodeViewWidth,
+        minY: nodeY - 0.5 * processNodeViewHeight,
+        maxX: nodeX + 0.5 * processNodeViewWidth,
+        maxY: nodeY + 0.5 * processNodeViewHeight,
+        position,
+        entity: processEvent,
+        type: 'processNode',
+      };
+      processesToIndex.push(indexedEvent);
+    }
+    for (const edgeLineSegment of edgeLineSegments) {
+      const {
+        points: [[x1, y1], [x2, y2]],
+      } = edgeLineSegment;
+      const indexedLineSegment: IndexedEdgeLineSegment = {
+        minX: Math.min(x1, x2) - lineSegmentPadding,
+        minY: Math.min(y1, y2) - lineSegmentPadding,
+        maxX: Math.max(x1, x2) + lineSegmentPadding,
+        maxY: Math.max(y1, y2) + lineSegmentPadding,
+        entity: edgeLineSegment,
+        type: 'edgeLine',
+      };
+      edgeLineSegmentsToIndex.push(indexedLineSegment);
+    }
+    tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return tree;
+  }
+);
+
+export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
+  indexedProcessNodePositionsAndEdgeLineSegments,
+  function visibleProcessNodePositionsAndEdgeLineSegments(tree) {
+    // memoize the results of this call to avoid unnecessarily rerunning
+    let lastBoundingBox: AABB | null = null;
+    let currentlyVisible: VisibleEntites = {
+      processNodePositions: new Map<ResolverEvent, Vector2>(),
+      connectingEdgeLineSegments: [],
+    };
+    return (boundingBox: AABB) => {
+      if (lastBoundingBox !== null && isEqual(lastBoundingBox, boundingBox)) {
+        return currentlyVisible;
+      } else {
+        const {
+          minimum: [minX, minY],
+          maximum: [maxX, maxY],
+        } = boundingBox;
+        const entities = tree.search({
+          minX,
+          minY,
+          maxX,
+          maxY,
+        });
+        const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+          entities
+            .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
+            .map((node) => [node.entity, node.position])
+        );
+        const connectingEdgeLineSegments = entities
+          .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
+          .map((node) => node.entity);
+        currentlyVisible = {
+          processNodePositions: visibleProcessNodePositions,
+          connectingEdgeLineSegments,
+        };
+        lastBoundingBox = boundingBox;
+        return currentlyVisible;
+      }
+    };
+  }
+);
 /**
  * Returns the `children` and `ancestors` limits for the current graph, if any.
  *

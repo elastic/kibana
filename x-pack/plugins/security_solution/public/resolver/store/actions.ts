@@ -141,15 +141,6 @@ interface UserSelectedRelatedEventCategory {
   };
 }
 
-/**
- * This action should dispatch to indicate that the user chose to focus
- * on examining alerts related to a particular ResolverEvent
- */
-interface UserSelectedRelatedAlerts {
-  readonly type: 'userSelectedRelatedAlerts';
-  readonly payload: ResolverEvent;
-}
-
 export type ResolverAction =
   | CameraAction
   | DataAction
@@ -160,7 +151,6 @@ export type ResolverAction =
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
   | UserSelectedRelatedEventCategory
-  | UserSelectedRelatedAlerts
   | AppDetectedNewIdFromQueryParams
   | AppDisplayedDifferentPanel
   | AppDetectedMissingEventData;
