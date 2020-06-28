@@ -5,16 +5,23 @@
  */
 
 import React from 'react';
-import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
+import { EuiText, EuiCommentProps, EuiAvatar, EuiComboBoxOptionOption } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
 import { FormattedEntry, OperatorOption, DescriptionListItem } from './types';
-import { EXCEPTION_OPERATORS, isOperator } from './operators';
+import {
+  EXCEPTION_OPERATORS,
+  isOperator,
+  isNotOperator,
+  existsOperator,
+  doesNotExistOperator,
+} from './operators';
 import {
   CommentsArray,
   Entry,
+  EntryNested,
   EntriesArray,
   ExceptionListItemSchema,
   OperatorTypeEnum,
@@ -22,6 +29,7 @@ import {
   entriesExists,
   entriesList,
 } from '../../../lists_plugin_deps';
+import { BrowserField, BrowserFields } from '../../containers/source';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -38,6 +46,39 @@ export const getOperatorType = (entry: Entry): OperatorTypeEnum => {
       return OperatorTypeEnum.LIST;
     default:
       return OperatorTypeEnum.EXISTS;
+  }
+};
+
+export const getFormattedBuilderEntries = (browserFields, entries) => {
+  return entries.reduce((acc, entry) => {
+    if (!entriesNested.is(entry)) {
+      return { ...acc, a: [...acc.a, getFormattedBuilderEntry(browserFields, entry)] };
+    }
+  }, []);
+};
+
+export const getFormattedBuilderEntry = (
+  browserFields: BrowserFields,
+  entry: Entry | EntryNested,
+  isNested = false
+): FormattedBuilderEntry | FormattedBuilderEntry[] => {
+  const options = getAllCategoryFieldNames(browserFields);
+  const labels = options.map(({ name }) => name);
+  const field = options[labels.indexOf(entry.field)];
+  console.log(browserFields);
+  const value = getEntryValue(entry);
+  if (entriesNested.is(entry)) {
+    const a = entry.entries.flatMap((t) =>
+      getFormattedBuilderEntry(browserFields, { ...t, field: `${entry.field}.${t.field}` }, true)
+    );
+    return [{ field: entry.field, operator: isOperator }, ...a];
+  } else {
+    return {
+      field,
+      operator: getExceptionOperatorSelect(entry),
+      value,
+      isNested,
+    };
   }
 };
 
@@ -192,3 +233,61 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
   }));
+
+export const getBrowserFields = (category: Partial<BrowserField>): Array<Partial<BrowserField>> => {
+  if (category != null && category.fields != null) {
+    return Object.keys(category.fields).map((field) => category.fields[field]);
+  } else {
+    return [];
+  }
+};
+
+export const getAllCategoryFieldNames = (
+  browserFields: BrowserFields
+): Array<Partial<BrowserField>> => {
+  return Object.keys(browserFields)
+    .sort()
+    .flatMap((categoryId) => getBrowserFields(browserFields[categoryId]));
+};
+
+export const getFields = ({
+  options,
+  fieldSelected,
+  getLabel,
+  onChange,
+}: {
+  options: T[];
+  fieldSelected: T[];
+  getLabel: (T) => string;
+  onChange: (a: T, b: string[]) => void;
+}): {
+  euiOptions: EuiComboBoxOptionOption[];
+  selectedEuiOptions: EuiComboBoxOptionOption[];
+  onInputChange: () => void;
+} => {
+  const labels = options.map(getLabel);
+  const euiOptions: EuiComboBoxOptionOption[] = labels.map((label) => ({ label }));
+  const selectedEuiOptions = fieldSelected
+    .filter((option) => {
+      return options.indexOf(option) !== -1;
+    })
+    .map((option) => {
+      return euiOptions[options.indexOf(option)];
+    });
+
+  const onInputChange = onChange(options, labels);
+
+  return { euiOptions, selectedEuiOptions: selectedEuiOptions ?? [], onInputChange };
+};
+
+export const getOperatorLabels = (field) => {
+  if (field == null) {
+    return [isOperator];
+  } else if (field.type === 'boolean') {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (field.type === 'nested') {
+    return [isOperator];
+  } else {
+    return EXCEPTION_OPERATORS;
+  }
+};

@@ -6,6 +6,7 @@
 import { ReactNode } from 'react';
 
 import { Operator, OperatorType } from '../../../lists_plugin_deps';
+import { BrowserField } from '../../containers/source';
 
 export interface OperatorOption {
   message: string;
@@ -18,6 +19,13 @@ export interface FormattedEntry {
   fieldName: string;
   operator: string | null;
   value: string | string[] | null;
+  isNested: boolean;
+}
+
+export interface FormattedBuilderEntry {
+  field: Partial<BrowserField> | null;
+  operator: OperatorOption;
+  value: string | string[];
   isNested: boolean;
 }
 

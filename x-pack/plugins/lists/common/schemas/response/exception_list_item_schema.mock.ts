@@ -13,7 +13,28 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   created_at: '2020-04-23T00:19:13.289Z',
   created_by: 'user_name',
   description: 'This is a sample endpoint type exception',
-  entries: ENTRIES,
+  entries: [
+    { field: 'event.category', operator: 'excluded', type: 'match_any', value: ['some value'] },
+    { field: 'event.module', operator: 'included', type: 'match', value: 'some value' },
+    // {
+    //   field: 'file.code_signature',
+    //   type: 'nested',
+    //   entries: [
+    //     {
+    //       field: 'subject_name',
+    //       type: 'match',
+    //       operator: 'included',
+    //       value: 'Evil',
+    //     },
+    //     {
+    //       field: 'trusted',
+    //       type: 'match',
+    //       operator: 'included',
+    //       value: 'true',
+    //     },
+    //   ],
+    // },
+  ],
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list',
