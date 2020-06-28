@@ -205,25 +205,30 @@ export const esDataTypeGeoShape = t.union([
 
 export type EsDataTypeGeoShape = t.TypeOf<typeof esDataTypeGeoShape>;
 
-export const esDataTypeUnion = t.union([
+export const esDataTypeSingle = t.union([
   t.type({ binary }),
   t.type({ boolean }),
   t.type({ byte }),
   t.type({ date }),
   t.type({ date_nanos }),
-  esDataTypeRangeTerm,
   t.type({ double }),
   t.type({ float }),
-  esDataTypeGeoPoint,
-  esDataTypeGeoShape,
   t.type({ half_float }),
   t.type({ integer }),
   t.type({ ip }),
   t.type({ keyword }),
   t.type({ long }),
-  t.type({ shape }),
   t.type({ short }),
   t.type({ text }),
+]);
+
+export type EsDataTypeSingle = t.TypeOf<typeof esDataTypeSingle>;
+
+export const esDataTypeUnion = t.union([
+  esDataTypeRangeTerm,
+  esDataTypeGeoPoint,
+  esDataTypeGeoShape,
+  esDataTypeSingle,
 ]);
 
 export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;

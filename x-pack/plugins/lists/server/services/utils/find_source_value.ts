@@ -16,7 +16,8 @@ import {
 
 export const DEFAULT_GEO_POINT = '{{lat}},{{lon}}';
 export const DEFAULT_DATE_RANGE = '{{gte}},{{lte}}';
-export const DEFAULT_DATA_TYPES = '{{gte}}-{{lte}}';
+export const DEFAULT_LTE_GTE = '{{gte}}-{{lte}}';
+export const DEFAULT_VALUE = '{{value}}';
 
 export const findSourceValue = (
   hit: SearchEsListItemSchema,
@@ -28,10 +29,22 @@ export const findSourceValue = (
   if (foundEntry != null) {
     const [foundType, value] = foundEntry;
     switch (foundType) {
+      case 'shape':
       case 'geo_shape':
       case 'geo_point': {
         return deserializeValue({
           defaultDeserializer: DEFAULT_GEO_POINT,
+          deserializer: hit.deserializer,
+          value,
+        });
+      }
+      case 'double_range':
+      case 'float_range':
+      case 'integer_range':
+      case 'long_range':
+      case 'ip_range': {
+        return deserializeValue({
+          defaultDeserializer: DEFAULT_LTE_GTE,
           deserializer: hit.deserializer,
           value,
         });
@@ -45,7 +58,7 @@ export const findSourceValue = (
       }
       default: {
         return deserializeValue({
-          defaultDeserializer: DEFAULT_DATA_TYPES,
+          defaultDeserializer: DEFAULT_LTE_GTE,
           deserializer: hit.deserializer,
           value,
         });
@@ -67,6 +80,7 @@ export const deserializeValue = ({
 }): string | null => {
   if (esDataTypeRange.is(value)) {
     if (value.gte === value.lte) {
+      // Since gte and lte are the same we want to deserialize this back out as the default of a single element
       return value.gte;
     } else {
       const template = deserializer ?? defaultDeserializer;

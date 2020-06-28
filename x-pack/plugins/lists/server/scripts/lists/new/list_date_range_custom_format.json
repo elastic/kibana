@@ -1,5 +1,5 @@
 {
-  "id": "list-date-range",
+  "id": "list-date-range-custom-format",
   "name": "Simple list with date ranges",
   "serializer": "(?<gte>.+)/(?<lte>.+)",
   "deserializer": "{{gte}}/{{lte}}",

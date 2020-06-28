@@ -8,18 +8,20 @@ import {
   EsDataTypeGeoPoint,
   EsDataTypeGeoShape,
   EsDataTypeRangeTerm,
+  EsDataTypeSingle,
   EsDataTypeUnion,
   SerializerOrUndefined,
   Type,
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
+  esDataTypeSingle,
   esDataTypeUnion,
 } from '../../../common/schemas';
-import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 export const DEFAULT_DATE_REGEX = RegExp('(?<gte>.+),(?<lte>.+)|(?<value>.+)');
 export const DEFAULT_LTE_GTE_REGEX = RegExp('(?<gte>.+)-(?<lte>.+)|(?<value>.+)');
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+),(?<lon>.+)');
+export const DEFAULT_SINGLE_REGEX = RegExp('(?<value>.+)');
 
 export const transformListItemToElasticQuery = ({
   serializer,
@@ -33,99 +35,65 @@ export const transformListItemToElasticQuery = ({
   switch (type) {
     case 'shape':
     case 'geo_shape': {
-      const shape = serializeGeoShape({
+      return serializeGeoShape({
         defaultSerializer: DEFAULT_GEO_REGEX,
         serializer,
         type,
         value,
       });
-      if (shape != null) {
-        return shape;
-      } else {
-        // TODO: Return null or write these to a new index that represents error conditions
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
     }
     case 'geo_point': {
-      const point = serializeGeoPoint({ defaultSerializer: DEFAULT_GEO_REGEX, serializer, value });
-      if (point != null) {
-        return point;
-      } else {
-        // TODO: Return null or write these to a new index that represents error conditions
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
+      return serializeGeoPoint({ defaultSerializer: DEFAULT_GEO_REGEX, serializer, value });
     }
     case 'ip_range': {
-      const range = serializeIpRange({
+      return serializeIpRange({
         defaultSerializer: DEFAULT_LTE_GTE_REGEX,
         serializer,
         value,
       });
-      if (range != null) {
-        return range;
-      } else {
-        // TODO: Return null or write these to a new index that represents error conditions
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
     }
     case 'date_range': {
-      const range = serializeRanges({
+      return serializeRanges({
         defaultSerializer: DEFAULT_DATE_REGEX,
         serializer,
         type,
         value,
       });
-      if (range != null) {
-        return range;
-      } else {
-        // TODO: Return null or write these to a new index that represents error conditions
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
     }
     case 'double_range':
     case 'float_range':
     case 'integer_range':
     case 'long_range': {
-      const range = serializeRanges({
+      return serializeRanges({
         defaultSerializer: DEFAULT_LTE_GTE_REGEX,
         serializer,
         type,
         value,
       });
-      if (range != null) {
-        return range;
-      } else {
-        // TODO: Return null or write these to a new index that represents error conditions
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
     }
     default: {
-      // TODO: Add the ability to search for the regex of '(?<value>)'?
-      const unionType = { [type]: value };
-      if (esDataTypeUnion.is(unionType)) {
-        return unionType;
-      } else {
-        throw new ErrorWithStatusCode(
-          `Unknown list item to transform to elastic query, type: ${type}, value: ${value}`,
-          400
-        );
-      }
+      return serializeSingleValue({
+        defaultSerializer: DEFAULT_SINGLE_REGEX,
+        serializer,
+        type,
+        value,
+      });
     }
+  }
+};
+
+export const serializeDefault = ({
+  type,
+  value,
+}: {
+  type: Type;
+  value: string;
+}): EsDataTypeUnion | null => {
+  const unionType = { [type]: value };
+  if (esDataTypeUnion.is(unionType)) {
+    return unionType;
+  } else {
+    return null;
   }
 };
 
@@ -145,17 +113,17 @@ export const serializeGeoShape = ({
 
   // we only support lat/lon for point and represent it as Well Known Text (WKT)
   if (parsed?.groups?.lat != null && parsed?.groups?.lon != null) {
-    const returnType = { [type]: `POINT(${parsed.groups.lon} ${parsed.groups.lat})` };
-    if (esDataTypeGeoShape.is(returnType)) {
-      return returnType;
+    const unionType = { [type]: `POINT(${parsed.groups.lon} ${parsed.groups.lat})` };
+    if (esDataTypeGeoShape.is(unionType)) {
+      return unionType;
     } else {
       return null;
     }
   } else {
     // This should be in Well Known Text (WKT) at this point so let's return it as is
-    const returnType = { [type]: value };
-    if (esDataTypeGeoShape.is(returnType)) {
-      return returnType;
+    const unionType = { [type]: value };
+    if (esDataTypeGeoShape.is(unionType)) {
+      return unionType;
     } else {
       return null;
     }
@@ -201,7 +169,7 @@ export const serializeIpRange = ({
       ip_range: { gte: parsed.groups.gte, lte: parsed.groups.lte },
     };
   } else if (parsed?.groups?.value != null) {
-    // This is a CIDR string
+    // This is a CIDR string based on the serializer involving value such as (?<value>.+)
     if (parsed.groups.value.includes('/')) {
       return {
         ip_range: parsed.groups.value,
@@ -231,24 +199,70 @@ export const serializeRanges = ({
   const parsed = regExpSerializer.exec(value);
 
   if (parsed?.groups?.lte != null && parsed?.groups?.gte != null) {
-    const returnType = {
+    const unionType = {
       [type]: { gte: parsed.groups.gte, lte: parsed.groups.lte },
     };
-    if (esDataTypeRangeTerm.is(returnType)) {
-      return returnType;
+    if (esDataTypeRangeTerm.is(unionType)) {
+      return unionType;
     } else {
       return null;
     }
   } else if (parsed?.groups?.value != null) {
-    const returnType = {
+    const unionType = {
       [type]: { gte: parsed.groups.value, lte: parsed.groups.value },
     };
-    if (esDataTypeRangeTerm.is(returnType)) {
-      return returnType;
+    if (esDataTypeRangeTerm.is(unionType)) {
+      return unionType;
     } else {
       return null;
     }
   } else {
     return null;
+  }
+};
+
+export const serializeSingleValue = ({
+  serializer,
+  value,
+  defaultSerializer,
+  type,
+}: {
+  value: string;
+  serializer: SerializerOrUndefined;
+  type:
+    | 'binary'
+    | 'boolean'
+    | 'byte'
+    | 'date'
+    | 'date_nanos'
+    | 'double'
+    | 'float'
+    | 'half_float'
+    | 'integer'
+    | 'ip'
+    | 'long'
+    | 'shape'
+    | 'short'
+    | 'text'
+    | 'keyword';
+  defaultSerializer: RegExp;
+}): EsDataTypeSingle | null => {
+  const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
+  const parsed = regExpSerializer.exec(value);
+
+  if (parsed?.groups?.value != null) {
+    const unionType = { [type]: `${parsed.groups.value}` };
+    if (esDataTypeSingle.is(unionType)) {
+      return unionType;
+    } else {
+      return null;
+    }
+  } else {
+    const unionType = { [type]: value };
+    if (esDataTypeSingle.is(unionType)) {
+      return unionType;
+    } else {
+      return null;
+    }
   }
 };
