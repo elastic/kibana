@@ -25,7 +25,6 @@ import { coreMock } from '../../../../core/public/mocks';
 describe('migrate legacy kibana urls', () => {
   let forwardDefinitions: ForwardDefinition[];
   let coreStart: CoreStart;
-  let locationMock: Location;
 
   beforeEach(() => {
     coreStart = coreMock.createStart({ basePath: '/base/path' });
@@ -36,34 +35,33 @@ describe('migrate legacy kibana urls', () => {
         rewritePath: jest.fn(() => '/new/path'),
       },
     ];
-    locationMock = { href: '' } as Location;
   });
 
-  it('should redirect to kibana if no forward definition is found', () => {
-    navigateToLegacyKibanaUrl(
+  it('should do nothing if no forward definition is found', () => {
+    const result = navigateToLegacyKibanaUrl(
       '/myOtherApp/deep/path',
       forwardDefinitions,
       coreStart.http.basePath,
-      coreStart.application,
-      locationMock
+      coreStart.application
     );
 
-    expect(locationMock.href).toEqual('/base/path/app/kibana#/myOtherApp/deep/path');
+    expect(result).toEqual({ navigated: false });
+    expect(coreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
 
   it('should call navigateToApp with migrated URL', () => {
-    navigateToLegacyKibanaUrl(
+    const result = navigateToLegacyKibanaUrl(
       '/myApp/deep/path',
       forwardDefinitions,
       coreStart.http.basePath,
-      coreStart.application,
-      locationMock
+      coreStart.application
     );
 
     expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('updatedApp', {
       path: '/new/path',
+      replace: true,
     });
     expect(forwardDefinitions[0].rewritePath).toHaveBeenCalledWith('/myApp/deep/path');
-    expect(locationMock.href).toEqual('');
+    expect(result).toEqual({ navigated: true });
   });
 });

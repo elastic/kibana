@@ -13,6 +13,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
@@ -26,6 +27,18 @@ import {
   timelineDefaults,
 } from '../../../timelines/components/manage_timeline';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 
@@ -144,7 +157,13 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  apolloClientObservable,
+  kibanaObservable,
+  storage
+);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"

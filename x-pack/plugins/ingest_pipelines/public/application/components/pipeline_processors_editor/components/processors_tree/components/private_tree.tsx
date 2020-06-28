@@ -11,6 +11,7 @@ import { AutoSizer, List, WindowScroller } from 'react-virtualized';
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
 import { isChildPath } from '../../../processors_reducer';
+import { selectorToDataTestSubject } from '../../../utils';
 
 import { DropZoneButton } from '.';
 import { TreeNode } from '.';
@@ -73,24 +74,27 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     info: ProcessorInfo;
     processor: ProcessorInternal;
   }) => {
+    const stringifiedSelector = selectorToDataTestSubject(info.selector);
     return (
       <>
         {idx === 0 ? (
-          <DropZoneButton
-            onClick={(event) => {
-              event.preventDefault();
-              onAction({
-                type: 'move',
-                payload: {
-                  destination: selector.concat(DropSpecialLocations.top),
-                  source: movingProcessor!.selector,
-                },
-              });
-            }}
-            isDisabled={Boolean(
-              !movingProcessor || isDropZoneAboveDisabled(info, movingProcessor!)
-            )}
-          />
+          <EuiFlexItem>
+            <DropZoneButton
+              data-test-subj={`dropButtonAbove-${stringifiedSelector}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onAction({
+                  type: 'move',
+                  payload: {
+                    destination: selector.concat(DropSpecialLocations.top),
+                    source: movingProcessor!.selector,
+                  },
+                });
+              }}
+              isVisible={Boolean(movingProcessor)}
+              isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
+            />
+          </EuiFlexItem>
         ) : undefined}
         <EuiFlexItem>
           <TreeNode
@@ -101,19 +105,23 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
             movingProcessor={movingProcessor}
           />
         </EuiFlexItem>
-        <DropZoneButton
-          isDisabled={Boolean(!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor!))}
-          onClick={(event) => {
-            event.preventDefault();
-            onAction({
-              type: 'move',
-              payload: {
-                destination: selector.concat(String(idx + 1)),
-                source: movingProcessor!.selector,
-              },
-            });
-          }}
-        />
+        <EuiFlexItem>
+          <DropZoneButton
+            data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
+            isVisible={Boolean(movingProcessor)}
+            isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
+            onClick={(event) => {
+              event.preventDefault();
+              onAction({
+                type: 'move',
+                payload: {
+                  destination: selector.concat(String(idx + 1)),
+                  source: movingProcessor!.selector,
+                },
+              });
+            }}
+          />
+        </EuiFlexItem>
       </>
     );
   };

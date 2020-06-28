@@ -388,6 +388,11 @@ export interface APICaller {
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "appendersSchema" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type AppenderConfigType = TypeOf<typeof appendersSchema>;
+
 // @public
 export function assertNever(x: never): never;
 
@@ -574,6 +579,72 @@ export const config: {
             ignoreVersionMismatch: import("@kbn/config-schema/target/types/types").ConditionalType<false, boolean, boolean>;
         }>;
     };
+    logging: {
+        appenders: import("@kbn/config-schema").Type<Readonly<{} & {
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "console";
+        }> | Readonly<{} & {
+            path: string;
+            layout: Readonly<{} & {
+                kind: "json";
+            }> | Readonly<{
+                pattern?: string | undefined;
+                highlight?: boolean | undefined;
+            } & {
+                kind: "pattern";
+            }>;
+            kind: "file";
+        }> | Readonly<{
+            legacyLoggingConfig?: any;
+        } & {
+            kind: "legacy-appender";
+        }>>;
+        loggers: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<string[]>;
+            context: import("@kbn/config-schema").Type<string>;
+            level: import("@kbn/config-schema").Type<import("./logging/log_level").LogLevelId>;
+        }>;
+        loggerContext: import("@kbn/config-schema").ObjectType<{
+            appenders: import("@kbn/config-schema").Type<Map<string, Readonly<{} & {
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "console";
+            }> | Readonly<{} & {
+                path: string;
+                layout: Readonly<{} & {
+                    kind: "json";
+                }> | Readonly<{
+                    pattern?: string | undefined;
+                    highlight?: boolean | undefined;
+                } & {
+                    kind: "pattern";
+                }>;
+                kind: "file";
+            }> | Readonly<{
+                legacyLoggingConfig?: any;
+            } & {
+                kind: "legacy-appender";
+            }>>>;
+            loggers: import("@kbn/config-schema").Type<Readonly<{} & {
+                context: string;
+                appenders: string[];
+                level: import("./logging/log_level").LogLevelId;
+            }>[]>;
+        }>;
+    };
 };
 
 // @public
@@ -639,7 +710,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
         resources: HttpResources;
     };
     // (undocumented)
-    metrics: MetricsServiceSetup;
+    logging: LoggingServiceSetup;
     // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
@@ -656,6 +727,13 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
+    http: HttpServiceStart;
+    // Warning: (ae-forgotten-export) The symbol "MetricsServiceStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "MetricsServiceStart"
+    //
+    // (undocumented)
+    metrics: MetricsServiceStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
@@ -905,6 +983,12 @@ export type Headers = {
     [header: string]: string | string[] | undefined;
 };
 
+// @public (undocumented)
+export interface HttpAuth {
+    get: GetAuthState;
+    isAuthenticated: IsAuthenticated;
+}
+
 // @public
 export interface HttpResources {
     register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
@@ -948,17 +1032,13 @@ export interface HttpServerInfo {
 
 // @public
 export interface HttpServiceSetup {
-    // (undocumented)
-    auth: {
-        get: GetAuthState;
-        isAuthenticated: IsAuthenticated;
-    };
+    // @deprecated
+    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
     csp: ICspConfig;
     getServerInfo: () => HttpServerInfo;
-    isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
@@ -968,7 +1048,9 @@ export interface HttpServiceSetup {
 
 // @public (undocumented)
 export interface HttpServiceStart {
-    isListening: (port: number) => boolean;
+    auth: HttpAuth;
+    basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
 }
 
 // @public
@@ -1264,9 +1346,27 @@ export interface Logger {
     warn(errorOrMessage: string | Error, meta?: LogMeta): void;
 }
 
+// Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+
+// @public (undocumented)
+export interface LoggerContextConfigInput {
+    // (undocumented)
+    appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
+    // (undocumented)
+    loggers?: LoggerConfigType[];
+}
+
 // @public
 export interface LoggerFactory {
     get(...contextParts: string[]): Logger;
+}
+
+// @public
+export interface LoggingServiceSetup {
+    configure(config$: Observable<LoggerContextConfigInput>): void;
 }
 
 // @internal
@@ -1323,9 +1423,10 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// @public
+// Warning: (ae-missing-release-tag) "MetricsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
 export interface MetricsServiceSetup {
-    getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 
 // @public (undocumented)
@@ -1873,8 +1974,6 @@ export interface SavedObjectsClientWrapperOptions {
 
 // @public
 export interface SavedObjectsComplexFieldMapping {
-    // (undocumented)
-    dynamic?: string;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
