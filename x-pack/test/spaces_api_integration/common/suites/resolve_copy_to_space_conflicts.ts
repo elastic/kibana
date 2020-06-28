@@ -331,7 +331,7 @@ export function resolveCopyToSpaceConflictsSuite(
           type,
           id: inexactMatchId,
           overwrite: true,
-          idToOverwrite: 'conflict_1_space_2',
+          destinationId: 'conflict_1_space_2',
         }),
         statusCode,
         response: async (response: TestResponse) => {
@@ -352,7 +352,7 @@ export function resolveCopyToSpaceConflictsSuite(
           type,
           id: ambiguousConflictId,
           overwrite: true,
-          idToOverwrite: 'conflict_2_space_2',
+          destinationId: 'conflict_2_space_2',
         }),
         statusCode,
         response: async (response: TestResponse) => {

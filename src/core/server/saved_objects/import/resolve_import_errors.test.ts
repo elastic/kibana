@@ -215,7 +215,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await resolveSavedObjectsImportErrors(options);
-      const opts = { typeRegistry, retries, trueCopy };
+      const opts = { retries, trueCopy };
       expect(getImportIdMapForRetries).toHaveBeenCalledWith(filteredObjects, opts);
     });
 

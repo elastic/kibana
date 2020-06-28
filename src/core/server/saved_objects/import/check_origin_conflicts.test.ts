@@ -444,28 +444,25 @@ describe('#checkOriginConflicts', () => {
 });
 
 describe('#getImportIdMapForRetries', () => {
-  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-
   const setupOptions = (
     retries: SavedObjectsImportRetry[],
     trueCopy: boolean = false
   ): GetImportIdMapForRetriesOptions => {
-    typeRegistry = typeRegistryMock.create();
-    typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
-    return { typeRegistry, retries, trueCopy };
+    return { retries, trueCopy };
   };
 
-  const createOverwriteRetry = (
+  const createRetry = (
     { type, id }: { type: string; id: string },
-    idToOverwrite?: string
+    options: { destinationId?: string } = {}
   ): SavedObjectsImportRetry => {
-    return { type, id, overwrite: true, idToOverwrite, replaceReferences: [] };
+    const { destinationId } = options;
+    return { type, id, overwrite: false, destinationId, replaceReferences: [] };
   };
 
   test('throws an error if retry is not found for an object', async () => {
     const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
     const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
-    const retries = [createOverwriteRetry(obj1)];
+    const retries = [createRetry(obj1)];
     const options = setupOptions(retries);
 
     expect(() =>
@@ -474,40 +471,32 @@ describe('#getImportIdMapForRetries', () => {
   });
 
   test('returns expected results', async () => {
-    const obj1 = createObject(OTHER_TYPE, 'id-1');
-    const obj2 = createObject(OTHER_TYPE, 'id-2');
-    const obj3 = createObject(OTHER_TYPE, 'id-3');
-    const obj4 = createObject(MULTI_NS_TYPE, 'id-4');
-    const obj5 = createObject(MULTI_NS_TYPE, 'id-5');
-    const obj6 = createObject(MULTI_NS_TYPE, 'id-6');
-    const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
+    const obj1 = createObject('type-1', 'id-1');
+    const obj2 = createObject('type-2', 'id-2');
+    const obj3 = createObject('type-3', 'id-3');
+    const objects = [obj1, obj2, obj3];
     const retries = [
-      // all three overwrite retries for non-multi-namespace types are ignored;
-      // retries for non-multi-namespace these should not have `idToOverwrite` specified, but we test it here for posterity
-      createOverwriteRetry(obj1),
-      createOverwriteRetry(obj2, obj2.id),
-      createOverwriteRetry(obj3, 'id-X'),
-      createOverwriteRetry(obj4), // retries that do not have `idToOverwrite` specified are ignored
-      createOverwriteRetry(obj5, obj5.id), // retries that have `id` that matches `idToOverwrite` are ignored
-      createOverwriteRetry(obj6, 'id-Y'), // this retry will get added to the `importIdMap`!
+      createRetry(obj1), // retries that do not have `destinationId` specified are ignored
+      createRetry(obj2, { destinationId: obj2.id }), // retries that have `id` that matches `destinationId` are ignored
+      createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
     ];
     const options = setupOptions(retries);
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y', omitOriginId: false }]])
+      new Map([[`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }]])
     );
   });
 
   test('omits origin ID in `importIdMap` entries when trueCopy=true', async () => {
-    const obj6 = createObject(MULTI_NS_TYPE, 'id-6');
-    const objects = [obj6];
-    const retries = [createOverwriteRetry(obj6, 'id-Y')];
+    const obj = createObject('type-1', 'id-1');
+    const objects = [obj];
+    const retries = [createRetry(obj, { destinationId: 'id-X' })];
     const options = setupOptions(retries, true);
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y', omitOriginId: true }]])
+      new Map([[`${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
     );
   });
 });

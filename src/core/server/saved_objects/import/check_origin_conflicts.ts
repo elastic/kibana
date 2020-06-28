@@ -34,7 +34,6 @@ interface CheckOriginConflictsOptions {
 }
 
 interface GetImportIdMapForRetriesOptions {
-  typeRegistry: ISavedObjectTypeRegistry;
   retries: SavedObjectsImportRetry[];
   trueCopy: boolean;
 }
@@ -210,7 +209,7 @@ export function getImportIdMapForRetries(
   objects: Array<SavedObject<{ title?: string }>>,
   options: GetImportIdMapForRetriesOptions
 ) {
-  const { typeRegistry, retries, trueCopy } = options;
+  const { retries, trueCopy } = options;
 
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
@@ -223,9 +222,9 @@ export function getImportIdMapForRetries(
     if (!retry) {
       throw new Error(`Retry was expected for "${type}:${id}" but not found`);
     }
-    const { overwrite, idToOverwrite } = retry;
-    if (overwrite && idToOverwrite && idToOverwrite !== id && typeRegistry.isMultiNamespace(type)) {
-      importIdMap.set(`${type}:${id}`, { id: idToOverwrite, omitOriginId: trueCopy });
+    const { destinationId } = retry;
+    if (destinationId && destinationId !== id) {
+      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: trueCopy });
     }
   });
 

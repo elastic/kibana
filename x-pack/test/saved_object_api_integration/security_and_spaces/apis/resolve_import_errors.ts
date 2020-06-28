@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
@@ -22,6 +23,20 @@ const {
 const { fail400, fail409 } = testCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
+
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  const importable = cases.map(([, val]) => ({
+    ...val,
+    successParam: 'trueCopy',
+    expectedNewId: uuidv4(),
+  }));
+  const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const all = [...importable, ...nonImportable];
+  return { importable, nonImportable, all };
+};
 
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -55,11 +70,11 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...destinationId(spaceId !== SPACE_2_ID),
     },
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
-    // if we call _resolve_import_errors and don't specify overwrite, each of these will not result in a conflict because they will skip the
-    // preflight search results; so the objects will be created instead.
-    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_3A_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
-    { ...CASES.CONFLICT_4_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
+    // `expectedDestinationId` already exists
+    { ...CASES.CONFLICT_2C_OBJ, ...fail409(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
   return { group1Importable, group1NonImportable, group1All, group2 };
 };
@@ -74,54 +89,78 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+    // use singleRequest to reduce execution time and/or test combined cases
+    const singleRequest = true;
+
+    if (trueCopy) {
+      const { importable, nonImportable, all } = createTrueCopyTestCases();
+      return {
+        unauthorized: [
+          createTestDefinitions(importable, true, { trueCopy, spaceId }),
+          createTestDefinitions(nonImportable, false, { trueCopy, spaceId, singleRequest }),
+          createTestDefinitions(all, true, {
+            trueCopy,
+            spaceId,
+            singleRequest,
+            responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype', 'sharedtype']),
+          }),
+        ].flat(),
+        authorized: createTestDefinitions(all, false, { trueCopy, spaceId, singleRequest }),
+      };
+    }
+
     const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(
       overwrite,
       spaceId
     );
-    const singleRequest = true;
-    // use singleRequest to reduce execution time and/or test combined cases
     return {
       unauthorized: [
-        createTestDefinitions(group1Importable, true, overwrite, { spaceId }),
-        createTestDefinitions(group1NonImportable, false, overwrite, { spaceId, singleRequest }),
-        createTestDefinitions(group1All, true, overwrite, {
+        createTestDefinitions(group1Importable, true, { overwrite, spaceId }),
+        createTestDefinitions(group1NonImportable, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group1All, true, {
+          overwrite,
           spaceId,
           singleRequest,
           responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
         }),
-        createTestDefinitions(group2, true, overwrite, { spaceId, singleRequest }),
+        createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
       ].flat(),
       authorized: [
-        createTestDefinitions(group1All, false, overwrite, { spaceId, singleRequest }),
-        createTestDefinitions(group2, false, overwrite, { spaceId, singleRequest }),
+        createTestDefinitions(group1All, false, { overwrite, spaceId, singleRequest }),
+        createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
       ].flat(),
     };
   };
 
   describe('_resolve_import_errors', () => {
-    getTestScenarios([false, true]).securityAndSpaces.forEach(
-      ({ spaceId, users, modifier: overwrite }) => {
-        const suffix = ` within the ${spaceId} space` + overwrite ? ' with overwrite enabled' : '';
-        const { unauthorized, authorized } = createTests(overwrite!, spaceId);
-        const _addTests = (user: TestUser, tests: ResolveImportErrorsTestDefinition[]) => {
-          addTests(`${user.description}${suffix}`, { user, spaceId, tests });
-        };
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).securityAndSpaces.forEach(({ spaceId, users, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = ` within the ${spaceId} space${
+        overwrite ? ' with overwrite enabled' : trueCopy ? ' with trueCopy enabled' : ''
+      }`;
+      const { unauthorized, authorized } = createTests(overwrite, trueCopy, spaceId);
+      const _addTests = (user: TestUser, tests: ResolveImportErrorsTestDefinition[]) => {
+        addTests(`${user.description}${suffix}`, { user, spaceId, tests });
+      };
 
-        [
-          users.noAccess,
-          users.legacyAll,
-          users.dualRead,
-          users.readGlobally,
-          users.readAtSpace,
-          users.allAtOtherSpace,
-        ].forEach((user) => {
-          _addTests(user, unauthorized);
-        });
-        [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
-          _addTests(user, authorized);
-        });
-      }
-    );
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.dualRead,
+        users.readGlobally,
+        users.readAtSpace,
+        users.allAtOtherSpace,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
+      });
+      [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
+        _addTests(user, authorized);
+      });
+    });
   });
 }

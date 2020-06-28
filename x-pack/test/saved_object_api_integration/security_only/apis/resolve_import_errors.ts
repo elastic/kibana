@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -17,6 +18,20 @@ const { fail400, fail409 } = testCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
 
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  const importable = cases.map(([, val]) => ({
+    ...val,
+    successParam: 'trueCopy',
+    expectedNewId: uuidv4(),
+  }));
+  const nonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const all = [...importable, ...nonImportable];
+  return { importable, nonImportable, all };
+};
+
 const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
@@ -29,11 +44,11 @@ const createTestCases = (overwrite: boolean) => {
   const group2 = [
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
-    // if we call _resolve_import_errors and don't specify overwrite, each of these will not result in a conflict because they will skip the
-    // preflight search results; so the objects will be created instead.
-    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_3A_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
-    { ...CASES.CONFLICT_4_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
+    // `expectedDestinationId` already exists
+    { ...CASES.CONFLICT_2C_OBJ, ...fail409(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
   return { group1Importable, group1NonImportable, group1All, group2 };
 };
@@ -48,32 +63,58 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean) => {
-    const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(overwrite);
+  const createTests = (overwrite: boolean, trueCopy: boolean) => {
     // use singleRequest to reduce execution time and/or test combined cases
+    const singleRequest = true;
+
+    if (trueCopy) {
+      const { importable, nonImportable, all } = createTrueCopyTestCases();
+      return {
+        unauthorized: [
+          createTestDefinitions(importable, true, { trueCopy }),
+          createTestDefinitions(nonImportable, false, { trueCopy, singleRequest }),
+          createTestDefinitions(all, true, {
+            trueCopy,
+            singleRequest,
+            responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype', 'sharedtype']),
+          }),
+        ].flat(),
+        authorized: createTestDefinitions(all, false, { trueCopy, singleRequest }),
+      };
+    }
+
+    const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(overwrite);
     return {
       unauthorized: [
-        createTestDefinitions(group1Importable, true, overwrite),
-        createTestDefinitions(group1NonImportable, false, overwrite, {
-          singleRequest: true,
-        }),
-        createTestDefinitions(group1All, true, overwrite, {
-          singleRequest: true,
+        createTestDefinitions(group1Importable, true, { overwrite }),
+        createTestDefinitions(group1NonImportable, false, { overwrite, singleRequest }),
+        createTestDefinitions(group1All, true, {
+          overwrite,
+          singleRequest,
           responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
         }),
-        createTestDefinitions(group2, true, overwrite, { singleRequest: true }),
+        createTestDefinitions(group2, true, { overwrite, singleRequest }),
       ].flat(),
       authorized: [
-        createTestDefinitions(group1All, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(group2, false, overwrite, { singleRequest: true }),
+        createTestDefinitions(group1All, false, { overwrite, singleRequest }),
+        createTestDefinitions(group2, false, { overwrite, singleRequest }),
       ].flat(),
     };
   };
 
   describe('_resolve_import_errors', () => {
-    getTestScenarios([false, true]).security.forEach(({ users, modifier: overwrite }) => {
-      const suffix = overwrite ? ' with overwrite enabled' : '';
-      const { unauthorized, authorized } = createTests(overwrite!);
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).security.forEach(({ users, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = overwrite
+        ? ' with overwrite enabled'
+        : trueCopy
+        ? ' with trueCopy enabled'
+        : '';
+      const { unauthorized, authorized } = createTests(overwrite, trueCopy);
       const _addTests = (user: TestUser, tests: ResolveImportErrorsTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, tests });
       };

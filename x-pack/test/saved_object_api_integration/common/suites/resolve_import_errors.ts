@@ -14,16 +14,15 @@ import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/
 export interface ResolveImportErrorsTestDefinition extends TestDefinition {
   request: {
     objects: Array<{ type: string; id: string; originId?: string }>;
-    retries: Array<
-      { type: string; id: string } & ({ overwrite: true; idToOverwrite?: string } | {})
-    >;
+    retries: Array<{ type: string; id: string; overwrite: boolean; destinationId?: string }>;
   };
   overwrite: boolean;
+  trueCopy: boolean;
 }
 export type ResolveImportErrorsTestSuite = TestSuite<ResolveImportErrorsTestDefinition>;
 export interface ResolveImportErrorsTestCase extends TestCase {
   originId?: string;
-  idToOverwrite?: string; // only used for overwrite retries for multi-namespace object types
+  expectedNewId?: string;
   successParam?: string;
   failure?: 400 | 409; // only used for permitted response case
 }
@@ -44,18 +43,18 @@ export const TEST_CASES = Object.freeze({
     type: 'sharedtype',
     id: `conflict_2c`,
     originId: `conflict_2`,
-    idToOverwrite: `conflict_2a`,
+    expectedNewId: `conflict_2a`,
   }),
   CONFLICT_3A_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_3a`,
     originId: `conflict_3`,
-    idToOverwrite: `conflict_3`,
+    expectedNewId: `conflict_3`,
   }),
   CONFLICT_4_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_4`,
-    idToOverwrite: `conflict_4a`,
+    expectedNewId: `conflict_4a`,
   }),
 });
 
@@ -63,13 +62,11 @@ export const TEST_CASES = Object.freeze({
  * Test cases have additional properties that we don't want to send in HTTP Requests
  */
 const createRequest = (
-  { type, id, originId, idToOverwrite }: ResolveImportErrorsTestCase,
+  { type, id, originId, expectedNewId }: ResolveImportErrorsTestCase,
   overwrite: boolean
 ): ResolveImportErrorsTestDefinition['request'] => ({
   objects: [{ type, id, ...(originId && { originId }) }],
-  retries: overwrite
-    ? [{ type, id, overwrite, ...(idToOverwrite && { idToOverwrite }) }]
-    : [{ type, id }],
+  retries: [{ type, id, overwrite, ...(expectedNewId && { destinationId: expectedNewId }) }],
 });
 
 export function resolveImportErrorsTestSuiteFactory(
@@ -100,7 +97,7 @@ export function resolveImportErrorsTestSuiteFactory(
         expect(response.body).not.to.have.property('errors');
       }
       for (let i = 0; i < expectedSuccesses.length; i++) {
-        const { type, id, successParam, idToOverwrite } = expectedSuccesses[i];
+        const { type, id, successParam, expectedNewId } = expectedSuccesses[i];
         // we don't know the order of the returned successResults; search for each one
         const object = (successResults as Array<Record<string, unknown>>).find(
           (x) => x.type === type && x.id === id
@@ -111,12 +108,14 @@ export function resolveImportErrorsTestSuiteFactory(
           // Kibana created the object with a different ID than what was specified in the import
           // This can happen due to an unresolvable conflict (so the new ID will be random), or due to an inexact match (so the new ID will
           // be equal to the ID or originID of the existing object that it inexactly matched)
-          if (idToOverwrite) {
-            expect(destinationId).to.be(idToOverwrite);
+          if (expectedNewId) {
+            expect(destinationId).to.be(expectedNewId);
           } else {
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
+        } else if (successParam === 'trueCopy') {
+          expect(destinationId).to.be(expectedNewId!);
         } else {
           expect(destinationId).to.be(undefined);
         }
@@ -129,7 +128,7 @@ export function resolveImportErrorsTestSuiteFactory(
         expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
       }
       for (let i = 0; i < expectedFailures.length; i++) {
-        const { type, id, failure } = expectedFailures[i];
+        const { type, id, failure, expectedNewId } = expectedFailures[i];
         // we don't know the order of the returned errors; search for each one
         const object = (errors as Array<Record<string, unknown>>).find(
           (x) => x.type === type && x.id === id
@@ -139,7 +138,10 @@ export function resolveImportErrorsTestSuiteFactory(
           expect(object!.error).to.eql({ type: 'unsupported_type' });
         } else {
           // 409
-          expect(object!.error).to.eql({ type: 'conflict' });
+          expect(object!.error).to.eql({
+            type: 'conflict',
+            ...(expectedNewId && { destinationId: expectedNewId }),
+          });
         }
       }
     }
@@ -147,8 +149,9 @@ export function resolveImportErrorsTestSuiteFactory(
   const createTestDefinitions = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     forbidden: boolean,
-    overwrite: boolean,
-    options?: {
+    options: {
+      overwrite?: boolean;
+      trueCopy?: boolean;
       spaceId?: string;
       singleRequest?: boolean;
       responseBodyOverride?: ExpectResponseBody;
@@ -156,17 +159,23 @@ export function resolveImportErrorsTestSuiteFactory(
   ): ResolveImportErrorsTestDefinition[] => {
     const cases = Array.isArray(testCases) ? testCases : [testCases];
     const responseStatusCode = forbidden ? 403 : 200;
-    if (!options?.singleRequest) {
+    const {
+      overwrite = false,
+      trueCopy = false,
+      spaceId,
+      singleRequest,
+      responseBodyOverride,
+    } = options;
+    if (!singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
       return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: createRequest(x, overwrite),
         responseStatusCode,
-        responseBody:
-          options?.responseBodyOverride ||
-          expectResponseBody(x, responseStatusCode, options?.spaceId),
+        responseBody: responseBodyOverride || expectResponseBody(x, responseStatusCode, spaceId),
         overwrite,
+        trueCopy,
       }));
     }
     // batch into a single request to save time during test execution
@@ -181,9 +190,9 @@ export function resolveImportErrorsTestSuiteFactory(
           })),
         responseStatusCode,
         responseBody:
-          options?.responseBodyOverride ||
-          expectResponseBody(cases, responseStatusCode, options?.spaceId),
+          responseBodyOverride || expectResponseBody(cases, responseStatusCode, spaceId),
         overwrite,
+        trueCopy,
       },
     ];
   };
@@ -205,8 +214,9 @@ export function resolveImportErrorsTestSuiteFactory(
           const requestBody = test.request.objects
             .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
+          const query = test.trueCopy ? '?trueCopy=true' : '';
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors${query}`)
             .auth(user?.username, user?.password)
             .field('retries', JSON.stringify(test.request.retries))
             .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')

@@ -30,9 +30,9 @@ export interface SavedObjectsImportRetry {
   id: string;
   overwrite: boolean;
   /**
-   * The object ID that will be overwritten. Only used if `overwrite` == true. This is required to resolve ambiguous conflicts.
+   * The object ID that will be created or overwritten. If not specified, the `id` field will be used.
    */
-  idToOverwrite?: string;
+  destinationId?: string;
   replaceReferences: Array<{
     type: string;
     from: string;

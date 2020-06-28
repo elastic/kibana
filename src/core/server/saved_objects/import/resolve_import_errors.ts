@@ -114,7 +114,6 @@ export async function resolveSavedObjectsImportErrors({
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
   const importIdMapForRetries = getImportIdMapForRetries(checkConflictsResult.filteredObjects, {
-    typeRegistry,
     retries,
     trueCopy,
   });

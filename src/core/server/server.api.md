@@ -2245,9 +2245,9 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
+    destinationId?: string;
     // (undocumented)
     id: string;
-    idToOverwrite?: string;
     // (undocumented)
     overwrite: boolean;
     // (undocumented)

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -20,6 +21,16 @@ const {
 const { fail400, fail409 } = testCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
+
+const createTrueCopyTestCases = () => {
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  const cases = Object.entries(CASES).filter(([key]) => key !== 'HIDDEN');
+  return [
+    ...cases.map(([, val]) => ({ ...val, successParam: 'trueCopy', expectedNewId: uuidv4() })),
+    { ...CASES.HIDDEN, ...fail400() },
+  ];
+};
 
 const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each outcome, if failure !== undefined then we expect to receive
@@ -50,11 +61,11 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
-    // if we call _resolve_import_errors and don't specify overwrite, each of these will not result in a conflict because they will skip the
-    // preflight search results; so the objects will be created instead.
-    { ...CASES.CONFLICT_2C_OBJ, ...destinationId(overwrite) }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
-    { ...CASES.CONFLICT_3A_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
-    { ...CASES.CONFLICT_4_OBJ, ...destinationId(overwrite) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
+    // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
+    // `expectedDestinationId` already exists
+    { ...CASES.CONFLICT_2C_OBJ, ...fail409(!overwrite), ...destinationId() }, // "ambiguous destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
 };
 
@@ -68,18 +79,32 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean, spaceId: string) => {
+  const createTests = (overwrite: boolean, trueCopy: boolean, spaceId: string) => {
+    const singleRequest = true;
+    if (trueCopy) {
+      const cases = createTrueCopyTestCases();
+      // The resolveImportErrors API doesn't actually have a flag for "trueCopy" mode; rather, we create test cases as if we are resolving
+      // errors from a call to the import API that had trueCopy mode enabled.
+      return createTestDefinitions(cases, false, { trueCopy, spaceId, singleRequest });
+    }
+
     const testCases = createTestCases(overwrite, spaceId);
-    return createTestDefinitions(testCases, false, overwrite, {
-      spaceId,
-      singleRequest: true,
-    });
+    return createTestDefinitions(testCases, false, { overwrite, spaceId, singleRequest });
   };
 
   describe('_resolve_import_errors', () => {
-    getTestScenarios([false, true]).spaces.forEach(({ spaceId, modifier: overwrite }) => {
-      const suffix = overwrite ? ' with overwrite enabled' : '';
-      const tests = createTests(overwrite!, spaceId);
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).spaces.forEach(({ spaceId, modifier }) => {
+      const [overwrite, trueCopy] = modifier!;
+      const suffix = overwrite
+        ? ' with overwrite enabled'
+        : trueCopy
+        ? ' with trueCopy enabled'
+        : '';
+      const tests = createTests(overwrite, trueCopy, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });
   });

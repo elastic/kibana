@@ -29,13 +29,13 @@ export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
     );
   }
 
-  const overwriteEntries = retries
-    .filter((retry) => retry.overwrite && retry.idToOverwrite !== undefined)
-    .map(({ type, idToOverwrite }) => ({ type, id: idToOverwrite! }));
-  const nonUniqueRetryOverwrites = getNonUniqueEntries(overwriteEntries);
-  if (nonUniqueRetryOverwrites.length > 0) {
+  const destinationEntries = retries
+    .filter((retry) => retry.destinationId !== undefined)
+    .map(({ type, destinationId }) => ({ type, id: destinationId! }));
+  const nonUniqueRetryDestinations = getNonUniqueEntries(destinationEntries);
+  if (nonUniqueRetryDestinations.length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Non-unique retry overwrites: [${nonUniqueRetryOverwrites.join()}]`
+      `Non-unique retry destinations: [${nonUniqueRetryDestinations.join()}]`
     );
   }
 };
