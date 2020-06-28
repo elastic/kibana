@@ -900,6 +900,7 @@ In other use cases the message field can be used to concatenate different values
               }
               indexToAdd={Array []}
               isLive={false}
+              isSaving={false}
               itemsPerPage={5}
               itemsPerPageOptions={
                 Array [

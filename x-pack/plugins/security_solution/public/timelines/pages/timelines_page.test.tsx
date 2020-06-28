@@ -10,10 +10,22 @@ import React from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
 
-jest.mock('react-router-dom');
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
+  return {
+    ...originalModule,
+    useParams: jest.fn().mockReturnValue({
+      tabName: 'default',
+    }),
+  };
+});
 jest.mock('../../overview/components/events_by_dataset');
 jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+
   return {
+    ...originalModule,
     useKibana: jest.fn(),
   };
 });
@@ -63,7 +75,7 @@ describe('TimelinesPageComponent', () => {
     });
 
     test('it renders no create timeline template btn', () => {
-      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeFalsy();
     });
   });
 
