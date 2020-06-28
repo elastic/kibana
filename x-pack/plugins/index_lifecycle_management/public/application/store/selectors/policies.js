@@ -193,8 +193,15 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     }
 
     if (actions.set_priority) {
-      policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
+      const { priority } = actions.set_priority;
+
+      if (priority) {
+        policy[PHASE_INDEX_PRIORITY] = priority;
+      } else {
+        policy[PHASE_INDEX_PRIORITY] = '';
+      }
     }
+
     if (actions.wait_for_snapshot) {
       policy[PHASE_WAIT_FOR_SNAPSHOT_POLICY] = actions.wait_for_snapshot.policy;
     }
@@ -310,6 +317,10 @@ export const phaseToES = (phase, originalEsPhase) => {
   if (isNumber(phase[PHASE_INDEX_PRIORITY])) {
     esPhase.actions.set_priority = {
       priority: phase[PHASE_INDEX_PRIORITY],
+    };
+  } else if (phase[PHASE_INDEX_PRIORITY] === '') {
+    esPhase.actions.set_priority = {
+      priority: null,
     };
   }
 

@@ -30,7 +30,7 @@ const minAgeSchema = schema.maybe(schema.string());
 
 const setPrioritySchema = schema.maybe(
   schema.object({
-    priority: schema.number(),
+    priority: schema.nullable(schema.number()),
   })
 );
 
