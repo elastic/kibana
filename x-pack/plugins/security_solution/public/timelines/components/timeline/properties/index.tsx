@@ -7,7 +7,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { TimelineStatus, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -36,13 +36,14 @@ interface Props {
   associateNote: AssociateNote;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
   timelineType: TimelineTypeLiteral;
-  status: TimelineStatus;
+  status: TimelineStatusLiteral;
   title: string;
   toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
@@ -69,6 +70,7 @@ export const Properties = React.memo<Props>(
     associateNote,
     description,
     getNotesByIds,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
     isFavorite,
@@ -111,18 +113,21 @@ export const Properties = React.memo<Props>(
     const onRowClick = useCallback(
       (id: string) => {
         onCloseCaseModal();
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-          path: getCaseDetailsUrl({ id }),
-        });
+
         dispatch(
           setInsertTimeline({
+            graphEventId,
             timelineId,
             timelineSavedObjectId: currentTimeline.savedObjectId,
             timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
           })
         );
+
+        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+          path: getCaseDetailsUrl({ id }),
+        });
       },
-      [navigateToApp, onCloseCaseModal, currentTimeline, dispatch, timelineId, title]
+      [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
     );
 
     const datePickerWidth = useMemo(
@@ -150,6 +155,7 @@ export const Properties = React.memo<Props>(
           isFavorite={isFavorite}
           noteIds={noteIds}
           onToggleShowNotes={onToggleShowNotes}
+          status={status}
           showDescription={width >= showDescriptionThreshold}
           showNotes={showNotes}
           showNotesFromWidth={width >= showNotesThreshold}
@@ -166,6 +172,7 @@ export const Properties = React.memo<Props>(
           associateNote={associateNote}
           description={description}
           getNotesByIds={getNotesByIds}
+          graphEventId={graphEventId}
           isDataInTimeline={isDataInTimeline}
           noteIds={noteIds}
           onButtonClick={onButtonClick}

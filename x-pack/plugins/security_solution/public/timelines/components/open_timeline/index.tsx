@@ -7,11 +7,8 @@
 import ApolloClient from 'apollo-client';
 import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-
 import { Dispatch } from 'redux';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
-import { deleteTimelineMutation } from '../../containers/delete/persist.gql_query';
-import { useGetAllTimeline } from '../../containers/all';
+
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
 import { State } from '../../../common/store';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
@@ -21,6 +18,12 @@ import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../../timelines/store/timeline/actions';
+
+import { deleteTimelineMutation } from '../../containers/delete/persist.gql_query';
+import { useGetAllTimeline } from '../../containers/all';
+
+import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
+
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -42,6 +45,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
+import { useTimelineStatus } from './use_timeline_status';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -105,28 +109,54 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes();
-    const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
-
-    const refetch = useCallback(
-      () =>
-        fetchAllTimeline({
-          pageInfo: {
-            pageIndex: pageIndex + 1,
-            pageSize,
-          },
-          search,
-          sort: {
-            sortField: sortField as SortFieldTimeline,
-            sortOrder: sortDirection as Direction,
-          },
-          onlyUserFavorite: onlyFavorites,
-          timelineType,
-        }),
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]
-    );
+    const {
+      customTemplateTimelineCount,
+      defaultTimelineCount,
+      elasticTemplateTimelineCount,
+      favoriteCount,
+      fetchAllTimeline,
+      timelines,
+      loading,
+      totalCount,
+      templateTimelineCount,
+    } = useGetAllTimeline();
+    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes({
+      defaultTimelineCount,
+      templateTimelineCount,
+    });
+    const { timelineStatus, templateTimelineType, templateTimelineFilter } = useTimelineStatus({
+      timelineType,
+      customTemplateTimelineCount,
+      elasticTemplateTimelineCount,
+    });
+    const refetch = useCallback(() => {
+      fetchAllTimeline({
+        pageInfo: {
+          pageIndex: pageIndex + 1,
+          pageSize,
+        },
+        search,
+        sort: {
+          sortField: sortField as SortFieldTimeline,
+          sortOrder: sortDirection as Direction,
+        },
+        onlyUserFavorite: onlyFavorites,
+        timelineType,
+        templateTimelineType,
+        status: timelineStatus,
+      });
+    }, [
+      fetchAllTimeline,
+      pageIndex,
+      pageSize,
+      search,
+      sortField,
+      sortDirection,
+      timelineType,
+      timelineStatus,
+      templateTimelineType,
+      onlyFavorites,
+    ]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -264,6 +294,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         data-test-subj={'open-timeline'}
         deleteTimelines={onDeleteOneTimeline}
         defaultPageSize={defaultPageSize}
+        favoriteCount={favoriteCount}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
         importDataModalToggle={importDataModalToggle}
@@ -285,9 +316,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineTabs}
-        title={title}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineFilter={timelineTabs}
+        title={title}
         totalSearchResultsCount={totalCount}
       />
     ) : (
@@ -295,6 +327,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         data-test-subj={'open-timeline-modal'}
         deleteTimelines={onDeleteOneTimeline}
         defaultPageSize={defaultPageSize}
+        favoriteCount={favoriteCount}
         hideActions={hideActions}
         isLoading={loading}
         itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
@@ -313,9 +346,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineFilters}
-        title={title}
+        templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineFilter={timelineFilters}
+        title={title}
         totalSearchResultsCount={totalCount}
       />
     );

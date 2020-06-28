@@ -44,6 +44,7 @@ describe('OpenTimelineModal', () => {
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline(
+        '',
         mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
       ),
       loading: false,

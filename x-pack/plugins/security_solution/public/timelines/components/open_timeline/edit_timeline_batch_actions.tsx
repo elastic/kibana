@@ -6,9 +6,8 @@
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { isEmpty } from 'lodash/fp';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
 import { DeleteTimelines, OpenTimelineResult } from './types';
@@ -27,12 +26,12 @@ export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
   tableRef,
-  timelineType,
+  timelineType = TimelineType.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
-  timelineType: TimelineType;
+  timelineType: TimelineType | null;
 }) => {
   const {
     enableExportTimelineDownloader,
@@ -67,7 +66,7 @@ export const useEditTimelineBatchActions = ({
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
-      const isDisabled = isEmpty(selectedItems);
+      const disabled = selectedItems?.some((item) => item.status === TimelineStatus.immutable);
       return (
         <>
           <EditTimelineActions
@@ -86,7 +85,7 @@ export const useEditTimelineBatchActions = ({
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                disabled={isDisabled}
+                disabled={disabled}
                 icon="exportAction"
                 key="ExportItemKey"
                 onClick={handleEnableExportTimelineDownloader}
@@ -94,7 +93,7 @@ export const useEditTimelineBatchActions = ({
                 {i18n.EXPORT_SELECTED}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                disabled={isDisabled}
+                disabled={disabled}
                 icon="trash"
                 key="DeleteItemKey"
                 onClick={handleOnOpenDeleteTimelineModal}
@@ -106,6 +105,7 @@ export const useEditTimelineBatchActions = ({
         </>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       selectedItems,
       deleteTimelines,

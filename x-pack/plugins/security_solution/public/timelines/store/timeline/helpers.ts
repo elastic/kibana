@@ -6,6 +6,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
+import uuid from 'uuid';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
@@ -157,28 +158,38 @@ export const addNewTimeline = ({
   showRowRenderers = true,
   timelineById,
   timelineType,
-}: AddNewTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    id,
-    ...timelineDefaults,
-    columns,
-    dataProviders,
-    dateRange,
-    filters,
-    itemsPerPage,
-    kqlQuery,
-    sort,
-    show,
-    savedObjectId: null,
-    version: null,
-    isSaving: false,
-    isLoading: false,
-    showCheckboxes,
-    showRowRenderers,
-    timelineType,
-  },
-});
+}: AddNewTimelineParams): TimelineById => {
+  const templateTimelineInfo =
+    timelineType === TimelineType.template
+      ? {
+          templateTimelineId: uuid.v4(),
+          templateTimelineVersion: 1,
+        }
+      : {};
+  return {
+    ...timelineById,
+    [id]: {
+      id,
+      ...timelineDefaults,
+      columns,
+      dataProviders,
+      dateRange,
+      filters,
+      itemsPerPage,
+      kqlQuery,
+      sort,
+      show,
+      savedObjectId: null,
+      version: null,
+      isSaving: false,
+      isLoading: false,
+      showCheckboxes,
+      showRowRenderers,
+      timelineType,
+      ...templateTimelineInfo,
+    },
+  };
+};
 
 interface PinTimelineEventParams {
   id: string;
@@ -223,6 +234,26 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
+    },
+  };
+};
+
+export const updateGraphEventId = ({
+  id,
+  graphEventId,
+  timelineById,
+}: {
+  id: string;
+  graphEventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      graphEventId,
     },
   };
 };

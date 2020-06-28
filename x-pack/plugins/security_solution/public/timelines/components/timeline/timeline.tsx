@@ -7,9 +7,9 @@
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../common/types/timeline';
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields } from '../../../common/containers/source';
 import { TimelineQuery } from '../../containers/index';
@@ -17,6 +17,7 @@ import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
+import { getInvestigateInResolverAction } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -40,6 +41,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
+import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -97,6 +99,7 @@ export interface Props {
   end: number;
   eventType?: EventType;
   filters: Filter[];
+  graphEventId?: string;
   id: string;
   indexPattern: IIndexPattern;
   indexToAdd: string[];
@@ -117,6 +120,7 @@ export interface Props {
   showCallOutUnauthorizedMsg: boolean;
   start: number;
   sort: Sort;
+  status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
   timelineType: TimelineType;
@@ -130,6 +134,7 @@ export const TimelineComponent: React.FC<Props> = ({
   end,
   eventType,
   filters,
+  graphEventId,
   id,
   indexPattern,
   indexToAdd,
@@ -149,11 +154,13 @@ export const TimelineComponent: React.FC<Props> = ({
   show,
   showCallOutUnauthorizedMsg,
   start,
+  status,
   sort,
   timelineType,
   toggleColumn,
   usersViewing,
 }) => {
+  const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const combinedQueries = combineQueries({
@@ -181,9 +188,14 @@ export const TimelineComponent: React.FC<Props> = ({
     initializeTimeline,
     setIsTimelineLoading,
     setTimelineFilterManager,
+    setTimelineRowActions,
   } = useManageTimeline();
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
+    setTimelineRowActions({
+      id,
+      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId: id })],
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
@@ -212,6 +224,7 @@ export const TimelineComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             dataProviders={dataProviders}
             filterManager={filterManager}
+            graphEventId={graphEventId}
             onDataProviderEdited={onDataProviderEdited}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
@@ -221,6 +234,7 @@ export const TimelineComponent: React.FC<Props> = ({
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             timelineId={id}
             timelineType={timelineType}
+            status={status}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>

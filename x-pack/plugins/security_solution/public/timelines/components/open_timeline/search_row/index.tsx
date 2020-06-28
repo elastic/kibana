@@ -35,60 +35,58 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
-  | 'onlyFavorites'
-  | 'onQueryChange'
-  | 'onToggleOnlyFavorites'
-  | 'query'
-  | 'totalSearchResultsCount'
-  | 'timelineType'
-> & { tabs?: JSX.Element };
+  'favoriteCount' | 'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'timelineType'
+> & { children?: JSX.Element | null };
 
 /**
  * Renders the row containing the search input and Only Favorites filter
  */
-const SearchRowComponent: React.FC<Props> = ({
-  onlyFavorites,
-  onQueryChange,
-  onToggleOnlyFavorites,
-  tabs,
-  timelineType,
-}) => {
-  const searchBox = useMemo(
-    () => ({
-      placeholder:
-        timelineType === TimelineType.default
-          ? i18n.SEARCH_PLACEHOLDER
-          : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
-      incremental: false,
-    }),
-    [timelineType]
-  );
-  return (
-    <SearchRowContainer>
-      <SearchRowFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
-        </EuiFlexItem>
+export const SearchRow = React.memo<Props>(
+  ({
+    favoriteCount,
+    onlyFavorites,
+    onQueryChange,
+    onToggleOnlyFavorites,
+    children,
+    timelineType,
+  }) => {
+    const searchBox = useMemo(
+      () => ({
+        placeholder:
+          timelineType === TimelineType.default
+            ? i18n.SEARCH_PLACEHOLDER
+            : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
+        incremental: false,
+      }),
+      [timelineType]
+    );
 
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup fullWidth={true}>
-            <>
-              <EuiFilterButton
-                data-test-subj="only-favorites-toggle"
-                hasActiveFilters={onlyFavorites}
-                onClick={onToggleOnlyFavorites}
-              >
-                {i18n.ONLY_FAVORITES}
-              </EuiFilterButton>
-              {tabs}
-            </>
-          </EuiFilterGroup>
-        </EuiFlexItem>
-      </SearchRowFlexGroup>
-    </SearchRowContainer>
-  );
-};
+    return (
+      <SearchRowContainer>
+        <SearchRowFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
+          </EuiFlexItem>
 
-export const SearchRow = React.memo(SearchRowComponent);
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup fullWidth={true}>
+              <>
+                <EuiFilterButton
+                  data-test-subj="only-favorites-toggle"
+                  hasActiveFilters={onlyFavorites}
+                  onClick={onToggleOnlyFavorites}
+                  numFilters={favoriteCount ?? undefined}
+                >
+                  {i18n.ONLY_FAVORITES}
+                </EuiFilterButton>
+                {!!children && children}
+              </>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+        </SearchRowFlexGroup>
+      </SearchRowContainer>
+    );
+  }
+);
 
 SearchRow.displayName = 'SearchRow';

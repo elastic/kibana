@@ -32,6 +32,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
     description,
+    graphEventId,
     isDataInTimeline,
     isDatepickerLocked,
     isFavorite,
@@ -57,6 +58,7 @@ const StatefulFlyoutHeader = React.memo<Props>(
         associateNote={associateNote}
         description={description}
         getNotesByIds={getNotesByIds}
+        graphEventId={graphEventId}
         isDataInTimeline={isDataInTimeline}
         isDatepickerLocked={isDatepickerLocked}
         isFavorite={isFavorite}
@@ -92,6 +94,7 @@ const makeMapStateToProps = () => {
     const {
       dataProviders,
       description = '',
+      graphEventId,
       isFavorite = false,
       kqlQuery,
       title = '',
@@ -104,13 +107,14 @@ const makeMapStateToProps = () => {
 
     return {
       description,
-      notesById: getNotesByIds(state),
+      graphEventId,
       history,
       isDataInTimeline:
         !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
       isFavorite,
       isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
+      notesById: getNotesByIds(state),
       status,
       title,
       timelineType,

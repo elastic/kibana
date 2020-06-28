@@ -10,6 +10,8 @@ import {
   GetHostPolicyResponse,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
+import { GetPolicyListResponse } from '../../policy/types';
+import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -41,10 +43,48 @@ interface ServerFailedToReturnHostPolicyResponse {
   payload: ServerApiError;
 }
 
+interface ServerReturnedPoliciesForOnboarding {
+  type: 'serverReturnedPoliciesForOnboarding';
+  payload: {
+    policyItems: GetPolicyListResponse['items'];
+  };
+}
+
+interface ServerFailedToReturnPoliciesForOnboarding {
+  type: 'serverFailedToReturnPoliciesForOnboarding';
+  payload: ServerApiError;
+}
+
+interface UserSelectedEndpointPolicy {
+  type: 'userSelectedEndpointPolicy';
+  payload: {
+    selectedPolicyId: string;
+  };
+}
+
+interface ServerCancelledHostListLoading {
+  type: 'serverCancelledHostListLoading';
+}
+
+interface ServerCancelledPolicyItemsLoading {
+  type: 'serverCancelledPolicyItemsLoading';
+}
+
+interface ServerReturnedEndpointPackageInfo {
+  type: 'serverReturnedEndpointPackageInfo';
+  payload: GetPackagesResponse['response'][0];
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
   | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse;
+  | ServerFailedToReturnHostPolicyResponse
+  | ServerReturnedPoliciesForOnboarding
+  | ServerFailedToReturnPoliciesForOnboarding
+  | UserSelectedEndpointPolicy
+  | ServerCancelledHostListLoading
+  | ServerCancelledPolicyItemsLoading
+  | ServerReturnedEndpointPackageInfo;

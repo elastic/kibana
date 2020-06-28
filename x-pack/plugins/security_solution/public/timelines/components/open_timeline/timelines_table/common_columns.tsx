@@ -33,7 +33,7 @@ export const getCommonColumns = ({
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-  timelineType: TimelineType;
+  timelineType: TimelineType | null;
 }) => [
   {
     isExpander: true,

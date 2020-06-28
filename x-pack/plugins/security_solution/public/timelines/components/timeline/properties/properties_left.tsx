@@ -10,9 +10,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { Description, Name, NotesButton, StarIcon } from './helpers';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
 import { Note } from '../../../../common/lib/note';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineStatusLiteral } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
 
@@ -23,7 +24,7 @@ type UpdateDescription = ({ id, description }: { id: string; description: string
 interface Props {
   isFavorite: boolean;
   timelineId: string;
-  timelineType: TimelineType;
+  timelineType: TimelineTypeLiteral;
   updateIsFavorite: UpdateIsFavorite;
   showDescription: boolean;
   description: string;
@@ -31,6 +32,7 @@ interface Props {
   updateTitle: UpdateTitle;
   updateDescription: UpdateDescription;
   showNotes: boolean;
+  status: TimelineStatusLiteral;
   associateNote: AssociateNote;
   showNotesFromWidth: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
@@ -75,13 +77,14 @@ export const PropertiesLeft = React.memo<Props>(
   ({
     isFavorite,
     timelineId,
-    timelineType,
     updateIsFavorite,
     showDescription,
     description,
     title,
+    timelineType,
     updateTitle,
     updateDescription,
+    status,
     showNotes,
     showNotesFromWidth,
     associateNote,
@@ -128,10 +131,12 @@ export const PropertiesLeft = React.memo<Props>(
             noteIds={noteIds}
             showNotes={showNotes}
             size="l"
+            status={status}
             text={i18n.NOTES}
             toggleShowNotes={onToggleShowNotes}
             toolTip={i18n.NOTES_TOOL_TIP}
             updateNote={updateNote}
+            timelineType={timelineType}
           />
         </EuiFlexItem>
       ) : null}

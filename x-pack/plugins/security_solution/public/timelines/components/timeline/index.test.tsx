@@ -15,7 +15,6 @@ import {
   ReturnSignalIndex,
 } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
-import { TimelineType } from '../../../../common/types/timeline';
 import { wait } from '../../../common/lib/helpers';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { Direction } from '../../../graphql/types';
@@ -26,6 +25,7 @@ import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
 import { Timeline } from './timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
@@ -73,6 +73,7 @@ describe('StatefulTimeline', () => {
       eventType: 'raw',
       end: endDate,
       filters: [],
+      graphEventId: undefined,
       id: 'foo',
       isLive: false,
       isTimelineExists: false,
@@ -88,6 +89,7 @@ describe('StatefulTimeline', () => {
       showCallOutUnauthorizedMsg: false,
       sort,
       start: startDate,
+      status: TimelineStatus.active,
       timelineType: TimelineType.default,
       updateColumns: timelineActions.updateColumns,
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,

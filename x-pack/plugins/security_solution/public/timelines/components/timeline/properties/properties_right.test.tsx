@@ -66,8 +66,8 @@ describe('Properties Right', () => {
     onOpenTimelineModal: jest.fn(),
     status: TimelineStatus.active,
     showTimelineModal: false,
-    title: 'title',
     timelineType: TimelineType.default,
+    title: 'title',
     updateNote: jest.fn(),
   };
 

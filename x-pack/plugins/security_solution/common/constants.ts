@@ -156,8 +156,7 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable timeline template
+/*
+ * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
  */
-export const disableTemplate = true;
+export const enableElasticFilter = false;

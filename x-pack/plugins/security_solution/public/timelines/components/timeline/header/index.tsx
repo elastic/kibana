@@ -9,6 +9,7 @@ import React from 'react';
 import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
+import { showGraphView } from '../body/helpers';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
@@ -20,14 +21,19 @@ import {
 } from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
-import { TimelineType } from '../../../../../common/types/timeline';
 
 import * as i18n from './translations';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineStatusLiteralWithNull,
+} from '../../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   filterManager: FilterManager;
+  graphEventId?: string;
   indexPattern: IIndexPattern;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -36,6 +42,7 @@ interface Props {
   onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
+  status: TimelineStatusLiteralWithNull;
   timelineId: string;
   timelineType: TimelineType;
 }
@@ -45,6 +52,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   indexPattern,
   dataProviders,
   filterManager,
+  graphEventId,
   onDataProviderEdited,
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
@@ -52,6 +60,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onToggleDataProviderType,
   show,
   showCallOutUnauthorizedMsg,
+  status,
   timelineId,
   timelineType,
 }) => (
@@ -65,7 +74,16 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    {show && (
+    {status === TimelineStatus.immutable && (
+      <EuiCallOut
+        data-test-subj="timelineImmutableCallOut"
+        title={i18n.CALL_OUT_IMMUTIABLE}
+        color="primary"
+        iconType="info"
+        size="s"
+      />
+    )}
+    {show && !showGraphView(graphEventId) && (
       <>
         <DataProviders
           browserFields={browserFields}
@@ -78,15 +96,15 @@ const TimelineHeaderComponent: React.FC<Props> = ({
           onToggleDataProviderExcluded={onToggleDataProviderExcluded}
           onToggleDataProviderType={onToggleDataProviderType}
         />
+
+        <StatefulSearchOrFilter
+          browserFields={browserFields}
+          filterManager={filterManager}
+          indexPattern={indexPattern}
+          timelineId={timelineId}
+        />
       </>
     )}
-
-    <StatefulSearchOrFilter
-      browserFields={browserFields}
-      filterManager={filterManager}
-      indexPattern={indexPattern}
-      timelineId={timelineId}
-    />
   </>
 );
 
@@ -97,6 +115,7 @@ export const TimelineHeader = React.memo(
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
+    prevProps.graphEventId === nextProps.graphEventId &&
     prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
     prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
@@ -104,6 +123,7 @@ export const TimelineHeader = React.memo(
     prevProps.onToggleDataProviderType === nextProps.onToggleDataProviderType &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+    prevProps.status === nextProps.status &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.timelineType === nextProps.timelineType
 );

@@ -62,7 +62,7 @@ describe('TimelinesPageComponent', () => {
       expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
     });
 
-    test('it renders no create template timeline btn', () => {
+    test('it renders no create timeline template btn', () => {
       expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
     });
   });

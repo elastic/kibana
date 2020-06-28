@@ -25,6 +25,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     hideActions = [],
     isLoading,
     itemIdToExpandedNotesRowMap,
@@ -44,9 +45,10 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
-    tabs,
-    title,
+    timelineFilter,
     timelineType,
+    templateTimelineFilter,
+    title,
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
@@ -70,6 +72,16 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
       return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions, searchResults]);
 
+    const SearchRowContent = useMemo(
+      () => (
+        <>
+          {!!timelineFilter && timelineFilter}
+          {!!templateTimelineFilter && templateTimelineFilter}
+        </>
+      ),
+      [timelineFilter, templateTimelineFilter]
+    );
+
     return (
       <>
         <EuiModalHeader>
@@ -83,14 +95,14 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             <>
               <SearchRow
                 data-test-subj="search-row"
+                favoriteCount={favoriteCount}
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
-                query={query}
-                tabs={tabs}
                 timelineType={timelineType}
-                totalSearchResultsCount={totalSearchResultsCount}
-              />
+              >
+                {SearchRowContent}
+              </SearchRow>
             </>
           </HeaderContainer>
         </EuiModalHeader>
@@ -113,8 +125,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
             showExtendedColumns={false}
             sortDirection={sortDirection}
             sortField={sortField}
-            totalSearchResultsCount={totalSearchResultsCount}
             timelineType={timelineType}
+            totalSearchResultsCount={totalSearchResultsCount}
           />
         </EuiModalBody>
       </>

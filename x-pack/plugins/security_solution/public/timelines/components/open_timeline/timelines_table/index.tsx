@@ -8,8 +8,6 @@ import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-
 import * as i18n from '../translations';
 import {
   ActionTimelineToShow,
@@ -26,6 +24,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
+import { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -68,24 +67,26 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
-  timelineType: TimelineTypeLiteral;
-}) => [
-  ...getCommonColumns({
-    itemIdToExpandedNotesRowMap,
-    onOpenTimeline,
-    onToggleShowNotes,
-    timelineType,
-  }),
-  ...getExtendedColumns(showExtendedColumns),
-  ...getIconHeaderColumns(),
-  ...getActionsColumns({
-    actionTimelineToShow,
-    deleteTimelines,
-    enableExportTimelineDownloader,
-    onOpenDeleteTimelineModal,
-    onOpenTimeline,
-  }),
-];
+  timelineType: TimelineTypeLiteralWithNull;
+}) => {
+  return [
+    ...getCommonColumns({
+      itemIdToExpandedNotesRowMap,
+      onOpenTimeline,
+      onToggleShowNotes,
+      timelineType,
+    }),
+    ...getExtendedColumns(showExtendedColumns),
+    ...getIconHeaderColumns({ timelineType }),
+    ...getActionsColumns({
+      actionTimelineToShow,
+      deleteTimelines,
+      enableExportTimelineDownloader,
+      onOpenDeleteTimelineModal,
+      onOpenTimeline,
+    }),
+  ];
+};
 
 export interface TimelinesTableProps {
   actionTimelineToShow: ActionTimelineToShow[];
@@ -105,10 +106,10 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  timelineType: TimelineTypeLiteralWithNull;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
-  timelineType: TimelineTypeLiteral;
 }
 
 /**
@@ -135,8 +136,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     sortField,
     sortDirection,
     tableRef,
-    totalSearchResultsCount,
     timelineType,
+    totalSearchResultsCount,
   }) => {
     const pagination = {
       hidePerPageOptions: !showExtendedColumns,

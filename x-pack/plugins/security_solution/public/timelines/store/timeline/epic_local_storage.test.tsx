@@ -15,9 +15,9 @@ import {
   defaultHeaders,
   createSecuritySolutionStorageMock,
   mockIndexPattern,
+  kibanaObservable,
 } from '../../../common/mock';
 
-import { TimelineType } from '../../../../common/types/timeline';
 import { createStore, State } from '../../../common/store';
 import {
   removeColumn,
@@ -39,6 +39,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -51,7 +52,13 @@ const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
@@ -64,7 +71,13 @@ describe('epicLocalStorage', () => {
   const indexPattern = mockIndexPattern;
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
@@ -91,6 +104,7 @@ describe('epicLocalStorage', () => {
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
+      status: TimelineStatus.active,
       sort,
       timelineType: TimelineType.default,
       toggleColumn: jest.fn(),

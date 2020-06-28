@@ -216,7 +216,7 @@ describe('alert actions', () => {
               sortDirection: 'desc',
             },
             status: TimelineStatus.draft,
-            title: '',
+            title: 'Test rule - Duplicate',
             timelineType: TimelineType.default,
             templateTimelineId: '1234-2136-11ea-9864-ebc8cc1cb8c2',
             templateTimelineVersion: null,

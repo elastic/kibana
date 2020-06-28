@@ -26,9 +26,7 @@ describe('SearchRow', () => {
           onlyFavorites={false}
           onQueryChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
-          query=""
           timelineType={TimelineType.default}
-          totalSearchResultsCount={0}
         />
       </ThemeProvider>
     );
@@ -47,9 +45,7 @@ describe('SearchRow', () => {
             onlyFavorites={false}
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
-            query=""
             timelineType={TimelineType.default}
-            totalSearchResultsCount={0}
           />
         </ThemeProvider>
       );
@@ -68,9 +64,7 @@ describe('SearchRow', () => {
             onlyFavorites={false}
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
-            query=""
             timelineType={TimelineType.default}
-            totalSearchResultsCount={0}
           />
         </ThemeProvider>
       );
@@ -87,9 +81,7 @@ describe('SearchRow', () => {
             onlyFavorites={true}
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
-            query=""
             timelineType={TimelineType.default}
-            totalSearchResultsCount={0}
           />
         </ThemeProvider>
       );
@@ -109,9 +101,7 @@ describe('SearchRow', () => {
             onlyFavorites={false}
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
-            query=""
             timelineType={TimelineType.default}
-            totalSearchResultsCount={0}
           />
         </ThemeProvider>
       );
@@ -135,9 +125,7 @@ describe('SearchRow', () => {
             onlyFavorites={false}
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={jest.fn()}
-            query=""
             timelineType={TimelineType.default}
-            totalSearchResultsCount={32}
           />
         </ThemeProvider>
       );

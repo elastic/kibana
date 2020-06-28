@@ -82,8 +82,6 @@ const TimelineFieldBadge = styled(ProviderFieldBadge)`
   background: #98a2b3;
 `;
 
-const TimelineFieldBadgeButton = styled(EuiButtonEmpty)``;
-
 interface ProviderBadgeProps {
   deleteProvider: () => void;
   field: string;

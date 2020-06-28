@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiBasicTable } from '@elastic/eui';
+import { EuiPanel, EuiBasicTable, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
-import { SearchRow } from './search_row';
-import { TimelinesTable } from './timelines_table';
+
 import { TimelineType } from '../../../../common/types/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
-import * as i18n from './translations';
-import { importTimelines } from '../../containers/api';
-
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -23,14 +17,23 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../../../common/components/utility_bar';
+
+import { importTimelines } from '../../containers/api';
+
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditOneTimelineAction } from './export_timeline';
+import { SearchRow } from './search_row';
+import { TimelinesTable } from './timelines_table';
+import * as i18n from './translations';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
+    favoriteCount,
     isLoading,
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
@@ -51,12 +54,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     sortDirection,
     setImportDataModalToggle,
     sortField,
-    tabs,
-    totalSearchResultsCount,
     timelineType = TimelineType.default,
+    timelineFilter,
+    templateTimelineFilter,
+    totalSearchResultsCount,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
-
     const {
       actionItem,
       enableExportTimelineDownloader,
@@ -147,6 +150,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       return timelineActions as ActionTimelineToShow[];
     }, [onDeleteSelected, deleteTimelines, searchResults]);
 
+    const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
+
     return (
       <>
         <EditOneTimelineAction
@@ -174,16 +179,19 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {!!tabs && tabs}
+          <EuiCallOut size="s" title={i18n.TEMPLATE_CALL_OUT_MESSAGE} />
+          <EuiSpacer size="m" />
+          {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"
+            favoriteCount={favoriteCount}
             onlyFavorites={onlyFavorites}
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
-            query={query}
             timelineType={timelineType}
-            totalSearchResultsCount={totalSearchResultsCount}
-          />
+          >
+            {SearchRowContent}
+          </SearchRow>
 
           <UtilityBar border>
             <UtilityBarSection>
@@ -232,9 +240,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             showExtendedColumns={true}
             sortDirection={sortDirection}
             sortField={sortField}
+            timelineType={timelineType}
             tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
-            timelineType={timelineType!}
           />
         </EuiPanel>
       </>
