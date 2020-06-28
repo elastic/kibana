@@ -89,6 +89,7 @@ describe('epicLocalStorage', () => {
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
