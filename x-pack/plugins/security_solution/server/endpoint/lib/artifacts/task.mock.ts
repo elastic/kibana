@@ -10,14 +10,8 @@ import { taskManagerMock } from '../../../../../task_manager/server/mocks';
 
 import { createMockEndpointAppContext } from '../../mocks';
 
-import { PackagerTaskScheduler, setupPackagerTask } from './task';
+import { ManifestTask } from './task';
 
-export const getMockPackagerTaskScheduler = (
-  taskManagerStart: TaskManagerStartContract
-): PackagerTaskScheduler => {
-  const packagerTask = setupPackagerTask({
-    endpointAppContext: createMockEndpointAppContext(),
-    taskManager: taskManagerMock.createSetup(),
-  });
-  return packagerTask.getTaskScheduler({ taskManager: taskManagerStart });
-};
+export class MockManifestTask extends ManifestTask {
+  private runTask = jest.fn();
+}

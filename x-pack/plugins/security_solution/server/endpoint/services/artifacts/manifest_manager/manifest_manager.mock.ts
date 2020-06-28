@@ -70,6 +70,7 @@ export class ManifestManagerMock extends ManifestManager {
     .fn()
     .mockResolvedValue(new Manifest(new Date(), '1.0.0'));
   private getManifestClient = jest.fn().mockReturnValue(getManifestClientMock());
+  public refresh = jest.fn().mockResolvedValue(null);
 }
 
 export const getManifestManagerMock = (): ManifestManagerMock => {
