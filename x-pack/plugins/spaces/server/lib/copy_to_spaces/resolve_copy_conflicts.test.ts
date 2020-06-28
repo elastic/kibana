@@ -148,6 +148,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           },
         ],
       },
+      trueCopy: false,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -273,6 +274,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
+            "trueCopy": false,
             "typeRegistry": Object {
               "getAllTypes": [MockFunction],
               "getImportableAndExportableTypes": [MockFunction],
@@ -354,6 +356,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
+            "trueCopy": false,
             "typeRegistry": Object {
               "getAllTypes": [MockFunction],
               "getImportableAndExportableTypes": [MockFunction],
@@ -445,6 +448,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           },
         ],
       },
+      trueCopy: false,
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -504,6 +508,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         includeReferences: true,
         objects: [],
         retries: {},
+        trueCopy: false,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Something went wrong while reading this stream"`

@@ -79,6 +79,7 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
+  const trueCopy = false;
 
   const setupOptions = (
     retries: SavedObjectsImportRetry[] = []
@@ -86,7 +87,16 @@ describe('#importSavedObjectsFromStream', () => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
-    return { readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace };
+    return {
+      readStream,
+      objectLimit,
+      retries,
+      savedObjectsClient,
+      typeRegistry,
+      // namespace and trueCopy don't matter, as they don't change the logic in this module, they just get passed to sub-module methods
+      namespace,
+      trueCopy,
+    };
   };
 
   const createRetry = (options?: {
@@ -188,6 +198,7 @@ describe('#importSavedObjectsFromStream', () => {
         savedObjectsClient,
         namespace,
         ignoreRegularConflicts: true,
+        trueCopy,
       };
       expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
     });
@@ -204,7 +215,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await resolveSavedObjectsImportErrors(options);
-      const opts = { typeRegistry, retries };
+      const opts = { typeRegistry, retries, trueCopy };
       expect(getImportIdMapForRetries).toHaveBeenCalledWith(filteredObjects, opts);
     });
 

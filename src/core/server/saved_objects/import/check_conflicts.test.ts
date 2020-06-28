@@ -37,6 +37,22 @@ const createObject = (type: string, id: string): SavedObjectType => ({
   references: (Symbol() as unknown) as SavedObjectReference[],
 });
 
+const getResultMock = {
+  conflict: (type: string, id: string) => {
+    const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
+    return { type, id, error };
+  },
+  unresolvableConflict: (type: string, id: string) => {
+    const conflictMock = getResultMock.conflict(type, id);
+    const metadata = { isNotOverwritable: true };
+    return { ...conflictMock, error: { ...conflictMock.error, metadata } };
+  },
+  invalidType: (type: string, id: string) => {
+    const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload;
+    return { type, id, error };
+  },
+};
+
 /**
  * Create a variety of different objects to exercise different import / result scenarios
  */
@@ -44,6 +60,10 @@ const obj1 = createObject('type-1', 'id-1'); // -> success
 const obj2 = createObject('type-2', 'id-2'); // -> conflict
 const obj3 = createObject('type-3', 'id-3'); // -> unresolvable conflict
 const obj4 = createObject('type-4', 'id-4'); // -> invalid type
+const objects = [obj1, obj2, obj3, obj4];
+const obj2Error = getResultMock.conflict(obj2.type, obj2.id);
+const obj3Error = getResultMock.unresolvableConflict(obj3.type, obj3.id);
+const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -57,30 +77,20 @@ describe('#checkConflicts', () => {
     options: {
       namespace?: string;
       ignoreRegularConflicts?: boolean;
+      trueCopy?: boolean;
     } = {}
   ): CheckConflictsOptions => {
-    const { namespace, ignoreRegularConflicts } = options;
+    const { namespace, ignoreRegularConflicts, trueCopy } = options;
     savedObjectsClient = savedObjectsClientMock.create();
     socCheckConflicts = savedObjectsClient.checkConflicts;
     socCheckConflicts.mockResolvedValue({ errors: [] }); // by default, mock to empty results
-    return { savedObjectsClient, namespace, ignoreRegularConflicts };
+    return { savedObjectsClient, namespace, ignoreRegularConflicts, trueCopy };
   };
 
-  const getResultMock = {
-    conflict: (type: string, id: string) => {
-      const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return { type, id, error };
-    },
-    unresolvableConflict: (type: string, id: string) => {
-      const conflictMock = getResultMock.conflict(type, id);
-      const metadata = { isNotOverwritable: true };
-      return { ...conflictMock, error: { ...conflictMock.error, metadata } };
-    },
-    invalidType: (type: string, id: string) => {
-      const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload;
-      return { type, id, error };
-    },
-  };
+  beforeEach(() => {
+    mockUuidv4.mockReset();
+    mockUuidv4.mockReturnValueOnce(`new-object-id`);
+  });
 
   it('exits early if there are no objects to check', async () => {
     const namespace = 'foo-namespace';
@@ -98,7 +108,6 @@ describe('#checkConflicts', () => {
 
   it('calls checkConflicts with expected inputs', async () => {
     const namespace = 'foo-namespace';
-    const objects = [obj1, obj2, obj3, obj4];
     const options = setupOptions({ namespace });
 
     await checkConflicts(objects, options);
@@ -108,13 +117,8 @@ describe('#checkConflicts', () => {
 
   it('returns expected result', async () => {
     const namespace = 'foo-namespace';
-    const objects = [obj1, obj2, obj3, obj4];
     const options = setupOptions({ namespace });
-    const obj2Error = getResultMock.conflict(obj2.type, obj2.id);
-    const obj3Error = getResultMock.unresolvableConflict(obj3.type, obj3.id);
-    const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
-    mockUuidv4.mockReturnValueOnce(`new-object-id`);
 
     const checkConflictsResult = await checkConflicts(objects, options);
     expect(checkConflictsResult).toEqual({
@@ -128,42 +132,42 @@ describe('#checkConflicts', () => {
         },
       ],
       importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
-      importIds: new Set([
-        `${obj1.type}:${obj1.id}`,
-        `${obj2.type}:${obj2.id}`,
-        `${obj3.type}:${obj3.id}`,
-        `${obj4.type}:${obj4.id}`,
-      ]),
+      importIds: new Set(objects.map(({ type, id }) => `${type}:${id}`)),
     });
   });
 
   it('does not return errors for regular conflicts when ignoreRegularConflicts=true', async () => {
     const namespace = 'foo-namespace';
-    const objects = [obj1, obj2, obj3, obj4];
     const options = setupOptions({ namespace, ignoreRegularConflicts: true });
-    const obj2Error = getResultMock.conflict(obj2.type, obj2.id);
-    const obj3Error = getResultMock.unresolvableConflict(obj3.type, obj3.id);
-    const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
-    mockUuidv4.mockReturnValueOnce(`new-object-id`);
 
     const checkConflictsResult = await checkConflicts(objects, options);
-    expect(checkConflictsResult).toEqual({
-      filteredObjects: [obj1, obj2, obj3],
-      errors: [
-        {
-          ...obj4Error,
-          title: obj4.attributes.title,
-          error: { ...obj4Error.error, type: 'unknown' },
-        },
-      ],
-      importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
-      importIds: new Set([
-        `${obj1.type}:${obj1.id}`,
-        `${obj2.type}:${obj2.id}`,
-        `${obj3.type}:${obj3.id}`,
-        `${obj4.type}:${obj4.id}`,
-      ]),
-    });
+    expect(checkConflictsResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [obj1, obj2, obj3],
+        errors: [
+          {
+            ...obj4Error,
+            title: obj4.attributes.title,
+            error: { ...obj4Error.error, type: 'unknown' },
+          },
+        ],
+      })
+    );
+  });
+
+  it('adds `omitOriginId` field to `importIdMap` entries when trueCopy=true', async () => {
+    const namespace = 'foo-namespace';
+    const options = setupOptions({ namespace, trueCopy: true });
+    socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
+
+    const checkConflictsResult = await checkConflicts(objects, options);
+    expect(checkConflictsResult).toEqual(
+      expect.objectContaining({
+        importIdMap: new Map([
+          [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+        ]),
+      })
+    );
   });
 });

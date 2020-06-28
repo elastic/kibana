@@ -179,4 +179,10 @@ export interface SavedObjectsResolveImportErrorsOptions {
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */
   namespace?: string;
+  /**
+   * @deprecated
+   * If true, will create new copies of import objects, each with a random `id` and undefined `originId`. This option will be removed and
+   * permanently enabled in a future release.
+   */
+  trueCopy: boolean;
 }

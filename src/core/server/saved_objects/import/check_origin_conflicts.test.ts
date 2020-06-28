@@ -446,10 +446,13 @@ describe('#checkOriginConflicts', () => {
 describe('#getImportIdMapForRetries', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
 
-  const setupOptions = (retries: SavedObjectsImportRetry[]): GetImportIdMapForRetriesOptions => {
+  const setupOptions = (
+    retries: SavedObjectsImportRetry[],
+    trueCopy: boolean = false
+  ): GetImportIdMapForRetriesOptions => {
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
-    return { typeRegistry, retries };
+    return { typeRegistry, retries, trueCopy };
   };
 
   const createOverwriteRetry = (
@@ -492,7 +495,19 @@ describe('#getImportIdMapForRetries', () => {
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y' }]])
+      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y', omitOriginId: false }]])
+    );
+  });
+
+  test('omits origin ID in `importIdMap` entries when trueCopy=true', async () => {
+    const obj6 = createObject(MULTI_NS_TYPE, 'id-6');
+    const objects = [obj6];
+    const retries = [createOverwriteRetry(obj6, 'id-Y')];
+    const options = setupOptions(retries, true);
+
+    const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
+    expect(checkOriginConflictsResult).toEqual(
+      new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y', omitOriginId: true }]])
     );
   });
 });

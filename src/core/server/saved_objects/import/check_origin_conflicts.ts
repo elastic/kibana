@@ -36,6 +36,7 @@ interface CheckOriginConflictsOptions {
 interface GetImportIdMapForRetriesOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   retries: SavedObjectsImportRetry[];
+  trueCopy: boolean;
 }
 
 interface InexactMatch<T> {
@@ -209,13 +210,13 @@ export function getImportIdMapForRetries(
   objects: Array<SavedObject<{ title?: string }>>,
   options: GetImportIdMapForRetriesOptions
 ) {
-  const { typeRegistry, retries } = options;
+  const { typeRegistry, retries, trueCopy } = options;
 
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()
   );
-  const importIdMap = new Map<string, { id: string }>();
+  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
 
   objects.forEach(({ type, id }) => {
     const retry = retryMap.get(`${type}:${id}`);
@@ -224,7 +225,7 @@ export function getImportIdMapForRetries(
     }
     const { overwrite, idToOverwrite } = retry;
     if (overwrite && idToOverwrite && idToOverwrite !== id && typeRegistry.isMultiNamespace(type)) {
-      importIdMap.set(`${type}:${id}`, { id: idToOverwrite });
+      importIdMap.set(`${type}:${id}`, { id: idToOverwrite, omitOriginId: trueCopy });
     }
   });
 

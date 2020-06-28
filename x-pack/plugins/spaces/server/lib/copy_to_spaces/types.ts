@@ -24,6 +24,7 @@ export interface ResolveConflictsOptions {
   retries: {
     [spaceId: string]: Array<Omit<SavedObjectsImportRetry, 'replaceReferences'>>;
   };
+  trueCopy: boolean;
 }
 
 export interface CopyResponse {

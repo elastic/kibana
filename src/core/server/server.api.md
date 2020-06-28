@@ -1698,7 +1698,7 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
 
 // @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, trueCopy, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -2399,6 +2399,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
     savedObjectsClient: SavedObjectsClientContract;
+    // @deprecated (undocumented)
+    trueCopy: boolean;
     typeRegistry: ISavedObjectTypeRegistry;
 }
 

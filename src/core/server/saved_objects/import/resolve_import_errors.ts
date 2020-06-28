@@ -44,6 +44,7 @@ export async function resolveSavedObjectsImportErrors({
   savedObjectsClient,
   typeRegistry,
   namespace,
+  trueCopy,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -98,7 +99,12 @@ export async function resolveSavedObjectsImportErrors({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-  const checkConflictsOptions = { savedObjectsClient, namespace, ignoreRegularConflicts: true };
+  const checkConflictsOptions = {
+    savedObjectsClient,
+    namespace,
+    ignoreRegularConflicts: true,
+    trueCopy,
+  };
   const checkConflictsResult = await checkConflicts(
     validateReferencesResult.filteredObjects,
     checkConflictsOptions
@@ -110,6 +116,7 @@ export async function resolveSavedObjectsImportErrors({
   const importIdMapForRetries = getImportIdMapForRetries(checkConflictsResult.filteredObjects, {
     typeRegistry,
     retries,
+    trueCopy,
   });
   importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
 

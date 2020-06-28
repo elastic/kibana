@@ -21,5 +21,6 @@ export interface SavedObjectsResolveImportErrorsOptions
 |  [readStream](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from |
 |  [retries](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.retries.md) | <code>SavedObjectsImportRetry[]</code> | saved object import references to retry |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | client to use to perform the import operation |
+|  [trueCopy](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.truecopy.md) | <code>boolean</code> |  |
 |  [typeRegistry](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> | The registry of all known saved object types |
 
