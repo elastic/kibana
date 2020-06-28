@@ -6,8 +6,8 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import {
-  ChildNode,
-  LifecycleNode,
+  ResolverChildNode,
+  ResolverLifecycleNode,
   ResolverAncestry,
   ResolverEvent,
   ResolverRelatedEvents,
@@ -35,7 +35,7 @@ import { Options, GeneratedTrees } from '../../services/resolver';
  * @param node a lifecycle node containing the start and end events for a node
  * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
  */
-const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, TreeNode>) => {
+const expectLifecycleNodeInMap = (node: ResolverLifecycleNode, nodeMap: Map<string, TreeNode>) => {
   const genNode = nodeMap.get(node.entityID);
   expect(genNode).to.be.ok();
   compareArrays(genNode!.lifecycle, node.lifecycle, true);
@@ -49,7 +49,11 @@ const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, Tree
  * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
  *  does not contain all the ancestors, the last one will not have the parent
  */
-const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent: boolean) => {
+const verifyAncestry = (
+  ancestors: ResolverLifecycleNode[],
+  tree: Tree,
+  verifyLastParent: boolean
+) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   // group by parent entity_id
@@ -97,7 +101,7 @@ const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent
  *
  * @param ancestors an array of ancestor nodes
  */
-const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
+const retrieveDistantAncestor = (ancestors: ResolverLifecycleNode[]) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
   const groupedAncestors = _.groupBy(ancestors, (ancestor) => ancestor.entityID);
   let node = ancestors[0];
@@ -124,7 +128,7 @@ const retrieveDistantAncestor = (ancestors: LifecycleNode[]) => {
  * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
  */
 const verifyChildren = (
-  children: ChildNode[],
+  children: ResolverChildNode[],
   tree: Tree,
   numberOfParents?: number,
   childrenPerParent?: number
@@ -178,7 +182,11 @@ const compareArrays = (
  * @param relatedEvents the related events received for a particular node
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEventInfo[]) => {
+const verifyStats = (
+  stats: ResolverNodeStats | undefined,
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   expect(stats).to.not.be(undefined);
   let totalExpEvents = 0;
   for (const cat of categories) {
@@ -196,6 +204,7 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
     totalExpEvents += cat.count;
   }
   expect(stats?.events.total).to.be(totalExpEvents);
+  expect(stats?.totalAlerts);
 };
 
 /**
@@ -204,9 +213,13 @@ const verifyStats = (stats: ResolverNodeStats | undefined, categories: RelatedEv
  * @param nodes an array of lifecycle nodes that should have a stats field defined
  * @param categories the related event info used when generating the resolver tree
  */
-const verifyLifecycleStats = (nodes: LifecycleNode[], categories: RelatedEventInfo[]) => {
+const verifyLifecycleStats = (
+  nodes: ResolverLifecycleNode[],
+  categories: RelatedEventInfo[],
+  relatedAlerts: number
+) => {
   for (const node of nodes) {
-    verifyStats(node.stats, categories);
+    verifyStats(node.stats, categories, relatedAlerts);
   }
 };
 
@@ -220,13 +233,13 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     { category: RelatedEventCategory.File, count: 1 },
     { category: RelatedEventCategory.Registry, count: 1 },
   ];
-
+  const relatedAlerts = 4;
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
-    relatedAlerts: 4,
+    relatedAlerts,
     children: 3,
     generations: 2,
     percentTerminated: 100,
@@ -697,11 +710,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
           verifyChildren(body.children.childNodes, tree, 4, 3);
-          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen);
+          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
           verifyAncestry(body.ancestry.ancestors, tree, true);
-          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen);
+          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
 
           expect(body.relatedEvents.nextEvent).to.equal(null);
           compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
@@ -710,7 +723,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen);
+          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
         });
       });
     });

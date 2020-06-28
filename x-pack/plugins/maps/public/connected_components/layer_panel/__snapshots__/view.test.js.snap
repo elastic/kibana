@@ -32,17 +32,9 @@ exports[`LayerPanel is rendered 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiButtonIcon
-            aria-label="Fit to bounds"
-            iconType="vector"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Fit"
-              id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonIcon>
+          <EuiIcon
+            type="vector"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle

@@ -5,7 +5,7 @@
  */
 
 export type TestSubjects =
-  | 'aliasesTab'
+  | 'aliasesTabContent'
   | 'appTitle'
   | 'cell'
   | 'closeDetailsButton'
@@ -27,7 +27,7 @@ export type TestSubjects =
   | 'indicesTab'
   | 'legacyTemplateTable'
   | 'manageTemplateButton'
-  | 'mappingsTab'
+  | 'mappingsTabContent'
   | 'noAliasesCallout'
   | 'noMappingsCallout'
   | 'noSettingsCallout'
@@ -36,7 +36,7 @@ export type TestSubjects =
   | 'row'
   | 'sectionError'
   | 'sectionLoading'
-  | 'settingsTab'
+  | 'settingsTabContent'
   | 'summaryTab'
   | 'summaryTitle'
   | 'systemTemplatesSwitch'
