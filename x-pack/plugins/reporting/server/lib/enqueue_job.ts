@@ -4,39 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventEmitter } from 'events';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import { ESQueueCreateJobFn } from '../../server/types';
 import { ReportingCore } from '../core';
-// @ts-ignore
-import { events as esqueueEvents } from './esqueue';
-import { LevelLogger } from './level_logger';
+import { LevelLogger } from './';
+import { ReportingStore, Report } from './store';
 
-interface ConfirmedJob {
-  id: string;
-  index: string;
-  _seq_no: number;
-  _primary_term: number;
-}
-
-export type Job = EventEmitter & {
-  id: string;
-  toJSON: () => {
-    id: string;
-  };
-};
-
-export type EnqueueJobFn = <JobParamsType>(
+export type EnqueueJobFn = (
   exportTypeId: string,
-  jobParams: JobParamsType,
+  jobParams: unknown,
   user: AuthenticatedUser | null,
   context: RequestHandlerContext,
   request: KibanaRequest
-) => Promise<Job>;
+) => Promise<Report>;
 
 export function enqueueJobFactory(
   reporting: ReportingCore,
+  store: ReportingStore,
   parentLogger: LevelLogger
 ): EnqueueJobFn {
   const config = reporting.getConfig();
@@ -45,16 +30,16 @@ export function enqueueJobFactory(
   const maxAttempts = config.get('capture', 'maxAttempts');
   const logger = parentLogger.clone(['queue-job']);
 
-  return async function enqueueJob<JobParamsType>(
+  return async function enqueueJob(
     exportTypeId: string,
-    jobParams: JobParamsType,
+    jobParams: unknown,
     user: AuthenticatedUser | null,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<Job> {
-    type ScheduleTaskFnType = ESQueueCreateJobFn<JobParamsType>;
+  ) {
+    type ScheduleTaskFnType = ESQueueCreateJobFn<unknown>;
+
     const username = user ? user.username : false;
-    const esqueue = await reporting.getEsqueue();
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
     if (exportType == null) {
@@ -71,16 +56,6 @@ export function enqueueJobFactory(
       max_attempts: maxAttempts,
     };
 
-    return new Promise((resolve, reject) => {
-      const job = esqueue.addJob(exportType.jobType, payload, options);
-
-      job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob: ConfirmedJob) => {
-        if (createdJob.id === job.id) {
-          logger.info(`Successfully queued job: ${createdJob.id}`);
-          resolve(job);
-        }
-      });
-      job.on(esqueueEvents.EVENT_JOB_CREATE_ERROR, reject);
-    });
+    return await store.addReport(exportType.jobType, payload, options);
   };
 }

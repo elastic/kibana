@@ -27,7 +27,7 @@ const DetailPageContent = euiStyled(PageContent)`
 `;
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   match: {
     params: {
       type: string;

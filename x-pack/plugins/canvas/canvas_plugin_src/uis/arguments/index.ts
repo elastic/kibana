@@ -15,7 +15,6 @@ import { imageUpload } from './image_upload';
 // @ts-expect-error untyped local
 import { number } from './number';
 import { numberFormatInitializer } from './number_format';
-// @ts-expect-error untyped local
 import { palette } from './palette';
 // @ts-expect-error untyped local
 import { percentage } from './percentage';

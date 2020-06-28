@@ -7,6 +7,12 @@
 import moment from 'moment';
 import sinon from 'sinon';
 
+import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { listMock } from '../../../../../lists/server/mocks';
+import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
+
+import * as featureFlags from '../feature_flags';
+
 import {
   generateId,
   parseInterval,
@@ -14,10 +20,10 @@ import {
   getDriftTolerance,
   getGapBetweenRuns,
   errorAggregator,
+  getListsClient,
+  hasLargeValueList,
 } from './utils';
-
 import { BulkResponseErrorAggregation } from './types';
-
 import {
   sampleBulkResponse,
   sampleEmptyBulkResponse,
@@ -527,6 +533,109 @@ describe('utils', () => {
       const aggregated = errorAggregator(bulkResponse, [409, 502]);
       const expected: BulkResponseErrorAggregation = {};
       expect(aggregated).toEqual(expected);
+    });
+  });
+
+  describe('#getListsClient', () => {
+    let alertServices: AlertServicesMock;
+
+    beforeEach(() => {
+      alertServices = alertsMock.createAlertServices();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('it successfully returns list and exceptions list client', async () => {
+      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
+
+      const { listClient, exceptionsClient } = await getListsClient({
+        services: alertServices,
+        savedObjectClient: alertServices.savedObjectsClient,
+        updatedByUser: 'some_user',
+        spaceId: '',
+        lists: listMock.createSetup(),
+      });
+
+      expect(listClient).toBeDefined();
+      expect(exceptionsClient).toBeDefined();
+    });
+
+    test('it returns list and exceptions client of "undefined" if lists feature flag is off', async () => {
+      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(false);
+
+      const listsClient = await getListsClient({
+        services: alertServices,
+        savedObjectClient: alertServices.savedObjectsClient,
+        updatedByUser: 'some_user',
+        spaceId: '',
+        lists: listMock.createSetup(),
+      });
+
+      expect(listsClient).toEqual({ listClient: undefined, exceptionsClient: undefined });
+    });
+
+    test('it throws if "lists" is undefined', async () => {
+      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
+
+      await expect(() =>
+        getListsClient({
+          services: alertServices,
+          savedObjectClient: alertServices.savedObjectsClient,
+          updatedByUser: 'some_user',
+          spaceId: '',
+          lists: undefined,
+        })
+      ).rejects.toThrowError('lists plugin unavailable during rule execution');
+    });
+  });
+
+  describe('#hasLargeValueList', () => {
+    test('it returns false if empty array', () => {
+      const hasLists = hasLargeValueList([]);
+
+      expect(hasLists).toBeFalsy();
+    });
+
+    test('it returns true if item of type EntryList exists', () => {
+      const entries: EntriesArray = [
+        {
+          field: 'actingProcess.file.signer',
+          type: 'list',
+          operator: 'included',
+          list: { id: 'some id', type: 'ip' },
+        },
+        {
+          field: 'file.signature.signer',
+          type: 'match',
+          operator: 'excluded',
+          value: 'Global Signer',
+        },
+      ];
+      const hasLists = hasLargeValueList(entries);
+
+      expect(hasLists).toBeTruthy();
+    });
+
+    test('it returns false if item of type EntryList does not exist', () => {
+      const entries: EntriesArray = [
+        {
+          field: 'actingProcess.file.signer',
+          type: 'match',
+          operator: 'included',
+          value: 'Elastic, N.V.',
+        },
+        {
+          field: 'file.signature.signer',
+          type: 'match',
+          operator: 'excluded',
+          value: 'Global Signer',
+        },
+      ];
+      const hasLists = hasLargeValueList(entries);
+
+      expect(hasLists).toBeFalsy();
     });
   });
 });

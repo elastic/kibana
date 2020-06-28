@@ -10,11 +10,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { ACTIVE_TIMELINE_REDUX_ID } from '../../../../common/components/top_n';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, State } from '../../../../common/store';
 import { appActions } from '../../../../common/store/actions';
+import { useManageTimeline } from '../../manage_timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -35,7 +37,6 @@ import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
-import { useManageTimeline } from '../../manage_timeline';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -72,8 +73,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     selectedEventIds,
     setSelected,
     clearSelected,
+    show,
     showCheckboxes,
     showRowRenderers,
+    graphEventId,
     sort,
     toggleColumn,
     unPinEvent,
@@ -177,12 +180,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
 
       if (!excludedRowRendererIds) return rowRenderers;
 
-      // console.error('dupa', rowRenderers, excludedRowRendererIds);
-      // console.error(
-      //   'enabled',
-      //   rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id))
-      // );
-
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, showRowRenderers]);
 
@@ -195,6 +192,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
+        graphEventId={graphEventId}
         height={height}
         id={id}
         isEventViewer={isEventViewer}
@@ -212,6 +210,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         pinnedEventIds={pinnedEventIds}
         rowRenderers={enabledRowRenderers}
         selectedEventIds={selectedEventIds}
+        show={id === ACTIVE_TIMELINE_REDUX_ID ? show : true}
         showCheckboxes={showCheckboxes}
         sort={sort}
         toggleColumn={toggleColumn}
@@ -225,6 +224,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.data, nextProps.data) &&
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
@@ -232,6 +232,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.loadingEventIds === nextProps.loadingEventIds &&
     prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+    prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.showRowRenderers === nextProps.showRowRenderers &&
@@ -250,16 +251,17 @@ const makeMapStateToProps = () => {
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
-    console.error('mapStateTimeline', timeline, id);
     const {
       columns,
       eventIdToNoteIds,
       eventType,
       excludedRowRendererIds,
+      graphEventId,
       isSelectAllChecked,
       loadingEventIds,
       pinnedEventIds,
       selectedEventIds,
+      show,
       showCheckboxes,
       showRowRenderers,
     } = timeline;
@@ -269,12 +271,14 @@ const makeMapStateToProps = () => {
       eventIdToNoteIds,
       eventType,
       excludedRowRendererIds,
+      graphEventId,
       isSelectAllChecked,
       loadingEventIds,
       notesById: getNotesByIds(state),
       id,
       pinnedEventIds,
       selectedEventIds,
+      show,
       showCheckboxes,
       showRowRenderers,
     };

@@ -27,7 +27,6 @@ export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> =
   timelineId,
   width,
 }) => {
-  console.error('timelineId', timelineId);
   const dispatch = useDispatch();
   const excludedRowRendererIds = useSelector(
     (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []

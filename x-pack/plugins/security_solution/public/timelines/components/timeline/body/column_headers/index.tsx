@@ -24,6 +24,7 @@ import {
   OnFilterChange,
   OnSelectAll,
 } from '../../events';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import {
   EventsTh,
   EventsThContent,
@@ -158,28 +159,29 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
-          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
         >
-          <EventsTh>
-            <EventsThContent />
-          </EventsTh>
-          {showEventsSelect && (
-            <EventsTh>
-              <EventsThContent textAlign="center">
-                <EventsSelect checkState="unchecked" timelineId={timelineId} />
-              </EventsThContent>
-            </EventsTh>
-          )}
           {showSelectAllCheckbox && (
             <EventsTh>
-              <EventsThContent textAlign="center">
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
                   id={'select-all-events'}
                   checked={isSelectAllChecked}
                   onChange={handleSelectAllChange}
                 />
+              </EventsThContent>
+            </EventsTh>
+          )}
+
+          <EventsTh>
+            <EventsThContent />
+          </EventsTh>
+
+          {showEventsSelect && (
+            <EventsTh>
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>
             </EventsTh>
           )}

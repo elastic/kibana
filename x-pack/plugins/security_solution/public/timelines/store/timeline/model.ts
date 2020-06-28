@@ -58,6 +58,8 @@ export interface TimelineModel {
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
   filters?: Filter[];
+  /** When non-empty, display a graph view for this event */
+  graphEventId?: string;
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -133,6 +135,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
+    | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'
@@ -161,7 +164,6 @@ export type SubsetTimelineModel = Readonly<
     | 'isLoading'
     | 'savedObjectId'
     | 'version'
-    | 'timelineType'
     | 'status'
   >
 >;
@@ -169,4 +171,5 @@ export type SubsetTimelineModel = Readonly<
 export interface TimelineUrl {
   id: string;
   isOpen: boolean;
+  graphEventId?: string;
 }

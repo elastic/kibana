@@ -133,6 +133,12 @@ export const timelineSchema = gql`
   enum TimelineStatus {
     active
     draft
+    immutable
+  }
+
+  enum TemplateTimelineType {
+    elastic
+    custom
   }
 
   enum RowRendererId {
@@ -295,6 +301,11 @@ export const timelineSchema = gql`
   type ResponseTimelines {
     timeline: [TimelineResult]!
     totalCount: Float
+    defaultTimelineCount: Float
+    templateTimelineCount: Float
+    elasticTemplateTimelineCount: Float
+    customTemplateTimelineCount: Float
+    favoriteCount: Float
   }
 
   #########################
@@ -303,7 +314,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

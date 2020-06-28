@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const READ_ONLY_SAVED_OBJECT_TITLE = i18n.translate(
   'xpack.securitySolution.case.readOnlySavedObjectTitle',
   {
-    defaultMessage: 'You have read-only feature privileges',
+    defaultMessage: 'You cannot open new or update existing cases',
   }
 );
 
@@ -17,7 +17,7 @@ export const READ_ONLY_SAVED_OBJECT_MSG = i18n.translate(
   'xpack.securitySolution.case.readOnlySavedObjectDescription',
   {
     defaultMessage:
-      'You are only allowed to view cases. If you need to open and update cases, contact your Kibana administrator',
+      'You only have permissions to view cases. If you need to open and update cases, contact your Kibana administrator.',
   }
 );
 
