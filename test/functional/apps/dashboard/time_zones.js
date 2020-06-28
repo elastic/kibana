@@ -24,7 +24,13 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'settings',
+    'common',
+    'savedObjects',
+  ]);
 
   describe('dashboard time zones', function () {
     this.tags('includeFirefox');
@@ -36,10 +42,10 @@ export default function ({ getService, getPageObjects }) {
       });
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.settings.importFile(
+      await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', 'timezonetest_6_2_4.json')
       );
-      await PageObjects.settings.checkImportSucceeded();
+      await PageObjects.savedObjects.checkImportSucceeded();
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('time zone test');

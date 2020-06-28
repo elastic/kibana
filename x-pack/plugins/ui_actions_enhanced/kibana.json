@@ -4,7 +4,8 @@
   "configPath": ["xpack", "ui_actions_enhanced"],
   "requiredPlugins": [
     "embeddable",
-    "uiActions"
+    "uiActions",
+    "licensing"
   ],
   "server": false,
   "ui": true
