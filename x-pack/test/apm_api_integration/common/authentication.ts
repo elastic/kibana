@@ -18,6 +18,12 @@ export async function createApmUser(security: SecurityService, apmUser: ApmUser)
   switch (apmUser) {
     case ApmUser.APM_READ_USER:
       await security.role.create(ApmUser.APM_READ_USER, {
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            { names: ['observability-annotations'], privileges: ['read', 'view_index_metadata'] },
+          ],
+        },
         kibana: [
           {
             base: [],
@@ -37,6 +43,22 @@ export async function createApmUser(security: SecurityService, apmUser: ApmUser)
 
     case ApmUser.APM_WRITE_USER:
       await security.role.create(ApmUser.APM_WRITE_USER, {
+        elasticsearch: {
+          cluster: [],
+          indices: [
+            {
+              names: ['observability-annotations'],
+              privileges: [
+                'read',
+                'view_index_metadata',
+                'index',
+                'manage',
+                'create_index',
+                'create_doc',
+              ],
+            },
+          ],
+        },
         kibana: [
           {
             base: [],
