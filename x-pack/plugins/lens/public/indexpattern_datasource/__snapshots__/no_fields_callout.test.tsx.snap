@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoFieldCallout renders properly for index with no fields 1`] = `
+<EuiCallOut
+  color="warning"
+  size="s"
+  title="No fields exist in this index pattern."
+/>
+`;
+
+exports[`NoFieldCallout renders properly when affected by field filter 1`] = `
+<EuiCallOut
+  color="warning"
+  size="s"
+  title="No fields match the selected filters."
+>
+  <strong>
+    Try:
+  </strong>
+  <ul>
+    <li>
+      Using different field filters
+    </li>
+  </ul>
+</EuiCallOut>
+`;
+
+exports[`NoFieldCallout renders properly when affected by field filters, global filter and timerange 1`] = `
+<EuiCallOut
+  color="warning"
+  size="s"
+  title="No fields match the selected filters."
+>
+  <strong>
+    Try:
+  </strong>
+  <ul>
+    <li>
+      Extending the time range
+    </li>
+    <li>
+      Using different field filters
+    </li>
+    <li>
+      Changing the global filters
+    </li>
+  </ul>
+</EuiCallOut>
+`;
