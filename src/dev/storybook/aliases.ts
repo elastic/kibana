@@ -25,5 +25,6 @@ export const storybookAliases = {
   embeddable: 'src/plugins/embeddable/scripts/storybook.js',
   infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
   security_solution: 'x-pack/plugins/security_solution/scripts/storybook.js',
+  tags: 'x-pack/plugins/tags/scripts/storybook.js',
   ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/scripts/storybook.js',
 };
