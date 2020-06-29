@@ -64,6 +64,7 @@ describe('IntegrationGroup', () => {
 
     it('finds url domain', () => {
       mockSummary.state.url.domain = 'mydomain';
+
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": undefined,
@@ -91,6 +92,7 @@ describe('IntegrationGroup', () => {
 
     it('does not throw for missing kubernetes fields', () => {
       mockSummary.state.checks = [];
+
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": undefined,
@@ -105,6 +107,7 @@ describe('IntegrationGroup', () => {
       mockSummary.state.checks = [
         { container: { id: 'mycontainer' }, monitor: { status: 'up' }, timestamp: 123 },
       ];
+
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": "mycontainer",
@@ -117,6 +120,7 @@ describe('IntegrationGroup', () => {
 
     it('finds ip field', () => {
       mockSummary.state.checks = [{ monitor: { ip: '127.0.0.1', status: 'up' }, timestamp: 123 }];
+
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": undefined,

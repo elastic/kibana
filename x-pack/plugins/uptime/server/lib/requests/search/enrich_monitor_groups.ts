@@ -381,27 +381,24 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
 
+const getStringValue = (value: string | Array<string | null> | null | undefined): string => {
+  if (Array.isArray(value)) {
+    value.sort();
+    return value[0] ?? '';
+  }
+  return value ?? '';
+};
+
 export const sortChecksBy = (
   a: Pick<Check, 'observer' | 'monitor'>,
   b: Pick<Check, 'observer' | 'monitor'>
 ) => {
   const nameA: string = a.observer?.geo?.name ?? '';
   const nameB: string = b.observer?.geo?.name ?? '';
+
   if (nameA === nameB) {
-    let ipA: string;
-    let ipB: string;
-    if (Array.isArray(a.monitor.ip)) {
-      a.monitor.ip.sort();
-      ipA = a.monitor.ip?.[0] ?? '';
-    } else {
-      ipA = a.monitor.ip ?? '';
-    }
-    if (Array.isArray(b.monitor.ip)) {
-      b.monitor.ip.sort();
-      ipB = b.monitor.ip?.[0] ?? '';
-    } else {
-      ipB = b.monitor.ip ?? '';
-    }
+    const ipA = getStringValue(a.monitor.ip);
+    const ipB = getStringValue(b.monitor.ip);
 
     if (ipA === ipB) {
       return 0;
