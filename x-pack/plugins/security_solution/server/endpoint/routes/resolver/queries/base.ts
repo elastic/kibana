@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
@@ -75,7 +75,7 @@ export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuer
    * @param client a client for searching ES
    * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
    */
-  async searchAndFormat(client: IScopedClusterClient, ids: string | string[]): Promise<T> {
+  async searchAndFormat(client: ILegacyScopedClusterClient, ids: string | string[]): Promise<T> {
     const res: SearchResponse<ResolverEvent> = await this.search(client, ids);
     return this.formatResponse(res);
   }
@@ -86,7 +86,7 @@ export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuer
    * @param client a client for searching ES
    * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
    */
-  async search(client: IScopedClusterClient, ids: string | string[]) {
+  async search(client: ILegacyScopedClusterClient, ids: string | string[]) {
     return client.callAsCurrentUser('search', this.buildSearch(ids));
   }
 

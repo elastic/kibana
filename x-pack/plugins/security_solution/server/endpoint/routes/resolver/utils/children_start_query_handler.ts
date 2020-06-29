@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ChildrenQuery } from '../queries/children';
 import { QueryInfo } from '../queries/multi_searcher';
@@ -96,7 +96,7 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
    *
    * @param client the elasticsearch client
    */
-  async search(client: IScopedClusterClient) {
+  async search(client: ILegacyScopedClusterClient) {
     while (this.hasMore()) {
       const info = this.nextQuery();
       if (!info) {

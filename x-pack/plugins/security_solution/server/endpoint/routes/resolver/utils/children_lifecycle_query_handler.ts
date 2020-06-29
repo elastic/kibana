@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ResolverEvent, ResolverChildren } from '../../../../../common/endpoint/types';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { QueryInfo } from '../queries/multi_searcher';
@@ -59,7 +59,7 @@ export class ChildrenLifecycleQueryHandler implements SingleQueryHandler<Resolve
    *
    * @param client the elasticsearch client
    */
-  async search(client: IScopedClusterClient) {
+  async search(client: ILegacyScopedClusterClient) {
     const results = this.getResults();
     if (results) {
       return results;

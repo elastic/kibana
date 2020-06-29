@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ResolverRelatedAlerts, ResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedAlerts } from './node';
 import { AlertsQuery } from '../queries/alerts';
@@ -71,7 +71,7 @@ export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRel
    *
    * @param client the elasticsearch client
    */
-  async search(client: IScopedClusterClient) {
+  async search(client: ILegacyScopedClusterClient) {
     const results = this.getResults();
     if (results) {
       return results;

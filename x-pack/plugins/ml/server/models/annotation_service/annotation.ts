@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
@@ -68,7 +68,7 @@ export type callWithRequestType = (
   params: annotationProviderParams
 ) => Promise<any>;
 
-export function annotationProvider(callAsCurrentUser: APICaller) {
+export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.

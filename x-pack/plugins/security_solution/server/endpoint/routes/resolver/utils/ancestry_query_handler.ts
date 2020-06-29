@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   parentEntityId,
   entityId,
@@ -117,7 +117,7 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
    *
    * @param client the elasticsearch client.
    */
-  async search(client: IScopedClusterClient) {
+  async search(client: ILegacyScopedClusterClient) {
     while (this.hasMore()) {
       const info = this.nextQuery();
       if (!info) {

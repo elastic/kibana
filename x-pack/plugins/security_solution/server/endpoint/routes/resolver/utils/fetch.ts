@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   ResolverChildren,
   ResolverRelatedEvents,
@@ -54,7 +54,7 @@ export interface SingleQueryHandler<T> extends QueryBuilder {
    * Do a regular search instead of msearch.
    * @param client the elasticsearch client
    */
-  search(client: IScopedClusterClient): Promise<T>;
+  search(client: ILegacyScopedClusterClient): Promise<T>;
 }
 
 /**
@@ -72,7 +72,7 @@ export interface QueryHandler<T> extends SingleQueryHandler<T> {
  */
 export class Fetcher {
   constructor(
-    private readonly client: IScopedClusterClient,
+    private readonly client: ILegacyScopedClusterClient,
     /**
      * The anchoring origin for the tree.
      */
