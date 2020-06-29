@@ -143,7 +143,7 @@ export const Editor: React.FC<Props> = (props) => {
   const groupByFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
-        return field.type === 'string' && field.searchable;
+        return field.type === 'string' && field.aggregatable && field.searchable;
       });
     } else {
       return [];

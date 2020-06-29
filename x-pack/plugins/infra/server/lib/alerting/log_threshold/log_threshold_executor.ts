@@ -153,8 +153,9 @@ const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestamp
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
   const intervalAsSeconds = getIntervalInSeconds(interval);
+  const intervalAsMs = intervalAsSeconds * 1000;
   const to = Date.now();
-  const from = to - intervalAsSeconds * 1000;
+  const from = to - intervalAsMs;
 
   const positiveComparators = getPositiveComparators();
   const negativeComparators = getNegativeComparators();
@@ -179,7 +180,21 @@ const buildFiltersFromCriteria = (params: LogDocumentCountAlertParams, timestamp
     },
   };
 
-  return { rangeFilter, mustFilters, mustNotFilters };
+  // For group by scenarios we'll pad the time range by 1 x the interval size on the left (lte) and right (gte), this is so
+  // a wider net is cast to "capture" the groups. This is to account for scenarios where we want ascertain if
+  // there were "no documents" (less than 1 for example). In these cases we may be missing documents to build the groups
+  // and match / not match the criteria.
+  const groupedRangeFilter = {
+    range: {
+      [timestampField]: {
+        gte: from - intervalAsMs,
+        lte: to + intervalAsMs,
+        format: 'epoch_millis',
+      },
+    },
+  };
+
+  return { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters };
 };
 
 const getGroupedESQuery = (
@@ -195,27 +210,10 @@ const getGroupedESQuery = (
 
   const timestampField = sourceConfiguration.fields.timestamp;
 
-  const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
+  const { rangeFilter, groupedRangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField
   );
-
-  // For group by scenarios we'll pad the interval by 20% on the left (lte) and right (gte), this is so
-  // a wider net is cast to "capture" the groups. This is to account for scenarios where we want ascertain if
-  // there were "no documents" (less than 1 for example). In these cases we may be missing documents to build the groups
-  // and match (or not match) the criteria.
-  const interval = rangeFilter.range[timestampField].lte - rangeFilter.range[timestampField].gte;
-  const twentyPercentOfInterval = (20 / 100) * interval;
-
-  const paddedRangeFilter = {
-    range: {
-      [timestampField]: {
-        gte: rangeFilter.range[timestampField].gte - twentyPercentOfInterval,
-        lte: rangeFilter.range[timestampField].lte + twentyPercentOfInterval,
-        format: 'epoch_millis',
-      },
-    },
-  };
 
   const aggregations = {
     groups: {
@@ -232,7 +230,7 @@ const getGroupedESQuery = (
           filter: {
             bool: {
               // Scope the inner filtering back to the unpadded range
-              must: [rangeFilter, ...mustFilters],
+              filter: [rangeFilter, ...mustFilters],
             },
           },
         },
@@ -243,7 +241,7 @@ const getGroupedESQuery = (
   const body = {
     query: {
       bool: {
-        filter: [paddedRangeFilter],
+        filter: [groupedRangeFilter],
         ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
       },
     },
@@ -320,7 +318,6 @@ const buildCriterionQuery = (criterion: Criterion): Filter | undefined => {
           },
         },
       };
-      break;
     case 'match': {
       return {
         match: {
@@ -400,12 +397,12 @@ const getUngroupedResults = async (query: object, callCluster: AlertServices['ca
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
 };
 
-const getGroupedResults = async (query: any, callCluster: AlertServices['callCluster']) => {
+const getGroupedResults = async (query: object, callCluster: AlertServices['callCluster']) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
 
   while (true) {
-    const queryWithAfterKey = { ...query };
+    const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
       await callCluster('search', queryWithAfterKey)
