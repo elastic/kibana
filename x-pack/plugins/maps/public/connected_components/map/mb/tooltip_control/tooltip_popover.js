@@ -58,7 +58,7 @@ export class TooltipPopover extends Component {
   // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
   _loadFeatureGeometry = ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 
@@ -76,7 +76,10 @@ export class TooltipPopover extends Component {
       return [];
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
+    let targetFeature;
+    if (typeof featureId !== 'undefined') {
+      targetFeature = tooltipLayer.getFeatureById(featureId);
+    }
 
     // fallback to mbProperties if the layer itself cannot get a feature.
     const properties = targetFeature ? targetFeature.properties : mbProperties;
@@ -85,7 +88,7 @@ export class TooltipPopover extends Component {
 
   _loadPreIndexedShape = async ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer) {
+    if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
     }
 

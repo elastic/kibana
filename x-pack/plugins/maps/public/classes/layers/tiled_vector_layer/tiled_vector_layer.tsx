@@ -198,7 +198,7 @@ export class TiledVectorLayer extends VectorLayer {
     return Math.max(this._source.getMinZoom(), super.getMinZoom());
   }
 
-  getFeatureById(id: string | number | undefined): Feature | null {
+  getFeatureById(id: string | number): Feature | null {
     // Cannot return the feature
     return null;
   }
