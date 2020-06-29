@@ -18,7 +18,6 @@ import {
   IntervalSchedule,
   Services,
   AlertInfoParams,
-  RawAlertInstance,
   AlertTaskState,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
@@ -166,7 +165,7 @@ export class TaskRunner {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
+    const alertInstances = mapValues(
       alertRawInstances,
       (rawAlertInstance) => new AlertInstance(rawAlertInstance as any)
     );
@@ -255,9 +254,8 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(
-        instancesWithScheduledActions,
-        (alertInstance: any) => alertInstance.toRaw()
+      alertInstances: mapValues(instancesWithScheduledActions, (alertInstance: any) =>
+        alertInstance.toRaw()
       ),
     };
   }
