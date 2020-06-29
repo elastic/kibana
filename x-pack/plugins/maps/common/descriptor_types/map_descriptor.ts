@@ -40,7 +40,7 @@ export type Goto = {
 };
 
 export type TooltipFeature = {
-  id: number;
+  id?: number | string;
   layerId: string;
   mbProperties: GeoJsonProperties;
 };

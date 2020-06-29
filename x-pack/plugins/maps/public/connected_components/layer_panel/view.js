@@ -31,7 +31,6 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { getData, getCore } from '../../kibana_services';
-import _ from 'lodash';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -75,9 +74,7 @@ export class LayerPanel extends React.Component {
 
     const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
     if (this._isMounted) {
-      if (!_.isEqual(this.state.immutableSourceProps, immutableSourceProps)) {
-        this.setState({ immutableSourceProps });
-      }
+      this.setState({ immutableSourceProps });
     }
   };
 

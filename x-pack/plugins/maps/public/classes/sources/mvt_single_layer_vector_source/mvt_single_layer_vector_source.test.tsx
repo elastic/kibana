@@ -87,3 +87,14 @@ describe('filterAndFormatPropertiesToHtml', () => {
     expect(tooltipProperties[1].getHtmlDisplayValue()).toEqual('123');
   });
 });
+
+describe('getImmutableSourceProperties', () => {
+  it('should only show immutable props', async () => {
+    const source = new MVTSingleLayerVectorSource(descriptor);
+    const properties = await source.getImmutableProperties();
+    expect(properties).toEqual([
+      { label: 'Data source', value: '.pbf vector tiles' },
+      { label: 'Url', value: 'https://example.com/{x}/{y}/{z}.pbf' },
+    ]);
+  });
+});

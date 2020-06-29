@@ -148,30 +148,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.urlTemplate },
-      {
-        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.layerNameMessage', {
-          defaultMessage: 'Layer name',
-        }),
-        value: this._descriptor.layerName,
-      },
-      {
-        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.minZoomMessage', {
-          defaultMessage: 'Min zoom',
-        }),
-        value: this._descriptor.minSourceZoom.toString(),
-      },
-      {
-        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.maxZoomMessage', {
-          defaultMessage: 'Max zoom',
-        }),
-        value: this._descriptor.maxSourceZoom.toString(),
-      },
-      {
-        label: i18n.translate('xpack.maps.source.MVTSingleLayerVectorSource.fields', {
-          defaultMessage: 'Fields',
-        }),
-        value: this._descriptor.fields.map(({ name, type }) => `${name}(${type})`).join(', '),
-      },
     ];
   }
 
