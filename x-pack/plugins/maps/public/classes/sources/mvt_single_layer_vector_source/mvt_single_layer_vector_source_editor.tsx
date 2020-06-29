@@ -5,9 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
@@ -85,7 +85,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
 
   render() {
     return (
-      <Fragment>
+      <EuiPanel>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlMessage', {
             defaultMessage: 'Url',
@@ -122,7 +122,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
             }
           )}
         />
-      </Fragment>
+      </EuiPanel>
     );
   }
 }
