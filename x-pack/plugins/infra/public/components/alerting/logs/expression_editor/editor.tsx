@@ -132,7 +132,7 @@ export const Editor: React.FC<Props> = (props) => {
   const supportedFields = useMemo(() => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
-        return field.type === 'string' || field.type === 'number';
+        return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
