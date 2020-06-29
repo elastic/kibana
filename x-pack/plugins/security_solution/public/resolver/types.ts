@@ -7,11 +7,11 @@
 import { Store } from 'redux';
 import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-export { ResolverAction } from './store/actions';
 import {
   ResolverEvent,
   ResolverNodeStats,
   ResolverRelatedEvents,
+  ResolverTree,
 } from '../../common/endpoint/types';
 
 /**
@@ -176,15 +176,49 @@ export interface VisibleEntites {
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ResolverEvent[];
-  readonly relatedEventsStats: Readonly<Map<string, ResolverNodeStats>>;
+  readonly relatedEventsStats: Map<string, ResolverNodeStats>;
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
-  readonly lineageLimits: Readonly<{ children: string | null; ancestors: string | null }>;
-  isLoading: boolean;
-  hasError: boolean;
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  readonly databaseDocumentID?: string;
+  /**
+   * The id used for the pending request, if there is one.
+   */
+  readonly pendingRequestDatabaseDocumentID?: string;
+
+  /**
+   * The parameters and response from the last successful request.
+   */
+  readonly lastResponse?: {
+    /**
+     * The id used in the request.
+     */
+    readonly databaseDocumentID: string;
+  } & (
+    | {
+        /**
+         * If a response with a success code was received, this is `true`.
+         */
+        readonly successful: true;
+        /**
+         * The ResolverTree parsed from the response.
+         */
+        readonly result: ResolverTree;
+      }
+    | {
+        /**
+         * If the request threw an exception or the response had a failure code, this will be false.
+         */
+        readonly successful: false;
+      }
+  );
 }
 
+/**
+ * Represents an ordered pair. Used for x-y coordinates and the like.
+ */
 export type Vector2 = readonly [number, number];
 
 /**
@@ -416,3 +450,17 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
+
+/**
+ * Describes the basic Resolver graph layout.
+ */
+export interface IsometricTaxiLayout {
+  /**
+   * A map of events to position. each event represents its own node.
+   */
+  processNodePositions: Map<ResolverEvent, Vector2>;
+  /**
+   * A map of edgline segments, which graphically connect nodes.
+   */
+  edgeLineSegments: EdgeLineSegment[];
+}

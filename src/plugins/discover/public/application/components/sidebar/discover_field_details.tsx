@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiSpacer, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -78,7 +78,6 @@ export function DiscoverFieldDetails({
 
       {details.visualizeUrl && (
         <>
-          <EuiSpacer size={'s'} />
           <EuiLink
             onClick={() => {
               getServices().core.application.navigateToApp(details.visualizeUrl.app, {
