@@ -6,7 +6,7 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Description,
@@ -27,7 +27,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   config: ConfigType;
   spaceId: string;
   user: string;

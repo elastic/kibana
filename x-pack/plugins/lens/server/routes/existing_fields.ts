@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import {
@@ -218,7 +218,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
