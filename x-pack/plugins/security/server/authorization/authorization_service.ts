@@ -10,7 +10,7 @@ import { UICapabilities } from 'ui/capabilities';
 import {
   LoggerFactory,
   KibanaRequest,
-  IClusterClient,
+  ILegacyClusterClient,
   ServiceStatusLevels,
   Logger,
   StatusServiceSetup,
@@ -54,7 +54,7 @@ interface AuthorizationServiceSetupParams {
   http: HttpServiceSetup;
   status: StatusServiceSetup;
   capabilities: CapabilitiesSetup;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   license: SecurityLicense;
   loggers: LoggerFactory;
   features: FeaturesPluginSetup;
@@ -64,7 +64,7 @@ interface AuthorizationServiceSetupParams {
 
 interface AuthorizationServiceStartParams {
   features: FeaturesPluginStart;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
 }
 
 export interface AuthorizationServiceSetup {
@@ -173,7 +173,7 @@ export class AuthorizationService {
     }
   }
 
-  private registerPrivileges(clusterClient: IClusterClient) {
+  private registerPrivileges(clusterClient: ILegacyClusterClient) {
     const RETRY_SCALE_DURATION = 100;
     const RETRY_TIMEOUT_MAX = 10000;
     const retries$ = new BehaviorSubject(0);

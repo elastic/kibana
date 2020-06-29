@@ -96,7 +96,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
 }: {
   relatedEventId: string;
   parentEvent: ResolverEvent;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
+  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
   countForParent: number | undefined;
 }) {
   const processName = (parentEvent && event.eventName(parentEvent)) || '*';

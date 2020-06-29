@@ -27,7 +27,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 const TYPES = [
   'dashboard',
@@ -45,7 +45,7 @@ export interface KibanaSavedObjectCounts {
 }
 
 export async function getSavedObjectsCounts(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   kibanaIndex: string // Typically '.kibana'. We might need a way to obtain it from the SavedObjects client (or the SavedObjects client to provide a way to run aggregations?)
 ): Promise<KibanaSavedObjectCounts> {
   const savedObjectCountSearchParams = {
