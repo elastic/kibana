@@ -38,7 +38,6 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
-import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
 
 interface SearchServiceSetupDependencies {
@@ -50,7 +49,6 @@ interface SearchServiceSetupDependencies {
 
 interface SearchServiceStartDependencies {
   indexPatterns: IndexPatternsContract;
-  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -158,7 +156,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
-            fieldFormats: dependencies.fieldFormats,
             typesRegistry: aggTypesStart,
           });
         },
