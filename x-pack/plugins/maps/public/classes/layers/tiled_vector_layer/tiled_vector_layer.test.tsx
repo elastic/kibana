@@ -6,7 +6,6 @@
 import { MockSyncContext } from '../__tests__/mock_sync_context';
 import sinon from 'sinon';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../kibana_services', () => {
   return {
     getUiSettings() {
