@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const NO_WRITE_SIGNALS_CALLOUT_TITLE = i18n.translate(
   'xpack.siem.detectionEngine.noWriteSignalsCallOutTitle',
   {
-    defaultMessage: 'Signals index permissions required',
+    defaultMessage: 'You cannot change signals states',
   }
 );
 
@@ -17,7 +17,7 @@ export const NO_WRITE_SIGNALS_CALLOUT_MSG = i18n.translate(
   'xpack.siem.detectionEngine.noWriteSignalsCallOutMsg',
   {
     defaultMessage:
-      'You are currently missing the required permissions to update signals. Please contact your administrator for further assistance.',
+      'You only have permissions to view signals. If you need to update signal states (open or close signals), contact your Kibana administrator.',
   }
 );
 

@@ -12,7 +12,8 @@
     "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/siem_cypress/config.ts"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.110"
+    "@types/lodash": "^4.14.110",
+    "@types/md5": "^2.2.0"
   },
   "dependencies": {
     "lodash": "^4.17.15",
