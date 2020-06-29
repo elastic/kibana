@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import {
   SavedObjectsSerializer,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
@@ -63,7 +63,7 @@ const VERSION_CONFLICT_STATUS = 409;
 export interface TaskManagerOpts {
   logger: Logger;
   config: TaskManagerConfig;
-  callAsInternalUser: IScopedClusterClient['callAsInternalUser'];
+  callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
   taskManagerId: string;
