@@ -16,6 +16,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
 import { State, createStore } from '../../common/store';
@@ -139,7 +140,13 @@ describe('rendering - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    const myStore = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
