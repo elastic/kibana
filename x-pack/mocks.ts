@@ -9,7 +9,7 @@ import { licensingMock } from './plugins/licensing/server/mocks';
 function createCoreRequestHandlerContextMock() {
   return {
     core: coreMock.createRequestHandlerContext(),
-    licensing: { license: licensingMock.createLicense() },
+    licensing: licensingMock.createRequestHandlerContext(),
   };
 }
 

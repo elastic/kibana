@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
+import { Unit } from '@elastic/datemath';
 import * as rt from 'io-ts';
-import { HttpSetup } from 'src/core/public';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -24,15 +24,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import {
+  previewOptions,
+  firedTimeLabel,
+  firedTimesLabel,
+  getMetricThresholdAlertPreview as getAlertPreview,
+} from '../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
 import {
   Comparator,
   Aggregators,
-  INFRA_ALERT_PREVIEW_PATH,
-  alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
 import {
   ForLastExpression,
@@ -49,7 +52,7 @@ import { useSourceViaHttp } from '../../../containers/source/use_source_via_http
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
-import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
+import { AlertContextMeta, TimeUnit, MetricExpression, AlertParams } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { validateMetricThreshold } from './validation';
 
@@ -57,14 +60,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: {
-    criteria: MetricExpression[];
-    groupBy?: string;
-    filterQuery?: string;
-    sourceId?: string;
-    filterQueryText?: string;
-    alertOnNoData?: boolean;
-  };
+  alertParams: AlertParams;
   alertsContext: AlertsContextValue<AlertContextMeta>;
   alertInterval: string;
   setAlertParams(key: string, value: any): void;
@@ -78,22 +74,7 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
-
-async function getAlertPreview({
-  fetch,
-  params,
-}: {
-  fetch: HttpSetup['fetch'];
-  params: rt.TypeOf<typeof alertPreviewRequestParamsRT>;
-}): Promise<rt.TypeOf<typeof alertPreviewSuccessResponsePayloadRT>> {
-  return await fetch(`${INFRA_ALERT_PREVIEW_PATH}`, {
-    method: 'POST',
-    body: JSON.stringify({
-      ...params,
-      alertType: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    }),
-  });
-}
+export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
@@ -260,6 +241,13 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
 
+  const preFillAlertGroupBy = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.groupBy && !md.series) {
+      setAlertParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
+
   const onSelectPreviewLookbackInterval = useCallback((e) => {
     setPreviewLookbackInterval(e.target.value);
     setPreviewResult(null);
@@ -275,7 +263,7 @@ export const Expressions: React.FC<Props> = (props) => {
         params: {
           ...pick(alertParams, 'criteria', 'groupBy', 'filterQuery'),
           sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
+          lookback: previewLookbackInterval as Unit,
           alertInterval,
         },
       });
@@ -299,6 +287,10 @@ export const Expressions: React.FC<Props> = (props) => {
       preFillAlertFilter();
     }
 
+    if (!alertParams.groupBy) {
+      preFillAlertGroupBy();
+    }
+
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
@@ -319,11 +311,12 @@ export const Expressions: React.FC<Props> = (props) => {
   }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
+    if (previewIntervalError) return true;
     const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
     const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
     );
-    return hasValidationErrors || previewIntervalError;
+    return hasValidationErrors;
   }, [alertParams.criteria, previewIntervalError]);
 
   return (
@@ -477,7 +470,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 id="selectPreviewLookbackInterval"
                 value={previewLookbackInterval}
                 onChange={onSelectPreviewLookbackInterval}
-                options={previewOptions}
+                options={previewDOMOptions}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -600,51 +593,9 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 };
 
-const previewOptions = [
-  {
-    value: 'h',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastHourLabel', {
-      defaultMessage: 'Last hour',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.hourLabel', {
-      defaultMessage: 'hour',
-    }),
-  },
-  {
-    value: 'd',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastDayLabel', {
-      defaultMessage: 'Last day',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.dayLabel', {
-      defaultMessage: 'day',
-    }),
-  },
-  {
-    value: 'w',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastWeekLabel', {
-      defaultMessage: 'Last week',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.weekLabel', {
-      defaultMessage: 'week',
-    }),
-  },
-  {
-    value: 'M',
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.lastMonthLabel', {
-      defaultMessage: 'Last month',
-    }),
-    shortText: i18n.translate('xpack.infra.metrics.alertFlyout.monthLabel', {
-      defaultMessage: 'month',
-    }),
-  },
-];
-
-const firedTimeLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTime', {
-  defaultMessage: 'time',
-});
-const firedTimesLabel = i18n.translate('xpack.infra.metrics.alertFlyout.firedTimes', {
-  defaultMessage: 'times',
-});
+const previewDOMOptions: Array<{ text: string; value: string }> = previewOptions.map((o) =>
+  omit(o, 'shortText')
+);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
