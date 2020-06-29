@@ -34,7 +34,16 @@ describe('Children helper', () => {
   const root = generator.generateEvent();
 
   it('builds the children response structure', () => {
-    const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 0, 100, true));
+    const children = Array.from(
+      generator.descendantsTreeGenerator(root, {
+        generations: 3,
+        children: 3,
+        relatedEvents: 0,
+        relatedAlerts: 0,
+        percentTerminated: 100,
+        alwaysGenMaxChildrenPerNode: true,
+      })
+    );
 
     // because we requested the generator to always return the max children, there will always be at least 2 parents
     const parents = findParents(children);
@@ -66,7 +75,15 @@ describe('Children helper', () => {
   });
 
   it('builds the children response structure twice', () => {
-    const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 100));
+    const children = Array.from(
+      generator.descendantsTreeGenerator(root, {
+        generations: 3,
+        children: 3,
+        relatedEvents: 0,
+        relatedAlerts: 0,
+        percentTerminated: 100,
+      })
+    );
     const helper = new ChildrenNodesHelper(root.process.entity_id);
     helper.addChildren({}, children);
     helper.getNodes();
