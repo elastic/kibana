@@ -204,6 +204,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
       id: SWIMLANE_TYPE.VIEW_BY,
       label: i18n.translate('xpack.ml.explorer.viewByFieldLabel', {
         defaultMessage: 'View by {viewByField}',
+        values: { viewByField: viewBy },
       }),
     },
   ];

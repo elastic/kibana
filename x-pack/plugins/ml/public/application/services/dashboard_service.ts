@@ -34,7 +34,7 @@ export function dashboardServiceProvider(
     async fetchDashboards(query?: string) {
       return await savedObjectClient.find<SavedObjectDashboard>({
         type: 'dashboard',
-        perPage: 10,
+        perPage: 1000,
         search: query ? `${query}*` : '',
         searchFields: ['title^3', 'description'],
       });
