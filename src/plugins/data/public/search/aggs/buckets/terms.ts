@@ -19,6 +19,9 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
+
+import { Adapters } from 'src/plugins/inspector/public';
+
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
@@ -28,7 +31,6 @@ import {
 } from './migrate_include_exclude_format';
 import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
-import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';

@@ -20,12 +20,12 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { Adapters } from 'src/plugins/inspector/public';
 
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
-import { Adapters } from '../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import { ISearchSource } from '../search_source';
