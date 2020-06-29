@@ -7,9 +7,9 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { operator_type as operatorType } from './schemas';
+import { Type, operator_type as operatorType, type } from './schemas';
 
 describe('Common schemas', () => {
   describe('operatorType', () => {
@@ -58,6 +58,28 @@ describe('Common schemas', () => {
       const keys = Object.keys(operatorType.keys);
 
       expect(keys.length).toEqual(4);
+    });
+  });
+
+  describe('type', () => {
+    test('it will work with a given expected type', () => {
+      const payload: Type = 'keyword';
+      const decoded = type.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it will give an error if given a type that does not exist', () => {
+      const payload: Type | 'madeup' = 'madeup';
+      const decoded = type.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "madeup" supplied to ""binary" | "boolean" | "byte" | "date" | "date_nanos" | "date_range" | "double" | "double_range" | "float" | "float_range" | "geo_point" | "geo_shape" | "half_float" | "integer" | "integer_range" | "ip" | "ip_range" | "keyword" | "long" | "long_range" | "shape" | "short" | "text""',
+      ]);
+      expect(message.schema).toEqual({});
     });
   });
 });
