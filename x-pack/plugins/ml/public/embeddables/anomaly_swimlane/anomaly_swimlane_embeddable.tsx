@@ -110,8 +110,8 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
           embeddableInput={this.getInput$()}
           services={this.services}
           refresh={this.reload$.asObservable()}
-          onOutputChange={(output) => {
-            this.updateInput(output);
+          onInputChange={(input) => {
+            this.updateInput(input);
           }}
         />
       </I18nContext>,

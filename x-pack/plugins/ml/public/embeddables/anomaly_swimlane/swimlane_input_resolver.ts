@@ -56,7 +56,7 @@ export const EMBEDDABLE_DEFAULT_PER_PAGE = 10;
 
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
+  onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
@@ -155,7 +155,7 @@ export function useSwimlaneInputResolver(
 
                 if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
                   // store per page value when the dashboard is in the edit mode
-                  onOutputChange({ perPage: perPageFromState });
+                  onInputChange({ perPage: perPageFromState });
                 }
 
                 return from(

@@ -28,7 +28,7 @@ export interface ExplorerSwimlaneContainerProps {
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
-  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
@@ -36,7 +36,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   embeddableInput,
   services,
   refresh,
-  onOutputChange,
+  onInputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [fromPage, setFromPage] = useState<number>(1);
@@ -50,7 +50,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     error,
   ] = useSwimlaneInputResolver(
     embeddableInput,
-    onOutputChange,
+    onInputChange,
     refresh,
     services,
     chartWidth,
