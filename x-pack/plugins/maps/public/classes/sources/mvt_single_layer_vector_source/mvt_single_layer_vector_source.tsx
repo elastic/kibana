@@ -216,14 +216,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.maxSourceZoom;
   }
 
-  getFeatureGeometry(
-    id: string | number | undefined,
-    mbProperties: GeoJsonProperties
-  ): Geometry | null {
-    // Cannot get the raw geometry for a simple tiled service
-    return null;
-  }
-
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
