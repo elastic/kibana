@@ -164,7 +164,7 @@ export const layerConfig: ExpressionFunctionDefinition<
     },
     yConfig: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_yAxisConfig' as any],
+      types: ['lens_xy_yConfig' as any],
       help: 'Additional configuration for y axes',
       multi: true,
     },
