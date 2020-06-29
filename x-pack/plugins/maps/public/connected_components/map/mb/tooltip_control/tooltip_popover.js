@@ -81,9 +81,8 @@ export class TooltipPopover extends Component {
       targetFeature = tooltipLayer.getFeatureById(featureId);
     }
 
-    // fallback to mbProperties if the layer itself cannot get a feature.
     const properties = targetFeature ? targetFeature.properties : mbProperties;
-    return await tooltipLayer.getPropertiesForTooltip(properties || {});
+    return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
   _loadPreIndexedShape = async ({ layerId, featureId }) => {

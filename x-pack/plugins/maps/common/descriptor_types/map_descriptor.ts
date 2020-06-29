@@ -42,7 +42,7 @@ export type Goto = {
 export type TooltipFeature = {
   id: number;
   layerId: string;
-  mbProperties?: GeoJsonProperties | null;
+  mbProperties: GeoJsonProperties;
 };
 
 export type TooltipState = {
