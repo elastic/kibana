@@ -22,11 +22,7 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { OnDataProviderEdited } from '../timeline/events';
-import {
-  DataProvider,
-  DataProviderType,
-  QueryOperator,
-} from '../timeline/data_providers/data_provider';
+import { DataProviderType, QueryOperator } from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
@@ -60,7 +56,7 @@ interface Props {
   providerId?: string;
   timelineId: string;
   value: string | number;
-  type?: DataProvider['type'];
+  type?: DataProviderType;
 }
 
 const sanatizeValue = (value: string | number): string =>

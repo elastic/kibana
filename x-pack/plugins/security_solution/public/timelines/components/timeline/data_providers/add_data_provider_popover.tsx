@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiContextMenu,
@@ -22,11 +22,13 @@ import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline } from './helpers';
 import { DataProviderType } from './data_provider';
 import { timelineSelectors } from '../../../store/timeline';
+import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
 
-const AddDataProviderPopoverComponent: React.FC<{
+interface AddDataProviderPopoverProps {
   timelineId: string;
-  Button: React.ComponentType<{ onClick: () => void }>;
-}> = ({ Button, timelineId }) => {
+}
+
+const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
@@ -73,95 +75,120 @@ const AddDataProviderPopoverComponent: React.FC<{
     [dataProviders, timelineId, dispatch, handleClosePopover]
   );
 
-  const panels = [
-    {
-      id: 0,
-      width: 400,
-      items: [
-        {
-          name: 'Add Field',
-          icon: <EuiIcon type="plusInCircle" size="m" />,
-          panel: 1,
-        },
-        timelineType === TimelineType.template
-          ? {
-              disabled: timelineType !== TimelineType.template,
-              name: 'Add Template Field',
-              icon: <EuiIcon type="visText" size="m" />,
-              panel: 2,
-            }
-          : null,
-      ].filter((item) => item !== null) as EuiContextMenuPanelItemDescriptor[],
-    },
-    {
-      id: 1,
-      title: 'Add Field',
-      width: 400,
-      content: (
-        <StatefulEditDataProvider
-          browserFields={browserFields!}
-          field=""
-          isExcluded={false}
-          onDataProviderEdited={handleDataProviderEdited}
-          operator=":"
-          timelineId={timelineId}
-          value=""
-          type={DataProviderType.default}
-        />
-      ),
-    },
-    {
-      id: 2,
-      title: 'Add Template Field',
-      width: 400,
-      content: (
-        <StatefulEditDataProvider
-          browserFields={browserFields!}
-          field=""
-          isExcluded={false}
-          onDataProviderEdited={handleDataProviderEdited}
-          operator=":"
-          timelineId={timelineId}
-          value=""
-          type={DataProviderType.template}
-        />
-      ),
-    },
-  ];
+  const panels = useMemo(
+    () => [
+      {
+        id: 0,
+        width: 400,
+        items: [
+          {
+            name: ADD_FIELD_LABEL,
+            icon: <EuiIcon type="plusInCircle" size="m" />,
+            panel: 1,
+          },
+          timelineType === TimelineType.template
+            ? {
+                disabled: timelineType !== TimelineType.template,
+                name: ADD_TEMPLATE_FIELD_LABEL,
+                icon: <EuiIcon type="visText" size="m" />,
+                panel: 2,
+              }
+            : null,
+        ].filter((item) => item !== null) as EuiContextMenuPanelItemDescriptor[],
+      },
+      {
+        id: 1,
+        title: ADD_FIELD_LABEL,
+        width: 400,
+        content: (
+          <StatefulEditDataProvider
+            browserFields={browserFields!}
+            field=""
+            isExcluded={false}
+            onDataProviderEdited={handleDataProviderEdited}
+            operator=":"
+            timelineId={timelineId}
+            value=""
+            type={DataProviderType.default}
+          />
+        ),
+      },
+      {
+        id: 2,
+        title: ADD_TEMPLATE_FIELD_LABEL,
+        width: 400,
+        content: (
+          <StatefulEditDataProvider
+            browserFields={browserFields!}
+            field=""
+            isExcluded={false}
+            onDataProviderEdited={handleDataProviderEdited}
+            operator=":"
+            timelineId={timelineId}
+            value=""
+            type={DataProviderType.template}
+          />
+        ),
+      },
+    ],
+    [browserFields, handleDataProviderEdited, timelineId, timelineType]
+  );
+
+  const button = useMemo(
+    () => (
+      <EuiButton
+        size="s"
+        onClick={handleOpenPopover}
+        data-test-subj="addFilter"
+        iconType="arrowDown"
+        fill
+        iconSide="right"
+      >
+        <EuiText size="s">{ADD_FIELD_LABEL}</EuiText>
+      </EuiButton>
+    ),
+    [handleOpenPopover]
+  );
+
+  const content = useMemo(() => {
+    if (timelineType === TimelineType.template) {
+      return <EuiContextMenu initialPanelId={0} panels={panels} />;
+    }
+
+    return (
+      <StatefulEditDataProvider
+        browserFields={browserFields!}
+        field=""
+        isExcluded={false}
+        onDataProviderEdited={handleDataProviderEdited}
+        operator=":"
+        timelineId={timelineId}
+        value=""
+        type={DataProviderType.default}
+      />
+    );
+  }, [browserFields, handleDataProviderEdited, panels, timelineId, timelineType]);
 
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        id="addFilterPopover"
-        button={<Button onClick={handleOpenPopover} />}
+        id="addFieldsPopover"
+        button={button}
         isOpen={isAddFilterPopoverOpen}
         closePopover={handleClosePopover}
         anchorPosition="downLeft"
         withTitle
         panelPaddingSize="none"
         ownFocus={true}
-        // initialFocus=".filterEditor__hiddenItem"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        {content}
       </EuiPopover>
     </EuiFlexItem>
   );
 };
 
+AddDataProviderPopoverComponent.displayName = 'AddDataProviderPopoverComponent';
+
 export const AddDataProviderPopover = React.memo(AddDataProviderPopoverComponent);
 
-export const AddDataProviderPopoverButton = React.memo(({ onClick }: { onClick: () => void }) => (
-  <EuiButton
-    size="s"
-    onClick={onClick}
-    data-test-subj="addFilter"
-    className="globalFilterBar__addButton"
-    iconType="arrowDown"
-    fill
-    iconSide="right"
-  >
-    <EuiText size="s">{'Add field'}</EuiText>
-  </EuiButton>
-));
-
-AddDataProviderPopoverButton.displayName = 'AddDataProviderPopoverButton';
+AddDataProviderPopover.displayName = 'AddDataProviderPopover';

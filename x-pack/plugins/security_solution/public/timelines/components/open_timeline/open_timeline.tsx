@@ -80,10 +80,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       const singleTerm = timelineType === TimelineType.template ? 'template' : 'timeline';
       const pluralTerm = timelineType === TimelineType.template ? 'templates' : 'timelines';
 
+      const defaultMessage = `Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`;
+
       return (
         <FormattedMessage
           id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
-          defaultMessage={`Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`}
+          defaultMessage={defaultMessage}
           values={{
             totalSearchResultsCount,
             with: (

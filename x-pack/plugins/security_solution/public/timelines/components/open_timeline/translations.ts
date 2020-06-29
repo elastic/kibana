@@ -232,9 +232,11 @@ export const SELECTED_TIMELINES = (
   const singleTerm = timelineType === TimelineType.template ? 'template' : 'timeline';
   const pluralTerm = timelineType === TimelineType.template ? 'templates' : 'timelines';
 
+  const defaultMessage = `Selected {selectedTimelines} {selectedTimelines, plural, =1 {${singleTerm}} other {${pluralTerm}}}`;
+
   return i18n.translate('xpack.securitySolution.open.timeline.selectedTimelinesTitle', {
     values: { selectedTimelines },
-    defaultMessage: `Selected {selectedTimelines} {selectedTimelines, plural, =1 {${singleTerm}} other {${pluralTerm}}}`,
+    defaultMessage,
   });
 };
 

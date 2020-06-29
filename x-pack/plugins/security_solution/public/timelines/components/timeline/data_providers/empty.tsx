@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { AddDataProviderPopover, AddDataProviderPopoverButton } from './add_data_provider_popover';
+import { AddDataProviderPopover } from './add_data_provider_popover';
 
 import * as i18n from './translations';
 
@@ -108,7 +108,7 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false, timelineId }) =>
         </div>
 
         <div>
-          <AddDataProviderPopover timelineId={timelineId} Button={AddDataProviderPopoverButton} />
+          <AddDataProviderPopover timelineId={timelineId} />
         </div>
       </>
     )}

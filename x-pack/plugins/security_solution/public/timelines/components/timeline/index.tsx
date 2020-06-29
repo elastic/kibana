@@ -261,12 +261,12 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
-    const kqlQueryTimeline = getKqlQueryTimeline(state, id);
+    const kqlQueryTimeline = getKqlQueryTimeline(state, id)!;
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     // return events on empty search
     const kqlQueryExpression =
-      kqlQueryTimeline && !isEmpty(kqlQueryTimeline) ? kqlQueryTimeline : ' ';
-    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
     return {
       columns,
       dataProviders,

@@ -195,6 +195,7 @@ export const TimelineComponent: React.FC<Props> = ({
     setTimelineFilterManager,
     setTimelineRowActions,
   } = useManageTimeline();
+
   useEffect(() => {
     initializeTimeline({ id, indexToAdd });
     setTimelineRowActions({
@@ -203,14 +204,14 @@ export const TimelineComponent: React.FC<Props> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingIndexName, isQueryLoading]);
+  }, [loadingIndexName, isQueryLoading, setIsTimelineLoading, id]);
+
   useEffect(() => {
     setTimelineFilterManager({ id, filterManager });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterManager]);
+  }, [filterManager, id, setTimelineFilterManager]);
 
   return (
     <TimelineContainer data-test-subj="timeline">

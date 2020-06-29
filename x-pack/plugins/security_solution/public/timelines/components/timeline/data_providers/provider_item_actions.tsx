@@ -139,7 +139,7 @@ export const getProviderActions = ({
       timelineType === TimelineType.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
-            disabled: isLoading || type === DataProviderType.default,
+            disabled: isLoading,
             icon: 'visText',
             name:
               type === DataProviderType.template
@@ -170,6 +170,7 @@ export const getProviderActions = ({
           providerId={providerId}
           timelineId={timelineId}
           value={value}
+          type={type}
         />
       ) : null,
     id: 1,

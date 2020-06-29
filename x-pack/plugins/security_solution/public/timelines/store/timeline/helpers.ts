@@ -1071,6 +1071,8 @@ const updateTypeAndProvider = (
                   name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
                   queryMatch: {
                     ...andProvider.queryMatch,
+                    displayField: undefined,
+                    displayValue: undefined,
                     value:
                       type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
                   },
@@ -1090,6 +1092,8 @@ const updateTypeProvider = (type: DataProviderType, providerId: string, timeline
           name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
           queryMatch: {
             ...provider.queryMatch,
+            displayField: undefined,
+            displayValue: undefined,
             value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
           },
         }

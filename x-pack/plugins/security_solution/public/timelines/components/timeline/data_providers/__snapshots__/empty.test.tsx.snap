@@ -39,15 +39,7 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
     </NoWrap>
   </div>
   <div>
-    <Memo(AddDataProviderPopoverComponent)
-      Button={
-        Object {
-          "$$typeof": Symbol(react.memo),
-          "compare": null,
-          "displayName": "AddDataProviderPopoverButton",
-          "type": [Function],
-        }
-      }
+    <AddDataProviderPopover
       timelineId="test"
     />
   </div>

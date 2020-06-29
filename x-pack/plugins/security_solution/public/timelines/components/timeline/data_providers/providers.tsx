@@ -12,7 +12,7 @@ import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-bea
 import styled, { css } from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { AddDataProviderPopover, AddDataProviderPopoverButton } from './add_data_provider_popover';
+import { AddDataProviderPopover } from './add_data_provider_popover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
@@ -162,10 +162,7 @@ export const Providers = React.memo<Props>(
               <OrFlexItem grow={false}>
                 {groupIndex === 0 ? (
                   <AddDataProviderContainer>
-                    <AddDataProviderPopover
-                      timelineId={timelineId}
-                      Button={AddDataProviderPopoverButton}
-                    />
+                    <AddDataProviderPopover timelineId={timelineId} />
                   </AddDataProviderContainer>
                 ) : (
                   <AndOrBadgeContainer>

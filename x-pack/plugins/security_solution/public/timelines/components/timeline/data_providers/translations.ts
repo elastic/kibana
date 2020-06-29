@@ -166,3 +166,24 @@ export const VALUE_ARIA_LABEL = i18n.translate(
     defaultMessage: 'value',
   }
 );
+
+export const ADD_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.addFieldPopoverButtonLabel',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const ADD_TEMPLATE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.addTemplateFieldPopoverButtonLabel',
+  {
+    defaultMessage: 'Add template field',
+  }
+);
+
+export const TEMPLATE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.dataProviders.templateFieldLabel',
+  {
+    defaultMessage: 'Template field',
+  }
+);

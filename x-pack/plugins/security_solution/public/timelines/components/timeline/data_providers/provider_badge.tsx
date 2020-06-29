@@ -20,7 +20,7 @@ import { DataProviderType, EXISTS_OPERATOR, QueryOperator } from './data_provide
 import * as i18n from './translations';
 
 type ProviderBadgeStyledType = typeof EuiBadge & {
-  type: DataProviderType;
+  timelineType: TimelineType;
 };
 
 const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
@@ -34,7 +34,7 @@ const ProviderBadgeStyled = styled(EuiBadge)<ProviderBadgeStyledType>`
 
   &.globalFilterItem {
     white-space: nowrap;
-    min-width: 140px;
+    min-width: ${({ timelineType }) => (timelineType === TimelineType.template ? '140px' : 'none')};
     display: flex;
 
     &.globalFilterItem-isDisabled {
@@ -103,7 +103,9 @@ const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleTyp
     }
 
     return (
-      <StyledTemplateFieldBadge onClick={toggleType}>{'TEMPLATE FIELD'}</StyledTemplateFieldBadge>
+      <StyledTemplateFieldBadge onClick={toggleType}>
+        {i18n.TEMPLATE_FIELD_LABEL}
+      </StyledTemplateFieldBadge>
     );
   }, [isHovered, toggleType, type]);
 
@@ -205,7 +207,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${formattedValue}`}
             closeButtonProps={closeButtonProps}
             data-test-subj="providerBadge"
-            type={type}
+            timelineType={timelineType}
           >
             {content}
           </ProviderBadgeStyled>
