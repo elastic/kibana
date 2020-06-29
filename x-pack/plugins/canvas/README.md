@@ -187,7 +187,7 @@ class CanvasExamplePlugin implements Plugin {
 export const plugin = () => new CanvasExamplePlugin();
 ```
 
-Now, we'll create a simple function definition that we will register on the server. 
+Now, we'll create a simple function definition that we will register on the server:
 
 ```typescript
 const serverFunctions = [
