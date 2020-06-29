@@ -8,6 +8,16 @@ import React from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
 import { DataStreamBadge } from '../components';
 
+export const orderDataStreamsAndIndices = <D extends any>({
+  dataStreams,
+  indices,
+}: {
+  indices: D[];
+  dataStreams: D[];
+}) => {
+  return dataStreams.concat(indices);
+};
+
 export const mapSelectionToIndicesOptions = ({
   allSelected,
   selection,
@@ -19,26 +29,25 @@ export const mapSelectionToIndicesOptions = ({
   dataStreams: string[];
   indices: string[];
 }): EuiSelectableOption[] => {
-  return indices
-    .map(
+  return orderDataStreamsAndIndices<EuiSelectableOption>({
+    dataStreams: dataStreams.map(
+      (dataStream): EuiSelectableOption => {
+        return {
+          label: dataStream,
+          append: <DataStreamBadge />,
+          checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
+        };
+      }
+    ),
+    indices: indices.map(
       (index): EuiSelectableOption => {
         return {
           label: index,
           checked: allSelected || selection.includes(index) ? 'on' : undefined,
         };
       }
-    )
-    .concat(
-      dataStreams.map(
-        (dataStream): EuiSelectableOption => {
-          return {
-            label: dataStream,
-            append: <DataStreamBadge />,
-            checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
-          };
-        }
-      )
-    );
+    ),
+  });
 };
 
 /**

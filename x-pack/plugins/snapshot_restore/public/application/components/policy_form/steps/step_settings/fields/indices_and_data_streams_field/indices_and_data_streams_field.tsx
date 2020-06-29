@@ -29,7 +29,11 @@ import { PolicyValidation } from '../../../../../../services/validation';
 
 import { DataStreamBadge } from '../components';
 
-import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
+import {
+  mapSelectionToIndicesOptions,
+  determineListMode,
+  orderDataStreamsAndIndices,
+} from './helpers';
 
 interface Props {
   isManagedPolicy: boolean;
@@ -299,14 +303,16 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                   </EuiSelectable>
                 ) : (
                   <EuiComboBox
-                    options={indices
-                      .map((index) => ({ label: index, value: { isDataStream: false } }))
-                      .concat(
-                        dataStreams.map((dataStream) => ({
-                          label: dataStream,
-                          value: { isDataStream: true },
-                        }))
-                      )}
+                    options={orderDataStreamsAndIndices({
+                      indices: indices.map((index) => ({
+                        label: index,
+                        value: { isDataStream: false },
+                      })),
+                      dataStreams: dataStreams.map((dataStream) => ({
+                        label: dataStream,
+                        value: { isDataStream: true },
+                      })),
+                    })}
                     renderOption={({ label, value }) => {
                       if (value?.isDataStream) {
                         return (
