@@ -6,17 +6,12 @@
 
 import { DATE_NOW, USER } from '../../constants.mock';
 
-import { CommentsArray } from './comments';
+import { Comments, CommentsArray } from './comments';
 
-export const getCommentsMock = (): CommentsArray => [
-  {
-    comment: 'some comment',
-    created_at: DATE_NOW,
-    created_by: USER,
-  },
-  {
-    comment: 'some other comment',
-    created_at: DATE_NOW,
-    created_by: 'lily',
-  },
-];
+export const getCommentsMock = (): Comments => ({
+  comment: 'some old comment',
+  created_at: DATE_NOW,
+  created_by: USER,
+});
+
+export const getCommentsArrayMock = (): CommentsArray => [getCommentsMock(), getCommentsMock()];
