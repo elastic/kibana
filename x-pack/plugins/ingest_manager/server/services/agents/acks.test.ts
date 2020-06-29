@@ -24,7 +24,7 @@ describe('test agent acks services', () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({
-      encryptedSavedObjects: mockStartEncryptedSOPlugin,
+      encryptedSavedObjectsStart: mockStartEncryptedSOPlugin,
     } as unknown) as IngestManagerAppContext);
 
     const [

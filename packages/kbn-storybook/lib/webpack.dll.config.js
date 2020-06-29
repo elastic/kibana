@@ -73,7 +73,6 @@ module.exports = {
     'rxjs',
     'sinon',
     'tinycolor2',
-    './src/legacy/ui/public/styles/font_awesome.less',
     './src/legacy/ui/public/styles/bootstrap/bootstrap_light.less',
   ],
   plugins: [

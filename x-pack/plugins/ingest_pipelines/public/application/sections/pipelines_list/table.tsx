@@ -89,7 +89,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           {...reactRouterNavigate(history, '/create')}
         >
           {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-            defaultMessage: 'Create a pipeline here',
+            defaultMessage: 'Create a pipeline',
           })}
         </EuiButton>,
       ],
@@ -111,7 +111,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
         render: (name: string) => (
           <EuiLink
             data-test-subj="pipelineDetailsLink"
-            {...reactRouterNavigate(history, { pathname: '/', search: `pipeline=${name}` })}
+            {...reactRouterNavigate(history, {
+              pathname: '/',
+              search: `pipeline=${encodeURIComponent(name)}`,
+            })}
           >
             {name}
           </EuiLink>

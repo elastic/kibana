@@ -7,39 +7,50 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useHistory: jest.fn(),
-}));
-jest.mock('../../../../common/lib/kibana', () => ({
-  ...jest.requireActual('../../../../common/lib/kibana'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      application: {
-        capabilities: {
-          siem: {
-            crud: true,
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: jest.fn(),
+  };
+});
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            siem: {
+              crud: true,
+            },
           },
         },
       },
-    },
-  }),
-  useUiSetting$: jest.fn().mockReturnValue([]),
-  useGetUserSavedObjectPermissions: jest.fn(),
-}));
+    }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
 
 describe('FlyoutHeaderWithCloseButton', () => {
+  const props = {
+    onClose: jest.fn(),
+    timelineId: 'test',
+    timelineType: TimelineType.default,
+    usersViewing: ['elastic'],
+  };
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
       <TestProviders>
-        <FlyoutHeaderWithCloseButton
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={['elastic']}
-        />
+        <FlyoutHeaderWithCloseButton {...props} />
       </TestProviders>
     );
     expect(EmptyComponent.find('FlyoutHeaderWithCloseButton')).toMatchSnapshot();
@@ -47,13 +58,13 @@ describe('FlyoutHeaderWithCloseButton', () => {
 
   test('it should invoke onClose when the close button is clicked', () => {
     const closeMock = jest.fn();
+    const testProps = {
+      ...props,
+      onClose: closeMock,
+    };
     const wrapper = mount(
       <TestProviders>
-        <FlyoutHeaderWithCloseButton
-          onClose={closeMock}
-          timelineId={'test'}
-          usersViewing={['elastic']}
-        />
+        <FlyoutHeaderWithCloseButton {...testProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="close-timeline"] button').first().simulate('click');

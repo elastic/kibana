@@ -12,13 +12,15 @@ import {
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { SecurityPluginSetup } from '../../../../../security/public';
 import { LicenseManagementUIPluginSetup } from '../../../../../license_management/public';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  share: SharePluginStart;
 }
-export type StartServices = CoreStart & StartPlugins;
+export type StartServices = CoreStart & StartPlugins & { kibanaVersion: string };
 // eslint-disable-next-line react-hooks/rules-of-hooks
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

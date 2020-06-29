@@ -24,8 +24,13 @@ export const initialHostListState: Immutable<HostState> = {
   policyResponseLoading: false,
   policyResponseError: undefined,
   location: undefined,
+  policyItems: [],
+  selectedPolicyId: undefined,
+  policyItemsLoading: false,
+  endpointPackageInfo: undefined,
 };
 
+/* eslint-disable-next-line complexity */
 export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
   state = initialHostListState,
   action
@@ -65,6 +70,18 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       detailsError: action.payload,
       detailsLoading: false,
     };
+  } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
+    return {
+      ...state,
+      policyItems: action.payload.policyItems,
+      policyItemsLoading: false,
+    };
+  } else if (action.type === 'serverFailedToReturnPoliciesForOnboarding') {
+    return {
+      ...state,
+      error: action.payload,
+      policyItemsLoading: false,
+    };
   } else if (action.type === 'serverReturnedHostPolicyResponse') {
     return {
       ...state,
@@ -77,6 +94,27 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       policyResponseError: action.payload,
       policyResponseLoading: false,
+    };
+  } else if (action.type === 'userSelectedEndpointPolicy') {
+    return {
+      ...state,
+      selectedPolicyId: action.payload.selectedPolicyId,
+      policyResponseLoading: false,
+    };
+  } else if (action.type === 'serverCancelledHostListLoading') {
+    return {
+      ...state,
+      loading: false,
+    };
+  } else if (action.type === 'serverCancelledPolicyItemsLoading') {
+    return {
+      ...state,
+      policyItemsLoading: false,
+    };
+  } else if (action.type === 'serverReturnedEndpointPackageInfo') {
+    return {
+      ...state,
+      endpointPackageInfo: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
@@ -95,6 +133,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           ...state,
           location: action.payload,
           loading: true,
+          policyItemsLoading: true,
           error: undefined,
           detailsError: undefined,
         };
@@ -122,6 +161,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           error: undefined,
           detailsError: undefined,
           policyResponseError: undefined,
+          policyItemsLoading: true,
         };
       }
     }

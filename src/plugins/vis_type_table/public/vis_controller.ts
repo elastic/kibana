@@ -22,6 +22,7 @@ import $ from 'jquery';
 
 import { VisParams, ExprVis } from '../../visualizations/public';
 import { getAngularModule } from './get_inner_angular';
+import { getKibanaLegacy } from './services';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
 
 const innerAngularName = 'kibana/table_vis';
@@ -64,6 +65,7 @@ export function getTableVisualizationControllerClass(
     }
 
     async render(esResponse: object, visParams: VisParams) {
+      getKibanaLegacy().loadFontAwesome();
       await this.initLocalAngular();
 
       return new Promise(async (resolve, reject) => {
