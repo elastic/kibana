@@ -6,10 +6,7 @@
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { ObservabilityApp } from '../../../typings/common';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { APMSection } from '../../components/app/section/apm';
@@ -17,13 +14,13 @@ import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
+import { fetchHasData } from '../../data_handler';
+import { useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { appsSection } from '../home/section';
-import { useFetcher, FETCH_STATUS } from '../../hooks/use_fetcher';
-import { fetchHasData } from '../../data_handler';
 
 interface Props {
   routeParams: RouteParams<'/dashboard'>;

@@ -17,16 +17,18 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import React, { Fragment, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { SectionContainer } from '../';
+import { getDataHandler } from '../../../../data_handler';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
-import { getDataHandler } from '../../../../data_handler';
 import { ChartContainer } from '../../chart_container';
+import { onBrushEnd } from '../helper';
 
 interface Props {
   startTime?: string;
@@ -36,6 +38,7 @@ interface Props {
 
 export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
+  const history = useHistory();
 
   const { data, status } = useFetcher(() => {
     if (startTime && endTime && bucketSize) {
@@ -90,7 +93,7 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
       <ChartContainer height={177} isLoading={isLoading}>
         <Chart size={{ height: 177 }}>
           <Settings
-            onBrushEnd={({ x }) => {}}
+            onBrushEnd={({ x }) => onBrushEnd({ x, history })}
             theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
             showLegend
             legendPosition="bottom"

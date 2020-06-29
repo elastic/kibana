@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AreaSeries, Chart, DARK_THEME, LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiStat } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { SectionContainer } from '../';
+import { getDataHandler } from '../../../../data_handler';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
-import { getDataHandler } from '../../../../data_handler';
 import { ChartContainer } from '../../chart_container';
 
 interface Props {
