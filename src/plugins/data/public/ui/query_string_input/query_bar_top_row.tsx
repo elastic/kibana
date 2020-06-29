@@ -270,11 +270,12 @@ export function QueryBarTopRow(props: Props) {
         };
       });
 
+    const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper', {
+      'kbnQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
+    });
+
     return (
-      <EuiFlexItem
-        className="kbnQueryBar__datePickerWrapper"
-        style={{ display: isQueryInputFocused ? 'none' : 'block' }}
-      >
+      <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
           start={props.dateRangeFrom}
           end={props.dateRangeTo}

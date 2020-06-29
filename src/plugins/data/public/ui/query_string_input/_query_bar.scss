@@ -7,9 +7,11 @@
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
   height: $euiSizeXXL;
-  padding-top: $euiSizeS + 1px !important;
+  // Unlike most inputs within layout control groups, the text area still needs a border.
+  // These adjusts help it sit above the control groups shadow to line up correctly.
+  padding-top: $euiSizeS + 3px !important;
   transform: translateY(-2px);
-  padding: $euiSizeS - 1px; // Accounts for the border from the control group
+  padding: $euiSizeS - 1px;
 
   &:not(:focus) {
     @include euiYScrollWithShadows;
@@ -47,5 +49,11 @@
     // sass-lint:disable-block no-important
     flex-grow: 0 !important;
     flex-basis: auto !important;
+
+    &.kbnQueryBar__datePickerWrapper-isHidden {
+      width: 0;
+      overflow: hidden;
+      visibility: hidden;
+    }
   }
 }
