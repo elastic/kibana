@@ -15,7 +15,6 @@ import {
   EuiCommentList,
   EuiCommentProps,
   EuiText,
-  EuiSpacer,
 } from '@elastic/eui';
 import { Comment } from '../../../lists_plugin_deps';
 import * as i18n from './translations';
@@ -28,15 +27,20 @@ interface AddExceptionCommentsProps {
   newCommentOnChange: (value: string) => void;
 }
 
+const commentAccordionButtonClassname = 'exceptionCommentAccordionButton';
+
 const MyAvatar = styled(EuiAvatar)`
   ${({ theme }) => css`
     margin-right: ${theme.eui.paddingSizes.m};
   `}
 `;
 
-const CommentToggleText = styled(EuiText)`
+const CommentAccordion = styled(EuiAccordion)`
   ${({ theme }) => css`
-    padding: ${theme.eui.paddingSizes.s};
+    .${commentAccordionButtonClassname} {
+      color: ${theme.eui.euiColorPrimary};
+      padding: ${theme.eui.paddingSizes.m} 0;
+    }
   `}
 `;
 
@@ -70,11 +74,11 @@ export const AddExceptionComments = memo(function AddExceptionComments({
   const commentsAccordionTitle = useMemo(() => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
       return (
-        <CommentToggleText size="s" data-test-subj="addExceptionCommentsAccordionButton">
+        <EuiText size="s" data-test-subj="addExceptionCommentsAccordionButton">
           {!shouldShowComments
             ? i18n.COMMENTS_SHOW(exceptionItemComments.length)
             : i18n.COMMENTS_HIDE(exceptionItemComments.length)}
-        </CommentToggleText>
+        </EuiText>
       );
     } else {
       return null;
@@ -92,14 +96,15 @@ export const AddExceptionComments = memo(function AddExceptionComments({
   return (
     <div>
       {shouldShowAccordion && (
-        <EuiAccordion
+        <CommentAccordion
           id={'add-exception-comments-accordion'}
+          buttonClassName={commentAccordionButtonClassname}
           buttonContent={commentsAccordionTitle}
           data-test-subj="addExceptionCommentsAccordion"
           onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
         >
           <EuiCommentList comments={formattedComments} />
-        </EuiAccordion>
+        </CommentAccordion>
       )}
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>

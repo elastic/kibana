@@ -228,16 +228,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               />
             </ModalBodySection>
             <EuiHorizontalRule />
-            <ModalBodySection>
-              <EuiFormRow>
-                <EuiCheckbox
-                  id="close-alert-on-add-add-exception-checkbox"
-                  label="Close this alert"
-                  checked={shouldCloseAlert}
-                  onChange={onCloseAlertCheckboxChange}
-                />
-              </EuiFormRow>
-            </ModalBodySection>
+            {alertData !== undefined && (
+              <ModalBodySection>
+                <EuiFormRow>
+                  <EuiCheckbox
+                    id="close-alert-on-add-add-exception-checkbox"
+                    label="Close this alert"
+                    checked={shouldCloseAlert}
+                    onChange={onCloseAlertCheckboxChange}
+                  />
+                </EuiFormRow>
+              </ModalBodySection>
+            )}
           </>
         )}
 

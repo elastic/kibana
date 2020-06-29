@@ -207,3 +207,10 @@ export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Add a new comment...',
   }
 );
+
+export const ADD_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToClipboard',
+  {
+    defaultMessage: 'Add to clipboard',
+  }
+);

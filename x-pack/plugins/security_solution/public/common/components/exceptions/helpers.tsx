@@ -40,6 +40,7 @@ import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data
 export const isListType = (item: BuilderEntry): item is EmptyListEntry =>
   item.type === OperatorTypeEnum.LIST;
 import { TimelineNonEcsData } from '../../../graphql/types';
+import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -227,6 +228,13 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     event: i18n.COMMENT_EVENT,
     timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
+    actions: (
+      <WithCopyToClipboard
+        data-test-subj="copy-to-clipboard"
+        text={comment.comment}
+        titleSummary={i18n.ADD_TO_CLIPBOARD}
+      />
+    ),
   }));
 
 export const getFormattedBuilderEntries = (
