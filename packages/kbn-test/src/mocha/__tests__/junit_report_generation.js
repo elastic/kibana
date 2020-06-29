@@ -33,7 +33,19 @@ const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
 const ISO_DATE_SEC_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
 
+const ENV_CI = process.env.CI;
+
 describe('dev/mocha/junit report generation', () => {
+  before(() => {
+    delete process.env.CI;
+  });
+
+  after(() => {
+    if (ENV_CI !== undefined) {
+      process.env.CI = ENV_CI;
+    }
+  });
+
   afterEach(() => {
     del.sync(resolve(PROJECT_DIR, 'target'));
   });
