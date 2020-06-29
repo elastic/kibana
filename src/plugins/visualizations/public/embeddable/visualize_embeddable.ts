@@ -377,8 +377,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public supportedTriggers() {
-    return typeof this.vis.type.getSupportedTriggers === 'function'
-      ? this.vis.type.getSupportedTriggers()
-      : [];
+    return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 }
