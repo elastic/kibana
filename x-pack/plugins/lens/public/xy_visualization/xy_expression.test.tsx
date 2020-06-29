@@ -917,14 +917,14 @@ describe('xy_expression', () => {
             {
               ...args.layers[0],
               accessors: ['a', 'b'],
-              yAxisConfig: [
+              yConfig: [
                 {
                   forAccessor: 'a',
-                  mode: 'left',
+                  axisMode: 'left',
                 },
                 {
                   forAccessor: 'b',
-                  mode: 'right',
+                  axisMode: 'right',
                 },
               ],
             },
@@ -973,14 +973,14 @@ describe('xy_expression', () => {
             {
               ...args.layers[0],
               accessors: ['c', 'd'],
-              yAxisConfig: [
+              yConfig: [
                 {
                   forAccessor: 'c',
-                  mode: 'left',
+                  axisMode: 'left',
                 },
                 {
                   forAccessor: 'd',
-                  mode: 'left',
+                  axisMode: 'left',
                 },
               ],
             },

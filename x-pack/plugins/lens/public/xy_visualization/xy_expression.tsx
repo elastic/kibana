@@ -360,12 +360,14 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
+        /* associate the x axis with the latest group to format x values in tooltip correctly */
+        groupId={yAxesConfiguration[yAxesConfiguration.length - 1]?.groupId}
         showGridLines={false}
         hide={filteredLayers[0].hide}
         tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
-      {yAxesConfiguration.map((axis) => (
+      {yAxesConfiguration.map((axis, index) => (
         <Axis
           key={axis.groupId}
           id={axis.groupId}
@@ -378,8 +380,7 @@ export function XYChart({
                   data.tables[series.layer].columns.find((column) => column.id === series.accessor)
                     ?.name
               )
-              .filter((name) => Boolean(name))
-              .join(', ') || args.yTitle
+              .filter((name) => Boolean(name))[0] || args.yTitle
           }
           showGridLines={false}
           hide={filteredLayers[0].hide}

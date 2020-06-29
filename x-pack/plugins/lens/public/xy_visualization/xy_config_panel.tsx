@@ -79,8 +79,8 @@ export function DimensionEditor({
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const axisMode =
-    (layer.yAxisConfig &&
-      layer.yAxisConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.mode) ||
+    (layer.yConfig &&
+      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
   return (
     <EuiFormRow
@@ -119,19 +119,19 @@ export function DimensionEditor({
         idSelected={`${idPrefix}${axisMode}`}
         onChange={(id) => {
           const newMode = id.replace(idPrefix, '') as YAxisMode;
-          const newYAxisConfigs = [...(layer.yAxisConfig || [])];
+          const newYAxisConfigs = [...(layer.yConfig || [])];
           const existingIndex = newYAxisConfigs.findIndex(
             (yAxisConfig) => yAxisConfig.forAccessor === accessor
           );
           if (existingIndex !== -1) {
-            newYAxisConfigs[existingIndex].mode = newMode;
+            newYAxisConfigs[existingIndex].axisMode = newMode;
           } else {
             newYAxisConfigs.push({
               forAccessor: accessor,
-              mode: newMode,
+              axisMode: newMode,
             });
           }
-          setState(updateLayer(state, { ...layer, yAxisConfig: newYAxisConfigs }, index));
+          setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
         }}
       />
     </EuiFormRow>

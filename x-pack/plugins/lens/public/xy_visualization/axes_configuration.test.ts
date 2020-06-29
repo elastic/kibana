@@ -239,7 +239,7 @@ describe('axes_configuration', () => {
   it('should map right series to right axis', () => {
     const formatFactory = jest.fn();
     const groups = getAxesConfiguration(
-      [{ ...sampleLayer, yAxisConfig: [{ forAccessor: 'yAccessorId', mode: 'right' }] }],
+      [{ ...sampleLayer, yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }] }],
       tables,
       formatFactory,
       false
@@ -257,7 +257,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yAxisConfig: [{ forAccessor: 'yAccessorId', mode: 'right' }],
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       tables,
@@ -281,7 +281,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yAxisConfig: [{ forAccessor: 'yAccessorId', mode: 'right' }],
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
       tables,

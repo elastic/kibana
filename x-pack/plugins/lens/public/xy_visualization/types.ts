@@ -77,33 +77,33 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   },
 };
 
-type YAxisConfigResult = YAxisConfig & { type: 'lens_xy_yAxisConfig' };
+type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
 export const yAxisConfig: ExpressionFunctionDefinition<
-  'lens_xy_yAxisConfig',
+  'lens_xy_yConfig',
   null,
-  YAxisConfig,
-  YAxisConfigResult
+  YConfig,
+  YConfigResult
 > = {
-  name: 'lens_xy_yAxisConfig',
+  name: 'lens_xy_yConfig',
   aliases: [],
-  type: 'lens_xy_yAxisConfig',
-  help: `Configure the axis behavior of an xy chart's y axis metric`,
+  type: 'lens_xy_yConfig',
+  help: `Configure the behavior of a xy chart's y axis metric`,
   inputTypes: ['null'],
   args: {
     forAccessor: {
       types: ['string'],
       help: 'The accessor this configuration is for',
     },
-    mode: {
+    axisMode: {
       types: ['string'],
       options: ['auto', 'left', 'right'],
       help: 'The axis mode of the metric',
     },
   },
-  fn: function fn(input: unknown, args: YAxisConfig) {
+  fn: function fn(input: unknown, args: YConfig) {
     return {
-      type: 'lens_xy_yAxisConfig',
+      type: 'lens_xy_yConfig',
       ...args,
     };
   },
@@ -162,7 +162,7 @@ export const layerConfig: ExpressionFunctionDefinition<
       help: 'The columns to display on the y axis.',
       multi: true,
     },
-    yAxisConfig: {
+    yConfig: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_yAxisConfig' as any],
       help: 'Additional configuration for y axes',
@@ -192,9 +192,9 @@ export type SeriesType =
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
-export interface YAxisConfig {
+export interface YConfig {
   forAccessor: string;
-  mode: YAxisMode;
+  axisMode?: YAxisMode;
 }
 
 export interface LayerConfig {
@@ -202,7 +202,7 @@ export interface LayerConfig {
   layerId: string;
   xAccessor?: string;
   accessors: string[];
-  yAxisConfig?: YAxisConfig[];
+  yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
 }

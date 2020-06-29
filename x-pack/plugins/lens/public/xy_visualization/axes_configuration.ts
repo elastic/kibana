@@ -47,7 +47,7 @@ export function getAxesConfiguration(
     const table = tables[layer.layerId];
     layer.accessors.forEach((accessor) => {
       const mode =
-        layer.yAxisConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.mode ||
+        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
         'auto';
       const formatter: SerializedFieldFormat = table.columns.find(
         (column) => column.id === accessor

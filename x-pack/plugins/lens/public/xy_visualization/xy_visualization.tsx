@@ -240,10 +240,8 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
 
-    if (newLayer.yAxisConfig) {
-      newLayer.yAxisConfig = newLayer.yAxisConfig.filter(
-        ({ forAccessor }) => forAccessor !== columnId
-      );
+    if (newLayer.yConfig) {
+      newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
     }
 
     return {
@@ -267,7 +265,6 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   },
 
   renderDimensionEditor(domElement, props) {
-    // TODO move this in xy_config_panel
     render(
       <I18nProvider>
         <DimensionEditor {...props} />

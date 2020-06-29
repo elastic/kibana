@@ -388,11 +388,9 @@ function buildSuggestion({
     xAccessor: xValue.columnId,
     splitAccessor: splitBy?.columnId,
     accessors,
-    yAxisConfig:
-      'yAxisConfig' in existingLayer && existingLayer.yAxisConfig
-        ? existingLayer.yAxisConfig.filter(
-            ({ forAccessor }) => accessors.indexOf(forAccessor) !== -1
-          )
+    yConfig:
+      'yConfig' in existingLayer && existingLayer.yConfig
+        ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
   };
 

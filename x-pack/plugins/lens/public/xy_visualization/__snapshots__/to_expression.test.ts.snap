@@ -38,7 +38,7 @@ Object {
                   "xScaleType": Array [
                     "linear",
                   ],
-                  "yAxisConfig": Array [],
+                  "yConfig": Array [],
                   "yScaleType": Array [
                     "linear",
                   ],
