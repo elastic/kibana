@@ -135,14 +135,24 @@ export class ElasticsearchService
         return await _client.callAsInternalUser(endpoint, clientParams, options);
       },
       asScoped(request: ScopeableRequest) {
+        const _clientPromise = client$.pipe(take(1)).toPromise();
         return {
-          callAsInternalUser: client.callAsInternalUser,
+          async callAsInternalUser(
+            endpoint: string,
+            clientParams: Record<string, any> = {},
+            options?: CallAPIOptions
+          ) {
+            const _client = await _clientPromise;
+            return await _client
+              .asScoped(request)
+              .callAsInternalUser(endpoint, clientParams, options);
+          },
           async callAsCurrentUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
             options?: CallAPIOptions
           ) {
-            const _client = await client$.pipe(take(1)).toPromise();
+            const _client = await _clientPromise;
             return await _client
               .asScoped(request)
               .callAsCurrentUser(endpoint, clientParams, options);
