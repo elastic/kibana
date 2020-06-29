@@ -250,7 +250,7 @@ describe('Exceptions Lists API', () => {
       });
       // TODO Would like to just use getExceptionListSchemaMock() here, but
       // validation returns object in different order, making the strings not match
-      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
         body: JSON.stringify(payload),
         method: 'PUT',
         signal: abortCtrl.signal,

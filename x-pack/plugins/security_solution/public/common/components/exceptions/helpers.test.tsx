@@ -37,7 +37,7 @@ import {
   getEntryMatchAnyMock,
   getEntriesArrayMock,
 } from '../../../../../lists/common/schemas/types/entries.mock';
-import { getCommentsMock } from '../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -215,7 +215,7 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'is in list',
-          value: ['some host name'],
+          value: 'some-list-id',
         },
         {
           fieldName: 'host.name',
@@ -238,8 +238,8 @@ describe('Exception helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'exists',
-          value: null,
+          operator: 'is',
+          value: 'some host name',
         },
       ];
       expect(result).toEqual(expected);
@@ -382,7 +382,7 @@ describe('Exception helpers', () => {
 
   describe('#getFormattedComments', () => {
     test('it returns formatted comment object with username and timestamp', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       expect(result[0].username).toEqual('some user');
@@ -390,7 +390,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns formatted timeline icon with comment users initial', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].timelineIcon as React.ReactElement);
@@ -399,12 +399,12 @@ describe('Exception helpers', () => {
     });
 
     test('it returns comment text', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].children as React.ReactElement);
 
-      expect(wrapper.text()).toEqual('some comment');
+      expect(wrapper.text()).toEqual('some old comment');
     });
   });
 });

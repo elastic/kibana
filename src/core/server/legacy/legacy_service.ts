@@ -276,6 +276,9 @@ export class LegacyService implements CoreService {
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
+      metrics: {
+        getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
@@ -309,8 +312,8 @@ export class LegacyService implements CoreService {
         csp: setupDeps.core.http.csp,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
-      metrics: {
-        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
