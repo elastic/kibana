@@ -62,13 +62,13 @@ export class AnomalySwimlaneEmbeddableFactory
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
-    const explorerService = new AnomalyTimelineService(
+    const anomalyTimelineService = new AnomalyTimelineService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
       mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
 
-    return [coreStart, pluginsStart, { anomalyDetectorService, explorerService }];
+    return [coreStart, pluginsStart, { anomalyDetectorService, anomalyTimelineService }];
   }
 
   public async create(

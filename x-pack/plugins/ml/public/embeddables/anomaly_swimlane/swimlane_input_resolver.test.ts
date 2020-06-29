@@ -76,12 +76,15 @@ describe('useSwimlaneInputResolver', () => {
   });
 
   test('should fetch jobs only when input job ids have been changed', async () => {
+    const updateSpy = jest.fn();
     const { result, waitForNextUpdate } = renderHook(() =>
       useSwimlaneInputResolver(
         embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
+        updateSpy,
         refresh,
         services,
-        1000
+        1000,
+        1
       )
     );
 
@@ -94,7 +97,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(1);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(1);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       embeddableInput.next({
@@ -109,7 +112,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(2);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(2);
 
     await act(async () => {
       embeddableInput.next({
@@ -124,7 +127,7 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
-    expect(services[2].explorerService.loadOverallData).toHaveBeenCalledTimes(3);
+    expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
   });
 });
 

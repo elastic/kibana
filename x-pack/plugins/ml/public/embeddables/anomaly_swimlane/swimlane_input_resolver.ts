@@ -69,7 +69,7 @@ export function useSwimlaneInputResolver(
   TimeBuckets,
   Error | null | undefined
 ] {
-  const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
+  const [{ uiSettings }, , { anomalyTimelineService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
@@ -117,7 +117,7 @@ export function useSwimlaneInputResolver(
             viewMode,
           } = input;
 
-          explorerService.setTimeRange(timeRange);
+          anomalyTimelineService.setTimeRange(timeRange);
 
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);
@@ -141,7 +141,9 @@ export function useSwimlaneInputResolver(
             return of(undefined);
           }
 
-          return from(explorerService.loadOverallData(explorerJobs, swimlaneContainerWidth)).pipe(
+          return from(
+            anomalyTimelineService.loadOverallData(explorerJobs, swimlaneContainerWidth)
+          ).pipe(
             switchMap((overallSwimlaneData) => {
               const { earliest, latest } = overallSwimlaneData;
 
@@ -157,7 +159,7 @@ export function useSwimlaneInputResolver(
                 }
 
                 return from(
-                  explorerService.loadViewBySwimlane(
+                  anomalyTimelineService.loadViewBySwimlane(
                     [],
                     { earliest, latest },
                     explorerJobs,

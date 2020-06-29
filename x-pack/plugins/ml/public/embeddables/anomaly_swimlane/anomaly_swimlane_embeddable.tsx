@@ -63,7 +63,7 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
-  explorerService: AnomalyTimelineService;
+  anomalyTimelineService: AnomalyTimelineService;
 }
 
 export type AnomalySwimlaneEmbeddableServices = [
