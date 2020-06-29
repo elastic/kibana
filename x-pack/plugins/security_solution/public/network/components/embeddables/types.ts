@@ -36,11 +36,6 @@ export type SetQuery = (params: {
   refetch: inputsModel.Refetch;
 }) => void;
 
-export interface MapFeature {
-  id: number;
-  layerId: string;
-}
-
 export interface FeatureGeometry {
   coordinates: [number];
   type: string;
