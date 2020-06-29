@@ -1,5 +1,5 @@
 {
-  "id": "audiTrail",
+  "id": "auditTrail",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "audit_trail"],

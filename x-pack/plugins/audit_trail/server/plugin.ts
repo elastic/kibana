@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
+  AppenderConfigType,
   CoreSetup,
   CoreStart,
   KibanaRequest,
   Logger,
+  LoggerContextConfigInput,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
 
-import { AuditEvent } from './types';
+import { AuditEvent, AuditTrailPluginSetup } from './types';
 import { AuditTrailClient } from './services/audit_trail_client';
+import { AuditTrailConfigType } from './config';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
@@ -25,11 +29,13 @@ interface DepsSetup {
   spaces: SpacesPluginSetup;
 }
 
-export class AuditTrailPlugin implements Plugin {
+export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
   private readonly logger: Logger;
+  private readonly config$: Observable<AuditTrailConfigType>;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
+    this.config$ = this.context.config.create();
   }
 
   public async setup(core: CoreSetup, deps: DepsSetup) {
@@ -46,6 +52,39 @@ export class AuditTrailPlugin implements Plugin {
         return new AuditTrailClient(request, event$, depsApi);
       },
     });
+
+    core.logging.configure(
+      this.config$.pipe<LoggerContextConfigInput>(
+        map((config) => ({
+          appenders: {
+            auditTrailAppender: this.getAppender(config),
+          },
+          loggers: [
+            {
+              context: '', // plugins.auditTrail prepended automatically
+              level: 'off',
+              appenders: ['auditTrailAppender'],
+            },
+          ],
+        }))
+      )
+    );
+
+    return {
+      event$: event$.asObservable(),
+    };
+  }
+
+  private getAppender(config: AuditTrailConfigType): AppenderConfigType {
+    return (
+      config.appender ?? {
+        kind: 'console',
+        layout: {
+          kind: 'pattern',
+          pattern: '[%level] %message %meta',
+        },
+      }
+    );
   }
 
   public start(core: CoreStart) {}

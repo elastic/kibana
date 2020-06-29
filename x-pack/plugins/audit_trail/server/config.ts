@@ -5,14 +5,15 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor, config as _config } from '../../../../src/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  appender: schema.maybe(_config.logging.appenders),
 });
 
-export type ConfigType = TypeOf<typeof configSchema>;
+export type AuditTrailConfigType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<AuditTrailConfigType> = {
   schema: configSchema,
 };

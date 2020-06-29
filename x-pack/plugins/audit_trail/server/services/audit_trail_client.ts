@@ -16,23 +16,21 @@ interface Deps {
 }
 
 export class AuditTrailClient implements Auditor {
-  private readonly scope: string[] = [];
+  private scope?: string;
   constructor(
     private readonly request: KibanaRequest,
     private readonly event$: Subject<AuditEvent>,
     private readonly deps: Deps
   ) {}
 
-  withScope = async <T>(name: string, fn: (...args: any[]) => Promise<T>): Promise<T> => {
-    try {
-      this.scope.push(name);
-      return await fn();
-    } finally {
-      this.scope.pop();
+  public withScope(name: string) {
+    if (this.scope !== undefined) {
+      throw new Error(`AuditTrail scope is already set to: ${this.scope}`);
     }
-  };
+    this.scope = name;
+  }
 
-  async add(event: AuditableEvent) {
+  public add(event: AuditableEvent) {
     const user = this.deps.getCurrentUser(this.request);
     const spaceId = this.deps.getSpaceId(this.request);
 
@@ -41,7 +39,7 @@ export class AuditTrailClient implements Auditor {
       type: event.type,
       user: user?.username,
       space: spaceId,
-      scope: this.scope.join('>'),
+      scope: this.scope,
     });
   }
 }
