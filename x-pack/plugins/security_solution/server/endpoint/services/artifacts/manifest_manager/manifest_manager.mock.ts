@@ -12,9 +12,15 @@ import {
 } from '../../../../../../../../src/core/server/mocks';
 
 import { DatasourceServiceInterface } from '../../../../../../ingest_manager/server';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { listMock } from '../../../../../../lists/server/mocks';
 
-import { Manifest } from '../../../lib/artifacts';
+import {
+  ExceptionsCache,
+  Manifest,
+  buildArtifact,
+  getFullEndpointExceptionList,
+} from '../../../lib/artifacts';
 import { getInternalArtifactMock, getInternalArtifactsMock } from '../../../schemas';
 
 import { getArtifactClientMock } from '../artifact_client.mock';
@@ -25,7 +31,11 @@ import { ManifestManager } from './manifest_manager';
 function getMockDatasource() {
   return {
     id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-    inputs: [{}],
+    inputs: [
+      {
+        config: {},
+      },
+    ],
     revision: 1,
     version: 'abcd', // TODO: not yet implemented in ingest_manager (https://github.com/elastic/kibana/issues/69992)
     updated_at: '2020-06-25T16:03:38.159292',
@@ -50,34 +60,61 @@ class DatasourceServiceMock {
   public update = jest.fn().mockResolvedValue(getMockDatasource());
 }
 
-function getDatasourceServiceMock() {
+export function getDatasourceServiceMock() {
   return new DatasourceServiceMock();
 }
 
-function mockBuildExceptionListArtifacts() {
-  // mock buildArtifactFunction
-  // pass in OS, mock implementation of ExceptionListItemSchemaMock more than once
-  // getInternalArtifactsMock()
+async function mockBuildExceptionListArtifacts(
+  os: string,
+  schemaVersion: string
+): InternalArtifactSchema[] {
+  const mockExceptionClient = listMock.getExceptionListClient();
+  const first = getFoundExceptionListItemSchemaMock();
+  mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+  const exceptions = await getFullEndpointExceptionList(mockExceptionClient, os, schemaVersion);
+  return [await buildArtifact(exceptions, os, schemaVersion)];
 }
 
 // TODO
 // eslint-disable-next-line max-classes-per-file
 export class ManifestManagerMock extends ManifestManager {
-  private buildExceptionListArtifacts = jest
-    .fn()
-    .mockResolvedValue(mockBuildExceptionListArtifacts());
+  private buildExceptionListArtifacts = async () => {
+    return mockBuildExceptionListArtifacts('linux', '1.0.0');
+  };
+
   private getLastDispatchedManifest = jest
     .fn()
     .mockResolvedValue(new Manifest(new Date(), '1.0.0'));
+
   private getManifestClient = jest.fn().mockReturnValue(getManifestClientMock());
-  // public refresh = jest.fn().mockResolvedValue(null);
 }
 
-export const getManifestManagerMock = (): ManifestManagerMock => {
+export const getManifestManagerMock = (opts: {
+  artifactClientMock?: ArtifactClient;
+  datasourceServiceMock?: DatasourceServiceMock;
+  manifestClientMock?: ManifestClient;
+}): ManifestManagerMock => {
+  let artifactClient = getArtifactClientMock();
+  if (opts?.artifactClientMock !== undefined) {
+    artifactClient = opts.artifactClientMock;
+  }
+
+  let datasourceService = getDatasourceServiceMock();
+  if (opts?.datasourceServiceMock !== undefined) {
+    datasourceService = opts.datasourceServiceMock;
+  }
+
+  // TODO: use the manifestClient
+  let manifestClient = getManifestClientMock();
+  if (opts?.manifestClientMock !== undefined) {
+    manifestClient = opts.manifestClientMock;
+  }
+
   return new ManifestManagerMock({
-    artifactClient: getArtifactClientMock(),
+    artifactClient,
+    cache: new ExceptionsCache(5),
     exceptionListClient: listMock.getExceptionListClient(),
-    datasourceService: getDatasourceServiceMock(),
+    datasourceService,
     savedObjectsClient: savedObjectsClientMock.create(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
   });
