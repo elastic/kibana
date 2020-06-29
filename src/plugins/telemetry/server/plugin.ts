@@ -75,7 +75,7 @@ export class TelemetryPlugin implements Plugin {
   }
 
   public async setup(
-    { elasticsearch, http, savedObjects, metrics }: CoreSetup,
+    { elasticsearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsSetup
   ) {
     const currentKibanaVersion = this.currentKibanaVersion;

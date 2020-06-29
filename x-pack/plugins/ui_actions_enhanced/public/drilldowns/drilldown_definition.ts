@@ -5,6 +5,7 @@
  */
 
 import { ActionFactoryDefinition } from '../dynamic_actions';
+import { LicenseType } from '../../../licensing/public';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -27,6 +28,12 @@ export interface DrilldownDefinition<
    * Globally unique identifier for this drilldown.
    */
   id: string;
+
+  /**
+   * Minimal licence level
+   * Empty means no restrictions
+   */
+  minimalLicense?: LicenseType;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.

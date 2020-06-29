@@ -153,7 +153,7 @@ describe('Events Viewer', () => {
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
