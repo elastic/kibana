@@ -10,19 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/common';
 import color from 'color';
 import {
-  euiPaletteColorBlindBehindText,
+  euiPaletteColorBlind,
+  euiPaletteComplimentary,
   euiPaletteCool,
+  euiPaletteForStatus,
   euiPaletteGray,
-  colorPalette as buildColorPalette,
+  euiPaletteNegative,
+  euiPalettePositive,
+  euiPaletteWarm,
 } from '@elastic/eui';
 import { ChartsPluginSetup, createColorPalette } from '../../../../../../src/plugins/charts/public';
 import { ColorFunctionDefinition, SeriesLayer } from '../../types';
 import { PaletteSetupPlugins } from './service';
 import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions';
 
-function buildRoundRobinCategorical(id: string, colors: string[] | ((n: number) => string[])) {
+function buildRoundRobinCategorical(id: string, colors: (n: number) => string[]) {
   function getColor(series: SeriesLayer[]) {
-    const actualColors = Array.isArray(colors) ? colors : colors(series[0].totalSeriesAtDepth);
+    const actualColors = colors(series[0].totalSeriesAtDepth);
     const outputColor = actualColors[series[0].rankAtDepth % actualColors.length];
 
     const lighten = (series.length - 1) / (series[0].maxDepth * 2);
@@ -32,53 +36,7 @@ function buildRoundRobinCategorical(id: string, colors: string[] | ((n: number) 
     id,
     getColor,
     ...buildStatelessExpressionIntegration(id, getColor),
-    renderPreview(element: Element) {
-      const actualColors = Array.isArray(colors) ? colors : colors(10);
-      render(
-        <div className="lensPaletteSwatch">
-          <div className="lensPaletteSwatch__foreground">
-            {actualColors.map((currentColor) => (
-              <div
-                key={currentColor}
-                className="lensPaletteSwatch__box"
-                style={{ backgroundColor: currentColor }}
-              />
-            ))}
-          </div>
-        </div>,
-        element
-      );
-    },
-  };
-}
-
-function buildGradient(id: string, gradientColors: [string, string]) {
-  function getColor(series: SeriesLayer[]) {
-    const colors = buildColorPalette(gradientColors, series[0].totalSeriesAtDepth);
-    const outputColor = colors[series[0].rankAtDepth % colors.length];
-
-    // TODO make sure this is not leaking into the next root level hue range
-    const lighten = (series.length - 1) / (series[0].maxDepth * 2);
-    return color(outputColor, 'hsl').lighten(lighten).hex();
-  }
-  return {
-    id,
-    getColor,
-    ...buildStatelessExpressionIntegration(id, getColor),
-    renderPreview(element: Element) {
-      render(
-        <div className="lensPaletteSwatch">
-          <div className="lensPaletteSwatch__foreground">
-            <div
-              key="gradient"
-              className="lensPaletteSwatch__box"
-              style={{ background: `linear-gradient(90deg, ${gradientColors.join(', ')})` }}
-            />
-          </div>
-        </div>,
-        element
-      );
-    },
+    getPreviewPalette: colors,
   };
 }
 
@@ -167,68 +125,44 @@ type SerializableColorFunctionDefinition = ColorFunctionDefinition & {
 export const buildPalettes: (
   dependencies: PaletteSetupPlugins
 ) => Record<string, SerializableColorFunctionDefinition> = ({ charts }) => ({
-  eui: {
-    title: i18n.translate('xpack.lens.palettes.euiPaletteLabel', { defaultMessage: 'Color Blind' }),
-    ...buildRoundRobinCategorical('eui', euiPaletteColorBlindBehindText()),
-  },
-  eui_pastel: {
-    title: i18n.translate('xpack.lens.palettes.pastelLabel', { defaultMessage: 'Pastel' }),
-    ...buildRoundRobinCategorical(
-      'eui_pastel',
-      (euiPaletteColorBlindBehindText() as string[]).map((original) =>
-        color(original).lighten(0.2).hex()
-      )
-    ),
+  default: {
+    title: i18n.translate('xpack.lens.palettes.defaultPaletteLabel', { defaultMessage: 'default' }),
+    ...buildRoundRobinCategorical('default', euiPaletteColorBlind),
   },
   kibana_palette: {
     title: i18n.translate('xpack.lens.palettes.kibanaPaletteLabel', {
-      defaultMessage: 'Kibana Default',
+      defaultMessage: 'legacy',
     }),
     ...buildSyncedKibanaPalette(charts.colors),
   },
-  eui_gray: {
-    title: i18n.translate('xpack.lens.palettes.grayGradientLabel', { defaultMessage: 'Gray' }),
-    ...buildRoundRobinCategorical('eui_gray', euiPaletteGray),
+  status: {
+    title: i18n.translate('xpack.lens.palettes.statusLabel', { defaultMessage: 'status' }),
+    ...buildRoundRobinCategorical('status', euiPaletteForStatus),
   },
-  eui_cool: {
-    title: i18n.translate('xpack.lens.palettes.coolBlueGradientLabel', {
-      defaultMessage: 'Cool Blue',
+  complimentary: {
+    title: i18n.translate('xpack.lens.palettes.complimentaryLabel', {
+      defaultMessage: 'complimentary',
     }),
-    ...buildRoundRobinCategorical('eui_cool', euiPaletteCool),
+    ...buildRoundRobinCategorical('complimentary', euiPaletteComplimentary),
   },
-  elastic_teal: {
-    title: i18n.translate('xpack.lens.palettes.tealGradientLabel', { defaultMessage: 'Teal' }),
-    ...buildGradient('elastic_teal', ['#C5FAF4', '#0F6259']),
+  negative: {
+    title: i18n.translate('xpack.lens.palettes.negativeLabel', { defaultMessage: 'negative' }),
+    ...buildRoundRobinCategorical('negative', euiPaletteNegative),
   },
-  elastic_blue: {
-    title: i18n.translate('xpack.lens.palettes.blueGradientLabel', { defaultMessage: 'Blue' }),
-    ...buildGradient('elastic_blue', ['#7ECAE3', '#003A4D']),
+  positive: {
+    title: i18n.translate('xpack.lens.palettes.positiveLabel', { defaultMessage: 'positive' }),
+    ...buildRoundRobinCategorical('positive', euiPalettePositive),
   },
-  elastic_pink: {
-    title: i18n.translate('xpack.lens.palettes.pinkGradientLabel', { defaultMessage: 'Pink' }),
-    ...buildGradient('elastic_pink', ['#FEA8D5', '#531E3A']),
+  cool: {
+    title: i18n.translate('xpack.lens.palettes.coolLabel', { defaultMessage: 'cool' }),
+    ...buildRoundRobinCategorical('cool', euiPaletteCool),
   },
-  elastic_purple: {
-    title: i18n.translate('xpack.lens.palettes.purpleGradientLabel', { defaultMessage: 'Purple' }),
-    ...buildGradient('elastic_purple', ['#CCC7DF', '#130351']),
+  warm: {
+    title: i18n.translate('xpack.lens.palettes.warmLabel', { defaultMessage: 'warm' }),
+    ...buildRoundRobinCategorical('warm', euiPaletteWarm),
   },
-  paul_tor: {
-    title: 'Paul Tor',
-    ...buildRoundRobinCategorical('paul_tor', [
-      '#882E72',
-      '#B178A6',
-      '#D6C1DE',
-      '#1965B0',
-      '#5289C7',
-      '#7BAFDE',
-      '#4EB265',
-      '#90C987',
-      '#CAE0AB',
-      '#F7EE55',
-      '#F6C141',
-      '#F1932D',
-      '#E8601C',
-      '#DC050C',
-    ]),
+  gray: {
+    title: i18n.translate('xpack.lens.palettes.grayLabel', { defaultMessage: 'gray' }),
+    ...buildRoundRobinCategorical('gray', euiPaletteGray),
   },
 });

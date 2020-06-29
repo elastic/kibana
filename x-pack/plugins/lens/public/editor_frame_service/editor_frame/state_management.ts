@@ -141,7 +141,7 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       activeId: props.initialVisualizationId,
     },
     globalPalette: props.doc?.state.globalPalette || {
-      activePaletteId: 'eui',
+      activePaletteId: 'default',
     },
   };
 };

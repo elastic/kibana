@@ -5,38 +5,27 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { EuiColorPalettePicker, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { FramePublicAPI } from '../../types';
 import { NativeRenderer } from '../../native_renderer';
-
-import './palette_picker.scss';
 
 export function PalettePicker({ frame }: { frame: FramePublicAPI }) {
   return (
     <>
-      <EuiSuperSelect
-        className="lensPalettePicker__swatchesPopover"
-        valueOfSelected={frame.globalPalette.colorFunction.id || 'eui'}
-        options={Object.entries(frame.globalPalette.availableColorFunctions).map(
-          ([id, palette]) => ({
-            value: id,
-            inputDisplay: (
-              <div className="lensPalettePicker__swatch" style={{ width: '100%' }}>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={1}>
-                    <span className="lensPalettePicker__label">{palette.title}</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    <NativeRenderer render={palette.renderPreview} nativeProps={{}} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            ),
-          })
+      <EuiColorPalettePicker
+        palettes={Object.entries(frame.globalPalette.availableColorFunctions).map(
+          ([id, palette]) => {
+            return {
+              value: id,
+              title: palette.title,
+              type: 'fixed',
+              palette: palette.getPreviewPalette(),
+            };
+          }
         )}
-        onChange={(value) => {
-          frame.globalPalette.setColorFunction(value);
-        }}
+        onChange={frame.globalPalette.setColorFunction}
+        valueOfSelected={frame.globalPalette.colorFunction.id || 'default'}
+        selectionDisplay={'palette'}
       />
       {frame.globalPalette.colorFunction.renderEditor && (
         <NativeRenderer
