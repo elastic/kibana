@@ -7,6 +7,15 @@
 import { newRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
+  CUSTOM_RULES_BTN,
+  RISK_SCORE,
+  RULE_NAME,
+  RULES_ROW,
+  RULES_TABLE,
+  SEVERITY,
+  SHOWING_RULES_TEXT,
+} from '../screens/alerts_detection_rules';
+import {
   ABOUT_FALSE_POSITIVES,
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_MITRE,
@@ -28,26 +37,12 @@ import {
   SCHEDULE_RUNS,
   SCHEDULE_STEP,
 } from '../screens/rule_details';
-import {
-  CUSTOM_RULES_BTN,
-  RISK_SCORE,
-  RULE_NAME,
-  RULES_ROW,
-  RULES_TABLE,
-  SEVERITY,
-  SHOWING_RULES_TEXT,
-} from '../screens/alert_detection_rules';
 
 import {
-  createAndActivateRule,
-  fillAboutRuleAndContinue,
-  fillDefineCustomRuleWithImportedQueryAndContinue,
-} from '../tasks/create_new_rule';
-import {
-  goToManageAlertDetectionRules,
+  goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
-} from '../tasks/detections';
+} from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
@@ -58,7 +53,12 @@ import {
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/alert_detection_rules';
+} from '../tasks/alerts_detection_rules';
+import {
+  createAndActivateRule,
+  fillAboutRuleAndContinue,
+  fillDefineCustomRuleWithImportedQueryAndContinue,
+} from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -77,7 +77,7 @@ describe('Detection rules, custom', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
     fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
@@ -172,7 +172,7 @@ describe('Deletes custom rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
   });
 
   after(() => {

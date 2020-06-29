@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALERT_ID } from '../screens/detections';
+import { ALERT_ID } from '../screens/alerts';
 import { PROVIDER_BADGE } from '../screens/timeline';
 
 import {
   expandFirstAlert,
   investigateFirstAlertInTimeline,
   waitForAlertsPanelToBeLoaded,
-} from '../tasks/detections';
+} from '../tasks/alerts';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { ALERTS_URL } from '../urls/navigation';
 
-describe('Detections timeline', () => {
+describe('Alerts timeline', () => {
   beforeEach(() => {
     esArchiverLoad('timeline_alerts');
     loginAndWaitForPage(ALERTS_URL);
