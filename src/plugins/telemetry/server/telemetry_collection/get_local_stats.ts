@@ -21,7 +21,6 @@ import {
   StatsGetter,
   StatsCollectionContext,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { merge } from 'lodash';
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
