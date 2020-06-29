@@ -63,7 +63,7 @@ const LabelInput = ({ value, onChange }: { value: string; onChange: (value: stri
     setInputValue(value);
   }, [value, setInputValue]);
 
-  const onChangeDebounced = _.debounce(onChange, 256);
+  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);
