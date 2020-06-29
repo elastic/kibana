@@ -54,7 +54,7 @@ export function useMultiContentContext<T extends object = { [key: string]: any }
  *
  * @param contentId The content id to be added to the "contents" map
  */
-export function useContent<T extends object = { [key: string]: any }>(contentId: keyof T) {
+export function useContent<T extends object, K extends keyof T>(contentId: K) {
   const { updateContentAt, saveSnapshotAndRemoveContent, getData } = useMultiContentContext<T>();
 
   const updateContent = useCallback(
@@ -71,8 +71,11 @@ export function useContent<T extends object = { [key: string]: any }>(contentId:
     };
   }, [contentId, saveSnapshotAndRemoveContent]);
 
+  const data = getData();
+  const defaultValue = data[contentId];
+
   return {
-    defaultValue: getData()[contentId]!,
+    defaultValue,
     updateContent,
     getData,
   };
