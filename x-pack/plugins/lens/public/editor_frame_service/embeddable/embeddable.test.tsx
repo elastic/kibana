@@ -5,12 +5,27 @@
  */
 
 import { Subject } from 'rxjs';
-import { Embeddable } from './embeddable';
+import {
+  Embeddable,
+  LensByValueInput,
+  LensByReferenceInput,
+  LensSavedObjectAttributes,
+  LensEmbeddableInput,
+} from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
-import { Query, TimeRange, Filter, TimefilterContract } from 'src/plugins/data/public';
+import {
+  Query,
+  TimeRange,
+  Filter,
+  TimefilterContract,
+  IndexPatternsContract,
+} from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
+import { AttributeService } from './attribute_service';
+import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { IBasePath } from '../../../../../../src/core/public';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -32,59 +47,86 @@ const savedVis: Document = {
   visualizationType: '',
 };
 
+// TODO: After #68719 is merged, use a mock from the embeddable plugin for this.
+const attributeServiceMockFromSavedVis = (
+  document: Document
+): AttributeService<LensSavedObjectAttributes, LensByValueInput, LensByReferenceInput> => {
+  const service = new AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >('lens', coreMock.createStart().savedObjects.client);
+  service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
+    return Promise.resolve({ ...document } as LensSavedObjectAttributes);
+  });
+  service.wrapAttributes = jest.fn();
+  return service;
+};
+
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
   let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
   let getTrigger: jest.Mock;
   let trigger: { exec: jest.Mock };
+  let basePath: IBasePath;
+  let attributeService: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >;
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
     expressionRenderer = jest.fn((_props) => null);
     trigger = { exec: jest.fn() };
     getTrigger = jest.fn(() => trigger);
+    attributeService = attributeServiceMockFromSavedVis(savedVis);
+    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    basePath = http.basePath;
   });
 
   afterEach(() => {
     mountpoint.remove();
   });
 
-  it('should render expression with expression renderer', () => {
+  it('should render expression with expression renderer', async () => {
     const embeddable = new Embeddable(
-      dataPluginMock.createSetupContract().query.timefilter.timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123' }
+      {} as LensEmbeddableInput
     );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(savedVis.expression);
   });
 
-  it('should re-render if new input is pushed', () => {
+  it('should re-render if new input is pushed', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
-      dataPluginMock.createSetupContract().query.timefilter.timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123' }
+      { id: '123' } as LensEmbeddableInput
     );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
     embeddable.updateInput({
@@ -96,45 +138,54 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
-  it('should pass context to embeddable', () => {
+  it('should pass context to embeddable', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
-      dataPluginMock.createSetupContract().query.timefilter.timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123', timeRange, query, filters }
+      { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
-    embeddable.render(mountpoint);
-
-    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
+    await embeddable.initializeSavedVis({
+      id: '123',
       timeRange,
       query,
       filters,
-    });
+    } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual(
+      expect.objectContaining({
+        timeRange,
+        query,
+        filters,
+      })
+    );
   });
 
-  it('should execute trigger on event from expression renderer', () => {
+  it('should execute trigger on event from expression renderer', async () => {
     const embeddable = new Embeddable(
-      dataPluginMock.createSetupContract().query.timefilter.timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123' }
+      { id: '123' } as LensEmbeddableInput
     );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
@@ -148,23 +199,29 @@ describe('embeddable', () => {
     );
   });
 
-  it('should not re-render if only change is in disabled filter', () => {
+  it('should not re-render if only change is in disabled filter', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
 
     const embeddable = new Embeddable(
-      dataPluginMock.createSetupContract().query.timefilter.timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123', timeRange, query, filters }
+      { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
+    await embeddable.initializeSavedVis({
+      id: '123',
+      timeRange,
+      query,
+      filters,
+    } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
     embeddable.updateInput({
@@ -176,7 +233,7 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
   });
 
-  it('should re-render on auto refresh fetch observable', () => {
+  it('should re-render on auto refresh fetch observable', async () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
@@ -187,17 +244,23 @@ describe('embeddable', () => {
     } as unknown) as TimefilterContract;
 
     const embeddable = new Embeddable(
-      timefilter,
-      expressionRenderer,
-      getTrigger,
       {
-        editPath: '',
-        editUrl: '',
+        timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
         editable: true,
-        savedVis,
+        getTrigger,
       },
-      { id: '123', timeRange, query, filters }
+      { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
+    await embeddable.initializeSavedVis({
+      id: '123',
+      timeRange,
+      query,
+      filters,
+    } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
     autoRefreshFetchSubject.next();

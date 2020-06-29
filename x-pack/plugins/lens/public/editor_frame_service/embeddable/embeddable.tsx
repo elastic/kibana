@@ -104,7 +104,6 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
 
     this.subscription = this.getInput$().subscribe((input) => {
-      // await this.documentChanged(input);
       this.onContainerStateChanged(input);
     });
 
@@ -134,11 +133,11 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     this.savedVis = {
       ...attributes,
       type: this.type,
-      id: 'test',
+      id: input.id,
     };
     this.initializeOutput();
     if (this.domNode) {
-      this.render(this.domNode!);
+      this.render(this.domNode);
     }
   }
 

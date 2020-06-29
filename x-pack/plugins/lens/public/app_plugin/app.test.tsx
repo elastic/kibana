@@ -124,7 +124,13 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+    redirectTo: (
+      id?: string,
+      documentByValue?: Document,
+      returnToOrigin?: boolean,
+      newlyCreated?: boolean,
+      embeddableIdToReplace?: string
+    ) => void;
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
@@ -163,7 +169,15 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
+      redirectTo: jest.fn(
+        (
+          id?: string,
+          documentByValue?: Document,
+          returnToOrigin?: boolean,
+          newlyCreated?: boolean,
+          embeddableIdToReplace?: string
+        ) => {}
+      ),
       onAppLeave: jest.fn(),
       history: createMemoryHistory(),
     } as unknown) as jest.Mocked<{
@@ -174,7 +188,13 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        documentByValue?: Document,
+        returnToOrigin?: boolean,
+        newlyCreated?: boolean,
+        embeddableIdToReplace?: string
+      ) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
