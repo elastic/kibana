@@ -241,6 +241,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiPopover
+          panelStyle={{
+            width: 400,
+          }}
           button={
             <EuiButtonEmpty
               iconType="arrowDown"

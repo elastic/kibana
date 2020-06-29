@@ -84,6 +84,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiPopover
+          panelStyle={{
+            width: 400,
+          }}
           button={
             <EuiButtonEmpty
               iconType="arrowDown"

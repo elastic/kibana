@@ -246,6 +246,8 @@ export function EditorFrame(props: EditorFrameProps) {
     activeVisualization,
     state.datasourceStates,
     state.visualization,
+    state.globalPalette.activePaletteId,
+    state.globalPalette.state,
     props.query,
     props.dateRange,
     props.filters,
