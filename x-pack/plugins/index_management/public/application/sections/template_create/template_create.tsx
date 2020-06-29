@@ -7,6 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
 
 import { TemplateForm } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
@@ -17,6 +19,8 @@ import { getTemplateDetailsLink } from '../../services/routing';
 export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const search = parse(useLocation().search.substring(1));
+  const isLegacy = Boolean(search.legacy);
 
   const onSave = async (template: TemplateDeserialized) => {
     const { name } = template;
@@ -61,6 +65,7 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
           isSaving={isSaving}
           saveError={saveError}
           clearSaveError={clearSaveError}
+          isLegacy={isLegacy}
         />
       </EuiPageContent>
     </EuiPageBody>

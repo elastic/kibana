@@ -22,10 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { serializers } from '../../../../shared_imports';
 
-import {
-  serializeLegacyTemplate,
-  serializeTemplate,
-} from '../../../../../common/lib/template_serialization';
+import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
 import { TemplateDeserialized, getTemplateParameter } from '../../../../../common';
 import { WizardSection } from '../template_form';
 
@@ -181,7 +178,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     );
 
     const RequestTab = () => {
-      const endpoint = `PUT _template/${name || '<templateName>'}`;
+      const esApiEndpoint = isLegacy ? '_template' : '_index_template';
+      const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}`;
       const templateString = JSON.stringify(serializedTemplate, null, 2);
       const request = `${endpoint}\n${templateString}`;
 
