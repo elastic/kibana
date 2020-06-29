@@ -28,8 +28,9 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { kibanaService } from '../state/kibana_service';
-import { fetchSnapshotCount, fetchIndexStatus, fetchPingHistogram } from '../state/api';
+import { fetchIndexStatus } from '../state/api';
 import { ObservabilityPluginSetup } from '../../../observability/public';
+import { fetchUptimeOverviewData } from './uptime_overview_fetcher';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -74,49 +75,7 @@ export class UptimePlugin
         const status = await fetchIndexStatus();
         return status.docCount > 0;
       },
-      fetchData: async ({ startTime, endTime, bucketSize }) => {
-        const snapshot = await fetchSnapshotCount({
-          dateRangeStart: startTime,
-          dateRangeEnd: endTime,
-        });
-        const pings = await fetchPingHistogram({ dateStart: startTime, dateEnd: endTime });
-        const response: UptimeFetchDataResponse = {
-          title: 'Uptime',
-          appLink: '/app/uptime#/', // Todo is there some sort of helper that handles subpaths?
-          stats: {
-            monitors: {
-              type: 'number',
-              label: 'Monitors',
-              value: snapshot.total,
-            },
-            up: {
-              type: 'number',
-              label: 'Up',
-              value: snapshot.up,
-            },
-            down: {
-              type: 'number',
-              label: 'Down',
-              value: snapshot.down,
-            },
-          },
-          series: {
-            up: {
-              label: 'Up',
-              coordinates: pings.histogram.map((p) => {
-                return { x: p.x!, y: p.upCount || 0 };
-              }),
-            },
-            down: {
-              label: 'Down',
-              coordinates: pings.histogram.map((p) => {
-                return { x: p.x!, y: p.downCount || 0 };
-              }),
-            },
-          },
-        };
-        return response;
-      },
+      fetchData: fetchUptimeOverviewData,
     });
 
     core.application.register({
