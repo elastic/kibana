@@ -1,5 +1,5 @@
 {
-  "id": "list-ip-range",
+  "id": "ip_range_list",
   "name": "Simple list with ip ranges",
   "description": "This list has ip ranges",
   "type": "ip_range"

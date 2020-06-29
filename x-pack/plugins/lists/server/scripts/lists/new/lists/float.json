@@ -1,5 +1,5 @@
 {
-  "id": "list-float",
+  "id": "float_list",
   "name": "Simple list with floats",
   "description": "This list has floats",
   "type": "float"

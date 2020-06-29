@@ -1,5 +1,5 @@
 {
-  "id": "list-date-range",
+  "id": "date_range_list",
   "name": "Simple list with date ranges",
   "description": "This list has date ranges",
   "type": "date_range"

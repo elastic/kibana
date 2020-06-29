@@ -1,5 +1,5 @@
 {
-  "id": "list-integer",
+  "id": "integer_list",
   "name": "Simple list with an integer",
   "description": "This list has integers",
   "type": "integer"
