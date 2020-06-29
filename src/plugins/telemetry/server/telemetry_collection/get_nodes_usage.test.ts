@@ -20,26 +20,6 @@
 import { getNodesUsage } from './get_nodes_usage';
 import { TIMEOUT } from './constants';
 
-const mockedNodesResponse = {
-  node_id: 'some_node_id',
-  timestamp: 1588617023177,
-  since: 1588616945163,
-  rest_actions: {
-    nodes_usage_action: 1,
-    create_index_action: 1,
-    document_get_action: 1,
-    search_action: 19,
-    nodes_info_action: 36,
-  },
-  aggregations: {
-    terms: {
-      bytes: 2,
-    },
-    scripted_metric: {
-      other: 7,
-    },
-  },
-};
 const mockedNodesFetchResponse = {
   cluster_name: 'test cluster',
   nodes: {
