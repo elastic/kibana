@@ -216,12 +216,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.maxSourceZoom;
   }
 
-  getFeatureProperties(
-    id: string | number | undefined,
-    mbProperties: GeoJsonProperties
-  ): GeoJsonProperties | null {
-    return mbProperties;
-  }
   getFeatureGeometry(
     id: string | number | undefined,
     mbProperties: GeoJsonProperties
