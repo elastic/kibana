@@ -260,12 +260,12 @@ describe(`POST ${URL}`, () => {
             'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
             'Content-Type: application/ndjson',
             '',
-            '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"existing"}]}',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
             '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
             '--EXAMPLE',
             'Content-Disposition: form-data; name="retries"',
             '',
-            '[{"type":"visualization","id":"my-vis","destinationId":"new-id-1"},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
+            '[{"type":"visualization","id":"my-vis","destinationId":"new-id-1","replaceReferences":[{"type":"index-pattern","from":"my-pattern","to":"existing"}]},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
             '--EXAMPLE--',
           ].join('\r\n')
         )
