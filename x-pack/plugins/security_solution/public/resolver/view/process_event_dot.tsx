@@ -285,7 +285,7 @@ const UnstyledProcessEventDot = React.memo(
      */
     const [left, top] = applyMatrix3(position, projectionMatrix);
 
-    const [magFactorX] = projectionMatrix;
+    const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
     const selfId = adjacentNodeMap.self;
@@ -295,8 +295,8 @@ const UnstyledProcessEventDot = React.memo(
     // Entity ID of self
     const selfEntityId = eventModel.entityId(event);
 
-    const isShowingEventActions = magFactorX > 0.8;
-    const isShowingDescriptionText = magFactorX >= 0.55;
+    const isShowingEventActions = xScale > 0.8;
+    const isShowingDescriptionText = xScale >= 0.55;
 
     /**
      * As the resolver zooms and buttons and text change visibility, we look to keep the overall container properly vertically aligned
@@ -328,26 +328,24 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * As the scale changes and button visibility toggles on the graph, these offsets help scale to keep the nodes centered on the edge
      */
-    const nodeXOffsetValue = isShowingEventActions
-      ? -0.147413
-      : -0.147413 - (magFactorX - 0.5) * 0.08;
+    const nodeXOffsetValue = isShowingEventActions ? -0.147413 : -0.147413 - (xScale - 0.5) * 0.08;
     const nodeYOffsetValue = isShowingEventActions
       ? -0.53684
-      : -0.53684 + (-magFactorX * 0.2 * (1 - magFactorX)) / magFactorX;
+      : -0.53684 + (-xScale * 0.2 * (1 - xScale)) / xScale;
 
-    const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * magFactorX;
-    const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * magFactorX;
+    const processNodeViewXOffset = nodeXOffsetValue * logicalProcessNodeViewWidth * xScale;
+    const processNodeViewYOffset = nodeYOffsetValue * logicalProcessNodeViewHeight * xScale;
 
     const nodeViewportStyle = useMemo(
       () => ({
         left: `${left + processNodeViewXOffset}px`,
         top: `${top + processNodeViewYOffset}px`,
         // Width of symbol viewport scaled to fit
-        width: `${logicalProcessNodeViewWidth * magFactorX}px`,
+        width: `${logicalProcessNodeViewWidth * xScale}px`,
         // Height according to symbol viewbox AR
-        height: `${logicalProcessNodeViewHeight * magFactorX}px`,
+        height: `${logicalProcessNodeViewHeight * xScale}px`,
       }),
-      [left, magFactorX, processNodeViewXOffset, processNodeViewYOffset, top]
+      [left, xScale, processNodeViewXOffset, processNodeViewYOffset, top]
     );
 
     /**
@@ -356,7 +354,7 @@ const UnstyledProcessEventDot = React.memo(
      *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
      *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
      */
-    const scaledTypeSize = calculateResolverFontSize(magFactorX, 18.75, 12.5);
+    const scaledTypeSize = calculateResolverFontSize(xScale, 18.75, 12.5);
 
     const markerBaseSize = 15;
     const markerSize = markerBaseSize;
@@ -583,7 +581,7 @@ const UnstyledProcessEventDot = React.memo(
             {descriptionText}
           </StyledDescriptionText>
           <div
-            className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+            className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
             data-test-subject="nodeLabel"
             id={labelId}
             onClick={handleClick}
@@ -602,8 +600,8 @@ const UnstyledProcessEventDot = React.memo(
               id={labelId}
               size="s"
               style={{
-                maxHeight: `${Math.min(26 + magFactorX * 3, 32)}px`,
-                maxWidth: `${isShowingEventActions ? 400 : 210 * magFactorX}px`,
+                maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
+                maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
               title={eventModel.eventName(event)}
