@@ -1,0 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+
+const STORAGE_KEY = 'lens-settings';
+
+export const readFromStorage = (storage: IStorageWrapper, key: string) => {
+  const data = storage.get(STORAGE_KEY);
+  return data && data[key];
+};
+export const writeToStorage = (storage: IStorageWrapper, key: string, value: string) => {
+  storage.set(STORAGE_KEY, { [key]: value });
+};
