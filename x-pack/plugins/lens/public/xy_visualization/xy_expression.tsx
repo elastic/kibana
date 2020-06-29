@@ -40,7 +40,7 @@ import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
-import { fittingFunctions, getFitOptions } from './fitting_functions';
+import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -96,8 +96,8 @@ export const xyChart: ExpressionFunctionDefinition<
     },
     fittingFunction: {
       types: ['string'],
-      options: [...fittingFunctions],
-      help: i18n.translate('xpack.lens.xyChart.fittingFuncction.help', {
+      options: [...fittingFunctionDefinitions.map(({ id }) => id)],
+      help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
     },

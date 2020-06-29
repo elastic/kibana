@@ -40,10 +40,6 @@ describe('XY Config panels', () => {
   });
 
   describe('LayerContextMenu', () => {
-    test.skip('allows toggling of legend visibility', () => {});
-    test.skip('allows changing legend position', () => {});
-    test.skip('allows toggling the y axis gridlines', () => {});
-    test.skip('allows toggling the x axis gridlines', () => {});
     test('enables stacked chart types even when there is no split series', () => {
       const state = testState();
       const component = mount(

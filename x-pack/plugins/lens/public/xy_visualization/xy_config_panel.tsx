@@ -21,11 +21,7 @@ import { State, SeriesType, visualizationTypes } from './types';
 import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import {
-  FittingFunction,
-  fittingFunctionDescriptions,
-  fittingFunctionTitles,
-} from './fitting_functions';
+import { fittingFunctionDefinitions } from './fitting_functions';
 
 import './xy_config_panel.scss';
 
@@ -88,7 +84,10 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const [open, setOpen] = useState(false);
   const hasNonBarSeries = props.state?.layers.some(
-    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
+    (layer) =>
+      layer.seriesType === 'line' ||
+      layer.seriesType === 'area' ||
+      layer.seriesType === 'area_stacked'
   );
   return (
     <EuiFlexGroup justifyContent="flexEnd">
@@ -115,7 +114,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-              defaultMessage: 'Fitting function',
+              defaultMessage: 'Missing values',
             })}
             helpText={
               !hasNonBarSeries &&
@@ -127,19 +126,18 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <EuiSuperSelect
               compressed
               disabled={!hasNonBarSeries}
-              options={(Object.entries(fittingFunctionDescriptions) as Array<
-                [FittingFunction, string]
-              >).map(([id, description]) => {
+              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                 return {
                   value: id,
-                  inputDisplay: (
+                  dropdownDisplay: (
                     <>
-                      <strong>{fittingFunctionTitles[id]}</strong>
-                      <EuiText size="s" color="subdued">
-                        <p className="euiTextColor--subdued">{description}</p>
+                      <strong>{title}</strong>
+                      <EuiText size="xs" color="subdued">
+                        <p>{description}</p>
                       </EuiText>
                     </>
                   ),
+                  inputDisplay: title,
                 };
               })}
               valueOfSelected={props.state?.fittingFunction || 'None'}
