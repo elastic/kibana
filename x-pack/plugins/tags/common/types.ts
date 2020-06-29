@@ -20,3 +20,11 @@ export interface RawTag {
 export interface Tag extends RawTag {
   id: string;
 }
+
+export interface TagsClientCreateParams {
+  tag: Pick<RawTag, 'title' | 'description' | 'color'>;
+}
+
+export interface ITagsClient {
+  create(params: TagsClientCreateParams): Promise<Tag>;
+}

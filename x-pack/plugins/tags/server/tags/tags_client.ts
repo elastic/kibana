@@ -6,7 +6,7 @@
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { RawTag, Tag } from '../../common';
+import { RawTag, Tag, ITagsClient, TagsClientCreateParams } from '../../common';
 import { validateTagTitle, validateTagDescription, validateTagColor } from './validators';
 
 export type TagSavedObject = SavedObject<RawTag>;
@@ -17,11 +17,7 @@ export interface TagsClientParams {
   user: AuthenticatedUser | null;
 }
 
-export interface TagsClientCreateParams {
-  tag: Pick<RawTag, 'title' | 'description' | 'color'>;
-}
-
-export class TagsClient {
+export class TagsClient implements ITagsClient {
   public readonly type = 'tag';
 
   constructor(private readonly params: TagsClientParams) {}
