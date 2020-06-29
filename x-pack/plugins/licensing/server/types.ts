@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IClusterClient } from 'src/core/server';
+import { ILegacyClusterClient } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -40,11 +40,18 @@ export interface RawLicense {
   mode: LicenseType;
 }
 
+/**
+ * The APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing.
+ * @public
+ */
+export interface LicensingRequestHandlerContext {
+  featureUsage: FeatureUsageServiceStart;
+  license: ILicense;
+}
+
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    licensing: {
-      license: ILicense;
-    };
+    licensing: LicensingRequestHandlerContext;
   }
 }
 
@@ -67,7 +74,7 @@ export interface LicensingPluginSetup {
    * @deprecated in favour of the counterpart provided from start contract
    */
   createLicensePoller: (
-    clusterClient: IClusterClient,
+    clusterClient: ILegacyClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
   /**
@@ -92,7 +99,7 @@ export interface LicensingPluginStart {
    * given polling frequency.
    */
   createLicensePoller: (
-    clusterClient: IClusterClient,
+    clusterClient: ILegacyClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
   /**

@@ -23,6 +23,12 @@ describe('when on the policies page', () => {
     render = () => mockedContext.render(<PolicyList />);
   });
 
+  it('should NOT display timeline', async () => {
+    const renderResult = render();
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
   it('should show the empty state', async () => {
     const renderResult = render();
     const table = await renderResult.findByTestId('emptyPolicyTable');
