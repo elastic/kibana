@@ -400,7 +400,7 @@ const getUngroupedResults = async (query: object, callCluster: AlertServices['ca
   return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
 };
 
-const getGroupedResults = async (query: any, callCluster: AlertServices['callCluster']) => {
+const getGroupedResults = async (query: object, callCluster: AlertServices['callCluster']) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
 
