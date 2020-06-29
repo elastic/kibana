@@ -4,40 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiResizeObserver,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { FC, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
-import { throttle } from 'lodash';
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
 import { MlStartDependencies } from '../../plugin';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from './anomaly_swimlane_embeddable';
-import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
-
-const RESIZE_THROTTLE_TIME_MS = 500;
+import {
+  isViewBySwimLaneData,
+  SwimlaneContainer,
+} from '../../application/explorer/swimlane_container';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
-  onOutputChange?: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
@@ -45,22 +36,25 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   embeddableInput,
   services,
   refresh,
+  onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
+  const [fromPage, setFromPage] = useState<number>(1);
 
-  const [swimlaneType, swimlaneData, timeBuckets, error] = useSwimlaneInputResolver(
+  const [
+    swimlaneType,
+    swimlaneData,
+    perPage,
+    setPerPage,
+    timeBuckets,
+    error,
+  ] = useSwimlaneInputResolver(
     embeddableInput,
+    onOutputChange,
     refresh,
     services,
-    chartWidth
-  );
-
-  const onResize = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      const labelWidth = 200;
-      setChartWidth(e.width - labelWidth);
-    }, RESIZE_THROTTLE_TIME_MS),
-    []
+    chartWidth,
+    fromPage
   );
 
   if (error) {
@@ -82,45 +76,27 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   }
 
   return (
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <div
-          style={{ width: '100%', height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-          data-test-subj={`mlMaxAnomalyScoreEmbeddable_${id}`}
-          ref={(el) => {
-            resizeRef(el);
-          }}
-        >
-          <div style={{ width: '100%' }}>
-            <EuiSpacer size="m" />
-
-            {chartWidth > 0 && swimlaneData && swimlaneType ? (
-              <EuiText color="subdued" size="s" data-test-subj="mlAnomalySwimlaneEmbeddableWrapper">
-                <MlTooltipComponent>
-                  {(tooltipService) => (
-                    <ExplorerSwimlane
-                      chartWidth={chartWidth}
-                      timeBuckets={timeBuckets}
-                      swimlaneData={swimlaneData}
-                      swimlaneType={swimlaneType as SwimlaneType}
-                      tooltipService={tooltipService}
-                    />
-                  )}
-                </MlTooltipComponent>
-              </EuiText>
-            ) : (
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingChart
-                    size="xl"
-                    data-test-subj={`loading_mlMaxAnomalyScoreEmbeddable_${id}`}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </div>
-        </div>
-      )}
-    </EuiResizeObserver>
+    <div style={{ width: '100%' }}>
+      <SwimlaneContainer
+        timeBuckets={timeBuckets}
+        swimlaneData={swimlaneData!}
+        swimlaneType={swimlaneType as SwimlaneType}
+        fromPage={fromPage}
+        perPage={perPage}
+        swimlaneLimit={isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined}
+        onResize={(width) => {
+          setChartWidth(width);
+        }}
+        onPaginationChange={(update) => {
+          if (update.fromPage) {
+            setFromPage(update.fromPage);
+          }
+          if (update.perPage) {
+            setFromPage(1);
+            setPerPage(update.perPage);
+          }
+        }}
+      />
+    </div>
   );
 };

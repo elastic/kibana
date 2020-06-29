@@ -16,18 +16,19 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { explorerService } from './explorer_dashboard_service';
 
 interface SwimLanePaginationProps {
   fromPage?: number;
   perPage?: number;
   cardinality: number;
+  onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
 }
 
 export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   cardinality,
   fromPage = 1,
   perPage = 10,
+  onPaginationChange,
 }) => {
   const componentFromPage = fromPage - 1;
 
@@ -37,11 +38,11 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const goToPage = useCallback((pageNumber: number) => {
-    explorerService.setViewByFromPage(pageNumber + 1);
+    onPaginationChange({ fromPage: pageNumber + 1 });
   }, []);
 
   const setPerPage = useCallback((perPageUpdate: number) => {
-    explorerService.setViewByPerPage(perPageUpdate);
+    onPaginationChange({ perPage: perPageUpdate });
   }, []);
 
   const pageCount = Math.ceil(cardinality / perPage);

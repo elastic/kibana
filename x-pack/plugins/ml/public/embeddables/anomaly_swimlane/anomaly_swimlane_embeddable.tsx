@@ -40,7 +40,7 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
   swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
@@ -58,7 +58,7 @@ export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
   swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 }
 
 export interface AnomalySwimlaneServices {
@@ -101,14 +101,20 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
+    const I18nContext = this.services[0].i18n.Context;
+
     ReactDOM.render(
-      <ExplorerSwimlaneContainer
-        id={this.input.id}
-        embeddableInput={this.getInput$()}
-        services={this.services}
-        refresh={this.reload$.asObservable()}
-        onOutputChange={(output) => this.updateOutput(output)}
-      />,
+      <I18nContext>
+        <ExplorerSwimlaneContainer
+          id={this.input.id}
+          embeddableInput={this.getInput$()}
+          services={this.services}
+          refresh={this.reload$.asObservable()}
+          onOutputChange={(output) => {
+            this.updateInput(output);
+          }}
+        />
+      </I18nContext>,
       node
     );
   }

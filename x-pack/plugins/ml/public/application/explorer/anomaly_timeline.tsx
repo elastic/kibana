@@ -334,6 +334,14 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     fromPage={viewByFromPage}
                     perPage={viewByPerPage}
                     swimlaneLimit={swimlaneLimit}
+                    onPaginationChange={({ perPage: perPageUpdate, fromPage: fromPageUpdate }) => {
+                      if (perPageUpdate) {
+                        explorerService.setViewByPerPage(perPageUpdate);
+                      }
+                      if (fromPageUpdate) {
+                        explorerService.setViewByFromPage(fromPageUpdate);
+                      }
+                    }}
                   />
                 </div>
               </>

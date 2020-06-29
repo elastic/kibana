@@ -27,7 +27,7 @@ export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;
   influencers: string[];
   initialInput?: Partial<
-    Pick<AnomalySwimlaneEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'limit'>
+    Pick<AnomalySwimlaneEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'>
   >;
   onCreate: (swimlaneProps: {
     panelTitle: string;
@@ -37,11 +37,6 @@ export interface AnomalySwimlaneInitializerProps {
   }) => void;
   onCancel: () => void;
 }
-
-const limitOptions = [5, 10, 25, 50].map((limit) => ({
-  value: limit,
-  text: `${limit}`,
-}));
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
   defaultTitle,
@@ -55,7 +50,6 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
   );
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
-  const [limit, setLimit] = useState(initialInput?.limit ?? 5);
 
   const swimlaneTypeOptions = [
     {
@@ -154,19 +148,6 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   onChange={(e) => setViewBySwimlaneFieldName(e.target.value)}
                 />
               </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage id="xpack.ml.explorer.limitLabel" defaultMessage="Limit" />
-                }
-              >
-                <EuiSelect
-                  id="limit"
-                  name="limit"
-                  options={limitOptions}
-                  value={limit}
-                  onChange={(e) => setLimit(Number(e.target.value))}
-                />
-              </EuiFormRow>
             </>
           )}
         </EuiForm>
@@ -186,7 +167,6 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             panelTitle,
             swimlaneType,
             viewBy: viewBySwimlaneFieldName,
-            limit,
           })}
           fill
         >

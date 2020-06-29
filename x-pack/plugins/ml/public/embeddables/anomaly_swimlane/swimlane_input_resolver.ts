@@ -21,18 +21,24 @@ import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import {
   AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from './anomaly_swimlane_embeddable';
 import { MlStartDependencies } from '../../plugin';
-import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
+import {
+  ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIMLANE_TYPE,
+  SwimlaneType,
+} from '../../application/explorer/explorer_constants';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
+import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 
-const RESIZE_IGNORED_DIFF_PX = 20;
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 function getJobsObservable(
@@ -46,19 +52,33 @@ function getJobsObservable(
   );
 }
 
+export const EMBEDDABLE_DEFAULT_PER_PAGE = 10;
+
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
+  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
   refresh: Observable<any>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
-  chartWidth: number
-): [string | undefined, OverallSwimlaneData | undefined, TimeBuckets, Error | null | undefined] {
+  chartWidth: number,
+  fromPage: number
+): [
+  string | undefined,
+  OverallSwimlaneData | undefined,
+  number,
+  (perPage: number) => void,
+  TimeBuckets,
+  Error | null | undefined
+] {
   const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
   const [error, setError] = useState<Error | null>();
+  const [perPage, setPerPage] = useState<number | undefined>();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
+  const fromPage$ = useMemo(() => new Subject<number>(), []);
+  const perPage$ = useMemo(() => new Subject<number>(), []);
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
@@ -73,25 +93,28 @@ export function useSwimlaneInputResolver(
     const subscription = combineLatest([
       getJobsObservable(embeddableInput, anomalyDetectorService),
       embeddableInput,
-      chartWidth$.pipe(
-        skipWhile((v) => !v),
-        distinctUntilChanged((prev, curr) => {
-          // emit only if the width has been changed significantly
-          return Math.abs(curr - prev) < RESIZE_IGNORED_DIFF_PX;
-        })
+      chartWidth$.pipe(skipWhile((v) => !v)),
+      fromPage$,
+      perPage$.pipe(
+        startWith(undefined),
+        // no need to emit when the initial value has been set
+        distinctUntilChanged(
+          (prev, curr) => prev === undefined && curr === EMBEDDABLE_DEFAULT_PER_PAGE
+        )
       ),
       refresh.pipe(startWith(null)),
     ])
       .pipe(
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, swimlaneContainerWidth]) => {
+        switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
           const {
             viewBy,
             swimlaneType: swimlaneTypeInput,
-            limit,
+            perPage: perPageInput,
             timeRange,
             filters,
             query,
+            viewMode,
           } = input;
 
           explorerService.setTimeRange(timeRange);
@@ -123,15 +146,27 @@ export function useSwimlaneInputResolver(
               const { earliest, latest } = overallSwimlaneData;
 
               if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
+                if (perPageFromState === undefined) {
+                  // set initial pagination from the input or default one
+                  setPerPage(perPageInput ?? EMBEDDABLE_DEFAULT_PER_PAGE);
+                }
+
+                if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
+                  // store per page value when the dashboard is in the edit mode
+                  onOutputChange({ perPage: perPageFromState });
+                }
+
                 return from(
                   explorerService.loadViewBySwimlane(
                     [],
                     { earliest, latest },
                     explorerJobs,
                     viewBy!,
-                    limit!,
-                    10,
-                    0,
+                    isViewBySwimLaneData(swimlaneData)
+                      ? swimlaneData.cardinality
+                      : ANOMALY_SWIM_LANE_HARD_LIMIT,
+                    perPageFromState ?? perPageInput ?? EMBEDDABLE_DEFAULT_PER_PAGE,
+                    fromPageInput,
                     swimlaneContainerWidth,
                     appliedFilters
                   )
@@ -167,10 +202,26 @@ export function useSwimlaneInputResolver(
   }, []);
 
   useEffect(() => {
+    fromPage$.next(fromPage);
+  }, [fromPage]);
+
+  useEffect(() => {
+    if (perPage === undefined) return;
+    perPage$.next(perPage);
+  }, [perPage]);
+
+  useEffect(() => {
     chartWidth$.next(chartWidth);
   }, [chartWidth]);
 
-  return [swimlaneType, swimlaneData, timeBuckets, error];
+  return [
+    swimlaneType,
+    swimlaneData,
+    perPage ?? EMBEDDABLE_DEFAULT_PER_PAGE,
+    setPerPage,
+    timeBuckets,
+    error,
+  ];
 }
 
 export function processFilters(filters: Filter[], query: Query) {

@@ -5,7 +5,13 @@
  */
 
 import React, { FC, useCallback, useState } from 'react';
-import { EuiText, EuiLoadingChart, EuiResizeObserver } from '@elastic/eui';
+import {
+  EuiText,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { throttle } from 'lodash';
 import {
@@ -24,14 +30,28 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
 }
 
+/**
+ * Anomaly swim lane container responsible for handling resizing, pagination and injecting
+ * tooltip service.
+ *
+ * @param children
+ * @param onResize
+ * @param perPage
+ * @param fromPage
+ * @param swimlaneLimit
+ * @param onPaginationChange
+ * @param props
+ * @constructor
+ */
 export const SwimlaneContainer: FC<
   Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService'> & {
     onResize: (width: number) => void;
     fromPage?: number;
     perPage?: number;
     swimlaneLimit?: number;
+    onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
   }
-> = ({ children, onResize, perPage, fromPage, swimlaneLimit, ...props }) => {
+> = ({ children, onResize, perPage, fromPage, swimlaneLimit, onPaginationChange, ...props }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const resizeHandler = useCallback(
@@ -47,28 +67,28 @@ export const SwimlaneContainer: FC<
   );
 
   const showSwimlane =
-    props.swimlaneData !== null &&
-    props.swimlaneData.laneLabels &&
-    props.swimlaneData.laneLabels.length > 0;
+    props.swimlaneData && props.swimlaneData.laneLabels && props.swimlaneData.laneLabels.length > 0;
 
   const isPaginationVisible =
     swimlaneLimit !== undefined &&
+    onPaginationChange &&
     props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
     fromPage &&
-    perPage &&
-    // only render pagination when there is more than 1 page
-    swimlaneLimit > perPage * fromPage;
+    perPage;
 
   return (
     <>
       <EuiResizeObserver onResize={resizeHandler}>
         {(resizeRef) => (
-          <div
+          <EuiFlexGroup
+            gutterSize={'none'}
+            direction={'column'}
+            style={{ width: '100%', height: '100%', overflowY: 'hidden', overflowX: 'hidden' }}
             ref={(el) => {
               resizeRef(el);
             }}
           >
-            <div style={{ width: '100%' }}>
+            <EuiFlexItem style={{ width: '100%', overflowY: 'auto' }} grow={false}>
               <EuiText color="subdued" size="s">
                 {showSwimlane ? (
                   <MlTooltipComponent>
@@ -86,13 +106,20 @@ export const SwimlaneContainer: FC<
                   </EuiText>
                 )}
               </EuiText>
-            </div>
-          </div>
+            </EuiFlexItem>
+            {isPaginationVisible && (
+              <EuiFlexItem grow={false}>
+                <SwimLanePagination
+                  cardinality={swimlaneLimit!}
+                  fromPage={fromPage}
+                  perPage={perPage}
+                  onPaginationChange={onPaginationChange!}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         )}
       </EuiResizeObserver>
-      {isPaginationVisible && (
-        <SwimLanePagination cardinality={swimlaneLimit!} fromPage={fromPage} perPage={perPage} />
-      )}
     </>
   );
 };
