@@ -83,7 +83,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
             label={
               <FormattedMessage
                 id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNameInputLabel"
-                defaultMessage="Configuration name"
+                defaultMessage="Integration name"
               />
             }
           >

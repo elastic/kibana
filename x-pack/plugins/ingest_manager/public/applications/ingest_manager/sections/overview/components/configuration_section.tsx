@@ -64,7 +64,7 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPackageConfigTitle"
-                  defaultMessage="Total used integrations"
+                  defaultMessage="Total integrations used"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
