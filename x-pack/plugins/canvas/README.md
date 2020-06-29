@@ -99,7 +99,7 @@ const canvasFunctions = [
 ];
 ```
 
-Then, in the `setup` method of your plugin, you can add this new function definition to Canvas.
+Then, in the `setup` method of your plugin, you can add this new function definition to Canvas:
 
 ```typescript
 setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
