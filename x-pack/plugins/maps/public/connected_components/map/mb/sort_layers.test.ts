@@ -61,19 +61,19 @@ class MockMbMap {
 
 class MockMapLayer {
   private readonly _id: string;
-  private readonly _bubbleLabelsToTop: boolean;
+  private readonly _labelsOnTop: boolean;
 
-  constructor(id: string, bubbleLabelsToTop: boolean) {
+  constructor(id: string, labelsOnTop: boolean) {
     this._id = id;
-    this._bubbleLabelsToTop = bubbleLabelsToTop;
+    this._labelsOnTop = labelsOnTop;
   }
 
   ownsMbLayerId(mbLayerId: string) {
     return mbLayerId.startsWith(this._id);
   }
 
-  bubbleLabelsToTop() {
-    return this._bubbleLabelsToTop;
+  labelsOnTop() {
+    return this._labelsOnTop;
   }
 
   getId() {

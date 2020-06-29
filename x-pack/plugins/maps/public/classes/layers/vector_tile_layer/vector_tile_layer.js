@@ -278,7 +278,11 @@ export class VectorTileLayer extends TileLayer {
     });
   }
 
-  bubbleLabelsToTop() {
+  labelsOnTop() {
+    return !!this._descriptor.labelsOnTop;
+  }
+
+  supportsLabelsOnTop() {
     return true;
   }
 }

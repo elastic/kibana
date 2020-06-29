@@ -169,6 +169,7 @@ export type LayerDescriptor = {
   alpha?: number;
   id: string;
   label?: string | null;
+  labelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
   sourceDescriptor: SourceDescriptor | null;

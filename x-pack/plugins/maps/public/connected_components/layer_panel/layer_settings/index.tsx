@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { LayerSettings } from './layer_settings';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
@@ -12,28 +13,24 @@ import {
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
+  updateLabelsOnTop,
 } from '../../../actions';
-import { MAX_ZOOM } from '../../../../common/constants';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    minVisibilityZoom: selectedLayer.getMinSourceZoom(),
-    maxVisibilityZoom: MAX_ZOOM,
-    alpha: selectedLayer.getAlpha(),
-    label: selectedLayer.getLabel(),
-    layerId: selectedLayer.getId(),
-    maxZoom: selectedLayer.getMaxZoom(),
-    minZoom: selectedLayer.getMinZoom(),
+    layer: selectedLayer ? selectedLayer : null,
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
+    updateLabelsOnTop: (id, alpha) => dispatch(updateLabelsOnTop(id, alpha)),
   };
 }
 
