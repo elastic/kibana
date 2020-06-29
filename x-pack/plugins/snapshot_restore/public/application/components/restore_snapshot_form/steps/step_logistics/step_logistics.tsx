@@ -368,7 +368,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesTitle"
-                defaultMessage="Rename indices"
+                defaultMessage="Rename indices and data streams"
               />
             </h3>
           </EuiTitle>
@@ -376,7 +376,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesDescription"
-            defaultMessage="Renames indices on restore."
+            defaultMessage="Renames indices and data streams on restore."
           />
         }
         fullWidth
@@ -387,7 +387,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesLabel"
-                  defaultMessage="Rename indices"
+                  defaultMessage="Rename indices and data streams"
                 />
               }
               checked={isRenamingIndices}
@@ -430,7 +430,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     >
                       <EuiFieldText
                         value={renamePattern}
-                        placeholder="index_(.+)"
+                        placeholder="data_(.+)"
                         onChange={(e) => {
                           setCachedRestoreSettings({
                             ...cachedRestoreSettings,
@@ -456,7 +456,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     >
                       <EuiFieldText
                         value={renameReplacement}
-                        placeholder="restored_index_$1"
+                        placeholder="restored_data_$1"
                         onChange={(e) => {
                           setCachedRestoreSettings({
                             ...cachedRestoreSettings,
