@@ -22,7 +22,7 @@ import {
   uniquePidForProcess,
 } from '../../models/process_event';
 import { factory as indexedProcessTreeFactory } from '../../models/indexed_process_tree';
-import { isEqual } from '../../lib/aabb';
+import { isEqual } from '../../models/aabb';
 
 import {
   ResolverEvent,
