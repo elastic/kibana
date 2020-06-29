@@ -14,9 +14,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-
+import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { getAnnotationsForAll, getLogEntryRateCombinedSeries } from '../helpers/data_formatters';
+import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
@@ -39,6 +41,23 @@ export const AnomaliesResults: React.FunctionComponent<{
         })
       : false;
   }, [results]);
+
+  const logEntryRateSeries = useMemo(
+    () => (results && results.histogramBuckets ? getLogEntryRateCombinedSeries(results) : []),
+    [results]
+  );
+  const anomalyAnnotations = useMemo(
+    () =>
+      results && results.histogramBuckets
+        ? getAnnotationsForAll(results)
+        : {
+            warning: [],
+            minor: [],
+            major: [],
+            critical: [],
+          },
+    [results]
+  );
 
   return (
     <>
@@ -88,6 +107,19 @@ export const AnomaliesResults: React.FunctionComponent<{
           />
         ) : (
           <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <AnomaliesChart
+                  chartId="overall"
+                  setTimeRange={setTimeRange}
+                  timeRange={timeRange}
+                  series={logEntryRateSeries}
+                  annotations={anomalyAnnotations}
+                  renderAnnotationTooltip={renderAnnotationTooltip}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
             <AnomaliesTable
               results={results}
               setTimeRange={setTimeRange}
@@ -111,3 +143,49 @@ const loadingAriaLabel = i18n.translate(
 );
 
 const LoadingOverlayContent = () => <EuiLoadingSpinner size="xl" aria-label={loadingAriaLabel} />;
+
+interface ParsedAnnotationDetails {
+  anomalyScoresByPartition: Array<{ partitionName: string; maximumAnomalyScore: number }>;
+}
+
+const overallAnomalyScoreLabel = i18n.translate(
+  'xpack.infra.logs.analysis.overallAnomalyChartMaxScoresLabel',
+  {
+    defaultMessage: 'Max anomaly scores:',
+  }
+);
+
+const AnnotationTooltip: React.FunctionComponent<{ details: string }> = ({ details }) => {
+  const parsedDetails: ParsedAnnotationDetails = JSON.parse(details);
+  return (
+    <TooltipWrapper>
+      <span>
+        <b>{overallAnomalyScoreLabel}</b>
+      </span>
+      <ul>
+        {parsedDetails.anomalyScoresByPartition.map(({ partitionName, maximumAnomalyScore }) => {
+          return (
+            <li key={`overall-anomaly-chart-${partitionName}`}>
+              <span>
+                {`${partitionName}: `}
+                <b>{maximumAnomalyScore}</b>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </TooltipWrapper>
+  );
+};
+
+const renderAnnotationTooltip = (details?: string) => {
+  // Note: Seems to be necessary to get things typed correctly all the way through to elastic-charts components
+  if (!details) {
+    return <div />;
+  }
+  return <AnnotationTooltip details={details} />;
+};
+
+const TooltipWrapper = euiStyled('div')`
+  white-space: nowrap;
+`;
