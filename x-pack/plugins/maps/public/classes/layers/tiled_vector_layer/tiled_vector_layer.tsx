@@ -199,7 +199,6 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   getFeatureById(id: string | number): Feature | null {
-    // Cannot return the feature
     return null;
   }
 }
