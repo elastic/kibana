@@ -172,7 +172,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   private navigate(appId: string, params: string) {
     if (this.props.stateTransfer && this.props.originatingApp) {
-      this.props.stateTransfer.navigateToWithOriginatingApp(appId, {
+      this.props.stateTransfer.navigateToEditor(appId, {
         path: params,
         state: { originatingApp: this.props.originatingApp },
       });
