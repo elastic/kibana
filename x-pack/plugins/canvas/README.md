@@ -202,7 +202,7 @@ const serverFunctions = [
 ];
 ```
 
-And then in our setup method, register it with the Expressions plugin
+And then in our setup method, register it with the Expressions plugin:
 
 ```typescript
 setup(core: CoreSetup, plugins: CanvasExamplePluginsSetup) {
