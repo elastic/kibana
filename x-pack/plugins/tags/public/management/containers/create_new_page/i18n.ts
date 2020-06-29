@@ -9,3 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const txtTitle = i18n.translate('xpack.tags.creanteNewPage.title', {
   defaultMessage: 'Create a tag',
 });
+
+export const txtSubtitle = i18n.translate('xpack.tags.creanteNewPage.subtitle', {
+  defaultMessage: 'Create a descriptive colorful tag to better organize your content.',
+});

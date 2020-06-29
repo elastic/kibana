@@ -5,24 +5,14 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { EuiButton } from '@elastic/eui';
 import { Page } from '../../components/page';
-import { txtTitle, txtSubtitle, txtCreateATag } from './i18n';
+import { txtTitle, txtSubtitle } from './i18n';
+import { CreateNewTagForm } from '../create_new_tag_form';
 
 export const CreateNewPage: React.FC = () => {
   return (
-    <Page
-      id={'CreateNew'}
-      title={txtTitle}
-      subtitle={<p>{txtSubtitle}</p>}
-      callToAction={
-        <Link to={'/create'}>
-          <EuiButton fill>{txtCreateATag}</EuiButton>
-        </Link>
-      }
-    >
-      <div>Crate new ... k</div>
+    <Page id={'CreateNew'} title={txtTitle} subtitle={<p>{txtSubtitle}</p>} separator>
+      <CreateNewTagForm />
     </Page>
   );
 };

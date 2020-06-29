@@ -12,6 +12,7 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 export interface Props {
@@ -19,9 +20,17 @@ export interface Props {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   callToAction?: React.ReactNode;
+  separator?: boolean;
 }
 
-export const Page: React.FC<Props> = ({ id, title, subtitle, callToAction, children }) => {
+export const Page: React.FC<Props> = ({
+  id,
+  title,
+  subtitle,
+  callToAction,
+  separator,
+  children,
+}) => {
   return (
     <EuiPageContent horizontalPosition="center" data-test-subj={`TagsManagementPage-${id}`}>
       <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -37,7 +46,8 @@ export const Page: React.FC<Props> = ({ id, title, subtitle, callToAction, child
         </EuiFlexItem>
         {!!callToAction && <EuiFlexItem grow={false}>{callToAction}</EuiFlexItem>}
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      {!!separator && <EuiHorizontalRule />}
+      <EuiSpacer size={separator ? 'm' : 'l'} />
       <div data-test-subj={`TagsManagementPageContent`}>{children}</div>
     </EuiPageContent>
   );
