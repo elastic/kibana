@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { merge } from 'lodash';
+import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
   TRANSACTION_SAMPLED,
@@ -20,23 +21,21 @@ interface MetricParams {
   setup: TransactionGroupSetup;
 }
 
-function withAggs<T extends AggregationInputMap>(
-  request: TransactionGroupRequestBase,
-  aggs: T
-) {
-  return {
-    ...request,
+type BucketKey = string | Record<string, string>;
+
+function withAggs<
+  TRequestBase extends TransactionGroupRequestBase,
+  TInputMap extends AggregationInputMap
+>(request: TRequestBase, aggs: TInputMap) {
+  return merge({}, request, {
     body: {
-      ...request.body,
       aggs: {
-        ...request.body.aggs,
         transaction_groups: {
-          ...request.body.aggs.transaction_groups,
           aggs,
         },
       },
     },
-  };
+  });
 }
 
 export async function getSamples({ request, setup }: MetricParams) {
@@ -68,9 +67,11 @@ export async function getSamples({ request, setup }: MetricParams) {
     },
   });
 
-  return response.aggregations?.transaction_groups.buckets.map((bucket) => {
+  return arrayUnionToCallable(
+    response.aggregations?.transaction_groups.buckets
+  ).map((bucket) => {
     return {
-      key: bucket.key as string,
+      key: bucket.key as BucketKey,
       count: bucket.doc_count,
       sample: bucket.sample.hits.hits[0]._source as Transaction,
     };
@@ -88,9 +89,11 @@ export async function getAvg({ request, setup }: MetricParams) {
 
   const response = await setup.client.search(params);
 
-  return response.aggregations?.transaction_groups.buckets.map((bucket) => {
+  return arrayUnionToCallable(
+    response.aggregations?.transaction_groups.buckets
+  ).map((bucket) => {
     return {
-      key: bucket.key as string,
+      key: bucket.key as BucketKey,
       avg: bucket.avg.value,
     };
   });
@@ -107,9 +110,11 @@ export async function getSum({ request, setup }: MetricParams) {
 
   const response = await setup.client.search(params);
 
-  return response.aggregations?.transaction_groups.buckets.map((bucket) => {
+  return arrayUnionToCallable(
+    response.aggregations?.transaction_groups.buckets
+  ).map((bucket) => {
     return {
-      key: bucket.key as string,
+      key: bucket.key as BucketKey,
       sum: bucket.sum.value,
     };
   });
@@ -128,9 +133,11 @@ export async function getPercentiles({ request, setup }: MetricParams) {
 
   const response = await setup.client.search(params);
 
-  return response.aggregations?.transaction_groups.buckets.map((bucket) => {
+  return arrayUnionToCallable(
+    response.aggregations?.transaction_groups.buckets
+  ).map((bucket) => {
     return {
-      key: bucket.key as string,
+      key: bucket.key as BucketKey,
       p95: Object.values(bucket.p95.values)[0],
     };
   });

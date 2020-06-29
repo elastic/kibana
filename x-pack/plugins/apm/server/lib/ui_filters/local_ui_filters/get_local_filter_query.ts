@@ -38,7 +38,7 @@ export const getLocalFilterQuery = ({
           },
         },
       }
-    : {};
+    : null;
 
   return mergeProjection(projection, {
     body: {
