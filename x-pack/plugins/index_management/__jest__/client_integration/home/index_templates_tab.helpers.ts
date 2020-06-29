@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import {
@@ -13,44 +12,21 @@ import {
   TestBedConfig,
   findTestSubject,
 } from '../../../../../test_utils';
-// NOTE: We have to use the Home component instead of the TemplateList component because we depend
-// upon react router to provide the name of the template to load in the detail panel.
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateList } from '../../../public/application/sections/home/template_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
-import { WithAppDependencies, services, TestSubjects } from '../helpers';
+import { WithAppDependencies, TestSubjects } from '../helpers';
 
 const testBedConfig: TestBedConfig = {
-  store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`/indices`],
-    componentRoutePath: `/:section(indices|templates)`,
+    initialEntries: [`/templates`],
+    componentRoutePath: `/templates/:templateName?`,
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
+const initTestBed = registerTestBed<TestSubjects>(WithAppDependencies(TemplateList), testBedConfig);
 
-export interface IndexTemplatesTabTestBed extends TestBed<TestSubjects> {
-  findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
-  actions: {
-    goToTemplatesList: () => void;
-    selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
-    clickReloadButton: () => void;
-    clickTemplateAction: (
-      name: TemplateDeserialized['name'],
-      action: 'edit' | 'clone' | 'delete'
-    ) => void;
-    clickTemplateAt: (index: number) => void;
-    clickCloseDetailsButton: () => void;
-    clickActionMenu: (name: TemplateDeserialized['name']) => void;
-    toggleViewItem: (view: 'composable' | 'system') => void;
-  };
-}
-
-export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
-  const testBed = await initTestBed();
-
+const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
    * Additional helpers
    */
@@ -64,11 +40,6 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   /**
    * User Actions
    */
-
-  const goToTemplatesList = () => {
-    testBed.find('templatesTab').simulate('click');
-  };
-
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
     const tabs = ['summary', 'settings', 'mappings', 'aliases'];
 
@@ -136,10 +107,8 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
   };
 
   return {
-    ...testBed,
     findAction,
     actions: {
-      goToTemplatesList,
       selectDetailsTab,
       clickReloadButton,
       clickTemplateAction,
@@ -150,3 +119,14 @@ export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
     },
   };
 };
+
+export const setup = async (): Promise<IndexTemplatesTabTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
+    ...testBed,
+    ...createActions(testBed),
+  };
+};
+
+export type IndexTemplatesTabTestBed = TestBed<TestSubjects> & ReturnType<typeof createActions>;

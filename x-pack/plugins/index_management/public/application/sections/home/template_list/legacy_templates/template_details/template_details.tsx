@@ -46,7 +46,7 @@ import { TabSummary } from '../../template_details/tabs';
 interface Props {
   template: { name: string; isLegacy?: boolean };
   onClose: () => void;
-  editTemplate: (name: string, isLegacy?: boolean) => void;
+  editTemplate: (name: string, isLegacy: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
   reload: () => Promise<SendRequestResponse>;
 }
@@ -290,7 +290,7 @@ export const LegacyTemplateDetails: React.FunctionComponent<Props> = ({
                               }
                             ),
                             icon: 'pencil',
-                            onClick: () => editTemplate(templateName, isLegacy),
+                            onClick: () => editTemplate(templateName, true),
                             disabled: isManaged,
                           },
                           {
