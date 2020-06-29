@@ -82,10 +82,12 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.settings.clickKibanaIndexPatterns();
       const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
-      const filteredIndex = indexPatternNames.filter(
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
         (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
       );
-      expect(filteredIndex.length).to.be(1);
+      expect(filteredIndexPatternNames.length).to.be(1);
     });
 
     after(async () => {
