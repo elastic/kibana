@@ -134,12 +134,15 @@ describe('SearchInterceptor', () => {
       const response = searchInterceptor.search(mockRequest, { signal: abort.signal });
       abort.abort();
 
+      const next = jest.fn();
       const error = (e: any) => {
+        expect(next).not.toBeCalled();
         expect(e).toBeInstanceOf(AbortError);
         expect(mockCoreStart.http.fetch).not.toBeCalled();
         done();
       };
-      response.subscribe({ error });
+      response.subscribe({ next, error });
+      setTimeout(() => abortController.abort(), 200);
     });
   });
 
