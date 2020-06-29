@@ -55,7 +55,7 @@ Open your plugin's `kibana.json` file. Make sure that `ui` has a value of true, 
 }
 ```
 
-In your plugin folder, create a new folder `public` and an `index.ts` file within that. 
+In your plugin folder, create a new folder `public` and an `index.ts` file within it.
 
 This `index.ts` will need export a Kibana Plugin. You can use this as a starting point for your plugin.
 
