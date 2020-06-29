@@ -6,8 +6,7 @@
 
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
-import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
@@ -28,7 +27,7 @@ class MockField {
 
 class MockSource {
   constructor({ supportedShapeTypes } = {}) {
-    this._supportedShapeTypes = supportedShapeTypes || Object.values(VECTOR_SHAPE_TYPES);
+    this._supportedShapeTypes = supportedShapeTypes || Object.values(VECTOR_SHAPE_TYPE);
   }
   getSupportedShapeTypes() {
     return this._supportedShapeTypes;
