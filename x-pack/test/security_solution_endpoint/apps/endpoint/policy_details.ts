@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       before(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.package_config.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       after(async () => {
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should display policy view', async () => {
         expect(await testSubjects.getVisibleText('pageViewHeaderLeftTitle')).to.equal(
-          policyInfo.package_config.name
+          policyInfo.packageConfig.name
         );
       });
     });
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.package_config.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       afterEach(async () => {
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Policy ${policyInfo.package_config.name} has been updated.`
+          `Policy ${policyInfo.packageConfig.name} has been updated.`
         );
       });
       it('should persist update on the screen', async () => {
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         await pageObjects.policy.navigateToPolicyList();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.package_config.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
 
         expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
           false
@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullConfig).to.eql({
           inputs: [
             {
-              id: policyInfo.package_config.id,
+              id: policyInfo.packageConfig.id,
               dataset: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
@@ -201,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         policyInfo = await policyTestResources.createPolicy();
         await pageObjects.ingestManagerCreatePackageConfig.navigateToAgentConfigEditPackageConfig(
           policyInfo.agentConfig.id,
-          policyInfo.package_config.id
+          policyInfo.packageConfig.id
         );
       });
       afterEach(async () => {
