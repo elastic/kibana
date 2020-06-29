@@ -5,11 +5,11 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { connectorConfiguration as serviceNowConnectorConfig } from '../../../../../triggers_actions_ui/public/application/components/builtin_action_types/servicenow/config';
+import { ServiceNowConnectorConfiguration } from '../../../../../triggers_actions_ui/public/common/constants';
 import { connector as jiraConnectorConfig } from './jira/config';
 import { ConnectorConfiguration } from './types';
 
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': serviceNowConnectorConfig as ConnectorConfiguration,
+  '.servicenow': ServiceNowConnectorConfiguration as ConnectorConfiguration,
   '.jira': jiraConnectorConfig,
 };

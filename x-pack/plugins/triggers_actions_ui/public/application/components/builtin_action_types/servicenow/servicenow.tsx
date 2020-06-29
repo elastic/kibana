@@ -5,11 +5,7 @@
  */
 
 import { lazy } from 'react';
-import {
-  ValidationResult,
-  ActionTypeModel,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../types';
+import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { ServiceNowActionConnector, ServiceNowActionParams } from './types';

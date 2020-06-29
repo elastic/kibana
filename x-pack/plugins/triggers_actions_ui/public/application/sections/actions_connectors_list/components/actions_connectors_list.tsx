@@ -118,7 +118,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      setActions(actionsResponse.filter((action) => !action.config || !action.config.isCaseOwned));
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(

@@ -53,6 +53,7 @@ interface ActionConnectorProps {
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   docLinks: DocLinksStart;
+  consumer?: string;
 }
 
 export const ActionConnectorForm = ({
@@ -64,6 +65,7 @@ export const ActionConnectorForm = ({
   http,
   actionTypeRegistry,
   docLinks,
+  consumer,
 }: ActionConnectorProps) => {
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -171,6 +173,7 @@ export const ActionConnectorForm = ({
             editActionProperty={setActionProperty}
             http={http}
             docLinks={docLinks}
+            consumer={consumer}
           />
         </Suspense>
       ) : null}

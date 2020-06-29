@@ -52,15 +52,17 @@ describe('servicenow connector validation', () => {
   });
 
   test('connector validation fails when connector config is not valid', () => {
-    const actionConnector = {
+    const actionConnector = ({
       secrets: {
         username: 'user',
       },
       id: 'test',
       actionTypeId: '.servicenow',
       name: 'servicenow',
-      config: {},
-    } as ServiceNowActionConnector;
+      config: {
+        apiUrl: '',
+      },
+    } as unknown) as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {

@@ -131,7 +131,9 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(loadedConnectors);
+        setConnectors(
+          loadedConnectors.filter((action) => !action.config || !action.config.isCaseOwned)
+        );
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -709,7 +711,6 @@ export const ActionForm = ({
           toastNotifications={toastNotifications}
           docLinks={docLinks}
           capabilities={capabilities}
-          consumer={consumer}
         />
       ) : null}
     </Fragment>

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiFieldText,
@@ -32,7 +32,7 @@ export interface ConnectorFlyoutFormProps<T> {
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, editActionProperty }) => {
+>> = ({ action, editActionSecrets, editActionConfig, errors, consumer }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
@@ -45,10 +45,15 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
 
   // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (action.isCaseOwned && isEmpty(mapping)) {
-    editActionConfig('incidentConfiguration', {
-      mapping: createDefaultMapping(connectorConfiguration.fields as any),
-    });
+  if (consumer === 'case') {
+    if (isEmpty(mapping)) {
+      editActionConfig('incidentConfiguration', {
+        mapping: createDefaultMapping(connectorConfiguration.fields as any),
+      });
+    }
+    if (!isCaseOwned) {
+      editActionConfig('isCaseOwned', true);
+    }
   }
 
   const handleOnChangeActionConfig = useCallback(

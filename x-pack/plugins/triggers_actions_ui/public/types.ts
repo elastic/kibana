@@ -33,6 +33,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   docLinks: DocLinksStart;
   http?: HttpSetup;
+  consumer?: string;
 }
 
 export interface ActionParamsProps<TParams> {

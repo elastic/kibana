@@ -7,9 +7,7 @@
 // to remove
 import { CaseField, ThirdPartyField, ActionType } from '../../../../../../case/common/api';
 
-import { ActionConnector } from '../../../../types';
-
-export interface ServiceNowActionConnector extends ActionConnector {
+export interface ServiceNowActionConnector {
   config: ServiceNowConfig;
   secrets: ServiceNowSecrets;
 }

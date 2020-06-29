@@ -32,7 +32,7 @@ export const useConnectors = (): ReturnConnectors => {
         if (!didCancel) {
           setLoading(false);
           setConnectors(
-            res.filter((connector) => !connector.consumer || connector.consumer === 'case')
+            res.filter((connector) => !connector.config || connector.config.isCaseOwned)
           );
         }
       } catch (error) {

@@ -282,7 +282,6 @@ export const AlertForm = ({
           toastNotifications={toastNotifications}
           docLinks={docLinks}
           capabilities={capabilities}
-          consumer={alert.consumer}
         />
       ) : null}
     </Fragment>

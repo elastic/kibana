@@ -11,7 +11,7 @@ export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
   // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
   incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.nullable(schema.boolean()),
+  isCaseOwned: schema.maybe(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(

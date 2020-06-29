@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-restricted-imports */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { ExternalIncidentServiceConfiguration } from '../../../../../../../actions/server/builtin_action_types/case/types';
 import { IErrorObject, ActionType } from '../../../../../types';
 
 import {
@@ -24,24 +20,6 @@ export interface ThirdPartyField {
   validSourceFields: CaseField[];
   defaultSourceField: CaseField;
   defaultActionType: ThirdPartySupportedActions;
-}
-
-export interface ConnectorConfiguration extends ActionType {
-  logo: string;
-  fields: Record<string, ThirdPartyField>;
-}
-
-export interface ActionConnector {
-  config: ExternalIncidentServiceConfiguration;
-  secrets: {};
-}
-
-export interface ActionConnectorParams {
-  message: string;
-}
-
-export interface ActionConnectorValidationErrors {
-  apiUrl: string[];
 }
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
