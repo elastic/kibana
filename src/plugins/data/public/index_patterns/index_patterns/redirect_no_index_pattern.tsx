@@ -30,7 +30,7 @@ export const onRedirectNoIndexPattern = (
   navigateToApp: CoreStart['application']['navigateToApp'],
   overlays: CoreStart['overlays']
 ) => () => {
-  const canManageIndexPatterns = capabilities.management.kibana.index_patterns;
+  const canManageIndexPatterns = capabilities.management.kibana.indexPatterns;
   const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
   let timeoutId: NodeJS.Timeout | undefined;
 

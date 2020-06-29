@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 
 export interface CountMetricAggDependencies {
@@ -39,11 +38,6 @@ export const getCountMetricAgg = ({ getInternalStartServices }: CountMetricAggDe
         return i18n.translate('data.search.aggs.metrics.countLabel', {
           defaultMessage: 'Count',
         });
-      },
-      getFormat() {
-        const { fieldFormats } = getInternalStartServices();
-
-        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       },
       getSerializedFormat(agg) {
         return {

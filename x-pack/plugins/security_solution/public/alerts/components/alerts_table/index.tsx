@@ -7,7 +7,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -84,6 +84,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   updateTimeline,
   updateTimelineIsLoading,
 }) => {
+  const dispatch = useDispatch();
   const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
 
@@ -292,11 +293,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       getAlertActions({
         apolloClient,
         canUserCRUD,
+        dispatch,
         hasIndexWrite,
         createTimeline: createTimelineCallback,
         setEventsLoading: setEventsLoadingCallback,
         setEventsDeleted: setEventsDeletedCallback,
         status: filterGroup,
+        timelineId,
         updateTimelineIsLoading,
         onAlertStatusUpdateSuccess,
         onAlertStatusUpdateFailure,
@@ -305,10 +308,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       apolloClient,
       canUserCRUD,
       createTimelineCallback,
+      dispatch,
       hasIndexWrite,
       filterGroup,
       setEventsLoadingCallback,
       setEventsDeletedCallback,
+      timelineId,
       updateTimelineIsLoading,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,

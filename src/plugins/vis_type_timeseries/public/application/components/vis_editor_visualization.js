@@ -73,6 +73,7 @@ class VisEditorVisualizationUI extends Component {
 
     this._handler = embeddableHandler;
     await this._handler.render(this._visEl.current);
+    this.props.eventEmitter.emit('embeddableRendered');
 
     this._subscription = this._handler.handler.data$.subscribe((data) => {
       this.setPanelInterval(data.value.visData);
@@ -279,6 +280,7 @@ VisEditorVisualizationUI.propTypes = {
   uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
   embeddableHandler: PropTypes.object,
+  eventEmitter: PropTypes.object,
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
