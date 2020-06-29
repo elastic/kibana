@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import styled from 'styled-components';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -27,6 +27,8 @@ interface EmptyPageProps {
   actionTertiaryLabel?: string;
   actionTertiaryTarget?: string;
   actionTertiaryUrl?: string;
+  actionTertiaryOnClick?: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
+  actionTertiaryFill?: boolean;
   'data-test-subj'?: string;
   message?: string;
   title: string;
@@ -46,6 +48,8 @@ export const EmptyPage = React.memo<EmptyPageProps>(
     actionTertiaryLabel,
     actionTertiaryTarget,
     actionTertiaryUrl,
+    actionTertiaryOnClick,
+    actionTertiaryFill = false,
     message,
     title,
     ...rest
@@ -56,6 +60,20 @@ export const EmptyPage = React.memo<EmptyPageProps>(
       body={message && <p>{message}</p>}
       actions={
         <EuiFlexGroup justifyContent="center">
+          {actionTertiaryLabel && actionTertiaryOnClick && (
+            <EuiFlexItem grow={false}>
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiButton
+                fill={actionTertiaryFill}
+                onClick={actionTertiaryOnClick}
+                href={actionTertiaryUrl}
+                iconType={actionTertiaryIcon}
+                target={actionTertiaryTarget}
+              >
+                {actionTertiaryLabel}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
@@ -75,18 +93,6 @@ export const EmptyPage = React.memo<EmptyPageProps>(
                 target={actionSecondaryTarget}
               >
                 {actionSecondaryLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-
-          {actionTertiaryLabel && actionTertiaryUrl && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                href={actionTertiaryUrl}
-                iconType={actionTertiaryIcon}
-                target={actionTertiaryTarget}
-              >
-                {actionTertiaryLabel}
               </EuiButton>
             </EuiFlexItem>
           )}

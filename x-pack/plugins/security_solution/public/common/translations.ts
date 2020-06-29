@@ -28,3 +28,10 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate(
     defaultMessage: 'View getting started guide',
   }
 );
+
+export const EMPTY_ACTION_ENDPOINT = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionEndpoint',
+  {
+    defaultMessage: 'Add data with Elastic Agent',
+  }
+);

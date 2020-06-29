@@ -10,10 +10,16 @@ import * as i18nCommon from '../../../common/translations';
 import { EmptyPage } from '../../../common/components/empty_page';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
+import { useHostIngestUrl } from '../../../management/pages/endpoint_hosts/view/hooks';
+import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
   const basePath = http.basePath.get();
+  const { appId: ingestAppId, appPath: ingestPath, url: ingestUrl } = useHostIngestUrl(
+    'integrations'
+  );
+  const handleOnClick = useNavigateToAppEventHandler(ingestAppId, { path: ingestPath });
 
   return (
     <EmptyPage
@@ -24,9 +30,11 @@ const OverviewEmptyComponent: React.FC = () => {
       actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
       actionSecondaryTarget="_blank"
       actionSecondaryUrl={docLinks.links.siem.gettingStarted}
-      actionTertiaryIcon="glasses"
-      actionTertiaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
-      actionTertiaryUrl={`${basePath}${ADD_DATA_PATH}`}
+      actionTertiaryIcon="gear"
+      actionTertiaryLabel={i18nCommon.EMPTY_ACTION_ENDPOINT}
+      actionTertiaryUrl={ingestUrl}
+      actionTertiaryOnClick={handleOnClick}
+      actionTertiaryFill={true}
       data-test-subj="empty-page"
       message={i18nCommon.EMPTY_MESSAGE}
       title={i18nCommon.EMPTY_TITLE}
