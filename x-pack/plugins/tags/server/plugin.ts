@@ -63,6 +63,12 @@ export class TagsPlugin
       hidden: false,
       namespaceType: 'single',
       mappings: tagMappings,
+      management: {
+        importableAndExportable: true,
+        icon: 'tag',
+        getTitle: (savedObject) => savedObject.attributes.title,
+        defaultSearchField: 'title',
+      },
     });
 
     const router = http.createRouter();
