@@ -47,6 +47,41 @@ interface AutoSize {
   contains: string;
 }
 
+interface Padding {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+interface Mark {
+  color?: string;
+  fill?: string;
+}
+
+type Renderer = 'svg' | 'canvas';
+
+export interface KibanaConfig {
+  controlsLocation: ControlsLocation;
+  controlsDirection: ControlsDirection;
+  hideWarnings: boolean;
+  type: string;
+  renderer: Renderer;
+}
+
+interface VegaSpecConfig extends KibanaConfig {
+  kibana: KibanaConfig;
+  padding: Padding;
+  projection: Projection;
+  autosize: AutoSize;
+  tooltips: TooltipConfig;
+  mark: Mark;
+}
+
+interface Projection {
+  name: string;
+}
+
 export interface VegaSpec {
   [index: string]: any;
   $schema: string;
@@ -55,12 +90,12 @@ export interface VegaSpec {
   mark?: string;
   title?: string;
   autosize: AutoSize;
-  projections?: any;
-  width?: any;
-  height?: any;
-  padding?: any;
-  _hostConfig?: any;
-  config?: any;
+  projections?: Projection[];
+  width?: number;
+  height?: number;
+  padding?: number | Padding;
+  _hostConfig?: KibanaConfig;
+  config?: VegaSpecConfig;
 }
 
 export enum CONSTANTS {
@@ -119,7 +154,10 @@ export interface UrlObject {
 }
 
 export interface Data {
+  [index: string]: any;
   url?: UrlObject;
+  values?: unknown;
+  source?: unknown;
 }
 
 export interface CacheOptions {
