@@ -288,10 +288,13 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+    after_key: Record<
+      GetCompositeKeys<TAggregationOptionsMap>,
+      string | number
+    >;
     buckets: Array<
       {
-        key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+        key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
         doc_count: number;
       } & BucketSubAggregationResponse<
         TAggregationOptionsMap['aggs'],

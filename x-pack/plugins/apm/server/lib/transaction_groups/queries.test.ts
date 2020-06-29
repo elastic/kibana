@@ -31,7 +31,9 @@ describe('transaction group queries', () => {
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 
   it('fetches top traces', async () => {
@@ -46,6 +48,8 @@ describe('transaction group queries', () => {
       )
     );
 
-    expect(mock.params).toMatchSnapshot();
+    const allParams = mock.spy.mock.calls.map((call) => call[0]);
+
+    expect(allParams).toMatchSnapshot();
   });
 });
