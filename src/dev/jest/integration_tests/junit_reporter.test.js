@@ -30,10 +30,18 @@ const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = makeJunitReportPath(FIXTURE_DIR, 'Jest Tests');
+const ENV_CI = process.env.CI;
+
+beforeAll(() => {
+  // We want JUnit report paths to be consistent for the tests. They are unique per execution in CI
+  delete process.env.CI;
+});
 
 afterAll(async () => {
   await del(TARGET_DIR);
+  if (ENV_CI !== undefined) {
+    process.env.CI = ENV_CI;
+  }
 });
 
 const parseXml = promisify(xml2js.parseString);
@@ -53,8 +61,10 @@ it(
       }
     );
 
+    const xmlPath = makeJunitReportPath(FIXTURE_DIR, 'Jest Tests');
+
     expect(result.exitCode).toBe(1);
-    await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
+    await expect(parseXml(readFileSync(xmlPath, 'utf8'))).resolves.toEqual({
       testsuites: {
         $: {
           name: 'jest',
