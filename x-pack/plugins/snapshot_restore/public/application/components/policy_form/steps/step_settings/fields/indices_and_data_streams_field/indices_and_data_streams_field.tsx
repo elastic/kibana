@@ -23,11 +23,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../../common/types';
-import { useServices } from '../../../../../app_context';
-import { PolicyValidation } from '../../../../../services/validation';
+import { SlmPolicyPayload } from '../../../../../../../../common/types';
+import { useServices } from '../../../../../../app_context';
+import { PolicyValidation } from '../../../../../../services/validation';
 
-import { DataStreamBadge } from './data_stream_badge';
+import { DataStreamBadge } from '../components';
+
+import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
 interface Props {
   isManagedPolicy: boolean;
@@ -38,7 +40,12 @@ interface Props {
   errors: PolicyValidation['errors'];
 }
 
-export const IndicesField: FunctionComponent<Props> = ({
+/**
+ * In future we may be able to split data streams to it's own field, but for now
+ * they share an array "indices" in the snapshot lifecycle policy config. See
+ * this github issue for progress: https://github.com/elastic/elasticsearch/issues/58474
+ */
+export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
   isManagedPolicy,
   dataStreams,
   indices,
@@ -62,66 +69,26 @@ export const IndicesField: FunctionComponent<Props> = ({
       : [...indicesAndDataStreams]
   );
 
-  const mapSelectionToIndicesOptions = (selection: string[]): EuiSelectableOption[] => {
-    return indices
-      .map(
-        (index): EuiSelectableOption => {
-          return {
-            label: index,
-            checked:
-              isAllIndices ||
-              // If indices is a string, we default to custom input mode, so we mark individual indices
-              // as selected if user goes back to list mode
-              typeof config.indices === 'string' ||
-              selection.includes(index)
-                ? 'on'
-                : undefined,
-          };
-        }
-      )
-      .concat(
-        dataStreams.map(
-          (dataStream): EuiSelectableOption => {
-            return {
-              label: dataStream,
-              append: <DataStreamBadge />,
-              checked:
-                isAllIndices ||
-                // If indices is a string, we default to custom input mode, so we mark individual indices
-                // as selected if user goes back to list mode
-                typeof config.indices === 'string' ||
-                selection.includes(dataStream)
-                  ? 'on'
-                  : undefined,
-            };
-          }
-        )
-      );
-  };
-
   // States for choosing all indices, or a subset, including caching previously chosen subset list
   const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(() =>
-    mapSelectionToIndicesOptions(indicesSelection)
+    mapSelectionToIndicesOptions({
+      selection: indicesSelection,
+      dataStreams,
+      indices,
+      allSelected: isAllIndices || typeof config.indices === 'string',
+    })
   );
 
   // State for using selectable indices list or custom patterns
-  // Users with more than 100 indices will probably want to use an index pattern to select
-  // them instead, so we'll default to showing them the index pattern input. Also show the custom
-  // list if we have no exact matches in the configured array to some existing index.
-  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(() => {
-    return typeof config.indices === 'string' ||
-      (Array.isArray(config.indices) &&
-        (config.indices.length > 100 ||
-          !config.indices.every((c) => indicesAndDataStreams.some((i) => i === c))))
-      ? 'custom'
-      : 'list';
-  });
+  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(() =>
+    determineListMode({ configuredIndices: config.indices, dataStreams, indices })
+  );
 
   // State for custom patterns
   const [indexPatterns, setIndexPatterns] = useState<string[]>(() =>
     typeof config.indices === 'string'
       ? (config.indices as string).split(',')
-      : Array.isArray(config.indices)
+      : Array.isArray(config.indices) && config.indices
       ? config.indices
       : []
   );
@@ -142,7 +109,14 @@ export const IndicesField: FunctionComponent<Props> = ({
         setIsAllIndices(isChecked);
         if (isChecked) {
           setIndicesSelection(indicesAndDataStreams);
-          setIndicesOptions(mapSelectionToIndicesOptions(indicesAndDataStreams));
+          setIndicesOptions(
+            mapSelectionToIndicesOptions({
+              allSelected: isAllIndices || typeof config.indices === 'string',
+              dataStreams,
+              indices,
+              selection: indicesSelection,
+            })
+          );
           onUpdate({ indices: undefined });
         } else {
           onUpdate({
@@ -300,6 +274,7 @@ export const IndicesField: FunctionComponent<Props> = ({
                 {selectIndicesMode === 'list' ? (
                   <EuiSelectable
                     allowExclusions={false}
+                    data-test-subj="indicesAndDataStreamsList"
                     options={indicesOptions}
                     onChange={(options) => {
                       const newSelectedIndices: string[] = [];

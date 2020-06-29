@@ -20,7 +20,7 @@ import { SlmPolicyPayload } from '../../../../../../common/types';
 import { documentationLinksService } from '../../../../services/documentation';
 import { StepProps } from '../';
 
-import { IndicesField } from './fields';
+import { IndicesAndDataStreamsField } from './fields';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   policy,
@@ -189,7 +189,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="l" />
 
-      <IndicesField
+      <IndicesAndDataStreamsField
         isManagedPolicy={isManagedPolicy}
         errors={errors}
         dataStreams={dataStreams}

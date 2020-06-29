@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { IndicesAndDataStreamsField } from './indices_and_data_streams_field';
+export { DataStreamBadge } from './data_stream_badge';
