@@ -21,7 +21,7 @@ import d3 from 'd3';
 import React, { Fragment, useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { SectionContainer } from '../';
 import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
@@ -36,7 +36,7 @@ interface Props {
 export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
 
-  const { data } = useFetcher(() => {
+  const { data, status } = useFetcher(() => {
     if (startTime && endTime && bucketSize) {
       return getDataHandler('infra_logs')?.fetchData({ startTime, endTime, bucketSize });
     }
@@ -61,6 +61,7 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
+      minHeight={296}
       title={data?.title || 'Uptime'}
       subtitle={i18n.translate('xpack.observability.overview.chart.uptime.subtitle', {
         defaultMessage: 'Summary',
@@ -73,12 +74,17 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
             const stat = data.stats[key as keyof UptimeFetchDataResponse['stats']];
             return (
               <EuiFlexItem key={key} grow={false}>
-                <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
+                <EuiStat
+                  title={formatStatValue(stat)}
+                  description={stat.label}
+                  titleSize="s"
+                  isLoading={status === FETCH_STATUS.LOADING}
+                />
               </EuiFlexItem>
             );
           })}
       </EuiFlexGroup>
-      <Chart size={{ height: 220 }}>
+      <Chart size={{ height: 177 }}>
         <Settings
           onBrushEnd={({ x }) => {}}
           theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}

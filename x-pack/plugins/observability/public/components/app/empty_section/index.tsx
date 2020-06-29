@@ -8,7 +8,6 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { ThemeContext } from 'styled-components';
 import { EuiText } from '@elastic/eui';
-// TODO: caue fix it
 import { ISection } from '../../../pages/home/section';
 
 interface Props {
@@ -19,8 +18,12 @@ export const EmptySection = ({ section }: Props) => {
   const theme = useContext(ThemeContext);
   return (
     <EuiEmptyPrompt
-      style={{ border: `1px dashed ${theme.eui.euiBorderColor}`, borderRadius: '4px' }}
-      iconType="dataVisualizer"
+      style={{
+        border: `1px dashed ${theme.eui.euiBorderColor}`,
+        borderRadius: '4px',
+        maxWidth: 'none',
+      }}
+      iconType={section.icon}
       iconColor="default"
       title={<h2>{section.title}</h2>}
       titleSize="xs"

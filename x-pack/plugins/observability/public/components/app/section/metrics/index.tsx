@@ -9,7 +9,7 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { SectionContainer } from '../';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
-  const { data } = useFetcher(() => {
+  const { data, status } = useFetcher(() => {
     if (startTime && endTime && bucketSize) {
       return getDataHandler('infra_metrics')?.fetchData({ startTime, endTime, bucketSize });
     }
@@ -30,6 +30,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
+      minHeight={165}
       title={data?.title || 'Metrics'}
       subtitle={i18n.translate('xpack.observability.overview.chart.metrics.subtitle', {
         defaultMessage: 'Summary',
@@ -56,7 +57,12 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
             return (
               <EuiFlexItem key={key}>
-                <EuiStat title={value} description={stat.label} titleSize="m">
+                <EuiStat
+                  title={value}
+                  description={stat.label}
+                  titleSize="s"
+                  isLoading={status === FETCH_STATUS.LOADING}
+                >
                   {statKey !== 'hosts' && chart}
                 </EuiStat>
               </EuiFlexItem>

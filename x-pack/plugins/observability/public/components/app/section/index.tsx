@@ -12,33 +12,36 @@ import { EuiSpacer } from '@elastic/eui';
 interface Props {
   title: string;
   subtitle: string;
+  minHeight: number;
   appLink?: string;
   children: React.ReactNode;
 }
 
-export const SectionContainer = ({ title, appLink, children, subtitle }: Props) => {
+export const SectionContainer = ({ title, appLink, children, subtitle, minHeight }: Props) => {
   return (
     <EuiAccordion
       initialIsOpen
       id={title}
       buttonContentClassName="accordion-button"
       buttonContent={
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h5>{title}</h5>
         </EuiTitle>
       }
       extraAction={
         appLink && (
           <EuiButtonEmpty href={appLink}>
-            {i18n.translate('xpack.observability.chart.viewInAppLabel', {
-              defaultMessage: 'View in app',
-            })}
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.chart.viewInAppLabel', {
+                defaultMessage: 'View in app',
+              })}
+            </EuiText>
           </EuiButtonEmpty>
         )
       }
     >
-      <EuiPanel hasShadow>
-        <EuiText size="m">
+      <EuiPanel hasShadow style={{ minHeight: `${minHeight}px` }}>
+        <EuiText size="xs">
           <h3>{subtitle}</h3>
         </EuiText>
         <EuiSpacer size="s" />

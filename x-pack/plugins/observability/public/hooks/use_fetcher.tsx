@@ -27,8 +27,13 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
 
 export function useFetcher<TReturn>(
   fn: () => TReturn,
-  fnDeps: any[]
+  fnDeps: any[],
+  options: {
+    preservePreviousData?: boolean;
+  } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
+  const { preservePreviousData = true } = options;
+
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.PENDING,
@@ -42,7 +47,7 @@ export function useFetcher<TReturn>(
       }
 
       setResult((prevResult) => ({
-        data: undefined,
+        data: preservePreviousData ? prevResult.data : undefined,
         status: FETCH_STATUS.LOADING,
         error: undefined,
       }));

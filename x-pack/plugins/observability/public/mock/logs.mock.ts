@@ -12,7 +12,7 @@ export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(response);
-    }, 2000);
+    }, 5000);
   });
 };
 

@@ -5,9 +5,9 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
-import { Start } from '../pages/start';
-import { Overview } from '../pages/overview';
-import { Home } from '../pages/home';
+import { HomePage } from '../pages/home';
+import { LandingPage } from '../pages/landing';
+import { DashboardPage } from '../pages/dashboard';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -22,19 +22,19 @@ export interface Params {
 export const routes = {
   '/': {
     handler: () => {
-      return <Home />;
+      return <HomePage />;
     },
     params: {},
   },
-  '/start': {
+  '/landing': {
     handler: () => {
-      return <Start />;
+      return <LandingPage />;
     },
     params: {},
   },
-  '/overview': {
+  '/dashboard': {
     handler: ({ query }: any) => {
-      return <Overview routeParams={{ query }} />;
+      return <DashboardPage routeParams={{ query }} />;
     },
     params: {
       query: t.partial({

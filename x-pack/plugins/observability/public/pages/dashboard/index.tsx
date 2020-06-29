@@ -8,6 +8,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ObservabilityApp } from '../../../typings/common';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
@@ -21,17 +22,16 @@ import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { appsSection } from '../home/section';
+import { useFetcher, FETCH_STATUS } from '../../hooks/use_fetcher';
+import { fetchHasData } from '../../data_handler';
 
 interface Props {
-  routeParams: RouteParams<'/overview'>;
+  routeParams: RouteParams<'/dashboard'>;
 }
 
-interface LocationState {
-  hasData: Record<ObservabilityApp, boolean | undefined>;
-}
-
-export const Overview = ({ routeParams }: Props) => {
-  const { state } = useLocation<LocationState>();
+export const DashboardPage = ({ routeParams }: Props) => {
+  const result = useFetcher(() => fetchHasData(), []);
+  const hasData = result.data;
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -49,8 +49,6 @@ export const Overview = ({ routeParams }: Props) => {
         })
       : undefined;
 
-  const emptySections = appsSection.filter(({ id }) => state && !state.hasData[id]);
-
   return (
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
@@ -61,54 +59,61 @@ export const Overview = ({ routeParams }: Props) => {
           <DatePicker rangeFrom={rangeFrom} rangeTo={rangeTo} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={6}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem>
-              <LogsSection
-                startTime={startTime}
-                endTime={endTime}
-                bucketSize={bucketSize?.intervalString}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <MetricsSection
-                startTime={startTime}
-                endTime={endTime}
-                bucketSize={bucketSize?.intervalString}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <APMSection
-                startTime={startTime}
-                endTime={endTime}
-                bucketSize={bucketSize?.intervalString}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UptimeSection
-                startTime={startTime}
-                endTime={endTime}
-                bucketSize={bucketSize?.intervalString}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={4}>Alert chart goes here</EuiFlexItem>
-      </EuiFlexGroup>
+
       <EuiSpacer />
 
-      <EuiFlexItem>
-        <EuiFlexGrid columns={2}>
-          {emptySections.map((app) => {
+      <EuiFlexGroup direction="column">
+        {hasData?.infra_logs && (
+          <EuiFlexItem>
+            <LogsSection
+              startTime={startTime}
+              endTime={endTime}
+              bucketSize={bucketSize?.intervalString}
+            />
+          </EuiFlexItem>
+        )}
+        {hasData?.infra_metrics && (
+          <EuiFlexItem>
+            <MetricsSection
+              startTime={startTime}
+              endTime={endTime}
+              bucketSize={bucketSize?.intervalString}
+            />
+          </EuiFlexItem>
+        )}
+        {hasData?.apm && (
+          <EuiFlexItem>
+            <APMSection
+              startTime={startTime}
+              endTime={endTime}
+              bucketSize={bucketSize?.intervalString}
+            />
+          </EuiFlexItem>
+        )}
+        {hasData?.uptime && (
+          <EuiFlexItem>
+            <UptimeSection
+              startTime={startTime}
+              endTime={endTime}
+              bucketSize={bucketSize?.intervalString}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGrid columns={2} gutterSize="s">
+        {appsSection
+          .filter(({ id }) => hasData && !hasData[id])
+          .map((app) => {
             return (
               <EuiFlexItem key={app.id}>
                 <EmptySection section={app} />
               </EuiFlexItem>
             );
           })}
-        </EuiFlexGrid>
-      </EuiFlexItem>
+      </EuiFlexGrid>
     </WithHeaderLayout>
   );
 };

@@ -22,7 +22,7 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { getDataHandler } from '../../../../data_handler';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
@@ -35,7 +35,7 @@ interface Props {
 
 export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
-  const { data } = useFetcher(() => {
+  const { data, status } = useFetcher(() => {
     if (startTime && endTime && bucketSize) {
       return getDataHandler('apm')?.fetchData({ startTime, endTime, bucketSize });
     }
@@ -60,6 +60,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
+      minHeight={296}
       title={data?.title || 'APM'}
       subtitle={i18n.translate('xpack.observability.overview.chart.apm.subtitle', {
         defaultMessage: 'Summary',
@@ -72,12 +73,17 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
             const stat = data?.stats[key as keyof ApmFetchDataResponse['stats']];
             return (
               <EuiFlexItem key={key} grow={false}>
-                <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
+                <EuiStat
+                  title={formatStatValue(stat)}
+                  description={stat.label}
+                  titleSize="s"
+                  isLoading={status === FETCH_STATUS.LOADING}
+                />
               </EuiFlexItem>
             );
           })}
       </EuiFlexGroup>
-      <Chart size={{ height: 220 }}>
+      <Chart size={{ height: 177 }}>
         <Settings
           onBrushEnd={({ x }) => {}}
           theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}

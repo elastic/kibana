@@ -47,8 +47,8 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup> {
       hasData: () =>
         new Promise((resolve) => {
           setTimeout(() => {
-            resolve(false);
-          }, 5000);
+            resolve(true);
+          }, 2000);
         }),
     });
     registerDataHandler({

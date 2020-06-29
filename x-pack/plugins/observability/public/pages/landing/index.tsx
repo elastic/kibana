@@ -27,7 +27,7 @@ const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
 `;
 
-export const Start = () => {
+export const LandingPage = () => {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
