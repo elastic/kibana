@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class TagsClient {}
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
+
+export interface TagsClientParams {
+  logger: Logger;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+export class TagsClient {
+  constructor(private readonly params: TagsClientParams) {}
+}

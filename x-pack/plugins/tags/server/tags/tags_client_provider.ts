@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../../../../src/core/server';
-import { TagsClient } from './tags_client';
-
-export interface Params {
-  logger: Logger;
-}
+import { TagsClient, TagsClientParams } from './tags_client';
 
 export class TagsClientProvider {
-  private constructor(private readonly params: Params) {}
+  constructor(private readonly initParams: Pick<TagsClientParams, 'logger'>) {}
 
-  // Public API ----------------------------------------------------------------
-
-  public create(): TagsClient {
-    throw new Error('not implemented');
-  }
+  public readonly create = (
+    remainingParams: Pick<TagsClientParams, 'savedObjectsClient'>
+  ): TagsClient => {
+    return new TagsClient({ ...this.initParams, ...remainingParams });
+  };
 }

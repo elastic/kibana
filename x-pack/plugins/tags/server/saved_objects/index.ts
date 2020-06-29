@@ -4,14 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagsClient } from './tags/tags_client';
-
-export interface TagsRequestHandlerContext {
-  tagsClient: TagsClient;
-}
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
-  }
-}
+export * from './mappings';

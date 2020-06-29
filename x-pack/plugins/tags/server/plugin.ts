@@ -15,6 +15,8 @@ import {
 } from '../../../../src/core/server';
 import { TagsRequestHandlerContext } from './types';
 import { setupRoutes } from './router';
+import { tagMappings } from './saved_objects';
+import { TagsClientProvider } from './tags/tags_client_provider';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TagsPluginSetupDependencies {}
@@ -22,11 +24,13 @@ export interface TagsPluginSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TagsPluginStartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsPluginSetup {}
+export interface TagsPluginSetup {
+  createTagsClient: TagsClientProvider['create'];
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsPluginStart {}
+export interface TagsPluginStart {
+  createTagsClient: TagsClientProvider['create'];
+}
 
 export class TagsPlugin
   implements
@@ -37,6 +41,7 @@ export class TagsPlugin
       TagsPluginStartDependencies
     > {
   private readonly logger: Logger;
+  private tagsClientProvider?: TagsClientProvider;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'tags');
@@ -46,28 +51,50 @@ export class TagsPlugin
     core: CoreSetup<TagsPluginStartDependencies, unknown>,
     plugins: TagsPluginSetupDependencies
   ): TagsPluginSetup {
-    this.logger.debug('setup()');
+    const { logger } = this;
+    const { http, savedObjects } = core;
 
-    const { http } = core;
+    logger.debug('setup()');
+
+    this.tagsClientProvider = new TagsClientProvider({ logger });
+
+    savedObjects.registerType({
+      name: 'tag',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: tagMappings,
+    });
+
     const router = http.createRouter();
 
     http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core));
     setupRoutes({ router });
 
-    return {};
+    return {
+      createTagsClient: this.tagsClientProvider.create,
+    };
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
     this.logger.debug('start()');
 
-    return {};
+    return {
+      createTagsClient: this.tagsClientProvider!.create,
+    };
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup
+    setupCore: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'tags'> => {
     return async (context, request) => {
-      const tagsContext: TagsRequestHandlerContext = {};
+      const [core] = await setupCore.getStartServices();
+      const { savedObjects } = core;
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const tagsClient = this.tagsClientProvider!.create({ savedObjectsClient });
+      const tagsContext: TagsRequestHandlerContext = {
+        tagsClient,
+      };
+
       return tagsContext;
     };
   };
