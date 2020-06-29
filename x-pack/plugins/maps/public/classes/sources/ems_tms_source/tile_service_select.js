@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiPanel } from '@elastic/eui';
 
 import { getEmsTmsServices } from '../../../meta';
-import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
 export const AUTO_SELECT = 'auto_select';
@@ -71,23 +71,25 @@ export class TileServiceSelect extends React.Component {
     }
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.emsTile.label', {
-          defaultMessage: 'Tile service',
-        })}
-        helpText={helpText}
-        display="columnCompressed"
-      >
-        <EuiSelect
-          hasNoInitialSelection={!selectedId}
-          value={selectedId}
-          options={this.state.emsTmsOptions}
-          onChange={this._onChange}
-          isLoading={!this.state.hasLoaded}
-          disabled={this.state.hasLoaded && this.state.emsTmsOptions.length === 0}
-          compressed
-        />
-      </EuiFormRow>
+      <EuiPanel>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.emsTile.label', {
+            defaultMessage: 'Tile service',
+          })}
+          helpText={helpText}
+          display="columnCompressed"
+        >
+          <EuiSelect
+            hasNoInitialSelection={!selectedId}
+            value={selectedId}
+            options={this.state.emsTmsOptions}
+            onChange={this._onChange}
+            isLoading={!this.state.hasLoaded}
+            disabled={this.state.hasLoaded && this.state.emsTmsOptions.length === 0}
+            compressed
+          />
+        </EuiFormRow>
+      </EuiPanel>
     );
   }
 }

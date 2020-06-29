@@ -11,3 +11,11 @@ export type UIFilters = {
   kuery?: string;
   environment?: string;
 } & { [key in LocalUIFilterName]?: string[] };
+
+export interface BreakdownItem {
+  name: string;
+  count: number;
+  type: string;
+  fieldName: string;
+  selected?: boolean;
+}

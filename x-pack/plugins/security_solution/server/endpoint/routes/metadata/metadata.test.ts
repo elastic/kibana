@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
   RouteConfig,
@@ -40,8 +40,8 @@ import { HostId } from './support/unenroll';
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any>;
@@ -60,7 +60,7 @@ describe('test endpoint route', () => {
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
-      IClusterClient
+      ILegacyClusterClient
     >;
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
