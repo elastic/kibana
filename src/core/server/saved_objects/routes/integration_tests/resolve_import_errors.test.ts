@@ -27,16 +27,33 @@ import { SavedObjectConfig } from '../../saved_objects_config';
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
-const config = {
-  maxImportPayloadBytes: 10485760,
-  maxImportExportSize: 10000,
-} as SavedObjectConfig;
+const config = { maxImportPayloadBytes: 10485760, maxImportExportSize: 10000 } as SavedObjectConfig;
+const URL = '/api/saved_objects/_resolve_import_errors';
 
-describe('POST /api/saved_objects/_resolve_import_errors', () => {
+describe(`POST ${URL}`, () => {
   let server: setupServerReturn['server'];
   let httpSetup: setupServerReturn['httpSetup'];
   let handlerContext: setupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+
+  const mockDashboard = {
+    type: 'dashboard',
+    id: 'my-dashboard',
+    attributes: { title: 'Look at my dashboard' },
+    references: [],
+  };
+  const mockVisualization = {
+    type: 'visualization',
+    id: 'my-vis',
+    attributes: { title: 'Look at my visualization' },
+    references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+  };
+  const mockIndexPattern = {
+    type: 'index-pattern',
+    id: 'existing',
+    attributes: {},
+    references: [],
+  };
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -59,7 +76,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
 
   it('formats successful response', async () => {
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_resolve_import_errors')
+      .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
         [
@@ -82,21 +99,10 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
   });
 
   it('defaults migrationVersion to empty object', async () => {
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {
-            title: 'Look at my dashboard',
-          },
-          references: [],
-        },
-      ],
-    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_resolve_import_errors')
+      .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -114,34 +120,21 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({
-      success: true,
-      successCount: 1,
-      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
-    });
-    expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
-    const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
-    expect(firstBulkCreateCallArray).toHaveLength(1);
-    expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
+    const { type, id } = mockDashboard;
+    expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ migrationVersion: {} })],
+      expect.anything() // options
+    );
   });
 
   it('retries importing a dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {
-            title: 'Look at my dashboard',
-          },
-          references: [],
-        },
-      ],
-    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_resolve_import_errors')
+      .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -159,58 +152,21 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({
-      success: true,
-      successCount: 1,
-      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
-    });
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "Look at my dashboard",
-                },
-                "id": "my-dashboard",
-                "migrationVersion": Object {},
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+    const { type, id, attributes } = mockDashboard;
+    expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [{ type, id, attributes, migrationVersion: {} }],
+      expect.objectContaining({ overwrite: undefined })
+    );
   });
 
   it('resolves conflicts for dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {
-            title: 'Look at my dashboard',
-          },
-          references: [],
-        },
-      ],
-    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_resolve_import_errors')
+      .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -229,74 +185,26 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
+    const { type, id, attributes } = mockDashboard;
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
+      successResults: [{ type, id }],
     });
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "Look at my dashboard",
-                },
-                "id": "my-dashboard",
-                "migrationVersion": Object {},
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": true,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [{ type, id, attributes, migrationVersion: {} }],
+      expect.objectContaining({ overwrite: true })
+    );
   });
 
   it('resolves conflicts by replacing the visualization references', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'visualization',
-          id: 'my-vis',
-          attributes: {
-            title: 'Look at my visualization',
-          },
-          references: [
-            {
-              name: 'ref_0',
-              type: 'index-pattern',
-              id: 'existing',
-            },
-          ],
-        },
-      ],
-    });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: 'existing',
-          type: 'index-pattern',
-          attributes: {},
-          references: [],
-        },
-      ],
-    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
 
     const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_resolve_import_errors')
+      .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -314,71 +222,21 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
+    const { type, id, attributes, references } = mockVisualization;
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
       successResults: [{ type: 'visualization', id: 'my-vis' }],
     });
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "Look at my visualization",
-                },
-                "id": "my-vis",
-                "migrationVersion": Object {},
-                "references": Array [
-                  Object {
-                    "id": "existing",
-                    "name": "ref_0",
-                    "type": "index-pattern",
-                  },
-                ],
-                "type": "visualization",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "existing",
-                "type": "index-pattern",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [{ type, id, attributes, references, migrationVersion: {} }],
+      expect.objectContaining({ overwrite: undefined })
+    );
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [{ fields: ['id'], id: 'existing', type: 'index-pattern' }],
+      expect.anything() // options
+    );
   });
 });
