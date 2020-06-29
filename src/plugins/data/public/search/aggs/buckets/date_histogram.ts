@@ -32,7 +32,6 @@ import { isMetricAggType } from '../metrics/metric_agg_type';
 
 import {
   dateHistogramInterval,
-  FIELD_FORMAT_IDS,
   KBN_FIELD_TYPES,
   TimeRange,
   TimeRangeBounds,
