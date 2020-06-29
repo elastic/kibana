@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
 import {
   Check,
@@ -245,17 +244,17 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const items = await queryContext.search(params);
 
-  const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
+  const monitorBuckets = items?.aggregations?.monitors?.buckets ?? [];
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    const monitorId = get(monitor, 'key.monitor_id');
+    const monitorId = monitor.key.monitor_id;
     monitorIds.push(monitorId);
     const state: any = monitor.state?.value;
     state.timestamp = state['@timestamp'];
     const { checks } = state;
-    if (checks) {
-      state.checks = sortBy(checks, checksSortBy);
+    if (Array.isArray(checks)) {
+      checks.sort(sortChecksBy);
       state.checks = state.checks.map((check: any) => ({
         ...check,
         timestamp: check['@timestamp'],
@@ -276,7 +275,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
     histogram: histogramMap[summary.monitor_id],
   }));
 
-  const sortedResItems: any = sortBy(resItems, 'monitor_id');
+  const sortedResItems: any = resItems.sort((a, b) => {
+    if (a.monitor_id === b.monitor_id) return 0;
+    return a.monitor_id > b.monitor_id ? 1 : -1;
+  });
+
   if (queryContext.pagination.sortOrder === SortOrder.DESC) {
     sortedResItems.reverse();
   }
@@ -378,4 +381,32 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
 
-const checksSortBy = (check: Check) => [get(check, 'observer.geo.name'), get(check, 'monitor.ip')];
+export const sortChecksBy = (
+  a: Pick<Check, 'observer' | 'monitor'>,
+  b: Pick<Check, 'observer' | 'monitor'>
+) => {
+  const nameA: string = a.observer?.geo?.name ?? '';
+  const nameB: string = b.observer?.geo?.name ?? '';
+  if (nameA === nameB) {
+    let ipA: string;
+    let ipB: string;
+    if (Array.isArray(a.monitor.ip)) {
+      a.monitor.ip.sort();
+      ipA = a.monitor.ip?.[0] ?? '';
+    } else {
+      ipA = a.monitor.ip ?? '';
+    }
+    if (Array.isArray(b.monitor.ip)) {
+      b.monitor.ip.sort();
+      ipB = b.monitor.ip?.[0] ?? '';
+    } else {
+      ipB = b.monitor.ip ?? '';
+    }
+
+    if (ipA === ipB) {
+      return 0;
+    }
+    return ipA > ipB ? 1 : -1;
+  }
+  return nameA > nameB ? 1 : -1;
+};
