@@ -19,6 +19,7 @@ import {
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
+import { TagsClient } from './services';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -28,11 +29,13 @@ export interface TagsPluginStartDependencies {
   management: ManagementStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsPluginSetup {}
+export interface TagsPluginSetup {
+  tagsClient: TagsClient;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsPluginStart {}
+export interface TagsPluginStart {
+  tagsClient: TagsClient;
+}
 
 export class TagsPlugin
   implements
@@ -42,12 +45,17 @@ export class TagsPlugin
       TagsPluginSetupDependencies,
       TagsPluginStartDependencies
     > {
+  private tagsClient!: TagsClient;
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<TagsPluginStartDependencies, unknown>,
     plugins: TagsPluginSetupDependencies
   ): TagsPluginSetup {
+    const { http } = core;
+
+    this.tagsClient = new TagsClient({ http });
+
     const kibanaSection = plugins.management.sections.getSection(ManagementSectionId.Kibana);
 
     kibanaSection.registerApp({
@@ -58,7 +66,11 @@ export class TagsPlugin
         defaultMessage: 'Tags',
       }),
       mount: ({ element, history, setBreadcrumbs }) => {
-        const services = new TagsManagementServices({ history, setBreadcrumbs });
+        const services = new TagsManagementServices({
+          history,
+          setBreadcrumbs,
+          tagsClient: this.tagsClient,
+        });
         render(h(TagsManagementSection, { services }), element);
         return () => {
           unmountComponentAtNode(element);
@@ -66,10 +78,14 @@ export class TagsPlugin
       },
     });
 
-    return {};
+    return {
+      tagsClient: this.tagsClient,
+    };
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
-    return {};
+    return {
+      tagsClient: this.tagsClient,
+    };
   }
 }

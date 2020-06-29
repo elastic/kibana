@@ -29,7 +29,7 @@ export class TagsClient implements ITagsClient {
     };
   }
 
-  public async create({ tag }: TagsClientCreateParams): Promise<Tag> {
+  public async create({ tag }: TagsClientCreateParams): Promise<{ tag: Tag }> {
     const { savedObjectsClient, user } = this.params;
     const { title, description, color } = tag;
 
@@ -58,6 +58,6 @@ export class TagsClient implements ITagsClient {
       {}
     );
 
-    return this.tagSavedObjectToTag(savedObject);
+    return { tag: this.tagSavedObjectToTag(savedObject) };
   }
 }
