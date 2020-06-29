@@ -25,7 +25,7 @@ describe('useFindLists', () => {
   it('invokes Api.findLists', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useFindLists());
     act(() => {
-      result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 });
+      result.current.start({ cursor: undefined, http: httpMock, pageIndex: 1, pageSize: 10 });
     });
     await waitForNextUpdate();
 

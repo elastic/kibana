@@ -88,6 +88,7 @@ describe('Value Lists API', () => {
     it('GETs from the lists endpoint', async () => {
       const abortCtrl = new AbortController();
       await findLists({
+        cursor: undefined,
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -105,6 +106,7 @@ describe('Value Lists API', () => {
     it('sends pagination as query parameters', async () => {
       const abortCtrl = new AbortController();
       await findLists({
+        cursor: undefined,
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -121,7 +123,11 @@ describe('Value Lists API', () => {
 
     it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 10, pageSize: 0 };
+      const payload: ApiPayload<FindListsParams> = {
+        cursor: undefined,
+        pageIndex: 10,
+        pageSize: 0,
+      };
 
       await expect(
         findLists({
@@ -135,7 +141,11 @@ describe('Value Lists API', () => {
 
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
-      const payload: ApiPayload<FindListsParams> = { pageIndex: 1, pageSize: 10 };
+      const payload: ApiPayload<FindListsParams> = {
+        cursor: undefined,
+        pageIndex: 1,
+        pageSize: 10,
+      };
       const badResponse = { ...getFoundListSchemaMock(), cursor: undefined };
       httpMock.fetch.mockResolvedValue(badResponse);
 

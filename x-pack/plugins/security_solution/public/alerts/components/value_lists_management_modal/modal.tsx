@@ -16,7 +16,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ListSchema, exportList, useFindLists, useDeleteList } from '../../../lists_plugin_deps';
+import {
+  ListSchema,
+  exportList,
+  useFindLists,
+  useDeleteList,
+  useCursor,
+} from '../../../lists_plugin_deps';
 import { useToasts, useKibana } from '../../../common/lib/kibana';
 import { GenericDownloader } from '../../../common/components/generic_downloader';
 import * as i18n from './translations';
@@ -34,6 +40,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
+  const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList } = useDeleteList();
@@ -41,8 +48,8 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const toasts = useToasts();
 
   const fetchLists = useCallback(() => {
-    findLists({ http, pageIndex: pageIndex + 1, pageSize });
-  }, [http, findLists, pageIndex, pageSize]);
+    findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
+  }, [cursor, http, findLists, pageIndex, pageSize]);
 
   const handleDelete = useCallback(
     async ({ id }: { id: string }) => {
@@ -92,6 +99,12 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
       fetchLists();
     }
   }, [showModal, fetchLists]);
+
+  useEffect(() => {
+    if (!lists.loading && lists.result?.cursor) {
+      setCursor(lists.result.cursor);
+    }
+  }, [lists.loading, lists.result, setCursor]);
 
   if (!showModal) {
     return null;

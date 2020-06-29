@@ -13,6 +13,7 @@ export { useFindLists } from './lists/hooks/use_find_lists';
 export { useImportList } from './lists/hooks/use_import_list';
 export { useDeleteList } from './lists/hooks/use_delete_list';
 export { exportList } from './lists/api';
+export { useCursor } from './common/hooks/use_cursor';
 export {
   ExceptionList,
   ExceptionIdentifiers,
