@@ -17,26 +17,5 @@
  * under the License.
  */
 
-import { ClientFacade } from './client_facade';
-
-/** @public **/
-export interface IScopedClusterClient {
-  asInternalUser: () => ClientFacade;
-  asCurrentUser: () => ClientFacade;
-}
-
-/** @internal **/
-export class ScopedClusterClient implements IScopedClusterClient {
-  constructor(
-    private readonly internalClient: ClientFacade,
-    private readonly scopedClient: ClientFacade
-  ) {}
-
-  asInternalUser() {
-    return this.internalClient;
-  }
-
-  asCurrentUser() {
-    return this.scopedClient;
-  }
-}
+require('../src/setup_node_env');
+require('../src/dev/generate_es_client');
