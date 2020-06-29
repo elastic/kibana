@@ -5,16 +5,16 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { SavedObjectAttributes, SimpleSavedObject } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
+export const useGetSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
   const kibana = useKibana();
-  const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);
+  const [data, setData] = useState<SimpleSavedObject<SavedObjectType> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const find = useCallback(
-    (query?: string, searchFields: string[] = []) => {
+  const getObject = useCallback(
+    (id: string) => {
       setLoading(true);
       const fetchData = async () => {
         try {
@@ -22,11 +22,7 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
           if (!savedObjectsClient) {
             throw new Error('Saved objects client is unavailable');
           }
-          const d = await savedObjectsClient.find<SavedObjectType>({
-            type,
-            search: query,
-            searchFields,
-          });
+          const d = await savedObjectsClient.get<SavedObjectType>(type, id);
           setError(null);
           setLoading(false);
           setData(d);
@@ -41,22 +37,10 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
     [type, kibana.services.savedObjects]
   );
 
-  const hasView = async (name: string) => {
-    const savedObjectsClient = kibana.services.savedObjects?.client;
-    if (!savedObjectsClient) {
-      throw new Error('Saved objects client is unavailable');
-    }
-    const objects = await savedObjectsClient.find<SavedObjectType>({
-      type,
-    });
-    return objects.savedObjects.find((o) => o.attributes.name === name);
-  };
-
   return {
-    hasView,
     data,
     loading,
     error,
-    find,
+    getObject,
   };
 };
