@@ -16,6 +16,7 @@ import {
   GetAgentStatusResponse,
   GetDatasourcesResponse,
   GetOneDatasourceResponse,
+  GetPackagesResponse,
   UpdateDatasourceResponse,
 } from '../../../../../ingest_manager/common';
 
@@ -25,6 +26,8 @@ import {
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** Information about the latest endpoint package */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
   /** API error if loading data failed */
   apiError?: ServerApiError;
   /** total number of policies */

@@ -19,7 +19,6 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_STACK_MANAGEMENT_STATS_TYPE } from '../../../common/constants';
 
 export type UsageStats = Record<string, any>;
 
@@ -47,7 +46,7 @@ export function registerManagementUsageCollector(
   getUiSettingsClient: () => IUiSettingsClient | undefined
 ) {
   const collector = usageCollection.makeUsageCollector({
-    type: KIBANA_STACK_MANAGEMENT_STATS_TYPE,
+    type: 'stack_management',
     isReady: () => typeof getUiSettingsClient() !== 'undefined',
     fetch: createCollectorFetch(getUiSettingsClient),
   });

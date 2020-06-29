@@ -27,7 +27,7 @@ import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
     const transform = jest.fn<any, any>((doc: any) => set(doc, 'attributes.name', 'HOI!'));
-    const result = migrateRawDocs(
+    const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
@@ -56,7 +56,7 @@ describe('migrateRawDocs', () => {
     const transform = jest.fn<any, any>((doc: any) =>
       set(_.cloneDeep(doc), 'attributes.name', 'TADA')
     );
-    const result = migrateRawDocs(
+    const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
