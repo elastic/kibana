@@ -56,13 +56,13 @@ export class TooltipPopover extends Component {
 
   // Must load original geometry instead of using geometry from mapbox feature.
   // Mapbox feature geometry is from vector tile and is not the same as the original geometry.
-  _loadFeatureGeometry = ({ layerId, featureId, meta }) => {
+  _loadFeatureGeometry = ({ layerId, featureId }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return null;
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId, meta);
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return null;
     }
@@ -70,18 +70,17 @@ export class TooltipPopover extends Component {
     return targetFeature.geometry;
   };
 
-  _loadFeatureProperties = async ({ layerId, featureId, meta }) => {
+  _loadFeatureProperties = async ({ layerId, featureId, mbProperties }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId, meta);
-    if (!targetFeature) {
-      return [];
-    }
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
 
-    return await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+    // fallback to mbProperties if the layer itself cannot get a feature.
+    const properties = targetFeature ? targetFeature.properties : mbProperties;
+    return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
   _loadPreIndexedShape = async ({ layerId, featureId }) => {
@@ -90,7 +89,7 @@ export class TooltipPopover extends Component {
       return null;
     }
 
-    const targetFeature = tooltipLayer.getFeatureById(featureId, { mbProperties: {} });
+    const targetFeature = tooltipLayer.getFeatureById(featureId);
     if (!targetFeature) {
       return null;
     }

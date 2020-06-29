@@ -65,7 +65,7 @@ export class FeatureProperties extends React.Component {
       properties = await this.props.loadFeatureProperties({
         layerId: nextLayerId,
         featureId: nextFeatureId,
-        meta: meta,
+        mbProperties: meta.mbProperties,
       });
     } catch (error) {
       if (this._isMounted) {

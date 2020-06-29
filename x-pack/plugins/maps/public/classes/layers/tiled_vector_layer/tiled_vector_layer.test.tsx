@@ -85,21 +85,22 @@ describe('icon', () => {
 });
 
 describe('getFeatureById', () => {
-  it('should echo properties with dummy geometry', async () => {
+  it('should return null feature', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const properties = {
       foo: 'bar',
     };
-    const feature = layer.getFeatureById(undefined, { mbProperties: properties }) as Feature;
+    const feature = layer.getFeatureById(undefined) as Feature;
+    expect(feature).toEqual(null);
 
-    expect(feature.properties).toEqual(properties);
-    expect(feature.geometry).toEqual({
-      type: 'Point',
-      coordinates: [0, 0],
-    });
-    expect(feature.id).toEqual(undefined);
-    expect(feature.type).toEqual('Feature');
+    // expect(feature.properties).toEqual(properties);
+    // expect(feature.geometry).toEqual({
+    //   type: 'Point',
+    //   coordinates: [0, 0],
+    // });
+    // expect(feature.id).toEqual(undefined);
+    // expect(feature.type).toEqual('Feature');
   });
 });
 

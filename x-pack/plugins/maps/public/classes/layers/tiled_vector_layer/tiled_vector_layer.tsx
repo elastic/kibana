@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { Feature, GeoJsonProperties } from 'geojson';
+import { Feature } from 'geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
@@ -198,19 +198,8 @@ export class TiledVectorLayer extends VectorLayer {
     return Math.max(this._source.getMinZoom(), super.getMinZoom());
   }
 
-  getFeatureById(
-    id: string | number | undefined,
-    meta: { mbProperties: GeoJsonProperties }
-  ): Feature | null {
-    const properties = this._source.getFeatureProperties(id, meta.mbProperties);
-    return {
-      type: 'Feature',
-      properties,
-      id,
-      geometry: {
-        type: 'Point',
-        coordinates: [0, 0],
-      },
-    };
+  getFeatureById(id: string | number | undefined): Feature | null {
+    // Cannot return the feature
+    return null;
   }
 }

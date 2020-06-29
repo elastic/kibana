@@ -33,10 +33,7 @@ export interface IVectorLayer extends ILayer {
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
   getStyle(): IVectorStyle;
-  getFeatureById(
-    id: string | number | undefined,
-    meta: { mbProperties: GeoJsonProperties }
-  ): Feature | null;
+  getFeatureById(id: string | number | undefined): Feature | null;
   getPropertiesForTooltip(
     properties: GeoJsonProperties,
     featureId?: string | number
@@ -85,10 +82,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
   getStyle(): IVectorStyle;
-  getFeatureById(
-    id: string | number | undefined,
-    meta: { mbProperties: GeoJsonProperties }
-  ): Feature | null;
+  getFeatureById(id: string | number | undefined): Feature | null;
   getPropertiesForTooltip(
     properties: GeoJsonProperties,
     featureId?: string | number
