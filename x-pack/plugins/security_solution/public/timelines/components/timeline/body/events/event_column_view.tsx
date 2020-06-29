@@ -105,6 +105,7 @@ export const EventColumnView = React.memo<Props>(
 
     const button = (
       <EuiButtonIcon
+        aria-label="context menu"
         data-test-subj="timeline-context-menu-button"
         size="s"
         iconType="boxesHorizontal"
