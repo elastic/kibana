@@ -5,6 +5,7 @@
  */
 
 import type { IScopedClusterClient } from 'src/core/server';
+import { LogEntryContext } from '../../../common/http_api';
 import {
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
@@ -523,7 +524,7 @@ async function fetchLogEntryCategoryExamples(
 
 const parseCategoryId = (rawCategoryId: string) => parseInt(rawCategoryId, 10);
 
-const getContextFromSource = (source: any) => {
+const getContextFromSource = (source: any): LogEntryContext => {
   const containerId = source.container?.id;
   const hostName = source.host?.name;
   const logFilePath = source.log?.file?.path;
@@ -535,6 +536,8 @@ const getContextFromSource = (source: any) => {
   if (typeof hostName === 'string' && typeof logFilePath === 'string') {
     return { 'host.name': hostName, 'log.file.path': logFilePath };
   }
+
+  return {};
 };
 
 interface HistogramParameters {
