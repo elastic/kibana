@@ -15,14 +15,15 @@ import {
 } from '@elastic/eui';
 
 export interface Props {
+  id: string;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   callToAction?: React.ReactNode;
 }
 
-export const Page: React.FC<Props> = ({ title, subtitle, callToAction, children }) => {
+export const Page: React.FC<Props> = ({ id, title, subtitle, callToAction, children }) => {
   return (
-    <EuiPageContent horizontalPosition="center" data-test-subj="TagsManagementPage">
+    <EuiPageContent horizontalPosition="center" data-test-subj={`TagsManagementPage-${id}`}>
       <EuiFlexGroup justifyContent={'spaceBetween'}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
@@ -37,7 +38,7 @@ export const Page: React.FC<Props> = ({ title, subtitle, callToAction, children 
         {!!callToAction && <EuiFlexItem grow={false}>{callToAction}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      {children}
+      <div data-test-subj={`TagsManagementPageContent`}>{children}</div>
     </EuiPageContent>
   );
 };

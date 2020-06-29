@@ -14,6 +14,7 @@ import { Tag } from '../../../../common';
 export const LandingPage: React.FC = () => {
   return (
     <Page
+      id={'TagTable'}
       title={txtTitle}
       subtitle={<p>{txtSubtitle}</p>}
       callToAction={
