@@ -215,8 +215,10 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
                 dataset: { type: 'keyword', index: false },
                 processors: { type: 'keyword', index: false },
                 config: { type: 'flattened', index: false },
-                agent_stream: { type: 'flattened', index: false },
-                vars: { type: 'flattened', index: false },
+                // @ts-ignore doc_values is not in SavedObjectsFieldMapping
+                agent_stream: { type: 'flattened', index: false, doc_values: false },
+                // @ts-ignore doc_values is not in SavedObjectsFieldMapping
+                vars: { type: 'flattened', index: false, doc_values: false },
               },
             },
           },
