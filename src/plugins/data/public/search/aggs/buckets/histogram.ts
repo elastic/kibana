@@ -67,7 +67,7 @@ export const getHistogramBucketAgg = ({
       makeLabel(aggConfig) {
         return aggConfig.getFieldDisplayName();
       },
-      createFilter: createFilterHistogram,
+      createFilter: createFilterHistogram(getInternalStartServices),
       decorateAggConfig() {
         let autoBounds: AutoBounds;
 

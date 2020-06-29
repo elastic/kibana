@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions, IScopedClusterClient } from 'kibana/server';
+import { LegacyCallAPIOptions, ILegacyScopedClusterClient } from 'kibana/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -110,10 +110,10 @@ export class DataVisualizer {
   callAsCurrentUser: (
     endpoint: string,
     clientParams: Record<string, any>,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => Promise<any>;
 
-  constructor(callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']) {
+  constructor(callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser']) {
     this.callAsCurrentUser = callAsCurrentUser;
   }
 

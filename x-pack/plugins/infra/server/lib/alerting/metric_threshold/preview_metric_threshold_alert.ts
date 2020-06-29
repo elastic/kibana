@@ -10,7 +10,7 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { IScopedClusterClient } from '../../../../../../../src/core/server';
+import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MetricExpressionParams } from './types';
@@ -19,7 +19,7 @@ import { evaluateAlert } from './lib/evaluate_alert';
 const MAX_ITERATIONS = 50;
 
 interface PreviewMetricThresholdAlertParams {
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: {
     criteria: MetricExpressionParams[];
     groupBy: string | undefined | string[];

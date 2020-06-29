@@ -25,9 +25,9 @@ import { IUiSettingsClient } from 'src/core/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
+import { DateRangeKey } from './lib/date_range';
 
-import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 
@@ -57,18 +57,6 @@ export const getDateRangeBucketAgg = ({
       createFilter: createFilterDateRange,
       getKey({ from, to }): DateRangeKey {
         return { from, to };
-      },
-      getFormat(agg) {
-        const { fieldFormats } = getInternalStartServices();
-
-        const formatter = agg.fieldOwnFormatter(
-          TEXT_CONTEXT_TYPE,
-          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
-        );
-        const DateRangeFormat = FieldFormat.from(function (range: DateRangeKey) {
-          return convertDateRangeToString(range, formatter);
-        });
-        return new DateRangeFormat();
       },
       getSerializedFormat(agg) {
         return {

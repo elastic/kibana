@@ -6,7 +6,7 @@
 
 import { Observable } from 'rxjs';
 import {
-  ClusterClient,
+  LegacyClusterClient,
   KibanaRequest,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
@@ -15,7 +15,7 @@ import {
 import { EsContext } from './es';
 import { IEventLogClientService } from './types';
 import { EventLogClient } from './event_log_client';
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {

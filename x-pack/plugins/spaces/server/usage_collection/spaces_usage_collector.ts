@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions } from 'src/core/server';
+import { LegacyCallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
@@ -14,7 +14,7 @@ import { PluginsSetup } from '../plugin';
 type CallCluster = <T = unknown>(
   endpoint: string,
   clientParams: Record<string, unknown>,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<T>;
 
 interface SpacesAggregationResponse {

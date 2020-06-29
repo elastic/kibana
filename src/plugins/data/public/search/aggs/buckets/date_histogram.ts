@@ -31,7 +31,7 @@ import { dateHistogramInterval, TimeRange } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { QuerySetup } from '../../../query/query_service';
 import { GetInternalStartServicesFn } from '../../../types';
@@ -136,21 +136,6 @@ export const getDateHistogramBucketAgg = ({
             },
           } as any,
         };
-      },
-      getFormat(agg) {
-        const { fieldFormats } = getInternalStartServices();
-        const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
-
-        if (!DateFieldFormat) {
-          throw new Error('Unable to retrieve Date Field Format');
-        }
-
-        return new DateFieldFormat(
-          {
-            pattern: agg.buckets.getScaledDateFormat(),
-          },
-          (key: string) => uiSettings.get(key)
-        );
       },
       getSerializedFormat(agg) {
         return {

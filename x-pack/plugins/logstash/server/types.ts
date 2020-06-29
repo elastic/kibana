@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 
 type UnwrapArray<T> = T extends Array<infer U> ? U : never;
 
@@ -21,7 +21,7 @@ export interface PipelineListItemOptions {
 declare module 'src/core/server' {
   interface RequestHandlerContext {
     logstash?: {
-      esClient: IScopedClusterClient;
+      esClient: ILegacyScopedClusterClient;
     };
   }
 }
