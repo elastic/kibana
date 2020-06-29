@@ -5,58 +5,50 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsCreateOptions,
+  SimpleSavedObject,
+} from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes>(type: string) => {
+export const useUpdateSavedObject = (type: string) => {
   const kibana = useKibana();
-  const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectType> | null>(null);
+  const [data, setData] = useState<SimpleSavedObject<SavedObjectAttributes> | null>(null);
+  const [updatedId, setUpdatedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const find = useCallback(
-    (query?: string, searchFields: string[] = []) => {
+
+  const update = useCallback(
+    (id: string, attributes: SavedObjectAttributes, options?: SavedObjectsCreateOptions) => {
       setLoading(true);
-      const fetchData = async () => {
+      const save = async () => {
         try {
           const savedObjectsClient = kibana.services.savedObjects?.client;
           if (!savedObjectsClient) {
             throw new Error('Saved objects client is unavailable');
           }
-          const d = await savedObjectsClient.find<SavedObjectType>({
-            type,
-            search: query,
-            searchFields,
-          });
+          const d = await savedObjectsClient.update(type, id, attributes, options);
+          setUpdatedId(d.id);
           setError(null);
-          setLoading(false);
           setData(d);
+          setLoading(false);
         } catch (e) {
           setLoading(false);
           setError(e);
         }
       };
-      fetchData();
+      save();
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 
-  const hasView = async (name: string) => {
-    const savedObjectsClient = kibana.services.savedObjects?.client;
-    if (!savedObjectsClient) {
-      throw new Error('Saved objects client is unavailable');
-    }
-    const objects = await savedObjectsClient.find<SavedObjectType>({
-      type,
-    });
-    return objects.savedObjects.find((o) => o.attributes.name === name);
-  };
-
   return {
-    hasView,
     data,
     loading,
     error,
-    find,
+    update,
+    updatedId,
   };
 };

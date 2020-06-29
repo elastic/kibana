@@ -19,17 +19,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedView } from '../../hooks/use_saved_view';
+import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {
   views: Array<SavedView<ViewState>>;
   loading: boolean;
+  defaultViewId: string;
+  sourceIsLoading: boolean;
   close(): void;
+  makeDefault(id: string): void;
   setView(viewState: ViewState): void;
   deleteView(id: string): void;
 }
 
 interface DeleteConfimationProps {
+  isDisabled?: boolean;
   confirmedAction(): void;
 }
 const DeleteConfimation = (props: DeleteConfimationProps) => {
@@ -46,6 +50,7 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
             <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
           </EuiButtonEmpty>
           <EuiButton
+            disabled={props.isDisabled}
             fill={true}
             iconType="trash"
             color="danger"
@@ -64,13 +69,17 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
   );
 };
 
-export function SavedViewListFlyout<ViewState>({
+export function SavedViewManageViewsFlyout<ViewState>({
   close,
   views,
+  defaultViewId,
   setView,
+  makeDefault,
   deleteView,
   loading,
+  sourceIsLoading,
 }: Props<ViewState>) {
+  const [inProgressView, setInProgressView] = useState<string | null>(null);
   const renderName = useCallback(
     (name: string, item: SavedView<ViewState>) => (
       <EuiButtonEmpty
@@ -89,6 +98,7 @@ export function SavedViewListFlyout<ViewState>({
     (item: SavedView<ViewState>) => {
       return (
         <DeleteConfimation
+          isDisabled={item.isDefault}
           confirmedAction={() => {
             deleteView(item.id);
           }}
@@ -96,6 +106,25 @@ export function SavedViewListFlyout<ViewState>({
       );
     },
     [deleteView]
+  );
+
+  const renderMakeDefaultAction = useCallback(
+    (item: SavedView<ViewState>) => {
+      const isDefault = item.id === defaultViewId;
+      return (
+        <>
+          <EuiButtonEmpty
+            isLoading={inProgressView === item.id && sourceIsLoading}
+            iconType={isDefault ? 'starFilled' : 'starEmpty'}
+            onClick={() => {
+              setInProgressView(item.id);
+              makeDefault(item.id);
+            }}
+          />
+        </>
+      );
+    },
+    [makeDefault, defaultViewId, sourceIsLoading, inProgressView]
   );
 
   const columns = [
@@ -112,7 +141,11 @@ export function SavedViewListFlyout<ViewState>({
       }),
       actions: [
         {
-          available: (item: SavedView<ViewState>) => !item.isDefault,
+          available: () => true,
+          render: renderMakeDefaultAction,
+        },
+        {
+          available: (item: SavedView<ViewState>) => true,
           render: renderDeleteAction,
         },
       ],
@@ -124,7 +157,10 @@ export function SavedViewListFlyout<ViewState>({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
-            <FormattedMessage defaultMessage="Load views" id="xpack.infra.openView.flyoutHeader" />
+            <FormattedMessage
+              defaultMessage="Manage saved views"
+              id="xpack.infra.openView.flyoutHeader"
+            />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
