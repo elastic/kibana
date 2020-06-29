@@ -53,9 +53,9 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
             bool: {
               filter: [
                 {
-                  match: {
-                    // only return documents with the matching _id
-                    _id,
+                  // only return documents with the matching _id
+                  ids: {
+                    values: _id,
                   },
                 },
                 {
