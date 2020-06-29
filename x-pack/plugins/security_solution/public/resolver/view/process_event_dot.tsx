@@ -301,19 +301,8 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * As the resolver zooms and buttons and text change visibility, we look to keep the overall container properly vertically aligned
      */
-    const actionalButtonsBaseTopOffset = 5;
-    let actionableButtonsTopOffset;
-    switch (true) {
-      case isShowingEventActions:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 3.5 * magFactorX;
-        break;
-      case isShowingDescriptionText:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + magFactorX;
-        break;
-      default:
-        actionableButtonsTopOffset = actionalButtonsBaseTopOffset + 21 * magFactorX;
-        break;
-    }
+    const actionableButtonsTopOffset =
+      (isShowingEventActions ? 3.5 : isShowingDescriptionText ? 1 : 21) * xScale + 5;
 
     /**
      * The `left` and `top` values represent the 'center' point of the process node.
