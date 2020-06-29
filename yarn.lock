@@ -2208,11 +2208,13 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.3.0"
 
-"@elastic/charts@19.2.0":
-  version "19.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.2.0.tgz#45db8c80e4699e5088a1771f190171c1144c5242"
-  integrity sha512-uhk73OQPaxg7l54gfr+kv+c6jiEngewwH408OySzJbnH23z/5sIpLSziZhV33I6bs/LKDXQSqamC9Jh6Xcwk1A==
+"@elastic/charts@19.5.2":
+  version "19.5.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.5.2.tgz#6117f7b3acce6deef0a4f272ae491d99d2e3b1e0"
+  integrity sha512-6GdqwVrDwQu+h5GUXpwy9a8dQ66oTNl3SO+ih1sljWvni+f/wcsrRcCTJUP99vtUcPQ8BT9Pn79QknBk1ZOH5Q==
   dependencies:
+    "@popperjs/core" "^2.4.0"
+    chroma-js "^2.1.0"
     classnames "^2.2.6"
     d3-array "^1.2.4"
     d3-collection "^1.0.7"
@@ -2358,6 +2360,11 @@
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.1.1.tgz#619b70322c9cce4a7ee5fbf8f678b1baa7f06095"
   integrity sha512-F6tIk8Txdqjg8Siv60iAvXzO9ZdQI87K3sS/fh5xd2XaWK+T5ZfqeTvsT7srwG6fr6uCBfuQEJV1KBBl+JpLZA==
+
+"@elastic/node-crypto@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.2.1.tgz#dfd9218f9b5729fa519762e6a6968aaf61b86eb0"
+  integrity sha512-RlZg+poLA2SwZZUM5RMJDJiKojlSB1mJkumIvLgXvvTCcCliC6rM0lUaNecV9pbQLIHrGlX2BrbwiuPWhv0czQ==
 
 "@elastic/numeral@^2.5.0":
   version "2.5.0"
@@ -3505,6 +3512,11 @@
     retry-axios "^1.0.1"
     which "^2.0.1"
     winston "^3.0.0"
+
+"@popperjs/core@^2.4.0":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.4.2.tgz#7c6dc4ecef16149fd7a736710baa1b811017fdca"
+  integrity sha512-JlGTGRYHC2QK+DDbePyXdBdooxFq2+noLfWpRqJtkxcb/oYWzOF0kcbfvvbWrwevCC1l6hLUg1wHYT+ona5BWQ==
 
 "@reach/router@^1.2.1":
   version "1.2.1"
@@ -5427,6 +5439,13 @@
   dependencies:
     "@types/linkify-it" "*"
 
+"@types/md5@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@types/md5/-/md5-2.2.0.tgz#cd82e16b95973f94bb03dee40c5b6be4a7fb7fb4"
+  integrity sha512-JN8OVL/wiDlCWTPzplsgMPu0uE9Q6blwp68rYsfk2G8aokRUQ8XD9MEhZwihfAiQvoyE+m31m6i3GFXwYWomKQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/memoize-one@^4.1.0":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@types/memoize-one/-/memoize-one-4.1.1.tgz#41dd138a4335b5041f7d8fc038f9d593d88b3369"
@@ -5667,6 +5686,11 @@
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.2.tgz#690a1475b84f2a884fd07cd797c00f5f31356ea8"
   integrity sha512-ce5d3q03Ex0sy4R14722Rmt6MT07Ua+k4FwDfdcToYJcMKNtRVQvJ6JCAPdAmAnbRb6CsX6aYb9m96NGod9uTw==
+
+"@types/rbush@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/rbush/-/rbush-3.0.0.tgz#b6887d99b159e87ae23cd14eceff34f139842aa6"
+  integrity sha512-W3ue/GYWXBOpkRm0VSoifrP3HV0Ni47aVJWvXyWMcbtpBy/l/K/smBRiJ+fI8f7shXRjZBiux+iJzYbh7VmcZg==
 
 "@types/reach__router@^1.2.3", "@types/reach__router@^1.2.6":
   version "1.2.6"
@@ -9990,7 +10014,7 @@ chroma-js@^1.4.1:
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-1.4.1.tgz#eb2d9c4d1ff24616be84b35119f4d26f8205f134"
   integrity sha512-jTwQiT859RTFN/vIf7s+Vl/Z2LcMrvMv3WUFmd/4u76AdlFC0NTNgqEEFPcRiHmAswPsMiQEDZLM8vX8qXpZNQ==
 
-chroma-js@^2.0.4:
+chroma-js@^2.0.4, chroma-js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.1.0.tgz#c0be48a21fe797ef8965608c1c4f911ef2da49d5"
   integrity sha512-uiRdh4ZZy+UTPSrAdp8hqEdVb1EllLtTHOt5TMaOjJUvi+O54/83Fc5K2ld1P+TJX+dw5B+8/sCgzI6eaur/lg==
@@ -13021,9 +13045,9 @@ element-resize-detector@^1.1.15:
     batch-processor "^1.0.0"
 
 elliptic@^6.0.0:
-  version "6.5.2"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.2.tgz#05c5678d7173c049d8ca433552224a495d0e3762"
-  integrity sha512-f4x70okzZbIQl/NSRLkI/+tteV/9WqL98zx+SQ69KbXxmVrmjwsNUPn/gYJJ0sHvEak24cZgHIPegRePAtA/xw==
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.3.tgz#cb59eb2efdaf73a0bd78ccd7015a62ad6e0f93d6"
+  integrity sha512-IMqzv5wNQf+E6aHeIqATs0tOLeOTwj1QKbRcS3jBbYkl5oLAserA8yJTT7/VyHUYG91PRmPyeQDObKLPpeS4dw==
   dependencies:
     bn.js "^4.4.0"
     brorand "^1.0.1"
@@ -19587,6 +19611,11 @@ js-levenshtein@^1.1.3:
   resolved "https://registry.yarnpkg.com/js-levenshtein/-/js-levenshtein-1.1.3.tgz#3ef627df48ec8cf24bacf05c0f184ff30ef413c5"
   integrity sha512-/812MXr9RBtMObviZ8gQBhHO8MOrGj8HlEE+4ccMTElNA/6I3u39u+bhny55Lk921yn44nSZFy9naNLElL5wgQ==
 
+js-levenshtein@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/js-levenshtein/-/js-levenshtein-1.1.6.tgz#c6cee58eb3550372df8deb85fad5ce66ce01d59d"
+  integrity sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==
+
 js-search@^1.4.3:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/js-search/-/js-search-1.4.3.tgz#23a86d7e064ca53a473930edc48615b6b1c1954a"
@@ -25347,6 +25376,13 @@ raw-loader@~0.5.1:
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/raw-loader/-/raw-loader-0.5.1.tgz#0c3d0beaed8a01c966d9787bf778281252a979aa"
   integrity sha1-DD0L6u2KAclm2Xh793goElKpeao=
+
+rbush@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/rbush/-/rbush-3.0.1.tgz#5fafa8a79b3b9afdfe5008403a720cc1de882ecf"
+  integrity sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==
+  dependencies:
+    quickselect "^2.0.0"
 
 rc@^1.0.1, rc@^1.1.6, rc@^1.2.7, rc@^1.2.8:
   version "1.2.8"

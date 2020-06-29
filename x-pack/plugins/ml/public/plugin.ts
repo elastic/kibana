@@ -30,10 +30,12 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
@@ -70,6 +72,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             data: pluginsStart.data,
             share: pluginsStart.share,
+            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,

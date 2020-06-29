@@ -282,5 +282,16 @@ export default function ({ getService, getPageObjects }) {
         expect(refreshedTimeString).not.to.be(initialTimeString);
       });
     });
+
+    describe('invalid time range in URL', function () {
+      it('should display a "Invalid time range toast"', async function () {
+        await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+        const toastMessage = await PageObjects.common.closeToast();
+        expect(toastMessage).to.be('Invalid time range');
+      });
+    });
   });
 }

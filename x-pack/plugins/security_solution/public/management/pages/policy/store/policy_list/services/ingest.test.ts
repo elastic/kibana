@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { sendGetDatasource, sendGetEndpointSpecificDatasources } from './ingest';
+import {
+  INGEST_API_EPM_PACKAGES,
+  sendGetDatasource,
+  sendGetEndpointSecurityPackage,
+  sendGetEndpointSpecificDatasources,
+} from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
+import { apiPathMockResponseProviders } from '../test_mock_utils';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -37,6 +43,7 @@ describe('ingest service', () => {
       });
     });
   });
+
   describe('sendGetDatasource()', () => {
     it('builds correct API path', async () => {
       await sendGetDatasource(http, '123');
@@ -49,6 +56,23 @@ describe('ingest service', () => {
           page: 1,
         },
       });
+    });
+  });
+
+  describe('sendGetEndpointSecurityPackage()', () => {
+    it('should query EPM with category=security', async () => {
+      http.get.mockReturnValue(apiPathMockResponseProviders[INGEST_API_EPM_PACKAGES]());
+      await sendGetEndpointSecurityPackage(http);
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/epm/packages', {
+        query: { category: 'security' },
+      });
+    });
+
+    it('should throw if package is not found', async () => {
+      http.get.mockResolvedValue({ response: [], success: true });
+      await expect(async () => {
+        await sendGetEndpointSecurityPackage(http);
+      }).rejects.toThrow();
     });
   });
 });

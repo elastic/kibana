@@ -46,7 +46,9 @@ export function ApmOverview({ stats, metrics, ...props }) {
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <Status stats={stats} />
+          <EuiPanel>
+            <Status stats={stats} />
+          </EuiPanel>
           <EuiSpacer size="s" />
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>

@@ -122,5 +122,5 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
 }
 
 export function getResultsUrl(jobId: string, analysisType: string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
+  return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }
