@@ -18,4 +18,4 @@
  */
 
 export const MockClusterClient = jest.fn();
-jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
+jest.mock('./legacy/cluster_client', () => ({ LegacyClusterClient: MockClusterClient }));

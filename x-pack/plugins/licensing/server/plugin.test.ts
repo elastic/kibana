@@ -12,9 +12,9 @@ import { LicensingPlugin } from './plugin';
 import {
   coreMock,
   elasticsearchServiceMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from '../../../../src/core/server/mocks';
-import { IClusterClient } from '../../../../src/core/server/';
+import { ILegacyClusterClient } from '../../../../src/core/server/';
 
 function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   const defaultRawLicense: RawLicense = {
@@ -29,7 +29,7 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
 
 const flushPromises = (ms = 50) => new Promise((res) => setTimeout(res, ms));
 
-function createCoreSetupWith(esClient: IClusterClient) {
+function createCoreSetupWith(esClient: ILegacyClusterClient) {
   const coreSetup = coreMock.createSetup();
 
   coreSetup.getStartServices.mockResolvedValue([
@@ -173,7 +173,7 @@ describe('licensing plugin', () => {
 
         await flushPromises();
 
-        const loggedMessages = loggingServiceMock.collect(pluginInitContextMock.logger).debug;
+        const loggedMessages = loggingSystemMock.collect(pluginInitContextMock.logger).debug;
 
         expect(
           loggedMessages.some(([message]) =>

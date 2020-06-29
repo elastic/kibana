@@ -5,12 +5,12 @@
  */
 
 import moment from 'moment';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 
 export class QueryContext {
-  callES: APICaller;
+  callES: LegacyAPICaller;
   heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;

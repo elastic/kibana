@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { deriveTypeFromItem, transformElasticToListItem } from '../utils';
 
 interface GetListItemOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
 }
 
