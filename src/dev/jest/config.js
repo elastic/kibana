@@ -43,6 +43,7 @@ export default {
     'src/plugins/**/*.{ts,tsx}',
     '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
     '!src/plugins/**/*.d.ts',
+    '!src/plugins/**/test_helpers/**',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',
@@ -51,6 +52,7 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
+    '!src/legacy/core_plugins/tests_bundle/**',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
