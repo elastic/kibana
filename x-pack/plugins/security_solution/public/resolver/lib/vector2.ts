@@ -41,6 +41,13 @@ export function applyMatrix3([x, y]: Vector2, [m11, m12, m13, m21, m22, m23]: Ma
 }
 
 /**
+ * Returns a boolean indicating equality of two vectors.
+ */
+export function isEqual([x1, y1]: Vector2, [x2, y2]: Vector2): boolean {
+  return x1 === x2 && y1 === y2;
+}
+
+/**
  * Returns the distance between two vectors
  */
 export function distance(a: Vector2, b: Vector2) {

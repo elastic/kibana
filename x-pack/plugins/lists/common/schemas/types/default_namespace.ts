@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-const namespaceType = t.keyof({ agnostic: null, single: null });
+export const namespaceType = t.keyof({ agnostic: null, single: null });
 
 type NamespaceType = t.TypeOf<typeof namespaceType>;
 
@@ -24,7 +24,7 @@ export const DefaultNamespace: DefaultNamespaceC = new t.Type<
 >(
   'DefaultNamespace',
   namespaceType.is,
-  (input): Either<t.Errors, NamespaceType> =>
-    input == null ? t.success('single') : namespaceType.decode(input),
+  (input, context): Either<t.Errors, NamespaceType> =>
+    input == null ? t.success('single') : namespaceType.validate(input, context),
   t.identity
 );

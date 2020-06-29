@@ -181,7 +181,7 @@ export const MemoizedAnalysisFieldsTable: FC<{
           </EuiCallOut>
         )}
         {tableItems.length > 0 && (
-          <EuiPanel paddingSize="m">
+          <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardExcludesSelect">
             <CustomSelectionTable
               data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
               checkboxDisabledCheck={checkboxDisabledCheck}
