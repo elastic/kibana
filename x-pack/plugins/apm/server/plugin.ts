@@ -4,46 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { combineLatest, Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import {
-  PluginInitializerContext,
-  Plugin,
   CoreSetup,
   CoreStart,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { Observable, combineLatest } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { APMConfig, APMXPackConfig, mergeConfigs } from '.';
+import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { ActionsPlugin } from '../../actions/server';
+import { AlertingPlugin } from '../../alerts/server';
+import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { LicensingPluginSetup } from '../../licensing/server';
+import { MlPluginSetup } from '../../ml/server';
 import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
-import { AlertingPlugin } from '../../alerts/server';
-import { ActionsPlugin } from '../../actions/server';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
-import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
-import { createApmApi } from './routes/create_apm_api';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
-import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { CloudSetup } from '../../cloud/server';
-import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '../../licensing/server';
-import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
-import { createApmTelemetry } from './lib/apm_telemetry';
-
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
   APM_FEATURE,
   APM_SERVICE_MAPS_FEATURE_NAME,
   APM_SERVICE_MAPS_LICENSE_TYPE,
 } from './feature';
+import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { createApmTelemetry } from './lib/apm_telemetry';
+import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
+import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
+import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
+import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
-import { MlPluginSetup } from '../../ml/server';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -135,18 +131,14 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       APM_SERVICE_MAPS_LICENSE_TYPE
     );
 
-    core.getStartServices().then(([_coreStart, pluginsStart]) => {
-      createApmApi().init(core, {
-        config$: mergedConfig$,
-        logger: this.logger!,
-        plugins: {
-          licensing: (pluginsStart as { licensing: LicensingPluginStart })
-            .licensing,
-          observability: plugins.observability,
-          security: plugins.security,
-          ml: plugins.ml,
-        },
-      });
+    createApmApi().init(core, {
+      config$: mergedConfig$,
+      logger: this.logger!,
+      plugins: {
+        observability: plugins.observability,
+        security: plugins.security,
+        ml: plugins.ml,
+      },
     });
 
     return {

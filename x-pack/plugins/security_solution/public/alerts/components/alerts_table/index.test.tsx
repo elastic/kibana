@@ -7,37 +7,40 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { TestProviders } from '../../../common/mock/test_providers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsTableComponent } from './index';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <AlertsTableComponent
-        timelineId={TimelineId.test}
-        canUserCRUD
-        hasIndexWrite
-        from={0}
-        loading
-        signalsIndex="index"
-        to={1}
-        globalQuery={{
-          query: 'query',
-          language: 'language',
-        }}
-        globalFilters={[]}
-        deletedEventIds={[]}
-        loadingEventIds={[]}
-        selectedEventIds={{}}
-        isSelectAllChecked={false}
-        clearSelected={jest.fn()}
-        setEventsLoading={jest.fn()}
-        clearEventsLoading={jest.fn()}
-        setEventsDeleted={jest.fn()}
-        clearEventsDeleted={jest.fn()}
-        updateTimelineIsLoading={jest.fn()}
-        updateTimeline={jest.fn()}
-      />
+      <TestProviders>
+        <AlertsTableComponent
+          timelineId={TimelineId.test}
+          canUserCRUD
+          hasIndexWrite
+          from={0}
+          loading
+          signalsIndex="index"
+          to={1}
+          globalQuery={{
+            query: 'query',
+            language: 'language',
+          }}
+          globalFilters={[]}
+          deletedEventIds={[]}
+          loadingEventIds={[]}
+          selectedEventIds={{}}
+          isSelectAllChecked={false}
+          clearSelected={jest.fn()}
+          setEventsLoading={jest.fn()}
+          clearEventsLoading={jest.fn()}
+          setEventsDeleted={jest.fn()}
+          clearEventsDeleted={jest.fn()}
+          updateTimelineIsLoading={jest.fn()}
+          updateTimeline={jest.fn()}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find('[title="Alerts"]')).toBeTruthy();
