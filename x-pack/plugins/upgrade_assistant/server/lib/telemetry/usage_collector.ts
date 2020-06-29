@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import {
-  APICaller,
+  LegacyAPICaller,
   ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
@@ -38,7 +38,9 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
-async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): Promise<boolean> {
+async function getDeprecationLoggingStatusValue(
+  callAsCurrentUser: LegacyAPICaller
+): Promise<boolean> {
   try {
     const loggerDeprecationCallResult = await callAsCurrentUser('cluster.getSettings', {
       includeDefaults: true,

@@ -5,12 +5,12 @@
  */
 
 import { createEsContext } from './context';
-import { ClusterClient, Logger } from '../../../../../src/core/server';
+import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 jest.mock('../lib/../../../../package.json', () => ({
   version: '1.2.3',
 }));
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
