@@ -39,7 +39,7 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const { data, status } = useFetcher(() => {
     if (startTime && endTime && bucketSize) {
-      return getDataHandler('infra_logs')?.fetchData({ startTime, endTime, bucketSize });
+      return getDataHandler('uptime')?.fetchData({ startTime, endTime, bucketSize });
     }
   }, [startTime, endTime, bucketSize]);
 
