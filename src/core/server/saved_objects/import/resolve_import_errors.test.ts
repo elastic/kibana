@@ -236,8 +236,17 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('creates saved objects', async () => {
       const options = setupOptions();
+      const errors = [createError(), createError(), createError()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [errors[0]],
+        collectedObjects: [], // doesn't matter
+      });
+      getMockFn(validateReferences).mockResolvedValue({
+        errors: [errors[1]],
+        filteredObjects: [], // doesn't matter
+      });
       getMockFn(checkConflicts).mockResolvedValue({
-        errors: [],
+        errors: [errors[2]],
         filteredObjects: [],
         importIdMap: new Map().set(`id1`, { id: `newId1` }),
         importIds: new Set(),
@@ -247,16 +256,21 @@ describe('#importSavedObjectsFromStream', () => {
       const objectsToOverwrite = [createObject()];
       const objectsToNotOverwrite = [createObject()];
       getMockFn(splitOverwrites).mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
+      getMockFn(createSavedObjects).mockResolvedValueOnce({
+        errors: [createError()], // this error will NOT be passed to the second `createSavedObjects` call
+        createdObjects: [],
+      });
 
       await resolveSavedObjectsImportErrors(options);
       const createSavedObjectsOptions = { savedObjectsClient, importIdMap, namespace };
-      expect(createSavedObjects).toHaveBeenNthCalledWith(1, objectsToOverwrite, {
+      expect(createSavedObjects).toHaveBeenNthCalledWith(1, objectsToOverwrite, errors, {
         ...createSavedObjectsOptions,
         overwrite: true,
       });
       expect(createSavedObjects).toHaveBeenNthCalledWith(
         2,
         objectsToNotOverwrite,
+        errors,
         createSavedObjectsOptions
       );
     });

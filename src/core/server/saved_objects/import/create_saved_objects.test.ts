@@ -19,11 +19,11 @@
 
 import { savedObjectsClientMock } from '../../mocks';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject } from '../types';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsImportError } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import { extractErrors } from './extract_errors';
 
-type CreateSavedObjectsOptions = Parameters<typeof createSavedObjects>[1];
+type CreateSavedObjectsOptions = Parameters<typeof createSavedObjects>[2];
 
 /**
  * Function to create a realistic-looking import object given a type, ID, and optional originId
@@ -161,7 +161,7 @@ describe('#createSavedObjects', () => {
   test('exits early if there are no objects to create', async () => {
     const options = setupOptions();
 
-    const createSavedObjectsResult = await createSavedObjects([], options);
+    const createSavedObjectsResult = await createSavedObjects([], [], options);
     expect(bulkCreate).not.toHaveBeenCalled();
     expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
   });
@@ -188,11 +188,49 @@ describe('#createSavedObjects', () => {
     });
   };
 
+  describe('handles accumulated errors as expected', () => {
+    const resolvableErrors: SavedObjectsImportError[] = [
+      { type: 'foo', id: 'foo-id', error: { type: 'conflict' } },
+      { type: 'bar', id: 'bar-id', error: { type: 'ambiguous_conflict', destinations: [] } },
+      {
+        type: 'baz',
+        id: 'baz-id',
+        error: { type: 'missing_references', references: [], blocking: [] },
+      },
+    ];
+    const unresolvableErrors: SavedObjectsImportError[] = [
+      { type: 'qux', id: 'qux-id', error: { type: 'unsupported_type' } },
+      { type: 'quux', id: 'quux-id', error: { type: 'unknown', message: '', statusCode: 400 } },
+    ];
+
+    test('does not call bulkCreate when resolvable errors are present', async () => {
+      for (const error of resolvableErrors) {
+        const options = setupOptions();
+        await createSavedObjects(objs, [error], options);
+        expect(bulkCreate).not.toHaveBeenCalled();
+      }
+    });
+
+    test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
+      for (const error of unresolvableErrors) {
+        const options = setupOptions();
+        setupMockResults(options);
+        await createSavedObjects(objs, [error], options);
+        expect(bulkCreate).toHaveBeenCalledTimes(1);
+        bulkCreate.mockClear();
+      }
+      const options = setupOptions();
+      setupMockResults(options);
+      await createSavedObjects(objs, [], options);
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+    });
+  });
+
   const testBulkCreateObjects = async (namespace?: string) => {
     const options = setupOptions({ namespace });
     setupMockResults(options);
 
-    await createSavedObjects(objs, options);
+    await createSavedObjects(objs, [], options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     // these three objects are transformed before being created, because they are included in the `importIdMap`
     const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
@@ -206,7 +244,7 @@ describe('#createSavedObjects', () => {
     const options = setupOptions({ namespace, overwrite });
     setupMockResults(options);
 
-    await createSavedObjects(objs, options);
+    await createSavedObjects(objs, [], options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     expectBulkCreateArgs.options(1, options);
   };
@@ -214,7 +252,7 @@ describe('#createSavedObjects', () => {
     const options = setupOptions({ namespace });
     setupMockResults(options);
 
-    const results = await createSavedObjects(objs, options);
+    const results = await createSavedObjects(objs, [], options);
     const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
     const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13] = resultSavedObjects;
     // these three results are transformed before being returned, because the bulkCreate attempt used different IDs for them

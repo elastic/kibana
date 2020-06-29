@@ -37,6 +37,7 @@ interface CreateSavedObjectsResult<T> {
  */
 export const createSavedObjects = async <T>(
   objects: Array<SavedObject<T>>,
+  accumulatedErrors: SavedObjectsImportError[],
   options: CreateSavedObjectsOptions
 ): Promise<CreateSavedObjectsResult<T>> => {
   // exit early if there are no objects to create
@@ -76,20 +77,26 @@ export const createSavedObjects = async <T>(
       });
       return { ...object, ...(references && { references }) };
     });
-  const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
-    namespace,
-    overwrite,
-  });
+
+  const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
+  let expectedResults = objectsToCreate;
+  if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
+    const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
+      namespace,
+      overwrite,
+    });
+    expectedResults = bulkCreateResponse.saved_objects;
+  }
 
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
-  const remappedResults = bulkCreateResponse.saved_objects.map<
-    SavedObject<T> & { destinationId?: string }
-  >((result) => {
-    const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
-    // also, include a `destinationId` field if the object create attempt was made with a different ID
-    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
-  });
+  const remappedResults = expectedResults.map<SavedObject<T> & { destinationId?: string }>(
+    (result) => {
+      const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
+      // also, include a `destinationId` field if the object create attempt was made with a different ID
+      return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
+    }
+  );
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),

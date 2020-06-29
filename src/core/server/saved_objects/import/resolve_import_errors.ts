@@ -121,9 +121,14 @@ export async function resolveSavedObjectsImportErrors({
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: Array<{ type: string; id: string; destinationId?: string }> = [];
+  const accumulatedErrors = [...errorAccumulator];
   const bulkCreateObjects = async (objects: Array<SavedObject<unknown>>, overwrite?: boolean) => {
     const options = { savedObjectsClient, importIdMap, namespace, overwrite };
-    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(objects, options);
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+      objects,
+      accumulatedErrors,
+      options
+    );
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [

@@ -101,6 +101,7 @@ export async function importSavedObjectsFromStream({
   const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
   const createSavedObjectsResult = await createSavedObjects(
     objectsToCreate,
+    errorAccumulator,
     createSavedObjectsOptions
   );
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

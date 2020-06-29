@@ -96,7 +96,7 @@ describe(`POST ${URL}`, () => {
       .expect(200);
 
     expect(result.body).toEqual({ success: true, successCount: 0 });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
   });
 
   it('defaults migrationVersion to empty object', async () => {
@@ -123,7 +123,7 @@ describe(`POST ${URL}`, () => {
 
     const { type, id } = mockDashboard;
     expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ migrationVersion: {} })],
       expect.anything() // options
@@ -155,7 +155,7 @@ describe(`POST ${URL}`, () => {
 
     const { type, id, attributes } = mockDashboard;
     expect(result.body).toEqual({ success: true, successCount: 1, successResults: [{ type, id }] });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [{ type, id, attributes, migrationVersion: {} }],
       expect.objectContaining({ overwrite: undefined })
@@ -192,7 +192,7 @@ describe(`POST ${URL}`, () => {
       successCount: 1,
       successResults: [{ type, id }],
     });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [{ type, id, attributes, migrationVersion: {} }],
       expect.objectContaining({ overwrite: true })
@@ -229,7 +229,7 @@ describe(`POST ${URL}`, () => {
       successCount: 1,
       successResults: [{ type: 'visualization', id: 'my-vis' }],
     });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [{ type, id, attributes, references, migrationVersion: {} }],
       expect.objectContaining({ overwrite: undefined })
@@ -279,7 +279,7 @@ describe(`POST ${URL}`, () => {
           { type: 'dashboard', id: 'my-dashboard', destinationId: 'new-id-2' },
         ],
       });
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         [
           expect.objectContaining({

@@ -92,7 +92,7 @@ describe(`POST ${URL}`, () => {
       .expect(200);
 
     expect(result.body).toEqual({ success: true, successCount: 0 });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
   });
 
   it('defaults migrationVersion to empty object', async () => {
@@ -118,7 +118,7 @@ describe(`POST ${URL}`, () => {
       successCount: 1,
       successResults: [{ type: 'index-pattern', id: 'my-pattern' }],
     });
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ migrationVersion: {} })],
       expect.anything() // options
@@ -159,6 +159,7 @@ describe(`POST ${URL}`, () => {
         { type: mockDashboard.type, id: mockDashboard.id },
       ],
     });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
   });
 
   it('imports an index pattern and dashboard but has a conflict on the index pattern', async () => {
@@ -169,7 +170,6 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.checkConflicts.mockResolvedValue({
       errors: [{ type: mockIndexPattern.type, id: mockIndexPattern.id, error }],
     });
-    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockDashboard] });
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
@@ -200,6 +200,7 @@ describe(`POST ${URL}`, () => {
         },
       ],
     });
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // successResults objects were not created because resolvable errors are present
   });
 
   it('imports a visualization with missing references', async () => {
@@ -250,6 +251,7 @@ describe(`POST ${URL}`, () => {
       [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
       expect.anything() // options
     );
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
   });
 
   describe('trueCopy enabled', () => {
@@ -287,7 +289,7 @@ describe(`POST ${URL}`, () => {
           { type: 'dashboard', id: 'my-dashboard', destinationId: 'new-id-2' },
         ],
       });
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         [
           expect.objectContaining({
