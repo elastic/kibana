@@ -23,23 +23,18 @@ import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
-import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
+import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
 import { IndexPattern, IIndexPatternFieldList } from '../../index_patterns';
-import { Field } from '../../../common';
-import { stubIndexPatternWithFields } from '../../../public/stubs';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
-  const indexPatternFields = [
+  const fields = [
     {
       name: '@timestamp',
       type: 'date',
-      esTypes: ['date'],
       aggregatable: true,
-      filterable: true,
-      searchable: true,
       format: {
         toJSON: () => ({}),
       },
@@ -47,10 +42,7 @@ describe('AggConfig', () => {
     {
       name: 'bytes',
       type: 'number',
-      esTypes: ['integer'],
       aggregatable: true,
-      filterable: true,
-      searchable: true,
       format: {
         toJSON: () => ({}),
       },
@@ -58,21 +50,23 @@ describe('AggConfig', () => {
     {
       name: 'machine.os.keyword',
       type: 'string',
-      esTypes: ['string'],
       aggregatable: true,
-      filterable: true,
-      searchable: true,
       format: {
         toJSON: () => ({}),
       },
     },
-  ] as Field[];
+  ];
 
   beforeEach(() => {
     jest.restoreAllMocks();
-    mockDataServices();
-    indexPattern = stubIndexPatternWithFields as IndexPattern;
-    indexPatternFields.forEach((f) => indexPattern.fields.push(f));
+    indexPattern = {
+      id: '1234',
+      title: 'logstash-*',
+      fields: ({
+        getByName: (name: string) => fields.find((f) => f.name === name),
+        filter: () => fields,
+      } as unknown) as IndexPattern['fields'],
+    } as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 

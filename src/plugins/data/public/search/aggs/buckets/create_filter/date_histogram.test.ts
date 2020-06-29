@@ -21,7 +21,7 @@ import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import {
   getDateHistogramBucketAgg,
   DateHistogramBucketAggDependencies,
@@ -46,8 +46,6 @@ describe('AggConfig Filters', () => {
         calculateBounds: jest.fn(),
         uiSettings,
       };
-
-      mockDataServices();
     });
 
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {

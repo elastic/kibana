@@ -21,7 +21,7 @@ import { getRangeBucketAgg } from '../range';
 import { createFilterRange } from './range';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { FieldFormatsStart } from '../../../../field_formats';
@@ -40,8 +40,6 @@ describe('AggConfig Filters', () => {
         (({
           fieldFormats,
         } as unknown) as InternalStartServices);
-
-      mockDataServices();
     });
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
