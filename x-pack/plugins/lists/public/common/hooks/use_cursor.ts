@@ -6,29 +6,37 @@
 
 import { useCallback, useState } from 'react';
 
-export interface UseCursorArgs {
+export interface UseCursorProps {
   pageIndex: number;
   pageSize: number;
 }
 type Cursor = string | undefined;
-type SetCursor = (cursor: Cursor, args: UseCursorArgs) => void;
-type UseCursor = (args: UseCursorArgs) => [Cursor, SetCursor];
+type SetCursor = (cursor: Cursor) => void;
+type UseCursor = (props: UseCursorProps) => [Cursor, SetCursor];
 
-const hash = (args: UseCursorArgs): string => JSON.stringify(args);
+const hash = (props: UseCursorProps): string => JSON.stringify(props);
 
-export const useCursor: UseCursor = (args) => {
+export const useCursor: UseCursor = (props) => {
   const [cache, setCache] = useState<Record<string, Cursor>>({});
 
   const setCursor = useCallback<SetCursor>(
-    (cursor, _args) => {
+    (cursor) => {
       setCache({
         ...cache,
-        [hash(_args)]: cursor,
+        [hash(props)]: cursor,
       });
     },
-    [cache]
+    [cache, props]
   );
 
-  const cursor = cache[hash(args)];
+  let cursor: Cursor;
+  for (let i = props.pageIndex; i >= 0; i--) {
+    const currentProps = { pageIndex: i, pageSize: props.pageSize };
+    cursor = cache[hash(currentProps)];
+    if (cursor) {
+      break;
+    }
+  }
+
   return [cursor, setCursor];
 };
