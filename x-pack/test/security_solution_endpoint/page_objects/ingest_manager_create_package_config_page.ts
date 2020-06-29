@@ -6,14 +6,17 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function IngestManagerCreateDatasource({ getService, getPageObjects }: FtrProviderContext) {
+export function IngestManagerCreatePackageConfig({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common']);
 
   return {
     /**
-     * Validates that the page shown is the Datasource Create Page
+     * Validates that the page shown is the Package Config Create Page
      */
     async ensureOnCreatePageOrFail() {
       await testSubjects.existOrFail('createPackageConfig_header');
@@ -60,10 +63,10 @@ export function IngestManagerCreateDatasource({ getService, getPageObjects }: Ft
     },
 
     /**
-     * Set the name of the datasource on the input field
+     * Set the name of the package config on the input field
      * @param name
      */
-    async setDatasourceName(name: string) {
+    async setPackageConfigName(name: string) {
       // Because of the bottom sticky bar, we need to scroll section 2 into view
       // so that `setValue()` enters the data on the input field.
       await testSubjects.scrollIntoView('dataCollectionSetupStep');
@@ -78,18 +81,18 @@ export function IngestManagerCreateDatasource({ getService, getPageObjects }: Ft
     },
 
     /**
-     * Validates that the page shown is the Datasource Edit Page
+     * Validates that the page shown is the Package Config Edit Page
      */
     async ensureOnEditPageOrFail() {
       await testSubjects.existOrFail('editPackageConfig_header');
     },
 
     /**
-     * Navigates to the Ingest Agent configuration Edit Datasource page
+     * Navigates to the Ingest Agent configuration Edit Package Config page
      */
-    async navigateToAgentConfigEditDatasource(agentConfigId: string, datasourceId: string) {
+    async navigateToAgentConfigEditPackageConfig(agentConfigId: string, packageConfigId: string) {
       await pageObjects.common.navigateToApp('ingestManager', {
-        hash: `/configs/${agentConfigId}/edit-datasource/${datasourceId}`,
+        hash: `/configs/${agentConfigId}/edit-integration/${packageConfigId}`,
       });
       await this.ensureOnEditPageOrFail();
     },

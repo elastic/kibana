@@ -212,7 +212,7 @@
         "namespace": "default",
         "description": "Config 1",
         "status": "active",
-        "datasources": [],
+        "package_configs": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
