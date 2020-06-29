@@ -23,6 +23,12 @@ describe('when on the policies page', () => {
     render = () => mockedContext.render(<PolicyList />);
   });
 
+  it('should NOT display timeline', async () => {
+    const renderResult = render();
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
   it('should show the empty state', async () => {
     const renderResult = render();
     const table = await renderResult.findByTestId('emptyPolicyTable');
@@ -39,7 +45,7 @@ describe('when on the policies page', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/management/policy');
+        history.push('/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;

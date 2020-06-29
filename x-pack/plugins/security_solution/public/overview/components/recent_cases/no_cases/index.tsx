@@ -4,20 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
+import { APP_ID } from '../../../../../common/constants';
 import { getCreateCaseUrl } from '../../../../common/components/link_to/redirect_to_case';
-import { useGetUrlSearch } from '../../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../../app/home/home_navigations';
-
+import { LinkAnchor } from '../../../../common/components/links';
+import { useFormatUrl } from '../../../../common/components/link_to';
 import * as i18n from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../app/types';
 
 const NoCasesComponent = () => {
-  const urlSearch = useGetUrlSearch(navTabs.case);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
+  const { navigateToApp } = useKibana().services.application;
+
+  const goToCreateCase = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getCreateCaseUrl(search),
+      });
+    },
+    [navigateToApp, search]
+  );
   const newCaseLink = useMemo(
-    () => <EuiLink href={getCreateCaseUrl(urlSearch)}>{` ${i18n.START_A_NEW_CASE}`}</EuiLink>,
-    [urlSearch]
+    () => (
+      <LinkAnchor
+        onClick={goToCreateCase}
+        href={formatUrl(getCreateCaseUrl())}
+      >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>
+    ),
+    [formatUrl, goToCreateCase]
   );
 
   return (

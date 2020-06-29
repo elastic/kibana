@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function retryLifecycle(callAsCurrentUser: APICaller, indexNames: string[]) {
+async function retryLifecycle(callAsCurrentUser: LegacyAPICaller, indexNames: string[]) {
   const responses = [];
   for (let i = 0; i < indexNames.length; i++) {
     const indexName = indexNames[i];

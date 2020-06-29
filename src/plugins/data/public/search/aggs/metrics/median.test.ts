@@ -63,7 +63,6 @@ describe('AggTypeMetricMedianProvider class', () => {
       ],
       {
         typesRegistry,
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   });

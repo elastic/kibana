@@ -8,37 +8,52 @@ import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor.container';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-      data-currentvalue={props.selectedOptions}
-      onChange={async (syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-currentvalue={props.value}
-      onChange={(e: any) => {
-        props.onChange(e.jsonContent);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
 
-jest.mock('react-virtualized', () => ({
-  ...jest.requireActual('react-virtualized'),
-  AutoSizer: ({ children }: { children: any }) => (
-    <div>{children({ height: 500, width: 500 })}</div>
-  ),
-}));
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
+        data-currentvalue={props.selectedOptions}
+        onChange={async (syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+  };
+});
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
+jest.mock('react-virtualized', () => {
+  const original = jest.requireActual('react-virtualized');
+
+  return {
+    ...original,
+    AutoSizer: ({ children }: { children: any }) => (
+      <div>{children({ height: 500, width: 500 })}</div>
+    ),
+  };
+});
 
 const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
   doMountAsync: false,
@@ -87,8 +102,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
       });
+      component.update();
       act(() => {
-        find(dropZoneSelector).last().simulate('click');
+        find(dropZoneSelector).simulate('click');
       });
       component.update();
     },
@@ -114,13 +130,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    duplicateProcessor(processorSelector: string) {
-      find(`${processorSelector}.moreMenu.button`).simulate('click');
-      act(() => {
-        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
-      });
-    },
-
     startAndCancelMove(processorSelector: string) {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
@@ -128,6 +137,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
       act(() => {
         find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+      });
+    },
+
+    duplicateProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      act(() => {
+        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
       });
     },
 

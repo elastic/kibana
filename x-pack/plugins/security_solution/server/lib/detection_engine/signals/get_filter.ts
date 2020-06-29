@@ -10,11 +10,11 @@ import {
   Type,
   SavedIdOrUndefined,
   IndexOrUndefined,
-  ListAndOrUndefined,
   Language,
   Index,
   Query,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
@@ -33,7 +33,7 @@ export const getQueryFilter = (
   language: Language,
   filters: PartialFilter[],
   index: Index,
-  lists: ListAndOrUndefined
+  lists: ExceptionListItemSchema[]
 ) => {
   const indexPattern = {
     fields: [],
@@ -64,7 +64,7 @@ interface GetFilterArgs {
   savedId: SavedIdOrUndefined;
   services: AlertServices;
   index: IndexOrUndefined;
-  lists: ListAndOrUndefined;
+  lists: ExceptionListItemSchema[];
 }
 
 interface QueryAttributes {
