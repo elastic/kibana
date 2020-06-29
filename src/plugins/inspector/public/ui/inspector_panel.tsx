@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { Adapters, InspectorViewDescription } from '../types';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {

@@ -19,9 +19,15 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
+import {
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  Render,
+} from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
+import { createInspectorAdapters, VegaInspectorAdapters } from './vega_inspector/index';
 import { TimeRange, Query } from '../../data/public';
 
 type Input = KibanaContext | null;
@@ -41,7 +47,13 @@ interface RenderValue {
 
 export const createVegaFn = (
   dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<'vega', Input, Arguments, Output> => ({
+): ExpressionFunctionDefinition<
+  'vega',
+  Input,
+  Arguments,
+  Output,
+  ExecutionContext<unknown, VegaInspectorAdapters>
+> => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -56,7 +68,10 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
-    const vegaRequestHandler = createVegaRequestHandler(dependencies, context.abortSignal);
+    // Temporary solution. we should find a more legal way to set custom adapters;
+    context.inspectorAdapters = createInspectorAdapters();
+
+    const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({
       timeRange: get(input, 'timeRange') as TimeRange,

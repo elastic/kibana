@@ -18,8 +18,10 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { Plugin as DataPublicPlugin } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { Setup, Start } from '../../inspector/public';
+
 import {
   setNotifications,
   setData,
@@ -37,11 +39,14 @@ import { IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
 
+import { getVegaInspectorView } from './vega_inspector';
+
 /** @internal */
 export interface VegaVisualizationDependencies {
   core: CoreSetup;
   plugins: {
-    data: ReturnType<DataPublicPlugin['setup']>;
+    data: DataPublicPluginSetup;
+    inspector: Setup;
   };
   serviceSettings: IServiceSettings;
 }
@@ -50,13 +55,15 @@ export interface VegaVisualizationDependencies {
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  data: ReturnType<DataPublicPlugin['setup']>;
+  inspector: Setup;
+  data: DataPublicPluginSetup;
   mapsLegacy: any;
 }
 
 /** @internal */
 export interface VegaPluginStartDependencies {
-  data: ReturnType<DataPublicPlugin['start']>;
+  data: DataPublicPluginStart;
+  inspector: Start;
 }
 
 /** @internal */
@@ -69,7 +76,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -84,16 +91,19 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       core,
       plugins: {
         data,
+        inspector,
       },
       serviceSettings: mapsLegacy.serviceSettings,
     };
+
+    inspector.registerView(getVegaInspectorView());
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, inspector }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setSavedObjects(core.savedObjects);
     setData(data);

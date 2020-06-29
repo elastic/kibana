@@ -16,22 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
+import { VegaAdapter } from './vega_adapter';
+import { VegaDataInspector } from './vega_data_inspector';
+import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
-import { RequestsViewComponent } from './components/requests_view';
-import { InspectorViewDescription } from '../../types';
-import { Adapters } from '../../../common';
+export interface VegaInspectorAdapters extends Adapters {
+  requests: RequestAdapter;
+  vega: VegaAdapter;
+}
 
-export const getRequestsViewDescription = (): InspectorViewDescription => ({
-  title: i18n.translate('inspector.requests.requestsTitle', {
-    defaultMessage: 'Requests',
-  }),
-  order: 20,
-  help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
-    defaultMessage: 'View the requests that collected the data',
-  }),
-  shouldShow(adapters: Adapters) {
-    return Boolean(adapters.requests);
-  },
-  component: RequestsViewComponent,
+export const getVegaInspectorView = () =>
+  ({
+    title: 'Vega Debug',
+    help: `And additional help text, that will be shown in the inspector help.`,
+    shouldShow(adapters) {
+      return Boolean(adapters.vega);
+    },
+    component: VegaDataInspector,
+  } as InspectorViewDescription);
+
+export const createInspectorAdapters = (): VegaInspectorAdapters => ({
+  requests: new RequestAdapter(),
+  vega: new VegaAdapter(),
 });

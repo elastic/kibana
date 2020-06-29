@@ -364,6 +364,8 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    this._parser.searchAPI.inspectorAdapters?.vega.bindVegaView(view);
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');

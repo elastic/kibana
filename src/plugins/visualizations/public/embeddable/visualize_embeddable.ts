@@ -78,7 +78,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
+const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'timelion'];
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;

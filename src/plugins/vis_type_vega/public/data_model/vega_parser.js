@@ -48,10 +48,11 @@ export class VegaParser {
     this.hideWarnings = false;
     this.error = undefined;
     this.warnings = [];
+    this.searchAPI = searchAPI;
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchAPI, filters, onWarn),
+      elasticsearch: new EsQueryParser(timeCache, this.searchAPI, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };

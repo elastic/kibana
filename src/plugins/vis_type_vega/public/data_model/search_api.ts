@@ -18,13 +18,17 @@
  */
 
 import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
+  IEsSearchResponse,
 } from '../../../data/public';
+import { search as dataPluginSearch } from '../../../data/public';
+import { VegaInspectorAdapters } from '../vega_inspector';
+import { RequestResponder } from '../../../inspector/public';
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
@@ -35,26 +39,54 @@ export interface SearchAPIDependencies {
 export class SearchAPI {
   constructor(
     private readonly dependencies: SearchAPIDependencies,
-    private readonly abortSignal?: AbortSignal
+    private readonly abortSignal?: AbortSignal,
+    public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
 
   search(searchRequests: SearchRequest[]) {
     const { search } = this.dependencies.search;
+    const requestResponders: any = {};
+
+    if (this.inspectorAdapters) {
+      this.inspectorAdapters.requests.reset();
+    }
 
     return combineLatest(
       searchRequests.map((request, index) => {
+        const requestId = index.toString();
         const params = getSearchParamsFromRequest(request, {
           uiSettings: this.dependencies.uiSettings,
           injectedMetadata: this.dependencies.injectedMetadata,
         });
 
+        if (this.inspectorAdapters) {
+          requestResponders[requestId] = this.inspectorAdapters.requests.start(
+            `#${requestId}`,
+            request
+          );
+          requestResponders[requestId].json(params.body);
+        }
+
         return search({ params }, { signal: this.abortSignal }).pipe(
           map((data) => ({
-            id: index,
+            id: requestId,
             rawResponse: data.rawResponse,
           }))
         );
       })
-    );
+    ).pipe(tap((data) => this.inspectSearchResults(data, requestResponders)));
+  }
+
+  private inspectSearchResults(
+    requests: IEsSearchResponse[],
+    requestResponders: Record<string, RequestResponder>
+  ) {
+    requests.forEach((request) => {
+      if (request.id && requestResponders[request.id]) {
+        requestResponders[request.id]
+          .stats(dataPluginSearch.getResponseInspectorStats(request.rawResponse))
+          .ok({ json: request.rawResponse });
+      }
+    });
   }
 }

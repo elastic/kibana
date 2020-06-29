@@ -23,9 +23,9 @@ import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-// @ts-ignore
+// @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
-// @ts-ignore
+// @ts-expect-error
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {

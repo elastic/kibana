@@ -19,3 +19,4 @@
 
 export { RequestStatistic, RequestStatistics, RequestStatus } from './types';
 export { RequestAdapter } from './request_adapter';
+export { RequestResponder } from './request_responder';
