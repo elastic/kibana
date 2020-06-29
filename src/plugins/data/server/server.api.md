@@ -335,6 +335,14 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     restTotalHitsAsInt: boolean;
 };
 
+// Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
+    forceNow?: Date;
+    fieldName?: string;
+}): import("../..").RangeFilter | undefined;
+
 // @internal
 export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {
     total: number;

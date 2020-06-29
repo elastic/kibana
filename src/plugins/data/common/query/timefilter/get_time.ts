@@ -18,14 +18,16 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { IIndexPattern } from '../..';
-import { TimeRange, buildRangeFilter } from '../../../common';
+import { buildRangeFilter, IIndexPattern, TimeRange, TimeRangeBounds } from '../..';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
 }
 
-export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOptions = {}) {
+export function calculateBounds(
+  timeRange: TimeRange,
+  options: CalculateBoundsOptions = {}
+): TimeRangeBounds {
   return {
     min: dateMath.parse(timeRange.from, { forceNow: options.forceNow }),
     max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: options.forceNow }),

@@ -17,13 +17,5 @@
  * under the License.
  */
 
-export interface RefreshInterval {
-  pause: boolean;
-  value: number;
-}
-
-export interface TimeRange {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative';
-}
+export * from './get_time';
+export * from './is_time_range';

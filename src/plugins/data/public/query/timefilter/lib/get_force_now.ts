@@ -17,14 +17,18 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './es_query';
-export * from './field_formats';
-export * from './field_mapping';
-export * from './index_patterns';
-export * from './kbn_field_types';
-export * from './query';
-export * from './search';
-export * from './search/aggs';
-export * from './types';
-export * from './utils';
+import { parseQueryString } from './parse_querystring';
+
+/** @internal */
+export function getForceNow() {
+  const forceNow = parseQueryString().forceNow as string;
+  if (!forceNow) {
+    return;
+  }
+
+  const ticks = Date.parse(forceNow);
+  if (isNaN(ticks)) {
+    throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
+  }
+  return new Date(ticks);
+}
