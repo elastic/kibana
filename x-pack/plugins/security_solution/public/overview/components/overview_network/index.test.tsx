@@ -14,6 +14,7 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
   createSecuritySolutionStorageMock,
+  kibanaObservable,
 } from '../../../common/mock';
 
 import { OverviewNetwork } from '.';
@@ -86,11 +87,23 @@ describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders the expected widget title', () => {
