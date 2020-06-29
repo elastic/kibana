@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import './mocks';
 import { setup as homeSetup } from './home.helpers';
 import { setup as repositoryAddSetup } from './repository_add.helpers';
 import { setup as repositoryEditSetup } from './repository_edit.helpers';
