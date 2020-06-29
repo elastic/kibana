@@ -5,7 +5,7 @@
  */
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
-import { IClusterClient } from 'src/core/server';
+import { ILegacyClusterClient } from 'src/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -18,7 +18,7 @@ describe('Upgrade Assistant Usage Collector', () => {
   let dependencies: any;
   let callClusterStub: any;
   let usageCollection: any;
-  let clusterClient: IClusterClient;
+  let clusterClient: ILegacyClusterClient;
 
   beforeEach(() => {
     clusterClient = elasticsearchServiceMock.createClusterClient();

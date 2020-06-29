@@ -5,17 +5,16 @@
  */
 
 import { mount } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import { mocksSource } from '../../common/containers/source/mock';
+import { useWithSource } from '../../common/containers/source';
 import { Overview } from './index';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/containers/source');
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -26,56 +25,36 @@ jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
 
-let localSource: Array<{
-  request: {};
-  result: {
-    data: {
-      source: {
-        status: {
-          indicesExist: boolean;
-        };
-      };
-    };
-  };
-}>;
-
 describe('Overview', () => {
   describe('rendering', () => {
-    beforeEach(() => {
-      localSource = cloneDeep(mocksSource);
-    });
-
     test('it renders the Setup Instructions text when no index is available', async () => {
-      localSource[0].result.data.source.status.indicesExist = false;
+      (useWithSource as jest.Mock).mockReturnValue({
+        indicesExist: false,
+      });
+
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </MockedProvider>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
         </TestProviders>
       );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise((resolve) => setTimeout(resolve));
-      wrapper.update();
+
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
     });
 
     test('it DOES NOT render the Getting started text when an index is available', async () => {
-      localSource[0].result.data.source.status.indicesExist = true;
+      (useWithSource as jest.Mock).mockReturnValue({
+        indicesExist: true,
+        indexPattern: {},
+      });
       const wrapper = mount(
         <TestProviders>
-          <MockedProvider mocks={localSource} addTypename={false}>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </MockedProvider>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
         </TestProviders>
       );
-      // Why => https://github.com/apollographql/react-apollo/issues/1711
-      await new Promise((resolve) => setTimeout(resolve));
-      wrapper.update();
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
   });

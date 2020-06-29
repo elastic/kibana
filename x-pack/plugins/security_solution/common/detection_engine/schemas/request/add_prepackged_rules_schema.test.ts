@@ -19,6 +19,7 @@ import {
   getAddPrepackagedRulesSchemaDecodedMock,
 } from './add_prepackaged_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { getListArrayMock } from '../types/lists.mock';
 
 describe('add prepackaged rules schema', () => {
   test('empty objects do not validate', () => {
@@ -1379,14 +1380,189 @@ describe('add prepackaged rules schema', () => {
     });
   });
 
-  // TODO: The exception_list tests are skipped and empty until we re-integrate it from the lists plugin
-  describe.skip('exception_list', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and exceptions_list] does validate', () => {});
+  describe('exception_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and exceptions_list] does validate', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+        version: 1,
+        exceptions_list: getListArrayMock(),
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {});
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        filters: [],
+        exceptions_list: [
+          {
+            id: 'some_uuid',
+            namespace_type: 'single',
+          },
+          {
+            id: 'some_uuid',
+            namespace_type: 'agnostic',
+          },
+        ],
+      };
+      expect(message.schema).toEqual(expected);
+    });
 
-    test('rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid exceptions_list] does NOT validate', () => {});
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+        exceptions_list: [],
+      };
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {});
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        filters: [],
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and invalid exceptions_list] does NOT validate', () => {
+      const payload: Omit<AddPrepackagedRulesSchema, 'exceptions_list'> & {
+        exceptions_list: Array<{ id: string; namespace_type: string }>;
+      } = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+        exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
+      };
+
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+      };
+
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        filters: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
   });
 });

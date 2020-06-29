@@ -4,7 +4,6 @@
 
 ```ts
 
-import { APICaller as APICaller_2 } from 'kibana/server';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -92,6 +91,7 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType as KibanaConfigType_2 } from 'src/core/server/kibana_config';
+import { LegacyAPICaller as LegacyAPICaller_2 } from 'kibana/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
@@ -335,6 +335,14 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     restTotalHitsAsInt: boolean;
 };
 
+// Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
+    forceNow?: Date;
+    fieldName?: string;
+}): import("../..").RangeFilter | undefined;
+
 // @internal
 export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {
     total: number;
@@ -392,6 +400,10 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    toSpec?: () => FieldSpec;
     // (undocumented)
     type: string;
     // (undocumented)
@@ -473,7 +485,7 @@ export const indexPatterns: {
 //
 // @public (undocumented)
 export class IndexPatternsFetcher {
-    constructor(callDataCluster: APICaller_2);
+    constructor(callDataCluster: LegacyAPICaller_2);
     getFieldsForTimePattern(options: {
         pattern: string;
         metaFields: string[];

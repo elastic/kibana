@@ -14,6 +14,7 @@ import {
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
   PolicyData,
+  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 
@@ -47,6 +48,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows 10',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Pro',
     },
@@ -55,6 +58,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows Server 2016',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -63,6 +68,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.2',
     full: 'Windows Server 2012',
     version: '6.2',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -71,6 +78,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.3',
     full: 'Windows Server 2012R2',
     version: '6.3',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server Release 2',
     },
@@ -209,6 +218,7 @@ interface HostInfo {
   };
   host: Host;
   Endpoint: {
+    status: EndpointStatus;
     policy: {
       applied: {
         id: string;
@@ -305,7 +315,7 @@ export class EndpointDocGenerator {
    * Creates new random policy id for the host to simulate new policy application
    */
   public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.failure,
@@ -314,6 +324,7 @@ export class EndpointDocGenerator {
   }
 
   private createHostData(): HostInfo {
+    const hostName = this.randomHostname();
     return {
       agent: {
         version: this.randomVersion(),
@@ -327,12 +338,15 @@ export class EndpointDocGenerator {
       },
       host: {
         id: this.seededUUIDv4(),
-        hostname: this.randomHostname(),
+        hostname: hostName,
+        name: hostName,
+        architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
       },
       Endpoint: {
+        status: EndpointStatus.enrolled,
         policy: {
           applied: this.randomChoice(APPLIED_POLICIES),
         },
@@ -1013,9 +1027,7 @@ export class EndpointDocGenerator {
       ecs: {
         version: '1.4.0',
       },
-      host: {
-        id: this.commonInfo.host.id,
-      },
+      host: this.commonInfo.host,
       Endpoint: {
         policy: {
           applied: {

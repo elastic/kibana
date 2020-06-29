@@ -7,7 +7,6 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -15,6 +14,7 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   RENDER_AS,
   GRID_RESOLUTION,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -326,10 +326,10 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   async getSupportedShapeTypes() {
     if (this._descriptor.requestType === RENDER_AS.GRID) {
-      return [VECTOR_SHAPE_TYPES.POLYGON];
+      return [VECTOR_SHAPE_TYPE.POLYGON];
     }
 
-    return [VECTOR_SHAPE_TYPES.POINT];
+    return [VECTOR_SHAPE_TYPE.POINT];
   }
 }
 
