@@ -66,17 +66,11 @@ export function getSearchDsl(
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
-  const normalizedNamespaces = namespaces
-    ? Array.from(
-        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
-      )
-    : undefined;
-
   return {
     ...getQueryParams({
       mappings,
       registry,
-      namespaces: normalizedNamespaces,
+      namespaces,
       type,
       search,
       searchFields,

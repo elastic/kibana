@@ -302,7 +302,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T
   ): Promise<T> {
-    if (this.getSpacesService() === undefined || savedObject.namespaces == null) {
+    if (
+      this.getSpacesService() === undefined ||
+      savedObject.namespaces == null ||
+      savedObject.namespaces.length === 0
+    ) {
       return savedObject;
     }
 

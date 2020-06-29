@@ -238,6 +238,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         expect(object.type).to.eql(expectedType);
         expect(object.id).to.eql(expectedId);
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        expect(object.namespaces).to.eql(object.namespaces);
         // don't test attributes, version, or references
       }
     }

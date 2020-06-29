@@ -84,33 +84,6 @@ describe('getSearchDsl', () => {
       });
     });
 
-    it('normalizes and de-duplicates provided namespaces', () => {
-      const opts = {
-        namespaces: ['foo-namespace', '*', 'bar-namespace', 'foo-namespace'],
-        type: 'foo',
-        search: 'bar',
-        searchFields: ['baz'],
-        defaultSearchOperator: 'AND',
-        hasReference: {
-          type: 'bar',
-          id: '1',
-        },
-      };
-
-      getSearchDsl(mappings, registry, opts);
-      expect(getQueryParams).toHaveBeenCalledTimes(1);
-      expect(getQueryParams).toHaveBeenCalledWith({
-        mappings,
-        registry,
-        namespaces: ['foo-namespace', 'default', 'bar-namespace'],
-        type: opts.type,
-        search: opts.search,
-        searchFields: opts.searchFields,
-        defaultSearchOperator: opts.defaultSearchOperator,
-        hasReference: opts.hasReference,
-      });
-    });
-
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
       getSortingParams.mockReturnValue({});
       const opts = {

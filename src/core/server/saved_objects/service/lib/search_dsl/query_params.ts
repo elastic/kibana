@@ -79,7 +79,7 @@ function getClauseForType(
     if (eligibleNamespaces.length > 0) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
-    if (namespaces?.includes('default') ?? true) {
+    if (namespaces.includes('default') ?? true) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
@@ -135,6 +135,13 @@ export function getQueryParams({
   kueryNode,
 }: QueryParams) {
   const types = getTypes(mappings, type);
+
+  const normalizedNamespaces = namespaces
+    ? Array.from(
+        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
+      )
+    : undefined;
+
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
@@ -165,7 +172,9 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map((shouldType) => getClauseForType(registry, namespaces, shouldType)),
+          should: types.map((shouldType) =>
+            getClauseForType(registry, normalizedNamespaces, shouldType)
+          ),
           minimum_should_match: 1,
         },
       },

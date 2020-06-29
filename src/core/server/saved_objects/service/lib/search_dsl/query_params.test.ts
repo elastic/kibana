@@ -250,12 +250,30 @@ describe('#getQueryParams', () => {
         expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespaces)));
       };
 
+      it('normalizes and deduplicates provided namespaces', () => {
+        const result = getQueryParams({
+          mappings,
+          registry,
+          search: '*',
+          namespaces: ['foo', '*', 'foo', 'bar', 'default'],
+        });
+
+        expectResult(
+          result,
+          ...ALL_TYPES.map((x) => createTypeClause(x, ['foo', 'default', 'bar']))
+        );
+      });
+
       it('filters results with "namespace" field when `namespaces` is not specified', () => {
         test(undefined);
       });
 
       it('filters results for specified namespace for appropriate type/s', () => {
         test(['foo-namespace']);
+      });
+
+      it('filters results for specified namespaces for appropriate type/s', () => {
+        test(['foo-namespace', 'default']);
       });
 
       it('filters results for specified `default` namespace for appropriate type/s', () => {

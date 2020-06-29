@@ -781,10 +781,15 @@ export class SavedObjectsRepository {
 
         const time = doc._source.updated_at;
 
+        let namespaces = [];
+        if (!this._registry.isNamespaceAgnostic(type)) {
+          namespaces = doc._source.namespaces ?? [getNamespaceString(doc._source.namespace)];
+        }
+
         return {
           id,
           type,
-          namespaces: doc._source.namespaces ?? [getNamespaceString(doc._source.namespace)],
+          namespaces,
           ...(time && { updated_at: time }),
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
@@ -830,10 +835,15 @@ export class SavedObjectsRepository {
 
     const { updated_at: updatedAt } = response._source;
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = response._source.namespaces ?? [getNamespaceString(response._source.namespace)];
+    }
+
     return {
       id,
       type,
-      namespaces: response._source.namespaces ?? [getNamespaceString(response._source.namespace)],
+      namespaces,
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
@@ -895,14 +905,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = updateResponse.get._source.namespaces ?? [
+        getNamespaceString(updateResponse.get._source.namespace),
+      ];
+    }
+
     return {
       id,
       type,
       updated_at: time,
       version: encodeHitVersion(updateResponse),
-      namespaces: updateResponse.get._source.namespaces ?? [
-        getNamespaceString(updateResponse.get._source.namespace),
-      ],
+      namespaces,
       references,
       attributes,
     };
@@ -1160,6 +1175,9 @@ export class SavedObjectsRepository {
           ];
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
+          if (this._registry.isSingleNamespace(type)) {
+            namespaces = [getNamespaceString(namespace)];
+          }
           versionProperties = getExpectedVersionProperties(version);
         }
 
