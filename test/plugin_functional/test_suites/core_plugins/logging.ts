@@ -26,7 +26,8 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
-  describe('plugin logging', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/70151
+  describe.skip('plugin logging', function describeIndexTests() {
     const LOG_FILE_DIRECTORY = resolve(__dirname, '..', '..', 'plugins', 'core_logging', 'server');
     const JSON_FILE_PATH = resolve(LOG_FILE_DIRECTORY, 'json_debug.log');
     const PATTERN_FILE_PATH = resolve(LOG_FILE_DIRECTORY, 'pattern_debug.log');

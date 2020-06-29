@@ -50,7 +50,11 @@ describe('Insert timeline popover ', () => {
       payload: { id: 'timeline-id', show: false },
       type: 'x-pack/security_solution/local/timeline/SHOW_TIMELINE',
     });
-    expect(onTimelineChange).toBeCalledWith('Timeline title', '34578-3497-5893-47589-34759');
+    expect(onTimelineChange).toBeCalledWith(
+      'Timeline title',
+      '34578-3497-5893-47589-34759',
+      undefined
+    );
     expect(mockDispatch.mock.calls[1][0]).toEqual({
       payload: null,
       type: 'x-pack/security_solution/local/timeline/SET_INSERT_TIMELINE',
