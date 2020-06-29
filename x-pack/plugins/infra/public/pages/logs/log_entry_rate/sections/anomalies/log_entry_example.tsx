@@ -188,7 +188,6 @@ const datasetColumnId = 'log-entry-examples-dataset-column' as const;
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
 
-// TODO: Tweak these widths for log entry rate instead of categories
 export const columnWidths: LogEntryColumnWidths = {
   [timestampColumnId]: {
     growWeight: 0,
@@ -204,7 +203,6 @@ export const columnWidths: LogEntryColumnWidths = {
   [datasetColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,
-    // w_dataset + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
     baseWidth: '250px',
   },
   [iconColumnId]: {
