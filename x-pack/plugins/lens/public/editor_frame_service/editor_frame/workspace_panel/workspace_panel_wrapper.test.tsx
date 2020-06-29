@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { Visualization } from '../../types';
-import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../mocks';
+import { Visualization } from '../../../types';
+import { createMockVisualization, createMockFramePublicAPI, FrameMock } from '../../mocks';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { WorkspacePanelWrapper, WorkspacePanelWrapperProps } from './workspace_panel_wrapper';
@@ -32,7 +32,10 @@ describe('workspace_panel_wrapper', () => {
         dispatch={jest.fn()}
         framePublicAPI={mockFrameAPI}
         visualizationState={{}}
-        activeVisualization={mockVisualization}
+        visualizationId="myVis"
+        visualizationMap={{ myVis: mockVisualization }}
+        datasourceMap={{}}
+        datasourceStates={{}}
         emptyExpression={false}
       >
         <MyChild />
@@ -51,7 +54,10 @@ describe('workspace_panel_wrapper', () => {
         framePublicAPI={mockFrameAPI}
         visualizationState={visState}
         children={<span />}
-        activeVisualization={{ ...mockVisualization, renderToolbar: renderToolbarMock }}
+        visualizationId="myVis"
+        visualizationMap={{ myVis: { ...mockVisualization, renderToolbar: renderToolbarMock } }}
+        datasourceMap={{}}
+        datasourceStates={{}}
         emptyExpression={false}
       />
     );

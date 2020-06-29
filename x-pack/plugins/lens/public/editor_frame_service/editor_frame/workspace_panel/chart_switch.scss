@@ -1,6 +1,4 @@
 .lnsChartSwitch__header {
-  padding: $euiSizeS 0;
-
   > * {
     display: flex;
     align-items: center;
@@ -9,7 +7,8 @@
 
 .lnsChartSwitch__triggerButton {
   @include euiTitle('xs');
-  line-height: $euiSizeXXL;
+  background-color: $euiColorEmptyShade;
+  border-color: $euiColorLightShade;
 }
 
 .lnsChartSwitch__summaryIcon {

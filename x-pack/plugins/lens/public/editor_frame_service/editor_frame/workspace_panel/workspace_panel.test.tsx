@@ -6,19 +6,19 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ReactExpressionRendererProps } from '../../../../../../src/plugins/expressions/public';
-import { FramePublicAPI, TableSuggestion, Visualization } from '../../types';
+import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
+import { FramePublicAPI, TableSuggestion, Visualization } from '../../../types';
 import {
   createMockVisualization,
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
-} from '../mocks';
+} from '../../mocks';
 import { InnerWorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop, ChildDragDropProvider } from '../../drag_drop';
+import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
 import {
@@ -26,12 +26,12 @@ import {
   esFilters,
   IFieldType,
   IIndexPattern,
-} from '../../../../../../src/plugins/data/public';
-import { TriggerId, UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { TriggerContract } from '../../../../../../src/plugins/ui_actions/public/triggers';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+} from '../../../../../../../src/plugins/data/public';
+import { TriggerId, UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
+import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;

@@ -20,23 +20,23 @@ import { CoreStart, CoreSetup } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
-import { Action } from './state_management';
+} from '../../../../../../../src/plugins/expressions/public';
+import { Action } from '../state_management';
 import {
   Datasource,
   Visualization,
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
-} from '../../types';
-import { DragDrop, DragContext } from '../../drag_drop';
-import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { buildExpression } from './expression_helpers';
-import { debouncedComponent } from '../../debounced_component';
-import { trackUiEvent } from '../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+} from '../../../types';
+import { DragDrop, DragContext } from '../../../drag_drop';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { buildExpression } from '../expression_helpers';
+import { debouncedComponent } from '../../../debounced_component';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface WorkspacePanelProps {
@@ -300,7 +300,10 @@ export function InnerWorkspacePanel({
       dispatch={dispatch}
       emptyExpression={expression === null}
       visualizationState={visualizationState}
-      activeVisualization={activeVisualization}
+      visualizationId={activeVisualizationId}
+      datasourceStates={datasourceStates}
+      datasourceMap={datasourceMap}
+      visualizationMap={visualizationMap}
     >
       <DragDrop
         data-test-subj="lnsWorkspace"
