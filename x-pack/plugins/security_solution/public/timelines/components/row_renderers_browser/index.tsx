@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip, EuiPopover } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -45,21 +45,23 @@ export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> =
 
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
+  const button = (
+    <EuiToolTip content={'Customize Event Renderers'}>
+      <EuiButtonEmpty
+        data-test-subj="show-field-browser"
+        iconType="gear"
+        onClick={toggleShow}
+        size="xs"
+      >
+        {'Event Renderers'}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  );
+
   return (
     <>
-      <RowRenderersBrowserButtonContainer data-test-subj="fields-browser-button-container">
-        <EuiToolTip content={'Customize Event Renderers'}>
-          <EuiButtonEmpty
-            data-test-subj="show-field-browser"
-            iconType="gear"
-            onClick={toggleShow}
-            size="xs"
-          >
-            {'Event Renderers'}
-          </EuiButtonEmpty>
-        </EuiToolTip>
-
-        {show && (
+      <EuiPopover button={button} isOpen={show} closePopover={hideFieldBrowser}>
+        <RowRenderersBrowserButtonContainer data-test-subj="fields-browser-button-container">
           <RowRenderersBrowser
             height={height}
             onOutsideClick={hideFieldBrowser}
@@ -68,8 +70,8 @@ export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> =
             excludedRowRendererIds={excludedRowRendererIds}
             setExcludedRowRendererIds={setExcludedRowRendererIds}
           />
-        )}
-      </RowRenderersBrowserButtonContainer>
+        </RowRenderersBrowserButtonContainer>
+      </EuiPopover>
     </>
   );
 };

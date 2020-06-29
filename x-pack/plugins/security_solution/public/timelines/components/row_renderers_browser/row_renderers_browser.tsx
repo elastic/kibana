@@ -23,21 +23,23 @@ import React, { useCallback, useMemo } from 'react';
 import { xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { getMockNetflowData } from '../../../common/mock/netflow';
 import { RowRendererId } from '../../../../common/types/timeline';
 // import { rowRenderers } from '../timeline/body/renderers';
+import { netflowRowRenderer } from '../timeline/body/renderers/netflow/netflow_row_renderer';
 
 import { FieldBrowserProps } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
-  background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-  border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
-    ${({ theme }) => theme.eui.euiColorMediumShade};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  left: 0;
-  position: absolute;
-  top: calc(100% + ${({ theme }) => theme.eui.euiSize});
+  // background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+  // border: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
+  //   ${({ theme }) => theme.eui.euiColorMediumShade};
+  // border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+  // left: 0;
+  // position: absolute;
+  // top: calc(100% + ${({ theme }) => theme.eui.euiSize});
   width: ${({ width }) => width}px;
-  z-index: 9990;
+  // z-index: 9990;
 `;
 FieldsBrowserContainer.displayName = 'FieldsBrowserContainer';
 
@@ -82,6 +84,20 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       name: 'Description',
       truncateText: true,
     },
+    {
+      field: 'example',
+      name: 'Example',
+      truncateText: true,
+      render: () => (
+        <div>
+          {netflowRowRenderer.renderRow({
+            browserFields: {},
+            data: getMockNetflowData(),
+            timelineId: 'row-renderer-example',
+          })}
+        </div>
+      ),
+    },
   ];
 
   const search = {
@@ -96,6 +112,7 @@ const FieldsBrowserComponent: React.FC<Props> = ({
       id: RowRendererId.auditd,
       name: 'Auditd',
       description: 'Auditd Row Renderer',
+      example: () => {},
     },
     {
       id: RowRendererId.auditd_file,

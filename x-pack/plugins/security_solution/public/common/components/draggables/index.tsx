@@ -73,6 +73,7 @@ Content.displayName = 'Content';
  * Draggable text (or an arbitrary visualization specified by `children`)
  * that's only displayed when the specified value is non-`null`.
  *
+ * @param disabled - disallows to drag the badge, used in customize row renderer example column
  * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
@@ -83,7 +84,7 @@ Content.displayName = 'Content';
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
-  ({ id, field, value, name, children, tooltipContent, queryValue }) =>
+  ({ id, field, value, name, children, tooltipContent, queryValue, disabled }) =>
     value != null ? (
       <DraggableWrapper
         dataProvider={{
@@ -144,33 +145,35 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DraggableBadge = React.memo<BadgeDraggableType>(
-  ({
-    contextId,
-    eventId,
-    field,
-    value,
-    iconType,
-    name,
-    color = 'hollow',
-    children,
-    tooltipContent,
-    queryValue,
-  }) =>
-    value != null ? (
-      <DefaultDraggable
-        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-        field={field}
-        name={name}
-        value={value}
-        tooltipContent={tooltipContent}
-        queryValue={queryValue}
-      >
-        <Badge iconType={iconType} color={color} title="">
-          {children ? children : value !== '' ? value : getEmptyStringTag()}
-        </Badge>
-      </DefaultDraggable>
-    ) : null
-);
+const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
+  contextId,
+  eventId,
+  field,
+  value,
+  iconType,
+  name,
+  color = 'hollow',
+  children,
+  tooltipContent,
+  queryValue,
+}) =>
+  value != null ? (
+    <DefaultDraggable
+      id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
+      field={field}
+      name={name}
+      value={value}
+      tooltipContent={tooltipContent}
+      queryValue={queryValue}
+      disabled={contextId.includes('-row-renderer-example-')}
+    >
+      <Badge iconType={iconType} color={color} title="">
+        {children ? children : value !== '' ? value : getEmptyStringTag()}
+      </Badge>
+    </DefaultDraggable>
+  ) : null;
 
+DraggableBadgeComponent.displayName = 'DraggableBadgeComponent';
+
+export const DraggableBadge = React.memo(DraggableBadgeComponent);
 DraggableBadge.displayName = 'DraggableBadge';

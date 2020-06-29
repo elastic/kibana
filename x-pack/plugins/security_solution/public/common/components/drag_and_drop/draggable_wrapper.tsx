@@ -56,6 +56,14 @@ const Wrapper = styled.div`
   [data-rbd-placeholder-context-id] {
     display: none !important;
   }
+
+  ${({ disabled }) =>
+    disabled &&
+    `
+    [data-rbd-draggable-id]:hover {
+      cursor: default;
+    }
+  `}
 `;
 
 Wrapper.displayName = 'Wrapper';
@@ -63,6 +71,7 @@ Wrapper.displayName = 'Wrapper';
 const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
+    white-space: nowrap;
   }
 `;
 
@@ -74,6 +83,7 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
+  disabled?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
   truncate?: boolean;
@@ -99,124 +109,137 @@ export const getStyle = (
   };
 };
 
-export const DraggableWrapper = React.memo<Props>(
-  ({ dataProvider, onFilterAdded, render, truncate }) => {
-    const [showTopN, setShowTopN] = useState<boolean>(false);
-    const toggleTopN = useCallback(() => {
-      setShowTopN(!showTopN);
-    }, [setShowTopN, showTopN]);
+const DraggableWrapperComponent: React.FC<Props> = ({
+  dataProvider,
+  onFilterAdded,
+  render,
+  truncate,
+  disabled,
+}) => {
+  const [showTopN, setShowTopN] = useState<boolean>(false);
+  const toggleTopN = useCallback(() => {
+    setShowTopN(!showTopN);
+  }, [setShowTopN, showTopN]);
 
-    const [providerRegistered, setProviderRegistered] = useState(false);
+  const [providerRegistered, setProviderRegistered] = useState(false);
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    const registerProvider = useCallback(() => {
-      if (!providerRegistered) {
-        dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
-        setProviderRegistered(true);
-      }
-    }, [dispatch, providerRegistered, dataProvider]);
+  const registerProvider = useCallback(() => {
+    if (!providerRegistered) {
+      dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
+      setProviderRegistered(true);
+    }
+  }, [dispatch, providerRegistered, dataProvider]);
 
-    const unRegisterProvider = useCallback(
-      () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
-      [dispatch, dataProvider]
-    );
+  const unRegisterProvider = useCallback(
+    () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
+    [dispatch, dataProvider]
+  );
 
-    useEffect(
-      () => () => {
-        unRegisterProvider();
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
-    );
+  useEffect(
+    () => () => {
+      unRegisterProvider();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-    const hoverContent = useMemo(
-      () => (
-        <DraggableWrapperHoverContent
-          draggableId={getDraggableId(dataProvider.id)}
-          field={dataProvider.queryMatch.field}
-          onFilterAdded={onFilterAdded}
-          showTopN={showTopN}
-          toggleTopN={toggleTopN}
-          value={
-            typeof dataProvider.queryMatch.value !== 'number'
-              ? dataProvider.queryMatch.value
-              : `${dataProvider.queryMatch.value}`
-          }
-        />
-      ),
-      [dataProvider, onFilterAdded, showTopN, toggleTopN]
-    );
+  const hoverContent = useMemo(
+    () => (
+      <DraggableWrapperHoverContent
+        draggableId={getDraggableId(dataProvider.id)}
+        field={dataProvider.queryMatch.field}
+        onFilterAdded={onFilterAdded}
+        showTopN={showTopN}
+        toggleTopN={toggleTopN}
+        value={
+          typeof dataProvider.queryMatch.value !== 'number'
+            ? dataProvider.queryMatch.value
+            : `${dataProvider.queryMatch.value}`
+        }
+      />
+    ),
+    [dataProvider, onFilterAdded, showTopN, toggleTopN]
+  );
 
-    const renderContent = useCallback(
-      () => (
-        <Wrapper data-test-subj="draggableWrapperDiv">
-          <DragDropErrorBoundary>
-            <Droppable
-              isDropDisabled={true}
-              droppableId={getDroppableId(dataProvider.id)}
-              renderClone={(provided, snapshot) => (
-                <ConditionalPortal registerProvider={registerProvider}>
-                  <div
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={getStyle(provided.draggableProps.style, snapshot)}
-                    ref={provided.innerRef}
-                    data-test-subj="providerContainer"
+  const renderContent = useCallback(
+    () => (
+      <Wrapper data-test-subj="draggableWrapperDiv" disabled>
+        <DragDropErrorBoundary>
+          <Droppable
+            isDropDisabled={true}
+            droppableId={getDroppableId(dataProvider.id)}
+            renderClone={(provided, snapshot) => (
+              <ConditionalPortal registerProvider={registerProvider}>
+                <div
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  style={getStyle(provided.draggableProps.style, snapshot)}
+                  ref={provided.innerRef}
+                  data-test-subj="providerContainer"
+                >
+                  <ProviderContentWrapper
+                    data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
                   >
-                    <ProviderContentWrapper
-                      data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                    >
-                      {render(dataProvider, provided, snapshot)}
-                    </ProviderContentWrapper>
-                  </div>
-                </ConditionalPortal>
-              )}
-            >
-              {(droppableProvided) => (
-                <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
-                  <Draggable
-                    draggableId={getDraggableId(dataProvider.id)}
-                    index={0}
-                    key={getDraggableId(dataProvider.id)}
-                  >
-                    {(provided, snapshot) => (
-                      <ProviderContainer
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        ref={provided.innerRef}
-                        data-test-subj="providerContainer"
-                        isDragging={snapshot.isDragging}
-                        registerProvider={registerProvider}
-                      >
-                        {truncate && !snapshot.isDragging ? (
-                          <TruncatableText data-test-subj="draggable-truncatable-content">
-                            {render(dataProvider, provided, snapshot)}
-                          </TruncatableText>
-                        ) : (
-                          <ProviderContentWrapper
-                            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                          >
-                            {render(dataProvider, provided, snapshot)}
-                          </ProviderContentWrapper>
-                        )}
-                      </ProviderContainer>
-                    )}
-                  </Draggable>
-                  {droppableProvided.placeholder}
+                    {render(dataProvider, provided, snapshot)}
+                  </ProviderContentWrapper>
                 </div>
-              )}
-            </Droppable>
-          </DragDropErrorBoundary>
-        </Wrapper>
-      ),
-      [dataProvider, render, registerProvider, truncate]
-    );
+              </ConditionalPortal>
+            )}
+          >
+            {(droppableProvided) => (
+              <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
+                <Draggable
+                  draggableId={getDraggableId(dataProvider.id)}
+                  index={0}
+                  key={getDraggableId(dataProvider.id)}
+                  isDragDisabled={true}
+                >
+                  {(provided, snapshot) => (
+                    <ProviderContainer
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      data-test-subj="providerContainer"
+                      isDragging={snapshot.isDragging}
+                      registerProvider={registerProvider}
+                    >
+                      {truncate && !snapshot.isDragging ? (
+                        <TruncatableText data-test-subj="draggable-truncatable-content">
+                          {render(dataProvider, provided, snapshot)}
+                        </TruncatableText>
+                      ) : (
+                        <ProviderContentWrapper
+                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                        >
+                          {render(dataProvider, provided, snapshot)}
+                        </ProviderContentWrapper>
+                      )}
+                    </ProviderContainer>
+                  )}
+                </Draggable>
+                {droppableProvided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropErrorBoundary>
+      </Wrapper>
+    ),
+    [dataProvider, render, registerProvider, truncate]
+  );
 
-    return (
-      <WithHoverActions alwaysShow={showTopN} hoverContent={hoverContent} render={renderContent} />
-    );
-  },
+  if (true || disabled) return <>{renderContent()}</>;
+
+  return (
+    <WithHoverActions alwaysShow={showTopN} hoverContent={hoverContent} render={renderContent} />
+  );
+};
+
+DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
+
+export const DraggableWrapper = React.memo(
+  DraggableWrapperComponent,
   (prevProps, nextProps) =>
     deepEqual(prevProps.dataProvider, nextProps.dataProvider) &&
     prevProps.render !== nextProps.render &&
