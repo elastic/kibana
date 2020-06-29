@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { TIMEOUT } from './constants';
 
 export interface NodeAggregation {
@@ -44,7 +44,7 @@ export interface NodesFeatureUsageResponse {
 }
 
 export type NodesUsageGetter = (
-  callCluster: APICaller
+  callCluster: LegacyAPICaller
 ) => Promise<{ nodes: NodeObj[] | Array<{}> }>;
 /**
  * Get the nodes usage data from the connected cluster.
@@ -53,7 +53,9 @@ export type NodesUsageGetter = (
  *
  * The Nodes usage API was introduced in v6.0.0
  */
-export async function fetchNodesUsage(callCluster: APICaller): Promise<NodesFeatureUsageResponse> {
+export async function fetchNodesUsage(
+  callCluster: LegacyAPICaller
+): Promise<NodesFeatureUsageResponse> {
   const response = await callCluster('transport.request', {
     method: 'GET',
     path: '/_nodes/usage',
