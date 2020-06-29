@@ -30,16 +30,34 @@ export interface AuditableEvent {
   type: string;
 }
 
+/**
+ * Provides methods to log user actions and access events.
+ * @public
+ */
 export interface Auditor {
-  add: (event: AuditableEvent) => void;
-  withScope: <T = unknown>(name: string, fn: (...args: any[]) => Promise<T>) => Promise<T>;
+  /**
+   * Add a record to audit log.
+   */
+  add(event: AuditableEvent): void;
+  /**
+   * Add a high-level scope name for logged events.
+   * It helps to identify the root cause of low-level events.
+   */
+  withScope(name: string): void;
 }
 
+/**
+ * Creates {@link Auditor} instance bound to the current user credentials.
+ * @public
+ */
 export interface AuditorFactory {
   asScoped(request: KibanaRequest): Auditor;
 }
 
 export interface AuditTrailSetup {
+  /**
+   * Register a custom {@link AuditorFactory} implementation.
+   */
   register(auditor: AuditorFactory): void;
 }
 

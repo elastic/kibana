@@ -27,9 +27,7 @@ const defaultAuditorFactory: AuditorFactory = {
   asScoped() {
     return {
       add() {},
-      withScope(name, fn) {
-        return fn();
-      },
+      withScope() {},
     };
   },
 };
@@ -57,10 +55,11 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
   start() {
     return {
       asScoped: (request: KibanaRequest) => {
-        if (!this.auditors.has(ensureRawRequest(request))) {
-          this.auditors.set(ensureRawRequest(request), this.auditor!.asScoped(request));
+        const key = ensureRawRequest(request);
+        if (!this.auditors.has(key)) {
+          this.auditors.set(key, this.auditor!.asScoped(request));
         }
-        return this.auditors.get(ensureRawRequest(request))!;
+        return this.auditors.get(key)!;
       },
     };
   }

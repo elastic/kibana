@@ -26,18 +26,19 @@ const createSetupContractMock = () => {
   return mocked;
 };
 
-const createStartContractMock = () => {
-  const mocked: jest.Mocked<AuditTrailStart> = {
-    asScoped: jest.fn(),
-  };
-  return mocked;
-};
-
 const createAuditorMock = () => {
   const mocked: jest.Mocked<Auditor> = {
     add: jest.fn(),
     withScope: jest.fn(),
   };
+  return mocked;
+};
+
+const createStartContractMock = () => {
+  const mocked: jest.Mocked<AuditTrailStart> = {
+    asScoped: jest.fn(),
+  };
+  mocked.asScoped.mockReturnValue(createAuditorMock());
   return mocked;
 };
 

@@ -83,6 +83,17 @@ describe('AuditTrailService', () => {
 
         expect(addEventMock).toHaveBeenLastCalledWith(message);
       });
+
+      describe('return the same auditor instance for the same KibanaRequest', () => {
+        const auditTrail = new AuditTrailService(coreContext);
+        auditTrail.setup();
+        const { asScoped } = auditTrail.start();
+
+        const rawRequest1 = httpServerMock.createKibanaRequest();
+        const rawRequest2 = httpServerMock.createKibanaRequest();
+        expect(asScoped(rawRequest1)).toBe(asScoped(rawRequest1));
+        expect(asScoped(rawRequest1)).not.toBe(asScoped(rawRequest2));
+      });
     });
   });
 });
