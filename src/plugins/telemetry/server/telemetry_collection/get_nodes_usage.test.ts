@@ -68,10 +68,6 @@ describe('get_nodes_usage', () => {
   it('calls fetchNodesUsage', async () => {
     const callCluster = jest.fn();
     callCluster.mockResolvedValueOnce(mockedNodesFetchResponse);
-    jest.fn(async () => ({
-      cluster_name: 'test',
-      nodes: mockedNodesResponse,
-    }));
     await getNodesUsage(callCluster);
     expect(callCluster).toHaveBeenCalledWith('transport.request', {
       path: '/_nodes/usage',
@@ -84,10 +80,6 @@ describe('get_nodes_usage', () => {
   it('returns a modified array of node usage data', async () => {
     const callCluster = jest.fn();
     callCluster.mockResolvedValueOnce(mockedNodesFetchResponse);
-    jest.fn(async () => ({
-      cluster_name: 'test',
-      nodes: mockedNodesResponse,
-    }));
     const result = await getNodesUsage(callCluster);
     expect(result.nodes).toEqual([
       {

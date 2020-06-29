@@ -35,19 +35,13 @@ export interface NodeObj {
     [key: string]: NodeAggregation;
   };
 }
-export interface NodesStats {
-  total: number;
-  successful: number;
-  failed: number;
-}
+
 export interface NodesFeatureUsageResponse {
   cluster_name: string;
   nodes: {
     [key: string]: NodeObj;
   };
 }
-
-export type NodesUsageFetcher = (callCluster: APICaller) => Promise<NodesFeatureUsageResponse>;
 
 export type NodesUsageGetter = (
   callCluster: APICaller
@@ -59,7 +53,7 @@ export type NodesUsageGetter = (
  *
  * The Nodes usage API was introduced in v6.0.0
  */
-export async function fetchNodesUsage<NodesUsageFetcher>(callCluster: APICaller) {
+export async function fetchNodesUsage(callCluster: APICaller): Promise<NodesFeatureUsageResponse> {
   const response = await callCluster('transport.request', {
     method: 'GET',
     path: '/_nodes/usage',
@@ -76,13 +70,10 @@ export async function fetchNodesUsage<NodesUsageFetcher>(callCluster: APICaller)
  * @returns Object containing array of modified usage information with the node_id nested within the data for that node.
  */
 export const getNodesUsage: NodesUsageGetter = async (callCluster) => {
-  const result = await fetchNodesUsage<NodesUsageFetcher>(callCluster);
-  let transformedNodes = [{}];
-  if (result && result.nodes) {
-    transformedNodes = Object.entries(result.nodes).map(([key, value]) => ({
-      ...(value as NodeObj),
-      node_id: key,
-    }));
-  }
+  const result = await fetchNodesUsage(callCluster);
+  const transformedNodes = Object.entries(result?.nodes || {}).map(([key, value]) => ({
+    ...(value as NodeObj),
+    node_id: key,
+  }));
   return { nodes: transformedNodes };
 };
