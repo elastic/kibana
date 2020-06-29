@@ -413,10 +413,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertInitialCloneJobAdditionalOptionsStep(
-      analysis: DataFrameAnalyticsConfig['analysis'],
-      jobType
+      analysis: DataFrameAnalyticsConfig['analysis']
     ) {
-      await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);
+      const jobType = Object.keys(analysis)[0];
+      if (isClassificationAnalysis(analysis) || isRegressionAnalysis(analysis)) {
+        // @ts-ignore
+        await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);
+      }
     },
 
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {

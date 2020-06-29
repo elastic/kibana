@@ -27,7 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'classification job supported by the form',
           archive: 'ml/bm_classification',
           indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
-          jobType: 'classification',
           job: {
             id: `bm_1_${timestamp}`,
             description:
@@ -63,7 +62,6 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'outlier detection job supported by the form',
           archive: 'ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
-          jobType: 'outlier_detection',
           job: {
             id: `ihp_1_${timestamp}`,
             description: 'This is the job description',
@@ -80,9 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
               results_field: 'ml',
             },
             analysis: {
-              outlier_detection: {
-                prediction_field_name: 'test',
-              },
+              outlier_detection: {},
             },
             analyzed_fields: {
               includes: [],
@@ -95,7 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
           suiteTitle: 'regression job supported by the form',
           archive: 'ml/egs_regression',
           indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
-          jobType: 'regression',
           job: {
             id: `egs_1_${timestamp}`,
             description: 'This is the job description',
@@ -164,9 +159,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should open the wizard with a proper header', async () => {
-          expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.match(
-            /Clone analytics job/
-          );
+          const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
+          expect(headerText).to.match(/Clone analytics job/);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
@@ -182,8 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should have correct init form values for additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
-            testData.job.analysis as DataFrameAnalyticsConfig['analysis'],
-            testData.jobType
+            testData.job.analysis as DataFrameAnalyticsConfig['analysis']
           );
         });
 
