@@ -23,7 +23,14 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
+import {
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins,
+  StartServices,
+  AppObservableLibs,
+} from './types';
 import {
   APP_ID,
   APP_ICON,
@@ -120,6 +127,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.downloadAssets(),
           this.downloadSubPlugins(),
         ]);
+
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -396,8 +404,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await this.downloadSubPlugins();
-
-    const libs$ = new BehaviorSubject(composeLibs(coreStart));
+    const { apolloClient } = composeLibs(coreStart);
+    const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+    const libs$ = new BehaviorSubject(appLibs);
 
     const alertsStart = alertsSubPlugin.start(storage);
     const hostsStart = hostsSubPlugin.start(storage);
@@ -434,6 +443,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
+      libs$.pipe(pluck('kibana')),
       storage,
       [
         ...(endpointAlertsStart.store.middleware ?? []),

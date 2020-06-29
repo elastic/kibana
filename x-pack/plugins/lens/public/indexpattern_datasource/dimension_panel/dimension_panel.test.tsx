@@ -87,7 +87,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
-      showEmptyFields: false,
       existingFields: {
         'my-fake-index-pattern': {
           timestamp: true,
@@ -1266,7 +1265,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',
