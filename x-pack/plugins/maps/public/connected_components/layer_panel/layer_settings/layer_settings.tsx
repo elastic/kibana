@@ -66,7 +66,7 @@ export function LayerSettings(props: Props) {
         formRowDisplay="columnCompressed"
         min={minVisibilityZoom}
         max={maxVisibilityZoom}
-        value={[props.layer.getMinZoom(), props.layer.getMaxZoom()]}
+        value={[props.layer!.getMinZoom(), props.layer!.getMaxZoom()]}
         showInput="inputWithPopover"
         showRange
         showLabels
@@ -88,13 +88,13 @@ export function LayerSettings(props: Props) {
         })}
         display="columnCompressed"
       >
-        <EuiFieldText value={props.layer.getLabel()} onChange={onLabelChange} compressed />
+        <EuiFieldText value={props.layer!.getLabel()} onChange={onLabelChange} compressed />
       </EuiFormRow>
     );
   };
 
   const renderShowLabelsOnTop = () => {
-    if (!props.layer.supportsLabelsOnTop()) {
+    if (!props.layer!.supportsLabelsOnTop()) {
       return null;
     }
 
@@ -104,7 +104,7 @@ export function LayerSettings(props: Props) {
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelsOnTop', {
             defaultMessage: `Show labels on top`,
           })}
-          checked={props.layer.labelsOnTop()}
+          checked={props.layer!.labelsOnTop()}
           onChange={onLabelsOnTopChange}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
           compressed
