@@ -195,11 +195,7 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     if (actions.set_priority) {
       const { priority } = actions.set_priority;
 
-      if (priority) {
-        policy[PHASE_INDEX_PRIORITY] = priority;
-      } else {
-        policy[PHASE_INDEX_PRIORITY] = '';
-      }
+      policy[PHASE_INDEX_PRIORITY] = priority ?? '';
     }
 
     if (actions.wait_for_snapshot) {
