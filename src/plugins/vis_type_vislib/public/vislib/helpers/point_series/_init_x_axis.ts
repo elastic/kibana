@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash3';
+import { uniq } from 'lodash';
 import moment from 'moment';
 import { Chart } from './point_series';
 import { Table } from '../../types';

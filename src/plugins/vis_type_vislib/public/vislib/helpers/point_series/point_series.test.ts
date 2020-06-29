@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { buildPointSeriesData, Dimensions } from './point_series';
 import { Table, Column } from '../../types';
 import { setFormatService } from '../../../services';

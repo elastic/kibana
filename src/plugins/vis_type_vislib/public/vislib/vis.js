@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 

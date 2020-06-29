@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import $ from 'jquery';
 
 import { pointSeriesTooltipFormatter } from './_pointseries_tooltip_formatter';
