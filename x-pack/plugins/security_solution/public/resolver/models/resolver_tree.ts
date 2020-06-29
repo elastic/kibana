@@ -54,8 +54,8 @@ export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNode
 /**
  * ResolverTree type is returned by the server. It organizes events into a complex structure. The
  * organization of events in the tree is done to associate metadata with the events. The client does not
- * use this metadata. Intsead, the client flattens the tree into an array. Therefore we can safely
- * make a malformed RelsoverTree for the purposes of the tests, so long as it is flattened in a predicatable way.
+ * use this metadata. Instead, the client flattens the tree into an array. Therefore we can safely
+ * make a malformed ResolverTree for the purposes of the tests, so long as it is flattened in a predictable way.
  */
 export function mock({
   events,
