@@ -9,7 +9,7 @@ import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
 
-export const routeCreateTag = ({ router }: RouteParams) => {
+export const createTag = ({ router }: RouteParams) => {
   router.post(
     {
       path: `${TAGS_API_PATH}`,

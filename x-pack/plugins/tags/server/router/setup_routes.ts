@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRoute } from './routes/create';
+import { createTag } from './routes/create_tag';
 import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
-  createRoute(params);
+  createTag(params);
 };
