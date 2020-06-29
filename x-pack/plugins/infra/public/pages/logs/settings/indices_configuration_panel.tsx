@@ -62,7 +62,7 @@ export const IndicesConfigurationPanel = ({
             id="xpack.infra.sourceConfiguration.logIndicesRecommendedValue"
             defaultMessage="The recommended value is {defaultValue}"
             values={{
-              defaultValue: <EuiCode>filebeat-*</EuiCode>,
+              defaultValue: <EuiCode>logs-*,filebeat-*</EuiCode>,
             }}
           />
         }
