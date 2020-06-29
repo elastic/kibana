@@ -121,7 +121,7 @@ const elements = [
 ];
 ```
 
-And then, in the `setup` method of the plugin, add this new element definition to Canvas, just like you did with the function.
+And then, in the `setup` method of the plugin, add this new element definition to Canvas, just like you did with the function:
 
 ```typescript
 setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
