@@ -34,24 +34,27 @@ import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import {
-  ClusterClient,
-  ScopeableRequest,
-  IClusterClient,
-  ICustomClusterClient,
-} from './cluster_client';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
+  LegacyClusterClient,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+  LegacyElasticsearchClientConfig,
+  LegacyCallAPIOptions,
+} from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { AuditTrailStart, AuditorFactory } from '../audit_trail';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
-import { CallAPIOptions } from './api_types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+  ScopeableRequest,
+} from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 
 /** @internal */
 interface CoreClusterClients {
   config: ElasticsearchConfig;
-  client: ClusterClient;
+  client: LegacyClusterClient;
 }
 
 interface SetupDeps {
@@ -73,9 +76,9 @@ export class ElasticsearchService
   private kibanaVersion: string;
   private createClient?: (
     type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ICustomClusterClient;
-  private client?: IClusterClient;
+    clientConfig?: Partial<LegacyElasticsearchClientConfig>
+  ) => ILegacyCustomClusterClient;
+  private client?: ILegacyClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -129,7 +132,7 @@ export class ElasticsearchService
       async callAsInternalUser(
         endpoint: string,
         clientParams: Record<string, any> = {},
-        options?: CallAPIOptions
+        options?: LegacyCallAPIOptions
       ) {
         const _client = await client$.pipe(take(1)).toPromise();
         return await _client.callAsInternalUser(endpoint, clientParams, options);
@@ -140,7 +143,7 @@ export class ElasticsearchService
           async callAsInternalUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
+            options?: LegacyCallAPIOptions
           ) {
             const _client = await _clientPromise;
             return await _client
@@ -150,7 +153,7 @@ export class ElasticsearchService
           async callAsCurrentUser(
             endpoint: string,
             clientParams: Record<string, any> = {},
-            options?: CallAPIOptions
+            options?: LegacyCallAPIOptions
           ) {
             const _client = await _clientPromise;
             return await _client
@@ -171,7 +174,10 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.createClient = (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+    this.createClient = (
+      type: string,
+      clientConfig: Partial<LegacyElasticsearchClientConfig> = {}
+    ) => {
       const finalConfig = merge({}, config, clientConfig);
       return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
     };
@@ -210,10 +216,10 @@ export class ElasticsearchService
 
   private createClusterClient(
     type: string,
-    config: ElasticsearchClientConfig,
+    config: LegacyElasticsearchClientConfig,
     getAuthHeaders?: GetAuthHeaders
   ) {
-    return new ClusterClient(
+    return new LegacyClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
       this.getAuditorFactory,

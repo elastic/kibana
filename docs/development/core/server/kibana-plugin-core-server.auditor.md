@@ -4,16 +4,18 @@
 
 ## Auditor interface
 
+Provides methods to log user actions and access events.
+
 <b>Signature:</b>
 
 ```typescript
 export interface Auditor 
 ```
 
-## Properties
+## Methods
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [add](./kibana-plugin-core-server.auditor.add.md) | <code>(event: AuditableEvent) =&gt; void</code> |  |
-|  [withScope](./kibana-plugin-core-server.auditor.withscope.md) | <code>&lt;T = unknown&gt;(name: string, fn: (...args: any[]) =&gt; Promise&lt;T&gt;) =&gt; Promise&lt;T&gt;</code> |  |
+|  Method | Description |
+|  --- | --- |
+|  [add(event)](./kibana-plugin-core-server.auditor.add.md) | Add a record to audit log. |
+|  [withScope(name)](./kibana-plugin-core-server.auditor.withscope.md) | Add a high-level scope name for logged events. It helps to identify the root cause of low-level events. |
 

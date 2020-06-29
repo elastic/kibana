@@ -14,5 +14,5 @@ export interface AuditTrailSetup
 
 |  Method | Description |
 |  --- | --- |
-|  [register(auditor)](./kibana-plugin-core-server.audittrailsetup.register.md) |  |
+|  [register(auditor)](./kibana-plugin-core-server.audittrailsetup.register.md) | Register a custom [AuditorFactory](./kibana-plugin-core-server.auditorfactory.md) implementation. |
 

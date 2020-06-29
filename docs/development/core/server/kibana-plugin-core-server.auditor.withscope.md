@@ -2,10 +2,23 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [Auditor](./kibana-plugin-core-server.auditor.md) &gt; [withScope](./kibana-plugin-core-server.auditor.withscope.md)
 
-## Auditor.withScope property
+## Auditor.withScope() method
+
+Add a high-level scope name for logged events. It helps to identify the root cause of low-level events.
 
 <b>Signature:</b>
 
 ```typescript
-withScope: <T = unknown>(name: string, fn: (...args: any[]) => Promise<T>) => Promise<T>;
+withScope(name: string): void;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  name | <code>string</code> |  |
+
+<b>Returns:</b>
+
+`void`
+

@@ -4,7 +4,7 @@
 
 ## createStateContainer() function
 
-Creates a state container with transitions and selectors
+Creates a state container with transitions and selectors.
 
 <b>Signature:</b>
 

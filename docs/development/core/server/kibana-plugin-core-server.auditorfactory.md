@@ -4,6 +4,8 @@
 
 ## AuditorFactory interface
 
+Creates [Auditor](./kibana-plugin-core-server.auditor.md) instance bound to the current user credentials.
+
 <b>Signature:</b>
 
 ```typescript

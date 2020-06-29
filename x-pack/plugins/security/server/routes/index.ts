@@ -8,7 +8,7 @@ import { Feature } from '../../../features/server';
 import {
   CoreSetup,
   HttpResources,
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
   Logger,
 } from '../../../../../src/core/server';
@@ -34,7 +34,7 @@ export interface RouteDefinitionParams {
   basePath: CoreSetup['http']['basePath'];
   httpResources: HttpResources;
   logger: Logger;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   config: ConfigType;
   authc: Authentication;
   authz: AuthorizationServiceSetup;

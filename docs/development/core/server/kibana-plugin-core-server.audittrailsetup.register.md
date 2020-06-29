@@ -4,6 +4,8 @@
 
 ## AuditTrailSetup.register() method
 
+Register a custom [AuditorFactory](./kibana-plugin-core-server.auditorfactory.md) implementation.
+
 <b>Signature:</b>
 
 ```typescript
