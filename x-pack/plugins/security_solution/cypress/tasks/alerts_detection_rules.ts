@@ -24,7 +24,7 @@ import {
   SORT_RULES_BTN,
   THREE_HUNDRED_ROWS,
   EXPORT_ACTION_BTN,
-} from '../screens/alert_detection_rules';
+} from '../screens/alerts_detection_rules';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
