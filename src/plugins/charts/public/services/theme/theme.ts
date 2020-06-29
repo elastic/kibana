@@ -48,6 +48,20 @@ export class ThemeService {
     return this._uiSettingsDarkMode$;
   }
 
+  /** A React hook for consuming the dark mode value */
+  public useDarkMode = (): boolean => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [value, update] = useState(false);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      const s = this.darkModeEnabled$.subscribe(update);
+      return () => s.unsubscribe();
+    }, []);
+
+    return value;
+  };
+
   /** A React hook for consuming the charts theme */
   public useChartsTheme = (): PartialTheme => {
     // eslint-disable-next-line react-hooks/rules-of-hooks

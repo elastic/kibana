@@ -13,11 +13,13 @@ import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
+  chartsThemeService: ChartsPluginSetup['theme'];
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -34,7 +36,12 @@ export class XyVisualization {
 
   setup(
     core: CoreSetup,
-    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
+    {
+      expressions,
+      formatFactory,
+      editorFrame,
+      chartsThemeService,
+    }: XyVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => legendConfig);
     expressions.registerFunction(() => xConfig);
@@ -44,9 +51,7 @@ export class XyVisualization {
     expressions.registerRenderer(
       getXyChartRenderer({
         formatFactory,
-        chartTheme: core.uiSettings.get<boolean>('theme:darkMode')
-          ? EUI_CHARTS_THEME_DARK.theme
-          : EUI_CHARTS_THEME_LIGHT.theme,
+        chartsThemeService,
         timeZone: getTimeZone(core.uiSettings),
         histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       })
