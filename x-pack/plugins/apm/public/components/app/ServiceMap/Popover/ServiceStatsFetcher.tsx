@@ -20,7 +20,6 @@ export function ServiceStatsFetcher({
   serviceName,
 }: ServiceStatsFetcherProps) {
   const {
-    uiFilters,
     urlParams: { start, end },
   } = useUrlParams();
 
@@ -29,14 +28,11 @@ export function ServiceStatsFetcher({
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: {
-            path: { serviceName },
-            query: { start, end, uiFilters: { ...uiFilters, environment } },
-          },
+          params: { path: { serviceName }, query: { start, end, environment } },
         });
       }
     },
-    [serviceName, start, end, environment, uiFilters],
+    [serviceName, start, end, environment],
     {
       preservePreviousData: false,
     }

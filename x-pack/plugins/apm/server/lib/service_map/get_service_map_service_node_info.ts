@@ -16,15 +16,13 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { getErrorRate } from '../errors/get_error_rate';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 
 interface Options {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
+  environment?: string;
   serviceName: string;
 }
 
@@ -37,15 +35,21 @@ interface TaskParameters {
 
 export async function getServiceMapServiceNodeInfo({
   serviceName,
+  environment,
   setup,
-}: Options) {
-  const { start, end, uiFiltersES } = setup;
+}: Options & { serviceName: string; environment?: string }) {
+  const { start, end } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...uiFiltersES,
   ];
+
+  const environmentFilter = getEnvironmentUiFilterES(environment);
+
+  if (environmentFilter) {
+    filter.push(environmentFilter);
+  }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
 

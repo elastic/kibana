@@ -10,12 +10,12 @@ import {
   invalidLicenseMessage,
   isValidPlatinumLicense,
 } from '../../common/service_map';
-import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
+import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -51,9 +51,12 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
     path: t.type({
       serviceName: t.string,
     }),
-    params: {
-      query: t.intersection([uiFiltersRt, rangeRt]),
-    },
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string,
+      }),
+    ]),
   },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
@@ -65,12 +68,14 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
     const setup = await setupRequest(context, request);
 
     const {
+      query: { environment },
       path: { serviceName },
     } = context.params;
 
     return getServiceMapServiceNodeInfo({
       setup,
       serviceName,
+      environment,
     });
   },
 }));
