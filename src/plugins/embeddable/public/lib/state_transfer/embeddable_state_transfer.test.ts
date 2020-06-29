@@ -38,7 +38,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing originating app state', async () => {
-    await stateTransfer.navigateToWithOriginatingApp(destinationApp, { state: { originatingApp } });
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
       state: { originatingApp: 'superUltraTestDashboard' },
     });
@@ -50,7 +50,7 @@ describe('embeddable state transfer', () => {
       application.navigateToApp,
       (historyMock as unknown) as ScopedHistory
     );
-    await stateTransfer.navigateToWithOriginatingApp(destinationApp, {
+    await stateTransfer.navigateToEditor(destinationApp, {
       state: { originatingApp },
       appendToExistingState: true,
     });
@@ -94,7 +94,7 @@ describe('embeddable state transfer', () => {
       application.navigateToApp,
       (historyMock as unknown) as ScopedHistory
     );
-    const fetchedState = stateTransfer.getIncomingOriginatingApp();
+    const fetchedState = stateTransfer.getIncomingEditorState();
     expect(fetchedState).toEqual({ originatingApp: 'extremeSportsKibana' });
   });
 
@@ -104,7 +104,7 @@ describe('embeddable state transfer', () => {
       application.navigateToApp,
       (historyMock as unknown) as ScopedHistory
     );
-    const fetchedState = stateTransfer.getIncomingOriginatingApp();
+    const fetchedState = stateTransfer.getIncomingEditorState();
     expect(fetchedState).toBeUndefined();
   });
 

@@ -35,6 +35,7 @@ export const CloneAction: FC<CloneActionProps> = ({ itemId }) => {
 
   const cloneButton = (
     <EuiButtonEmpty
+      data-test-subj="transformActionClone"
       size="xs"
       color="text"
       disabled={!canCreateTransform}
