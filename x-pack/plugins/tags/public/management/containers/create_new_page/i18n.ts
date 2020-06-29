@@ -13,3 +13,7 @@ export const txtTitle = i18n.translate('xpack.tags.creanteNewPage.title', {
 export const txtSubtitle = i18n.translate('xpack.tags.creanteNewPage.subtitle', {
   defaultMessage: 'Create a descriptive colorful tag to better organize your content.',
 });
+
+export const txtGoBack = i18n.translate('xpack.tags.creanteNewPage.goBack', {
+  defaultMessage: 'Go back',
+});

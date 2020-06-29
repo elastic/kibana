@@ -5,8 +5,10 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { EuiButtonToggle } from '@elastic/eui';
 import { Page } from '../page';
-import { txtTitle, txtSubtitle } from './i18n';
+import { txtTitle, txtSubtitle, txtGoBack } from './i18n';
 import { CreateNewTagForm } from '../create_new_tag_form';
 
 export const CreateNewPage: React.FC = () => {
@@ -17,6 +19,11 @@ export const CreateNewPage: React.FC = () => {
       subtitle={<p>{txtSubtitle}</p>}
       breadcrumbs={[{ text: txtTitle }]}
       separator
+      callToAction={
+        <Link to={'/'}>
+          <EuiButtonToggle label={txtGoBack} iconType={'arrowLeft'} isEmpty isIconOnly />
+        </Link>
+      }
     >
       <CreateNewTagForm />
     </Page>
