@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
 import { TaskContext } from './task_context';
 import { generateMapping } from '../manage_schema';
 
