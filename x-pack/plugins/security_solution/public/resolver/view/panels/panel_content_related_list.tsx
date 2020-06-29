@@ -84,7 +84,6 @@ const DisplayList = memo(function DisplayList({
           eventType={eventType}
           aggregateCountForEventType={aggregateCountForEventType}
           matchingEventEntries={matchingEventEntries}
-          relatedEventEntityId={processEntityId}
         />
       ) : null}
       <EuiSpacer size="l" />

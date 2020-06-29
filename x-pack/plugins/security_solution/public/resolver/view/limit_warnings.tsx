@@ -7,8 +7,6 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
-import { useSelector } from 'react-redux';
-import * as selectors from '../store/selectors';
 
 const LineageLimitMessage = (
   <>
@@ -71,34 +69,24 @@ const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
   );
 });
 
+/**
+ * Limit warning for hitting the /events API limit
+ */
 export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWarning({
   className,
-  relatedEventEntityId,
   eventType,
   matchingEventEntries,
   aggregateCountForEventType,
 }: {
   className?: string;
-  relatedEventEntityId: string;
   eventType: string;
   matchingEventEntries: unknown[];
   aggregateCountForEventType: number;
 }) {
-  const relatedEventResponsesById = useSelector(selectors.relatedEventsByEntityId);
-  const responseForThisNode = relatedEventResponsesById.get(relatedEventEntityId);
-  if (!responseForThisNode || responseForThisNode.nextEvent === null) {
-    return null;
-  }
-
   /**
    * Based on API limits, all related events may not be displayed.
    */
   const numberActuallyDisplayed = matchingEventEntries.length;
-  if (numberActuallyDisplayed >= aggregateCountForEventType) {
-    // No need to show the limit warning for this category if we've got the number of events we expected,
-    // even if the `nextEvent` cursor isn't null.
-    return null;
-  }
   const numberMissing = aggregateCountForEventType - numberActuallyDisplayed;
   return (
     <EuiCallOut
@@ -118,6 +106,9 @@ export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWar
   );
 });
 
+/**
+ * Limit warning for hitting a limit of nodes in the tree
+ */
 export const LineageLimitWarning = React.memo(function LineageLimitWarning({
   className,
   numberDisplayed,
