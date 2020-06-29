@@ -41,7 +41,7 @@ const defaultProps: TableProps = {
         editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
           path: '/management/kibana/indexPatterns/patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },
@@ -68,7 +68,7 @@ const defaultProps: TableProps = {
         editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
           path: '/management/kibana/indexPatterns/patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },

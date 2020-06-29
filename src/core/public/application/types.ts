@@ -269,6 +269,10 @@ export interface LegacyApp extends AppBase {
  */
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
   legacy: false;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
+  appRoute: string;
 };
 
 /**
@@ -278,6 +282,9 @@ export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
  */
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
   legacy: true;
+  // remove optional on fields populated with default values
+  status: AppStatus;
+  navLinkStatus: AppNavLinkStatus;
 };
 
 /**
