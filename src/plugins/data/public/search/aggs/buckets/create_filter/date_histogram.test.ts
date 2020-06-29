@@ -29,9 +29,7 @@ import {
 } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
-import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { InternalStartServices } from '../../../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -46,11 +44,6 @@ describe('AggConfig Filters', () => {
 
       aggTypesDependencies = {
         calculateBounds: jest.fn(),
-        getInternalStartServices: () =>
-          (({
-            fieldFormats: fieldFormatsServiceMock.createStartContract(),
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
         uiSettings,
       };
 
