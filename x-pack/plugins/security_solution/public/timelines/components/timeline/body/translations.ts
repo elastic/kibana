@@ -13,6 +13,13 @@ export const NOTES_TOOLTIP = i18n.translate(
   }
 );
 
+export const NOTES_DISABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
+  {
+    defaultMessage: 'Add notes for event filtered by a timeline template is not allowed',
+  }
+);
+
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.timeline.body.copyToClipboardButtonLabel',
   {
@@ -38,6 +45,13 @@ export const PINNED_WITH_NOTES = i18n.translate(
   }
 );
 
+export const DISABLE_PIN = i18n.translate(
+  'xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip',
+  {
+    defaultMessage: 'This event cannot be pinned because it is filtered by a timeline template',
+  }
+);
+
 export const EXPAND = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.expandAriaLabel',
   {
@@ -49,5 +63,12 @@ export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
   {
     defaultMessage: 'Collapse',
+  }
+);
+
+export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.investigateInResolverTooltip',
+  {
+    defaultMessage: 'Investigate in Resolver',
   }
 );
