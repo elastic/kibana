@@ -17,7 +17,7 @@ describe('useCursor', () => {
     expect(result.current[0]).toBeUndefined();
   });
 
-  it('retrieves a cursor for a known set of props', () => {
+  it('retrieves a cursor for the next page of a given page size', () => {
     const { rerender, result } = renderHook((props: UseCursorProps) => useCursor(props), {
       initialProps: { pageIndex: 0, pageSize: 0 },
     });
@@ -26,18 +26,21 @@ describe('useCursor', () => {
       result.current[1]('new_cursor');
     });
 
+    expect(result.current[0]).toBeUndefined();
+
+    rerender({ pageIndex: 2, pageSize: 1 });
     expect(result.current[0]).toEqual('new_cursor');
   });
 
-  it('returns undefined cursor for an unknown set of props', () => {
+  it('returns undefined cursor for an unknown search', () => {
     const { rerender, result } = renderHook((props: UseCursorProps) => useCursor(props), {
       initialProps: { pageIndex: 0, pageSize: 0 },
     });
     act(() => {
       result.current[1]('new_cursor');
     });
-    rerender({ pageIndex: 1, pageSize: 1 });
 
+    rerender({ pageIndex: 1, pageSize: 2 });
     expect(result.current[0]).toBeUndefined();
   });
 
@@ -50,12 +53,14 @@ describe('useCursor', () => {
     act(() => {
       result.current[1]('new_cursor');
     });
+
+    rerender({ pageIndex: 2, pageSize: 1 });
     expect(result.current[0]).toEqual('new_cursor');
 
     rerender({ pageIndex: 0, pageSize: 0 });
     expect(result.current[0]).toBeUndefined();
 
-    rerender({ pageIndex: 1, pageSize: 1 });
+    rerender({ pageIndex: 2, pageSize: 1 });
     expect(result.current[0]).toEqual('new_cursor');
   });
 
@@ -68,12 +73,15 @@ describe('useCursor', () => {
     act(() => {
       result.current[1]('new_cursor');
     });
-    expect(result.current[0]).toEqual('new_cursor');
-
     rerender({ pageIndex: 2, pageSize: 2 });
     act(() => {
       result.current[1]('another_cursor');
     });
+
+    rerender({ pageIndex: 2, pageSize: 1 });
+    expect(result.current[0]).toEqual('new_cursor');
+
+    rerender({ pageIndex: 3, pageSize: 2 });
     expect(result.current[0]).toEqual('another_cursor');
   });
 
@@ -86,19 +94,20 @@ describe('useCursor', () => {
     act(() => {
       result.current[1]('cursor1');
     });
-    expect(result.current[0]).toEqual('cursor1');
-
     rerender({ pageIndex: 2, pageSize: 2 });
     act(() => {
       result.current[1]('cursor2');
     });
-    expect(result.current[0]).toEqual('cursor2');
-
     rerender({ pageIndex: 3, pageSize: 2 });
     act(() => {
       result.current[1]('cursor3');
     });
-    expect(result.current[0]).toEqual('cursor3');
+
+    rerender({ pageIndex: 2, pageSize: 2 });
+    expect(result.current[0]).toEqual('cursor1');
+
+    rerender({ pageIndex: 3, pageSize: 2 });
+    expect(result.current[0]).toEqual('cursor2');
 
     rerender({ pageIndex: 4, pageSize: 2 });
     expect(result.current[0]).toEqual('cursor3');

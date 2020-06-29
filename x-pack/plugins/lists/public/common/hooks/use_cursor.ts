@@ -16,22 +16,23 @@ type UseCursor = (props: UseCursorProps) => [Cursor, SetCursor];
 
 const hash = (props: UseCursorProps): string => JSON.stringify(props);
 
-export const useCursor: UseCursor = (props) => {
+export const useCursor: UseCursor = ({ pageIndex, pageSize }) => {
   const [cache, setCache] = useState<Record<string, Cursor>>({});
 
   const setCursor = useCallback<SetCursor>(
     (cursor) => {
       setCache({
         ...cache,
-        [hash(props)]: cursor,
+        [hash({ pageIndex: pageIndex + 1, pageSize })]: cursor,
       });
     },
-    [cache, props]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pageIndex, pageSize]
   );
 
   let cursor: Cursor;
-  for (let i = props.pageIndex; i >= 0; i--) {
-    const currentProps = { pageIndex: i, pageSize: props.pageSize };
+  for (let i = pageIndex; i >= 0; i--) {
+    const currentProps = { pageIndex: i, pageSize };
     cursor = cache[hash(currentProps)];
     if (cursor) {
       break;
