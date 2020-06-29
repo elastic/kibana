@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { AgentStatus } from '../types';
+import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { AgentStatus, Agent } from '../types';
 import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
@@ -26,11 +26,37 @@ export interface ESIndexPatternService {
  */
 export interface AgentService {
   /**
+   * Get an Agent by id
+   */
+  getAgent(soClient: SavedObjectsClientContract, agentId: string): Promise<Agent>;
+  /**
+   * Authenticate an agent with access toekn
+   */
+  authenticateAgentWithAccessToken(
+    soClient: SavedObjectsClientContract,
+    request: KibanaRequest
+  ): Promise<Agent>;
+  /**
    * Return the status by the Agent's id
-   * @param soClient
-   * @param agentId
    */
   getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
+  /**
+   * List agents
+   */
+  listAgents(
+    soClient: SavedObjectsClientContract,
+    options: {
+      page: number;
+      perPage: number;
+      kuery?: string;
+      showInactive: boolean;
+    }
+  ): Promise<{
+    agents: Agent[];
+    total: number;
+    page: number;
+    perPage: number;
+  }>;
 }
 
 // Saved object services
