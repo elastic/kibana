@@ -108,7 +108,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
     [deleteView]
   );
 
-  const renderMakeDefaultction = useCallback(
+  const renderMakeDefaultAction = useCallback(
     (item: SavedView<ViewState>) => {
       const isDefault = item.id === defaultViewId;
       return (
@@ -142,7 +142,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
       actions: [
         {
           available: () => true,
-          render: renderMakeDefaultction,
+          render: renderMakeDefaultAction,
         },
         {
           available: (item: SavedView<ViewState>) => true,
