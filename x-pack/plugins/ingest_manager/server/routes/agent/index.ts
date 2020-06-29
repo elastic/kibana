@@ -109,7 +109,7 @@ export const registerRoutes = (router: IRouter) => {
     },
     postAgentAcksHandlerBuilder({
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
-      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
+      authenticateAgentWithAccessToken: AgentService.authenticateAgentWithAccessToken,
       getSavedObjectsClientContract: appContextService.getInternalUserSOClient.bind(
         appContextService
       ),

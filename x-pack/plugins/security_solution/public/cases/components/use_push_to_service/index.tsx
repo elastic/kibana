@@ -20,6 +20,7 @@ import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
+import { ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {
   caseId: string;
@@ -76,11 +77,7 @@ export const usePushToService = ({
   );
 
   const errorsMsg = useMemo(() => {
-    let errors: Array<{
-      title: string;
-      description: JSX.Element;
-      errorType?: 'primary' | 'success' | 'warning' | 'danger';
-    }> = [];
+    let errors: ErrorMessage[] = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
@@ -88,6 +85,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-missing-error',
           title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -112,6 +110,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-not-selected-error',
           title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -125,6 +124,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'connector-deleted-error',
           title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
           description: (
             <FormattedMessage
@@ -140,6 +140,7 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
+          id: 'closed-case-push-error',
           title: i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE,
           description: (
             <FormattedMessage

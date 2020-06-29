@@ -712,8 +712,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
-    metrics: MetricsServiceSetup;
-    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     status: StatusServiceSetup;
@@ -731,6 +729,11 @@ export interface CoreStart {
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
     http: HttpServiceStart;
+    // Warning: (ae-forgotten-export) The symbol "MetricsServiceStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "MetricsServiceStart"
+    //
+    // (undocumented)
+    metrics: MetricsServiceStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
@@ -1420,9 +1423,10 @@ export interface LogRecord {
     timestamp: Date;
 }
 
-// @public
+// Warning: (ae-missing-release-tag) "MetricsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
 export interface MetricsServiceSetup {
-    getOpsMetrics$: () => Observable<OpsMetrics>;
 }
 
 // @public (undocumented)
@@ -1970,8 +1974,6 @@ export interface SavedObjectsClientWrapperOptions {
 
 // @public
 export interface SavedObjectsComplexFieldMapping {
-    // (undocumented)
-    dynamic?: string;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)

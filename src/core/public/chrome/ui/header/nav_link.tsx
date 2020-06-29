@@ -17,29 +17,25 @@
  * under the License.
  */
 
-import { EuiImage } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
-function isModifiedEvent(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
-
-function LinkIcon({ url }: { url: string }) {
-  return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
-}
+export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
 interface Props {
   link: ChromeNavLink;
   legacyMode: boolean;
-  appId: string | undefined;
+  appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
   onClick?: Function;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  externalLink?: boolean;
 }
 
 // TODO #64541
@@ -54,6 +50,7 @@ export function createEuiListItem({
   onClick = () => {},
   navigateToApp,
   dataTestSubj,
+  externalLink = false,
 }: Props) {
   const { legacy, active, id, title, disabled, euiIconType, icon, tooltip } = link;
   let { href } = link;
@@ -67,13 +64,16 @@ export function createEuiListItem({
     href,
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
-      onClick();
+      if (!isModifiedOrPrevented(event)) {
+        onClick();
+      }
+
       if (
+        !externalLink && // ignore external links
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
-        !event.defaultPrevented && // onClick prevented default
         event.button === 0 && // ignore everything but left clicks
-        !isModifiedEvent(event) // ignore clicks with modifier keys
+        !isModifiedOrPrevented(event)
       ) {
         event.preventDefault();
         navigateToApp(id);
@@ -85,7 +85,8 @@ export function createEuiListItem({
     'data-test-subj': dataTestSubj,
     ...(basePath && {
       iconType: euiIconType,
-      icon: !euiIconType && icon ? <LinkIcon url={basePath.prepend(`/${icon}`)} /> : undefined,
+      icon:
+        !euiIconType && icon ? <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" /> : undefined,
     }),
   };
 }
