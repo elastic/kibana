@@ -4,47 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import * as selectors from '../store/selectors';
 
-const bothLimitsMessage = (
+const LineageLimitMessage = (
   <>
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.bothLineageLimitsExceeded"
-      defaultMessage="Some ancestors and children of the trigger event could not be displayed in this view."
+      id="xpack.securitySolution.endpoint.resolver.eitherLineageLimitExceeded"
+      defaultMessage="Some process events in the visualization and event list below could not be displayed because the data limit has been reached."
     />
   </>
 );
 
-const childrenLimitMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.childrenLimitExceeded"
-      defaultMessage="Some children of the trigger event could not be displayed in this view."
-    />
-  </>
-);
-
-const ancestorsLimitMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.ancestorsLimitExceeded"
-      defaultMessage="Some ancestors of the trigger event could not be displayed in this view."
-    />
-  </>
-);
-
-const titleMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.lineageLimitsExceededTitle"
-      defaultMessage="API Limit:"
-    />
-  </>
-);
+const LineageTitleMessage = React.memo(function RelatedEventsLimitMessage({
+  numberOfEntries,
+}: {
+  numberOfEntries: number;
+}) {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
+        defaultMessage="This list includes {numberOfEntries} process events."
+        values={{ numberOfEntries }}
+      />
+    </>
+  );
+});
 
 const RelatedEventsLimitMessage = React.memo(function RelatedEventsLimitMessage({
   category,
@@ -131,27 +120,18 @@ export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWar
 
 export const LineageLimitWarning = React.memo(function LineageLimitWarning({
   className,
+  numberDisplayed,
 }: {
   className?: string;
+  numberDisplayed: number;
 }) {
-  const { children, ancestors } = useSelector(selectors.lineageLimitsReached);
-  const limitMessage = useMemo(() => {
-    if (children && ancestors) {
-      return bothLimitsMessage;
-    } else if (ancestors) {
-      return ancestorsLimitMessage;
-    }
-    return childrenLimitMessage;
-  }, [children, ancestors]);
-
-  if (!children && !ancestors) {
-    // If there are no limits exceeded, display nothing
-    return null;
-  }
-
   return (
-    <EuiCallOut color="warning" size="s" className={className} title={titleMessage}>
-      <p>{limitMessage}</p>
+    <EuiCallOut
+      size="s"
+      className={className}
+      title={<LineageTitleMessage numberOfEntries={numberDisplayed} />}
+    >
+      <p>{LineageLimitMessage}</p>
     </EuiCallOut>
   );
 });

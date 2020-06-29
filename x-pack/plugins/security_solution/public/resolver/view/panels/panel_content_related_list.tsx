@@ -69,15 +69,24 @@ const DisplayList = memo(function DisplayList({
   processEntityId: string;
   aggregateCountForEventType: number;
 }) {
+  const relatedEventResponsesById = useSelector(selectors.relatedEventsByEntityId);
+  const responseForThisNode = relatedEventResponsesById.get(processEntityId);
+  const shouldShowLimitWarning =
+    responseForThisNode &&
+    responseForThisNode.nextEvent !== null &&
+    matchingEventEntries.length < aggregateCountForEventType;
+
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      <StyledRelatedLimitWarning
-        eventType={eventType}
-        aggregateCountForEventType={aggregateCountForEventType}
-        matchingEventEntries={matchingEventEntries}
-        relatedEventEntityId={processEntityId}
-      />
+      {shouldShowLimitWarning ? (
+        <StyledRelatedLimitWarning
+          eventType={eventType}
+          aggregateCountForEventType={aggregateCountForEventType}
+          matchingEventEntries={matchingEventEntries}
+          relatedEventEntityId={processEntityId}
+        />
+      ) : null}
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
