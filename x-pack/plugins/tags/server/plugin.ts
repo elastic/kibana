@@ -13,7 +13,8 @@ import {
   IContextProvider,
   RequestHandler,
 } from '../../../../src/core/server';
-import { TagsRequestHandlerConrtext } from './types';
+import { TagsRequestHandlerContext } from './types';
+import { setupRoutes } from './router';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TagsPluginSetupDependencies {}
@@ -44,7 +45,12 @@ export class TagsPlugin
   ): TagsPluginSetup {
     this.logger.debug('setup()');
 
-    core.http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core));
+    const { http } = core;
+    const router = http.createRouter();
+
+    http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core));
+    setupRoutes({ router });
+
     return {};
   }
 
@@ -58,7 +64,7 @@ export class TagsPlugin
     core: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'tags'> => {
     return async (context, request) => {
-      const tagsContext: TagsRequestHandlerConrtext = {};
+      const tagsContext: TagsRequestHandlerContext = {};
       return tagsContext;
     };
   };

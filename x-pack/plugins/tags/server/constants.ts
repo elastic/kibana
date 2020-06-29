@@ -4,11 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsRequestHandlerContext {}
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
-  }
-}
+export const TAGS_API_PATH = '/api/tags';

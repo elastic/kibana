@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TagsRequestHandlerContext {}
+import { createRoute } from './routes/create';
+import { RouteParams } from './types';
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    tags?: TagsRequestHandlerContext;
-  }
-}
+export const setupRoutes = (params: RouteParams) => {
+  createRoute(params);
+};
