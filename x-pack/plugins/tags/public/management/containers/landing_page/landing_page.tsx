@@ -7,7 +7,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
-import { Page } from '../../components/page';
+import { Page } from '../page';
 import { txtTitle, txtSubtitle, txtCreateATag } from './i18n';
 import { Tag } from '../../../../common';
 

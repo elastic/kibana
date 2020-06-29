@@ -5,13 +5,19 @@
  */
 
 import React from 'react';
-import { Page } from '../../components/page';
+import { Page } from '../page';
 import { txtTitle, txtSubtitle } from './i18n';
 import { CreateNewTagForm } from '../create_new_tag_form';
 
 export const CreateNewPage: React.FC = () => {
   return (
-    <Page id={'CreateNew'} title={txtTitle} subtitle={<p>{txtSubtitle}</p>} separator>
+    <Page
+      id={'CreateNew'}
+      title={txtTitle}
+      subtitle={<p>{txtSubtitle}</p>}
+      breadcrumbs={[{ text: txtTitle }]}
+      separator
+    >
       <CreateNewTagForm />
     </Page>
   );
