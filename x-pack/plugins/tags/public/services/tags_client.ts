@@ -10,7 +10,7 @@ import {
   TagsClientCreateParams,
   TagsClientCreateResult,
 } from '../../common';
-import { HttpSetup, HttpStart, HttpResponse } from '../../../../../src/core/public';
+import { HttpSetup, HttpStart } from '../../../../../src/core/public';
 
 export interface Params {
   http: HttpSetup | HttpStart;
@@ -20,13 +20,8 @@ export class TagsClient implements ITagsClient {
   constructor(private readonly params: Params) {}
 
   public async create(params: TagsClientCreateParams): Promise<TagsClientCreateResult> {
-    const response: HttpResponse<TagsClientCreateResult> = await this.params.http.post(
-      TAGS_API_PATH,
-      {
-        body: JSON.stringify(params),
-      }
-    );
-
-    return response.body!;
+    return await this.params.http.post<TagsClientCreateResult>(TAGS_API_PATH, {
+      body: JSON.stringify(params),
+    });
   }
 }

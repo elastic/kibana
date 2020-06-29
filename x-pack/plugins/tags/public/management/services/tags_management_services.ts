@@ -5,12 +5,12 @@
  */
 
 import { ScopedHistory, ChromeBreadcrumb } from 'kibana/public';
-import { ITagsClient } from '../../../common';
+import { TagsClient } from '../../services';
 
 export interface Params {
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  tagsClient: ITagsClient;
+  tagsClient: TagsClient;
 }
 
 export class TagsManagementServices {

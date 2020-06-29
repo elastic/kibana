@@ -21,7 +21,7 @@ export const CreateNewPage: React.FC = () => {
       separator
       callToAction={
         <Link to={'/'}>
-          <EuiButtonToggle label={txtGoBack} iconType={'arrowLeft'} isEmpty isIconOnly />
+          <EuiButtonToggle label={txtGoBack} iconType={'arrowLeft'} isEmpty />
         </Link>
       }
     >

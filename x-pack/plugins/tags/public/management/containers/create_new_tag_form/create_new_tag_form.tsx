@@ -4,38 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
-  EuiSpacer,
-  EuiColorPicker,
-  EuiTextArea,
-} from '@elastic/eui';
-import { txtTitle, txtColor, txtDescription, txtSave } from './i18n';
+import React, { useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
+import { useServices } from '../../context';
+import { Tag } from '../../../../common';
 
-export const CreateNewTagForm: React.FC = () => {
+export interface Props {
+  onCreate?: (tag: Tag) => void;
+}
+
+export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
+  const services = useServices();
+  const isMounted = useMountedState();
+  const [title, setTitle] = useState('');
+  const [color, setColor] = useState('#ffffff');
+  const [description, setDescription] = useState('');
+
+  const handleSubmit = async () => {
+    try {
+      const { tag } = await services.params.tagsClient.create({
+        tag: {
+          title,
+          color,
+          description,
+        },
+      });
+      if (!isMounted()) return;
+      alert('created');
+      if (onCreate) onCreate(tag);
+    } catch (error) {
+      if (!isMounted()) return;
+      alert(error.message);
+    }
+  };
+
   return (
-    <EuiForm component="form">
-      <EuiFormRow label={txtTitle}>
-        <EuiFieldText name="first" />
-      </EuiFormRow>
-
-      <EuiFormRow label={txtColor}>
-        <EuiColorPicker onChange={() => {}} color={'#ffffff'} />
-      </EuiFormRow>
-
-      <EuiFormRow label={txtDescription}>
-        <EuiTextArea aria-label={txtDescription} value={''} onChange={() => {}} />
-      </EuiFormRow>
-
-      <EuiSpacer />
-
-      <EuiButton type="submit" fill>
-        {txtSave}
-      </EuiButton>
-    </EuiForm>
+    <CreateNewTagFormUi
+      title={title}
+      color={color}
+      description={description}
+      onTitleChange={setTitle}
+      onColorChange={setColor}
+      onDescriptionChange={setDescription}
+      onSubmit={handleSubmit}
+    />
   );
 };
