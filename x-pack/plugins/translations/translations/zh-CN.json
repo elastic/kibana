@@ -749,7 +749,6 @@
     "data.search.aggs.aggGroups.bucketsText": "存储桶",
     "data.search.aggs.aggGroups.metricsText": "指标",
     "data.search.aggs.aggGroups.noneText": "无",
-    "data.search.aggs.aggTypes.rangesFormatMessage": "{gte} {from} 和 {lt} {to}",
     "data.search.aggs.aggTypesLabel": "{fieldName} 范围",
     "data.search.aggs.buckets.dateHistogram.customLabel.help": "表示此聚合的定制标签",
     "data.search.aggs.buckets.dateHistogram.dropPartials.help": "指定是否将 drop_partials 用于此聚合",

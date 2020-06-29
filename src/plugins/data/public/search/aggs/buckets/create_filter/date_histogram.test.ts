@@ -82,7 +82,6 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
       const bucketKey = 1422579600000;

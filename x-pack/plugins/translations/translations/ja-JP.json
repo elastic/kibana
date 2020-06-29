@@ -748,7 +748,6 @@
     "data.search.aggs.aggGroups.bucketsText": "バケット",
     "data.search.aggs.aggGroups.metricsText": "メトリック",
     "data.search.aggs.aggGroups.noneText": "なし",
-    "data.search.aggs.aggTypes.rangesFormatMessage": "{gte} {from} と {lt} {to}",
     "data.search.aggs.aggTypesLabel": "{fieldName} の範囲",
     "data.search.aggs.buckets.dateHistogram.customLabel.help": "このアグリゲーションのカスタムラベルを表します",
     "data.search.aggs.buckets.dateHistogram.dropPartials.help": "このアグリゲーションでdrop_partialsを使用するかどうかを指定します",
