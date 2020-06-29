@@ -25,12 +25,15 @@ export function getJobServiceProvider({
 }: SharedServicesChecks): JobServiceProvider {
   return {
     jobServiceProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      // const hasMlCapabilities = getHasMlCapabilities(request);
       const { jobsSummary } = jobServiceProvider(callAsCurrentUser);
       return {
         async jobsSummary(...args) {
           isFullLicense();
-          await hasMlCapabilities(['canGetJobs']);
+          // Removed while https://github.com/elastic/kibana/issues/64588 exists.
+          // SIEM are calling this endpoint with a dummy request object from their alerting
+          // integration and currently alerting does not supply a request object.
+          // await hasMlCapabilities(['canGetJobs']);
 
           return jobsSummary(...args);
         },
