@@ -19,6 +19,7 @@ import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/us
 import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
 import { BackToListPanel } from '../back_to_list_panel';
+import { ProgressStats } from './progress_stats';
 
 interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;
@@ -27,8 +28,10 @@ interface Props extends CreateAnalyticsFormProps {
 export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
+  const { jobId } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
@@ -36,6 +39,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
     await createAnalyticsJob();
 
     if (checked) {
+      setShowProgress(true);
       startAnalyticsJob();
     }
   };
@@ -82,6 +86,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       )}
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
+      {isJobCreated === true && showProgress && <ProgressStats jobId={jobId} />}
       {isJobCreated === true && <BackToListPanel />}
     </Fragment>
   );

@@ -29,6 +29,7 @@ import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
 import { State } from './types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { CoreStart } from '../../../../../../src/core/public';
 
 type ComposeType = typeof compose;
 declare global {
@@ -49,6 +50,7 @@ export const createStore = (
   state: PreloadedState<State>,
   pluginsReducer: SubPluginsInitReducer,
   apolloClient: Observable<AppApolloClient>,
+  kibana: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
@@ -56,6 +58,7 @@ export const createStore = (
 
   const middlewareDependencies = {
     apolloClient$: apolloClient,
+    kibana$: kibana,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
