@@ -130,7 +130,7 @@ setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
 }
 ```
 
-Now, your `Random Number` element will show up in the list of other Canvas elements.
+Now, your 'Random Number' element will show up in the list of other Canvas elements.
 
 #### Trying out your new plugin
 
