@@ -42,7 +42,7 @@ export class CollectorSet {
   public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
     return new Collector(this.logger, options);
   };
-  public makeUsageCollector = <T, U>(options: CollectorOptions<T, U>) => {
+  public makeUsageCollector = <T, U = T>(options: CollectorOptions<T, U>) => {
     return new UsageCollector(this.logger, options);
   };
 
