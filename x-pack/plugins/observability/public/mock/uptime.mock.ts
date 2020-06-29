@@ -7,7 +7,11 @@ import { UptimeFetchDataResponse } from '../typings/fetch_data_response';
 import { FetchData } from '../data_handler';
 
 export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
-  return Promise.resolve(response);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(response);
+    }, 3000);
+  });
 };
 
 const response: UptimeFetchDataResponse = {

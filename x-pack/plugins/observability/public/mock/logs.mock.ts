@@ -9,7 +9,11 @@ import { LogsFetchDataResponse } from '../typings/fetch_data_response';
 import { FetchData } from '../data_handler';
 
 export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
-  return Promise.resolve(response);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(response);
+    }, 2000);
+  });
 };
 
 const response: LogsFetchDataResponse = {

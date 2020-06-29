@@ -28,11 +28,13 @@ export const SectionContainer = ({ title, appLink, children, subtitle }: Props) 
         </EuiTitle>
       }
       extraAction={
-        <EuiButtonEmpty href={appLink}>
-          {i18n.translate('xpack.observability.chart.viewInAppLabel', {
-            defaultMessage: 'View in app',
-          })}
-        </EuiButtonEmpty>
+        appLink && (
+          <EuiButtonEmpty href={appLink}>
+            {i18n.translate('xpack.observability.chart.viewInAppLabel', {
+              defaultMessage: 'View in app',
+            })}
+          </EuiButtonEmpty>
+        )
       }
     >
       <EuiPanel hasShadow>

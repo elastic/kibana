@@ -21,24 +21,31 @@ import numeral from '@elastic/numeral';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { getDataHandler } from '../../../../data_handler';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
 
 interface Props {
-  data?: ApmFetchDataResponse;
+  startTime?: string;
+  endTime?: string;
+  bucketSize?: string;
 }
 
-export const APMSection = ({ data }: Props) => {
+export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
+  const { data } = useFetcher(() => {
+    if (startTime && endTime && bucketSize) {
+      return getDataHandler('apm')?.fetchData({ startTime, endTime, bucketSize });
+    }
+  }, [startTime, endTime, bucketSize]);
 
-  if (!data) {
-    return null;
-  }
+  const transactionSeries = data?.series.transactions;
 
-  const transactionSeries = data.series.transactions;
-
-  const xCoordinates = transactionSeries.coordinates.map((coordinate) => coordinate.x);
+  const xCoordinates = transactionSeries
+    ? transactionSeries.coordinates.map((coordinate) => coordinate.x)
+    : [0];
 
   const min = d3.min(xCoordinates);
   const max = d3.max(xCoordinates);
@@ -53,27 +60,26 @@ export const APMSection = ({ data }: Props) => {
 
   return (
     <SectionContainer
-      title={data.title}
+      title={data?.title || 'APM'}
       subtitle={i18n.translate('xpack.observability.overview.chart.apm.subtitle', {
         defaultMessage: 'Summary',
       })}
-      appLink={data.appLink}
+      appLink={data?.appLink}
     >
       <EuiFlexGroup>
-        {Object.keys(data.stats).map((key) => {
-          const stat = data.stats[key as keyof ApmFetchDataResponse['stats']];
-          return (
-            <EuiFlexItem key={key} grow={false}>
-              <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
-            </EuiFlexItem>
-          );
-        })}
+        {data &&
+          Object.keys(data.stats).map((key) => {
+            const stat = data?.stats[key as keyof ApmFetchDataResponse['stats']];
+            return (
+              <EuiFlexItem key={key} grow={false}>
+                <EuiStat title={formatStatValue(stat)} description={stat.label} titleSize="m" />
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGroup>
       <Chart size={{ height: 220 }}>
         <Settings
-          onBrushEnd={({ x }) => {
-            console.log('#### APM', x);
-          }}
+          onBrushEnd={({ x }) => {}}
           theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
           showLegend={true}
           legendPosition="bottom"

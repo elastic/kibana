@@ -9,7 +9,11 @@ import { MetricsFetchDataResponse } from '../typings/fetch_data_response';
 import { FetchData } from '../data_handler';
 
 export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
-  return Promise.resolve(response);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(response);
+    }, 1500);
+  });
 };
 
 const response: MetricsFetchDataResponse = {

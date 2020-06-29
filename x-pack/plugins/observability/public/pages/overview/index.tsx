@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
 import moment from 'moment';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ThemeContext } from 'styled-components';
 import { ObservabilityApp } from '../../../typings/common';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
@@ -16,13 +16,11 @@ import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
-import { getDataHandler } from '../../data_handler';
-import { useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
-import { appsSection } from '../home/section';
 import { getBucketSize } from '../../utils/get_bucket_size';
+import { appsSection } from '../home/section';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -40,26 +38,16 @@ export const Overview = ({ routeParams }: Props) => {
 
   const { rangeFrom = timePickerTime.from, rangeTo = timePickerTime.to } = routeParams.query;
 
-  const { data = [] } = useFetcher(() => {
-    const startTime = getParsedDate(rangeFrom);
-    const endTime = getParsedDate(rangeTo, { roundUp: true });
-    if (startTime && endTime) {
-      const { intervalString } = getBucketSize({
-        start: moment.utc(startTime).valueOf(),
-        end: moment.utc(endTime).valueOf(),
-        minInterval: 'auto',
-      });
-      const params = { startTime, endTime, bucketSize: intervalString };
-      const apmDataPromise = getDataHandler('apm')?.fetchData(params);
-      const logsDataPromise = getDataHandler('infra_logs')?.fetchData(params);
-      const metricsDataPromise = getDataHandler('infra_metrics')?.fetchData(params);
-      const uptimeDataPromise = getDataHandler('uptime')?.fetchData(params);
-
-      return Promise.all([apmDataPromise, logsDataPromise, metricsDataPromise, uptimeDataPromise]);
-    }
-  }, [rangeFrom, rangeTo]);
-
-  const [apmData, logsData, metricsData, uptimeData] = data;
+  const startTime = getParsedDate(rangeFrom);
+  const endTime = getParsedDate(rangeTo, { roundUp: true });
+  const bucketSize =
+    startTime && endTime
+      ? getBucketSize({
+          start: moment.utc(startTime).valueOf(),
+          end: moment.utc(endTime).valueOf(),
+          minInterval: 'auto',
+        })
+      : undefined;
 
   const emptySections = appsSection.filter(({ id }) => state && !state.hasData[id]);
 
@@ -77,16 +65,32 @@ export const Overview = ({ routeParams }: Props) => {
         <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
-              <LogsSection data={logsData} />
+              <LogsSection
+                startTime={startTime}
+                endTime={endTime}
+                bucketSize={bucketSize?.intervalString}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <MetricsSection data={metricsData} />
+              <MetricsSection
+                startTime={startTime}
+                endTime={endTime}
+                bucketSize={bucketSize?.intervalString}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <APMSection data={apmData} />
+              <APMSection
+                startTime={startTime}
+                endTime={endTime}
+                bucketSize={bucketSize?.intervalString}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <UptimeSection data={uptimeData} />
+              <UptimeSection
+                startTime={startTime}
+                endTime={endTime}
+                bucketSize={bucketSize?.intervalString}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

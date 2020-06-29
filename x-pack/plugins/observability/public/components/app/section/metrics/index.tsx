@@ -9,52 +9,59 @@ import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { SectionContainer } from '../';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
+import { getDataHandler } from '../../../../data_handler';
 
 interface Props {
-  data?: MetricsFetchDataResponse;
+  startTime?: string;
+  endTime?: string;
+  bucketSize?: string;
 }
 
-export const MetricsSection = ({ data }: Props) => {
-  if (!data) {
-    return null;
-  }
+export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
+  const { data } = useFetcher(() => {
+    if (startTime && endTime && bucketSize) {
+      return getDataHandler('infra_metrics')?.fetchData({ startTime, endTime, bucketSize });
+    }
+  }, [startTime, endTime, bucketSize]);
 
   return (
     <SectionContainer
-      title={data.title}
+      title={data?.title || 'Metrics'}
       subtitle={i18n.translate('xpack.observability.overview.chart.metrics.subtitle', {
         defaultMessage: 'Summary',
       })}
-      appLink={data.appLink}
+      appLink={data?.appLink}
     >
       <EuiFlexGroup>
-        {Object.keys(data.stats).map((key) => {
-          const statKey = key as keyof MetricsFetchDataResponse['stats'];
-          const stat = data.stats[statKey];
-          const value = formatStatValue(stat);
+        {data &&
+          Object.keys(data.stats).map((key) => {
+            const statKey = key as keyof MetricsFetchDataResponse['stats'];
+            const stat = data.stats[statKey];
+            const value = formatStatValue(stat);
 
-          const serie = data.series[key as keyof MetricsFetchDataResponse['series']];
+            const serie = data.series[key as keyof MetricsFetchDataResponse['series']];
 
-          const chart = serie ? (
-            <AreaChart serie={serie} />
-          ) : (
-            <>
-              <EuiSpacer size="s" />
-              <EuiProgress value={stat.value} max={1} />
-            </>
-          );
+            const chart = serie ? (
+              <AreaChart serie={serie} />
+            ) : (
+              <>
+                <EuiSpacer size="s" />
+                <EuiProgress value={stat.value} max={1} />
+              </>
+            );
 
-          return (
-            <EuiFlexItem key={key}>
-              <EuiStat title={value} description={stat.label} titleSize="m">
-                {statKey !== 'hosts' && chart}
-              </EuiStat>
-            </EuiFlexItem>
-          );
-        })}
+            return (
+              <EuiFlexItem key={key}>
+                <EuiStat title={value} description={stat.label} titleSize="m">
+                  {statKey !== 'hosts' && chart}
+                </EuiStat>
+              </EuiFlexItem>
+            );
+          })}
       </EuiFlexGroup>
     </SectionContainer>
   );
