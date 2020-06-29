@@ -12,8 +12,11 @@ export {
   useFindLists,
   addExceptionListItem,
   updateExceptionListItem,
+  fetchExceptionListById,
+  addExceptionList,
   ExceptionIdentifiers,
   ExceptionList,
+  ExceptionListType,
   Pagination,
   UseExceptionListSuccess,
 } from '../../lists/public';

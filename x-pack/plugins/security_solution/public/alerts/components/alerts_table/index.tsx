@@ -70,7 +70,7 @@ type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 const addExceptionModalInitialState: AddExceptionOnClick = {
   ruleName: '',
-  ruleExceptionLists: [],
+  ruleId: '',
   exceptionListType: 'detection',
   alertData: undefined,
 };
@@ -208,10 +208,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const openAddExceptionModalCallback = useCallback(
-    ({ ruleName, ruleExceptionLists, exceptionListType, alertData }: AddExceptionOnClick) => {
+    ({ ruleName, ruleId, exceptionListType, alertData }: AddExceptionOnClick) => {
       if (alertData !== null && alertData !== undefined) {
         setShouldShowAddExceptionModal(true);
-        setAddExceptionModalState({ ruleName, ruleExceptionLists, exceptionListType, alertData });
+        setAddExceptionModalState({
+          ruleName,
+          ruleId,
+          exceptionListType,
+          alertData,
+        });
       }
     },
     [setShouldShowAddExceptionModal, setAddExceptionModalState]
@@ -424,7 +429,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       {shouldShowAddExceptionModal === true && addExceptionModalState.alertData !== null && (
         <AddExceptionModal
           ruleName={addExceptionModalState.ruleName}
-          ruleExceptionLists={addExceptionModalState.ruleExceptionLists}
+          ruleId={addExceptionModalState.ruleId}
           exceptionListType={addExceptionModalState.exceptionListType}
           alertData={addExceptionModalState.alertData}
           onCancel={onAddExceptionCancel}

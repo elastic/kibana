@@ -47,7 +47,7 @@ const initialState: State = {
   loadingItemIds: [],
   isInitLoading: true,
   currentModal: null,
-  exceptionListToEdit: null,
+  exceptionListTypeToEdit: null,
 };
 
 enum ModalAction {
@@ -100,7 +100,7 @@ const ExceptionsViewerComponent = ({
       isInitLoading,
       currentModal,
       exceptionToEdit,
-      exceptionListToEdit,
+      exceptionListTypeToEdit,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
@@ -168,14 +168,13 @@ const ExceptionsViewerComponent = ({
 
   const handleAddException = useCallback(
     (type: ExceptionListTypeEnum): void => {
-      const listToEdit = type === 'endpoint' ? endpointList : detectionsList;
       dispatch({
-        type: 'updateExceptionListToEdit',
-        exceptionList: listToEdit,
+        type: 'updateExceptionListTypeToEdit',
+        exceptionListType: type,
       });
       setCurrentModal('addModal');
     },
-    [setCurrentModal, endpointList, detectionsList]
+    [setCurrentModal]
   );
 
   const handleEditException = useCallback(
@@ -267,11 +266,11 @@ const ExceptionsViewerComponent = ({
           onConfirm={onCloseExceptionModal}
         />
       )}
-      {currentModal === 'addModal' && exceptionListToEdit !== null && (
+      {currentModal === 'addModal' && exceptionListTypeToEdit !== null && (
         <AddExceptionModal
           ruleName={ruleName}
-          ruleExceptionLists={[exceptionListToEdit]}
-          exceptionListType={exceptionListToEdit.type}
+          ruleId={ruleId}
+          exceptionListType={exceptionListTypeToEdit}
           onCancel={onCloseExceptionModal}
           onConfirm={onCloseExceptionModal}
         />

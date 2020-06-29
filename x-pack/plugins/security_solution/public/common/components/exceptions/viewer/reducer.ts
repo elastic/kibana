@@ -6,6 +6,7 @@
 import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 import {
   ExceptionList,
+  ExceptionListType,
   ExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionIdentifiers,
@@ -24,7 +25,7 @@ export interface State {
   loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
   currentModal: string | null;
-  exceptionListToEdit: ExceptionList | null;
+  exceptionListTypeToEdit: ExceptionListType | null;
 }
 
 export type Action =
@@ -44,7 +45,7 @@ export type Action =
   | { type: 'updateModalOpen'; modalName: string | null }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
   | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] }
-  | { type: 'updateExceptionListToEdit'; exceptionList: ExceptionList | null };
+  | { type: 'updateExceptionListTypeToEdit'; exceptionListType: ExceptionListType | null };
 
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
@@ -130,10 +131,10 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         currentModal: action.modalName,
       };
     }
-    case 'updateExceptionListToEdit': {
+    case 'updateExceptionListTypeToEdit': {
       return {
         ...state,
-        exceptionListToEdit: action.exceptionList,
+        exceptionListTypeToEdit: action.exceptionListType,
       };
     }
     default:

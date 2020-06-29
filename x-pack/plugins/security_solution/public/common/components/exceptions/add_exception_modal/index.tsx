@@ -19,6 +19,8 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiFormRow,
+  EuiLoadingSpinner,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
@@ -30,9 +32,12 @@ import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
+import { useRule } from '../../../../../alerts/containers/detection_engine/rules';
 import { ExceptionBuilder } from '../../exception_builder';
 import { ExceptionItem } from '../../exception_builder/types';
+import { Loader } from '../../loader';
 import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
@@ -45,7 +50,8 @@ import {
 // TODO: rename?
 export interface AddExceptionOnClick {
   ruleName: string;
-  ruleExceptionLists: ExceptionListSchema[];
+  ruleId: string;
+  ruleExceptionLists?: ExceptionListSchema[];
   exceptionListType: ExceptionListSchema['type'];
   alertData: TimelineNonEcsData[] | undefined;
 }
@@ -53,7 +59,7 @@ export interface AddExceptionOnClick {
 // TODO: What's the different between ECS data and Non ECS data
 interface AddExceptionModalProps {
   ruleName: string;
-  ruleExceptionLists: ExceptionListSchema[];
+  ruleId: string;
   exceptionListType: ExceptionListSchema['type'];
   alertData?: TimelineNonEcsData[];
   onCancel: () => void;
@@ -88,7 +94,7 @@ const ModalBodySection = styled.section`
 // TODO: for endpoint exceptions add OS to each entry in the exception items
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
-  ruleExceptionLists,
+  ruleId,
   exceptionListType,
   alertData,
   onCancel,
@@ -98,8 +104,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [comment, setComment] = useState('');
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
-  const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
-  const [createListError, setCreateListError] = useState(false);
+  const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
   const { addExceptionList } = useApi(http);
 
@@ -121,41 +126,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     http,
   });
 
-  useEffect(() => {
-    const listOfDesiredType = ruleExceptionLists.find((list: ExceptionListSchema) => {
-      return list.type === exceptionListType;
-    });
-    if (listOfDesiredType !== undefined) {
-      setExceptionList(listOfDesiredType);
-    } else {
-      // Create new exception list
-      // TODO: associate it with the rule
-      // TODO: descrition shouldn't be required by create schema
-      // TODO: name shouldn't be required by create schema
-      const newExceptionList = {
-        description: 'test description',
-        name: 'test exception list',
-        type: exceptionListType,
-        namespace_type: exceptionListType === 'endpoint' ? 'agnostic' : 'single',
-      };
-      addExceptionList({
-        list: newExceptionList,
-        onSuccess: (list: ExceptionListSchema) => {
-          // TODO: set isLoading, add spinner
-          setExceptionList(list);
-        },
-        onError: () => {
-          setCreateListError(true);
-        },
-      });
-    }
-  }, [
-    ruleExceptionLists,
+  const onFetchOrCreateExceptionListError = useCallback(
+    (error: Error) => {
+      setFetchOrCreateListError(true);
+    },
+    [setFetchOrCreateListError]
+  );
+  const [isLoadingExceptionList, ruleExceptionList] = useFetchOrCreateRuleExceptionList({
+    http,
+    ruleId,
     exceptionListType,
-    addExceptionList,
-    setExceptionList,
-    setCreateListError,
-  ]);
+    onError: onFetchOrCreateExceptionListError,
+  });
 
   const onCommentChange = useCallback(
     (value: string) => {
@@ -196,8 +178,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     // TODO: if close checkbox is selected, refresh signals table
   }, [addExceptionItems, enrichExceptionItems]);
 
-  // TODO: builder - dynamically set listType
   // TODO: set default exception items in builder if type is endpoint and alert data is passed in
+  // TODO: intl error message
+  // TODO: disable submit button if the list of exception items is empty
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -208,12 +191,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           </div>
         </ModalHeader>
 
-        {exceptionList && createListError === false && (
+        {fetchOrCreateListError === true && (
+          <EuiCallOut title={'Error'} color="danger" iconType="alert">
+            <p>{'Error fetching exception list'}</p>
+          </EuiCallOut>
+        )}
+        {fetchOrCreateListError === false && isLoadingExceptionList === true && (
+          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+        )}
+        {fetchOrCreateListError === false && !isLoadingExceptionList && ruleExceptionList && (
           <>
             <ModalBodySection className="builder-section">
               <ExceptionBuilder
                 exceptionItems={[]}
-                listId={exceptionList.list_id}
+                listId={ruleExceptionList.list_id}
                 listType={exceptionListType}
                 dataTestSubj="alert-exception-builder"
                 idAria="alert-exception-builder"
@@ -246,7 +237,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onAddExceptionConfirm} isLoading={addExceptionIsLoading} fill>
+          <EuiButton
+            onClick={onAddExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={fetchOrCreateListError}
+            fill
+          >
             {i18n.ADD_EXCEPTION}
           </EuiButton>
         </EuiModalFooter>

@@ -308,26 +308,15 @@ export const getAlertActions = ({
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        // TODO: ruleExceptionLists should come from data or ecsData
-        openAddExceptionModal({
-          ruleName: ruleNameValue ? ruleNameValue[0] : '',
-          ruleExceptionLists: [
-            {
-              id: '7a9d6910-b57c-11ea-823e-03a250049b55',
-              list_id: '20381031-1189-4aaa-be74-b9d2896eff52',
-              type: 'endpoint',
-              namespace_type: 'agnostic',
-            },
-            {
-              id: '1ad4d770-b57c-11ea-823e-03a250049b55',
-              list_id: 'c364ada6-e259-4eba-b3b8-3c29bd0341dc',
-              type: 'detection',
-              namespace_type: 'single',
-            },
-          ],
-          exceptionListType: 'endpoint',
-          alertData: data,
-        });
+        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        if (ruleId !== undefined && ruleId.length > 0) {
+          openAddExceptionModal({
+            ruleName: ruleNameValue ? ruleNameValue[0] : '',
+            ruleId: ruleId[0],
+            exceptionListType: 'endpoint',
+            alertData: data,
+          });
+        }
       },
       id: 'addEndpointException',
       iconType: 'documentEdit',
@@ -341,26 +330,16 @@ export const getAlertActions = ({
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        // TODO: ruleExceptionLists should come from data or ecsData
-        openAddExceptionModal({
-          ruleName: ruleNameValue ? ruleNameValue[0] : '',
-          ruleExceptionLists: [
-            {
-              id: '7a9d6910-b57c-11ea-823e-03a250049b55',
-              list_id: '20381031-1189-4aaa-be74-b9d2896eff52',
-              type: 'endpoint',
-              namespace_type: 'agnostic',
-            },
-            {
-              id: '1ad4d770-b57c-11ea-823e-03a250049b55',
-              list_id: 'c364ada6-e259-4eba-b3b8-3c29bd0341dc',
-              type: 'detection',
-              namespace_type: 'single',
-            },
-          ],
-          exceptionListType: 'detection',
-          alertData: data,
-        });
+        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        console.log(ruleId);
+        if (ruleId !== undefined && ruleId.length > 0) {
+          openAddExceptionModal({
+            ruleName: ruleNameValue ? ruleNameValue[0] : '',
+            ruleId: ruleId[0],
+            exceptionListType: 'detection',
+            alertData: data,
+          });
+        }
       },
       id: 'addException',
       iconType: 'documentEdit',
