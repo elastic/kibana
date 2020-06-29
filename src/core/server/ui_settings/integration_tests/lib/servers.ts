@@ -25,7 +25,7 @@ import {
   TestKibanaUtils,
   TestUtils,
 } from '../../../../../test_utils/kbn_server';
-import { APICaller } from '../../../elasticsearch/';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
@@ -37,7 +37,7 @@ let kbnServer: TestKibanaUtils['kbnServer'];
 interface AllServices {
   kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
   deleteKibanaIndex: typeof deleteKibanaIndex;
 }
@@ -62,7 +62,7 @@ export async function startServers() {
   kbnServer = kbn.kbnServer;
 }
 
-async function deleteKibanaIndex(callCluster: APICaller) {
+async function deleteKibanaIndex(callCluster: LegacyAPICaller) {
   const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
   const indexNames = kibanaIndices.map((x: any) => x.index);
   if (!indexNames.length) {

@@ -5,7 +5,7 @@
  */
 import Boom from 'boom';
 import {
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
@@ -50,7 +50,7 @@ interface CreateOptions {
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: IScopedClusterClient;
+  scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   savedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
@@ -66,7 +66,7 @@ interface UpdateOptions {
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: IScopedClusterClient;
+  private readonly scopedClusterClient: ILegacyScopedClusterClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
@@ -298,7 +298,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: IScopedClusterClient,
+  scopedClusterClient: ILegacyScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
   const aggs: Record<string, unknown> = {};
