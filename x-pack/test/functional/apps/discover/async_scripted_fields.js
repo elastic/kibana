@@ -39,24 +39,25 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('query should show failed shards pop up', async function () {
-      /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
-       */
-
-      // await PageObjects.settings.navigateTo();
-      // await PageObjects.settings.clickKibanaIndexPatterns();
-      // await PageObjects.settings.createIndexPattern('logsta');
-      // await PageObjects.settings.clickScriptedFieldsTab();
-      // await log.debug('add scripted field');
-      // await PageObjects.settings.addScriptedField(
-      //   'sharedFail',
-      //   'painless',
-      //   'string',
-      //   null,
-      //   '1',
-      //   // Scripted field below with multiple string checking actually should cause share failure message
-      //   // bcause it's not checking if all the fields it uses exist in each doc (and they don't)
-      //   "if (doc['response.raw'].value == '200') { return 'good ' + doc['url.raw'].value } else { return 'bad ' + doc['machine.os.raw'].value } "
-      // );
+      if (false) {
+        /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
+         */
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.createIndexPattern('logsta');
+        await PageObjects.settings.clickScriptedFieldsTab();
+        await log.debug('add scripted field');
+        await PageObjects.settings.addScriptedField(
+          'sharedFail',
+          'painless',
+          'string',
+          null,
+          '1',
+          // Scripted field below with multiple string checking actually should cause share failure message
+          // bcause it's not checking if all the fields it uses exist in each doc (and they don't)
+          "if (doc['response.raw'].value == '200') { return 'good ' + doc['url.raw'].value } else { return 'bad ' + doc['machine.os.raw'].value } "
+        );
+      }
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logsta*');
@@ -70,46 +71,48 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('query return results with valid scripted field', async function () {
-      // the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
-      // which are now saved in the esArchive.
+      if (false) {
+        /* the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
+        which are now saved in the esArchive.
+         */
 
-      // await PageObjects.settings.navigateTo();
-      // await PageObjects.settings.clickKibanaIndexPatterns();
-      // await PageObjects.settings.clickIndexPatternLogstash();
-      // const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
-      // await PageObjects.settings.clickScriptedFieldsTab();
-      // await log.debug('add scripted field');
-      // await PageObjects.settings.addScriptedField(
-      //   'goodScript',
-      //   'painless',
-      //   'string',
-      //   null,
-      //   '1',
-      //   // Scripted field below with should work
-      //   "if (doc['response.raw'].value == '200') { if (doc['url.raw'].size() > 0) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].size() > 0) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
-      // );
-      // await retry.try(async function() {
-      //   expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
-      //     startingCount + 1
-      //   );
-      // });
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        await PageObjects.settings.clickScriptedFieldsTab();
+        await log.debug('add scripted field');
+        await PageObjects.settings.addScriptedField(
+          'goodScript',
+          'painless',
+          'string',
+          null,
+          '1',
+          // Scripted field below with should work
+          "if (doc['response.raw'].value == '200') { if (doc['url.raw'].size() > 0) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].size() > 0) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
+        );
+        await retry.try(async function () {
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
+        });
 
-      // await PageObjects.settings.addScriptedField(
-      //   'goodScript2',
-      //   'painless',
-      //   'string',
-      //   null,
-      //   '1',
-      //   // Scripted field below which should work
-      //   "if (doc['url.raw'].size() > 0) { String tempString = \"\"; for ( int i = (doc['url.raw'].value.length() - 1); i >= 0 ; i--) { tempString = tempString + (doc['url.raw'].value).charAt(i); } return tempString; } else { return \"emptyUrl\"; }"
-      // );
-      // await retry.try(async function() {
-      //   expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
-      //     startingCount + 2
-      //   );
-      // });
+        await PageObjects.settings.addScriptedField(
+          'goodScript2',
+          'painless',
+          'string',
+          null,
+          '1',
+          // Scripted field below which should work
+          "if (doc['url.raw'].size() > 0) { String tempString = \"\"; for ( int i = (doc['url.raw'].value.length() - 1); i >= 0 ; i--) { tempString = tempString + (doc['url.raw'].value).charAt(i); } return tempString; } else { return \"emptyUrl\"; }"
+        );
+        await retry.try(async function () {
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 2
+          );
+        });
+      }
 
-      // await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
