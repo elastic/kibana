@@ -17,15 +17,8 @@
  * under the License.
  */
 
-import { IModule } from 'angular';
-import { VisualizeKibanaServices } from '../kibana_services';
-
-// @ts-ignore
-import { initEditorDirective } from './editor/editor';
-// @ts-ignore
-import { initListingDirective } from './listing/visualize_listing';
-
-export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
-  initEditorDirective(app, deps);
-  initListingDirective(app, deps.I18nContext);
-}
+export * from './get_table_columns';
+export * from './get_top_nav_config';
+export * from './breadcrumbs';
+export * from './utils';
+export * from './use';
