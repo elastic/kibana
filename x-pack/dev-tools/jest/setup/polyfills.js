@@ -21,3 +21,6 @@ require('whatwg-fetch');
 if (!global.URL.hasOwnProperty('createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }
+
+// Will be replaced with a better solution in EUI
+global._isJest = true;
