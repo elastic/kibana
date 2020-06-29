@@ -17,18 +17,18 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Class | Description |
 |  --- | --- |
 |  [BasePath](./kibana-plugin-core-server.basepath.md) | Access or manipulate the Kibana base path |
-|  [ClusterClient](./kibana-plugin-core-server.clusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-core-server.clusterclient.md)<!-- -->. |
 |  [CspConfig](./kibana-plugin-core-server.cspconfig.md) | CSP configuration for use in Kibana. |
 |  [ElasticsearchConfig](./kibana-plugin-core-server.elasticsearchconfig.md) | Wrapper of config schema. |
-|  [ElasticsearchErrorHelpers](./kibana-plugin-core-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
+|  [LegacyClusterClient](./kibana-plugin-core-server.legacyclusterclient.md) |  |
+|  [LegacyElasticsearchErrorHelpers](./kibana-plugin-core-server.legacyelasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
+|  [LegacyScopedClusterClient](./kibana-plugin-core-server.legacyscopedclusterclient.md) |  |
 |  [RouteValidationError](./kibana-plugin-core-server.routevalidationerror.md) | Error to return when the validation is not successful. |
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. |
-|  [ScopedClusterClient](./kibana-plugin-core-server.scopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-core-server.scopedclusterclient.md)<!-- -->. |
 
 ## Enumerations
 
@@ -54,7 +54,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
-|  [APICaller](./kibana-plugin-core-server.apicaller.md) |  |
 |  [AssistanceAPIResponse](./kibana-plugin-core-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-core-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-core-server.authenticated.md) |  |
@@ -63,7 +62,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthRedirectedParams](./kibana-plugin-core-server.authredirectedparams.md) | Result of auth redirection. |
 |  [AuthResultParams](./kibana-plugin-core-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
-|  [CallAPIOptions](./kibana-plugin-core-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-core-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-core-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
 |  [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-core-server.capabilities.md)<!-- -->. |
@@ -78,7 +76,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationInfo](./kibana-plugin-core-server.deprecationinfo.md) |  |
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
-|  [ElasticsearchError](./kibana-plugin-core-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
 |  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
@@ -104,6 +101,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
 |  [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) | Request events. |
 |  [KibanaRequestRoute](./kibana-plugin-core-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
+|  [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md) |  |
+|  [LegacyCallAPIOptions](./kibana-plugin-core-server.legacycallapioptions.md) | The set of options that defines how API call should be made and result be processed. |
+|  [LegacyElasticsearchError](./kibana-plugin-core-server.legacyelasticsearcherror.md) |  |
 |  [LegacyRequest](./kibana-plugin-core-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-core-server.legacyservicesetupdeps.md) |  |
 |  [LegacyServiceStartDeps](./kibana-plugin-core-server.legacyservicestartdeps.md) |  |
@@ -128,7 +128,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-core-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
-|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.legacy.client](./kibana-plugin-core-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.legacy.client](./kibana-plugin-core-server.legacyscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md) | Additional body options for a route |
@@ -222,7 +222,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationProvider](./kibana-plugin-core-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-core-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-core-server.configpath.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
-|  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) |  |
 |  [Freezable](./kibana-plugin-core-server.freezable.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
@@ -234,16 +233,17 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpResourcesResponseOptions](./kibana-plugin-core-server.httpresourcesresponseoptions.md) | HTTP Resources response parameters |
 |  [HttpResponsePayload](./kibana-plugin-core-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [IBasePath](./kibana-plugin-core-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-core-server.basepath.md) |
-|  [IClusterClient](./kibana-plugin-core-server.iclusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-core-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
-|  [ICustomClusterClient](./kibana-plugin-core-server.icustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-core-server.clusterclient.md)<!-- -->. |
+|  [ILegacyClusterClient](./kibana-plugin-core-server.ilegacyclusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [LegacyClusterClient](./kibana-plugin-core-server.legacyclusterclient.md)<!-- -->. |
+|  [ILegacyCustomClusterClient](./kibana-plugin-core-server.ilegacycustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [LegacyClusterClient](./kibana-plugin-core-server.legacyclusterclient.md)<!-- -->. |
+|  [ILegacyScopedClusterClient](./kibana-plugin-core-server.ilegacyscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [LegacyScopedClusterClient](./kibana-plugin-core-server.legacyscopedclusterclient.md)<!-- -->. |
 |  [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) | Returns authentication status for a request. |
 |  [ISavedObjectsRepository](./kibana-plugin-core-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |
 |  [ISavedObjectTypeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) | See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) for documentation. |
-|  [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-core-server.scopedclusterclient.md)<!-- -->. |
 |  [KibanaRequestRouteOptions](./kibana-plugin-core-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |
 |  [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Creates an object containing request response payload, HTTP headers, error details, and other data transmitted to the client. |
 |  [KnownHeaders](./kibana-plugin-core-server.knownheaders.md) | Set of well-known HTTP headers. |
+|  [LegacyElasticsearchClientConfig](./kibana-plugin-core-server.legacyelasticsearchclientconfig.md) |  |
 |  [LifecycleResponseFactory](./kibana-plugin-core-server.lifecycleresponsefactory.md) | Creates an object containing redirection or error response with error details, HTTP headers, and other data transmitted to the client. |
 |  [LoggerConfigType](./kibana-plugin-core-server.loggerconfigtype.md) |  |
 |  [MIGRATION\_ASSISTANCE\_INDEX\_ACTION](./kibana-plugin-core-server.migration_assistance_index_action.md) |  |
