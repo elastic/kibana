@@ -6,7 +6,7 @@
 
 import dateMath from '@elastic/datemath';
 
-import { APICaller, KibanaRequest } from '../../../../../../../src/core/server';
+import { LegacyAPICaller, KibanaRequest } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { getAnomalies } from '../../machine_learning';
 
@@ -20,7 +20,7 @@ export const findMlSignals = async ({
   to,
 }: {
   ml: MlPluginSetup;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   request: KibanaRequest;
   jobId: string;
   anomalyThreshold: number;

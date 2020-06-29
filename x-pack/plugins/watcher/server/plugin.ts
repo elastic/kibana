@@ -12,8 +12,8 @@ declare module 'kibana/server' {
 
 import {
   CoreSetup,
-  ICustomClusterClient,
-  IScopedClusterClient,
+  ILegacyCustomClusterClient,
+  ILegacyScopedClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -31,7 +31,7 @@ import { registerLoadHistoryRoute } from './routes/api/register_load_history_rou
 import { elasticsearchJsPlugin } from './lib/elasticsearch_js_plugin';
 
 export interface WatcherContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -42,7 +42,7 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   private readonly log: Logger;
-  private watcherESClient?: ICustomClusterClient;
+  private watcherESClient?: ILegacyCustomClusterClient;
 
   private licenseStatus: LicenseStatus = {
     hasRequired: false,
