@@ -70,6 +70,8 @@ export const createTimeline = actionCreator<{
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
   timelineType?: TimelineTypeLiteral;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
