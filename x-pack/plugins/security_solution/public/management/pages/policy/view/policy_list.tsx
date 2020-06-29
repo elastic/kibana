@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, CSSProperties, useState, MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 'react';
 import {
   EuiBasicTable,
   EuiText,
@@ -22,9 +22,6 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiButton,
-  EuiSteps,
-  EuiTitle,
-  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,6 +38,7 @@ import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
+import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { SecurityPageName } from '../../../../app/types';
@@ -63,10 +61,6 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-});
-
-const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
-  textAlign: 'center',
 });
 
 const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
@@ -437,12 +431,7 @@ export const PolicyList = React.memo(() => {
                   hasActions={false}
                 />
               ) : (
-                <EmptyPolicyTable
-                  loading={loading}
-                  onActionClick={handleCreatePolicyClick}
-                  actionDisabled={false}
-                  dataTestSubj="emptyPolicyTable"
-                />
+                <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
               )}
             </>
           );
@@ -461,107 +450,6 @@ export const PolicyList = React.memo(() => {
 });
 
 PolicyList.displayName = 'PolicyList';
-
-const EmptyPolicyTable = React.memo<{
-  loading: boolean;
-  onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
-  actionDisabled: boolean;
-  dataTestSubj: string;
-}>(({ loading, onActionClick, actionDisabled, dataTestSubj }) => {
-  const policySteps = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
-          defaultMessage: 'Head over to Ingest Manager.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepOne"
-              defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepTwoTitle', {
-          defaultMessage: 'We’ll create a recommended security policy for you.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepTwo"
-              defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepThreeTitle', {
-          defaultMessage: 'Enroll your agents through Fleet.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepThree"
-              defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
-            />
-          </EuiText>
-        ),
-      },
-    ],
-    []
-  );
-  return (
-    <div data-test-subj={dataTestSubj}>
-      {loading ? (
-        <EuiProgress size="xs" color="accent" className="essentialAnimation" />
-      ) : (
-        <>
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="m">
-            <h2 style={TEXT_ALIGN_CENTER}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyList.noPoliciesPrompt"
-                defaultMessage="Looks like you're not using Elastic Endpoint"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="xxl" />
-          <EuiText textAlign="center" color="subdued" size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.noPoliciesInstructions"
-              defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
-            />
-          </EuiText>
-          <EuiSpacer size="xxl" />
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiSteps steps={policySteps} data-test-subj={'onboardingSteps'} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onActionClick}
-                isDisabled={actionDisabled}
-                data-test-subj="onboardingStartButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
-                  defaultMessage="Click here to get started"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </div>
-  );
-});
-
-EmptyPolicyTable.displayName = 'EmptyPolicyTable';
 
 const ConfirmDelete = React.memo<{
   hostCount: number;
