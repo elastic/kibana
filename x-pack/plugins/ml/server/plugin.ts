@@ -51,7 +51,7 @@ import { registerKibanaSettings } from './lib/register_settings';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
-    ml?: {
+    [PLUGIN_ID]?: {
       mlClient: ILegacyScopedClusterClient;
     };
   }
