@@ -35,6 +35,7 @@ const mockDefaultMessagesMap = new Map([
 const defaultIntegrateOptions = {
   sourceFileName: localePath,
   dryRun: false,
+  ignoreMalformed: false,
   ignoreIncompatible: false,
   ignoreMissing: false,
   ignoreUnused: false,

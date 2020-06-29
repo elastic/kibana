@@ -43,6 +43,7 @@ export interface IntegrateOptions {
   targetFileName?: string;
   dryRun: boolean;
   ignoreIncompatible: boolean;
+  ignoreMalformed: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
   config: I18nConfig;

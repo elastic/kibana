@@ -23,6 +23,7 @@ import { integrateLocaleFiles, I18nConfig } from '..';
 export interface I18nFlags {
   fix: boolean;
   ignoreIncompatible: boolean;
+  ignoreMalformed: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
 }
