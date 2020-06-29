@@ -10,7 +10,7 @@ export interface RawTag {
   description: string;
   key: string;
   value: string;
-  color: string;
+  color: '' | string;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;

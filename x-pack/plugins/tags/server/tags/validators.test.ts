@@ -45,6 +45,10 @@ describe('validateTagColor()', () => {
     validateTagColor('#234983');
   });
 
+  test('allows empty string as color', () => {
+    validateTagColor('');
+  });
+
   test('throws if number if provided', () => {
     expect(() => validateTagColor(123 as any)).toThrowErrorMatchingInlineSnapshot(
       `"Expected color to be a string."`
