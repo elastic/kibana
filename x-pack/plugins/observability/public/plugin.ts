@@ -54,12 +54,12 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup> {
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(false),
+      hasData: () => Promise.resolve(true),
     });
     registerDataHandler({
       appName: 'uptime',
       fetchData: fetchUptimeData,
-      hasData: () => Promise.resolve(false),
+      hasData: () => Promise.resolve(true),
     });
 
     return {

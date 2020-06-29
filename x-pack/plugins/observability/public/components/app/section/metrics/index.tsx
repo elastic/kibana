@@ -14,6 +14,7 @@ import { SectionContainer } from '../';
 import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { getDataHandler } from '../../../../data_handler';
+import { ChartContainer } from '../../chart_container';
 
 interface Props {
   startTime?: string;
@@ -27,6 +28,8 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
       return getDataHandler('infra_metrics')?.fetchData({ startTime, endTime, bucketSize });
     }
   }, [startTime, endTime, bucketSize]);
+
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <SectionContainer
@@ -47,7 +50,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
             const serie = data.series[key as keyof MetricsFetchDataResponse['series']];
 
             const chart = serie ? (
-              <AreaChart serie={serie} />
+              <AreaChart serie={serie} isLoading={isLoading} />
             ) : (
               <>
                 <EuiSpacer size="s" />
@@ -57,12 +60,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
             return (
               <EuiFlexItem key={key}>
-                <EuiStat
-                  title={value}
-                  description={stat.label}
-                  titleSize="s"
-                  isLoading={status === FETCH_STATUS.LOADING}
-                >
+                <EuiStat title={value} description={stat.label} titleSize="s" isLoading={isLoading}>
                   {statKey !== 'hosts' && chart}
                 </EuiStat>
               </EuiFlexItem>
@@ -73,24 +71,26 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
   );
 };
 
-const AreaChart = ({ serie }: { serie: Series }) => {
+const AreaChart = ({ serie, isLoading }: { serie: Series; isLoading: boolean }) => {
   const theme = useContext(ThemeContext);
 
   return (
-    <Chart size={{ height: 30, width: 100 }}>
-      <Settings
-        theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-        showLegend={false}
-        tooltip="none"
-      />
-      <AreaSeries
-        id="area"
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor={'x'}
-        yAccessors={['y']}
-        data={serie.coordinates}
-      />
-    </Chart>
+    <ChartContainer height={30} width={100} isLoading={isLoading} iconSize="m">
+      <Chart size={{ height: 30, width: 100 }}>
+        <Settings
+          theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+          showLegend={false}
+          tooltip="none"
+        />
+        <AreaSeries
+          id="area"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'x'}
+          yAccessors={['y']}
+          data={serie.coordinates}
+        />
+      </Chart>
+    </ChartContainer>
   );
 };

@@ -4,31 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, Fragment } from 'react';
-import d3 from 'd3';
 import {
+  Axis,
+  BarSeries,
   Chart,
-  Settings,
   DARK_THEME,
   LIGHT_THEME,
-  BarSeries,
-  ScaleType,
   niceTimeFormatter,
-  Axis,
   Position,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
-import { ThemeContext } from 'styled-components';
-import { euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { formatStatValue } from '../../../../utils/format_stat_value';
+import d3 from 'd3';
+import React, { Fragment, useContext } from 'react';
+import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
-import { LogsFetchDataResponse } from '../../../../typings/fetch_data_response';
 import { getDataHandler } from '../../../../data_handler';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { LogsFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { formatStatValue } from '../../../../utils/format_stat_value';
+import { ChartContainer } from '../../chart_container';
 
 interface Props {
   startTime?: string;
@@ -64,6 +62,8 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
     },
   };
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+
   return (
     <SectionContainer
       minHeight={296}
@@ -83,56 +83,58 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
                   title={formatStatValue(stat)}
                   description={stat.label}
                   titleSize="s"
-                  isLoading={status === FETCH_STATUS.LOADING}
+                  isLoading={isLoading}
                 />
               </EuiFlexItem>
             );
           })}
       </EuiFlexGroup>
-      <Chart size={{ height: 177 }}>
-        <Settings
-          onBrushEnd={({ x }) => {}}
-          theme={[customColors, theme.darkMode ? DARK_THEME : LIGHT_THEME]}
-          showLegend
-          legendPosition="bottom"
-          xDomain={{ min, max }}
-        />
-        {data &&
-          Object.keys(data.series).map((key) => {
-            const serie = data.series[key];
-            const chartData = serie.coordinates.map((coordinate) => ({
-              ...coordinate,
-              g: serie.label,
-            }));
-            return (
-              <Fragment key={key}>
-                <BarSeries
-                  id={key}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor={'x'}
-                  yAccessors={['y']}
-                  stackAccessors={['x']}
-                  splitSeriesAccessors={['g']}
-                  data={chartData}
-                />
-                <Axis
-                  id="x-axis"
-                  position={Position.Bottom}
-                  showOverlappingTicks={false}
-                  showOverlappingLabels={false}
-                  tickFormat={formatter}
-                />
-                <Axis
-                  id="y-axis"
-                  showGridLines
-                  position={Position.Left}
-                  tickFormat={(d: number) => numeral(d).format('0a')}
-                />
-              </Fragment>
-            );
-          })}
-      </Chart>
+      <ChartContainer height={177} isLoading={isLoading}>
+        <Chart size={{ height: 177 }}>
+          <Settings
+            onBrushEnd={({ x }) => {}}
+            theme={[customColors, theme.darkMode ? DARK_THEME : LIGHT_THEME]}
+            showLegend
+            legendPosition="bottom"
+            xDomain={{ min, max }}
+          />
+          {data &&
+            Object.keys(data.series).map((key) => {
+              const serie = data.series[key];
+              const chartData = serie.coordinates.map((coordinate) => ({
+                ...coordinate,
+                g: serie.label,
+              }));
+              return (
+                <Fragment key={key}>
+                  <BarSeries
+                    id={key}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    stackAccessors={['x']}
+                    splitSeriesAccessors={['g']}
+                    data={chartData}
+                  />
+                  <Axis
+                    id="x-axis"
+                    position={Position.Bottom}
+                    showOverlappingTicks={false}
+                    showOverlappingLabels={false}
+                    tickFormat={formatter}
+                  />
+                  <Axis
+                    id="y-axis"
+                    showGridLines
+                    position={Position.Left}
+                    tickFormat={(d: number) => numeral(d).format('0a')}
+                  />
+                </Fragment>
+              );
+            })}
+        </Chart>
+      </ChartContainer>
     </SectionContainer>
   );
 };

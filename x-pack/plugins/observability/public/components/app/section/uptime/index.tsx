@@ -26,6 +26,7 @@ import { SectionContainer } from '../';
 import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { getDataHandler } from '../../../../data_handler';
+import { ChartContainer } from '../../chart_container';
 
 interface Props {
   startTime?: string;
@@ -59,6 +60,8 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
     }
   };
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+
   return (
     <SectionContainer
       minHeight={296}
@@ -78,57 +81,59 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
                   title={formatStatValue(stat)}
                   description={stat.label}
                   titleSize="s"
-                  isLoading={status === FETCH_STATUS.LOADING}
+                  isLoading={isLoading}
                 />
               </EuiFlexItem>
             );
           })}
       </EuiFlexGroup>
-      <Chart size={{ height: 177 }}>
-        <Settings
-          onBrushEnd={({ x }) => {}}
-          theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-          showLegend
-          legendPosition="bottom"
-          xDomain={{ min, max }}
-        />
-        {data &&
-          Object.keys(data.series).map((key) => {
-            const serie = data.series[key as keyof UptimeFetchDataResponse['series']];
-            const chartData = serie.coordinates.map((coordinate) => ({
-              ...coordinate,
-              g: serie.label,
-            }));
-            return (
-              <Fragment key={key}>
-                <BarSeries
-                  id={key}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor={'x'}
-                  yAccessors={['y']}
-                  color={getSerieColor(serie.color)}
-                  stackAccessors={['x']}
-                  splitSeriesAccessors={['g']}
-                  data={chartData}
-                />
-                <Axis
-                  id="x-axis"
-                  position={Position.Bottom}
-                  showOverlappingTicks={false}
-                  showOverlappingLabels={false}
-                  tickFormat={formatter}
-                />
-                <Axis
-                  id="y-axis"
-                  showGridLines
-                  position={Position.Left}
-                  tickFormat={(x: any) => numeral(x).format('0a')}
-                />
-              </Fragment>
-            );
-          })}
-      </Chart>
+      <ChartContainer height={177} isLoading={isLoading}>
+        <Chart size={{ height: 177 }}>
+          <Settings
+            onBrushEnd={({ x }) => {}}
+            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            showLegend
+            legendPosition="bottom"
+            xDomain={{ min, max }}
+          />
+          {data &&
+            Object.keys(data.series).map((key) => {
+              const serie = data.series[key as keyof UptimeFetchDataResponse['series']];
+              const chartData = serie.coordinates.map((coordinate) => ({
+                ...coordinate,
+                g: serie.label,
+              }));
+              return (
+                <Fragment key={key}>
+                  <BarSeries
+                    id={key}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor={'x'}
+                    yAccessors={['y']}
+                    color={getSerieColor(serie.color)}
+                    stackAccessors={['x']}
+                    splitSeriesAccessors={['g']}
+                    data={chartData}
+                  />
+                  <Axis
+                    id="x-axis"
+                    position={Position.Bottom}
+                    showOverlappingTicks={false}
+                    showOverlappingLabels={false}
+                    tickFormat={formatter}
+                  />
+                  <Axis
+                    id="y-axis"
+                    showGridLines
+                    position={Position.Left}
+                    tickFormat={(x: any) => numeral(x).format('0a')}
+                  />
+                </Fragment>
+              );
+            })}
+        </Chart>
+      </ChartContainer>
     </SectionContainer>
   );
 };

@@ -26,6 +26,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { SectionContainer } from '../';
 import { ApmFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { ChartContainer } from '../../chart_container';
 
 interface Props {
   startTime?: string;
@@ -58,6 +59,8 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
     }
   };
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+
   return (
     <SectionContainer
       minHeight={296}
@@ -77,42 +80,44 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
                   title={formatStatValue(stat)}
                   description={stat.label}
                   titleSize="s"
-                  isLoading={status === FETCH_STATUS.LOADING}
+                  isLoading={isLoading}
                 />
               </EuiFlexItem>
             );
           })}
       </EuiFlexGroup>
-      <Chart size={{ height: 177 }}>
-        <Settings
-          onBrushEnd={({ x }) => {}}
-          theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-          showLegend={true}
-          legendPosition="bottom"
-          xDomain={{ min, max }}
-        />
-        {transactionSeries?.coordinates && (
-          <>
-            <BarSeries
-              id="transactions"
-              name="Transactions"
-              data={transactionSeries.coordinates}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor={'x'}
-              yAccessors={['y']}
-              color={getSerieColor(transactionSeries.color)}
-            />
-            <Axis
-              id="y-axis"
-              position={Position.Left}
-              showGridLines
-              tickFormat={(d) => numeral(d).format('0a')}
-            />
-            <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
-          </>
-        )}
-      </Chart>
+      <ChartContainer height={177} isLoading={isLoading}>
+        <Chart size={{ height: 177 }}>
+          <Settings
+            onBrushEnd={({ x }) => {}}
+            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
+            showLegend={true}
+            legendPosition="bottom"
+            xDomain={{ min, max }}
+          />
+          {transactionSeries?.coordinates && (
+            <>
+              <BarSeries
+                id="transactions"
+                name="Transactions"
+                data={transactionSeries.coordinates}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                color={getSerieColor(transactionSeries.color)}
+              />
+              <Axis
+                id="y-axis"
+                position={Position.Left}
+                showGridLines
+                tickFormat={(d) => numeral(d).format('0a')}
+              />
+              <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
+            </>
+          )}
+        </Chart>
+      </ChartContainer>
     </SectionContainer>
   );
 };
