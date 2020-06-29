@@ -57,7 +57,7 @@ export function ContextErrorMessage({ status, reason, queryParameters }: Context
         <EuiText data-test-subj="contextErrorMessageBody">
           {reason === FAILURE_REASONS.INVALID_TIEBREAKER && (
             <FormattedMessage
-              id="discover.context.failedToLoadAnchorDocumentDescription"
+              id="discover.context.noSearchableTiebreakerFieldDescription"
               defaultMessage="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
               values={{
                 indexPatternId: queryParameters.indexPatternId,
