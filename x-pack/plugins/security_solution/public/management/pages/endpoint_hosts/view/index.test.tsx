@@ -428,7 +428,7 @@ describe('when on the hosts page', () => {
         });
       });
 
-      it('should navigate to logs without full page refresh', () => {
+      it('should navigate to Ingest without full page refresh', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
