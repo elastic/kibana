@@ -29,7 +29,7 @@ export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
 };
 
-// Datasource API routes
+// Package config API routes
 export const PACKAGE_CONFIG_API_ROUTES = {
   LIST_PATTERN: `${PACKAGE_CONFIG_API_ROOT}`,
   INFO_PATTERN: `${PACKAGE_CONFIG_API_ROOT}/{packageConfigId}`,
