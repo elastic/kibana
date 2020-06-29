@@ -135,7 +135,7 @@ export const getHistogramBucketAgg = ({
               })
               .catch((e: Error) => {
                 if (e.name === 'AbortError') return;
-                getInternalStartServices().notifications.toasts.addWarning(
+                throw new Error(
                   i18n.translate('data.search.aggs.histogram.missingMaxMinValuesWarning', {
                     defaultMessage:
                       'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',

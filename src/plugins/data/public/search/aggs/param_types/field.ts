@@ -91,10 +91,9 @@ export class FieldParamType extends BaseParamType {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
       }
 
-      // @ts-ignore
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
-        getInternalStartServices().notifications.toasts.addDanger(
+        throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
