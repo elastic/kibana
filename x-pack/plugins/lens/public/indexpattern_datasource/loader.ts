@@ -118,7 +118,6 @@ export async function loadInitialState({
       currentIndexPatternId,
       indexPatternRefs,
       indexPatterns,
-      showEmptyFields: false,
       existingFields: {},
     };
   }
@@ -128,7 +127,6 @@ export async function loadInitialState({
     indexPatternRefs,
     indexPatterns,
     layers: {},
-    showEmptyFields: false,
     existingFields: {},
   };
 }

@@ -12,7 +12,7 @@ import {
   Logger,
   Plugin as CorePlugin,
   PluginInitializerContext,
-  ClusterClient,
+  LegacyClusterClient,
   SharedGlobalConfig,
   IContextProvider,
   RequestHandler,
@@ -30,7 +30,7 @@ import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
 
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 const PROVIDER = 'eventLog';
 
