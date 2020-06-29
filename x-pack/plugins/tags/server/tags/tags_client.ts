@@ -14,7 +14,7 @@ export type TagSavedObject = SavedObject<RawTag>;
 export interface TagsClientParams {
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
-  user: AuthenticatedUser | null;
+  user: AuthenticatedUser | null | undefined;
 }
 
 export class TagsClient implements ITagsClient {

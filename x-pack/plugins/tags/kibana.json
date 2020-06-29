@@ -6,5 +6,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "tags"],
   "requiredPlugins": ["management"],
-  "optionalPlugins": []
+  "optionalPlugins": ["security"]
 }
