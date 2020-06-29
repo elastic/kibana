@@ -163,7 +163,7 @@ export interface MemoryRouterConfig {
   /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
   initialIndex?: number;
   /** The route **path** for the mounted component (defaults to `"/"`) */
-  componentRoutePath?: string;
+  componentRoutePath?: string | string[];
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }
