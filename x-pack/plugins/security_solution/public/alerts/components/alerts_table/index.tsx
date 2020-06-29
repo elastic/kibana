@@ -7,7 +7,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -22,10 +22,7 @@ import { inputsSelectors, State, inputsModel } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import {
-  TimelineRowActionArgs,
-  useManageTimeline,
-} from '../../../timelines/components/manage_timeline';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import { updateAlertStatusAction } from './actions';
@@ -51,6 +48,7 @@ import {
   displaySuccessToast,
   displayErrorToast,
 } from '../../../common/components/toasters';
+import { Ecs } from '../../../graphql/types';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -87,6 +85,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   updateTimeline,
   updateTimelineIsLoading,
 }) => {
+  const dispatch = useDispatch();
   const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
 
@@ -297,22 +296,26 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         canUserCRUD,
         createTimeline: createTimelineCallback,
         ecsRowData,
+        dispatch,
         hasIndexWrite,
         onAlertStatusUpdateFailure,
         onAlertStatusUpdateSuccess,
         setEventsDeleted: setEventsDeletedCallback,
         setEventsLoading: setEventsLoadingCallback,
         status: filterGroup,
+        timelineId,
         updateTimelineIsLoading,
       }),
     [
       apolloClient,
       canUserCRUD,
       createTimelineCallback,
+      dispatch,
       hasIndexWrite,
       filterGroup,
       setEventsLoadingCallback,
       setEventsDeletedCallback,
+      timelineId,
       updateTimelineIsLoading,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,

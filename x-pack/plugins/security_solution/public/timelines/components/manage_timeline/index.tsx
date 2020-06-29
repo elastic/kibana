@@ -11,7 +11,7 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public/quer
 import { TimelineRowAction } from '../timeline/body/actions';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
-import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
+import { Ecs } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;

@@ -205,6 +205,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
 
   let deleteButton = (
     <EuiButtonEmpty
+      data-test-subj="transformActionDelete"
       size="xs"
       color="text"
       disabled={forceDisable === true || disabled || !canDeleteTransform}

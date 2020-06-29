@@ -8,8 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { TimelineId } from '../../../../common/types/timeline';
-import { AlertsTableComponent } from './index';
 import { TestProviders } from '../../../common/mock';
+import { AlertsTableComponent } from './index';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
