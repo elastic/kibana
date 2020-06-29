@@ -21,10 +21,11 @@ import { resolve } from 'path';
 import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export function makeJunitReportPath(rootDirectory: string, reportName: string) {
+  const timestampPrefix = process.env.CI ? `${new Date().getTime()}-` : '';
   return resolve(
     rootDirectory,
     'target/junit',
     process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${timestampPrefix}${reportName}.xml`
   );
 }
