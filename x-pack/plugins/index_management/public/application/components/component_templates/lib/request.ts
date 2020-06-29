@@ -15,13 +15,15 @@ import {
   useRequest as _useRequest,
 } from '../shared_imports';
 
-export type UseRequestHook = <T = any>(config: UseRequestConfig) => UseRequestResponse<T>;
+export type UseRequestHook = <T = any, E = Error>(
+  config: UseRequestConfig
+) => UseRequestResponse<T, E>;
 export type SendRequestHook = (config: SendRequestConfig) => Promise<SendRequestResponse>;
 
-export const getUseRequest = (httpClient: HttpSetup): UseRequestHook => <T = any>(
+export const getUseRequest = (httpClient: HttpSetup): UseRequestHook => <T = any, E = Error>(
   config: UseRequestConfig
 ) => {
-  return _useRequest<T>(httpClient, config);
+  return _useRequest<T, E>(httpClient, config);
 };
 
 export const getSendRequest = (httpClient: HttpSetup): SendRequestHook => <T = any>(
