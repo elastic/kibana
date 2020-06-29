@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { AlertEvent } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { esQuery } from '../../../../../../../../src/plugins/data/server';
@@ -145,7 +145,7 @@ const buildAlertSearchQuery = async (
  * Makes a request to Elasticsearch, given an `AlertSearchRequestWrapper`.
  **/
 export const searchESForAlerts = async (
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   query: AlertSearchQuery,
   indexPattern: string
 ): Promise<SearchResponse<AlertEvent>> => {
