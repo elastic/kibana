@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('feature controls', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('feature controls', function () {
     this.tags('skipFirefox');
     loadTestFile(require.resolve('./uptime_security'));
     loadTestFile(require.resolve('./uptime_spaces'));

@@ -98,7 +98,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             }
             defaultValue={uri ? uri.split('hdfs://')[1] : ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 uri: e.target.value ? `hdfs://${e.target.value}` : '',
               });
@@ -143,7 +143,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={path || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 path: e.target.value,
               });
@@ -187,7 +187,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(loadDefaults === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 loadDefaults: e.target.checked,
               });
@@ -231,7 +231,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(compress === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -276,7 +276,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={chunkSize || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
               });
@@ -320,7 +320,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={securityPrincipal || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 'security.principal': e.target.value,
               });
@@ -461,7 +461,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxSnapshotBytesPerSec: e.target.value,
               });
@@ -506,7 +506,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 maxRestoreBytesPerSec: e.target.value,
               });
@@ -550,7 +550,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: e.target.checked,
               });

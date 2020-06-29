@@ -41,12 +41,12 @@ const dataTypes = [
   ['term series', termSeries],
 ];
 
-describe('Vislib Line Chart', function() {
-  dataTypes.forEach(function(type) {
+describe('Vislib Line Chart', function () {
+  dataTypes.forEach(function (type) {
     const name = type[0];
     const data = type[1];
 
-    describe(name + ' Data', function() {
+    describe(name + ' Data', function () {
       let vis;
       let mockUiState;
 
@@ -64,11 +64,11 @@ describe('Vislib Line Chart', function() {
         vis.on('brush', _.noop);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         vis.destroy();
       });
 
-      describe('addCircleEvents method', function() {
+      describe('addCircleEvents method', function () {
         let circle;
         let brush;
         let d3selectedCircle;
@@ -76,8 +76,8 @@ describe('Vislib Line Chart', function() {
         let onClick;
         let onMouseOver;
 
-        beforeEach(function() {
-          vis.handler.charts.forEach(function(chart) {
+        beforeEach(function () {
+          vis.handler.charts.forEach(function (chart) {
             circle = $(chart.chartEl).find('.circle')[0];
             brush = $(chart.chartEl).find('.brush');
             d3selectedCircle = d3.select(circle)[0][0];
@@ -94,36 +94,36 @@ describe('Vislib Line Chart', function() {
         // listeners, however, I was not able to test for the listener
         // function being present. I will need to update this test
         // in the future.
-        it('should attach a brush g element', function() {
-          vis.handler.charts.forEach(function() {
+        it('should attach a brush g element', function () {
+          vis.handler.charts.forEach(function () {
             expect(onBrush).to.be(true);
           });
         });
 
-        it('should attach a click event', function() {
-          vis.handler.charts.forEach(function() {
+        it('should attach a click event', function () {
+          vis.handler.charts.forEach(function () {
             expect(onClick).to.be(true);
           });
         });
 
-        it('should attach a hover event', function() {
-          vis.handler.charts.forEach(function() {
+        it('should attach a hover event', function () {
+          vis.handler.charts.forEach(function () {
             expect(onMouseOver).to.be(true);
           });
         });
       });
 
-      describe('addCircles method', function() {
-        it('should append circles', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe('addCircles method', function () {
+        it('should append circles', function () {
+          vis.handler.charts.forEach(function (chart) {
             expect($(chart.chartEl).find('circle').length).to.be.greaterThan(0);
           });
         });
       });
 
-      describe('addLines method', function() {
-        it('should append a paths', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe('addLines method', function () {
+        it('should append a paths', function () {
+          vis.handler.charts.forEach(function (chart) {
             expect($(chart.chartEl).find('path').length).to.be.greaterThan(0);
           });
         });
@@ -139,15 +139,15 @@ describe('Vislib Line Chart', function() {
       //  });
       //});
 
-      describe('draw method', function() {
-        it('should return a function', function() {
-          vis.handler.charts.forEach(function(chart) {
+      describe('draw method', function () {
+        it('should return a function', function () {
+          vis.handler.charts.forEach(function (chart) {
             expect(chart.draw()).to.be.a(Function);
           });
         });
 
-        it('should return a yMin and yMax', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should return a yMin and yMax', function () {
+          vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const domain = yAxis.getScale().domain();
             expect(domain[0]).to.not.be(undefined);
@@ -155,8 +155,8 @@ describe('Vislib Line Chart', function() {
           });
         });
 
-        it('should render a zero axis line', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should render a zero axis line', function () {
+          vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
 
             if (yAxis.yMin < 0 && yAxis.yMax > 0) {
@@ -166,14 +166,14 @@ describe('Vislib Line Chart', function() {
         });
       });
 
-      describe('defaultYExtents is true', function() {
-        beforeEach(function() {
+      describe('defaultYExtents is true', function () {
+        beforeEach(function () {
           vis.visConfigArgs.defaultYExtents = true;
           vis.render(data, mockUiState);
         });
 
-        it('should return yAxis extents equal to data extents', function() {
-          vis.handler.charts.forEach(function(chart) {
+        it('should return yAxis extents equal to data extents', function () {
+          vis.handler.charts.forEach(function (chart) {
             const yAxis = chart.handler.valueAxes[0];
             const min = vis.handler.valueAxes[0].axisScale.getYMin();
             const max = vis.handler.valueAxes[0].axisScale.getYMax();
@@ -183,16 +183,16 @@ describe('Vislib Line Chart', function() {
           });
         });
       });
-      [0, 2, 4, 8].forEach(function(boundsMarginValue) {
-        describe('defaultYExtents is true and boundsMargin is defined', function() {
-          beforeEach(function() {
+      [0, 2, 4, 8].forEach(function (boundsMarginValue) {
+        describe('defaultYExtents is true and boundsMargin is defined', function () {
+          beforeEach(function () {
             vis.visConfigArgs.defaultYExtents = true;
             vis.visConfigArgs.boundsMargin = boundsMarginValue;
             vis.render(data, mockUiState);
           });
 
-          it('should return yAxis extents equal to data extents with boundsMargin', function() {
-            vis.handler.charts.forEach(function(chart) {
+          it('should return yAxis extents equal to data extents with boundsMargin', function () {
+            vis.handler.charts.forEach(function (chart) {
               const yAxis = chart.handler.valueAxes[0];
               const min = vis.handler.valueAxes[0].axisScale.getYMin();
               const max = vis.handler.valueAxes[0].axisScale.getYMax();

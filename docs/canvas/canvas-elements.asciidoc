@@ -27,28 +27,30 @@ By default, most of the elements you create use demo data until you change the d
 
 * *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
+Each element can display a different data source. Pages and workpads often contain multiple data sources.
+
 [float]
 [[canvas-add-object]]
 ==== Add a saved object
 
-Add a <<managing-saved-objects,saved object>>, such as a map or Lens visualization, then customize it to fit your display needs.
+Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
 
-. Click *Embed object*.
+. Click *Add element > Add from Visualize Library*.
 
-. Select the object you want to add.
+. Select the saved object you want to add.
 +
 [role="screenshot"]
 image::images/canvas-map-embed.gif[]
 
 . To use the customization options, click the panel menu, then select one of the following options:
 
-* *Edit map* &mdash; Opens <<maps,Maps>> so that you can edit the original map.
+* *Edit map* &mdash; Opens <<maps,Maps>> or <<visualize,Visualize>> so that you can edit the original saved object.
 
-* *Customize panel* &mdash; Specifies the object title options.
+* *Edit panel title* &mdash; Adds a title to the saved object.
+
+* *Customize time range* &mdash; Exposes a time filter dedicated to the saved object.
 
 * *Inspect* &mdash; Allows you to drill down into the element data.
-
-* *Customize time range* &mdash; Exposes a time filter dedicated to the map.
 
 [float]
 [[canvas-add-image]]
@@ -56,7 +58,7 @@ image::images/canvas-map-embed.gif[]
 
 To personalize your workpad, add your own logos and graphics.
 
-. Click *Manage assets*.
+. Click *Add element > Manage assets*.
 
 . On the *Manage workpad assets* window, drag and drop your images.
 
@@ -83,40 +85,25 @@ Move and resize your elements to meet your design needs.
 [[format-canvas-elements]]
 ==== Format elements
 
-Align, distribute, and reorder elements for consistency and readability across your workpad pages.
+For consistency and readability across your workpad pages, align, distribute, and reorder elements.
 
-Access the align, distribute, and reorder options by clicking the *Element options* icon.
-
-[role="screenshot"]
-image::images/canvas_element_options.png[]
-
-To align elements:
+To align two or more elements:
 
 . Press and hold Shift, then select the elements you want to align.
 
-. Click the , then select *Group*.
+. Click *Edit > Alignment*, then select the alignment option.
 
-. Click the *Element options* icon, then select *Alignment*.
-
-. Select the alignment option.
-
-To distribute elements:
+To distribute three or more elements:
 
 . Press and hold Shift, then select the elements you want to distribute.
 
-. Click the *Element options* icon, then select *Group*.
-
-. Click the *Element options* icon, then select *Distribution*.
-
-. Select the distribution option.
+. Click *Edit > Distribution*, then select the distribution option.
 
 To reorder elements:
 
 . Select the element you want to reorder.
 
-. Click the *Element options* icon, then select *Order*.
-
-. Select the order option.
+. Click *Edit > Order*, then select the order option.
 
 [float]
 [[data-display]]
@@ -157,14 +144,14 @@ text.align: center;
 
 To use the elements across all workpads, save the elements.
 
-When you're ready to save your element, select the element, then click the *Save as new element* icon.
+When you're ready to save your element, select the element, then click *Edit > Save as new element*.
 
 [role="screenshot"]
 image::images/canvas_save_element.png[]
 
-To save a group of elements, press and hold Shift, then select the elements you want to save.
+To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
 
-To access your saved elements, click *Add element*, then select *My elements*.
+To access your saved elements, click *Add element > My elements*.
 
 [float]
 [[delete-elements]]
@@ -174,9 +161,7 @@ When you no longer need an element, delete it from your workpad.
 
 . Select the element you want to delete.
 
-. Click the *Element options* icon.
+. Click *Edit > Delete*.
 +
 [role="screenshot"]
 image::images/canvas_element_options.png[]
-
-. Select *Delete*.

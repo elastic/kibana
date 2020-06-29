@@ -85,7 +85,7 @@ export class SectionPanel extends Component<Props, State> {
                   <EuiIcon
                     type={this.props.iconType}
                     size={'xl'}
-                    className={'collapsiblePanel__logo'}
+                    className={'spcSectionPanel__collapsiblePanelLogo'}
                   />{' '}
                 </Fragment>
               )}

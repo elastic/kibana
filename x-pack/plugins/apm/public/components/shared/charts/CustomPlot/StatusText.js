@@ -18,7 +18,7 @@ function StatusText({
   marginRight,
   marginTop,
   marginBottom,
-  text
+  text,
 }) {
   const xTransform = `calc(-50% + ${marginLeft - marginRight}px)`;
   const yTransform = `calc(-50% + ${marginTop - marginBottom}px - 15px)`;
@@ -29,7 +29,7 @@ function StatusText({
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: `translate(${xTransform},${yTransform})`
+        transform: `translate(${xTransform},${yTransform})`,
       }}
     >
       {text}
@@ -38,7 +38,7 @@ function StatusText({
 }
 
 StatusText.propTypes = {
-  text: PropTypes.string
+  text: PropTypes.string,
 };
 
 export default StatusText;

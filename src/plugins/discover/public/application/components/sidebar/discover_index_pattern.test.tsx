@@ -53,18 +53,11 @@ const defaultProps = {
 };
 
 function getIndexPatternPickerList(instance: ShallowWrapper) {
-  return instance
-    .find(ChangeIndexPattern)
-    .first()
-    .dive()
-    .find(EuiSelectable);
+  return instance.find(ChangeIndexPattern).first().dive().find(EuiSelectable);
 }
 
 function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-  return getIndexPatternPickerList(instance)
-    .dive()
-    .find(EuiSelectableList)
-    .prop('options');
+  return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
 }
 
 function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {

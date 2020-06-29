@@ -32,7 +32,7 @@ export function createListStream(items = []) {
   return new Readable({
     objectMode: true,
     read(size) {
-      queue.splice(0, size).forEach(item => {
+      queue.splice(0, size).forEach((item) => {
         this.push(item);
       });
 

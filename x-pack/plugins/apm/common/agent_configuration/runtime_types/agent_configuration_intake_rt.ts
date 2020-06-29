@@ -18,18 +18,18 @@ const knownSettings = settingDefinitions.reduce<
 
 export const serviceRt = t.partial({
   name: t.string,
-  environment: t.string
+  environment: t.string,
 });
 
 export const settingsRt = t.intersection([
   t.record(t.string, t.string),
-  t.partial(knownSettings)
+  t.partial(knownSettings),
 ]);
 
 export const agentConfigurationIntakeRt = t.intersection([
   t.partial({ agent_name: t.string }),
   t.type({
     service: serviceRt,
-    settings: settingsRt
-  })
+    settings: settingsRt,
+  }),
 ]);

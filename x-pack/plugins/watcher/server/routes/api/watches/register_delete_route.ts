@@ -14,7 +14,7 @@ const bodySchema = schema.object({
 });
 
 function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
-  const deletePromises = watchIds.map(watchId => {
+  const deletePromises = watchIds.map((watchId) => {
     return dataClient
       .callAsCurrentUser('watcher.deleteWatch', {
         id: watchId,
@@ -23,7 +23,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
       .catch((error: Array<{ _id: string }>) => ({ error }));
   });
 
-  return Promise.all(deletePromises).then(results => {
+  return Promise.all(deletePromises).then((results) => {
     const errors: Error[] = [];
     const successes: boolean[] = [];
     results.forEach(({ success, error }: { success?: any; error?: any }) => {

@@ -57,7 +57,7 @@ export function initPatchCommentApi({
           throw Boom.notFound(`This comment ${query.id} does not exist anymore.`);
         }
 
-        const caseRef = myComment.references.find(c => c.type === CASE_SAVED_OBJECT);
+        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
         if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
           throw Boom.notFound(`This comment ${query.id} does not exist in ${caseId}).`);
         }

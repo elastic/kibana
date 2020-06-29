@@ -47,7 +47,7 @@ export type PipelineFormTestSubjects =
   | 'versionField'
   | 'nameField.input'
   | 'descriptionField.input'
-  | 'processorsField'
+  | 'processorsEditor'
   | 'onFailureToggle'
   | 'onFailureEditor'
   | 'testPipelineButton'

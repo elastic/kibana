@@ -22,19 +22,19 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'visualize']);
   let isOss = true;
 
-  describe('chart types', function() {
-    before(async function() {
+  describe('chart types', function () {
+    before(async function () {
       log.debug('navigateToApp visualize');
       isOss = await PageObjects.common.isOss();
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
-    it('should show the correct chart types', async function() {
+    it('should show the correct chart types', async function () {
       let expectedChartTypes = [
         'Area',
         'Controls',
@@ -57,10 +57,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       ];
       if (!isOss) {
         expectedChartTypes.push('Maps', 'Lens');
-        expectedChartTypes = _.remove(expectedChartTypes, function(n) {
+        expectedChartTypes = _.remove(expectedChartTypes, function (n) {
           return n !== 'Coordinate Map';
         });
-        expectedChartTypes = _.remove(expectedChartTypes, function(n) {
+        expectedChartTypes = _.remove(expectedChartTypes, function (n) {
           return n !== 'Region Map';
         });
         expectedChartTypes.sort();

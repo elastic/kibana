@@ -11,7 +11,7 @@ const checkAllAliases = (
   clusterState: ClusterStateAPIResponse
 ): 'open' | 'close' => {
   for (const index of Object.values(clusterState.metadata.indices)) {
-    if (index.aliases?.some(alias => alias === indexName)) {
+    if (index.aliases?.some((alias) => alias === indexName)) {
       return index.state;
     }
   }

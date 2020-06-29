@@ -113,7 +113,7 @@ export function createTileMapTypeDefinition(dependencies) {
         ],
         tmsLayers: [],
       },
-      optionsTemplate: props => <TileMapOptions {...props} />,
+      optionsTemplate: (props) => <TileMapOptions {...props} />,
       schemas: new Schemas([
         {
           group: 'metrics',
@@ -138,7 +138,7 @@ export function createTileMapTypeDefinition(dependencies) {
         },
       ]),
     },
-    setup: async vis => {
+    setup: async (vis) => {
       let tmsLayers;
 
       try {

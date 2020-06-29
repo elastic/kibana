@@ -21,3 +21,13 @@ export const sendGetFleetStatus = () => {
     method: 'get',
   });
 };
+
+export const sendPostFleetSetup = ({ forceRecreate }: { forceRecreate: boolean }) => {
+  return sendRequest({
+    method: 'post',
+    path: fleetSetupRouteService.postFleetSetupPath(),
+    body: {
+      forceRecreate,
+    },
+  });
+};

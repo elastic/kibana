@@ -67,7 +67,7 @@ export class Metric extends Component {
   render() {
     const { metric, secondary } = this.props;
     const { scale, translateX, translateY } = this.state;
-    const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || (n => n);
+    const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
     const primaryValue = primaryFormatter(getLastValue((metric && metric.data) || 0));
     const styles = reactcss(
       {
@@ -99,7 +99,7 @@ export class Metric extends Component {
 
     let secondarySnippet;
     if (secondary) {
-      const secondaryFormatter = secondary.formatter || (n => n);
+      const secondaryFormatter = secondary.formatter || ((n) => n);
       const secondaryValue = secondaryFormatter(getLastValue(secondary.data));
       if (secondary.color) styles.secondary_value.color = secondary.color;
       let secondaryLabel;
@@ -133,8 +133,8 @@ export class Metric extends Component {
 
     return (
       <div className={className} style={styles.container}>
-        <div ref={el => (this.resize = el)} className="tvbVisMetric__resize">
-          <div ref={el => (this.inner = el)} className="tvbVisMetric__inner" style={styles.inner}>
+        <div ref={(el) => (this.resize = el)} className="tvbVisMetric__resize">
+          <div ref={(el) => (this.inner = el)} className="tvbVisMetric__inner" style={styles.inner}>
             <div className="tvbVisMetric__primary">
               {primaryLabel}
               <div

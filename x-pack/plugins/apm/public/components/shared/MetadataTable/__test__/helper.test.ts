@@ -12,20 +12,20 @@ describe('MetadataTable Helper', () => {
   const sections = [
     { ...LABELS, required: true },
     HTTP,
-    { ...SERVICE, properties: ['environment'] }
+    { ...SERVICE, properties: ['environment'] },
   ];
   const apmDoc = ({
     http: {
       headers: {
         Connection: 'close',
         Host: 'opbeans:3000',
-        request: { method: 'get' }
-      }
+        request: { method: 'get' },
+      },
     },
     service: {
       framework: { name: 'express' },
-      environment: 'production'
-    }
+      environment: 'production',
+    },
   } as unknown) as Transaction;
   const metadataItems = getSectionsWithRows(sections, apmDoc);
 
@@ -38,15 +38,15 @@ describe('MetadataTable Helper', () => {
         rows: [
           { key: 'http.headers.Connection', value: 'close' },
           { key: 'http.headers.Host', value: 'opbeans:3000' },
-          { key: 'http.headers.request.method', value: 'get' }
-        ]
+          { key: 'http.headers.request.method', value: 'get' },
+        ],
       },
       {
         key: 'service',
         label: 'Service',
         properties: ['environment'],
-        rows: [{ key: 'service.environment', value: 'production' }]
-      }
+        rows: [{ key: 'service.environment', value: 'production' }],
+      },
     ]);
   });
   describe('filter', () => {
@@ -59,9 +59,9 @@ describe('MetadataTable Helper', () => {
           rows: [
             { key: 'http.headers.Connection', value: 'close' },
             { key: 'http.headers.Host', value: 'opbeans:3000' },
-            { key: 'http.headers.request.method', value: 'get' }
-          ]
-        }
+            { key: 'http.headers.request.method', value: 'get' },
+          ],
+        },
       ]);
     });
 
@@ -72,8 +72,8 @@ describe('MetadataTable Helper', () => {
           key: 'service',
           label: 'Service',
           properties: ['environment'],
-          rows: [{ key: 'service.environment', value: 'production' }]
-        }
+          rows: [{ key: 'service.environment', value: 'production' }],
+        },
       ]);
     });
 

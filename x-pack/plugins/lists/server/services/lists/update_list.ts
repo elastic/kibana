@@ -51,7 +51,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const response: CreateDocumentResponse = await callCluster('update', {
+    const response = await callCluster<CreateDocumentResponse>('update', {
       body: { doc },
       id,
       index: listIndex,

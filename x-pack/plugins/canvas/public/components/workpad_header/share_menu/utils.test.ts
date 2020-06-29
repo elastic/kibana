@@ -12,7 +12,7 @@ import { fetch } from '../../../../common/lib/fetch';
 import { IBasePath } from 'kibana/public';
 
 const basePath = ({
-  prepend: jest.fn().mockImplementation(s => `basepath/s/spacey/${s}`),
+  prepend: jest.fn().mockImplementation((s) => `basepath/s/spacey/${s}`),
   get: () => 'basepath/s/spacey',
   serverBasePath: `basepath`,
 } as unknown) as IBasePath;

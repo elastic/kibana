@@ -106,7 +106,7 @@ describe('plugin discovery', () => {
               uiExports: {
                 migrations: {
                   'test-type': {
-                    '1.2.3': doc => {
+                    '1.2.3': (doc) => {
                       return doc;
                     },
                   },
@@ -116,7 +116,7 @@ describe('plugin discovery', () => {
           ];
         },
       }).getPluginSpecs();
-      expect(() => collectUiExports(invalidSpecs)).to.throwError(err => {
+      expect(() => collectUiExports(invalidSpecs)).to.throwError((err) => {
         expect(err).to.be.a(Error);
         expect(err).to.have.property(
           'message',

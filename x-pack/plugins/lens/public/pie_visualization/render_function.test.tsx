@@ -5,18 +5,19 @@
  */
 
 import React from 'react';
-import { Settings } from '@elastic/charts';
+import { SeriesIdentifier, Settings } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
+import { EmptyPlaceholder } from '../shared_components';
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
   let convertSpy: jest.Mock;
 
   beforeEach(() => {
-    convertSpy = jest.fn(x => x);
+    convertSpy = jest.fn((x) => x);
     getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({ convert: convertSpy });
   });
@@ -58,7 +59,7 @@ describe('PieVisualization component', () => {
         formatFactory: getFormatSpy,
         isDarkMode: false,
         chartTheme: {},
-        executeTriggerActions: jest.fn(),
+        onClickValue: jest.fn(),
       };
     }
 
@@ -108,6 +109,78 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, nestedLegend: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('legendMaxDepth')).toBeUndefined();
+    });
+
+    test('it calls filter callback with the given context', () => {
+      const defaultArgs = getDefaultArgs();
+      const component = shallow(<PieComponent args={{ ...args }} {...defaultArgs} />);
+      component.find(Settings).first().prop('onElementClick')!([
+        [[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier],
+      ]);
+
+      expect(defaultArgs.onClickValue.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "data": Array [
+            Object {
+              "column": 0,
+              "row": 0,
+              "table": Object {
+                "columns": Array [
+                  Object {
+                    "id": "a",
+                    "name": "a",
+                  },
+                  Object {
+                    "id": "b",
+                    "name": "b",
+                  },
+                  Object {
+                    "id": "c",
+                    "name": "c",
+                  },
+                ],
+                "rows": Array [
+                  Object {
+                    "a": 6,
+                    "b": 2,
+                    "c": "I",
+                    "d": "Row 1",
+                  },
+                  Object {
+                    "a": 1,
+                    "b": 5,
+                    "c": "J",
+                    "d": "Row 2",
+                  },
+                ],
+                "type": "kibana_datatable",
+              },
+              "value": 6,
+            },
+          ],
+        }
+      `);
+    });
+
+    test('it shows emptyPlaceholder for undefined grouped data', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: undefined, b: undefined, c: 'I', d: 'Row 1' },
+              { a: undefined, b: undefined, c: 'J', d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visPie');
     });
   });
 });

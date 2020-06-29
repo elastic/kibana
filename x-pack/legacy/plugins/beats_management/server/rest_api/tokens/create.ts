@@ -21,10 +21,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
   config: {
     validate: {
       payload: Joi.object({
-        num_tokens: Joi.number()
-          .optional()
-          .default(DEFAULT_NUM_TOKENS)
-          .min(1),
+        num_tokens: Joi.number().optional().default(DEFAULT_NUM_TOKENS).min(1),
       }).allow(null),
     },
   },
@@ -36,7 +33,7 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
     try {
       const tokens = await libs.tokens.createEnrollmentTokens(request.user, numTokens);
       return {
-        results: tokens.map(token => ({
+        results: tokens.map((token) => ({
           item: token,
           success: true,
           action: 'created',

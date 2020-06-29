@@ -1,0 +1,305 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`categorical Should render categorical legend with breaks from custom 1`] = `""`;
+
+exports[`categorical Should render categorical legend with breaks from default 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#54B399"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="US_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="#6092C0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="CN_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="2"
+    >
+      <Category
+        color="#D36086"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label={
+          <EuiTextColor
+            color="secondary"
+          >
+            Other
+          </EuiTextColor>
+        }
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#00FF00"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="10_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render only single band of last color when delta is 0 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#072f6b"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="100_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`ordinal Should render ordinal legend as bands 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#ddeaf7"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="13_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="#c5daee"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="25_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="2"
+    >
+      <Category
+        color="#9dc9e0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="38_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="3"
+    >
+      <Category
+        color="#6aadd5"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="50_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="4"
+    >
+      <Category
+        color="#4191c5"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="63_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="5"
+    >
+      <Category
+        color="#2070b4"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="75_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="6"
+    >
+      <Category
+        color="#072f6b"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="88_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

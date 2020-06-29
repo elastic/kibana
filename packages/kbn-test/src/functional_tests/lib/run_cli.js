@@ -53,12 +53,7 @@ export async function runCli(getHelpText, run) {
     if (!(error instanceof CliError)) {
       // first line in the stack trace is the message, skip it as we log it directly and color it red
       if (error.stack) {
-        console.log(
-          error.stack
-            .split('\n')
-            .slice(1)
-            .join('\n')
-        );
+        console.log(error.stack.split('\n').slice(1).join('\n'));
       } else {
         console.log('  (no stack trace)');
       }

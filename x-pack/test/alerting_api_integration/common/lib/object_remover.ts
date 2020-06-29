@@ -10,6 +10,7 @@ interface ObjectToRemove {
   spaceId: string;
   id: string;
   type: string;
+  plugin: string;
 }
 
 export class ObjectRemover {
@@ -20,15 +21,20 @@ export class ObjectRemover {
     this.supertest = supertest;
   }
 
-  add(spaceId: ObjectToRemove['spaceId'], id: ObjectToRemove['id'], type: ObjectToRemove['type']) {
-    this.objectsToRemove.push({ spaceId, id, type });
+  add(
+    spaceId: ObjectToRemove['spaceId'],
+    id: ObjectToRemove['id'],
+    type: ObjectToRemove['type'],
+    plugin: ObjectToRemove['plugin']
+  ) {
+    this.objectsToRemove.push({ spaceId, id, type, plugin });
   }
 
   async removeAll() {
     await Promise.all(
-      this.objectsToRemove.map(({ spaceId, id, type }) => {
+      this.objectsToRemove.map(({ spaceId, id, type, plugin }) => {
         return this.supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/${type}/${id}`)
+          .delete(`${getUrlPrefix(spaceId)}/api/${plugin}/${type}/${id}`)
           .set('kbn-xsrf', 'foo')
           .expect(204);
       })

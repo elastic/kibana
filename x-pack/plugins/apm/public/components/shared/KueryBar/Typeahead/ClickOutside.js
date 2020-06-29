@@ -16,11 +16,11 @@ export default class ClickOutside extends Component {
     document.removeEventListener('mousedown', this.onClick);
   }
 
-  setNodeRef = node => {
+  setNodeRef = (node) => {
     this.nodeRef = node;
   };
 
-  onClick = event => {
+  onClick = (event) => {
     if (this.nodeRef && !this.nodeRef.contains(event.target)) {
       this.props.onClickOutside();
     }
@@ -38,5 +38,5 @@ export default class ClickOutside extends Component {
 }
 
 ClickOutside.propTypes = {
-  onClickOutside: PropTypes.func.isRequired
+  onClickOutside: PropTypes.func.isRequired,
 };

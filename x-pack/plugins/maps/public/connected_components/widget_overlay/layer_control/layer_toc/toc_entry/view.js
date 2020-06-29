@@ -239,7 +239,8 @@ export class TOCEntry extends React.Component {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
       'mapTocEntry-isSelected':
-        this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId(),
+        this.props.layer.isPreviewLayer() ||
+        (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
     });
 
     return (

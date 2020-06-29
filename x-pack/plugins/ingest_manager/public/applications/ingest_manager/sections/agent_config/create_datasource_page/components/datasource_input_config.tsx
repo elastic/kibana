@@ -42,7 +42,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
   const advancedVars: RegistryVarsEntry[] = [];
 
   if (packageInputVars) {
-    packageInputVars.forEach(varDef => {
+    packageInputVars.forEach((varDef) => {
       if (isAdvancedVar(varDef)) {
         advancedVars.push(varDef);
       } else {
@@ -95,7 +95,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {requiredVars.map(varDef => {
+          {requiredVars.map((varDef) => {
             const { name: varName, type: varType } = varDef;
             const value = datasourceInput.vars![varName].value;
             return (
@@ -139,7 +139,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                 </div>
               </EuiFlexItem>
               {isShowingAdvanced
-                ? advancedVars.map(varDef => {
+                ? advancedVars.map((varDef) => {
                     const { name: varName, type: varType } = varDef;
                     const value = datasourceInput.vars![varName].value;
                     return (

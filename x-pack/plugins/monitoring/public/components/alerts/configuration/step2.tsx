@@ -30,7 +30,7 @@ export const Step2: React.FC<GetStep2Props> = (props: GetStep2Props) => {
         <EuiFieldText
           value={props.emailAddress}
           disabled={props.isDisabled}
-          onChange={e => props.setEmailAddress(e.target.value)}
+          onChange={(e) => props.setEmailAddress(e.target.value)}
         />
       </EuiFormRow>
     </EuiForm>

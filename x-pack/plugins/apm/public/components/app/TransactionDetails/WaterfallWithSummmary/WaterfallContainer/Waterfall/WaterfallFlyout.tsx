@@ -19,9 +19,11 @@ export const WaterfallFlyout: React.FC<Props> = ({
   waterfallItemId,
   waterfall,
   location,
-  toggleFlyout
+  toggleFlyout,
 }) => {
-  const currentItem = waterfall.items.find(item => item.id === waterfallItemId);
+  const currentItem = waterfall.items.find(
+    (item) => item.id === waterfallItemId
+  );
 
   if (!currentItem) {
     return null;

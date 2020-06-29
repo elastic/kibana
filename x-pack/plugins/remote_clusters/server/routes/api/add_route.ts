@@ -13,7 +13,7 @@ import { serializeCluster, Cluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../lib/is_es_error';
+import { isEsError } from '../../shared_imports';
 import { RouteDependencies } from '../../types';
 
 const bodyValidation = schema.object({
@@ -36,7 +36,7 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
 
       const { name } = request.body;
 

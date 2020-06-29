@@ -27,13 +27,13 @@ import { getEnvOptions } from '../../config/__mocks__/env';
 import { BehaviorSubject, from } from 'rxjs';
 import { rawConfigServiceMock } from '../../config/raw_config_service.mock';
 import { config } from '../plugins_config';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { coreMock } from '../../mocks';
 import { Plugin } from '../types';
 import { PluginWrapper } from '../plugin';
 
 describe('PluginsService', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -139,7 +139,7 @@ describe('PluginsService', () => {
         },
         start: async (core, plugins) => {
           contextFromStart = { core, plugins };
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },

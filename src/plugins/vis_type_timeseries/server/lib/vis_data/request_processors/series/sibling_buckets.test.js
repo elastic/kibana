@@ -62,7 +62,7 @@ describe('siblingBuckets(req, panel, series)', () => {
   });
 
   test('returns sibling aggs', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = siblingBuckets(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {

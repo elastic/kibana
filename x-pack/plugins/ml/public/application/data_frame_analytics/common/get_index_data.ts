@@ -34,7 +34,7 @@ export const getIndexData = async (
 
     try {
       const sort: EsSorting = sortingColumns
-        .map(column => {
+        .map((column) => {
           const { id } = column;
           column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
           return column;
@@ -57,7 +57,7 @@ export const getIndexData = async (
 
       setRowCount(resp.hits.total.value);
 
-      const docs = resp.hits.hits.map(d => d._source);
+      const docs = resp.hits.hits.map((d) => d._source);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {

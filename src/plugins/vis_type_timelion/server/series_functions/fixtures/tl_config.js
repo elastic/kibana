@@ -22,16 +22,16 @@ import sinon from 'sinon';
 import timelionDefaults from '../../lib/get_namespaced_settings';
 import esResponse from './es_response';
 
-export default function() {
+export default function () {
   const functions = require('../../lib/load_functions')('series_functions');
 
   const tlConfig = require('../../handlers/lib/tl_config.js')({
-    getFunction: name => {
+    getFunction: (name) => {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];
     },
     esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
+      callAsCurrentUser: function () {
         return Promise.resolve(esResponse);
       },
     }),

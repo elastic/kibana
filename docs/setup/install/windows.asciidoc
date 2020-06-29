@@ -1,13 +1,16 @@
 [[windows]]
-=== Install Kibana on Windows
+=== Install {kib} on Windows
+++++
+<titleabbrev>Install on Windows</titleabbrev>
+++++
 
 Kibana can be installed on Windows using the `.zip` package.
 
-This package is free to use under the Elastic license. It contains open source 
-and free commercial features and access to paid commercial features. 
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+This package is free to use under the Elastic license. It contains open source
+and free commercial features and access to paid commercial features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 The latest stable version of Kibana can be found on the
@@ -39,9 +42,9 @@ terminal window, `CD` to the `$KIBANA_HOME` directory, for instance:
 CD c:\kibana-{version}-windows-x86_64
 ----------------------------
 
-Alternatively, you can download the following package, which contains only 
+Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-windows-x86_64.zip  
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-windows-x86_64.zip
 
 endif::[]
 
@@ -49,7 +52,7 @@ endif::[]
 include::windows-running.asciidoc[]
 
 [[windows-configuring]]
-==== Configuring Kibana via config file
+==== Configure {kib} via the config file
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in

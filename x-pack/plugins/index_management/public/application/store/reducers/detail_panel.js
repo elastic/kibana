@@ -29,7 +29,7 @@ import { deleteIndicesSuccess } from '../actions/delete_indices';
 
 const defaultState = {};
 
-export const getDetailPanelReducer = uiMetricService =>
+export const getDetailPanelReducer = (uiMetricService) =>
   handleActions(
     {
       [deleteIndicesSuccess](state, action) {

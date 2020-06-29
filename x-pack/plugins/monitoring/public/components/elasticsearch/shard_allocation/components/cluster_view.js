@@ -19,8 +19,6 @@ export class ClusterView extends React.Component {
 
   constructor(props) {
     super(props);
-    const scope = props.scope;
-    const kbnChangePath = props.kbnUrl.changePath;
 
     this.state = {
       labels: props.scope.labels || [],
@@ -28,19 +26,16 @@ export class ClusterView extends React.Component {
       shardStats: props.scope.pageData.shardStats,
       showSystemIndices: props.showSystemIndices,
       toggleShowSystemIndices: props.toggleShowSystemIndices,
-      angularChangeUrl: url => {
-        scope.$evalAsync(() => kbnChangePath(url));
-      },
     };
   }
 
-  setShowing = data => {
+  setShowing = (data) => {
     if (data) {
       this.setState({ showing: data });
     }
   };
 
-  setShardStats = stats => {
+  setShardStats = (stats) => {
     this.setState({ shardStats: stats });
   };
 
@@ -71,7 +66,6 @@ export class ClusterView extends React.Component {
           rows={this.state.showing}
           cols={this.state.labels.length}
           shardStats={this.state.shardStats}
-          changeUrl={this.state.angularChangeUrl}
         />
       </table>
     );

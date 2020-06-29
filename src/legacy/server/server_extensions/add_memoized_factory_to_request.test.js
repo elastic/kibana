@@ -104,7 +104,7 @@ describe('server.addMemoizedFactoryToRequest()', () => {
     expect(() => server.addMemoizedFactoryToRequest('name', () => {})).not.toThrowError(
       'more than one argument'
     );
-    expect(() => server.addMemoizedFactoryToRequest('name', a => {})).not.toThrowError(
+    expect(() => server.addMemoizedFactoryToRequest('name', (a) => {})).not.toThrowError(
       'more than one argument'
     );
     expect(() => server.addMemoizedFactoryToRequest('name', (a, b) => {})).toThrowError(

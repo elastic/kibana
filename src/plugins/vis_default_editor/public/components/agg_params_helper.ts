@@ -89,7 +89,7 @@ function getAggParamsToRender({
       if (agg.type.name === 'top_hits' && param.name === 'field') {
         const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
         if (!allowStrings) {
-          availableFields = availableFields.filter(field => field.type === 'number');
+          availableFields = availableFields.filter((field) => field.type === 'number');
         }
       }
       fields = filterAggTypeFields(availableFields, agg);
@@ -163,13 +163,13 @@ function isInvalidParamsTouched(
     return aggTypeState.touched;
   }
 
-  const invalidParams = Object.values(aggParams).filter(param => !param.valid);
+  const invalidParams = Object.values(aggParams).filter((param) => !param.valid);
 
   if (isEmpty(invalidParams)) {
     return false;
   }
 
-  return invalidParams.every(param => param.touched);
+  return invalidParams.every((param) => param.touched);
 }
 
 function buildAggDescription(agg: IAggConfig) {

@@ -11,7 +11,7 @@ import {
   successColor,
   neutralColor,
   warningColor,
-  errorColor
+  errorColor,
 } from '../../../../../utils/httpStatusCodeToColor';
 
 describe('HttpStatusBadge', () => {

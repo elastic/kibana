@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 function getFieldValues(hits, field) {
   const name = field.name;
   const flattenHit = field.indexPattern.flattenHit;
-  return _.map(hits, function(hit) {
+  return _.map(hits, function (hit) {
     return flattenHit(hit)[name];
   });
 }
@@ -55,18 +55,13 @@ function getFieldValueCounts(params) {
 
   try {
     const groups = _groupValues(allValues, params);
-    counts = _.map(
-      _.sortBy(groups, 'count')
-        .reverse()
-        .slice(0, params.count),
-      function(bucket) {
-        return {
-          value: bucket.value,
-          count: bucket.count,
-          percent: ((bucket.count / (params.hits.length - missing)) * 100).toFixed(1),
-        };
-      }
-    );
+    counts = _.map(_.sortBy(groups, 'count').reverse().slice(0, params.count), function (bucket) {
+      return {
+        value: bucket.value,
+        count: bucket.count,
+        percent: ((bucket.count / (params.hits.length - missing)) * 100).toFixed(1),
+      };
+    });
 
     if (params.hits.length - missing === 0) {
       return {
@@ -103,7 +98,7 @@ function _groupValues(allValues, params) {
   const groups = {};
   let k;
 
-  allValues.forEach(function(value) {
+  allValues.forEach(function (value) {
     if (_.isObject(value) && !Array.isArray(value)) {
       throw new Error(
         i18n.translate(
@@ -121,7 +116,7 @@ function _groupValues(allValues, params) {
       k = value == null ? undefined : [value];
     }
 
-    _.each(k, function(key) {
+    _.each(k, function (key) {
       if (groups.hasOwnProperty(key)) {
         groups[key].count++;
       } else {

@@ -24,12 +24,12 @@ export const compareArrays = ({
     addedItems: [],
     deletedItems: [],
   };
-  originalValue.forEach(origVal => {
+  originalValue.forEach((origVal) => {
     if (!updatedValue.includes(origVal)) {
       result.deletedItems = [...result.deletedItems, origVal];
     }
   });
-  updatedValue.forEach(updatedVal => {
+  updatedValue.forEach((updatedVal) => {
     if (!originalValue.includes(updatedVal)) {
       result.addedItems = [...result.addedItems, updatedVal];
     }

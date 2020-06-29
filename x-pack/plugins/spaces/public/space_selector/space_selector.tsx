@@ -71,7 +71,7 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({ loading: true });
     const { spacesManager } = this.props;
 
-    spacesManager.getSpaces().then(spaces => {
+    spacesManager.getSpaces().then((spaces) => {
       this.setState({
         loading: false,
         spaces,
@@ -85,7 +85,7 @@ export class SpaceSelector extends Component<Props, State> {
     let filteredSpaces = spaces;
     if (searchTerm) {
       filteredSpaces = spaces.filter(
-        space =>
+        (space) =>
           space.name.toLowerCase().indexOf(searchTerm) >= 0 ||
           (space.description || '').toLowerCase().indexOf(searchTerm) >= 0
       );

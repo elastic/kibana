@@ -23,7 +23,7 @@ export class WorkpadSearch extends React.PureComponent {
 
   triggerChange = debounce(this.props.onChange, 150);
 
-  setSearchText = ev => {
+  setSearchText = (ev) => {
     const text = ev.target.value;
     this.setState({ searchText: text });
     this.triggerChange(text);

@@ -20,7 +20,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // not enough license info to make decision one way or another
-  if (!xpackInfo.isAvailable() || !xpackInfo.feature('security').getLicenseCheckResults()) {
+  if (!xpackInfo.isAvailable()) {
     return originalInjectedVars;
   }
 

@@ -5,7 +5,9 @@
  */
 
 export * from './common';
-export * from './request';
-export * from './response';
 export * from './elastic_query';
 export * from './elastic_response';
+export * from './request';
+export * from './response';
+export * from './saved_objects';
+export * from './types';

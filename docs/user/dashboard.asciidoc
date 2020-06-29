@@ -44,7 +44,7 @@ add them as you create the dashboard, or you can add
 <<add-sample-data, sample data sets>>,
 which include pre-built dashboards.
 
-To begin, open *Dashboard*, then click *Create new dashboard.*
+To begin, open the menu, go to *Dashboard*, then click *Create dashboard.*
 
 [float]
 [[dashboard-add-elements]]
@@ -66,7 +66,7 @@ image:images/Dashboard_add_new_visualization.png[Example add new visualization t
 +
 For information on how to create visualizations, see <<visualize,Visualize>>.
 +
-For information on how to create Maps, see <<maps,Elastic Maps>>.
+For information on how to create maps, see <<maps,Maps>>.
 
 To add an existing element:
 
@@ -159,8 +159,10 @@ When you're finished adding and arranging the panels, save the dashboard.
 
 . Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
 
+include::{kib-repo-dir}/drilldowns/drilldowns.asciidoc[]
+
 [[sharing-dashboards]]
-=== Share the dashboard
+== Share the dashboard
 
 [[embedding-dashboards]]
 Share your dashboard outside of {kib}.
@@ -174,7 +176,7 @@ to view an embedded dashboard.
 * Generate a PNG report
 
 TIP: To create a link to a dashboard by title, use: +
-`${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
+`${domain}/${basepath?}/app/dashboards#/list?title=${yourdashboardtitle}`
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other
@@ -184,5 +186,5 @@ tools. To create a short URL, you must have write access to {kib}.
 [[import-dashboards]]
 === Export the dashboard
 
-To export the dashboard, go to *Management > Saved Objects*. For more information,
-see <<managing-saved-objects, Managing saved objects>>.
+To export the dashboard, open the menu, then click *Stack Management > Saved Objects*. For more information,
+refer to <<managing-saved-objects, Managing saved objects>>.

@@ -17,12 +17,12 @@ export const WithLogFilterUrlState: React.FC = () => {
       urlState={filterQueryAsKuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
-      onChange={urlState => {
+      onChange={(urlState) => {
         if (urlState) {
           applyLogFilterQuery(urlState.expression);
         }
       }}
-      onInitialize={urlState => {
+      onInitialize={(urlState) => {
         if (urlState) {
           applyLogFilterQuery(urlState.expression);
         }

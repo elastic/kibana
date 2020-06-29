@@ -50,7 +50,7 @@ export function validateMetricThreshold({
     if (!c.aggType) {
       errors[id].aggField.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.aggregationRequired', {
-          defaultMessage: 'Aggreation is required.',
+          defaultMessage: 'Aggregation is required.',
         })
       );
     }
@@ -61,6 +61,21 @@ export function validateMetricThreshold({
           defaultMessage: 'Threshold is required.',
         })
       );
+    }
+
+    // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
+    // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
+    if (c.threshold && c.threshold.length && ![...c.threshold].every(isNumber)) {
+      [...c.threshold].forEach((v, i) => {
+        if (!isNumber(v)) {
+          const key = i === 0 ? 'threshold0' : 'threshold1';
+          errors[id][key].push(
+            i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
+              defaultMessage: 'Thresholds must contain a valid number.',
+            })
+          );
+        }
+      });
     }
 
     if (c.comparator === Comparator.BETWEEN && (!c.threshold || c.threshold.length < 2)) {
@@ -90,3 +105,5 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
+
+const isNumber = (value: unknown): value is number => typeof value === 'number';

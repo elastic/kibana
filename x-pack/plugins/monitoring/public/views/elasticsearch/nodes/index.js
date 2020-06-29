@@ -53,10 +53,12 @@ uiRoutes.when('/elasticsearch/nodes', {
             ...routeOptions,
           });
 
-        const promise = globalState.cluster_uuid ? getNodes() : new Promise(resolve => resolve({}));
+        const promise = globalState.cluster_uuid
+          ? getNodes()
+          : new Promise((resolve) => resolve({}));
         return promise
-          .then(response => response.data)
-          .catch(err => {
+          .then((response) => response.data)
+          .catch((err) => {
             const Private = $injector.get('Private');
             const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
             return ajaxErrorHandlers(err);

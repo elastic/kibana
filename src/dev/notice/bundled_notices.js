@@ -25,11 +25,11 @@ import glob from 'glob';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await fcb(cb => glob(pattern, cb));
+  const paths = await fcb((cb) => glob(pattern, cb));
   return Promise.all(
-    paths.map(async path => ({
+    paths.map(async (path) => ({
       path,
-      text: await fcb(cb => readFile(path, 'utf8', cb)),
+      text: await fcb((cb) => readFile(path, 'utf8', cb)),
     }))
   );
 }

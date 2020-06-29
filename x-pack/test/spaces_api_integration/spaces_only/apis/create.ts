@@ -28,7 +28,7 @@ export default function createSpacesOnlySuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       createTest(`from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         tests: {

@@ -35,7 +35,7 @@ import { ScopedHistory } from '../../../../../core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {
-    const url = 'http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id';
+    const url = 'http://localhost:5601/oxf/app/kibana#/yourApp';
     const state1 = {
       testStr: '123',
       testNumber: 0,
@@ -50,14 +50,14 @@ describe('kbn_url_storage', () => {
     it('should set expanded state to url', () => {
       let newUrl = setStateToKbnUrl('_s', state1, { useHash: false }, url);
       expect(newUrl).toMatchInlineSnapshot(
-        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')"`
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')"`
       );
       const retrievedState1 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState1).toEqual(state1);
 
       newUrl = setStateToKbnUrl('_s', state2, { useHash: false }, newUrl);
       expect(newUrl).toMatchInlineSnapshot(
-        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=(test:'123')"`
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=(test:'123')"`
       );
       const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState2).toEqual(state2);
@@ -66,14 +66,14 @@ describe('kbn_url_storage', () => {
     it('should set hashed state to url', () => {
       let newUrl = setStateToKbnUrl('_s', state1, { useHash: true }, url);
       expect(newUrl).toMatchInlineSnapshot(
-        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@a897fac"`
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@a897fac"`
       );
       const retrievedState1 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState1).toEqual(state1);
 
       newUrl = setStateToKbnUrl('_s', state2, { useHash: true }, newUrl);
       expect(newUrl).toMatchInlineSnapshot(
-        `"http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_s=h@40f94d5"`
+        `"http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@40f94d5"`
       );
       const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState2).toEqual(state2);
@@ -244,67 +244,55 @@ describe('kbn_url_storage', () => {
     it('should extract path relative to browser history without basename', () => {
       const history = createBrowserHistory();
       const url =
-        "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
       expect(relativePath).toEqual(
-        "/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+        "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
       );
     });
 
     it('should extract path relative to browser history with basename', () => {
       const url =
-        "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const history1 = createBrowserHistory({ basename: '/oxf/app/' });
       const relativePath1 = getRelativeToHistoryPath(url, history1);
       expect(relativePath1).toEqual(
-        "/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
+        "/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
       );
 
       const history2 = createBrowserHistory({ basename: '/oxf/app/kibana/' });
       const relativePath2 = getRelativeToHistoryPath(url, history2);
-      expect(relativePath2).toEqual(
-        "#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
-      );
+      expect(relativePath2).toEqual("#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
 
     it('should extract path relative to browser history with basename from relative url', () => {
       const history = createBrowserHistory({ basename: '/oxf/app/' });
-      const url =
-        "/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const url = "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
-      expect(relativePath).toEqual(
-        "/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
-      );
+      expect(relativePath).toEqual("/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
 
     it('should extract path relative to hash history without basename', () => {
       const history = createHashHistory();
       const url =
-        "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
-      expect(relativePath).toEqual(
-        "/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
-      );
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
 
     it('should extract path relative to hash history with basename', () => {
       const history = createHashHistory({ basename: 'management' });
       const url =
-        "http://localhost:5601/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+        "http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
-      expect(relativePath).toEqual(
-        "/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
-      );
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
 
     it('should extract path relative to hash history with basename from relative url', () => {
       const history = createHashHistory({ basename: 'management' });
-      const url =
-        "/oxf/app/kibana#/management/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
+      const url = "/oxf/app/kibana#/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')";
       const relativePath = getRelativeToHistoryPath(url, history);
-      expect(relativePath).toEqual(
-        "/kibana/index_patterns/id?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')"
-      );
+      expect(relativePath).toEqual("/yourApp?_a=(tab:indexedFields)&_b=(f:test,i:'',l:'')");
     });
   });
 });

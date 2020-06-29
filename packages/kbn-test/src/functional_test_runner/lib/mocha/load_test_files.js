@@ -32,7 +32,7 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @return {undefined} - mutates mocha, no return value
  */
 export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, updateBaselines }) => {
-  const innerLoadTestFile = path => {
+  const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
     }

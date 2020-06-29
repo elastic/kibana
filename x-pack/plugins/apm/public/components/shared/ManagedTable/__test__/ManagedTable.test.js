@@ -16,16 +16,16 @@ describe('ManagedTable component', () => {
     people = [
       { name: 'Jess', age: 29 },
       { name: 'Becky', age: 43 },
-      { name: 'Thomas', age: 31 }
+      { name: 'Thomas', age: 31 },
     ];
     columns = [
       {
         field: 'name',
         name: 'Name',
         sortable: true,
-        render: name => `Name: ${name}`
+        render: (name) => `Name: ${name}`,
       },
-      { field: 'age', name: 'Age', render: age => `Age: ${age}` }
+      { field: 'age', name: 'Age', render: (age) => `Age: ${age}` },
     ];
   });
 

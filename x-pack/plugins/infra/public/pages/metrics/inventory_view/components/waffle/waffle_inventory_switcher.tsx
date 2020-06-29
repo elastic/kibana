@@ -7,6 +7,7 @@
 import { EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import React, { useCallback, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
@@ -115,7 +116,10 @@ export const WaffleInventorySwitcher: React.FC = () => {
   }, [nodeType]);
 
   const button = (
-    <DropdownButton onClick={openPopover} label="Show">
+    <DropdownButton
+      onClick={openPopover}
+      label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
+    >
       {selectedText}
     </DropdownButton>
   );

@@ -2,15 +2,12 @@
 [[heatmap-layer]]
 == Heat map layer
 
-In the heat map layer, point data is clustered to show locations with higher densities.
+Heat map layers cluster point data to show locations with higher densities.
 
 [role="screenshot"]
 image::maps/images/heatmap_layer.png[]
 
-You can create a heat map layer from the following data source:
-
-*Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
-Set *Show as* to *heat map*.
+To add a heat map layer to your map, click *Add layer*, then select the *Heat map* layer.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 NOTE: Only count, sum, unique count metric aggregations are available with the grid aggregation source and heat map layers.

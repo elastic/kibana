@@ -58,7 +58,7 @@ export class PointSeries extends Chart {
   }
 
   getSeries(seriesId) {
-    return this.series.find(series => series.chartData.aggId === seriesId);
+    return this.series.find((series) => series.chartData.aggId === seriesId);
   }
 
   addBackground(svg, width, height) {
@@ -77,10 +77,7 @@ export class PointSeries extends Chart {
 
   addGrid(svg) {
     const { width, height } = svg.node().getBBox();
-    return svg
-      .append('g')
-      .attr('class', 'grid')
-      .call(this.handler.grid.draw(width, height));
+    return svg.append('g').attr('class', 'grid').call(this.handler.grid.draw(width, height));
   }
 
   addClipPath(svg) {
@@ -153,10 +150,10 @@ export class PointSeries extends Chart {
       .attr('class', 'endzone')
       .append('rect')
       .attr('class', 'zone')
-      .attr('x', d => (isHorizontal ? d.x : 0))
-      .attr('y', d => (isHorizontal ? 0 : d.x))
-      .attr('height', d => (isHorizontal ? height : d.w))
-      .attr('width', d => (isHorizontal ? d.w : width));
+      .attr('x', (d) => (isHorizontal ? d.x : 0))
+      .attr('y', (d) => (isHorizontal ? 0 : d.x))
+      .attr('height', (d) => (isHorizontal ? height : d.w))
+      .attr('width', (d) => (isHorizontal ? d.w : width));
 
     function callPlay(event) {
       const boundData = event.target.__data__;
@@ -197,12 +194,12 @@ export class PointSeries extends Chart {
 
   calculateRadiusLimits(data) {
     this.radii = _(data.series)
-      .map(function(series) {
+      .map(function (series) {
         return _.map(series.values, 'z');
       })
       .flattenDeep()
       .reduce(
-        function(result, val) {
+        function (result, val) {
           if (result.min > val) result.min = val;
           if (result.max < val) result.max = val;
           return result;
@@ -225,8 +222,8 @@ export class PointSeries extends Chart {
     let div;
     let svg;
 
-    return function(selection) {
-      selection.each(function(data) {
+    return function (selection) {
+      selection.each(function (data) {
         const el = this;
 
         div = d3.select(el);

@@ -17,7 +17,7 @@ const httpStatusCodeColors: Record<string, string> = {
   2: successColor,
   3: neutralColor,
   4: warningColor,
-  5: errorColor
+  5: errorColor,
 };
 
 function getStatusColor(status: number) {

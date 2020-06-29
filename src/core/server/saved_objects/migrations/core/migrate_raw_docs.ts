@@ -21,8 +21,13 @@
  * This file provides logic for migrating raw documents.
  */
 
-import { SavedObjectsRawDoc, SavedObjectsSerializer } from '../../serialization';
+import {
+  SavedObjectsRawDoc,
+  SavedObjectsSerializer,
+  SavedObjectUnsanitizedDoc,
+} from '../../serialization';
 import { TransformFn } from './document_migrator';
+import { SavedObjectsMigrationLogger } from '.';
 
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -32,21 +37,51 @@ import { TransformFn } from './document_migrator';
  * @param {SavedObjectsRawDoc[]} rawDocs
  * @returns {SavedObjectsRawDoc[]}
  */
-export function migrateRawDocs(
+export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: TransformFn,
-  rawDocs: SavedObjectsRawDoc[]
-): SavedObjectsRawDoc[] {
-  return rawDocs.map(raw => {
+  rawDocs: SavedObjectsRawDoc[],
+  log: SavedObjectsMigrationLogger
+): Promise<SavedObjectsRawDoc[]> {
+  const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
+  const processedDocs = [];
+  for (const raw of rawDocs) {
     if (serializer.isRawSavedObject(raw)) {
       const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
-      return serializer.savedObjectToRaw({
-        references: [],
-        ...migrateDoc(savedObject),
-      });
+      processedDocs.push(
+        serializer.savedObjectToRaw({
+          references: [],
+          ...(await migrateDocWithoutBlocking(savedObject)),
+        })
+      );
+    } else {
+      log.error(
+        `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
+        { rawDocument: raw }
+      );
+      processedDocs.push(raw);
     }
+  }
+  return processedDocs;
+}
 
-    return raw;
-  });
+/**
+ * Migration transform functions are potentially CPU heavy e.g. doing decryption/encryption
+ * or (de)/serializing large JSON payloads.
+ * Executing all transforms for a batch in a synchronous loop can block the event-loop for a long time.
+ * To prevent this we use setImmediate to ensure that the event-loop can process other parallel
+ * work in between each transform.
+ */
+function transformNonBlocking(
+  transform: TransformFn
+): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc> {
+  // promises aren't enough to unblock the event loop
+  return (doc: SavedObjectUnsanitizedDoc) =>
+    new Promise((resolve) => {
+      // set immediate is though
+      setImmediate(() => {
+        resolve(transform(doc));
+      });
+    });
 }

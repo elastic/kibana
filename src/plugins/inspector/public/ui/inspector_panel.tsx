@@ -27,7 +27,7 @@ import { InspectorViewChooser } from './inspector_view_chooser';
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
     Object.keys(oldAdapters).length !== Object.keys(newAdapters).length ||
-    Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key])
+    Object.keys(oldAdapters).some((key) => oldAdapters[key] !== newAdapters[key])
   );
 }
 

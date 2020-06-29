@@ -36,7 +36,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
 
-export const TopNSeries = injectI18n(function(props) {
+export const TopNSeries = injectI18n(function (props) {
   const {
     panel,
     model,

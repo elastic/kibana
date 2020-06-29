@@ -9,7 +9,7 @@
 // x-pack has a different version of bluebird so it needs its own polyfills.js to ensure
 // the scheduler is set on the right bluebird instance
 const bluebird = require('bluebird');
-bluebird.Promise.setScheduler(function(fn) {
+bluebird.Promise.setScheduler(function (fn) {
   global.setImmediate.call(global, fn);
 });
 
@@ -17,5 +17,7 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 require('whatwg-fetch');
-const URL = { createObjectURL: () => '' };
-Object.defineProperty(window, 'URL', { value: URL });
+
+if (!global.URL.hasOwnProperty('createObjectURL')) {
+  Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
+}

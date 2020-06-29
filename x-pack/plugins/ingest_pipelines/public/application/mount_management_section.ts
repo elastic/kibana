@@ -13,7 +13,7 @@ export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [coreStart] = await getStartServices();
   const {
     docLinks,
@@ -29,6 +29,8 @@ export async function mountManagementSection(
     documentation: documentationService,
     api: apiService,
     notifications,
+    history,
+    uiSettings: coreStart.uiSettings,
   };
 
   return renderApp(element, I18nContext, services, { http });

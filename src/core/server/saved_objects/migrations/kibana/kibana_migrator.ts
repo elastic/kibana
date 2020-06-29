@@ -22,9 +22,9 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
+import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
@@ -74,6 +74,7 @@ export class KibanaMigrator {
   private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
     status: 'waiting',
   });
+  private readonly activeMappings: IndexMapping;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -100,6 +101,9 @@ export class KibanaMigrator {
       validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
+    // Building the active mappings (and associated md5sums) is an expensive
+    // operation so we cache the result
+    this.activeMappings = buildActiveMappings(this.mappingProperties);
   }
 
   /**
@@ -125,7 +129,7 @@ export class KibanaMigrator {
   > {
     if (this.migrationResult === undefined || rerun) {
       this.status$.next({ status: 'running' });
-      this.migrationResult = this.runMigrationsInternal().then(result => {
+      this.migrationResult = this.runMigrationsInternal().then((result) => {
         this.status$.next({ status: 'completed', result });
         return result;
       });
@@ -146,7 +150,7 @@ export class KibanaMigrator {
       registry: this.typeRegistry,
     });
 
-    const migrators = Object.keys(indexMap).map(index => {
+    const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
         batchSize: this.savedObjectsConfig.batchSize,
         callCluster: this.callCluster,
@@ -164,7 +168,7 @@ export class KibanaMigrator {
       });
     });
 
-    return Promise.all(migrators.map(migrator => migrator.migrate()));
+    return Promise.all(migrators.map((migrator) => migrator.migrate()));
   }
 
   /**
@@ -172,7 +176,7 @@ export class KibanaMigrator {
    *
    */
   public getActiveMappings(): IndexMapping {
-    return buildActiveMappings(this.mappingProperties);
+    return this.activeMappings;
   }
 
   /**

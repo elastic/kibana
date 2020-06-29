@@ -152,7 +152,7 @@ export const outlinkEncoders: OutlinkEncoder[] = [
       const luceneChars = '+-&|!(){}[]^"~*?:\\';
       q = q
         .split('')
-        .map(char => (luceneChars.includes(char) ? `\\${char}` : char))
+        .map((char) => (luceneChars.includes(char) ? `\\${char}` : char))
         .join('');
       return encodeURIComponent(q);
     },

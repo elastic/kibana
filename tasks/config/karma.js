@@ -27,7 +27,7 @@ const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
 const buildHash = String(Number.MAX_SAFE_INTEGER);
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   function pickBrowser() {
     if (grunt.option('browser')) {
       return grunt.option('browser');
@@ -58,14 +58,14 @@ module.exports = function(grunt) {
       'http://localhost:5610/test_bundle/karma/globals.js',
 
       ...UiSharedDeps.jsDepFilenames.map(
-        chunkFilename =>
+        (chunkFilename) =>
           `http://localhost:5610/${buildHash}/bundles/kbn-ui-shared-deps/${chunkFilename}`
       ),
       `http://localhost:5610/${buildHash}/bundles/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
 
       `http://localhost:5610/${buildHash}/built_assets/dlls/vendors_runtime.bundle.dll.js`,
       ...DllCompiler.getRawDllConfig().chunks.map(
-        chunk =>
+        (chunk) =>
           `http://localhost:5610/${buildHash}/built_assets/dlls/vendors${chunk}.bundle.dll.js`
       ),
 
@@ -78,7 +78,7 @@ module.exports = function(grunt) {
       // included in the karma harness a long some time, if ever
       // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
       ...DllCompiler.getRawDllConfig().chunks.map(
-        chunk =>
+        (chunk) =>
           `http://localhost:5610/${buildHash}/built_assets/dlls/vendors${chunk}.style.dll.css`
       ),
       `http://localhost:5610/${buildHash}/bundles/tests.style.css`,
@@ -205,7 +205,7 @@ module.exports = function(grunt) {
    *
    *  [1]: src/legacy/ui/public/test_harness/test_sharding/setup_test_sharding.js
    */
-  times(TOTAL_CI_SHARDS, i => {
+  times(TOTAL_CI_SHARDS, (i) => {
     const n = i + 1;
     config[`ciShard-${n}`] = {
       singleRun: true,

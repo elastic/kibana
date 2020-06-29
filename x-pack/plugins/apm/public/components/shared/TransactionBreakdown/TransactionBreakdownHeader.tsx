@@ -9,7 +9,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +23,7 @@ const TransactionBreakdownHeader: React.FC<{
         <EuiTitle size="xs">
           <h3>
             {i18n.translate('xpack.apm.transactionBreakdown.chartTitle', {
-              defaultMessage: 'Time spent by span type'
+              defaultMessage: 'Time spent by span type',
             })}
           </h3>
         </EuiTitle>
@@ -36,10 +36,10 @@ const TransactionBreakdownHeader: React.FC<{
         >
           {showChart
             ? i18n.translate('xpack.apm.transactionBreakdown.hideChart', {
-                defaultMessage: 'Hide chart'
+                defaultMessage: 'Hide chart',
               })
             : i18n.translate('xpack.apm.transactionBreakdown.showChart', {
-                defaultMessage: 'Show chart'
+                defaultMessage: 'Show chart',
               })}
         </EuiButtonEmpty>
       </EuiFlexItem>

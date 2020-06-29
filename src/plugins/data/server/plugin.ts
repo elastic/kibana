@@ -18,8 +18,9 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import { ConfigSchema } from '../config';
 import { IndexPatternsService } from './index_patterns';
-import { ISearchSetup } from './search';
+import { ISearchSetup, ISearchStart } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -27,6 +28,7 @@ import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { getUiSettings } from './ui_settings';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -34,6 +36,7 @@ export interface DataPluginSetup {
 }
 
 export interface DataPluginStart {
+  search: ISearchStart;
   fieldFormats: FieldFormatsStart;
 }
 
@@ -50,28 +53,34 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
-  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<object, DataPluginStart>,
+    { usageCollection }: DataPluginSetupDependencies
+  ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
+    core.uiSettings.register(getUiSettings());
+
     return {
-      fieldFormats: this.fieldFormats.setup(),
       search: this.searchService.setup(core),
+      fieldFormats: this.fieldFormats.setup(),
     };
   }
 
   public start(core: CoreStart) {
     return {
+      search: this.searchService.start(),
       fieldFormats: this.fieldFormats.start(),
     };
   }

@@ -16,112 +16,88 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Appenders, DisposableAppender } from './appenders/appenders';
-import { BufferAppender } from './appenders/buffer/buffer_appender';
-import { LogLevel } from './log_level';
-import { BaseLogger, Logger } from './logger';
-import { LoggerAdapter } from './logger_adapter';
-import { LoggerFactory } from './logger_factory';
-import { LoggingConfigType, LoggerConfigType, LoggingConfig } from './logging_config';
 
-export type ILoggingService = PublicMethodsOf<LoggingService>;
+import { Observable, Subscription } from 'rxjs';
+import { CoreService } from '../../types';
+import { LoggingConfig, LoggerContextConfigInput } from './logging_config';
+import { ILoggingSystem } from './logging_system';
+import { Logger } from './logger';
+import { CoreContext } from '../core_context';
+
 /**
- * Service that is responsible for maintaining loggers and logger appenders.
- * @internal
+ * Provides APIs to plugins for customizing the plugin's logger.
+ * @public
  */
-export class LoggingService implements LoggerFactory {
-  private config?: LoggingConfig;
-  private readonly appenders: Map<string, DisposableAppender> = new Map();
-  private readonly bufferAppender = new BufferAppender();
-  private readonly loggers: Map<string, LoggerAdapter> = new Map();
-
-  public get(...contextParts: string[]): Logger {
-    const context = LoggingConfig.getLoggerContext(contextParts);
-    if (!this.loggers.has(context)) {
-      this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.config)));
-    }
-    return this.loggers.get(context)!;
-  }
-
+export interface LoggingServiceSetup {
   /**
-   * Safe wrapper that allows passing logging service as immutable LoggerFactory.
+   * Customizes the logging config for the plugin's context.
+   *
+   * @remarks
+   * Assumes that that the `context` property of the individual `logger` items emitted by `config$`
+   * are relative to the plugin's logging context (defaults to `plugins.<plugin_id>`).
+   *
+   * @example
+   * Customize the configuration for the plugins.data.search context.
+   * ```ts
+   * core.logging.configure(
+   *   of({
+   *     appenders: new Map(),
+   *     loggers: [{ context: 'search', appenders: ['default'] }]
+   *   })
+   * )
+   * ```
+   *
+   * @param config$
    */
-  public asLoggerFactory(): LoggerFactory {
-    return { get: (...contextParts: string[]) => this.get(...contextParts) };
+  configure(config$: Observable<LoggerContextConfigInput>): void;
+}
+
+/** @internal */
+export interface InternalLoggingServiceSetup {
+  configure(contextParts: string[], config$: Observable<LoggerContextConfigInput>): void;
+}
+
+interface SetupDeps {
+  loggingSystem: ILoggingSystem;
+}
+
+/** @internal */
+export class LoggingService implements CoreService<InternalLoggingServiceSetup> {
+  private readonly subscriptions = new Map<string, Subscription>();
+  private readonly log: Logger;
+
+  constructor(coreContext: CoreContext) {
+    this.log = coreContext.logger.get('logging');
   }
 
-  /**
-   * Updates all current active loggers with the new config values.
-   * @param rawConfig New config instance.
-   */
-  public upgrade(rawConfig: LoggingConfigType) {
-    const config = new LoggingConfig(rawConfig);
-    // Config update is asynchronous and may require some time to complete, so we should invalidate
-    // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
-    this.config = undefined;
+  public setup({ loggingSystem }: SetupDeps) {
+    return {
+      configure: (contextParts: string[], config$: Observable<LoggerContextConfigInput>) => {
+        const contextName = LoggingConfig.getLoggerContext(contextParts);
+        this.log.debug(`Setting custom config for context [${contextName}]`);
 
-    // Appenders must be reset, so we first dispose of the current ones, then
-    // build up a new set of appenders.
-    for (const appender of this.appenders.values()) {
-      appender.dispose();
-    }
-    this.appenders.clear();
+        const existingSubscription = this.subscriptions.get(contextName);
+        if (existingSubscription) {
+          existingSubscription.unsubscribe();
+        }
 
-    for (const [appenderKey, appenderConfig] of config.appenders) {
-      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
-    }
-
-    for (const [loggerKey, loggerAdapter] of this.loggers) {
-      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
-    }
-
-    this.config = config;
-
-    // Re-log all buffered log records with newly configured appenders.
-    for (const logRecord of this.bufferAppender.flush()) {
-      this.get(logRecord.context).log(logRecord);
-    }
+        // Might be fancier way to do this with rxjs, but this works and is simple to understand
+        this.subscriptions.set(
+          contextName,
+          config$.subscribe((config) => {
+            this.log.debug(`Updating logging config for context [${contextName}]`);
+            loggingSystem.setContextConfig(contextParts, config);
+          })
+        );
+      },
+    };
   }
 
-  /**
-   * Disposes all loggers (closes log files, clears buffers etc.). Service is not usable after
-   * calling of this method until new config is provided via `upgrade` method.
-   * @returns Promise that is resolved once all loggers are successfully disposed.
-   */
-  public async stop() {
-    for (const appender of this.appenders.values()) {
-      await appender.dispose();
+  public start() {}
+
+  public stop() {
+    for (const [, subscription] of this.subscriptions) {
+      subscription.unsubscribe();
     }
-
-    await this.bufferAppender.dispose();
-
-    this.appenders.clear();
-    this.loggers.clear();
-  }
-
-  private createLogger(context: string, config: LoggingConfig | undefined) {
-    if (config === undefined) {
-      // If we don't have config yet, use `buffered` appender that will store all logged messages in the memory
-      // until the config is ready.
-      return new BaseLogger(context, LogLevel.All, [this.bufferAppender], this.asLoggerFactory());
-    }
-
-    const { level, appenders } = this.getLoggerConfigByContext(config, context);
-    const loggerLevel = LogLevel.fromId(level);
-    const loggerAppenders = appenders.map(appenderKey => this.appenders.get(appenderKey)!);
-
-    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
-  }
-
-  private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {
-    const loggerConfig = config.loggers.get(context);
-    if (loggerConfig !== undefined) {
-      return loggerConfig;
-    }
-
-    // If we don't have configuration for the specified context and it's the "nested" one (eg. `foo.bar.baz`),
-    // let's move up to the parent context (eg. `foo.bar`) and check if it has config we can rely on. Otherwise
-    // we fallback to the `root` context that should always be defined (enforced by configuration schema).
-    return this.getLoggerConfigByContext(config, LoggingConfig.getParentLoggerContext(context));
   }
 }

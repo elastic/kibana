@@ -133,7 +133,7 @@ export class Feature {
 
   constructor(protected readonly config: RecursiveReadonly<FeatureConfig>) {
     this.subFeatures = (config.subFeatures ?? []).map(
-      subFeatureConfig => new SubFeature(subFeatureConfig)
+      (subFeatureConfig) => new SubFeature(subFeatureConfig)
     );
   }
 

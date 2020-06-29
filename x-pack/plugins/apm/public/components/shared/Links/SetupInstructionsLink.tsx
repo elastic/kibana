@@ -4,35 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { KibanaLink } from './KibanaLink';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
   'xpack.apm.setupInstructionsButtonLabel',
   {
-    defaultMessage: 'Setup Instructions'
+    defaultMessage: 'Setup instructions',
   }
 );
 
+const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 // renders a filled button or a link as a kibana link to setup instructions
 export function SetupInstructionsLink({
-  buttonFill = false
+  buttonFill = false,
 }: {
   buttonFill?: boolean;
 }) {
+  const { core } = useApmPluginContext();
   return (
-    <KibanaLink path={'/home/tutorial/apm'}>
+    <EuiLink href={core.http.basePath.prepend('/app/home#/tutorial/apm')}>
       {buttonFill ? (
         <EuiButton size="s" color="primary" fill={buttonFill} iconType="help">
           {SETUP_INSTRUCTIONS_LABEL}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty size="s" color="primary" iconType="help">
-          {SETUP_INSTRUCTIONS_LABEL}
+        <EuiButtonEmpty size="s" color="primary" iconType="plusInCircle">
+          {ADD_DATA_LABEL}
         </EuiButtonEmpty>
       )}
-    </KibanaLink>
+    </EuiLink>
   );
 }

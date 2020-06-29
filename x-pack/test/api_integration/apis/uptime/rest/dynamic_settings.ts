@@ -12,7 +12,7 @@ import {
   DynamicSettings,
 } from '../../../../../plugins/uptime/common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../plugins/uptime/common/constants';
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('dynamic settings', () => {

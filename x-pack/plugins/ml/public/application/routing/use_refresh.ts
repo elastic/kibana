@@ -22,7 +22,7 @@ export interface Refresh {
 const refresh$: Observable<Refresh> = merge(
   mlTimefilterRefresh$,
   mlTimefilterTimeChange$,
-  annotationsRefresh$.pipe(map(d => ({ lastRefresh: d })))
+  annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))
 );
 
 export const useRefresh = () => {

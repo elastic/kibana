@@ -7,5 +7,5 @@
 import { Operation } from '../../types';
 
 export const hasVisibleChild = ({ children }: Operation) => {
-  return Boolean(children && children.some(child => child.visible));
+  return Boolean(children && children.some((child) => child.visible));
 };

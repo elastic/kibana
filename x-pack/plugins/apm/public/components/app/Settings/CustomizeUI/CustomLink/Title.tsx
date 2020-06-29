@@ -15,7 +15,7 @@ export const Title = () => (
           <EuiFlexItem grow={false}>
             <h1>
               {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
-                defaultMessage: 'Custom Links'
+                defaultMessage: 'Custom Links',
               })}
             </h1>
           </EuiFlexItem>
@@ -28,7 +28,7 @@ export const Title = () => (
                 'xpack.apm.settings.customizeUI.customLink.info',
                 {
                   defaultMessage:
-                    'These links will be shown in the Actions context menu for transactions.'
+                    'These links will be shown in the Actions context menu for transactions.',
                 }
               )}
             />

@@ -5,60 +5,34 @@
  */
 import {
   TemplateDeserialized,
-  TemplateV1Serialized,
-  TemplateV2Serialized,
+  LegacyTemplateSerialized,
+  TemplateSerialized,
   TemplateListItem,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function serializeV1Template(template: TemplateDeserialized): TemplateV1Serialized {
-  const {
-    name,
-    version,
-    order,
-    indexPatterns,
-    template: { settings, aliases, mappings } = {} as TemplateDeserialized['template'],
-  } = template;
-
-  const serializedTemplate: TemplateV1Serialized = {
-    name,
-    version,
-    order,
-    index_patterns: indexPatterns,
-    settings,
-    aliases,
-    mappings,
-  };
-
-  return serializedTemplate;
-}
-
-export function serializeV2Template(template: TemplateDeserialized): TemplateV2Serialized {
-  const { aliases, mappings, settings, ...templateV1serialized } = serializeV1Template(template);
+export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
+  const { version, priority, indexPatterns, template, composedOf } = templateDeserialized;
 
   return {
-    ...templateV1serialized,
-    template: {
-      aliases,
-      mappings,
-      settings,
-    },
-    priority: template.priority,
-    composed_of: template.composedOf,
+    version,
+    priority,
+    template,
+    index_patterns: indexPatterns,
+    composed_of: composedOf,
   };
 }
 
-export function deserializeV2Template(
-  templateEs: TemplateV2Serialized,
+export function deserializeTemplate(
+  templateEs: TemplateSerialized & { name: string },
   managedTemplatePrefix?: string
 ): TemplateDeserialized {
   const {
     name,
     version,
-    order,
     index_patterns: indexPatterns,
-    template,
+    template = {},
     priority,
     composed_of: composedOf,
   } = templateEs;
@@ -67,49 +41,92 @@ export function deserializeV2Template(
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
-    order,
+    priority,
     indexPatterns: indexPatterns.sort(),
     template,
-    ilmPolicy: settings && settings.index && settings.index.lifecycle,
-    isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
-    priority,
+    ilmPolicy: settings?.index?.lifecycle,
     composedOf,
     _kbnMeta: {
-      formatVersion: 2,
+      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
     },
   };
 
   return deserializedTemplate;
 }
 
-export function deserializeV1Template(
-  templateEs: TemplateV1Serialized,
+export function deserializeTemplateList(
+  indexTemplates: Array<{ name: string; index_template: TemplateSerialized }>,
+  managedTemplatePrefix?: string
+): TemplateListItem[] {
+  return indexTemplates.map(({ name, index_template: templateSerialized }) => {
+    const {
+      template: { mappings, settings, aliases },
+      ...deserializedTemplate
+    } = deserializeTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
+
+    return {
+      ...deserializedTemplate,
+      hasSettings: hasEntries(settings),
+      hasAliases: hasEntries(aliases),
+      hasMappings: hasEntries(mappings),
+    };
+  });
+}
+
+/**
+ * ------------------------------------------
+ * --------- LEGACY INDEX TEMPLATES ---------
+ * ------------------------------------------
+ */
+
+export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyTemplateSerialized {
+  const {
+    version,
+    order,
+    indexPatterns,
+    template: { settings, aliases, mappings },
+  } = template;
+
+  return {
+    version,
+    order,
+    index_patterns: indexPatterns,
+    settings,
+    aliases,
+    mappings,
+  };
+}
+
+export function deserializeLegacyTemplate(
+  templateEs: LegacyTemplateSerialized & { name: string },
   managedTemplatePrefix?: string
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
-  const deserializedTemplateV2 = deserializeV2Template(
+  const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
     managedTemplatePrefix
   );
 
   return {
-    ...deserializedTemplateV2,
+    ...deserializedTemplate,
+    order: templateEs.order,
     _kbnMeta: {
-      formatVersion: 1,
+      ...deserializedTemplate._kbnMeta,
+      isLegacy: true,
     },
   };
 }
 
-export function deserializeTemplateList(
-  indexTemplatesByName: { [key: string]: Omit<TemplateV1Serialized, 'name'> },
+export function deserializeLegacyTemplateList(
+  indexTemplatesByName: { [key: string]: LegacyTemplateSerialized },
   managedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeV1Template({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeLegacyTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

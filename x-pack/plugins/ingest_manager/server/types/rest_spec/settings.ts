@@ -11,7 +11,7 @@ export const PutSettingsRequestSchema = {
   body: schema.object({
     agent_auto_upgrade: schema.maybe(schema.boolean()),
     package_auto_upgrade: schema.maybe(schema.boolean()),
-    kibana_url: schema.maybe(schema.string()),
+    kibana_url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     kibana_ca_sha256: schema.maybe(schema.string()),
   }),
 };

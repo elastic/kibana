@@ -5,15 +5,14 @@
  */
 
 import { EuiBetaBadge } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
 const BetaBadgeContainer = styled.div`
-  right: ${theme.gutterTypes.gutterMedium};
+  right: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
   position: absolute;
-  top: ${theme.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
@@ -22,13 +21,13 @@ export function BetaBadge() {
     <BetaBadgeContainer>
       <EuiBetaBadge
         label={i18n.translate('xpack.apm.serviceMap.betaBadge', {
-          defaultMessage: 'Beta'
+          defaultMessage: 'Beta',
         })}
         tooltipContent={i18n.translate(
           'xpack.apm.serviceMap.betaTooltipMessage',
           {
             defaultMessage:
-              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+              'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
           }
         )}
       />

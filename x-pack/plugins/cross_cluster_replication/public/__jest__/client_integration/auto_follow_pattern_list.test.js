@@ -61,6 +61,50 @@ describe('<AutoFollowPatternList />', () => {
     });
   });
 
+  describe('when there are multiple pages of auto-follow patterns', () => {
+    let find;
+    let component;
+    let table;
+    let actions;
+    let form;
+
+    const autoFollowPatterns = [
+      getAutoFollowPatternMock({ name: 'unique', followPattern: '{{leader_index}}' }),
+    ];
+
+    for (let i = 0; i < 29; i++) {
+      autoFollowPatterns.push(
+        getAutoFollowPatternMock({ name: `${i}`, followPattern: '{{leader_index}}' })
+      );
+    }
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
+
+      // Mount the component
+      ({ find, component, table, actions, form } = setup());
+
+      await nextTick(); // Make sure that the http request is fulfilled
+      component.update();
+    });
+
+    test('pagination works', () => {
+      actions.clickPaginationNextButton();
+      const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
+
+      // Pagination defaults to 20 auto-follow patterns per page. We loaded 30 auto-follow patterns,
+      // so the second page should have 10.
+      expect(tableCellsValues.length).toBe(10);
+    });
+
+    // Skipped until we can figure out how to get this test to work.
+    test.skip('search works', () => {
+      form.setInputValue(find('autoFollowPatternSearch'), 'unique');
+      const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+  });
+
   describe('when there are auto-follow patterns', () => {
     let find;
     let exists;
@@ -230,11 +274,7 @@ describe('<AutoFollowPatternList />', () => {
 
       test('should have a "settings" section', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(
-          find('settingsSection')
-            .find('h3')
-            .text()
-        ).toEqual('Settings');
+        expect(find('settingsSection').find('h3').text()).toEqual('Settings');
         expect(exists('settingsValues')).toBe(true);
       });
 
@@ -325,7 +365,7 @@ describe('<AutoFollowPatternList />', () => {
 
         expect(exists('autoFollowPatternDetail.errors')).toBe(true);
         expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
-        expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([
+        expect(find('autoFollowPatternDetail.recentError').map((error) => error.text())).toEqual([
           'April 16th, 2020 8:00:00 PM: bar',
         ]);
       });

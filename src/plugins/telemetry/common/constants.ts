@@ -49,7 +49,7 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to Advanced Settings.
  */
-export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
+export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
 
 /**
  * Link to the Elastic Telemetry privacy statement.
@@ -57,37 +57,6 @@ export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
 export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
 
 /**
- * The type name used to publish telemetry plugin stats.
- */
-export const TELEMETRY_STATS_TYPE = 'telemetry';
-
-/**
  * The endpoint version when hitting the remote telemetry service
  */
 export const ENDPOINT_VERSION = 'v2';
-
-/**
- * UI metric usage type
- */
-export const UI_METRIC_USAGE_TYPE = 'ui_metric';
-
-/**
- * Application Usage type
- */
-export const APPLICATION_USAGE_TYPE = 'application_usage';
-
-/**
- * The type name used within the Monitoring index to publish management stats.
- */
-export const KIBANA_STACK_MANAGEMENT_STATS_TYPE = 'stack_management';
-
-/**
- * The type name used to publish Kibana usage stats.
- * NOTE: this string shows as-is in the stats API as a field name for the kibana usage stats
- */
-export const KIBANA_USAGE_TYPE = 'kibana';
-
-/**
- * The type name used to publish Kibana usage stats in the formatted as bulk.
- */
-export const KIBANA_STATS_TYPE = 'kibana_stats';

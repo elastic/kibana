@@ -8,7 +8,7 @@ import { DeepPartial } from 'utility-types';
 import { AggregationInputMap } from '../../../../typings/elasticsearch/aggregations';
 import {
   ESSearchRequest,
-  ESSearchBody
+  ESSearchBody,
 } from '../../../../typings/elasticsearch';
 import { Projection } from '../../typings';
 

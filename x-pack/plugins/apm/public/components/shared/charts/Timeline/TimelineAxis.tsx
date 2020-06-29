@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
+import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
+import { useTheme } from '../../../../hooks/useTheme';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import { Mark } from './';
@@ -29,7 +29,7 @@ const getXAxisTickValues = (
   const lowerBound = topTraceDuration - padding;
   const upperBound = topTraceDuration + padding;
 
-  return tickValues.filter(value => {
+  return tickValues.filter((value) => {
     const isInRange = inRange(value, lowerBound, upperBound);
     return !isInRange && value !== topTraceDuration;
   });
@@ -42,11 +42,12 @@ interface TimelineAxisProps {
   topTraceDuration: number;
 }
 
-export function TimelineAxis({
+export const TimelineAxis = ({
   plotValues,
   marks = [],
-  topTraceDuration
-}: TimelineAxisProps) {
+  topTraceDuration,
+}: TimelineAxisProps) => {
+  const theme = useTheme();
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
@@ -59,11 +60,11 @@ export function TimelineAxis({
           <div
             style={{
               position: 'absolute',
-              borderBottom: `1px solid ${theme.euiColorMediumShade}`,
+              borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
               height: px(margins.top),
               zIndex: 2,
               width: '100%',
-              ...style
+              ...style,
             }}
           >
             <XYPlot
@@ -73,7 +74,7 @@ export function TimelineAxis({
               margin={{
                 top: margins.top,
                 left: margins.left,
-                right: margins.right
+                right: margins.right,
               }}
               xDomain={xDomain}
             >
@@ -85,7 +86,7 @@ export function TimelineAxis({
                 tickFormat={(time?: number) => tickFormatter(time).formatted}
                 tickPadding={20}
                 style={{
-                  text: { fill: theme.euiColorDarkShade }
+                  text: { fill: theme.eui.euiColorDarkShade },
                 }}
               />
 
@@ -97,7 +98,7 @@ export function TimelineAxis({
                 />
               )}
 
-              {marks.map(mark => (
+              {marks.map((mark) => (
                 <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
               ))}
             </XYPlot>
@@ -106,4 +107,4 @@ export function TimelineAxis({
       }}
     </Sticky>
   );
-}
+};

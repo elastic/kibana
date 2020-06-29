@@ -9,8 +9,8 @@ import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
 import * as labels from './translations';
 
-const WrapFieldSearch = styled(EuiFieldSearch)`
-  min-width: 700px;
+const WrapFieldSearch = styled('div')`
+  max-width: 700px;
 `;
 
 interface Props {
@@ -23,12 +23,15 @@ export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
   };
 
   return (
-    <WrapFieldSearch
-      data-test-subj="uptimeCertSearch"
-      placeholder={labels.SEARCH_CERTS}
-      onChange={onChange}
-      isClearable={true}
-      aria-label={labels.SEARCH_CERTS}
-    />
+    <WrapFieldSearch>
+      <EuiFieldSearch
+        data-test-subj="uptimeCertSearch"
+        placeholder={labels.SEARCH_CERTS}
+        onChange={onChange}
+        isClearable={true}
+        aria-label={labels.SEARCH_CERTS}
+        fullWidth={true}
+      />
+    </WrapFieldSearch>
   );
 };

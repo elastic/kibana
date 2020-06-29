@@ -25,13 +25,13 @@ export const multiSelectComponent: Record<string, FuncType> = {
   // This deSerializer takes the previously selected options and map them
   // against the default select options values.
   selectedValueToOptions(selectOptions) {
-    return defaultFormValue => {
+    return (defaultFormValue) => {
       // If there are no default form value, it means that no previous value has been selected.
       if (!defaultFormValue) {
         return selectOptions;
       }
 
-      return (selectOptions as EuiSelectableOption[]).map(option => ({
+      return (selectOptions as EuiSelectableOption[]).map((option) => ({
         ...option,
         checked: (defaultFormValue as string[]).includes(option.label) ? 'on' : undefined,
       }));

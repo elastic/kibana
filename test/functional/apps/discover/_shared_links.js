@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -71,20 +71,20 @@ export default function({ getService, getPageObjects }) {
 
     describe('shared links with state in query', async () => {
       let teardown;
-      before(async function() {
+      before(async function () {
         teardown = await setup({ storeStateInSessionStorage: false });
       });
 
-      after(async function() {
+      after(async function () {
         await teardown();
       });
 
-      describe('permalink', function() {
-        it('should allow for copying the snapshot URL', async function() {
+      describe('permalink', function () {
+        it('should allow for copying the snapshot URL', async function () {
           const expectedUrl =
             baseUrl +
-            '/app/kibana?_t=1453775307251#' +
-            '/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
+            '/app/discover?_t=1453775307251#' +
+            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
             ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
             "-23T18:31:44.000Z'))&_a=(columns:!(_source),filters:!(),index:'logstash-" +
             "*',interval:auto,query:(language:kuery,query:'')" +
@@ -96,7 +96,7 @@ export default function({ getService, getPageObjects }) {
           );
         });
 
-        it('should allow for copying the snapshot URL as a short URL', async function() {
+        it('should allow for copying the snapshot URL as a short URL', async function () {
           const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
           await PageObjects.share.checkShortenUrl();
           await retry.try(async () => {
@@ -105,11 +105,11 @@ export default function({ getService, getPageObjects }) {
           });
         });
 
-        it('should allow for copying the saved object URL', async function() {
+        it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
             baseUrl +
-            '/app/kibana#' +
-            '/discover/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
+            '/app/discover#' +
+            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
             '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
             "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
             "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
@@ -124,16 +124,16 @@ export default function({ getService, getPageObjects }) {
 
     describe('shared links with state in sessionStorage', async () => {
       let teardown;
-      before(async function() {
+      before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
       });
 
-      after(async function() {
+      after(async function () {
         await teardown();
       });
 
-      describe('permalink', function() {
-        it('should allow for copying the snapshot URL as a short URL and should open it', async function() {
+      describe('permalink', function () {
+        it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
           const re = new RegExp(baseUrl + '/goto/[0-9a-f]{32}$');
           await PageObjects.share.checkShortenUrl();
           let actualUrl;

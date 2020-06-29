@@ -23,6 +23,6 @@ export interface NativeRendererProps<T> extends HTMLAttributes<HTMLDivElement> {
 export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeRendererProps<T>) {
   return React.createElement(tag || 'div', {
     ...rest,
-    ref: el => el && render(el, nativeProps),
+    ref: (el) => el && render(el, nativeProps),
   });
 }

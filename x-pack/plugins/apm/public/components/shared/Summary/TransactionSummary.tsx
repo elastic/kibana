@@ -44,7 +44,7 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
 const TransactionSummary = ({
   transaction,
   totalDuration,
-  errorCount
+  errorCount,
 }: Props) => {
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
@@ -57,7 +57,7 @@ const TransactionSummary = ({
     errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,
     transaction.user_agent ? (
       <UserAgentSummaryItem {...transaction.user_agent} />
-    ) : null
+    ) : null,
   ];
 
   return <Summary items={items} />;

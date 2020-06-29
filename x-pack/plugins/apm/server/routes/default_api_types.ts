@@ -9,7 +9,7 @@ import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 
 export const rangeRt = t.type({
   start: dateAsStringRt,
-  end: dateAsStringRt
+  end: dateAsStringRt,
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });

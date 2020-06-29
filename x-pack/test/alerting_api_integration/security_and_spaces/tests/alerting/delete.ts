@@ -32,13 +32,13 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle delete alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -52,7 +52,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 error: 'Not Found',
                 message: 'Not Found',
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert');
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
               // Ensure task still exists
               await getScheduledTask(createdAlert.scheduledTaskId);
               break;
@@ -74,14 +74,14 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't delete alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix('other')}/api/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -111,13 +111,15 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
         it('should still be able to delete alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/saved_objects/alert/${createdAlert.id}`)
+            .put(
+              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+            )
             .set('kbn-xsrf', 'foo')
             .send({
               attributes: {
@@ -127,7 +129,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -141,7 +143,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
                 error: 'Not Found',
                 message: 'Not Found',
               });
-              objectRemover.add(space.id, createdAlert.id, 'alert');
+              objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
               // Ensure task still exists
               await getScheduledTask(createdAlert.scheduledTaskId);
               break;

@@ -13,7 +13,7 @@ import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/wat
 
 export const MaybeViewTraceLink = ({
   transaction,
-  waterfall
+  waterfall,
 }: {
   transaction: ITransaction;
   waterfall: IWaterfall;
@@ -21,7 +21,7 @@ export const MaybeViewTraceLink = ({
   const viewFullTraceButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
     {
-      defaultMessage: 'View full trace'
+      defaultMessage: 'View full trace',
     }
   );
 
@@ -34,7 +34,7 @@ export const MaybeViewTraceLink = ({
           content={i18n.translate(
             'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
             {
-              defaultMessage: 'The trace parent cannot be found'
+              defaultMessage: 'The trace parent cannot be found',
             }
           )}
         >
@@ -56,7 +56,7 @@ export const MaybeViewTraceLink = ({
           content={i18n.translate(
             'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
             {
-              defaultMessage: 'Currently viewing the full trace'
+              defaultMessage: 'Currently viewing the full trace',
             }
           )}
         >

@@ -20,7 +20,7 @@
 import * as utils from '../';
 
 describe('Utils class', () => {
-  test('extract deprecation messages', function() {
+  test('extract deprecation messages', function () {
     expect(
       utils.extractDeprecationMessages(
         '299 Elasticsearch-6.0.0-alpha1-SNAPSHOT-abcdef1 "this is a warning" "Mon, 27 Feb 2017 14:52:14 GMT"'
@@ -70,7 +70,7 @@ describe('Utils class', () => {
     ]);
   });
 
-  test('unescape', function() {
+  test('unescape', function () {
     expect(utils.unescape('escaped backslash \\\\')).toEqual('escaped backslash \\');
     expect(utils.unescape('a pair of \\"escaped quotes\\"')).toEqual('a pair of "escaped quotes"');
     expect(utils.unescape('escaped quotes do not have to come in pairs: \\"')).toEqual(
@@ -78,7 +78,7 @@ describe('Utils class', () => {
     );
   });
 
-  test('split on unquoted comma followed by space', function() {
+  test('split on unquoted comma followed by space', function () {
     expect(utils.splitOnUnquotedCommaSpace('a, b')).toEqual(['a', 'b']);
     expect(utils.splitOnUnquotedCommaSpace('a,b, c')).toEqual(['a,b', 'c']);
     expect(utils.splitOnUnquotedCommaSpace('"a, b"')).toEqual(['"a, b"']);

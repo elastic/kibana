@@ -91,7 +91,7 @@ class RuleEditorFlyoutUI extends Component {
     }
   }
 
-  showFlyout = anomaly => {
+  showFlyout = (anomaly) => {
     let ruleIndex = -1;
     const job = mlJobService.getJob(anomaly.jobId);
     if (job === undefined) {
@@ -144,13 +144,13 @@ class RuleEditorFlyoutUI extends Component {
       // Load the current list of filters. These are used for configuring rule scope.
       ml.filters
         .filters()
-        .then(filters => {
-          const filterListIds = filters.map(filter => filter.filter_id);
+        .then((filters) => {
+          const filterListIds = filters.map((filter) => filter.filter_id);
           this.setState({
             filterListIds,
           });
         })
-        .catch(resp => {
+        .catch((resp) => {
           console.log('Error loading list of filters:', resp);
           const { toasts } = this.props.kibana.services.notifications;
           toasts.addDanger(
@@ -169,7 +169,7 @@ class RuleEditorFlyoutUI extends Component {
     this.setState({ isFlyoutVisible: false });
   };
 
-  setEditRuleIndex = ruleIndex => {
+  setEditRuleIndex = (ruleIndex) => {
     const detectorIndex = this.state.anomaly.detectorIndex;
     const detector = this.state.job.analysis_config.detectors[detectorIndex];
     const rules = detector.custom_rules;
@@ -182,7 +182,7 @@ class RuleEditorFlyoutUI extends Component {
     const isScopeEnabled = rule.scope !== undefined && Object.keys(rule.scope).length > 0;
     if (isScopeEnabled === true) {
       // Add 'enabled:true' to mark them as selected in the UI.
-      Object.keys(rule.scope).forEach(field => {
+      Object.keys(rule.scope).forEach((field) => {
         rule.scope[field].enabled = true;
       });
     }
@@ -195,9 +195,9 @@ class RuleEditorFlyoutUI extends Component {
     });
   };
 
-  onSkipResultChange = e => {
+  onSkipResultChange = (e) => {
     const checked = e.target.checked;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
       const idx = actions.indexOf(ACTION.SKIP_RESULT);
       if (idx === -1 && checked) {
@@ -212,9 +212,9 @@ class RuleEditorFlyoutUI extends Component {
     });
   };
 
-  onSkipModelUpdateChange = e => {
+  onSkipModelUpdateChange = (e) => {
     const checked = e.target.checked;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
       const idx = actions.indexOf(ACTION.SKIP_MODEL_UPDATE);
       if (idx === -1 && checked) {
@@ -229,9 +229,9 @@ class RuleEditorFlyoutUI extends Component {
     });
   };
 
-  onConditionsEnabledChange = e => {
+  onConditionsEnabledChange = (e) => {
     const isConditionsEnabled = e.target.checked;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       let conditions;
       if (isConditionsEnabled === false) {
         // Clear any conditions that have been added.
@@ -249,7 +249,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   addCondition = () => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const conditions = [...prevState.rule.conditions];
       conditions.push(getNewConditionDefaults());
 
@@ -260,7 +260,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   updateCondition = (index, appliesTo, operator, value) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const conditions = [...prevState.rule.conditions];
       if (index < conditions.length) {
         conditions[index] = {
@@ -276,8 +276,8 @@ class RuleEditorFlyoutUI extends Component {
     });
   };
 
-  deleteCondition = index => {
-    this.setState(prevState => {
+  deleteCondition = (index) => {
+    this.setState((prevState) => {
       const conditions = [...prevState.rule.conditions];
       if (index < conditions.length) {
         conditions.splice(index, 1);
@@ -289,9 +289,9 @@ class RuleEditorFlyoutUI extends Component {
     });
   };
 
-  onScopeEnabledChange = e => {
+  onScopeEnabledChange = (e) => {
     const isScopeEnabled = e.target.checked;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       const rule = { ...prevState.rule };
       if (isScopeEnabled === false) {
         // Clear scope property.
@@ -306,7 +306,7 @@ class RuleEditorFlyoutUI extends Component {
   };
 
   updateScope = (fieldName, filterId, filterType, enabled) => {
-    this.setState(prevState => {
+    this.setState((prevState) => {
       let scope = { ...prevState.rule.scope };
       if (scope === undefined) {
         scope = {};
@@ -338,7 +338,7 @@ class RuleEditorFlyoutUI extends Component {
     const detectorIndex = anomaly.detectorIndex;
 
     saveJobRule(job, detectorIndex, ruleIndex, editedRule)
-      .then(resp => {
+      .then((resp) => {
         if (resp.success) {
           toasts.add({
             title: i18n.translate(
@@ -370,7 +370,7 @@ class RuleEditorFlyoutUI extends Component {
           );
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
         toasts.addDanger(
           i18n.translate(
@@ -384,14 +384,14 @@ class RuleEditorFlyoutUI extends Component {
       });
   };
 
-  deleteRuleAtIndex = index => {
+  deleteRuleAtIndex = (index) => {
     const { toasts } = this.props.kibana.services.notifications;
     const { job, anomaly } = this.state;
     const jobId = job.job_id;
     const detectorIndex = anomaly.detectorIndex;
 
     deleteJobRule(job, detectorIndex, index)
-      .then(resp => {
+      .then((resp) => {
         if (resp.success) {
           toasts.addSuccess(
             i18n.translate(
@@ -402,7 +402,14 @@ class RuleEditorFlyoutUI extends Component {
               }
             )
           );
-          this.closeFlyout();
+          const updatedJob = mlJobService.getJob(anomaly.jobId);
+          const updatedDetector = updatedJob.analysis_config.detectors[detectorIndex];
+          const updatedRules = updatedDetector.custom_rules;
+          if (!updatedRules) {
+            this.closeFlyout();
+          } else {
+            this.setState({ job: { ...updatedJob } });
+          }
         } else {
           toasts.addDanger(
             i18n.translate(
@@ -415,7 +422,7 @@ class RuleEditorFlyoutUI extends Component {
           );
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
         let errorMessage = i18n.translate(
           'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
@@ -456,7 +463,7 @@ class RuleEditorFlyoutUI extends Component {
           this.closeFlyout();
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(`Error adding ${item} to filter ${filterId}:`, error);
         toasts.addDanger(
           i18n.translate(

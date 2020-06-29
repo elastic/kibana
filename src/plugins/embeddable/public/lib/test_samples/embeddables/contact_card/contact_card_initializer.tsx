@@ -59,7 +59,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
               <EuiFieldText
                 name="popfirst"
                 value={this.state.firstName}
-                onChange={e => this.setState({ firstName: e.target.value })}
+                onChange={(e) => this.setState({ firstName: e.target.value })}
               />
             </EuiFormRow>
 
@@ -68,7 +68,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
                 name="popfirst"
                 value={this.state.lastName}
                 placeholder="optional"
-                onChange={e => this.setState({ lastName: e.target.value })}
+                onChange={(e) => this.setState({ lastName: e.target.value })}
               />
             </EuiFormRow>
           </EuiForm>

@@ -6,8 +6,8 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('apis Kerberos', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('apis Kerberos', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./security'));
   });

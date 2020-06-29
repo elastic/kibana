@@ -11,24 +11,24 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
   Filter,
-  FilterKey
+  FilterKey,
 } from '../../../../../../../common/custom_link/custom_link_types';
 import {
   DEFAULT_OPTION,
   FILTER_SELECT_OPTIONS,
-  getSelectOptions
+  getSelectOptions,
 } from './helper';
 
 export const FiltersSection = ({
   filters,
-  onChangeFilters
+  onChangeFilters,
 }: {
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
@@ -68,7 +68,7 @@ export const FiltersSection = ({
           {i18n.translate(
             'xpack.apm.settings.customizeUI.customLink.flyout.filters.title',
             {
-              defaultMessage: 'Filters'
+              defaultMessage: 'Filters',
             }
           )}
         </h3>
@@ -79,7 +79,7 @@ export const FiltersSection = ({
           'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
           {
             defaultMessage:
-              'Use the filter options to scope them to only appear for specific services.'
+              'Use the filter options to scope them to only appear for specific services.',
           }
         )}
       </EuiText>
@@ -102,10 +102,10 @@ export const FiltersSection = ({
                 prepend={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyout.filters.prepend',
                   {
-                    defaultMessage: 'Field'
+                    defaultMessage: 'Field',
                   }
                 )}
-                onChange={e =>
+                onChange={(e) =>
                   onChangeFilter(e.target.value as FilterKey, value, idx)
                 }
                 isInvalid={
@@ -122,7 +122,7 @@ export const FiltersSection = ({
                   'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
                 )}
-                onChange={e => onChangeFilter(key, e.target.value, idx)}
+                onChange={(e) => onChangeFilter(key, e.target.value, idx)}
                 value={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
               />
@@ -151,7 +151,7 @@ export const FiltersSection = ({
 
 const AddFilterButton = ({
   onClick,
-  isDisabled
+  isDisabled,
 }: {
   onClick: () => void;
   isDisabled: boolean;
@@ -164,7 +164,7 @@ const AddFilterButton = ({
     {i18n.translate(
       'xpack.apm.settings.customizeUI.customLink.flyout.filters.addAnotherFilter',
       {
-        defaultMessage: 'Add another filter'
+        defaultMessage: 'Add another filter',
       }
     )}
   </EuiButtonEmpty>

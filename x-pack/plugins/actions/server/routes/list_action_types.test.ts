@@ -28,7 +28,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -80,7 +80,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -125,7 +125,7 @@ describe('listActionTypesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

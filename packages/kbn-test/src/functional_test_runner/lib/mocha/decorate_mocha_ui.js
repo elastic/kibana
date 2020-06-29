@@ -57,12 +57,12 @@ export function decorateMochaUi(lifecycle, context) {
           throw new Error(`Unexpected arguments to ${name}(${argumentsList.join(', ')})`);
         }
 
-        argumentsList[1] = function() {
+        argumentsList[1] = function () {
           before(async () => {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = tags => {
+          this.tags = (tags) => {
             this._tags = [].concat(this._tags || [], tags);
           };
 

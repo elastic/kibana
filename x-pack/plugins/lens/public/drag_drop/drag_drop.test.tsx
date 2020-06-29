@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, shallow, mount } from 'enzyme';
+import { render, mount } from 'enzyme';
 import { DragDrop } from './drag_drop';
 import { ChildDragDropProvider } from './providers';
 
@@ -24,7 +24,7 @@ describe('DragDrop', () => {
 
   test('dragover calls preventDefault if droppable is true', () => {
     const preventDefault = jest.fn();
-    const component = shallow(<DragDrop droppable>Hello!</DragDrop>);
+    const component = mount(<DragDrop droppable>Hello!</DragDrop>);
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -33,7 +33,7 @@ describe('DragDrop', () => {
 
   test('dragover does not call preventDefault if droppable is false', () => {
     const preventDefault = jest.fn();
-    const component = shallow(<DragDrop>Hello!</DragDrop>);
+    const component = mount(<DragDrop>Hello!</DragDrop>);
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 

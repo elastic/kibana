@@ -24,7 +24,7 @@ export function createTopNavDirective() {
   return {
     restrict: 'E',
     template: '',
-    compile: elem => {
+    compile: (elem) => {
       const child = document.createElement('kbn-top-nav-helper');
 
       // Copy attributes to the child directive
@@ -44,7 +44,7 @@ export function createTopNavDirective() {
         $scope.$watch(
           () => {
             const config = $scope.$eval($attr.config) || [];
-            return config.map(item => {
+            return config.map((item) => {
               // Copy key into id, as it's a reserved react propery.
               // This is done for Angular directive backward compatibility.
               // In React only id is recognized.
@@ -59,7 +59,7 @@ export function createTopNavDirective() {
               return item.disableButton;
             });
           },
-          newVal => {
+          (newVal) => {
             $scope.disabledButtons = newVal;
           },
           true
@@ -71,7 +71,7 @@ export function createTopNavDirective() {
   };
 }
 
-export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
+export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
   return reactDirective(TopNavMenu, [
     ['config', { watchDepth: 'value' }],
     ['disabledButtons', { watchDepth: 'reference' }],
@@ -94,11 +94,11 @@ export const createTopNavHelper = ({ TopNavMenu }) => reactDirective => {
     // All modifiers default to true.
     // Set to false to hide subcomponents.
     'showSearchBar',
-    'showFilterBar',
     'showQueryBar',
     'showQueryInput',
-    'showDatePicker',
     'showSaveQuery',
+    'showDatePicker',
+    'showFilterBar',
 
     'appName',
     'screenTitle',

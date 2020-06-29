@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {
   function getTooltipMessage(shard) {
-    const isRelocating = node => includes(node.node_ids, shard.relocating_node);
+    const isRelocating = (node) => includes(node.node_ids, shard.relocating_node);
     const nodeName = get(
-      find(nodes, n => isRelocating(n)),
+      find(nodes, (n) => isRelocating(n)),
       'name'
     );
 
@@ -43,7 +43,7 @@ export function decorateShards(shards, nodes) {
     return capitalize(shard.state.toLowerCase());
   }
 
-  return shards.map(shard => {
+  return shards.map((shard) => {
     const node = nodes[shard.node];
     shard.nodeName = (node && node.name) || null;
     shard.type = 'shard';

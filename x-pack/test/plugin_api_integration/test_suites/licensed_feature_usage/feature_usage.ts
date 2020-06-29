@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const notifyUsage = async (featureName: string, usedAt: number) => {
@@ -20,15 +20,39 @@ export default function({ getService }: FtrProviderContext) {
   describe('/api/licensing/feature_usage', () => {
     it('returns a map of last feature usages', async () => {
       const timeA = Date.now();
-      await notifyUsage('test_feature_a', timeA);
+      await notifyUsage('Test feature C', timeA);
 
       const timeB = Date.now() - 4567;
-      await notifyUsage('test_feature_b', timeB);
+      await notifyUsage('Test feature B', timeB);
 
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
 
-      expect(response.body.test_feature_a).to.eql(toISO(timeA));
-      expect(response.body.test_feature_b).to.eql(toISO(timeB));
+      const testFeaturesResponse = {
+        ...response.body,
+        features: response.body.features.filter((feature: { name: string }) =>
+          feature.name.startsWith('Test feature ')
+        ),
+      };
+
+      expect(testFeaturesResponse).to.eql({
+        features: [
+          {
+            last_used: null,
+            license_level: 'basic',
+            name: 'Test feature A',
+          },
+          {
+            last_used: toISO(timeB),
+            license_level: 'gold',
+            name: 'Test feature B',
+          },
+          {
+            last_used: toISO(timeA),
+            license_level: 'platinum',
+            name: 'Test feature C',
+          },
+        ],
+      });
     });
   });
 }

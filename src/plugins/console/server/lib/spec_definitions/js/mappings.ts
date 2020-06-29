@@ -177,7 +177,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
                   'week_date_time',
                   'week_date_time_no_millis',
                 ],
-                function(s) {
+                function (s) {
                   return ['basic_' + s, 'strict_' + s];
                 }
               ),

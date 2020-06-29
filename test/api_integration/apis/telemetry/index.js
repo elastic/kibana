@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('Telemetry', () => {
     loadTestFile(require.resolve('./telemetry_local'));
     loadTestFile(require.resolve('./opt_in'));

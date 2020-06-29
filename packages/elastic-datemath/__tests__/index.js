@@ -36,7 +36,7 @@ function momentClone() {
   return require('moment');
 }
 
-describe('dateMath', function() {
+describe('dateMath', function () {
   // Test each of these intervals when testing relative time
   const spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
   const anchor = '2014-01-01T06:06:06.666Z';
@@ -45,53 +45,53 @@ describe('dateMath', function() {
   const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
   let clock;
 
-  describe('errors', function() {
-    it('should return undefined if passed something falsy', function() {
+  describe('errors', function () {
+    it('should return undefined if passed something falsy', function () {
       expect(dateMath.parse()).to.be(undefined);
     });
 
-    it('should return undefined if I pass an operator besides [+-/]', function() {
+    it('should return undefined if I pass an operator besides [+-/]', function () {
       expect(dateMath.parse('now&1d')).to.be(undefined);
     });
 
-    it('should return undefined if I pass a unit besides' + spans.toString(), function() {
+    it('should return undefined if I pass a unit besides' + spans.toString(), function () {
       expect(dateMath.parse('now+5f')).to.be(undefined);
     });
 
-    it('should return undefined if rounding unit is not 1', function() {
+    it('should return undefined if rounding unit is not 1', function () {
       expect(dateMath.parse('now/2y')).to.be(undefined);
       expect(dateMath.parse('now/0.5y')).to.be(undefined);
     });
 
-    it('should not go into an infinite loop when missing a unit', function() {
+    it('should not go into an infinite loop when missing a unit', function () {
       expect(dateMath.parse('now-0')).to.be(undefined);
       expect(dateMath.parse('now-00')).to.be(undefined);
       expect(dateMath.parse('now-000')).to.be(undefined);
     });
 
-    describe('forceNow', function() {
-      it('should throw an Error if passed a string', function() {
+    describe('forceNow', function () {
+      it('should throw an Error if passed a string', function () {
         const fn = () => dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
         expect(fn).to.throwError();
       });
 
-      it('should throw an Error if passed a moment', function() {
+      it('should throw an Error if passed a moment', function () {
         expect(() => dateMath.parse('now', { forceNow: moment() })).to.throwError();
       });
 
-      it('should throw an Error if passed an invalid date', function() {
+      it('should throw an Error if passed an invalid date', function () {
         expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).to.throwError();
       });
     });
   });
 
-  describe('objects and strings', function() {
+  describe('objects and strings', function () {
     let mmnt;
     let date;
     let string;
     let now;
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
       mmnt = moment(anchor);
@@ -99,61 +99,61 @@ describe('dateMath', function() {
       string = mmnt.format(format);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 
-    it('should return the same moment if passed a moment', function() {
+    it('should return the same moment if passed a moment', function () {
       expect(dateMath.parse(mmnt)).to.eql(mmnt);
     });
 
-    it('should return a moment if passed a date', function() {
+    it('should return a moment if passed a date', function () {
       expect(dateMath.parse(date).format(format)).to.eql(mmnt.format(format));
     });
 
-    it('should return a moment if passed an ISO8601 string', function() {
+    it('should return a moment if passed an ISO8601 string', function () {
       expect(dateMath.parse(string).format(format)).to.eql(mmnt.format(format));
     });
 
-    it('should return the current time when parsing now', function() {
+    it('should return the current time when parsing now', function () {
       expect(dateMath.parse('now').format(format)).to.eql(now.format(format));
     });
 
-    it('should use the forceNow parameter when parsing now', function() {
+    it('should use the forceNow parameter when parsing now', function () {
       expect(dateMath.parse('now', { forceNow: anchoredDate }).valueOf()).to.eql(unix);
     });
   });
 
-  describe('subtraction', function() {
+  describe('subtraction', function () {
     let now;
     let anchored;
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 
-    [5, 12, 247].forEach(len => {
-      spans.forEach(span => {
+    [5, 12, 247].forEach((len) => {
+      spans.forEach((span) => {
         const nowEx = `now-${len}${span}`;
         const thenEx = `${anchor}||-${len}${span}`;
 
-        it('should return ' + len + span + ' ago', function() {
+        it('should return ' + len + span + ' ago', function () {
           const parsed = dateMath.parse(nowEx).format(format);
           expect(parsed).to.eql(now.subtract(len, span).format(format));
         });
 
-        it('should return ' + len + span + ' before ' + anchor, function() {
+        it('should return ' + len + span + ' before ' + anchor, function () {
           const parsed = dateMath.parse(thenEx).format(format);
           expect(parsed).to.eql(anchored.subtract(len, span).format(format));
         });
 
-        it('should return ' + len + span + ' before forceNow', function() {
+        it('should return ' + len + span + ' before forceNow', function () {
           const parsed = dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf();
           expect(parsed).to.eql(anchored.subtract(len, span).valueOf());
         });
@@ -161,36 +161,36 @@ describe('dateMath', function() {
     });
   });
 
-  describe('addition', function() {
+  describe('addition', function () {
     let now;
     let anchored;
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 
-    [5, 12, 247].forEach(len => {
-      spans.forEach(span => {
+    [5, 12, 247].forEach((len) => {
+      spans.forEach((span) => {
         const nowEx = `now+${len}${span}`;
         const thenEx = `${anchor}||+${len}${span}`;
 
-        it('should return ' + len + span + ' from now', function() {
+        it('should return ' + len + span + ' from now', function () {
           expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
         });
 
-        it('should return ' + len + span + ' after ' + anchor, function() {
+        it('should return ' + len + span + ' after ' + anchor, function () {
           expect(dateMath.parse(thenEx).format(format)).to.eql(
             anchored.add(len, span).format(format)
           );
         });
 
-        it('should return ' + len + span + ' after forceNow', function() {
+        it('should return ' + len + span + ' after forceNow', function () {
           expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(
             anchored.add(len, span).valueOf()
           );
@@ -199,40 +199,40 @@ describe('dateMath', function() {
     });
   });
 
-  describe('rounding', function() {
+  describe('rounding', function () {
     let now;
     let anchored;
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 
-    spans.forEach(span => {
-      it(`should round now to the beginning of the ${span}`, function() {
+    spans.forEach((span) => {
+      it(`should round now to the beginning of the ${span}`, function () {
         expect(dateMath.parse('now/' + span).format(format)).to.eql(
           now.startOf(span).format(format)
         );
       });
 
-      it(`should round now to the beginning of forceNow's ${span}`, function() {
+      it(`should round now to the beginning of forceNow's ${span}`, function () {
         expect(dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()).to.eql(
           anchored.startOf(span).valueOf()
         );
       });
 
-      it(`should round now to the end of the ${span}`, function() {
+      it(`should round now to the end of the ${span}`, function () {
         expect(dateMath.parse('now/' + span, { roundUp: true }).format(format)).to.eql(
           now.endOf(span).format(format)
         );
       });
 
-      it(`should round now to the end of forceNow's ${span}`, function() {
+      it(`should round now to the end of forceNow's ${span}`, function () {
         expect(
           dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate }).valueOf()
         ).to.eql(anchored.endOf(span).valueOf());
@@ -240,61 +240,46 @@ describe('dateMath', function() {
     });
   });
 
-  describe('math and rounding', function() {
+  describe('math and rounding', function () {
     let now;
     let anchored;
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 
-    it('should round to the nearest second with 0 value', function() {
+    it('should round to the nearest second with 0 value', function () {
       const val = dateMath.parse('now-0s/s').format(format);
       expect(val).to.eql(now.startOf('s').format(format));
     });
 
-    it('should subtract 17s, rounded to the nearest second', function() {
+    it('should subtract 17s, rounded to the nearest second', function () {
       const val = dateMath.parse('now-17s/s').format(format);
-      expect(val).to.eql(
-        now
-          .startOf('s')
-          .subtract(17, 's')
-          .format(format)
-      );
+      expect(val).to.eql(now.startOf('s').subtract(17, 's').format(format));
     });
 
-    it('should add 555ms, rounded to the nearest millisecond', function() {
+    it('should add 555ms, rounded to the nearest millisecond', function () {
       const val = dateMath.parse('now+555ms/ms').format(format);
-      expect(val).to.eql(
-        now
-          .add(555, 'ms')
-          .startOf('ms')
-          .format(format)
-      );
+      expect(val).to.eql(now.add(555, 'ms').startOf('ms').format(format));
     });
 
-    it('should subtract 555ms, rounded to the nearest second', function() {
+    it('should subtract 555ms, rounded to the nearest second', function () {
       const val = dateMath.parse('now-555ms/s').format(format);
-      expect(val).to.eql(
-        now
-          .subtract(555, 'ms')
-          .startOf('s')
-          .format(format)
-      );
+      expect(val).to.eql(now.subtract(555, 'ms').startOf('s').format(format));
     });
 
-    it('should round weeks to Sunday by default', function() {
+    it('should round weeks to Sunday by default', function () {
       const val = dateMath.parse('now-1w/w');
       expect(val.isoWeekday()).to.eql(7);
     });
 
-    it('should round weeks based on the passed moment locale start of week setting', function() {
+    it('should round weeks based on the passed moment locale start of week setting', function () {
       const m = momentClone();
       // Define a locale, that has Tuesday as beginning of the week
       m.defineLocale('x-test', {
@@ -304,7 +289,7 @@ describe('dateMath', function() {
       expect(val.isoWeekday()).to.eql(2);
     });
 
-    it('should round up weeks based on the passed moment locale start of week setting', function() {
+    it('should round up weeks based on the passed moment locale start of week setting', function () {
       const m = momentClone();
       // Define a locale, that has Tuesday as beginning of the week
       m.defineLocale('x-test', {
@@ -319,7 +304,7 @@ describe('dateMath', function() {
       expect(val.isoWeekday()).to.eql(3 - 1);
     });
 
-    it('should round relative to forceNow', function() {
+    it('should round relative to forceNow', function () {
       const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate }).valueOf();
       expect(val).to.eql(anchored.startOf('s').valueOf());
     });
@@ -329,15 +314,15 @@ describe('dateMath', function() {
     });
   });
 
-  describe('used momentjs instance', function() {
-    it('should use the default moment instance if parameter not specified', function() {
+  describe('used momentjs instance', function () {
+    it('should use the default moment instance if parameter not specified', function () {
       const momentSpy = sinon.spy(moment, 'isMoment');
       dateMath.parse('now');
       expect(momentSpy.called).to.be(true);
       momentSpy.restore();
     });
 
-    it('should not use default moment instance if parameter is specified', function() {
+    it('should not use default moment instance if parameter is specified', function () {
       const m = momentClone();
       const momentSpy = sinon.spy(moment, 'isMoment');
       const cloneSpy = sinon.spy(m, 'isMoment');
@@ -348,7 +333,7 @@ describe('dateMath', function() {
       cloneSpy.restore();
     });
 
-    it('should work with multiple different instances', function() {
+    it('should work with multiple different instances', function () {
       const m1 = momentClone();
       const m2 = momentClone();
       const m1Spy = sinon.spy(m1, 'isMoment');
@@ -365,7 +350,7 @@ describe('dateMath', function() {
       m2Spy.restore();
     });
 
-    it('should use global instance after passing an instance', function() {
+    it('should use global instance after passing an instance', function () {
       const m = momentClone();
       const momentSpy = sinon.spy(moment, 'isMoment');
       const cloneSpy = sinon.spy(m, 'isMoment');
@@ -382,12 +367,12 @@ describe('dateMath', function() {
     });
   });
 
-  describe('units', function() {
-    it('should have units descending for unitsDesc', function() {
+  describe('units', function () {
+    it('should have units descending for unitsDesc', function () {
       expect(dateMath.unitsDesc).to.eql(['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms']);
     });
 
-    it('should have units ascending for unitsAsc', function() {
+    it('should have units ascending for unitsAsc', function () {
       expect(dateMath.unitsAsc).to.eql(['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']);
     });
   });

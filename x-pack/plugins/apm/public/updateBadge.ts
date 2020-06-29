@@ -14,12 +14,12 @@ export function setReadonlyBadge({ application, chrome }: CoreStart) {
     !canSave
       ? {
           text: i18n.translate('xpack.apm.header.badge.readOnly.text', {
-            defaultMessage: 'Read only'
+            defaultMessage: 'Read only',
           }),
           tooltip: i18n.translate('xpack.apm.header.badge.readOnly.tooltip', {
-            defaultMessage: 'Unable to save'
+            defaultMessage: 'Unable to save',
           }),
-          iconType: 'glasses'
+          iconType: 'glasses',
         }
       : undefined
   );

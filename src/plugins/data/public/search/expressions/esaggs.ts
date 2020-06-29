@@ -32,14 +32,7 @@ import { Adapters } from '../../../../../plugins/inspector/public';
 import { IAggConfigs } from '../aggs';
 import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
-import {
-  Filter,
-  Query,
-  serializeFieldFormat,
-  TimeRange,
-  IIndexPattern,
-  isRangeFilter,
-} from '../../../common';
+import { Filter, Query, TimeRange, IIndexPattern, isRangeFilter } from '../../../common';
 import { FilterManager, calculateBounds, getTime } from '../../query';
 import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
@@ -115,7 +108,7 @@ const handleCourierRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function() {
+  requestSearchSource.setField('aggs', function () {
     return aggs.toDsl(metricsAtAllLevels);
   });
 
@@ -134,7 +127,7 @@ const handleCourierRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
         .filter(isRangeFilter);
     });
   }
@@ -282,7 +275,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = searchService.searchSource.create();
+    const searchSource = await searchService.searchSource.create();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
@@ -313,7 +306,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
         }
         return cleanedColumn;
       }),

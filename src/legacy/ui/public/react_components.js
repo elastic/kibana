@@ -25,8 +25,8 @@ import { uiModules } from './modules';
 
 const app = uiModules.get('app/kibana', ['react']);
 
-app.directive('icon', reactDirective => reactDirective(EuiIcon));
+app.directive('icon', (reactDirective) => reactDirective(EuiIcon));
 
-app.directive('iconTip', reactDirective =>
+app.directive('iconTip', (reactDirective) =>
   reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color'])
 );

@@ -37,7 +37,7 @@ export type EsHitRecordList = EsHitRecord[];
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 // look from 1 day up to 10000 days into the past and future
-const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map(days => days * DAY_MILLIS);
+const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS);
 
 function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   return {
@@ -113,8 +113,8 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
     const { data } = getServices();
 
-    return data.search.searchSource
-      .create()
+    const searchSource = await data.search.searchSource.create();
+    return searchSource
       .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);

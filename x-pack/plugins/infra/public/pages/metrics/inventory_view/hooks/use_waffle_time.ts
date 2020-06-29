@@ -26,21 +26,23 @@ export const useWaffleTime = () => {
 
   const [state, setState] = useState<WaffleTimeState>(urlState);
 
-  useEffect(() => setUrlState(state), [setUrlState, state]);
+  useEffect(() => {
+    setUrlState(state);
+  }, [setUrlState, state]);
 
   const { currentTime, isAutoReloading } = urlState;
 
   const startAutoReload = useCallback(() => {
-    setState(previous => ({ ...previous, isAutoReloading: true }));
+    setState((previous) => ({ ...previous, isAutoReloading: true }));
   }, [setState]);
 
   const stopAutoReload = useCallback(() => {
-    setState(previous => ({ ...previous, isAutoReloading: false }));
+    setState((previous) => ({ ...previous, isAutoReloading: false }));
   }, [setState]);
 
   const jumpToTime = useCallback(
     (time: number) => {
-      setState(previous => ({ ...previous, currentTime: time }));
+      setState((previous) => ({ ...previous, currentTime: time }));
     },
     [setState]
   );

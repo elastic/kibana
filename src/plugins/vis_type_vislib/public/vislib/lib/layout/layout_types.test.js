@@ -21,18 +21,18 @@ import _ from 'lodash';
 
 import { layoutTypes as layoutType } from './layout_types';
 
-describe('Vislib Layout Types Test Suite', function() {
+describe('Vislib Layout Types Test Suite', function () {
   let layoutFunc;
 
   beforeEach(() => {
     layoutFunc = layoutType.point_series;
   });
 
-  it('should be an object', function() {
+  it('should be an object', function () {
     expect(_.isObject(layoutType)).toBe(true);
   });
 
-  it('should return a function', function() {
+  it('should return a function', function () {
     expect(typeof layoutFunc).toBe('function');
   });
 });

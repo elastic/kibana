@@ -44,7 +44,7 @@ export const registerDeleteRoute = ({
       };
 
       await Promise.all(
-        ids.map(_id =>
+        ids.map((_id) =>
           context
             .crossClusterReplication!.client.callAsCurrentUser('ccr.deleteAutoFollowPattern', {
               id: _id,

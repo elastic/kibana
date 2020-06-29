@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { getFormatService, getNotifications } from './kibana_services';
+import { getFormatService, getNotifications, getKibanaLegacy } from './kibana_services';
 import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
 import { mapTooltipProvider } from '../../maps_legacy/public';
@@ -38,6 +38,7 @@ export function createRegionMapVisualization({
     }
 
     async render(esResponse, visParams) {
+      getKibanaLegacy().loadFontAwesome();
       await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
@@ -52,7 +53,7 @@ export function createRegionMapVisualization({
       if (!this._hasColumns() || !table.rows.length) {
         results = [];
       } else {
-        results = table.rows.map(row => {
+        results = table.rows.map((row) => {
           const term = row[termColumn.id];
           const value = row[valueColumn.id];
           return { term: term, value: value };
@@ -161,9 +162,9 @@ export function createRegionMapVisualization({
         );
       }
 
-      this._choroplethLayer.on('select', event => {
+      this._choroplethLayer.on('select', (event) => {
         const { rows, columns } = this._chartData;
-        const rowIndex = rows.findIndex(row => row[columns[0].id] === event);
+        const rowIndex = rows.findIndex((row) => row[columns[0].id] === event);
         this._vis.API.events.filter({
           table: this._chartData,
           column: 0,
@@ -172,7 +173,7 @@ export function createRegionMapVisualization({
         });
       });
 
-      this._choroplethLayer.on('styleChanged', event => {
+      this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning =
           this._params.isDisplayWarning && uiSettings.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {

@@ -46,7 +46,7 @@ function SwitchParamEditor({
           checked={value}
           disabled={disabled}
           data-test-subj={dataTestSubj}
-          onChange={ev => setValue(ev.target.checked)}
+          onChange={(ev) => setValue(ev.target.checked)}
         />
       </EuiToolTip>
     </EuiFormRow>

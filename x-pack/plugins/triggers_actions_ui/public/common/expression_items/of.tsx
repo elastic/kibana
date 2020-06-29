@@ -43,6 +43,7 @@ interface OfExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
 }
 
 export const OfExpression = ({
@@ -51,6 +52,7 @@ export const OfExpression = ({
   errors,
   onChangeSelectedAggField,
   fields,
+  display = 'inline',
   customAggTypesOptions,
   popupPosition,
 }: OfExpressionProps) => {
@@ -86,12 +88,13 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
             setAggFieldPopoverOpen(true);
           }}
-          color={aggField ? 'secondary' : 'danger'}
+          isInvalid={!aggField}
         />
       }
       isOpen={aggFieldPopoverOpen}
@@ -99,6 +102,7 @@ export const OfExpression = ({
         setAggFieldPopoverOpen(false);
       }}
       withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
@@ -125,7 +129,7 @@ export const OfExpression = ({
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );

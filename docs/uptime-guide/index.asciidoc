@@ -1,5 +1,3 @@
-// short-version can be:    8, 7, 6, etc.
-:short-version:   8
 
 include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
 include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
@@ -11,4 +9,14 @@ include::overview.asciidoc[]
 include::install.asciidoc[]
 
 include::deployment-arch.asciidoc[]
+
+include::app-overview.asciidoc[]
+
+include::monitor.asciidoc[]
+
+include::settings.asciidoc[]
+
+include::certificates.asciidoc[]
+
+include::alerting.asciidoc[]
 

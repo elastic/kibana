@@ -12,10 +12,10 @@ import { setHttpClient, setSavedObjectsClient } from '../../../public/applicatio
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 mockHttpClient.interceptors.response.use(
-  res => {
+  (res) => {
     return res.data;
   },
-  rej => {
+  (rej) => {
     return Promise.reject(rej);
   }
 );

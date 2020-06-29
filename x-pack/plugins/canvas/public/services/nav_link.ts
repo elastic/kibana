@@ -25,7 +25,7 @@ export const navLinkServiceFactory: CanvasServiceFactory<NavLinkService> = (
         defaultPath: `#${path}`,
       }));
 
-      getSessionStorage().set(SESSIONSTORAGE_LASTPATH, path);
+      getSessionStorage().set(`${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`, path);
     },
   };
 };

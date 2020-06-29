@@ -8,6 +8,10 @@ import { createHashHistory } from 'history';
 
 // Make history singleton available across APM project
 // TODO: Explore using React context or hook instead?
-const history = createHashHistory();
+let history = createHashHistory();
+
+export const resetHistory = () => {
+  history = createHashHistory();
+};
 
 export { history };

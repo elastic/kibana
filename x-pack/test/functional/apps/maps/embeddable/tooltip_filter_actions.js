@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -32,8 +32,9 @@ export default function({ getPageObjects, getService }) {
       await testSubjects.click('mapTooltipCreateFilterButton');
       await testSubjects.click('applyFiltersPopoverButton');
 
-      const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
-      expect(hasSourceFilter).to.be(true);
+      // TODO: Fix me #64861
+      // const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
+      // expect(hasSourceFilter).to.be(true);
 
       const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
       expect(hasJoinFilter).to.be(true);

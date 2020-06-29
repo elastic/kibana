@@ -43,9 +43,9 @@ export interface ExecutorPureTransitions {
 }
 
 export const pureTransitions: ExecutorPureTransitions = {
-  addFunction: state => fn => ({ ...state, functions: { ...state.functions, [fn.name]: fn } }),
-  addType: state => type => ({ ...state, types: { ...state.types, [type.name]: type } }),
-  extendContext: state => extraContext => ({
+  addFunction: (state) => (fn) => ({ ...state, functions: { ...state.functions, [fn.name]: fn } }),
+  addType: (state) => (type) => ({ ...state, types: { ...state.types, [type.name]: type } }),
+  extendContext: (state) => (extraContext) => ({
     ...state,
     context: { ...state.context, ...extraContext },
   }),
@@ -58,8 +58,8 @@ export interface ExecutorPureSelectors {
 }
 
 export const pureSelectors: ExecutorPureSelectors = {
-  getFunction: state => id => state.functions[id] || null,
-  getType: state => id => state.types[id] || null,
+  getFunction: (state) => (id) => state.functions[id] || null,
+  getType: (state) => (id) => state.types[id] || null,
   getContext: ({ context }) => () => context,
 };
 

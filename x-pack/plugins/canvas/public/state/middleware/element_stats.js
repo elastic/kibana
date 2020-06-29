@@ -7,7 +7,7 @@
 import { setElementStats } from '../actions/transient';
 import { getAllElements, getElementCounts, getElementStats } from '../selectors/workpad';
 
-export const elementStats = ({ dispatch, getState }) => next => action => {
+export const elementStats = ({ dispatch, getState }) => (next) => (action) => {
   // execute the action
   next(action);
 

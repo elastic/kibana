@@ -25,6 +25,6 @@ const module = uiModules.get('apps/timelion', ['react']);
 
 import { TimelionHelpTabs } from './timelionhelp_tabs';
 
-module.directive('timelionHelpTabs', function(reactDirective) {
+module.directive('timelionHelpTabs', function (reactDirective) {
   return reactDirective(wrapInI18nContext(TimelionHelpTabs), undefined, { restrict: 'E' });
 });

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
-import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
+import { useGetDataStreams, useStartDeps, usePagination, useBreadcrumbs } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 
@@ -55,6 +55,8 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
 );
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('data_streams');
+
   const {
     data: { fieldFormats },
   } = useStartDeps();
@@ -192,7 +194,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   };
 
   if (dataStreamsData && dataStreamsData.data_streams.length) {
-    dataStreamsData.data_streams.forEach(stream => {
+    dataStreamsData.data_streams.forEach((stream) => {
       const { dataset, type, namespace, package: pkg } = stream;
       if (!filterOptions.dataset.includes(dataset)) {
         filterOptions.dataset.push(dataset);
@@ -239,7 +241,12 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         sorting={true}
         search={{
           toolsRight: [
-            <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
+            <EuiButton
+              key="reloadButton"
+              color="primary"
+              iconType="refresh"
+              onClick={() => sendRequest()}
+            >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
                 defaultMessage="Reload"
@@ -263,7 +270,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Dataset',
               }),
               multiSelect: 'or',
-              options: filterOptions.dataset.map(option => ({
+              options: filterOptions.dataset.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -275,7 +282,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Type',
               }),
               multiSelect: 'or',
-              options: filterOptions.type.map(option => ({
+              options: filterOptions.type.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -287,7 +294,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Namespace',
               }),
               multiSelect: 'or',
-              options: filterOptions.namespace.map(option => ({
+              options: filterOptions.namespace.map((option) => ({
                 value: option,
                 name: option,
               })),
@@ -299,7 +306,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                 defaultMessage: 'Integration',
               }),
               multiSelect: 'or',
-              options: filterOptions.package.map(option => ({
+              options: filterOptions.package.map((option) => ({
                 value: option,
                 name: option,
               })),

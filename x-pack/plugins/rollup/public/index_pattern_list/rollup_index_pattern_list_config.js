@@ -14,7 +14,7 @@ function isRollup(indexPattern) {
 export class RollupIndexPatternListConfig extends IndexPatternListConfig {
   key = 'rollup';
 
-  getIndexPatternTags = indexPattern => {
+  getIndexPatternTags = (indexPattern) => {
     return isRollup(indexPattern)
       ? [
           {
@@ -31,14 +31,14 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
     }
 
     const allAggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
-    const fieldAggs = allAggs && Object.keys(allAggs).filter(agg => allAggs[agg][field]);
+    const fieldAggs = allAggs && Object.keys(allAggs).filter((agg) => allAggs[agg][field]);
 
     if (!fieldAggs || !fieldAggs.length) {
       return [];
     }
 
     return ['Rollup aggregations:'].concat(
-      fieldAggs.map(aggName => {
+      fieldAggs.map((aggName) => {
         const agg = allAggs[aggName][field];
         switch (aggName) {
           case 'date_histogram':
@@ -55,7 +55,7 @@ export class RollupIndexPatternListConfig extends IndexPatternListConfig {
     );
   };
 
-  areScriptedFieldsEnabled = indexPattern => {
+  areScriptedFieldsEnabled = (indexPattern) => {
     return !isRollup(indexPattern);
   };
 }

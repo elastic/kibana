@@ -114,9 +114,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/security/logged_out`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
   }
 
   /**
@@ -339,7 +337,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   private getNegotiateChallenge(error: ElasticsearchError) {
     const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
 
-    const negotiateChallenge = challenges.find(challenge =>
+    const negotiateChallenge = challenges.find((challenge) =>
       challenge.toLowerCase().startsWith('negotiate')
     );
     if (negotiateChallenge) {

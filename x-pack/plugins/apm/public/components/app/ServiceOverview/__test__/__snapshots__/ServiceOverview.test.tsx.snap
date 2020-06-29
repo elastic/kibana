@@ -79,7 +79,7 @@ NodeList [
                    
                   <a
                     class="euiLink euiLink--primary"
-                    href="/basepath/app/kibana#/management/elasticsearch/upgrade_assistant"
+                    href="/basepath/app/kibana#/management/stack/upgrade_assistant"
                     rel="noreferrer"
                   >
                     Learn more by visiting the Kibana Upgrade Assistant
@@ -96,7 +96,7 @@ NodeList [
             />
             <a
               class="euiLink euiLink--primary"
-              href="/basepath/app/kibana#/home/tutorial/apm"
+              href="/basepath/app/home#/tutorial/apm"
               rel="noreferrer"
             >
               <button
@@ -114,7 +114,7 @@ NodeList [
                   <span
                     class="euiButton__text"
                   >
-                    Setup Instructions
+                    Setup instructions
                   </span>
                 </span>
               </button>
@@ -203,7 +203,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        1 ms
+        0.6 ms
       </div>
     </td>
     <td
@@ -338,7 +338,7 @@ NodeList [
       <div
         class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
       >
-        0 ms
+        0.3 ms
       </div>
     </td>
     <td

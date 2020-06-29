@@ -1,16 +1,17 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 module.exports = {
-  APM: {
-    'Transaction duration charts': {
-      '1': '500 ms',
-      '2': '250 ms',
-      '3': '0 ms'
+  "__version": "4.5.0",
+  "APM": {
+    "Transaction duration charts": {
+      "1": "55 ms",
+      "2": "28 ms",
+      "3": "0 ms"
     }
   },
-  __version: '4.2.0'
-};
+  "RUM Dashboard": {
+    "Client metrics": {
+      "1": "62",
+      "2": "0.07 sec",
+      "3": "0.01 sec"
+    }
+  }
+}

@@ -48,7 +48,7 @@ describe('KuiButton', () => {
 
   describe('Props', () => {
     describe('buttonType', () => {
-      BUTTON_TYPES.forEach(buttonType => {
+      BUTTON_TYPES.forEach((buttonType) => {
         describe(`${buttonType}`, () => {
           test(`renders the ${buttonType} class`, () => {
             const $button = render(<KuiButton buttonType={buttonType} aria-label="aria label" />);

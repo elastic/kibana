@@ -119,7 +119,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
         }
 
         // Fire and forget.
-        $.ajax(loadFrom).done(async data => {
+        $.ajax(loadFrom).done(async (data) => {
           const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
           editor.moveToNextRequestEdge(false);
@@ -188,10 +188,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     const { current: editor } = editorInstanceRef;
     applyCurrentSettings(editor!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editor!
-      .getCoreEditor()
-      .getContainer()
-      .focus();
+    editor!.getCoreEditor().getContainer().focus();
   }, [settings]);
 
   useEffect(() => {

@@ -11,15 +11,15 @@ export function useDynamicIndexPattern(
   processorEvent: ProcessorEvent | undefined
 ) {
   const { data, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       return callApmApi({
         pathname: '/api/apm/index_pattern/dynamic',
         isCachable: true,
         params: {
           query: {
-            processorEvent
-          }
-        }
+            processorEvent,
+          },
+        },
       });
     },
     [processorEvent]
@@ -27,6 +27,6 @@ export function useDynamicIndexPattern(
 
   return {
     indexPattern: data?.dynamicIndexPattern,
-    status
+    status,
   };
 }

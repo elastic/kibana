@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -14,7 +13,7 @@ import {
   fontSizes,
   px,
   truncate,
-  units
+  units,
 } from '../../../style/variables';
 
 export interface IStickyProperty {
@@ -32,7 +31,7 @@ const TooltipFieldName = styled.span`
 const PropertyLabel = styled.div`
   margin-bottom: ${px(units.half)};
   font-size: ${fontSizes.small};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 
   span {
     cursor: help;
@@ -69,8 +68,7 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
 
 function getPropertyValue({
   val,
-  fieldName,
-  truncated = false
+  truncated = false,
 }: Partial<IStickyProperty>) {
   if (truncated) {
     return (
@@ -84,7 +82,7 @@ function getPropertyValue({
 }
 
 export function StickyProperties({
-  stickyProperties
+  stickyProperties,
 }: {
   stickyProperties: IStickyProperty[];
 }) {
@@ -100,11 +98,11 @@ export function StickyProperties({
    * Hopefully we can make EUI handle this better and remove all this.
    */
   const itemStyles = {
-    padding: '1em 1em 1em 0'
+    padding: '1em 1em 1em 0',
   };
   const groupStyles = {
     marginTop: '-1em',
-    marginBottom: '-1em'
+    marginBottom: '-1em',
   };
 
   return (
@@ -116,7 +114,7 @@ export function StickyProperties({
               key={i}
               style={{
                 minWidth: width,
-                ...itemStyles
+                ...itemStyles,
               }}
               grow={false}
             >

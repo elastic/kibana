@@ -18,7 +18,7 @@ import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
@@ -47,12 +47,12 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(data);
         }
       );
 
-      this.renderReact = props => {
+      this.renderReact = (props) => {
         super.renderReact(<CcrShard {...props} />);
       };
     }

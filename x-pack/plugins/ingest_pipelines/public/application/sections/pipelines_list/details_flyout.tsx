@@ -89,7 +89,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           defaultMessage: 'Manage pipeline',
         }
       )}
-      onClick={() => setShowPopover(previousBool => !previousBool)}
+      onClick={() => setShowPopover((previousBool) => !previousBool)}
       iconType="arrowUp"
       iconSide="right"
       fill
@@ -117,14 +117,16 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       <EuiFlyoutBody>
         <EuiDescriptionList>
           {/* Pipeline description */}
-          <EuiDescriptionListTitle>
-            {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
-              defaultMessage: 'Description',
-            })}
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {pipeline.description ?? ''}
-          </EuiDescriptionListDescription>
+          {pipeline.description && (
+            <>
+              <EuiDescriptionListTitle>
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
+                  defaultMessage: 'Description',
+                })}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{pipeline.description}</EuiDescriptionListDescription>
+            </>
+          )}
 
           {/* Pipeline version */}
           {pipeline.version && (

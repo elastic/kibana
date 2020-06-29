@@ -24,16 +24,16 @@ import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function percentileRank(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 
-    getSplits(resp, panel, series, meta).forEach(split => {
-      (metric.values || []).forEach(percentileRank => {
-        const data = split.timeseries.buckets.map(bucket => [
+    getSplits(resp, panel, series, meta).forEach((split) => {
+      (metric.values || []).forEach((percentileRank) => {
+        const data = split.timeseries.buckets.map((bucket) => [
           bucket.key,
           getAggValue(bucket, {
             ...metric,

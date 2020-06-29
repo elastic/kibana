@@ -66,6 +66,6 @@ describe('esArchiver: createFilterRecordsStream()', () => {
     ]);
 
     expect(output).to.have.length(3);
-    expect(output.map(o => o.type)).to.eql([type1, type1, type1]);
+    expect(output.map((o) => o.type)).to.eql([type1, type1, type1]);
   });
 });

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -23,8 +23,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const listingTable = getService('listingTable');
 
   async function assertExpectedMetric(metricCount: string = '19,986') {
     await PageObjects.lens.assertExactText(
@@ -41,11 +43,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     );
     await PageObjects.lens.assertExactText(
       '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValue"]',
-      '19,985'
-    );
-    await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValueFilterable"]',
-      'IN'
+      '19,986'
     );
   }
 
@@ -64,17 +62,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   async function clickOnBarHistogram() {
     const el = await elasticChart.getCanvas();
-
-    await browser
-      .getActions()
-      .move({ x: 5, y: 5, origin: el._webElement })
-      .click()
-      .perform();
+    await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
   }
 
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
@@ -84,6 +78,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
@@ -94,11 +89,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
       await clickOnBarHistogram();
-      await testSubjects.click('applyFiltersPopoverButton');
+
+      await retry.try(async () => {
+        await testSubjects.click('applyFiltersPopoverButton');
+        await testSubjects.missingOrFail('applyFiltersPopoverButton');
+      });
 
       await assertExpectedChart();
       await assertExpectedTimerange();
@@ -106,22 +106,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
-    it('should allow seamless transition to and from table view and add a filter', async () => {
+    it('should allow seamless transition to and from table view', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
-      await PageObjects.lens.configureDimension({
-        dimension: '[data-test-subj="lnsDatatable_column"] [data-test-subj="lns-empty-dimension"]',
-        operation: 'terms',
-        field: 'geo.dest',
-      });
-      await PageObjects.lens.save('Artistpreviouslyknownaslens');
-      await find.clickByCssSelector('[data-test-subj="lensDatatableFilterOut"]');
       await assertExpectedTable();
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsMetric');
-      await assertExpectedMetric('19,985');
+      await assertExpectedMetric();
     });
 
     it('should allow creation of lens visualizations', async () => {
@@ -166,6 +160,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // Ensure the visualization shows up in the visualize list, and takes
       // us back to the visualization as we configured it.
       await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
 

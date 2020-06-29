@@ -22,6 +22,7 @@ export type MapContext = {
   zoom?: number;
   center?: MapCenter;
   scrollZoom: boolean;
+  buffer?: MapExtent;
   extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
@@ -65,7 +66,6 @@ export type MapState = {
   openTooltips: TooltipState[];
   mapState: MapContext;
   selectedLayerId: string | null;
-  __transientLayerId: string | null;
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;

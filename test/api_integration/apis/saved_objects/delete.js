@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -33,7 +33,7 @@ export default function({ getService }) {
         await supertest
           .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({});
           }));
 
@@ -41,7 +41,7 @@ export default function({ getService }) {
         await supertest
           .delete(`/api/saved_objects/dashboard/not-a-real-id`)
           .expect(404)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               statusCode: 404,
               error: 'Not Found',
@@ -64,7 +64,7 @@ export default function({ getService }) {
         await supertest
           .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(404)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               statusCode: 404,
               error: 'Not Found',

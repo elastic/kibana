@@ -33,7 +33,7 @@ export class PendingArgValue extends React.PureComponent {
       setResolvedArgValue(null);
     } else {
       argResolver(argValue)
-        .then(val => setResolvedArgValue(val != null ? val : null))
+        .then((val) => setResolvedArgValue(val != null ? val : null))
         .catch(() => setResolvedArgValue(null)); // swallow error, it's not important
     }
   }

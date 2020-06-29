@@ -51,7 +51,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
     }
 
     try {
-      rawFields = await getRawFields(ctx.core.elasticsearch.dataClient, req.body.indexPatterns);
+      rawFields = await getRawFields(ctx.core.elasticsearch.legacy.client, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       service.logger.warn(

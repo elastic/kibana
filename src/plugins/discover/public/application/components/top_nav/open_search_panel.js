@@ -40,6 +40,7 @@ const SEARCH_OBJECT_TYPE = 'search';
 export function OpenSearchPanel(props) {
   const {
     core: { uiSettings, savedObjects },
+    addBasePath,
   } = getServices();
 
   return (
@@ -71,7 +72,7 @@ export function OpenSearchPanel(props) {
               }),
             },
           ]}
-          onChoose={id => {
+          onChoose={(id) => {
             window.location.assign(props.makeUrl(id));
             props.onClose();
           }}
@@ -86,7 +87,9 @@ export function OpenSearchPanel(props) {
             <EuiButton
               fill
               onClick={props.onClose}
-              href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
+              href={addBasePath(
+                `/app/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
+              )}
             >
               <FormattedMessage
                 id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"

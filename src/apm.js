@@ -85,7 +85,7 @@ function getConfig(serviceName) {
  */
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
-module.exports = function(serviceName = name) {
+module.exports = function (serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
   const conf = getConfig(serviceName);

@@ -13,7 +13,7 @@ export const dateAsStringRt = new t.Type<string, string, unknown>(
   'DateAsString',
   t.string.is,
   (input, context) =>
-    either.chain(t.string.validate(input, context), str => {
+    either.chain(t.string.validate(input, context), (str) => {
       const date = new Date(str);
       return isNaN(date.getTime()) ? t.failure(input, context) : t.success(str);
     }),

@@ -23,7 +23,11 @@ import { OverlayStart } from 'kibana/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { IContainer, EmbeddableFactoryDefinition } from '../../../../src/plugins/embeddable/public';
+import {
+  IContainer,
+  EmbeddableFactoryDefinition,
+  EmbeddableFactory,
+} from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
 function TaskInput({ onSave }: { onSave: (task: string) => void }) {
@@ -34,7 +38,7 @@ function TaskInput({ onSave }: { onSave: (task: string) => void }) {
         data-test-subj="taskInputField"
         value={task}
         placeholder="Enter task here"
-        onChange={e => setTask(e.target.value)}
+        onChange={(e) => setTask(e.target.value)}
       />
       <EuiButton data-test-subj="createTodoEmbeddable" onClick={() => onSave(task)}>
         Save
@@ -47,7 +51,9 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class TodoEmbeddableFactory
+export type TodoEmbeddableFactory = EmbeddableFactory<TodoInput, TodoOutput, TodoEmbeddable>;
+
+export class TodoEmbeddableFactoryDefinition
   implements EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> {
   public readonly type = TODO_EMBEDDABLE;
 
@@ -69,7 +75,7 @@ export class TodoEmbeddableFactory
    */
   public getExplicitInput = async () => {
     const { openModal } = await this.getStartServices();
-    return new Promise<{ task: string }>(resolve => {
+    return new Promise<{ task: string }>((resolve) => {
       const onSave = (task: string) => resolve({ task });
       const overlay = openModal(
         toMountPoint(

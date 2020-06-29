@@ -12,7 +12,7 @@
  * @param {*[][]} arrays
  * @returns *[]
  */
-export const flatten = arrays => [].concat(...arrays);
+export const flatten = (arrays) => [].concat(...arrays);
 
 /**
  * identity
@@ -20,7 +20,7 @@ export const flatten = arrays => [].concat(...arrays);
  * @param d
  * @returns d
  */
-export const identity = d => d;
+export const identity = (d) => d;
 
 /**
  * map
@@ -32,7 +32,7 @@ export const identity = d => d;
  * @param {Function} fun
  * @returns {function(*): *}
  */
-export const map = fun => array => array.map(value => fun(value));
+export const map = (fun) => (array) => array.map((value) => fun(value));
 
 /**
  * disjunctiveUnion
@@ -44,8 +44,8 @@ export const map = fun => array => array.map(value => fun(value));
  */
 export const disjunctiveUnion = (keyFun, set1, set2) =>
   set1
-    .filter(s1 => !set2.find(s2 => keyFun(s2) === keyFun(s1)))
-    .concat(set2.filter(s2 => !set1.find(s1 => keyFun(s1) === keyFun(s2))));
+    .filter((s1) => !set2.find((s2) => keyFun(s2) === keyFun(s1)))
+    .concat(set2.filter((s2) => !set1.find((s1) => keyFun(s1) === keyFun(s2))));
 
 /**
  *
@@ -70,16 +70,16 @@ export const shallowEqual = (a, b) => {
   return true;
 };
 
-export const not = fun => (...args) => !fun(...args);
+export const not = (fun) => (...args) => !fun(...args);
 
 export const removeDuplicates = (idFun, a) =>
-  a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
+  a.filter((d, i) => a.findIndex((s) => idFun(s) === idFun(d)) === i);
 
-export const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
+export const arrayToMap = (a) => Object.assign({}, ...a.map((d) => ({ [d]: true })));
 
 export const subMultitree = (pk, fk, elements, inputRoots) => {
-  const getSubgraphs = roots => {
-    const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
+  const getSubgraphs = (roots) => {
+    const children = flatten(roots.map((r) => elements.filter((e) => fk(e) === pk(r))));
     if (children.length) {
       return [...roots, ...getSubgraphs(children, elements)];
     } else {

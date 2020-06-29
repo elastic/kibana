@@ -37,7 +37,7 @@ angular
   .service('debounce', ['$timeout', DebounceProviderTimeout])
   .directive('fixedScroll', FixedScrollProvider);
 
-describe('FixedScroll directive', function() {
+describe('FixedScroll directive', function () {
   const sandbox = sinon.createSandbox();
 
   let compile;
@@ -45,13 +45,13 @@ describe('FixedScroll directive', function() {
   const trash = [];
   beforeEach(ngMock.module(testModuleName));
   beforeEach(
-    ngMock.inject(function($compile, $rootScope, $timeout) {
+    ngMock.inject(function ($compile, $rootScope, $timeout) {
       flushPendingTasks = function flushPendingTasks() {
         $rootScope.$digest();
         $timeout.flush();
       };
 
-      compile = function(ratioY, ratioX) {
+      compile = function (ratioY, ratioX) {
         if (ratioX == null) ratioX = ratioY;
 
         // since the directive works at the sibling level we create a
@@ -93,15 +93,15 @@ describe('FixedScroll directive', function() {
     })
   );
 
-  afterEach(function() {
-    trash.splice(0).forEach(function($el) {
+  afterEach(function () {
+    trash.splice(0).forEach(function ($el) {
       $el.remove();
     });
 
     sandbox.restore();
   });
 
-  it('does nothing when not needed', function() {
+  it('does nothing when not needed', function () {
     let els = compile(0.5, 1.5);
     expect(els.$scroller).to.have.length(0);
 
@@ -109,23 +109,23 @@ describe('FixedScroll directive', function() {
     expect(els.$scroller).to.have.length(0);
   });
 
-  it('attaches a scroller below the element when the content is larger then the container', function() {
+  it('attaches a scroller below the element when the content is larger then the container', function () {
     const els = compile(1.5);
     expect(els.$scroller).to.have.length(1);
   });
 
-  it('copies the width of the container', function() {
+  it('copies the width of the container', function () {
     const els = compile(1.5);
     expect(els.$scroller.width()).to.be(els.$container.width());
   });
 
-  it('mimics the scrollWidth of the element', function() {
+  it('mimics the scrollWidth of the element', function () {
     const els = compile(1.5);
     expect(els.$scroller.prop('scrollWidth')).to.be(els.$container.prop('scrollWidth'));
   });
 
-  describe('scroll event handling / tug of war prevention', function() {
-    it('listens when needed, unlistens when not needed', function() {
+  describe('scroll event handling / tug of war prevention', function () {
+    it('listens when needed, unlistens when not needed', function () {
       const on = sandbox.spy($.fn, 'on');
       const off = sandbox.spy($.fn, 'off');
 
@@ -143,7 +143,7 @@ describe('FixedScroll directive', function() {
         // the this values should be different
         expect(spy.thisValues[0].is(spy.thisValues[1])).to.be(false);
         // but they should be either $scroller or $container
-        spy.thisValues.forEach(function($this) {
+        spy.thisValues.forEach(function ($this) {
           if ($this.is(els.$scroller) || $this.is(els.$container)) return;
           expect.fail('expected ' + name + ' to be called with $scroller or $container');
         });
@@ -153,21 +153,21 @@ describe('FixedScroll directive', function() {
     [
       { from: '$container', to: '$scroller' },
       { from: '$scroller', to: '$container' },
-    ].forEach(function(names) {
-      describe('scroll events ' + JSON.stringify(names), function() {
+    ].forEach(function (names) {
+      describe('scroll events ' + JSON.stringify(names), function () {
         let spy;
         let els;
         let $from;
         let $to;
 
-        beforeEach(function() {
+        beforeEach(function () {
           spy = sandbox.spy($.fn, 'scrollLeft');
           els = compile(1.5);
           $from = els[names.from];
           $to = els[names.to];
         });
 
-        it('transfers the scrollLeft', function() {
+        it('transfers the scrollLeft', function () {
           expect(spy.callCount).to.be(0);
           $from.scroll();
           expect(spy.callCount).to.be(2);
@@ -188,7 +188,7 @@ describe('FixedScroll directive', function() {
          * but the browser seems to be very careful about triggering the event too much
          * and I can't reliably recreate the browsers behavior in a test. So... faking it!
          */
-        it('prevents tug of war by ignoring echo scroll events', function() {
+        it('prevents tug of war by ignoring echo scroll events', function () {
           $from.scroll();
           expect(spy.callCount).to.be(2);
 

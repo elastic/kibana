@@ -16,11 +16,15 @@ import {
   AGENT,
   URL,
   USER,
-  CUSTOM_ERROR
+  CUSTOM_ERROR,
+  TRACE,
+  TRANSACTION,
 } from '../sections';
 
 export const ERROR_METADATA_SECTIONS: Section[] = [
   { ...LABELS, required: true },
+  TRACE,
+  TRANSACTION,
   ERROR,
   HTTP,
   HOST,
@@ -30,5 +34,5 @@ export const ERROR_METADATA_SECTIONS: Section[] = [
   AGENT,
   URL,
   { ...USER, required: true },
-  CUSTOM_ERROR
+  CUSTOM_ERROR,
 ];

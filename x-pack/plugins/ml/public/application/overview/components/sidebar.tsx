@@ -42,7 +42,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const docsLink = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-ml.html`;
-  const transformsLink = `${basePath.get()}/app/kibana#/management/elasticsearch/transform`;
+  const transformsLink = `${basePath.get()}/app/management/data/transform`;
 
   return (
     <EuiFlexItem grow={1}>

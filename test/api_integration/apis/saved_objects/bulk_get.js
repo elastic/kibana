@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -49,7 +49,7 @@ export default function({ getService }) {
           .post(`/api/saved_objects/_bulk_get`)
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
@@ -94,6 +94,7 @@ export default function({ getService }) {
                     buildNum: 8467,
                     defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   },
+                  migrationVersion: resp.body.saved_objects[2].migrationVersion,
                   references: [],
                 },
               ],
@@ -117,7 +118,7 @@ export default function({ getService }) {
           .post('/api/saved_objects/_bulk_get')
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {

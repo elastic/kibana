@@ -86,28 +86,28 @@ export class Listing extends PureComponent {
           defaultMessage: 'Total Events Rate',
         }),
         field: 'total_events_rate',
-        render: value => formatMetric(value, '', '/s'),
+        render: (value) => formatMetric(value, '', '/s'),
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.bytesSentRateTitle', {
           defaultMessage: 'Bytes Sent Rate',
         }),
         field: 'bytes_sent_rate',
-        render: value => formatMetric(value, 'byte', '/s'),
+        render: (value) => formatMetric(value, 'byte', '/s'),
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.outputErrorsTitle', {
           defaultMessage: 'Output Errors',
         }),
         field: 'errors',
-        render: value => formatMetric(value, '0'),
+        render: (value) => formatMetric(value, '0'),
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.allocatedMemoryTitle', {
           defaultMessage: 'Allocated Memory',
         }),
         field: 'memory',
-        render: value => formatMetric(value, 'byte'),
+        render: (value) => formatMetric(value, 'byte'),
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.versionTitle', {
@@ -132,11 +132,11 @@ export class Listing extends PureComponent {
       );
     }
 
-    const types = uniq(data.map(item => item.type)).map(type => {
+    const types = uniq(data.map((item) => item.type)).map((type) => {
       return { value: type };
     });
 
-    const versions = uniq(data.map(item => item.version)).map(version => {
+    const versions = uniq(data.map((item) => item.version)).map((version) => {
       return { value: version };
     });
 

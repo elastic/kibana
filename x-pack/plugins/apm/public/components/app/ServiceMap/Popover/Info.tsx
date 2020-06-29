@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import styled from 'styled-components';
 import {
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 
 const ItemRow = styled.div`
@@ -19,7 +18,7 @@ const ItemRow = styled.div`
 `;
 
 const ItemTitle = styled.dt`
-  color: ${lightTheme.textColors.subdued};
+  color: ${({ theme }) => theme.eui.textColors.subdued};
 `;
 
 const ItemDescription = styled.dd``;
@@ -40,16 +39,16 @@ export function Info(data: InfoProps) {
   const listItems = [
     {
       title: i18n.translate('xpack.apm.serviceMap.typePopoverMetric', {
-        defaultMessage: 'Type'
+        defaultMessage: 'Type',
       }),
-      description: type
+      description: type,
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.subtypePopoverMetric', {
-        defaultMessage: 'Subtype'
+        defaultMessage: 'Subtype',
       }),
-      description: subtype
-    }
+      description: subtype,
+    },
   ];
 
   return (

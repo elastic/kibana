@@ -22,8 +22,8 @@ require('@babel/register')({
   plugins: ['@babel/plugin-proposal-optional-chaining'],
   presets: [
     '@babel/typescript',
-    ['@babel/preset-env', { targets: { node: 'current' } }]
-  ]
+    ['@babel/preset-env', { targets: { node: 'current' } }],
+  ],
 });
 
 require('./kibana-security/setup-custom-kibana-user-role.ts');

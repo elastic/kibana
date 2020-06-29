@@ -7,19 +7,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
-const DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
-
 const DRILLDOWN_TO_PIE_CHART_NAME = 'Go to pie chart dashboard';
 const DRILLDOWN_TO_AREA_CHART_NAME = 'Go to area chart dashboard';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
   const PageObjects = getPageObjects(['dashboard', 'common', 'header', 'timePicker']);
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
   const pieChart = getService('pieChart');
   const log = getService('log');
   const browser = getService('browser');
@@ -27,22 +22,17 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard Drilldowns', function() {
+  describe('Dashboard Drilldowns', function () {
     before(async () => {
       log.debug('Dashboard Drilldowns:initTests');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard/drilldowns');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
-    });
-
     it('should create dashboard to dashboard drilldown, use it, and then delete it', async () => {
-      await PageObjects.dashboard.gotoDashboardEditMode(DASHBOARD_WITH_PIE_CHART_NAME);
+      await PageObjects.dashboard.gotoDashboardEditMode(
+        dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
+      );
 
       // create drilldown
       await dashboardPanelActions.openContextMenu();
@@ -51,7 +41,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
       await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
         drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
-        destinationDashboardTitle: DASHBOARD_WITH_AREA_CHART_NAME,
+        destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
       });
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
@@ -60,13 +50,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
 
       // save dashboard, navigate to view mode
-      await PageObjects.dashboard.saveDashboard(DASHBOARD_WITH_PIE_CHART_NAME, {
-        saveAsNew: false,
-        waitDialogIsClosed: true,
-      });
+      await PageObjects.dashboard.saveDashboard(
+        dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME,
+        {
+          saveAsNew: false,
+          waitDialogIsClosed: true,
+        }
+      );
 
       // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
-      await pieChart.filterOnPieSlice('40,000');
+      await pieChart.clickOnPieSlice('40,000');
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
 
       const href = await dashboardDrilldownPanelActions.getActionHrefByText(
@@ -117,7 +110,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('browser back/forward navigation works after drilldown navigation', async () => {
-      await PageObjects.dashboard.loadSavedDashboard(DASHBOARD_WITH_AREA_CHART_NAME);
+      await PageObjects.dashboard.loadSavedDashboard(
+        dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
+      );
       const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       await brushAreaChart();
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();

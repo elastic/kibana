@@ -37,7 +37,7 @@ export class ProviderCollection {
 
   public getPageObjects = (names: string[]) => {
     const pageObjects: Record<string, any> = {};
-    names.forEach(name => (pageObjects[name] = this.getPageObject(name)));
+    names.forEach((name) => (pageObjects[name] = this.getPageObject(name)));
     return pageObjects;
   };
 
@@ -78,7 +78,7 @@ export class ProviderCollection {
   }
 
   private findProvider(type: string, name: string) {
-    return this.providers.find(p => p.type === type && p.name === name);
+    return this.providers.find((p) => p.type === type && p.name === name);
   }
 
   private getProvider(type: string, name: string) {

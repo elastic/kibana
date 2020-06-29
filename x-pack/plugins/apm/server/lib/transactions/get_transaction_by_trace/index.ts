@@ -7,7 +7,7 @@
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
-  PARENT_ID
+  PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Setup } from '../../helpers/setup_request';
@@ -29,23 +29,23 @@ export async function getRootTransactionByTraceId(
               constant_score: {
                 filter: {
                   bool: {
-                    must_not: { exists: { field: PARENT_ID } }
-                  }
-                }
-              }
-            }
+                    must_not: { exists: { field: PARENT_ID } },
+                  },
+                },
+              },
+            },
           ],
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }
-          ]
-        }
-      }
-    }
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await client.search<Transaction>(params);
   return {
-    transaction: resp.hits.hits[0]?._source
+    transaction: resp.hits.hits[0]?._source,
   };
 }

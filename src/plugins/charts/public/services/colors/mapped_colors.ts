@@ -22,6 +22,7 @@ import d3 from 'd3';
 
 import { CoreSetup } from 'kibana/public';
 
+import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from './color_palette';
 
 const standardizeColor = (color: string) => d3.rgb(color).toString();
@@ -41,7 +42,7 @@ export class MappedColors {
   }
 
   private getConfigColorMapping() {
-    return _.mapValues(this.uiSettings.get('visualization:colorMapping'), standardizeColor);
+    return _.mapValues(this.uiSettings.get(COLOR_MAPPING_SETTING), standardizeColor);
   }
 
   public get oldMap(): any {
@@ -72,7 +73,7 @@ export class MappedColors {
     const oldColors = _.values(this._oldMap);
 
     const keysToMap: Array<string | number> = [];
-    _.each(keys, key => {
+    _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
       if (configMapping[key]) delete this._mapping[key];
 
@@ -87,11 +88,7 @@ export class MappedColors {
     });
 
     // Generate a color palette big enough that all new keys can have unique color values
-    const allColors = _(this._mapping)
-      .values()
-      .union(configColors)
-      .union(oldColors)
-      .value();
+    const allColors = _(this._mapping).values().union(configColors).union(oldColors).value();
     const colorPalette = createColorPalette(allColors.length + keysToMap.length);
     let newColors = _.difference(colorPalette, allColors);
 

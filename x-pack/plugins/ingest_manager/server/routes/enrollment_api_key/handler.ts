@@ -58,6 +58,12 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

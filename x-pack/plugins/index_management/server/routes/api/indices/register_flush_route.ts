@@ -27,7 +27,7 @@ export function registerFlushRoute({ router, license, lib }: RouteDependencies) 
       };
 
       try {
-        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.flush', params);
+        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.flush', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

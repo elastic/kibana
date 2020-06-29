@@ -33,7 +33,7 @@ export const useLogAnalysisCapabilities = () => {
           fold(throwErrors(createPlainError), identity)
         );
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setMlCapabilities(response);
       },
     },

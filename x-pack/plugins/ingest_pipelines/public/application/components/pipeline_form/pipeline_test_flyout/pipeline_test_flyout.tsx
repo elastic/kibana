@@ -154,7 +154,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
         <Tabs
           onTabChange={setSelectedTab}
           selectedTab={selectedTab}
-          getIsDisabled={tabId => !executeOutput && tabId === 'output'}
+          getIsDisabled={(tabId) => !executeOutput && tabId === 'output'}
         />
 
         <EuiSpacer />

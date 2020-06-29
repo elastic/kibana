@@ -45,8 +45,8 @@ const options = {
 
 export function displayHelp() {
   const helpOptions = Object.keys(options)
-    .filter(name => name !== '_')
-    .map(name => {
+    .filter((name) => name !== '_')
+    .map((name) => {
       const option = options[name];
       return {
         ...option,
@@ -54,7 +54,7 @@ export function displayHelp() {
         default: option.defaultHelp || '',
       };
     })
-    .map(option => {
+    .map((option) => {
       return `--${option.usage.padEnd(30)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);

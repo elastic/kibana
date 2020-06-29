@@ -28,7 +28,7 @@ import {
 } from './build_pipeline';
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
-import { IAggConfig } from '../../../../plugins/data/public';
+import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -344,23 +344,20 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('buildVislibDimensions', () => {
     const dataStart = dataPluginMock.createStartContract();
 
-    let aggs: IAggConfig[];
+    let aggs: IAggConfigs;
     let vis: Vis;
     let params: any;
 
     beforeEach(() => {
-      aggs = [
+      aggs = dataStart.search.aggs.createAggConfigs({} as IndexPattern, [
         {
           id: '0',
           enabled: true,
-          type: {
-            type: 'metrics',
-            name: 'count',
-          },
+          type: 'count',
           schema: 'metric',
           params: {},
-        } as IAggConfig,
-      ];
+        },
+      ]);
 
       params = {
         searchSource: null,
@@ -393,11 +390,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             ],
           },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
+            searchSource: {} as any,
           },
           isHierarchical: () => {
             return false;
@@ -421,8 +415,13 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
 
       it('with two numeric metrics, mixed normal and percent mode should have corresponding formatters', async () => {
-        const aggConfig = aggs[0];
-        aggs = [{ ...aggConfig } as IAggConfig, { ...aggConfig, id: '5' } as IAggConfig];
+        aggs.createAggConfig({
+          id: '5',
+          enabled: true,
+          type: 'count',
+          schema: 'metric',
+          params: {},
+        });
 
         vis.params = {
           seriesParams: [
@@ -468,11 +467,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
           },
           params: { gauge: {} },
           data: {
-            aggs: {
-              getResponseAggs: () => {
-                return aggs;
-              },
-            } as any,
+            aggs,
+            searchSource: {} as any,
           },
           isHierarchical: () => {
             return false;

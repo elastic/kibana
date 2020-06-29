@@ -37,7 +37,7 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
   if (formattedMessageDelimiter !== null) {
     return message
       .split(formattedMessageDelimiter[0])
-      .map(part => (part.startsWith('ELEMENT-') ? part : translateUsingPseudoLocale(part)))
+      .map((part) => (part.startsWith('ELEMENT-') ? part : translateUsingPseudoLocale(part)))
       .join(formattedMessageDelimiter[0]);
   }
 

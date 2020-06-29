@@ -74,7 +74,7 @@ describe('Alerts Clusters Aggregation', () => {
     it('aggregates alert count summary by cluster', () => {
       const { mockReq } = createStubs(mockQueryResult, featureStub);
       return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
+        (result) => {
           expect(result).to.eql({
             alertsMeta: { enabled: true },
             'cluster-abc0': undefined,
@@ -116,7 +116,7 @@ describe('Alerts Clusters Aggregation', () => {
         '.monitoring-alerts',
         newClusters,
         checkLicense
-      ).then(result => {
+      ).then((result) => {
         expect(result).to.eql({
           alertsMeta: { enabled: true },
           'cluster-abc0': {
@@ -164,7 +164,7 @@ describe('Alerts Clusters Aggregation', () => {
       const { mockReq } = createStubs(mockQueryResult, featureStub);
 
       return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
+        (result) => {
           expect(result).to.eql({
             alertsMeta: { enabled: false, message: 'monitoring cluster license is fail' },
           });
@@ -182,7 +182,7 @@ describe('Alerts Clusters Aggregation', () => {
       const { mockReq } = createStubs(mockQueryResult, featureStub);
 
       return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
+        (result) => {
           expect(result).to.eql({
             alertsMeta: { enabled: true },
             'cluster-abc0': {

@@ -56,12 +56,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await chartTypeField.parseDomContent();
       return $('button')
         .toArray()
-        .map(chart =>
-          $(chart)
-            .findTestSubject('visTypeTitle')
-            .text()
-            .trim()
-        );
+        .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
     public async waitForVisualizationSelectPage() {
@@ -250,7 +245,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
+      await find.clickByCssSelector('[href="#/"]');
     }
 
     public async clickVisualizationByName(vizName: string) {

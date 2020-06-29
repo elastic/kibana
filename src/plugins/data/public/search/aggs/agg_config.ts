@@ -20,7 +20,11 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
-import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
+import {
+  ExpressionAstFunction,
+  ExpressionAstArgument,
+  SerializedFieldFormat,
+} from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -42,7 +46,7 @@ export type AggConfigSerialized = Ensure<
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: SerializableState;
+    params?: {} | SerializableState;
     schema?: string;
   },
   SerializableState
@@ -75,12 +79,12 @@ export class AggConfig {
   static ensureIds(list: any[]) {
     const have: IAggConfig[] = [];
     const haveNot: AggConfigOptions[] = [];
-    list.forEach(function(obj) {
+    list.forEach(function (obj) {
       (obj.id ? have : haveNot).push(obj);
     });
 
     let nextId = AggConfig.nextId(have);
-    haveNot.forEach(function(obj) {
+    haveNot.forEach(function (obj) {
       obj.id = String(nextId++);
     });
 
@@ -95,7 +99,7 @@ export class AggConfig {
   static nextId(list: IAggConfig[]) {
     return (
       1 +
-      list.reduce(function(max, obj) {
+      list.reduce(function (max, obj) {
         return Math.max(max, +obj.id || 0);
       }, 0)
     );
@@ -154,7 +158,7 @@ export class AggConfig {
     from = from || this.params || {};
     const to = (this.params = {} as any);
 
-    this.getAggParams().forEach(aggParam => {
+    this.getAggParams().forEach((aggParam) => {
       let val = from[aggParam.name];
 
       if (val == null) {
@@ -298,8 +302,8 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      schema: this.schema,
       params: outParams as SerializableState,
+      ...(this.schema && { schema: this.schema }),
     };
   }
 
@@ -308,6 +312,19 @@ export class AggConfig {
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
+  }
+
+  /**
+   * Returns a serialized field format for the field used in this agg.
+   * This can be passed to fieldFormats.deserialize to get the field
+   * format instance.
+   *
+   * @public
+   */
+  toSerializedFieldFormat():
+    | {}
+    | Ensure<SerializedFieldFormat<SerializableState>, SerializableState> {
+    return this.type ? this.type.getSerializedFormat(this) : {};
   }
 
   /**
@@ -323,7 +340,7 @@ export class AggConfig {
 
     // Go through each of the params and convert to an array of expression args.
     const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
-      const deserializedParam = this.getAggParams().find(p => p.name === key);
+      const deserializedParam = this.getAggParams().find((p) => p.name === key);
 
       if (deserializedParam && deserializedParam.toExpressionAst) {
         // If the param provides `toExpressionAst`, we call it with the value
@@ -454,7 +471,7 @@ export class AggConfig {
     if (this.__typeDecorations) {
       _.forOwn(
         this.__typeDecorations,
-        function(prop, name: string | undefined) {
+        function (prop, name: string | undefined) {
           // @ts-ignore
           delete this[name];
         },

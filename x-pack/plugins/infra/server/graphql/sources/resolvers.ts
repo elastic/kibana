@@ -191,10 +191,10 @@ const compactObject = <T>(obj: T): CompactObject<T> =>
 
 const decodeLogColumns = (logColumns?: UpdateSourceLogColumnInput[] | null) =>
   logColumns
-    ? logColumns.map(logColumn =>
+    ? logColumns.map((logColumn) =>
         pipe(
           SavedSourceConfigurationColumnRuntimeType.decode(logColumn),
-          fold(errors => {
+          fold((errors) => {
             throw new UserInputError(failure(errors).join('\n'));
           }, identity)
         )

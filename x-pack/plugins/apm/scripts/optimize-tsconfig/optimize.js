@@ -19,7 +19,7 @@ const {
   xpackRoot,
   kibanaRoot,
   tsconfigTpl,
-  filesToIgnore
+  filesToIgnore,
 } = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
@@ -27,8 +27,8 @@ function prepareParentTsConfigs() {
   return Promise.all(
     [
       path.resolve(xpackRoot, 'tsconfig.json'),
-      path.resolve(kibanaRoot, 'tsconfig.json')
-    ].map(async filename => {
+      path.resolve(kibanaRoot, 'tsconfig.json'),
+    ].map(async (filename) => {
       const config = json5.parse(await readFile(filename, 'utf-8'));
 
       await writeFile(
@@ -36,7 +36,7 @@ function prepareParentTsConfigs() {
         JSON.stringify(
           {
             ...config,
-            include: []
+            include: [],
           },
           null,
           2
@@ -80,5 +80,5 @@ async function optimizeTsConfig() {
 }
 
 module.exports = {
-  optimizeTsConfig
+  optimizeTsConfig,
 };

@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   describe('post_privileges', () => {
     it('should allow privileges to be updated', async () => {
       const es = getService('legacyEs');

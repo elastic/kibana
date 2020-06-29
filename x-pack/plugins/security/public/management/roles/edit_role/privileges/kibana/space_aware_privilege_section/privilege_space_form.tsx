@@ -452,8 +452,8 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     // remove any spaces that no longer exist
     if (!this.isDefiningGlobalPrivilege()) {
-      form.spaces = form.spaces.filter(spaceId =>
-        this.props.spaces.find(space => space.id === spaceId)
+      form.spaces = form.spaces.filter((spaceId) =>
+        this.props.spaces.find((space) => space.id === spaceId)
       );
     }
 
@@ -532,10 +532,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (privileges.length === 0) {
       entry.feature = {};
     } else {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach(feature => {
+      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
         const nextFeaturePrivilege = feature
           .getPrimaryFeaturePrivileges()
-          .find(pfp => privileges.includes(pfp.id));
+          .find((pfp) => privileges.includes(pfp.id));
         if (nextFeaturePrivilege) {
           entry.feature[feature.id] = [nextFeaturePrivilege.id];
         }

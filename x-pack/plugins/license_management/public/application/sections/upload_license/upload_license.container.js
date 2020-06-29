@@ -19,7 +19,7 @@ import {
 } from '../../store/reducers/license_management';
 import { UploadLicense as PresentationComponent } from './upload_license';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isInvalid: isInvalid(state),
     needsAcknowledgement: uploadNeedsAcknowledgement(state),

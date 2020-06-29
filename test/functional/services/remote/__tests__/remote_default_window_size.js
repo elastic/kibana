@@ -31,7 +31,7 @@ const SUITE2_SIZE = { width: 900, height: 900 };
 const SUITE3_SIZE = { width: 800, height: 800 };
 const SUITE31_SIZE = { width: 700, height: 700 };
 
-describe('remote default window size', function() {
+describe('remote default window size', function () {
   // give the tests some time to initialize the FTR and Chrome
   this.timeout(30 * SECOND);
 
@@ -41,7 +41,7 @@ describe('remote default window size', function() {
     });
 
     const messages = [];
-    proc.on('message', msg => {
+    proc.on('message', (msg) => {
       messages.push(msg);
     });
 

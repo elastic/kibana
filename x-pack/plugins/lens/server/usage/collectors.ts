@@ -61,7 +61,7 @@ export function registerLensUsageCollector(
 }
 
 function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {
-  Object.keys(newEvents).forEach(key => {
+  Object.keys(newEvents).forEach((key) => {
     prevEvents[key] = (prevEvents[key] || 0) + newEvents[key];
   });
 }
@@ -88,19 +88,15 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 }
 
 function getDataByDate(dates: Record<string, Record<string, number>>) {
-  const byDate = Object.keys(dates || {}).map(dateStr => parseInt(dateStr, 10));
+  const byDate = Object.keys(dates || {}).map((dateStr) => parseInt(dateStr, 10));
 
   const last30: Record<string, number> = {};
   const last90: Record<string, number> = {};
 
-  const last30Timestamp = moment()
-    .subtract(30, 'days')
-    .unix();
-  const last90Timestamp = moment()
-    .subtract(90, 'days')
-    .unix();
+  const last30Timestamp = moment().subtract(30, 'days').unix();
+  const last90Timestamp = moment().subtract(90, 'days').unix();
 
-  byDate.forEach(dateKey => {
+  byDate.forEach((dateKey) => {
     if (dateKey >= last30Timestamp) {
       addEvents(last30, dates[dateKey]);
       addEvents(last90, dates[dateKey]);

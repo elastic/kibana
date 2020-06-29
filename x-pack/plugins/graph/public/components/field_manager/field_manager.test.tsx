@@ -76,28 +76,13 @@ describe('field_manager', () => {
       </Provider>
     );
 
-    getInstance = () =>
-      instance
-        .find(FieldManager)
-        .dive()
-        .dive()
-        .dive();
+    getInstance = () => instance.find(FieldManager).dive().dive().dive();
   });
 
   it('should list editors for all selected fields', () => {
     expect(getInstance().find(FieldEditor).length).toEqual(2);
-    expect(
-      getInstance()
-        .find(FieldEditor)
-        .at(0)
-        .prop('field').name
-    ).toEqual('field1');
-    expect(
-      getInstance()
-        .find(FieldEditor)
-        .at(1)
-        .prop('field').name
-    ).toEqual('field2');
+    expect(getInstance().find(FieldEditor).at(0).prop('field').name).toEqual('field1');
+    expect(getInstance().find(FieldEditor).at(1).prop('field').name).toEqual('field2');
   });
 
   it('should show selected non-aggregatable fields in picker, but hide unselected ones', () => {
@@ -122,11 +107,9 @@ describe('field_manager', () => {
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      getInstance()
-        .find(FieldPicker)
-        .dive()
-        .find(EuiSelectable)
-        .prop('onChange')([{ checked: 'on', label: 'field3' }]);
+      getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')([
+        { checked: 'on', label: 'field3' },
+      ]);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
@@ -139,12 +122,8 @@ describe('field_manager', () => {
 
   it('should deselect field', () => {
     act(() => {
-      getInstance()
-        .find(FieldEditor)
-        .at(0)
-        .dive()
-        .find(EuiContextMenu)
-        .prop('panels')![0].items![2].onClick!({} as any);
+      getInstance().find(FieldEditor).at(0).dive().find(EuiContextMenu).prop('panels')![0].items![2]
+        .onClick!({} as any);
     });
 
     expect(dispatchSpy).toHaveBeenCalledWith({
@@ -157,12 +136,8 @@ describe('field_manager', () => {
 
   it('should show remove non-aggregatable fields from picker after deselection', () => {
     act(() => {
-      getInstance()
-        .find(FieldEditor)
-        .at(1)
-        .dive()
-        .find(EuiContextMenu)
-        .prop('panels')![0].items![2].onClick!({} as any);
+      getInstance().find(FieldEditor).at(1).dive().find(EuiContextMenu).prop('panels')![0].items![2]
+        .onClick!({} as any);
     });
     expect(
       getInstance()
@@ -198,12 +173,8 @@ describe('field_manager', () => {
     });
 
     expect(
-      getInstance()
-        .find(FieldEditor)
-        .at(0)
-        .dive()
-        .find(EuiContextMenu)
-        .prop('panels')![0].items![1].name
+      getInstance().find(FieldEditor).at(0).dive().find(EuiContextMenu).prop('panels')![0].items![1]
+        .name
     ).toEqual('Enable field');
   });
 
@@ -231,37 +202,26 @@ describe('field_manager', () => {
     });
 
     expect(
-      getInstance()
-        .find(FieldEditor)
-        .at(1)
-        .dive()
-        .find(EuiContextMenu)
-        .prop('panels')![0].items![1].name
+      getInstance().find(FieldEditor).at(1).dive().find(EuiContextMenu).prop('panels')![0].items![1]
+        .name
     ).toEqual('Disable field');
   });
 
   it('should change color', () => {
-    const fieldEditor = getInstance()
-      .find(FieldEditor)
-      .at(1)
-      .dive();
+    const fieldEditor = getInstance().find(FieldEditor).at(1).dive();
 
     const getDisplayForm = () =>
       shallow(fieldEditor.find(EuiContextMenu).prop('panels')![1].content as ReactElement);
 
     act(() => {
-      getDisplayForm()
-        .find(EuiColorPicker)
-        .prop('onChange')!('#aaa', {
+      getDisplayForm().find(EuiColorPicker).prop('onChange')!('#aaa', {
         rgba: [170, 170, 170, 1],
         hex: '#aaa',
         isValid: true,
       });
     });
     fieldEditor.update();
-    getDisplayForm()
-      .find(EuiButton)
-      .prop('onClick')!({} as any);
+    getDisplayForm().find(EuiButton).prop('onClick')!({} as any);
 
     expect(dispatchSpy).toHaveBeenCalledWith({
       type: 'x-pack/graph/fields/UPDATE_FIELD_PROPERTIES',

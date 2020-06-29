@@ -47,7 +47,7 @@ export async function isValidTimeField(callAsCurrentUser: APICaller, job: Combin
 export async function validateTimeRange(
   callAsCurrentUser: APICaller,
   job: CombinedJob,
-  timeRange?: TimeRange
+  timeRange?: Partial<TimeRange>
 ) {
   const messages: ValidateTimeRangeMessage[] = [];
 
@@ -78,7 +78,7 @@ export async function validateTimeRange(
   }
 
   // check for minimum time range (25 buckets or 2 hours, whichever is longer)
-  const interval = parseInterval(job.analysis_config.bucket_span);
+  const interval = parseInterval(job.analysis_config.bucket_span, true);
   if (interval === null) {
     messages.push({ id: 'bucket_span_invalid' });
   } else {

@@ -21,7 +21,7 @@ interface StateProps {
   element: PositionedElement | undefined;
 }
 
-const renderIfElement: React.FunctionComponent<StateProps> = props => {
+const renderIfElement: React.FunctionComponent<StateProps> = (props) => {
   if (props.element) {
     return <Component element={props.element} />;
   }

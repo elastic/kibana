@@ -27,7 +27,7 @@ function unflatten(data) {
 
   const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
   const result = {};
-  _.each(data, function(val, p) {
+  _.each(data, function (val, p) {
     let cur = result;
     let prop = '';
     let m;
@@ -77,7 +77,7 @@ export default new Chainable('props', {
       _.assign(args.byName.inputSeries, properties);
       return args.byName.inputSeries;
     } else {
-      return alter(args, function(eachSeries) {
+      return alter(args, function (eachSeries) {
         _.assign(eachSeries, properties);
         return eachSeries;
       });

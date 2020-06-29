@@ -25,9 +25,7 @@ describe('FingerprintCol', () => {
   });
 
   it('renders expected elements for valid props', () => {
-    cert.not_after = moment()
-      .add('4', 'months')
-      .toISOString();
+    cert.not_after = moment().add('4', 'months').toISOString();
 
     expect(renderWithRouter(<FingerprintCol cert={cert} />)).toMatchSnapshot();
   });

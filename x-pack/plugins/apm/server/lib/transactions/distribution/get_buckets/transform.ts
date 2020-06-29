@@ -20,14 +20,14 @@ function getBucket(
   const samples = bucket.samples.items.hits.hits.map(
     ({ _source }: { _source: Transaction }) => ({
       traceId: _source.trace.id,
-      transactionId: _source.transaction.id
+      transactionId: _source.transaction.id,
     })
   );
 
   return {
     key: bucket.key,
     count: bucket.doc_count,
-    samples
+    samples,
   };
 }
 
@@ -37,6 +37,6 @@ export function bucketTransformer(response: DistributionBucketResponse) {
 
   return {
     noHits: response.hits.total.value === 0,
-    buckets
+    buckets,
   };
 }

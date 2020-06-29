@@ -11,7 +11,7 @@ export const flattenObject = (nestedObj, flattenArrays) => {
   const flatObj = {};
   const dot = '.';
   (function flattenObj(obj) {
-    _.keys(obj).forEach(function(key) {
+    _.keys(obj).forEach(function (key) {
       stack.push(key);
       if (!flattenArrays && Array.isArray(obj[key])) flatObj[stack.join(dot)] = obj[key];
       else if (_.isObject(obj[key])) flattenObj(obj[key]);

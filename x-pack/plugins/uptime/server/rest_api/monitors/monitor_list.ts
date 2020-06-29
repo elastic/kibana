@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS, CONTEXT_DEFAULTS } from '../../../common/constants';
 
-export const createMonitorListRoute: UMRestApiRouteFactory = libs => ({
+export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'GET',
   path: API_URLS.MONITOR_LIST,
   validate: {

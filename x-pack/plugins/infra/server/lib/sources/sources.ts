@@ -42,7 +42,7 @@ export class InfraSources {
   ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then(internalSourceConfiguration => ({
+      .then((internalSourceConfiguration) => ({
         id: sourceId,
         version: undefined,
         updatedAt: undefined,
@@ -52,9 +52,9 @@ export class InfraSources {
           internalSourceConfiguration
         ),
       }))
-      .catch(err =>
+      .catch((err) =>
         err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then(result => ({
+          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
               ...result,
               configuration: mergeSourceConfiguration(
                 staticDefaultSourceConfiguration,
@@ -63,7 +63,7 @@ export class InfraSources {
             }))
           : Promise.reject(err)
       )
-      .catch(err =>
+      .catch((err) =>
         savedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
@@ -85,7 +85,7 @@ export class InfraSources {
       savedObjectsClient
     );
 
-    return savedSourceConfigurations.map(savedSourceConfiguration => ({
+    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
       ...savedSourceConfiguration,
       configuration: mergeSourceConfiguration(
         staticDefaultSourceConfiguration,
@@ -242,14 +242,14 @@ const mergeSourceConfiguration = (
 export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
-    map(savedSourceConfiguration => ({
+    map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

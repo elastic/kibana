@@ -6,7 +6,7 @@
 
 import { RequestAdapter } from '../../../../../src/plugins/inspector/common/adapters/request';
 import { MapAdapter } from '../inspector/adapters/map_adapter';
-import { getInjectedVarFunc } from '../kibana_services';
+import { getShowMapsInspectorAdapter } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
@@ -16,8 +16,7 @@ function createInspectorAdapters() {
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
-  const getInjectedVar = getInjectedVarFunc();
-  if (getInjectedVar && getInjectedVar('showMapsInspectorAdapter', false)) {
+  if (getShowMapsInspectorAdapter()) {
     inspectorAdapters.map = new MapAdapter();
   }
   return inspectorAdapters;
@@ -77,14 +76,14 @@ export const registerCancelCallback = (requestToken, callback) => {
   };
 };
 
-export const unregisterCancelCallback = requestToken => {
+export const unregisterCancelCallback = (requestToken) => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = requestToken => {
+export const cancelRequest = (requestToken) => {
   return (dispatch, getState) => {
     if (!requestToken) {
       return;

@@ -14,7 +14,7 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 /*
  * Mostly copied from base_table_controller test, with modifications
  */
-describe('MonitoringViewBaseController', function() {
+describe('MonitoringViewBaseController', function () {
   let ctrl;
   let $injector;
   let $scope;
@@ -23,7 +23,7 @@ describe('MonitoringViewBaseController', function() {
   let executorService;
   let configService;
   let timefilter;
-  const httpCall = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
+  const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
   before(() => {
     const data = dataPluginMock.createStartContract();
@@ -78,7 +78,7 @@ describe('MonitoringViewBaseController', function() {
     ctrl = new MonitoringViewBaseController(opts);
   });
 
-  it('show/hide zoom-out button based on interaction', done => {
+  it('show/hide zoom-out button based on interaction', (done) => {
     const xaxis = { from: 1562089923880, to: 1562090159676 };
     const timeRange = { xaxis };
     const { zoomInfo } = ctrl;
@@ -113,11 +113,11 @@ describe('MonitoringViewBaseController', function() {
     expect(executorService.start.calledOnce).to.be(true);
   });
 
-  it('does not allow for a new request if one is inflight', done => {
+  it('does not allow for a new request if one is inflight', (done) => {
     let counter = 0;
     const opts = {
       title: 'testo',
-      getPageData: ms => httpCall(ms),
+      getPageData: (ms) => httpCall(ms),
       $injector,
       $scope,
     };
@@ -183,7 +183,7 @@ describe('MonitoringViewBaseController', function() {
       expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     });
 
-    it('disables timepicker and auto refresh', done => {
+    it('disables timepicker and auto refresh', (done) => {
       opts = {
         title: 'test',
         getPageData: () => httpCall(60),

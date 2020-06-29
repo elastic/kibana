@@ -8,20 +8,20 @@ import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 
 export async function getBuckets({
   serviceName,
   groupId,
   bucketSize,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId?: string;
@@ -33,7 +33,7 @@ export async function getBuckets({
     { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES
+    ...uiFiltersES,
   ];
 
   if (groupId) {
@@ -46,8 +46,8 @@ export async function getBuckets({
       size: 0,
       query: {
         bool: {
-          filter
-        }
+          filter,
+        },
       },
       aggs: {
         distribution: {
@@ -57,25 +57,25 @@ export async function getBuckets({
             interval: bucketSize,
             extended_bounds: {
               min: start,
-              max: end
-            }
-          }
-        }
-      }
-    }
+              max: end,
+            },
+          },
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
-    bucket => ({
+    (bucket) => ({
       key: bucket.key,
-      count: bucket.doc_count
+      count: bucket.doc_count,
     })
   );
 
   return {
     noHits: resp.hits.total.value === 0,
-    buckets
+    buckets,
   };
 }

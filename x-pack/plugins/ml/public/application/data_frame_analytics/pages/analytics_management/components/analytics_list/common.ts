@@ -81,6 +81,22 @@ export function getDataFrameAnalyticsProgress(stats: DataFrameAnalyticsStats) {
   return undefined;
 }
 
+export function getDataFrameAnalyticsProgressPhase(
+  stats: DataFrameAnalyticsStats
+): { currentPhase: number; progress: number; totalPhases: number } {
+  let phase = 0;
+  let progress = 0;
+
+  for (const progressPhase of stats.progress) {
+    phase++;
+    progress = progressPhase.progress_percent;
+    if (progressPhase.progress_percent < 100) {
+      break;
+    }
+  }
+  return { currentPhase: phase, progress, totalPhases: stats.progress.length };
+}
+
 export interface DataFrameAnalyticsListRow {
   id: DataFrameAnalyticsId;
   checkpointing: object;
@@ -106,5 +122,5 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
 }
 
 export function getResultsUrl(jobId: string, analysisType: string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
+  return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }

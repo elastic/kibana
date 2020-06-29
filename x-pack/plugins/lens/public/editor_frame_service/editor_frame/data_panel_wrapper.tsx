@@ -27,7 +27,7 @@ interface DataPanelWrapperProps {
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => updater => {
+    () => (updater) => {
       props.dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater,
@@ -78,7 +78,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
             title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
               defaultMessage: 'Switch to datasource',
             })}
-            items={Object.keys(props.datasourceMap).map(datasourceId => (
+            items={Object.keys(props.datasourceMap).map((datasourceId) => (
               <EuiContextMenuItem
                 key={datasourceId}
                 data-test-subj={`datasource-switch-${datasourceId}`}

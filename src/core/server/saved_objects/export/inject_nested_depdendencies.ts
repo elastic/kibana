@@ -51,8 +51,10 @@ export async function fetchNestedDependencies(
   }
   const allObjects = [...savedObjectsMap.values()];
   return {
-    objects: allObjects.filter(obj => !obj.error),
-    missingRefs: allObjects.filter(obj => !!obj.error).map(obj => ({ type: obj.type, id: obj.id })),
+    objects: allObjects.filter((obj) => !obj.error),
+    missingRefs: allObjects
+      .filter((obj) => !!obj.error)
+      .map((obj) => ({ type: obj.type, id: obj.id })),
   };
 }
 

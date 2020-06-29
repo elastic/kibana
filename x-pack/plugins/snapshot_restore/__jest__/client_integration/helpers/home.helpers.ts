@@ -98,19 +98,13 @@ export const setup = async (): Promise<HomeTestBed> => {
   const selectTab = (tab: 'repositories' | 'snapshots') => {
     const tabs = ['snapshots', 'repositories'];
 
-    testBed
-      .find(`${tab}_tab`)
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find(`${tab}_tab`).at(tabs.indexOf(tab)).simulate('click');
   };
 
   const selectSnapshotDetailTab = (tab: 'summary' | 'failedIndices') => {
     const tabs = ['summary', 'failedIndices'];
 
-    testBed
-      .find('snapshotDetail.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('snapshotDetail.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   return {

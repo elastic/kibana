@@ -18,15 +18,13 @@
  */
 
 import { Vis } from './vis';
-// @ts-ignore
-import fixturesStubbedLogstashIndexPatternProvider from '../../../fixtures/stubbed_logstash_index_pattern';
 
 jest.mock('./services', () => {
   class MockVisualizationController {
     constructor() {}
 
     render(): Promise<void> {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve();
       });
     }
@@ -36,7 +34,10 @@ jest.mock('./services', () => {
 
   // eslint-disable-next-line
   const { BaseVisType } = require('./vis_types/base_vis_type');
-
+  // eslint-disable-next-line
+  const { SearchSource } = require('../../data/public/search/search_source');
+  // eslint-disable-next-line
+  const fixturesStubbedLogstashIndexPatternProvider = require('../../../fixtures/stubbed_logstash_index_pattern');
   const visType = new BaseVisType({
     name: 'pie',
     title: 'pie',
@@ -51,10 +52,17 @@ jest.mock('./services', () => {
         aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, toJSON: () => aggConfig })),
       }),
     }),
+    getSearch: () => ({
+      searchSource: {
+        create: () => {
+          return new SearchSource({ index: fixturesStubbedLogstashIndexPatternProvider });
+        },
+      },
+    }),
   };
 });
 
-describe('Vis Class', function() {
+describe('Vis Class', function () {
   let vis: Vis;
   const stateFixture = {
     type: 'pie',
@@ -66,22 +74,18 @@ describe('Vis Class', function() {
         { type: 'terms' as any, schema: 'segment', params: { field: 'geo.src' } },
       ],
       searchSource: {
-        getField: (name: string) => {
-          if (name === 'index') {
-            return fixturesStubbedLogstashIndexPatternProvider();
-          }
-        },
-        createCopy: jest.fn(),
+        index: '123',
       },
     },
     params: { isDonut: true },
   };
 
-  beforeEach(function() {
+  beforeEach(async function () {
     vis = new Vis('test', stateFixture as any);
+    await vis.setState(stateFixture as any);
   });
 
-  const verifyVis = function(visToVerify: Vis) {
+  const verifyVis = function (visToVerify: Vis) {
     expect(visToVerify).toHaveProperty('data');
     expect(visToVerify.data).toHaveProperty('aggs');
     expect(visToVerify.data.aggs!.aggs).toHaveLength(3);
@@ -92,14 +96,14 @@ describe('Vis Class', function() {
     expect(visToVerify.params).toHaveProperty('isDonut', true);
   };
 
-  describe('initialization', function() {
-    it('should set the state', function() {
+  describe('initialization', function () {
+    it('should set the state', function () {
       verifyVis(vis);
     });
   });
 
-  describe('getState()', function() {
-    it('should get a state that represents the... er... state', function() {
+  describe('getState()', function () {
+    it('should get a state that represents the... er... state', function () {
       const state = vis.serialize();
       expect(state).toHaveProperty('type', 'pie');
 
@@ -111,12 +115,12 @@ describe('Vis Class', function() {
     });
   });
 
-  describe('isHierarchical()', function() {
-    it('should return false for non-hierarchical vis (like histogram)', function() {
+  describe('isHierarchical()', function () {
+    it('should return false for non-hierarchical vis (like histogram)', function () {
       expect(vis.isHierarchical()).toBe(false);
     });
 
-    it('should return true for hierarchical vis (like pie)', function() {
+    it('should return true for hierarchical vis (like pie)', function () {
       vis.type.hierarchicalData = true;
       expect(vis.isHierarchical()).toBe(true);
     });

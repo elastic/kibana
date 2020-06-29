@@ -132,7 +132,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
           compressed
           valueOfSelected={layer.categoryDisplay}
           options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
-          onChange={option => {
+          onChange={(option) => {
             setState({
               ...state,
               layers: [{ ...layer, categoryDisplay: option }],
@@ -152,7 +152,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
           disabled={layer.categoryDisplay === 'hide'}
           valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
           options={numberOptions}
-          onChange={option => {
+          onChange={(option) => {
             setState({
               ...state,
               layers: [{ ...layer, numberDisplay: option }],
@@ -175,7 +175,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
           max={10}
           showInput
           compressed
-          onChange={e => {
+          onChange={(e) => {
             setState({
               ...state,
               layers: [{ ...layer, percentDecimals: Number(e.currentTarget.value) }],
@@ -197,7 +197,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
             })}
             options={legendOptions}
             idSelected={legendOptions.find(({ value }) => value === layer.legendDisplay)!.id}
-            onChange={optionId => {
+            onChange={(optionId) => {
               setState({
                 ...state,
                 layers: [

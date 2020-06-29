@@ -26,7 +26,6 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-  EMBEDDABLE_ORIGINATING_APP_PARAM,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
@@ -43,13 +42,14 @@ import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
 
 export interface VisualizeEmbeddableFactoryDeps {
-  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector'>>;
+  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector' | 'embeddable'>>;
 }
 
 export class VisualizeEmbeddableFactory
@@ -66,23 +66,23 @@ export class VisualizeEmbeddableFactory
     name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
     includeFields: ['visState'],
     type: 'visualization',
-    getIconForSavedObject: savedObject => {
+    getIconForSavedObject: (savedObject) => {
       return (
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
       );
     },
-    getTooltipForSavedObject: savedObject => {
+    getTooltipForSavedObject: (savedObject) => {
       return `${savedObject.attributes.title} (${
         getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
       })`;
     },
-    showSavedObject: savedObject => {
+    showSavedObject: (savedObject) => {
       const typeName: string = JSON.parse(savedObject.attributes.visState).type;
       const visType = getTypes().get(typeName);
       if (!visType) {
         return false;
       }
-      if (getUISettings().get('visualize:enableLabs')) {
+      if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
         return true;
       }
       return visType.stage !== 'experimental';
@@ -102,15 +102,7 @@ export class VisualizeEmbeddableFactory
   }
 
   public async getCurrentAppId() {
-    let currentAppId = await this.deps
-      .start()
-      .core.application.currentAppId$.pipe(first())
-      .toPromise();
-    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
-    if (currentAppId === 'kibana') {
-      currentAppId += `:${window.location.hash.split(/[\/\?]/)[1]}`;
-    }
-    return currentAppId;
+    return await this.deps.start().core.application.currentAppId$.pipe(first()).toPromise();
   }
 
   public async createFromSavedObject(
@@ -122,7 +114,9 @@ export class VisualizeEmbeddableFactory
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
+      const visState = convertToSerializedVis(savedObject);
+      const vis = new Vis(savedObject.visState.type, visState);
+      await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
@@ -133,9 +127,9 @@ export class VisualizeEmbeddableFactory
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
-      editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+      originatingApp: await this.getCurrentAppId(),
+      outsideVisualizeApp: true,
     });
     return undefined;
   }

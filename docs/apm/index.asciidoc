@@ -31,6 +31,8 @@ include::getting-started.asciidoc[]
 
 include::how-to-guides.asciidoc[]
 
+include::apm-app-users.asciidoc[]
+
 include::settings.asciidoc[]
 
 include::api.asciidoc[]

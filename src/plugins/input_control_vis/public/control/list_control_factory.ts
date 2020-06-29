@@ -29,11 +29,11 @@ import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
-import { InputControlVisDependencies } from '../plugin';
+import { InputControlSettings, InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 
 interface TermsAggArgs {
@@ -76,7 +76,7 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
 };
 
 export class ListControl extends Control<PhraseFilterManager> {
-  private getInjectedVar: InputControlVisDependencies['core']['injectedMetadata']['getInjectedVar'];
+  private getSettings: () => Promise<InputControlSettings>;
   private timefilter: TimefilterContract;
   private searchSource: DataPublicPluginStart['search']['searchSource'];
 
@@ -94,7 +94,7 @@ export class ListControl extends Control<PhraseFilterManager> {
     deps: InputControlVisDependencies
   ) {
     super(controlParams, filterManager, useTimeFilter);
-    this.getInjectedVar = deps.core.injectedMetadata.getInjectedVar;
+    this.getSettings = deps.getSettings;
     this.timefilter = deps.data.query.timefilter.timefilter;
     this.searchSource = searchSource;
   }
@@ -137,9 +137,10 @@ export class ListControl extends Control<PhraseFilterManager> {
     }
 
     const fieldName = this.filterManager.fieldName;
+    const settings = await this.getSettings();
     const initialSearchSourceState: SearchSourceFields = {
-      timeout: `${this.getInjectedVar('autocompleteTimeout')}ms`,
-      terminate_after: Number(this.getInjectedVar('autocompleteTerminateAfter')),
+      timeout: `${settings.autocompleteTimeout}ms`,
+      terminate_after: Number(settings.autocompleteTerminateAfter),
     };
     const aggs = termsAgg({
       field: indexPattern.fields.getByName(fieldName),
@@ -147,7 +148,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       direction: 'desc',
       query,
     });
-    const searchSource = createSearchSource(
+    const searchSource = await createSearchSource(
       this.searchSource,
       initialSearchSourceState,
       indexPattern,

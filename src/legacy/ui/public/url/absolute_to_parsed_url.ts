@@ -24,9 +24,9 @@ import { KibanaParsedUrl } from './kibana_parsed_url';
 
 /**
  *
- * @param absoluteUrl - an absolute url, e.g. https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id?hi=bye
+ * @param absoluteUrl - an absolute url, e.g. https://localhost:5601/gra/app/visualize#/edit/viz_id?hi=bye
  * @param basePath - An optional base path for kibana. If supplied, should start with a "/".
- * e.g. in https://localhost:5601/gra/app/kibana#/visualize/edit/viz_id the basePath is
+ * e.g. in https://localhost:5601/gra/app/visualize#/edit/viz_id the basePath is
  * "/gra".
  * @return {KibanaParsedUrl}
  */

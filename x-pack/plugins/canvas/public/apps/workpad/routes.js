@@ -25,7 +25,7 @@ export const routes = [
       {
         name: 'createWorkpad',
         path: '/create',
-        action: dispatch => async ({ router }) => {
+        action: (dispatch) => async ({ router }) => {
           const newWorkpad = getDefaultWorkpad();
           try {
             await workpadService.create(newWorkpad);

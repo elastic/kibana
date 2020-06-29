@@ -24,18 +24,18 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function percentile(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE) {
       return next(results);
     }
 
-    getSplits(resp, panel, series, meta).forEach(split => {
-      metric.percentiles.forEach(percentile => {
+    getSplits(resp, panel, series, meta).forEach((split) => {
+      metric.percentiles.forEach((percentile) => {
         const percentileValue = percentile.value ? percentile.value : 0;
         const id = `${split.id}:${percentile.id}`;
-        const data = split.timeseries.buckets.map(bucket => {
+        const data = split.timeseries.buckets.map((bucket) => {
           const higherMetric = { ...metric, percent: percentileValue };
           const serieData = [bucket.key, getAggValue(bucket, higherMetric)];
 

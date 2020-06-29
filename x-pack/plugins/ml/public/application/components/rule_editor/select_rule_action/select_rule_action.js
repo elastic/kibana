@@ -32,7 +32,7 @@ export function SelectRuleAction({
   if (rules.length > 0) {
     ruleActionPanels = rules.map((rule, index) => {
       return (
-        <React.Fragment key={`rule_panel_${index}`}>
+        <React.Fragment key={`rule_panel_${index}_${rules.length}`}>
           <RuleActionPanel
             job={job}
             ruleIndex={index}

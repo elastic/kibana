@@ -18,7 +18,7 @@ export function topHitsTimeToSort({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach(layerDescriptor => {
+  layerList.forEach((layerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
       if (_.has(layerDescriptor, 'sourceDescriptor.topHitsTimeField')) {
         layerDescriptor.sourceDescriptor.sortField =

@@ -47,7 +47,7 @@ export const FilterBar: React.FunctionComponent<FilterBarProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
-        {allFilterOptions.map(option => (
+        {allFilterOptions.map((option) => (
           <EuiFilterButton
             key={option}
             onClick={onFilterChange.bind(null, option)}

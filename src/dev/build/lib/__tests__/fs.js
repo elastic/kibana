@@ -23,11 +23,12 @@ import { chmodSync, statSync } from 'fs';
 import del from 'del';
 import expect from '@kbn/expect';
 
-import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar } from '../fs';
+import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
 
 const TMP = resolve(__dirname, '__tmp__');
 const FIXTURES = resolve(__dirname, 'fixtures');
 const FOO_TAR_PATH = resolve(FIXTURES, 'foo_dir.tar.gz');
+const FOO_GZIP_PATH = resolve(FIXTURES, 'foo.txt.gz');
 const BAR_TXT_PATH = resolve(FIXTURES, 'foo_dir/bar.txt');
 const WORLD_EXECUTABLE = resolve(FIXTURES, 'bin/world_executable');
 
@@ -35,9 +36,7 @@ const isWindows = /^win/.test(process.platform);
 
 // get the mode of a file as a string, like 777, or 644,
 function getCommonMode(path) {
-  return statSync(path)
-    .mode.toString(8)
-    .slice(-3);
+  return statSync(path).mode.toString(8).slice(-3);
 }
 
 function assertNonAbsoluteError(error) {
@@ -323,6 +322,41 @@ describe('dev/build/lib/fs', () => {
 
       expect(await read(resolve(destination, 'bar.txt'))).to.be('bar\n');
       expect(await read(resolve(destination, 'foo/foo.txt'))).to.be('foo\n');
+    });
+  });
+
+  describe('gunzip()', () => {
+    it('rejects if source path is not absolute', async () => {
+      try {
+        await gunzip('foo/bar', '**/*', __dirname);
+        throw new Error('Expected gunzip() to reject');
+      } catch (error) {
+        assertNonAbsoluteError(error);
+      }
+    });
+
+    it('rejects if destination path is not absolute', async () => {
+      try {
+        await gunzip(__dirname, '**/*', 'foo/bar');
+        throw new Error('Expected gunzip() to reject');
+      } catch (error) {
+        assertNonAbsoluteError(error);
+      }
+    });
+
+    it('rejects if neither path is not absolute', async () => {
+      try {
+        await gunzip('foo/bar', '**/*', 'foo/bar');
+        throw new Error('Expected gunzip() to reject');
+      } catch (error) {
+        assertNonAbsoluteError(error);
+      }
+    });
+
+    it('extracts gzip from source into destination, creating destination if necessary', async () => {
+      const destination = resolve(TMP, 'z/y/x/v/u/t/foo.txt');
+      await gunzip(FOO_GZIP_PATH, destination);
+      expect(await read(resolve(destination))).to.be('foo\n');
     });
   });
 });

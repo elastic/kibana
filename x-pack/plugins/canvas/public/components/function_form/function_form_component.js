@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const FunctionFormComponent = props => {
+export const FunctionFormComponent = (props) => {
   const passedProps = {
     argResolver: props.argResolver,
     args: props.args,

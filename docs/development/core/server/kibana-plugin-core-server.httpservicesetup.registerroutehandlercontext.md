@@ -21,7 +21,7 @@ registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName
    'myApp',
    (context, req) => {
     async function search (id: string) {
-      return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
+      return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint', id);
     }
     return { search };
    }

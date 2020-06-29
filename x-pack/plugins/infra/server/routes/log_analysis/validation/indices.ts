@@ -40,10 +40,10 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
 
         // Query each pattern individually, to map correctly the errors
         await Promise.all(
-          indices.map(async index => {
+          indices.map(async (index) => {
             const fieldCaps = await framework.callWithRequest(requestContext, 'fieldCaps', {
               allow_no_indices: true,
-              fields: fields.map(field => field.name),
+              fields: fields.map((field) => field.name),
               ignore_unavailable: true,
               index,
             });
@@ -68,7 +68,7 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
               } else {
                 const fieldTypes = Object.keys(fieldMetadata);
 
-                if (!fieldTypes.every(fieldType => validTypes.includes(fieldType))) {
+                if (!fieldTypes.every((fieldType) => validTypes.includes(fieldType))) {
                   errors.push({
                     error: `FIELD_NOT_VALID`,
                     index,

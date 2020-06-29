@@ -54,12 +54,17 @@ export const getCardinalityMetricAgg = ({
 
         return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       },
+      getSerializedFormat(agg) {
+        return {
+          id: 'number',
+        };
+      },
       params: [
         {
           name: 'field',
           type: 'field',
           filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-            type => type !== KBN_FIELD_TYPES.HISTOGRAM
+            (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
           ),
         },
       ],

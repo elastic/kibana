@@ -32,7 +32,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = props => {
+export const SimpleTemplate: FunctionComponent<Props> = (props) => {
   const { typeInstance, argValue, onValueChange, labels, workpad } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
@@ -74,7 +74,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
             <ColorPickerPopover
               anchorPosition="leftCenter"
               colors={workpad.colors}
-              onChange={val => handleChange('color', val)}
+              onChange={(val) => handleChange('color', val)}
               value={color}
               ariaLabel={strings.getColorLabel()}
             />

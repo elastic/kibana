@@ -51,10 +51,7 @@ export function getLoggerStream({ events, config }) {
     });
   }
 
-  logInterceptor
-    .pipe(squeeze)
-    .pipe(format)
-    .pipe(dest);
+  logInterceptor.pipe(squeeze).pipe(format).pipe(dest);
 
   return logInterceptor;
 }

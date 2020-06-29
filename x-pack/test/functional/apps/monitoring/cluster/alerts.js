@@ -11,7 +11,7 @@ const HIGH_ALERT_MESSAGE = 'High severity alert';
 const MEDIUM_ALERT_MESSAGE = 'Medium severity alert';
 const LOW_ALERT_MESSAGE = 'Low severity alert';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const overview = getService('monitoringClusterOverview');
   const alerts = getService('monitoringClusterAlerts');
@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
 
       it('in alerts panel, a single medium alert is shown', async () => {
         const clusterAlerts = await alerts.getOverviewAlerts();
-        await new Promise(r => setTimeout(r, 10000));
+        await new Promise((r) => setTimeout(r, 10000));
         expect(clusterAlerts.length).to.be(1);
 
         const { alertIcon, alertText } = await alerts.getOverviewAlert(0);

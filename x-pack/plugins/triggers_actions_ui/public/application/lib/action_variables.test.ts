@@ -183,5 +183,6 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     actionVariables,
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    producer: 'alerting',
   };
 }

@@ -32,13 +32,13 @@ const FILES = [
 ];
 
 describe('parseFilePath()', () => {
-  it.each([...FILES, ...AMBIGUOUS])('parses %s', path => {
+  it.each([...FILES, ...AMBIGUOUS])('parses %s', (path) => {
     expect(parseFilePath(path)).toMatchSnapshot();
   });
 });
 
 describe('parseDirPath()', () => {
-  it.each([...DIRS, ...AMBIGUOUS])('parses %s', path => {
+  it.each([...DIRS, ...AMBIGUOUS])('parses %s', (path) => {
     expect(parseDirPath(path)).toMatchSnapshot();
   });
 });

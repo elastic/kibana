@@ -7,7 +7,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore (elastic/eui#1262) EuiImage is not exported yet
   EuiImage,
   EuiPanel,
   EuiSpacer,
@@ -36,7 +35,7 @@ interface Props {
   onDelete: (asset: AssetType) => void;
 }
 
-export const Asset: FunctionComponent<Props> = props => {
+export const Asset: FunctionComponent<Props> = (props) => {
   const { asset, onCreate, onCopy, onDelete } = props;
 
   const createImage = (

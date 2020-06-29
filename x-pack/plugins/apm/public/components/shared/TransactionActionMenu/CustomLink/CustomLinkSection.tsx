@@ -26,13 +26,13 @@ const TruncateText = styled(EuiText)`
 
 export const CustomLinkSection = ({
   customLinks,
-  transaction
+  transaction,
 }: {
   customLinks: CustomLink[];
   transaction: Transaction;
 }) => (
   <ul>
-    {customLinks.map(link => {
+    {customLinks.map((link) => {
       let href = link.url;
       try {
         href = Mustache.render(link.url, transaction);

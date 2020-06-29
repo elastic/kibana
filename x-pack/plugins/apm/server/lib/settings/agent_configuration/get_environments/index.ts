@@ -15,20 +15,20 @@ export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
 
 export async function getEnvironments({
   serviceName,
-  setup
+  setup,
 }: {
   serviceName: string | undefined;
   setup: Setup;
 }) {
   const [allEnvironments, existingEnvironments] = await Promise.all([
     getAllEnvironments({ serviceName, setup }),
-    getExistingEnvironmentsForService({ serviceName, setup })
+    getExistingEnvironmentsForService({ serviceName, setup }),
   ]);
 
-  return allEnvironments.map(environment => {
+  return allEnvironments.map((environment) => {
     return {
       name: environment,
-      alreadyConfigured: existingEnvironments.includes(environment)
+      alreadyConfigured: existingEnvironments.includes(environment),
     };
   });
 }

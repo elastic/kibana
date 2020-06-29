@@ -20,22 +20,12 @@ import React, { Component, RefObject } from 'react';
 import { Subscription } from 'rxjs';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CoreStart } from 'src/core/public';
-import { UiActionsService } from 'src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IContainer, PanelState, EmbeddableChildPanel } from '../..';
 import { EmbeddableStart } from '../../../plugin';
 
 interface Props {
   container: IContainer;
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  overlays: CoreStart['overlays'];
-  application: CoreStart['application'];
-  notifications: CoreStart['notifications'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
+  panelComponent: EmbeddableStart['EmbeddablePanel'];
 }
 
 interface State {
@@ -52,7 +42,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    Object.values(this.props.container.getInput().panels).forEach(panelState => {
+    Object.values(this.props.container.getInput().panels).forEach((panelState) => {
       this.roots[panelState.explicitInput.id] = React.createRef();
     });
 
@@ -102,20 +92,13 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
   }
 
   private renderList() {
-    const list = Object.values(this.state.panels).map(panelState => {
+    const list = Object.values(this.state.panels).map((panelState) => {
       const item = (
         <EuiFlexItem key={panelState.explicitInput.id}>
           <EmbeddableChildPanel
             container={this.props.container}
             embeddableId={panelState.explicitInput.id}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            notifications={this.props.notifications}
-            application={this.props.application}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
+            PanelComponent={this.props.panelComponent}
           />
         </EuiFlexItem>
       );

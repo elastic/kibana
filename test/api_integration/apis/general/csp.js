@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('csp smoke test', () => {
@@ -29,7 +29,7 @@ export default function({ getService }) {
       expect(response.headers).to.have.property('content-security-policy');
       const header = response.headers['content-security-policy'];
       const parsed = new Map(
-        header.split(';').map(rule => {
+        header.split(';').map((rule) => {
           const parts = rule.trim().split(' ');
           const key = parts.splice(0, 1)[0];
           return [key, parts];

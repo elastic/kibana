@@ -57,12 +57,15 @@ export function setStartServices(npStart: NpStart) {
   dataServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   dataServices.setQueryService(npStart.plugins.data.query);
   dataServices.setSearchService(npStart.plugins.data.search);
+
   visualizationsServices.setI18n(npStart.core.i18n);
   visualizationsServices.setTypes(
     pick(npStart.plugins.visualizations, ['get', 'all', 'getAliases'])
   );
   visualizationsServices.setCapabilities(npStart.core.application.capabilities);
   visualizationsServices.setHttp(npStart.core.http);
+  visualizationsServices.setApplication(npStart.core.application);
+  visualizationsServices.setEmbeddable(npStart.plugins.embeddable);
   visualizationsServices.setSavedObjects(npStart.core.savedObjects);
   visualizationsServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   visualizationsServices.setFilterManager(npStart.plugins.data.query.filterManager);
@@ -82,4 +85,5 @@ export function setStartServices(npStart: NpStart) {
     visualizationTypes: visualizationsServices.getTypes(),
   });
   visualizationsServices.setSavedVisualizationsLoader(savedVisualizationsLoader);
+  visualizationsServices.setSavedSearchLoader(npStart.plugins.discover.savedSearchLoader);
 }

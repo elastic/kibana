@@ -33,12 +33,10 @@ export function getEsClientForAPIKey({ getService }: FtrProviderContext, esApiKe
 
 export function setupIngest({ getService }: FtrProviderContext) {
   before(async () => {
-    await getService('supertest')
-      .post(`/api/ingest_manager/setup`)
-      .set('kbn-xsrf', 'xxx')
-      .send();
+    await getService('supertest').post(`/api/ingest_manager/setup`).set('kbn-xsrf', 'xxx').send();
     await getService('supertest')
       .post(`/api/ingest_manager/fleet/setup`)
-      .set('kbn-xsrf', 'xxx');
+      .set('kbn-xsrf', 'xxx')
+      .send({ forceRecreate: true });
   });
 }

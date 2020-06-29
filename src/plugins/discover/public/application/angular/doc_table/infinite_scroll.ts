@@ -43,7 +43,7 @@ export function createInfiniteScrollDirective() {
         const remaining = elTop - winBottom;
 
         if (remaining <= winHeight * 0.5) {
-          $scope[$scope.$$phase ? '$eval' : '$apply'](function() {
+          $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
             $scope.more();
           });
         }
@@ -51,14 +51,14 @@ export function createInfiniteScrollDirective() {
 
       function scheduleCheck() {
         if (checkTimer) return;
-        checkTimer = setTimeout(function() {
+        checkTimer = setTimeout(function () {
           checkTimer = null;
           onScroll();
         }, 50);
       }
 
       $window.on('scroll', scheduleCheck);
-      $scope.$on('$destroy', function() {
+      $scope.$on('$destroy', function () {
         clearTimeout(checkTimer);
         $window.off('scroll', scheduleCheck);
       });

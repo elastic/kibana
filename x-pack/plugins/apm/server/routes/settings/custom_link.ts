@@ -10,17 +10,17 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
 import {
   filterOptionsRt,
-  payloadRt
+  payloadRt,
 } from '../../lib/settings/custom_link/custom_link_types';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { createRoute } from '../create_route';
 
-export const customLinkTransactionRoute = createRoute(core => ({
+export const customLinkTransactionRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/transaction',
   params: {
-    query: filterOptionsRt
+    query: filterOptionsRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -28,13 +28,13 @@ export const customLinkTransactionRoute = createRoute(core => ({
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
     return await getTransaction({ setup, filters });
-  }
+  },
 }));
 
-export const listCustomLinksRoute = createRoute(core => ({
+export const listCustomLinksRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links',
   params: {
-    query: filterOptionsRt
+    query: filterOptionsRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -42,24 +42,24 @@ export const listCustomLinksRoute = createRoute(core => ({
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
     return await listCustomLinks({ setup, filters });
-  }
+  },
 }));
 
 export const createCustomLinkRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/custom_links',
   params: {
-    body: payloadRt
+    body: payloadRt,
   },
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const customLink = context.params.body;
     const res = await createOrUpdateCustomLink({ customLink, setup });
     return res;
-  }
+  },
 }));
 
 export const updateCustomLinkRoute = createRoute(() => ({
@@ -67,12 +67,12 @@ export const updateCustomLinkRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/{id}',
   params: {
     path: t.type({
-      id: t.string
+      id: t.string,
     }),
-    body: payloadRt
+    body: payloadRt,
   },
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -81,10 +81,10 @@ export const updateCustomLinkRoute = createRoute(() => ({
     const res = await createOrUpdateCustomLink({
       customLinkId: id,
       customLink,
-      setup
+      setup,
     });
     return res;
-  }
+  },
 }));
 
 export const deleteCustomLinkRoute = createRoute(() => ({
@@ -92,19 +92,19 @@ export const deleteCustomLinkRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/{id}',
   params: {
     path: t.type({
-      id: t.string
-    })
+      id: t.string,
+    }),
   },
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { id } = context.params.path;
     const res = await deleteCustomLink({
       customLinkId: id,
-      setup
+      setup,
     });
     return res;
-  }
+  },
 }));

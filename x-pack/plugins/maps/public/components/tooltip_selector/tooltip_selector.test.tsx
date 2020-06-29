@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { TooltipSelector } from './tooltip_selector';
-import { AbstractField } from '../../layers/fields/field';
+import { AbstractField } from '../../classes/fields/field';
 import { FIELD_ORIGIN } from '../../../common/constants';
 
 class MockField extends AbstractField {
@@ -42,7 +42,7 @@ describe('TooltipSelector', () => {
     const component = shallow(<TooltipSelector {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
     expect(component).toMatchSnapshot();

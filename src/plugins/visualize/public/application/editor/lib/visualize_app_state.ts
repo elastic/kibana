@@ -59,15 +59,15 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
   const stateContainer = createStateContainer<VisualizeAppState, VisualizeAppStateTransitions>(
     initialState,
     {
-      set: state => (prop, value) => ({ ...state, [prop]: value }),
-      setVis: state => vis => ({
+      set: (state) => (prop, value) => ({ ...state, [prop]: value }),
+      setVis: (state) => (vis) => ({
         ...state,
         vis: {
           ...state.vis,
           ...vis,
         },
       }),
-      removeSavedQuery: state => defaultQuery => {
+      removeSavedQuery: (state) => (defaultQuery) => {
         const { savedQuery, ...rest } = state;
 
         return {
@@ -75,14 +75,14 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
           query: defaultQuery,
         };
       },
-      unlinkSavedSearch: state => ({ query, parentFilters = [] }) => ({
+      unlinkSavedSearch: (state) => ({ query, parentFilters = [] }) => ({
         ...state,
         query: query || state.query,
         filters: union(state.filters, parentFilters),
         linked: false,
       }),
-      updateVisState: state => newVisState => ({ ...state, vis: toObject(newVisState) }),
-      updateFromSavedQuery: state => savedQuery => ({
+      updateVisState: (state) => (newVisState) => ({ ...state, vis: toObject(newVisState) }),
+      updateFromSavedQuery: (state) => (savedQuery) => ({
         ...state,
         savedQuery: savedQuery.id,
         query: savedQuery.attributes.query,
@@ -94,7 +94,7 @@ export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Argu
     storageKey: STATE_STORAGE_KEY,
     stateContainer: {
       ...stateContainer,
-      set: state => {
+      set: (state) => {
         if (state) {
           // syncState utils requires to handle incoming "null" value
           stateContainer.set(state);

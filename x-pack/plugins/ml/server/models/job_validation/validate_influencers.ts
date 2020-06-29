@@ -21,7 +21,7 @@ export async function validateInfluencers(callWithRequest: APICaller, job: Combi
   const influencers = job.analysis_config.influencers;
 
   const detectorFieldNames: string[] = [];
-  job.analysis_config.detectors.forEach(d => {
+  job.analysis_config.detectors.forEach((d) => {
     if (d.by_field_name) {
       detectorFieldNames.push(d.by_field_name);
     }
@@ -56,7 +56,7 @@ export async function validateInfluencers(callWithRequest: APICaller, job: Combi
     if (detectorFieldNames.length > 1) {
       id = 'influencer_low_suggestions';
       const uniqueInfluencers = [...new Set(detectorFieldNames)];
-      influencerSuggestion = `[${uniqueInfluencers.map(i => `"${i}"`).join(',')}]`;
+      influencerSuggestion = `[${uniqueInfluencers.map((i) => `"${i}"`).join(',')}]`;
     }
 
     messages.push({ id, influencerSuggestion });

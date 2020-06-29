@@ -55,7 +55,7 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
         label: i18n.translate('home.tutorials.kibanaMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

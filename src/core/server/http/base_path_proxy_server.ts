@@ -180,9 +180,7 @@ export class BasePathProxyServer {
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
             apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
-            await delayUntil()
-              .pipe(take(1))
-              .toPromise();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
@@ -216,9 +214,7 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            await delayUntil()
-              .pipe(take(1))
-              .toPromise();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],

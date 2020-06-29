@@ -37,10 +37,10 @@ export const CalendarsSelection: FC = () => {
   async function loadCalendars() {
     setIsLoading(true);
     const calendars = (await ml.calendars()).filter(
-      c => c.job_ids.includes(GLOBAL_CALENDAR) === false
+      (c) => c.job_ids.includes(GLOBAL_CALENDAR) === false
     );
-    setOptions(calendars.map(c => ({ label: c.calendar_id, value: c })));
-    setSelectedOptions(selectedCalendars.map(c => ({ label: c.calendar_id, value: c })));
+    setOptions(calendars.map((c) => ({ label: c.calendar_id, value: c })));
+    setSelectedOptions(selectedCalendars.map((c) => ({ label: c.calendar_id, value: c })));
     setIsLoading(false);
   }
 
@@ -58,9 +58,9 @@ export const CalendarsSelection: FC = () => {
     options,
     selectedOptions,
     isLoading,
-    onChange: optionsIn => {
+    onChange: (optionsIn) => {
       setSelectedOptions(optionsIn);
-      setSelectedCalendars(optionsIn.map(o => o.value!));
+      setSelectedCalendars(optionsIn.map((o) => o.value!));
     },
   };
 

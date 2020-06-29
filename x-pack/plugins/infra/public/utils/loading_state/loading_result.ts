@@ -81,7 +81,7 @@ export const createFailureResult = <Parameters = any, ErrorPayload = any>(
 });
 
 export const createFailureResultReducer = <Parameters = any, ErrorPayload = any>(
-  convertErrorToString: (error: ErrorPayload) => string = error => `${error}`
+  convertErrorToString: (error: ErrorPayload) => string = (error) => `${error}`
 ) => (
   state: LoadingResult<Parameters>,
   { params, error }: { params: Parameters; error: ErrorPayload }

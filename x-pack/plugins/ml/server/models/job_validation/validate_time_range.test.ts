@@ -23,7 +23,7 @@ const mockSearchResponse = {
 
 const callWithRequestFactory = (resp: any): APICaller => {
   return (path: string) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve(resp[path]);
     }) as Promise<any>;
   };
@@ -44,7 +44,7 @@ function getMinimalValidJob() {
 }
 
 describe('ML - isValidTimeField', () => {
-  it('called without job config argument triggers Promise rejection', done => {
+  it('called without job config argument triggers Promise rejection', (done) => {
     isValidTimeField(
       callWithRequestFactory(mockSearchResponse),
       (undefined as unknown) as CombinedJob
@@ -54,9 +54,9 @@ describe('ML - isValidTimeField', () => {
     );
   });
 
-  it('time_field `@timestamp`', done => {
+  it('time_field `@timestamp`', (done) => {
     isValidTimeField(callWithRequestFactory(mockSearchResponse), getMinimalValidJob()).then(
-      valid => {
+      (valid) => {
         expect(valid).toBe(true);
         done();
       },
@@ -64,7 +64,7 @@ describe('ML - isValidTimeField', () => {
     );
   });
 
-  it('time_field `metadata.timestamp`', done => {
+  it('time_field `metadata.timestamp`', (done) => {
     const mockJobConfigNestedDate = getMinimalValidJob();
     mockJobConfigNestedDate.data_description.time_field = 'metadata.timestamp';
 
@@ -77,7 +77,7 @@ describe('ML - isValidTimeField', () => {
       callWithRequestFactory(mockSearchResponseNestedDate),
       mockJobConfigNestedDate
     ).then(
-      valid => {
+      (valid) => {
         expect(valid).toBe(true);
         done();
       },
@@ -87,7 +87,7 @@ describe('ML - isValidTimeField', () => {
 });
 
 describe('ML - validateTimeRange', () => {
-  it('called without arguments', done => {
+  it('called without arguments', (done) => {
     validateTimeRange(
       callWithRequestFactory(mockSearchResponse),
       (undefined as unknown) as CombinedJob
@@ -97,7 +97,7 @@ describe('ML - validateTimeRange', () => {
     );
   });
 
-  it('called with non-valid job argument #2, missing datafeed_config', done => {
+  it('called with non-valid job argument #2, missing datafeed_config', (done) => {
     validateTimeRange(callWithRequestFactory(mockSearchResponse), ({
       analysis_config: {},
     } as unknown) as CombinedJob).then(
@@ -106,7 +106,7 @@ describe('ML - validateTimeRange', () => {
     );
   });
 
-  it('called with non-valid job argument #3, missing datafeed_config.indices', done => {
+  it('called with non-valid job argument #3, missing datafeed_config.indices', (done) => {
     const job = { analysis_config: {}, datafeed_config: {} };
     validateTimeRange(
       callWithRequestFactory(mockSearchResponse),
@@ -117,7 +117,7 @@ describe('ML - validateTimeRange', () => {
     );
   });
 
-  it('called with non-valid job argument #4, missing data_description', done => {
+  it('called with non-valid job argument #4, missing data_description', (done) => {
     const job = { analysis_config: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
       callWithRequestFactory(mockSearchResponse),
@@ -128,7 +128,7 @@ describe('ML - validateTimeRange', () => {
     );
   });
 
-  it('called with non-valid job argument #5, missing data_description.time_field', done => {
+  it('called with non-valid job argument #5, missing data_description.time_field', (done) => {
     const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
       callWithRequestFactory(mockSearchResponse),
@@ -147,8 +147,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponseInvalid),
       getMinimalValidJob(),
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['time_field_invalid']);
     });
   });
@@ -161,8 +161,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponse),
       jobShortTimeRange,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['time_range_short']);
     });
   });
@@ -173,8 +173,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['time_range_short']);
     });
   });
@@ -185,8 +185,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['time_range_short']);
     });
   });
@@ -197,8 +197,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['success_time_range']);
     });
   });
@@ -209,8 +209,8 @@ describe('ML - validateTimeRange', () => {
       callWithRequestFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['time_range_before_epoch']);
     });
   });

@@ -34,7 +34,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const PositiveOnlyAgg = props => {
+export const PositiveOnlyAgg = (props) => {
   const { siblings } = props;
 
   const defaults = { unit: '' };

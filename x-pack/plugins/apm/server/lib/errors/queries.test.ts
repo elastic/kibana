@@ -8,7 +8,7 @@ import { getErrorGroup } from './get_error_group';
 import { getErrorGroups } from './get_error_groups';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../public/utils/testHelpers';
 
 describe('error queries', () => {
@@ -19,11 +19,11 @@ describe('error queries', () => {
   });
 
   it('fetches a single error group', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorGroup({
         groupId: 'groupId',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -31,12 +31,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorGroups({
         sortDirection: 'asc',
         sortField: 'foo',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -44,12 +44,12 @@ describe('error queries', () => {
   });
 
   it('fetches multiple error groups when sortField = latestOccurrenceAt', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorGroups({
         sortDirection: 'asc',
         sortField: 'latestOccurrenceAt',
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 

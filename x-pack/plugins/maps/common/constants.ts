@@ -25,15 +25,18 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
-export const TELEMETRY_TYPE = 'maps-telemetry';
 
-export const MAP_APP_PATH = `app/${APP_ID}`;
+export const MAPS_APP_PATH = `app/${APP_ID}`;
+export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
+export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 
-export const MAP_BASE_URL = `/${MAP_APP_PATH}#/${MAP_SAVED_OBJECT_TYPE}`;
-
-export function createMapPath(id: string) {
+const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
+export function getNewMapPath() {
+  return MAP_BASE_URL;
+}
+export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
 }
 
@@ -72,11 +75,12 @@ export enum FIELD_ORIGIN {
 }
 export const JOIN_FIELD_NAME_PREFIX = '__kbnjoin__';
 
-export const SOURCE_DATA_ID_ORIGIN = 'source';
-export const META_ID_ORIGIN_SUFFIX = 'meta';
-export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
-export const FORMATTERS_ID_ORIGIN_SUFFIX = 'formatters';
-export const SOURCE_FORMATTERS_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${FORMATTERS_ID_ORIGIN_SUFFIX}`;
+export const META_DATA_REQUEST_ID_SUFFIX = 'meta';
+export const FORMATTERS_DATA_REQUEST_ID_SUFFIX = 'formatters';
+export const SOURCE_DATA_REQUEST_ID = 'source';
+export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DATA_REQUEST_ID_SUFFIX}`;
+export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
+export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -96,6 +100,9 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
 }
+
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
   INTERSECTS = 'INTERSECTS',
@@ -170,10 +177,10 @@ export enum LAYER_STYLE_TYPE {
   TILE = 'TILE',
 }
 
-export const COLOR_MAP_TYPE = {
-  CATEGORICAL: 'CATEGORICAL',
-  ORDINAL: 'ORDINAL',
-};
+export enum COLOR_MAP_TYPE {
+  CATEGORICAL = 'CATEGORICAL',
+  ORDINAL = 'ORDINAL',
+}
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];
@@ -221,4 +228,22 @@ export enum INITIAL_LOCATION {
   LAST_SAVED_LOCATION = 'LAST_SAVED_LOCATION',
   FIXED_LOCATION = 'FIXED_LOCATION',
   BROWSER_LOCATION = 'BROWSER_LOCATION',
+}
+
+export enum LAYER_WIZARD_CATEGORY {
+  ELASTICSEARCH = 'ELASTICSEARCH',
+  REFERENCE = 'REFERENCE',
+  SOLUTIONS = 'SOLUTIONS',
+}
+
+export enum VECTOR_SHAPE_TYPE {
+  POINT = 'POINT',
+  LINE = 'LINE',
+  POLYGON = 'POLYGON',
+}
+
+// https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#data-expressions
+export enum MB_LOOKUP_FUNCTION {
+  GET = 'get',
+  FEATURE_STATE = 'feature-state',
 }

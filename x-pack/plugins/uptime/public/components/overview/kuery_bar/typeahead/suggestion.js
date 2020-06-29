@@ -49,18 +49,19 @@ const Description = styled.div`
   }
 `;
 
-const ListItem = styled.li`
+const ListItem = styled.button`
+  width: inherit;
   font-size: ${fontSizes.small};
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props => (props.selected ? theme.euiColorLightestShade : 'initial')};
+  background: ${(props) => (props.selected ? theme.euiColorLightestShade : 'initial')};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props =>
+      background: ${(props) =>
         props.selected ? theme.euiColorEmptyShade : theme.euiColorLightestShade};
     }
     @media only screen and (max-width: ${theme.euiBreakpoints.s}) {
@@ -72,8 +73,8 @@ const ListItem = styled.li`
 
 const Icon = styled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
-  color: ${props => getIconColor(props.type)};
+  background: ${(props) => tint(0.1, getIconColor(props.type))};
+  color: ${(props) => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -81,6 +82,7 @@ const Icon = styled.div`
 `;
 
 const TextValue = styled.div`
+  text-align: left;
   flex: 0 0 ${px(unit * 12)};
   color: ${theme.euiColorDarkestShade};
   padding: 0 ${px(units.half)};

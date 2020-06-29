@@ -20,12 +20,7 @@ describe('IndexParamsFields renders', () => {
         index={0}
       />
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="actionIndexDoc"]')
-        .first()
-        .prop('value')
-    ).toBe(`{
+    expect(wrapper.find('[data-test-subj="actionIndexDoc"]').first().prop('value')).toBe(`{
   "test": 123
 }`);
     expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();

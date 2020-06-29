@@ -33,7 +33,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
     let loggedInit = false;
 
     return update$.pipe(
-      tap(update => {
+      tap((update) => {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {

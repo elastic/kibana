@@ -61,7 +61,7 @@ export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
  * @param signals
  */
 export function getCombinedSignal(signals: AbortSignal[]) {
-  const promises = signals.map(signal => toPromise(signal));
+  const promises = signals.map((signal) => toPromise(signal));
   const controller = new AbortController();
   Promise.race(promises).then(() => controller.abort());
   return controller.signal;

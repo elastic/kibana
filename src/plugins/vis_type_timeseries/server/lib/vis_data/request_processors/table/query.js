@@ -21,7 +21,7 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { esQuery } from '../../../../../../data/server';
 
 export function query(req, panel, esQueryConfig, indexPatternObject) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { timeField } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { from, to } = getTimerange(req);
 

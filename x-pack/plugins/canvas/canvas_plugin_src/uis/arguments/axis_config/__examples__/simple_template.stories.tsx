@@ -20,7 +20,7 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
   public render() {
     return (
       <SimpleTemplate
-        onValueChange={argValue => {
+        onValueChange={(argValue) => {
           action('onValueChange')(argValue);
           this.setState({ argValue });
         }}
@@ -31,13 +31,13 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
 }
 
 storiesOf('arguments/AxisConfig', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple', () => <Interactive />);
 
 storiesOf('arguments/AxisConfig/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple template', () => (

@@ -21,7 +21,7 @@ import * as parser from '@babel/parser';
 import traverse from '@babel/traverse';
 import { dependenciesVisitorsGenerator } from './visitors';
 
-const visitorsApplier = code => {
+const visitorsApplier = (code) => {
   const result = [];
   traverse(
     parser.parse(code, {

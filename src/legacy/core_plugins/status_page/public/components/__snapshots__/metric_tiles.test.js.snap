@@ -4,7 +4,7 @@ exports[`byte metric 1`] = `
 <EuiCard
   description="Heap Total"
   layout="horizontal"
-  title="1.50 GB"
+  title="1.40 GB"
 />
 `;
 

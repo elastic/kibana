@@ -31,7 +31,7 @@ GET _search
 
 `.trim();
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const visualTesting = getService('visualTesting');

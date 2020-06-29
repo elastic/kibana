@@ -1,0 +1,17 @@
+{
+  "item_id": "endpoint_list_item",
+  "_tags": ["endpoint", "process", "malware", "os:windows"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample change here this list",
+  "name": "Sample Endpoint Exception List update change",
+  "comments": [{ "comment": "this is a newly added comment" }],
+  "entries": [
+    {
+      "field": "event.category",
+      "operator": "included",
+      "type": "match_any",
+      "value": ["process", "malware"]
+    }
+  ]
+}

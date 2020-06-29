@@ -13,13 +13,13 @@ export const getFilteredMetrics = (
   metadata: Array<InfraMetadataFeature | null | undefined>
 ) => {
   const metricMetadata = metadata
-    .filter(data => data && data.source === 'metrics')
-    .map(data => data && data.name);
-  return requiredMetrics.filter(metric => {
+    .filter((data) => data && data.source === 'metrics')
+    .map((data) => data && data.name);
+  return requiredMetrics.filter((metric) => {
     const metricModelCreator = metrics.tsvb[metric];
     // We just need to get a dummy version of the model so we can filter
     // using the `requires` attribute.
     const metricModel = metricModelCreator('@timestamp', 'test', '>=1m');
-    return metricMetadata.some(m => m && metricModel.requires.includes(m));
+    return metricMetadata.some((m) => m && metricModel.requires.includes(m));
   });
 };

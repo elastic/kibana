@@ -12,12 +12,12 @@ import { useAvgDurationByBrowser } from './useAvgDurationByBrowser';
 describe('useAvgDurationByBrowser', () => {
   it('returns data', () => {
     const data = [
-      { title: 'Other', data: [{ x: 1572530100000, y: 130010.8947368421 }] }
+      { title: 'Other', data: [{ x: 1572530100000, y: 130010.8947368421 }] },
     ];
     jest.spyOn(useFetcherModule, 'useFetcher').mockReturnValueOnce({
       data,
       refetch: () => {},
-      status: 'success' as useFetcherModule.FETCH_STATUS
+      status: 'success' as useFetcherModule.FETCH_STATUS,
     });
     const { result } = renderHook(() => useAvgDurationByBrowser());
 
@@ -26,8 +26,8 @@ describe('useAvgDurationByBrowser', () => {
         color: theme.euiColorVis0,
         data: [{ x: 1572530100000, y: 130010.8947368421 }],
         title: 'Other',
-        type: 'linemark'
-      }
+        type: 'linemark',
+      },
     ]);
   });
 });

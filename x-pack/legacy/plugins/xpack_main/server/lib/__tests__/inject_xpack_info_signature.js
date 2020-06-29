@@ -39,7 +39,7 @@ describe('injectXPackInfoSignature()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       mockXPackInfo.refreshNow = () => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           mockXPackInfo.isAvailable.returns(false);
           resolve();
         });
@@ -64,7 +64,7 @@ describe('injectXPackInfoSignature()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       mockXPackInfo.refreshNow = () => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           mockXPackInfo.getSignature.returns('new-signature');
           resolve();
         });

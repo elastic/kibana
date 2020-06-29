@@ -13,7 +13,7 @@ import {
   sortBy,
   sum,
   uniq,
-  zipObject
+  zipObject,
 } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
@@ -84,7 +84,7 @@ function getTransactionItem(transaction: Transaction): IWaterfallTransaction {
     parentId: transaction.parent?.id,
     duration: transaction.transaction.duration.us,
     offset: 0,
-    skew: 0
+    skew: 0,
   };
 }
 
@@ -96,7 +96,7 @@ function getSpanItem(span: Span): IWaterfallSpan {
     parentId: span.parent?.id,
     duration: span.span.duration.us,
     offset: 0,
-    skew: 0
+    skew: 0,
   };
 }
 
@@ -107,7 +107,7 @@ function getErrorItem(
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
   const parent = items.find(
-    waterfallItem => waterfallItem.id === error.parent?.id
+    (waterfallItem) => waterfallItem.id === error.parent?.id
   );
   const errorItem: IWaterfallError = {
     docType: 'error',
@@ -117,12 +117,12 @@ function getErrorItem(
     parentId: parent?.id,
     offset: error.timestamp.us - entryTimestamp,
     skew: 0,
-    duration: 0
+    duration: 0,
   };
 
   return {
     ...errorItem,
-    skew: getClockSkew(errorItem, parent)
+    skew: getClockSkew(errorItem, parent),
   };
 }
 
@@ -186,7 +186,7 @@ export function getOrderedWaterfallItems(
     item.skew = getClockSkew(item, parentItem);
 
     const deepChildren = flatten(
-      children.map(child => getSortedChildren(child, item))
+      children.map((child) => getSortedChildren(child, item))
     );
     return [item, ...deepChildren];
   }
@@ -204,7 +204,7 @@ function getRootTransaction(childrenByParentId: IWaterfallGroup) {
 export type IServiceColors = Record<string, string>;
 
 function getServiceColors(waterfallItems: IWaterfallItem[]) {
-  const services = uniq(waterfallItems.map(item => item.doc.service.name));
+  const services = uniq(waterfallItems.map((item) => item.doc.service.name));
 
   const assignedColors = [
     theme.euiColorVis1,
@@ -213,7 +213,7 @@ function getServiceColors(waterfallItems: IWaterfallItem[]) {
     theme.euiColorVis2,
     theme.euiColorVis6,
     theme.euiColorVis7,
-    theme.euiColorVis5
+    theme.euiColorVis5,
   ];
 
   return zipObject(services, assignedColors) as IServiceColors;
@@ -221,12 +221,12 @@ function getServiceColors(waterfallItems: IWaterfallItem[]) {
 
 const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
   Math.max(
-    ...waterfallItems.map(item => item.offset + item.skew + item.duration),
+    ...waterfallItems.map((item) => item.offset + item.skew + item.duration),
     0
   );
 
 const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
-  items.map(item => {
+  items.map((item) => {
     const docType = item.processor.event;
     switch (docType) {
       case 'span':
@@ -236,38 +236,43 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
     }
   });
 
-/**
- * Changes the parent_id of items based on the child.id property.
- * Solves the problem of Inferred spans that are created as child of trace spans
- * when it actually should be its parent.
- * @param waterfallItems
- */
-const reparentSpans = (waterfallItems: IWaterfallItem[]) => {
-  return waterfallItems.map(waterfallItem => {
-    if (waterfallItem.docType === 'span') {
-      const childId = waterfallItem.doc.child?.id;
-      if (childId) {
-        childId.forEach(id => {
-          const item = waterfallItems.find(_item => _item.id === id);
-          if (item) {
-            item.parentId = waterfallItem.id;
-          }
-        });
-      }
+function reparentSpans(waterfallItems: IWaterfallItem[]) {
+  // find children that needs to be re-parented and map them to their correct parent id
+  const childIdToParentIdMapping = Object.fromEntries(
+    flatten(
+      waterfallItems.map((waterfallItem) => {
+        if (waterfallItem.docType === 'span') {
+          const childIds = waterfallItem.doc.child?.id ?? [];
+          return childIds.map((id) => [id, waterfallItem.id]);
+        }
+        return [];
+      })
+    )
+  );
+
+  // update parent id for children that needs it or return unchanged
+  return waterfallItems.map((waterfallItem) => {
+    const newParentId = childIdToParentIdMapping[waterfallItem.id];
+    if (newParentId) {
+      return {
+        ...waterfallItem,
+        parentId: newParentId,
+      };
     }
+
     return waterfallItem;
   });
-};
+}
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallItem[]) =>
-  groupBy(waterfallItems, item => (item.parentId ? item.parentId : ROOT_ID));
+  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallItem[]
 ): IWaterfallTransaction | undefined =>
   waterfallItems.find(
-    item => item.docType === 'transaction' && item.id === entryTransactionId
+    (item) => item.docType === 'transaction' && item.id === entryTransactionId
   ) as IWaterfallTransaction;
 
 function isInEntryTransaction(
@@ -290,7 +295,7 @@ function getWaterfallErrors(
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
-  const errorItems = errorDocs.map(errorDoc =>
+  const errorItems = errorDocs.map((errorDoc) =>
     getErrorItem(errorDoc, items, entryWaterfallTransaction)
   );
   if (!entryWaterfallTransaction) {
@@ -303,7 +308,7 @@ function getWaterfallErrors(
     },
     new Map<string, string>()
   );
-  return errorItems.filter(errorItem =>
+  return errorItems.filter((errorItem) =>
     isInEntryTransaction(
       parentIdLookup,
       entryWaterfallTransaction?.id,
@@ -323,7 +328,7 @@ export function getWaterfall(
       errorsPerTransaction,
       errorsCount: sum(Object.values(errorsPerTransaction)),
       serviceColors: {},
-      errorItems: []
+      errorItems: [],
     };
   }
 
@@ -362,6 +367,6 @@ export function getWaterfall(
     errorsPerTransaction,
     errorsCount: errorItems.length,
     serviceColors,
-    errorItems
+    errorItems,
   };
 }

@@ -47,7 +47,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   public setup(core: SetupDeps) {
     const core$ = this.setupCoreStatus(core);
     const overall$: Observable<ServiceStatus> = core$.pipe(
-      map(coreStatus => {
+      map((coreStatus) => {
         const summary = getSummaryStatus(Object.entries(coreStatus));
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;

@@ -42,7 +42,7 @@ export const getIndexOptions = async (
     pattern,
     http,
   })) as string[];
-  const matchingIndexPatterns = indexPatternsParam.filter(anIndexPattern => {
+  const matchingIndexPatterns = indexPatternsParam.filter((anIndexPattern) => {
     return anIndexPattern.includes(pattern);
   }) as string[];
 
@@ -56,7 +56,7 @@ export const getIndexOptions = async (
           defaultMessage: 'Based on your index patterns',
         }
       ),
-      options: matchingOptions.map(match => {
+      options: matchingOptions.map((match) => {
         return {
           label: match,
           value: match,

@@ -6,12 +6,12 @@
 
 import { connect } from 'react-redux';
 import { LayerTOC } from './view';
-import { updateLayerOrder } from '../../../../actions/map_actions';
+import { updateLayerOrder } from '../../../../actions';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../selectors/ui_selectors';
 
 const mapDispatchToProps = {
-  updateLayerOrder: newOrder => updateLayerOrder(newOrder),
+  updateLayerOrder: (newOrder) => updateLayerOrder(newOrder),
 };
 
 function mapStateToProps(state = {}) {

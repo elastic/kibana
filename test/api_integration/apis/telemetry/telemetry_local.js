@@ -35,7 +35,7 @@ function flatKeys(source) {
   return _.uniq(_.flattenDeep(recursivelyFlatKeys(source))).sort((a, b) => a.localeCompare(b));
 }
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
@@ -127,7 +127,7 @@ export default function({ getService }) {
         'version',
       ];
 
-      expect(expected.every(m => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
   });
 }

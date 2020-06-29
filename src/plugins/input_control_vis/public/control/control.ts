@@ -106,13 +106,13 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   }
 
   getAncestorValues() {
-    return this.ancestors.map(ancestor => {
+    return this.ancestors.map((ancestor) => {
       return ancestor.value;
     });
   }
 
   getAncestorFilters() {
-    return this.ancestors.map(ancestor => {
+    return this.ancestors.map((ancestor) => {
       return ancestor.filterManager.createFilter(ancestor.value);
     });
   }

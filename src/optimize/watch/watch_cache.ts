@@ -174,7 +174,7 @@ async function recursiveDelete(directory: string) {
     const entries = await readdirAsync(directory, { withFileTypes: true });
 
     await Promise.all(
-      entries.map(entry => {
+      entries.map((entry) => {
         const absolutePath = path.join(directory, entry.name);
         return entry.isDirectory() ? recursiveDelete(absolutePath) : unlinkAsync(absolutePath);
       })

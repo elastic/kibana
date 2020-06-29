@@ -38,7 +38,7 @@ export function replacePlaceholder(read: Stream.Readable, replacement: string) {
   // choose what to do with them.
   Rx.fromEvent(read, 'error')
     .pipe(take(1), takeUntil(Rx.fromEvent(read, 'end')))
-    .forEach(error => {
+    .forEach((error) => {
       replace.emit('error', error);
       replace.end();
     });

@@ -36,11 +36,9 @@ describe('getLatestMonitor', () => {
           'url',
           'monitor',
           'observer',
-          'tls',
           '@timestamp',
-          'http',
-          'tls.server.x509.not_after',
-          'tls.server.x509.not_before',
+          'tls.certificate_not_valid_after',
+          'tls.certificate_not_valid_before',
         ],
         sort: {
           '@timestamp': { order: 'desc' },

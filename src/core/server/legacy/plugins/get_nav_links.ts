@@ -66,11 +66,11 @@ function isHidden(app: LegacyAppSpec) {
 export function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]) {
   const navLinkSpecs = uiExports.navLinkSpecs || [];
   const appSpecs = (uiExports.uiAppSpecs || []).filter(
-    app => app !== undefined && !isHidden(app)
+    (app) => app !== undefined && !isHidden(app)
   ) as LegacyAppSpec[];
 
-  const pluginIds = (pluginSpecs || []).map(spec => spec.getId());
-  appSpecs.forEach(spec => {
+  const pluginIds = (pluginSpecs || []).map((spec) => spec.getId());
+  appSpecs.forEach((spec) => {
     if (spec.pluginId && !pluginIds.includes(spec.pluginId)) {
       throw new Error(`Unknown plugin id "${spec.pluginId}"`);
     }

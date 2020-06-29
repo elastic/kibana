@@ -28,7 +28,7 @@ export function registerReloadRoute({
 
       try {
         const indices = await fetchIndices(
-          ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
           indexDataEnricher,
           indexNames
         );

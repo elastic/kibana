@@ -91,7 +91,7 @@ export class ElementShareContainer extends React.PureComponent {
         data-shared-item={shouldTrackComplete ? this.state.renderComplete : undefined}
         data-render-complete={shouldTrackComplete ? this.state.renderComplete : undefined}
         className={this.props.className}
-        ref={ref => (this.sharedItemRef = ref)}
+        ref={(ref) => (this.sharedItemRef = ref)}
       >
         {this.props.children}
       </div>

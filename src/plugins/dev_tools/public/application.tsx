@@ -24,7 +24,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
-import { AppMountContext, AppMountDeprecated } from 'kibana/public';
+import { AppMountContext, AppMountDeprecated, ScopedHistory } from 'kibana/public';
 import { DevToolApp } from './dev_tool';
 
 interface DevToolsWrapperProps {
@@ -60,14 +60,14 @@ function DevToolsWrapper({
   return (
     <main className="devApp">
       <EuiTabs>
-        {devTools.map(currentDevTool => (
+        {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab
               disabled={currentDevTool.isDisabled()}
               isSelected={currentDevTool === activeDevTool}
               onClick={() => {
                 if (!currentDevTool.isDisabled()) {
-                  updateRoute(`/dev_tools/${currentDevTool.id}`);
+                  updateRoute(`/${currentDevTool.id}`);
                 }
               }}
             >
@@ -80,7 +80,7 @@ function DevToolsWrapper({
         className="devApp__container"
         role="tabpanel"
         data-test-subj={activeDevTool.id}
-        ref={async element => {
+        ref={async (element) => {
           if (
             element &&
             (mountedTool.current === null ||
@@ -114,7 +114,7 @@ function DevToolsWrapper({
 
 function redirectOnMissingCapabilities(appMountContext: AppMountContext) {
   if (!appMountContext.core.application.capabilities.dev_tools.show) {
-    window.location.hash = '/home';
+    appMountContext.core.application.navigateToApp('home');
     return true;
   }
   return false;
@@ -135,13 +135,21 @@ function setBadge(appMountContext: AppMountContext) {
   });
 }
 
+function setTitle(appMountContext: AppMountContext) {
+  appMountContext.core.chrome.docTitle.change(
+    i18n.translate('devTools.pageTitle', {
+      defaultMessage: 'Dev Tools',
+    })
+  );
+}
+
 function setBreadcrumbs(appMountContext: AppMountContext) {
   appMountContext.core.chrome.setBreadcrumbs([
     {
       text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
         defaultMessage: 'Dev Tools',
       }),
-      href: '#/dev_tools',
+      href: '#/',
     },
   ]);
 }
@@ -149,7 +157,7 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
 export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
-  basePath: string,
+  history: ScopedHistory,
   devTools: readonly DevToolApp[]
 ) {
   if (redirectOnMissingCapabilities(appMountContext)) {
@@ -157,19 +165,20 @@ export function renderApp(
   }
   setBadge(appMountContext);
   setBreadcrumbs(appMountContext);
+  setTitle(appMountContext);
   ReactDOM.render(
     <I18nProvider>
       <Router>
         <Switch>
           {devTools
             // Only create routes for devtools that are not disabled
-            .filter(devTool => !devTool.isDisabled())
-            .map(devTool => (
+            .filter((devTool) => !devTool.isDisabled())
+            .map((devTool) => (
               <Route
                 key={devTool.id}
-                path={`/dev_tools/${devTool.id}`}
+                path={`/${devTool.id}`}
                 exact={!devTool.enableRouting}
-                render={props => (
+                render={(props) => (
                   <DevToolsWrapper
                     updateRoute={props.history.push}
                     activeDevTool={devTool}
@@ -179,8 +188,8 @@ export function renderApp(
                 )}
               />
             ))}
-          <Route path="/dev_tools">
-            <Redirect to={`/dev_tools/${devTools[0].id}`} />
+          <Route path="/">
+            <Redirect to={`/${devTools[0].id}`} />
           </Route>
         </Switch>
       </Router>
@@ -188,7 +197,16 @@ export function renderApp(
     element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  const unlisten = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+    unlisten();
+  };
 }
 
 function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
