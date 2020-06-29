@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks'
 import {
   kibanaResponseFactory,
   RequestHandlerContext,
-  IClusterClient,
+  ILegacyClusterClient,
 } from '../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../licensing/server';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
@@ -19,7 +19,7 @@ interface TestOptions {
   canManageRoleMappings?: boolean;
   nodeSettingsResponse?: Record<string, any>;
   xpackUsageResponse?: Record<string, any>;
-  internalUserClusterClientImpl?: IClusterClient['callAsInternalUser'];
+  internalUserClusterClientImpl?: ILegacyClusterClient['callAsInternalUser'];
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
