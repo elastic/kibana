@@ -61,3 +61,5 @@ export const useComponentTemplatesContext = () => {
   }
   return ctx;
 };
+
+export const useApi = () => useComponentTemplatesContext().api;
