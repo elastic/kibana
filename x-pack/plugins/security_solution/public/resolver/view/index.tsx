@@ -136,7 +136,7 @@ export const Resolver = React.memo(function Resolver({
               projectionMatrix={projectionMatrix}
             />
           ))}
-          {[...processNodePositions].map(([processEvent, position], index) => {
+          {[...processNodePositions].map(([processEvent, position]) => {
             const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
             const processEntityId = entityId(processEvent);
             if (!adjacentNodeMap) {
@@ -145,7 +145,7 @@ export const Resolver = React.memo(function Resolver({
             }
             return (
               <ProcessEventDot
-                key={index}
+                key={processEntityId}
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
