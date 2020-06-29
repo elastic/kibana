@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -24,15 +24,21 @@ export function RumOverview() {
     return config;
   }, []);
 
+  const [filters, setFilters] = useState(null);
+
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} showCount={true} />
+          <LocalUIFilters
+            {...localUIFiltersConfig}
+            showCount={true}
+            onFiltersLoad={setFilters}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <RumDashboard />
+          <RumDashboard filters={filters} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

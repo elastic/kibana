@@ -17,8 +17,9 @@ import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { VisitorBreakdown } from './VisitorBreakdown';
 
-export function RumDashboard() {
+export const RumDashboard = ({ filters }) => {
   const { urlParams } = useUrlParams();
 
   const { environment } = urlParams;
@@ -58,8 +59,16 @@ export function RumDashboard() {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
+          <EuiSpacer size="s" />
+          <EuiPanel>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={3}>
+                <VisitorBreakdown filters={filters} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
-}
+};
