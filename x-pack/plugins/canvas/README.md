@@ -168,7 +168,7 @@ In your plugin's `kibana.json` file, set `server` to true, and add `"expressions
 
 Now, much like we made the client plugin, we'll make a server plugin.  
 
-Start by making the `server` directory and an `index.ts` file with a shell for your server plugin.
+Start by making the `server` directory and an `index.ts` file with a shell for your server plugin:
 
 ```typescript
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/server';
