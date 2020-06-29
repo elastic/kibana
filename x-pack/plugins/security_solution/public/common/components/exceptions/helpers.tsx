@@ -10,9 +10,10 @@ import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
-import { FormattedEntry, OperatorOption, DescriptionListItem, Comment } from './types';
+import { FormattedEntry, OperatorOption, DescriptionListItem } from './types';
 import { EXCEPTION_OPERATORS, isOperator } from './operators';
 import {
+  CommentsArray,
   Entry,
   EntriesArray,
   ExceptionListItemSchema,
@@ -183,7 +184,7 @@ export const getDescriptionListContent = (
  *
  * @param comments ExceptionItem.comments
  */
-export const getFormattedComments = (comments: Comment[]): EuiCommentProps[] =>
+export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[] =>
   comments.map((comment) => ({
     username: comment.created_by,
     timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
