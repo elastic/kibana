@@ -8,16 +8,22 @@ For that reason, we run a dockerized version of the package registry in Kibana C
 
 ## How to run the tests locally
 
-In the `x-pack` directory, run:
+Usually, having the test server and the test runner in two different shells is most efficient, as it is possible to keep the server running and only rerun the test runner as often as needed. To do so, in one shell in the main `kibana` directory, run:
 ```
 $ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
-$ node scripts/functional_tests_server.js --config test/ingest_manager_api_integration/config.ts
+$ yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
 ```
 
-In the main kibana directory, run
+In another shell in the same directory, run
 ```
 $ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
-$ node scripts/functional_test_runner.js --config x-pack/test/ingest_manager_api_integration/config.ts
+$ yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
+```
+
+However, it is also possible to **alternatively** run everything in one go, again from the main `kibana` directory:
+```
+$ export INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345
+$ yarn test:ftr --config x-pack/test/ingest_manager_api_integration/config.ts
 ```
 Port `12345` is used as an example here, it can be anything, but the environment variable has to be present for the tests to run at all.
 
