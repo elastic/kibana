@@ -83,7 +83,7 @@ export const SwimlaneContainer: FC<
           <EuiFlexGroup
             gutterSize={'none'}
             direction={'column'}
-            style={{ width: '100%', height: '100%', overflowY: 'hidden', overflowX: 'hidden' }}
+            style={{ width: '100%', height: '100%' }}
             ref={(el) => {
               resizeRef(el);
             }}
