@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { NodeSubMenu, subMenuAssets } from './submenu';
-import { applyMatrix3 } from '../lib/vector2';
+import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
