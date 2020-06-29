@@ -27,7 +27,7 @@ import {
   from,
   Observable,
 } from 'rxjs';
-import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
+import { takeUntil, finalize, mergeMapTo, filter, tap } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
@@ -113,17 +113,7 @@ export class SearchInterceptor {
         return throwError(new AbortError());
       }
 
-      const { combinedSignal, cleanup } = this.getCombinedSignal(options);
-
-      // If the request timed out, throw a `RequestTimeoutError`
-      const timeoutError$ = fromEvent(combinedSignal, 'abort').pipe(
-        mergeMapTo(
-          throwError(
-            this.abortController.signal.aborted ? new AbortError() : new RequestTimeoutError()
-          )
-        )
-      );
-
+      const { combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(++this.pendingCount);
 
       return from(
@@ -134,7 +124,6 @@ export class SearchInterceptor {
           signal: combinedSignal,
         })
       ).pipe(
-        takeUntil(timeoutError$),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -143,12 +132,14 @@ export class SearchInterceptor {
     });
   }
 
-  protected getCombinedSignal(options?: ISearchOptions) {
+  protected setupTimers(options?: ISearchOptions) {
     // Schedule this request to automatically timeout after some interval
     const timeoutController = new AbortController();
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timer(this.requestTimeout);
-    const subscription = timeout$.subscribe(() => timeoutController.abort());
+    const subscription = timeout$.subscribe(() => {
+      timeoutController.abort()
+    });
     this.timeoutSubscriptions.add(subscription);
 
     // Schedule the notification to allow users to cancel or wait beyond the timeout

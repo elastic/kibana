@@ -100,7 +100,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         if (!isRunning) return EMPTY;
 
         id = response.id;
-
         // Delay by the given poll interval
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
