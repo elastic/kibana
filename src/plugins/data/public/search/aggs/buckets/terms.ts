@@ -20,8 +20,6 @@
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { Adapters } from 'src/plugins/inspector/public';
-
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
@@ -29,9 +27,8 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
-import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 
-import { ISearchSource } from '../../search_source';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
@@ -98,12 +95,12 @@ export const getTermsBucketAgg = () =>
     },
     createFilter: createFilterTerms,
     postFlightRequest: async (
-      resp: any,
-      aggConfigs: IAggConfigs,
-      aggConfig: IBucketAggConfig,
-      searchSource: ISearchSource,
-      inspectorAdapters: Adapters,
-      abortSignal?: AbortSignal
+      resp,
+      aggConfigs,
+      aggConfig,
+      searchSource,
+      inspectorRequestAdapter,
+      abortSignal
     ) => {
       if (!resp.aggregations) return resp;
       const nestedSearchSource = searchSource.createChild();
@@ -113,7 +110,7 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        const request = inspectorAdapters.requests.start(
+        const request = inspectorRequestAdapter.start(
           i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
             defaultMessage: 'Other bucket',
           }),
@@ -125,7 +122,7 @@ export const getTermsBucketAgg = () =>
             }),
           }
         );
-        nestedSearchSource.getSearchRequestBody().then((body: string) => {
+        nestedSearchSource.getSearchRequestBody().then((body) => {
           request.json(body);
         });
         request.stats(getRequestInspectorStats(nestedSearchSource));

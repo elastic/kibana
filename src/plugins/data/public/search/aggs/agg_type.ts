@@ -21,7 +21,7 @@ import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { SerializedFieldFormat } from 'src/plugins/expressions/common';
-import { Adapters } from 'src/plugins/inspector/public';
+import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
@@ -53,7 +53,7 @@ export interface AggTypeConfig<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorAdapters: Adapters,
+    inspectorRequestAdapter: RequestAdapter,
     abortSignal?: AbortSignal
   ) => Promise<any>;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
@@ -187,7 +187,7 @@ export class AggType<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorAdapters: Adapters,
+    inspectorRequestAdapter: RequestAdapter,
     abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
