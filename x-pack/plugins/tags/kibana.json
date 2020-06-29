@@ -1,7 +1,7 @@
 {
   "id": "tags",
   "server": true,
-  "ui": false,
+  "ui": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "tags"],

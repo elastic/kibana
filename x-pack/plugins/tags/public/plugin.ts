@@ -5,16 +5,11 @@
  */
 
 import {
-  Logger,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
-  IContextProvider,
-  RequestHandler,
-} from '../../../../src/core/server';
-import { TagsRequestHandlerContext } from './types';
-import { setupRoutes } from './router';
+} from '../../../../src/core/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TagsPluginSetupDependencies {}
@@ -36,39 +31,16 @@ export class TagsPlugin
       TagsPluginSetupDependencies,
       TagsPluginStartDependencies
     > {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'tags');
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<TagsPluginStartDependencies, unknown>,
     plugins: TagsPluginSetupDependencies
   ): TagsPluginSetup {
-    this.logger.debug('setup()');
-
-    const { http } = core;
-    const router = http.createRouter();
-
-    http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core));
-    setupRoutes({ router });
-
     return {};
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
-    this.logger.debug('start()');
-
     return {};
   }
-
-  private createRouteHandlerContext = (
-    core: CoreSetup
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'tags'> => {
-    return async (context, request) => {
-      const tagsContext: TagsRequestHandlerContext = {};
-      return tagsContext;
-    };
-  };
 }
