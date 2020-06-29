@@ -50,7 +50,7 @@ export function validateMetricThreshold({
     if (!c.aggType) {
       errors[id].aggField.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.aggregationRequired', {
-          defaultMessage: 'Aggreation is required.',
+          defaultMessage: 'Aggregation is required.',
         })
       );
     }

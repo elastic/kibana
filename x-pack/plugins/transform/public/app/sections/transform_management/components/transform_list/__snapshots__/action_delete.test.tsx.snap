@@ -10,6 +10,7 @@ exports[`Transform: Transform List Actions <DeleteAction /> Minimal initializati
     <EuiButtonEmpty
       aria-label="Delete"
       color="text"
+      data-test-subj="transformActionDelete"
       disabled={true}
       iconType="trash"
       onClick={[Function]}
