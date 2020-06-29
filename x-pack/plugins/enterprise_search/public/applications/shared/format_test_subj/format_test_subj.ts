@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  enterpriseSearchBreadcrumbs,
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
-} from './generate_breadcrumbs';
-export { SetAppSearchBreadcrumbs, SetWorkplaceSearchBreadcrumbs } from './set_breadcrumbs';
+export const formatTestSubj = (str: string): string =>
+  str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, '');
