@@ -7,11 +7,9 @@
 import { CoreSetup } from 'kibana/server';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { getTelemetry, initTelemetry } from './telemetry';
+import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 import { mlTelemetryMappingsType } from './mappings';
 import { setInternalRepository } from './internal_repository';
-
-const TELEMETRY_TYPE = 'mlTelemetry';
 
 export function initMlTelemetry(coreSetup: CoreSetup, usageCollection: UsageCollectionSetup) {
   coreSetup.savedObjects.registerType(mlTelemetryMappingsType);
@@ -22,10 +20,22 @@ export function initMlTelemetry(coreSetup: CoreSetup, usageCollection: UsageColl
 }
 
 function registerMlUsageCollector(usageCollection: UsageCollectionSetup): void {
-  const mlUsageCollector = usageCollection.makeUsageCollector({
-    type: TELEMETRY_TYPE,
+  const mlUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
+    type: 'mlTelemetry',
     isReady: () => true,
-    fetch: async () => (await getTelemetry()) || initTelemetry(),
+    schema: {
+      file_data_visualizer: {
+        index_creation_count: { type: 'long' },
+      },
+    },
+    fetch: async () => {
+      const mlUsage = await getTelemetry();
+      if (!mlUsage) {
+        return initTelemetry();
+      }
+
+      return mlUsage;
+    },
   });
 
   usageCollection.registerCollector(mlUsageCollector);

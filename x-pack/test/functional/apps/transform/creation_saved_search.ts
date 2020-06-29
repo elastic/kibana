@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
-        it('job creation displays details for the created job in the job list', async () => {
+        it('transform creation displays details for the created transform in the transform list', async () => {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
