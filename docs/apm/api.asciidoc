@@ -355,6 +355,7 @@ allowing you to easily see how these events are impacting the performance of you
 
 By default, annotations are stored in a newly created `observability-annotations` index.
 The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
+If you change the default index name, you'll also need to <<apm-app-annotation-user-create,update your user privileges>> accordingly.
 
 The following APIs are available:
 
