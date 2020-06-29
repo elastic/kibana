@@ -5,6 +5,7 @@
  */
 
 import { Filter, IIndexPattern, Query as DataQuery, esQuery } from 'src/plugins/data/public';
+import { isFilterDisabled } from 'src/plugins/data/common/es_query';
 import { ExceptionListItemSchema } from '../../../lists/common/schemas';
 import { buildQueryExceptions } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
@@ -30,8 +31,6 @@ export const getQueryFilter = (
     dateFormatTZ: 'Zulu',
   };
 
-  const enabledFilters = ((filters as unknown) as Filter[]).filter(
-    (f) => f?.meta?.disabled !== true
-  );
+  const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
   return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
 };
