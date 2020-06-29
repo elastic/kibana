@@ -15,7 +15,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
   describe('Service Maps', () => {
     describe('when there is no data', () => {
-      it('returns data', async () => {
+      it('returns empty list', async () => {
         const response = await supertest.get(
           '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
         );
@@ -29,7 +29,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       before(() => esArchiver.load('8.0.0'));
       after(() => esArchiver.unload('8.0.0'));
 
-      it('returns data', async () => {
+      it('returns service map elements', async () => {
         const response = await supertest.get(
           '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
         );
