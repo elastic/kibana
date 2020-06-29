@@ -68,6 +68,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         default_api_key: { type: 'keyword' },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text' },
+        packages: { type: 'keyword' },
       },
     },
   },
