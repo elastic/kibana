@@ -273,7 +273,7 @@ export interface IndexTemplate {
   index_patterns: string[];
   template: {
     settings: any;
-    mappings: object;
+    mappings: any;
     aliases: object;
   };
   data_stream: {
