@@ -133,6 +133,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       selectedJobs,
       viewByFromPage,
       viewByPerPage,
+      swimlaneLimit,
+      loading,
     } = explorerState;
 
     const setSwimlaneSelectActive = useCallback((active: boolean) => {
@@ -302,10 +304,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           </div>
 
+          <EuiSpacer size="m" />
+
           {viewBySwimlaneOptions.length > 0 && (
             <>
               <>
-                <EuiSpacer size="m" />
                 <div
                   className="ml-explorer-swimlane euiText"
                   onMouseEnter={onSwimlaneEnterHandler}
@@ -330,11 +333,13 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
                     fromPage={viewByFromPage}
                     perPage={viewByPerPage}
+                    swimlaneLimit={swimlaneLimit}
                   />
                 </div>
               </>
 
-              {!showViewBySwimlane &&
+              {!loading &&
+                !showViewBySwimlane &&
                 !viewBySwimlaneDataLoading &&
                 typeof viewBySwimlaneFieldName === 'string' && (
                   <ExplorerNoInfluencersFound

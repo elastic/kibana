@@ -49,9 +49,10 @@ export interface ExplorerState {
   viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
-  viewByPerPage?: number;
-  viewByFromPage?: number;
+  viewByPerPage: number;
+  viewByFromPage: number;
   viewBySwimlaneOptions: string[];
+  swimlaneLimit?: number;
 }
 
 function getDefaultIndexPattern() {
@@ -95,5 +96,6 @@ export function getExplorerDefaultState(): ExplorerState {
     viewBySwimlaneOptions: [],
     viewByPerPage: 10,
     viewByFromPage: 1,
+    swimlaneLimit: undefined,
   };
 }

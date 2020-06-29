@@ -5,13 +5,7 @@
  */
 
 import React, { FC, useCallback, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiResizeObserver,
-  EuiText,
-} from '@elastic/eui';
+import { EuiText, EuiLoadingChart, EuiResizeObserver } from '@elastic/eui';
 
 import { throttle } from 'lodash';
 import {
@@ -27,7 +21,7 @@ import { ViewBySwimLaneData } from './explorer_utils';
 const RESIZE_THROTTLE_TIME_MS = 500;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
-  return arg.hasOwnProperty('cardinality');
+  return arg && arg.hasOwnProperty('cardinality');
 }
 
 export const SwimlaneContainer: FC<
@@ -35,8 +29,9 @@ export const SwimlaneContainer: FC<
     onResize: (width: number) => void;
     fromPage?: number;
     perPage?: number;
+    swimlaneLimit?: number;
   }
-> = ({ children, onResize, perPage, fromPage, ...props }) => {
+> = ({ children, onResize, perPage, fromPage, swimlaneLimit, ...props }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const resizeHandler = useCallback(
@@ -57,13 +52,12 @@ export const SwimlaneContainer: FC<
     props.swimlaneData.laneLabels.length > 0;
 
   const isPaginationVisible =
-    (props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
-      isViewBySwimLaneData(props.swimlaneData) &&
-      fromPage &&
-      perPage &&
-      // only render pagination when there is more than 1 page
-      props.swimlaneData.cardinality > perPage * fromPage) ||
-    (fromPage && fromPage > 1);
+    swimlaneLimit !== undefined &&
+    props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
+    fromPage &&
+    perPage &&
+    // only render pagination when there is more than 1 page
+    swimlaneLimit > perPage * fromPage;
 
   return (
     <>
@@ -87,11 +81,9 @@ export const SwimlaneContainer: FC<
                     )}
                   </MlTooltipComponent>
                 ) : (
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem grow={false}>
-                      <EuiLoadingChart size="xl" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiText textAlign={'center'}>
+                    <EuiLoadingChart size="xl" />
+                  </EuiText>
                 )}
               </EuiText>
             </div>
@@ -99,11 +91,7 @@ export const SwimlaneContainer: FC<
         )}
       </EuiResizeObserver>
       {isPaginationVisible && (
-        <SwimLanePagination
-          cardinality={props.swimlaneData.cardinality}
-          fromPage={fromPage}
-          perPage={perPage}
-        />
+        <SwimLanePagination cardinality={swimlaneLimit!} fromPage={fromPage} perPage={perPage} />
       )}
     </>
   );

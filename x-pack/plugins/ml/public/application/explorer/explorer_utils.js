@@ -48,6 +48,7 @@ export function getClearedSelectedAnomaliesState() {
   return {
     selectedCells: undefined,
     viewByLoadedForTimeFormatted: null,
+    swimlaneLimit: undefined,
   };
 }
 

@@ -32,6 +32,7 @@ import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
+import { isViewBySwimLaneData } from '../swimlane_container';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -255,6 +256,9 @@ const loadExplorerDataProvider = (explorerDataService: AnomalyTimelineService) =
           overallSwimlaneData: overallState,
           viewBySwimlaneData: viewBySwimlaneState,
           tableData,
+          swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
+            ? viewBySwimlaneState.cardinality
+            : undefined,
         };
       }
     )
