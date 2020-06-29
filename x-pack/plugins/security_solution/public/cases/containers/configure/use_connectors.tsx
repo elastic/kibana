@@ -6,6 +6,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceNowConnectorConfiguration } from '../../../../../triggers_actions_ui/public/common/constants';
 import { useStateToaster, errorToToaster } from '../../../common/components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors } from './api';
@@ -32,7 +34,13 @@ export const useConnectors = (): ReturnConnectors => {
         if (!didCancel) {
           setLoading(false);
           setConnectors(
-            res.filter((connector) => !connector.config || connector.config.isCaseOwned)
+            res.filter(
+              (connector) =>
+                // Need this filtering temporary to display only Case owned ServiceNow connectors
+                connector.actionTypeId !== ServiceNowConnectorConfiguration.id ||
+                (connector.actionTypeId === ServiceNowConnectorConfiguration.id &&
+                  connector.config.isCaseOwned)
+            )
           );
         }
       } catch (error) {

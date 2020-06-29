@@ -18,10 +18,6 @@ import {
   ExternalServiceParams,
 } from './types';
 
-export interface AnyParams {
-  [index: string]: string | number | object | undefined | null;
-}
-
 export interface CreateCommentRequest {
   [key: string]: string;
 }

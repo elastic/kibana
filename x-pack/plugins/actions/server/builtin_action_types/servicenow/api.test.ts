@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from 'src/core/server';
 import { externalServiceMock, mapping, apiParams } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';
+let mockedLogger: jest.Mocked<Logger>;
 
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
@@ -24,7 +26,13 @@ describe('api', () => {
     describe('create incident', () => {
       test('it creates an incident', async () => {
         const params = { ...apiParams, externalId: null };
-        const res = await api.pushToService({ externalService, mapping, params, secrets: {} });
+        const res = await api.pushToService({
+          externalService,
+          mapping,
+          params,
+          secrets: {},
+          logger: mockedLogger,
+        });
 
         expect(res).toEqual({
           id: 'incident-1',
@@ -51,6 +59,7 @@ describe('api', () => {
           mapping,
           params,
           secrets: {},
+          logger: mockedLogger,
         });
 
         expect(res).toEqual({
@@ -63,7 +72,13 @@ describe('api', () => {
 
       test('it calls createIncident correctly', async () => {
         const params = { ...apiParams, externalId: null, comments: undefined };
-        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params,
+          secrets: {},
+          logger: mockedLogger,
+        });
 
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
@@ -76,9 +91,15 @@ describe('api', () => {
         expect(externalService.updateIncident).not.toHaveBeenCalled();
       });
 
-      test('it calls createComment correctly', async () => {
+      test('it calls updateIncident correctly', async () => {
         const params = { ...apiParams, externalId: null };
-        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incident: {
@@ -111,6 +132,7 @@ describe('api', () => {
           mapping,
           params: apiParams,
           secrets: {},
+          logger: mockedLogger,
         });
 
         expect(res).toEqual({
@@ -138,6 +160,7 @@ describe('api', () => {
           mapping,
           params,
           secrets: {},
+          logger: mockedLogger,
         });
 
         expect(res).toEqual({
@@ -150,7 +173,13 @@ describe('api', () => {
 
       test('it calls updateIncident correctly', async () => {
         const params = { ...apiParams };
-        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params,
+          secrets: {},
+          logger: mockedLogger,
+        });
 
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
@@ -166,7 +195,13 @@ describe('api', () => {
 
       test('it calls updateIncident to create a comments correctly', async () => {
         const params = { ...apiParams };
-        await api.pushToService({ externalService, mapping, params, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
         expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
           incident: {
@@ -213,7 +248,13 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -246,7 +287,13 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -277,7 +324,13 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -310,7 +363,13 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {},
@@ -338,7 +397,13 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -369,7 +434,13 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -402,7 +473,13 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -433,7 +510,13 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -466,7 +549,13 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
@@ -497,7 +586,13 @@ describe('api', () => {
           actionType: 'overwrite',
         });
 
-        await api.pushToService({ externalService, mapping, params: apiParams, secrets: {} });
+        await api.pushToService({
+          externalService,
+          mapping,
+          params: apiParams,
+          secrets: {},
+          logger: mockedLogger,
+        });
         expect(externalService.updateIncident).toHaveBeenCalledTimes(1);
       });
     });

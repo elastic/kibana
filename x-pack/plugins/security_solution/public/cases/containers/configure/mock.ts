@@ -35,12 +35,12 @@ export const connectorsMock: Connector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping,
       },
+      isCaseOwned: true,
     },
     isPreconfigured: false,
-    consumer: 'case',
   },
   {
     id: 'servicenow-2',
@@ -48,7 +48,7 @@ export const connectorsMock: Connector[] = [
     name: 'My Connector 2',
     config: {
       apiUrl: 'https://instance2.service-now.com',
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',
@@ -67,9 +67,9 @@ export const connectorsMock: Connector[] = [
           },
         ],
       },
+      isCaseOwned: true,
     },
     isPreconfigured: false,
-    consumer: 'case',
   },
   {
     id: 'jira-1',
@@ -98,7 +98,6 @@ export const connectorsMock: Connector[] = [
       },
     },
     isPreconfigured: false,
-    consumer: 'case',
   },
 ];
 

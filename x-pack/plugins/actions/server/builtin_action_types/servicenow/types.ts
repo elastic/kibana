@@ -18,6 +18,7 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { IncidentConfigurationSchema } from './case_shema';
 import { PushToServiceResponse } from './case_types';
+import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -83,6 +84,7 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
   secrets: Record<string, unknown>;
+  logger: Logger;
 }
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {

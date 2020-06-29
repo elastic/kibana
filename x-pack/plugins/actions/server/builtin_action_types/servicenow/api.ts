@@ -33,6 +33,7 @@ const pushToServiceHandler = async ({
   mapping,
   params,
   secrets,
+  logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { externalId, comments } = params;
   const updateIncident = externalId ? true : false;
@@ -41,7 +42,13 @@ const pushToServiceHandler = async ({
   let res: PushToServiceResponse;
 
   if (externalId) {
-    currentIncident = await externalService.getIncident(externalId);
+    try {
+      currentIncident = await externalService.getIncident(externalId);
+    } catch (ex) {
+      logger.debug(
+        `Retrieving Incident by id ${externalId} from ServiceNow was failed with exception: ${ex}`
+      );
+    }
   }
 
   let incident = {};

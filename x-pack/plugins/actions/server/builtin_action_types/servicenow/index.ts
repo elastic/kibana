@@ -61,12 +61,6 @@ async function executor(
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: PushToServiceResponse | null = null;
 
-  const res: Pick<ActionTypeExecutorResult, 'status'> &
-    Pick<ActionTypeExecutorResult, 'actionId'> = {
-    status: 'ok',
-    actionId,
-  };
-
   const externalService = createExternalService({
     config,
     secrets,
@@ -99,13 +93,11 @@ async function executor(
       mapping,
       params: { ...pushToServiceParams, externalObject },
       secrets,
+      logger,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
   }
 
-  return {
-    ...res,
-    data: data ?? {},
-  };
+  return { status: 'ok', data: data ?? {}, actionId };
 }

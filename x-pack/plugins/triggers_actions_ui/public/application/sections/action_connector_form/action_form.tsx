@@ -44,7 +44,10 @@ import { ConnectorAddModal } from './connector_add_modal';
 import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import {
+  VIEW_LICENSE_OPTIONS_LINK,
+  ServiceNowConnectorConfiguration,
+} from '../../../common/constants';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -132,7 +135,12 @@ export const ActionForm = ({
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
         setConnectors(
-          loadedConnectors.filter((action) => !action.config || !action.config.isCaseOwned)
+          loadedConnectors.filter(
+            (action) =>
+              action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
+              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
+                !action.config.isCaseOwned)
+          )
         );
       } catch (e) {
         toastNotifications.addDanger({
