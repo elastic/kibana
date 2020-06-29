@@ -37,12 +37,12 @@ export function Overview(props) {
               license={props.cluster.license}
               setupMode={props.setupMode}
               showLicenseExpiration={props.showLicenseExpiration}
-              alerts={props.cluster.alerts}
+              alerts={props.alerts}
             />
             <KibanaPanel
               {...props.cluster.kibana}
               setupMode={props.setupMode}
-              alerts={props.cluster.alerts}
+              alerts={props.alerts}
             />
           </Fragment>
         ) : null}
@@ -50,7 +50,7 @@ export function Overview(props) {
         <LogstashPanel
           {...props.cluster.logstash}
           setupMode={props.setupMode}
-          alerts={props.cluster.alerts}
+          alerts={props.alerts}
         />
 
         <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} />

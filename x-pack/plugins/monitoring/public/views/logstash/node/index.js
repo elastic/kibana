@@ -27,7 +27,6 @@ import {
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_LOGSTASH, ALERT_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { AlertRenderer } from '../../../alerts/renderer';
 import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
@@ -71,6 +70,12 @@ uiRoutes.when('/logstash/node/:uuid', {
         reactNodeId: 'monitoringLogstashNodeApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+          },
+        },
       });
 
       $scope.$watch(
@@ -99,35 +104,30 @@ uiRoutes.when('/logstash/node/:uuid', {
           ];
 
           this.renderReact(
-            <AlertRenderer
-              alertTypeIds={[ALERT_LOGSTASH_VERSION_MISMATCH]}
-              render={({ alerts }) => (
-                <EuiPage>
-                  <EuiPageBody>
-                    <EuiPanel>
-                      <DetailStatus stats={data.nodeSummary} />
-                    </EuiPanel>
-                    <EuiSpacer size="m" />
-                    <AlertsCallout alerts={alerts} />
-                    <EuiPageContent>
-                      <EuiFlexGrid columns={2} gutterSize="s">
-                        {metricsToShow.map((metric, index) => (
-                          <EuiFlexItem key={index}>
-                            <MonitoringTimeseriesContainer
-                              series={metric}
-                              onBrush={this.onBrush}
-                              zoomInfo={this.zoomInfo}
-                              {...data}
-                            />
-                            <EuiSpacer />
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGrid>
-                    </EuiPageContent>
-                  </EuiPageBody>
-                </EuiPage>
-              )}
-            />
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <DetailStatus stats={data.nodeSummary} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <AlertsCallout alerts={this.alerts} />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
+                    {metricsToShow.map((metric, index) => (
+                      <EuiFlexItem key={index}>
+                        <MonitoringTimeseriesContainer
+                          series={metric}
+                          onBrush={this.onBrush}
+                          zoomInfo={this.zoomInfo}
+                          {...data}
+                        />
+                        <EuiSpacer />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGrid>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
           );
         }
       );

@@ -15,7 +15,6 @@ import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
-import { fetchStatus } from '../alerts/fetch_status';
 import { getClustersSummary } from './get_clusters_summary';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
@@ -26,7 +25,6 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
-  ALERTS,
 } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
@@ -97,18 +95,6 @@ export async function getClustersFromRequest(
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
     }
-
-    // if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-    const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
-    cluster.alerts = await fetchStatus(
-      alertsClient,
-      ALERTS,
-      cluster.cluster_uuid,
-      start,
-      end,
-      req.logger
-    );
-    // }
 
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
       ? await getLogTypes(req, filebeatIndexPattern, {

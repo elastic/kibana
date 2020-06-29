@@ -8,18 +8,19 @@ import { AlertInstanceState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerts/server';
 import { AlertsFactory } from '../../alerts';
 import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
+import { ALERTS } from '../../../common/constants';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
-  alertTypes: string[],
+  alertTypes: string[] | undefined,
   clusterUuid: string,
   start: number,
   end: number,
   filters: CommonAlertFilter[]
-): Promise<any> {
+): Promise<{ [type: string]: CommonAlertStatus }> {
   const byType: { [type: string]: CommonAlertStatus } = {};
   await Promise.all(
-    alertTypes.map(async (type) => {
+    (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
       const serialized = alert.serialize();
       if (!serialized) {
@@ -46,7 +47,6 @@ export async function fetchStatus(
       // Now that we have the id, we can get the state
       const states = await alert.getStates(alertsClient, id, filters);
       if (!states) {
-        result.enabled = true;
         return result;
       }
 

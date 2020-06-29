@@ -17,7 +17,6 @@ import {
   CODE_PATH_KIBANA,
   ALERT_KIBANA_VERSION_MISMATCH,
 } from '../../../../common/constants';
-import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/kibana/instances', {
   template,
@@ -38,6 +37,12 @@ uiRoutes.when('/kibana/instances', {
         reactNodeId: 'monitoringKibanaInstancesApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_KIBANA_VERSION_MISMATCH],
+          },
+        },
       });
 
       const renderReact = () => {
@@ -49,19 +54,14 @@ uiRoutes.when('/kibana/instances', {
             render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
-                <AlertRenderer
-                  alertTypeIds={[ALERT_KIBANA_VERSION_MISMATCH]}
-                  render={({ alerts }) => (
-                    <KibanaInstances
-                      instances={this.data.kibanas}
-                      alerts={alerts}
-                      setupMode={setupMode}
-                      sorting={this.sorting}
-                      pagination={this.pagination}
-                      onTableChange={this.onTableChange}
-                      clusterStatus={this.data.clusterStatus}
-                    />
-                  )}
+                <KibanaInstances
+                  instances={this.data.kibanas}
+                  alerts={this.alerts}
+                  setupMode={setupMode}
+                  sorting={this.sorting}
+                  pagination={this.pagination}
+                  onTableChange={this.onTableChange}
+                  clusterStatus={this.data.clusterStatus}
                 />
                 {bottomBarComponent}
               </Fragment>

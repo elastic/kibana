@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
@@ -22,11 +21,11 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
           clusterUuid: schema.string(),
         }),
         body: schema.object({
-          alertTypeIds: schema.arrayOf(schema.string()),
+          alertTypeIds: schema.maybe(schema.arrayOf(schema.string())),
           filters: schema.maybe(schema.arrayOf(schema.any())),
           timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
+            min: schema.number(),
+            max: schema.number(),
           }),
         }),
       },
@@ -40,18 +39,16 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
           filters,
         } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
-        if (!alertsClient || !alertTypeIds) {
+        if (!alertsClient) {
           return response.notFound();
         }
 
-        const start = moment(min).valueOf();
-        const end = moment(max).valueOf();
         const status = await fetchStatus(
           alertsClient,
           alertTypeIds,
           clusterUuid,
-          start,
-          end,
+          min,
+          max,
           filters as CommonAlertFilter[]
         );
         return response.ok({ body: status });

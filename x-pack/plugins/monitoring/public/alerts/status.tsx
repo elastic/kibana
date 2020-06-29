@@ -13,6 +13,7 @@ import { replaceTokens } from './replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertEdit } from '../../../triggers_actions_ui/public';
+import { isInSetupMode } from '../lib/setup_mode';
 
 interface Props {
   alert: CommonAlertStatus;
@@ -22,25 +23,11 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
     alert: { states, alert },
   } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
+  const inSetupMode = isInSetupMode();
 
   if (!alert.rawAlert) {
     return null;
   }
-
-  const firingStates = states.filter((state) => state.firing);
-  if (!firingStates.length) {
-    return null;
-  }
-
-  const firingState = firingStates[0];
-  const nextStepsUi =
-    firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
-      <ul>
-        {firingState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
-          <li key={index}>{replaceTokens(step)}</li>
-        ))}
-      </ul>
-    ) : null;
 
   const flyoutUi = showFlyout ? (
     <AlertsContextProvider
@@ -60,6 +47,29 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
       <AlertEdit initialAlert={alert.rawAlert} onClose={() => setShowFlyout(false)} />
     </AlertsContextProvider>
   ) : null;
+
+  const firingStates = states.filter((state) => state.firing);
+  if (!firingStates.length) {
+    if (inSetupMode) {
+      return (
+        <Fragment>
+          <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
+          {flyoutUi}
+        </Fragment>
+      );
+    }
+    return null;
+  }
+
+  const firingState = firingStates[0];
+  const nextStepsUi =
+    firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
+      <ul>
+        {firingState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
+          <li key={index}>{replaceTokens(step)}</li>
+        ))}
+      </ul>
+    ) : null;
 
   return (
     <Fragment>

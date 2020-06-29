@@ -20,6 +20,7 @@ import { formatDateTimeLocal } from '../../common/formatting';
 import { AlertState } from '../../server/alerts/types';
 import { AlertStatus } from './status';
 import { Legacy } from '../legacy_shims';
+import { isInSetupMode } from '../lib/setup_mode';
 
 function getDateFromState(states: CommonAlertState[]) {
   const timestamp = states[0].state.ui.triggeredMS;
@@ -31,52 +32,30 @@ interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
 }
 export const AlertsList: React.FC<Props> = (props: Props) => {
-  const { alerts } = props;
-  const [showPopover, setShowPopover] = React.useState<AlertSeverity | null>(null);
-
-  const byType = {
-    [AlertSeverity.Danger]: [] as CommonAlertStatus[],
-    [AlertSeverity.Warning]: [] as CommonAlertStatus[],
-    [AlertSeverity.Success]: [] as CommonAlertStatus[],
-  };
-
-  for (const alert of Object.values(alerts).filter(Boolean)) {
-    for (const alertState of alert.states) {
-      const state = alertState.state as AlertState;
-      byType[state.ui.severity].push(alert);
-    }
-  }
+  const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
+  const inSetupMode = isInSetupMode();
+  const alerts = Object.values(props.alerts).filter(Boolean);
 
   const badges = [];
-  const typesToShow = [AlertSeverity.Danger, AlertSeverity.Warning];
-  for (const type of typesToShow) {
-    const list = byType[type];
-    if (list.length === 0) {
-      continue;
-    }
 
+  if (inSetupMode) {
     const button = (
       <EuiBadge
         iconType="bell"
-        color={type}
-        onClickAriaLabel={`${list.length} alert(s)`}
-        onClick={() => setShowPopover(type)}
+        onClickAriaLabel={`${alerts.length} alert(s)`}
+        onClick={() => setShowPopover(true)}
       >
-        {list.length} alert(s)
+        {alerts.length} alert(s)
       </EuiBadge>
     );
-
     const panels = [
       {
         id: 0,
         title: `Alerts`,
-        items: list.map(({ alert, states }, index) => {
+        items: alerts.map(({ alert }, index) => {
           return {
             name: (
               <Fragment>
-                <EuiText size="s">
-                  <h4>{getDateFromState(states)}</h4>
-                </EuiText>
                 <EuiText>{alert.label}</EuiText>
               </Fragment>
             ),
@@ -84,10 +63,10 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
           };
         }),
       },
-      ...list.map((alertStatus, index) => {
+      ...alerts.map((alertStatus, index) => {
         return {
           id: index + 1,
-          title: getDateFromState(alertStatus.states),
+          title: alertStatus.alert.label,
           width: 400,
           content: (
             <div style={{ padding: '1rem' }}>
@@ -102,7 +81,7 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
       <EuiPopover
         id="monitoringAlertMenu"
         button={button}
-        isOpen={showPopover === type}
+        isOpen={showPopover === true}
         closePopover={() => setShowPopover(null)}
         panelPaddingSize="none"
         withTitle
@@ -111,6 +90,84 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
     );
+  } else {
+    const byType = {
+      [AlertSeverity.Danger]: [] as CommonAlertStatus[],
+      [AlertSeverity.Warning]: [] as CommonAlertStatus[],
+      [AlertSeverity.Success]: [] as CommonAlertStatus[],
+    };
+
+    for (const alert of alerts) {
+      for (const alertState of alert.states) {
+        const state = alertState.state as AlertState;
+        byType[state.ui.severity].push(alert);
+      }
+    }
+
+    const typesToShow = [AlertSeverity.Danger, AlertSeverity.Warning];
+    for (const type of typesToShow) {
+      const list = byType[type];
+      if (list.length === 0) {
+        continue;
+      }
+
+      const button = (
+        <EuiBadge
+          iconType="bell"
+          color={type}
+          onClickAriaLabel={`${list.length} alert(s)`}
+          onClick={() => setShowPopover(type)}
+        >
+          {list.length} alert(s)
+        </EuiBadge>
+      );
+
+      const panels = [
+        {
+          id: 0,
+          title: `Alerts`,
+          items: list.map(({ alert, states }, index) => {
+            return {
+              name: (
+                <Fragment>
+                  <EuiText size="s">
+                    <h4>{getDateFromState(states)}</h4>
+                  </EuiText>
+                  <EuiText>{alert.label}</EuiText>
+                </Fragment>
+              ),
+              panel: index + 1,
+            };
+          }),
+        },
+        ...list.map((alertStatus, index) => {
+          return {
+            id: index + 1,
+            title: getDateFromState(alertStatus.states),
+            width: 400,
+            content: (
+              <div style={{ padding: '1rem' }}>
+                <AlertStatus alert={alertStatus} />
+              </div>
+            ),
+          };
+        }),
+      ];
+
+      badges.push(
+        <EuiPopover
+          id="monitoringAlertMenu"
+          button={button}
+          isOpen={showPopover === type}
+          closePopover={() => setShowPopover(null)}
+          panelPaddingSize="none"
+          withTitle
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      );
+    }
   }
 
   return (

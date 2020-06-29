@@ -218,7 +218,10 @@ export function ElasticsearchPanel(props) {
   };
 
   let nodesAlertStatus = null;
-  if (NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)) {
+  if (
+    (setupMode && setupMode.enabled) ||
+    NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
+  ) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
@@ -228,7 +231,11 @@ export function ElasticsearchPanel(props) {
   }
 
   let overviewAlertStatus = null;
-  if (alerts[ALERT_CLUSTER_HEALTH] || alerts[ALERT_LICENSE_EXPIRATION]) {
+  if (
+    (setupMode && setupMode.enabled) ||
+    alerts[ALERT_CLUSTER_HEALTH] ||
+    alerts[ALERT_LICENSE_EXPIRATION]
+  ) {
     const alertsList = [alerts[ALERT_CLUSTER_HEALTH], alerts[ALERT_LICENSE_EXPIRATION]];
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>

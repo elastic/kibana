@@ -65,7 +65,10 @@ export function LogstashPanel(props) {
     ) : null;
 
   let nodesAlertStatus = null;
-  if (NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)) {
+  if (
+    (setupMode && setupMode.enabled) ||
+    NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
+  ) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>

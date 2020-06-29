@@ -59,7 +59,10 @@ export function KibanaPanel(props) {
     ) : null;
 
   let instancesAlertStatus = null;
-  if (INSTANCES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)) {
+  if (
+    (setupMode && setupMode.enabled) ||
+    INSTANCES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
+  ) {
     const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     instancesAlertStatus = (
       <EuiFlexItem grow={false}>

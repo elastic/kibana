@@ -182,7 +182,7 @@ export class BaseAlert {
   public async getStates(
     alertsClient: AlertsClient,
     id: string,
-    filters: any[]
+    filters: CommonAlertFilter[]
   ): Promise<{ [instanceId: string]: RawAlertInstance }> {
     const states = await alertsClient.getAlertState({ id });
     if (!states || !states.alertInstances) {

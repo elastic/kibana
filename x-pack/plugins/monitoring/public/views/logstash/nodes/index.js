@@ -16,7 +16,6 @@ import {
   LOGSTASH_SYSTEM_ID,
   ALERT_LOGSTASH_VERSION_MISMATCH,
 } from '../../../../common/constants';
-import { AlertRenderer } from '../../../alerts/renderer';
 
 uiRoutes.when('/logstash/nodes', {
   template,
@@ -37,6 +36,12 @@ uiRoutes.when('/logstash/nodes', {
         reactNodeId: 'monitoringLogstashNodesApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+          },
+        },
       });
 
       $scope.$watch(
@@ -50,21 +55,15 @@ uiRoutes.when('/logstash/nodes', {
               render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
                 <Fragment>
                   {flyoutComponent}
-                  <AlertRenderer
-                    alertTypeIds={[ALERT_LOGSTASH_VERSION_MISMATCH]}
-                    render={({ alerts }) => (
-                      <Listing
-                        data={data.nodes}
-                        setupMode={setupMode}
-                        stats={data.clusterStatus}
-                        alerts={alerts}
-                        sorting={this.sorting}
-                        pagination={this.pagination}
-                        onTableChange={this.onTableChange}
-                      />
-                    )}
+                  <Listing
+                    data={data.nodes}
+                    setupMode={setupMode}
+                    stats={data.clusterStatus}
+                    alerts={this.alerts}
+                    sorting={this.sorting}
+                    pagination={this.pagination}
+                    onTableChange={this.onTableChange}
                   />
-
                   {bottomBarComponent}
                 </Fragment>
               )}
