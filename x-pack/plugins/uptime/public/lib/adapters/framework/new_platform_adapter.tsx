@@ -7,7 +7,6 @@
 import { CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
@@ -38,7 +37,7 @@ export const getKibanaFrameworkAdapter = (
     INTEGRATED_SOLUTIONS
   );
 
-  const canSave = get(capabilities, 'uptime.save', false) as boolean;
+  const canSave = (capabilities.uptime.save ?? false) as boolean;
 
   const props: UptimeAppProps = {
     basePath: basePath.get(),
