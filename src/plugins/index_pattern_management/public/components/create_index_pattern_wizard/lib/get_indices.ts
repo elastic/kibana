@@ -18,12 +18,18 @@
  */
 
 import { get, sortBy } from 'lodash';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../../data/public';
-import { MatchedIndex } from '../types';
+import { MatchedIndex, ResolveIndexResponse } from '../types';
+
+const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
+const dataStreamLabel = i18n.translate('indexPatternManagement.aliasLabel', {
+  defaultMessage: 'Data stream',
+});
 
 export async function getIndices(
-  es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
+  http: HttpStart,
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
   limit: number
@@ -48,47 +54,14 @@ export async function getIndices(
     return [];
   }
 
-  // We need to always provide a limit and not rely on the default
-  if (!limit) {
-    throw new Error('`getIndices()` was called without the required `limit` parameter.');
-  }
-
-  const params = {
-    ignoreUnavailable: true,
-    index: pattern,
-    ignore: [404],
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: limit,
-          },
-        },
-      },
-    },
-  };
-
   try {
-    const response = await es.search(params);
-    if (!response || response.error || !response.aggregations) {
-      return [];
-    }
-
-    return sortBy(
-      response.aggregations.indices.buckets
-        .map((bucket: { key: string; doc_count: number }) => {
-          return bucket.key;
-        })
-        .map((indexName: string) => {
-          return {
-            name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName),
-          };
-        }),
-      'name'
+    const response = await http.get<ResolveIndexResponse>(
+      `/api/index-pattern-management/resolve_index/*`,
+      {
+        // prependBasePath: false,
+      }
     );
+    return responseToItemArray(response, indexPatternCreationType);
   } catch (err) {
     const type = get(err, 'body.error.caused_by.type');
     if (type === 'index_not_found_exception') {
@@ -99,3 +72,22 @@ export async function getIndices(
     throw err;
   }
 }
+
+const responseToItemArray = (
+  response: ResolveIndexResponse,
+  indexPatternCreationType: IndexPatternCreationConfig
+): MatchedIndex[] => {
+  const source: MatchedIndex[] = [];
+
+  response.indices.forEach((index) => {
+    source.push({ name: index.name, tags: indexPatternCreationType.getIndexTags(index.name) });
+  });
+  response.aliases.forEach((alias) => {
+    source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }] });
+  });
+  response.data_streams.forEach((dataStream) => {
+    source.push({ name: dataStream.name, tags: [{ key: 'data_stream', name: dataStreamLabel }] });
+  });
+
+  return sortBy(source, 'name');
+};

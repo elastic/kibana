@@ -128,12 +128,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices(
-          this.context.services.data.search.__LEGACY.esClient,
-          indexPatternCreationType,
-          query,
-          MAX_SEARCH_SIZE
-        )
+        getIndices(this.context.services.http, indexPatternCreationType, query, MAX_SEARCH_SIZE)
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -145,17 +140,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
       getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
+        this.context.services.http,
         indexPatternCreationType,
         `${query}*`,
         MAX_SEARCH_SIZE
       ),
-      getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
-        indexPatternCreationType,
-        query,
-        MAX_SEARCH_SIZE
-      ),
+      getIndices(this.context.services.http, indexPatternCreationType, query, MAX_SEARCH_SIZE),
     ]);
 
     // If the search changed, discard this state

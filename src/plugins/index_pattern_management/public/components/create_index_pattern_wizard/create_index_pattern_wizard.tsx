@@ -126,7 +126,7 @@ export class CreateIndexPatternWizard extends Component<
     ensureMinimumTime(
       this.catchAndWarn(
         getIndices(
-          this.context.services.data.search.__LEGACY.esClient,
+          this.context.services.http,
           this.state.indexPatternCreationType,
           `*`,
           MAX_SEARCH_SIZE
@@ -141,12 +141,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
-        this.state.indexPatternCreationType,
-        `*:*`,
-        1
-      ),
+      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, 1),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedIndex[]) =>

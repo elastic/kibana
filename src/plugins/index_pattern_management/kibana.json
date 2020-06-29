@@ -1,7 +1,7 @@
 {
   "id": "indexPatternManagement",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["management", "data", "kibanaLegacy"]
 }
