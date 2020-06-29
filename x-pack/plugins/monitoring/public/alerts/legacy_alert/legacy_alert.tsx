@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiTextColor } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { EuiTextColor, EuiSpacer } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { LEGACY_ALERTS } from '../../../common/constants';
@@ -20,7 +20,11 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       name: alert.label,
       iconClass: 'bell',
       alertParamsExpression: (props: any) => (
-        <EuiTextColor color="subdued">There is nothing to configure.</EuiTextColor>
+        <Fragment>
+          <EuiSpacer />
+          <EuiTextColor color="subdued">There is nothing to configure.</EuiTextColor>
+          <EuiSpacer />
+        </Fragment>
       ),
       validate: () => ({ errors: {} }),
       requiresAppContext: false,

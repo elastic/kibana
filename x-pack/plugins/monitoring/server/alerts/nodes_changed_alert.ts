@@ -115,7 +115,6 @@ export class NodesChangedAlert extends BaseAlert {
       }
 
       const { removed, added, restarted } = this.getNodeStates(nodes);
-
       const shouldFire = removed.length > 0 || added.length > 0 || restarted.length > 0;
       const severity = AlertSeverity.Warning;
 
@@ -162,7 +161,7 @@ export class NodesChangedAlert extends BaseAlert {
     const addedText =
       added.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.addedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes {added} added to this cluster.`,
+            defaultMessage: `Elasticsearch nodes '{added}' added to this cluster.`,
             values: {
               added: added.map((node) => node.nodeName).join(','),
             },
@@ -171,7 +170,7 @@ export class NodesChangedAlert extends BaseAlert {
     const removedText =
       removed.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.removedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes {removed} removed from this cluster.`,
+            defaultMessage: `Elasticsearch nodes '{removed}' removed from this cluster.`,
             values: {
               removed: removed.map((node) => node.nodeName).join(','),
             },
@@ -180,7 +179,7 @@ export class NodesChangedAlert extends BaseAlert {
     const restartedText =
       restarted.length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage', {
-            defaultMessage: `Elasticsearch nodes {restarted} restarted in this cluster.`,
+            defaultMessage: `Elasticsearch nodes '{restarted}' restarted in this cluster.`,
             values: {
               restarted: restarted.map((node) => node.nodeName).join(','),
             },
