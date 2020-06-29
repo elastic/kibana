@@ -3,17 +3,16 @@
 echo "### Ingesting Code Coverage"
 echo ""
 
-
-BUILD_ID=$1
-export BUILD_ID
-
-CI_RUN_URL=$2
-export CI_RUN_URL
-echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
-
-COVERAGE_JOB_NAME=$3
+COVERAGE_JOB_NAME=$1
 export COVERAGE_JOB_NAME
 echo "### debug COVERAGE_JOB_NAME: ${COVERAGE_JOB_NAME}"
+
+BUILD_ID=$2
+export BUILD_ID
+
+CI_RUN_URL=$3
+export CI_RUN_URL
+echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 
 ES_HOST="https://${USER_FROM_VAULT}:${PASS_FROM_VAULT}@${HOST_FROM_VAULT}"
 export ES_HOST
