@@ -12,7 +12,7 @@ kibanaPipeline(timeoutMinutes: 180) {
 
   // if (params.NOTIFY_ON_FAILURE) {
   if (true) {
-    slackNotifications.onFailure(channel: '@brian.seeders')
-    kibanaPipeline.sendMail(to: 'brian.seeders@elastic.co')
+    slackNotifications.onFailure(channel: '@Glo')
+    kibanaPipeline.sendMail(to: 'gloria.delatorre@elastic.co')
   }
 }
