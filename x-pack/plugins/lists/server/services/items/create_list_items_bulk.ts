@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { transformListItemToElasticQuery } from '../utils';
 import {
@@ -19,7 +19,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;

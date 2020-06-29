@@ -16,7 +16,7 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Service } from '../../../types';
@@ -84,7 +84,7 @@ function uniqueCombined(list1: string[], list2: string[], limit: number) {
 }
 
 async function getIndicesFromPattern(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
@@ -114,7 +114,7 @@ async function getIndicesFromPattern(
 }
 
 async function getAliasesFromPattern(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
