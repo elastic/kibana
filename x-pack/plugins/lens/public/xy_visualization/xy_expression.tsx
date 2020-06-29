@@ -276,6 +276,9 @@ export function XYChart({
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}
+        tooltip={{
+          headerFormatter: (d) => xAxisFormatter.convert(d.value),
+        }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={({ x }) => {
@@ -360,8 +363,6 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
-        /* associate the x axis with the latest group to format x values in tooltip correctly */
-        groupId={yAxesConfiguration[yAxesConfiguration.length - 1]?.groupId}
         showGridLines={false}
         hide={filteredLayers[0].hide}
         tickFormat={(d) => xAxisFormatter.convert(d)}
