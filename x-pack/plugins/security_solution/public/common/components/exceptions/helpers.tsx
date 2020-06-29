@@ -10,34 +10,35 @@ import { capitalize } from 'lodash';
 import moment from 'moment';
 
 import * as i18n from './translations';
-import { FormattedEntry, OperatorOption, DescriptionListItem } from './types';
-import { EXCEPTION_OPERATORS, isOperator } from './operators';
+import { FormattedEntry, DescriptionListItem, FormattedBuilderEntry } from './types';
+import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
+import { OperatorOption, OperatorType } from '../autocomplete/types';
 import {
   CommentsArray,
   Entry,
   EntriesArray,
   ExceptionListItemSchema,
-  OperatorTypeEnum,
   entriesNested,
   entriesExists,
   entriesList,
 } from '../../../lists_plugin_deps';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
  *
  * @param entry a single ExceptionItem entry
  */
-export const getOperatorType = (entry: Entry): OperatorTypeEnum => {
+export const getOperatorType = (entry: Entry): OperatorType => {
   switch (entry.type) {
     case 'match':
-      return OperatorTypeEnum.MATCH;
+      return OperatorType.MATCH;
     case 'match_any':
-      return OperatorTypeEnum.MATCH_ANY;
+      return OperatorType.MATCH_ANY;
     case 'list':
-      return OperatorTypeEnum.LIST;
+      return OperatorType.LIST;
     default:
-      return OperatorTypeEnum.EXISTS;
+      return OperatorType.EXISTS;
   }
 };
 
@@ -58,6 +59,11 @@ export const getExceptionOperatorSelect = (entry: Entry): OperatorOption => {
 
     return foundOperator ?? isOperator;
   }
+};
+
+export const getExceptionOperatorFromSelect = (value: string): OperatorOption => {
+  const operator = EXCEPTION_OPERATORS.filter(({ message }) => message === value);
+  return operator[0] ?? isOperator;
 };
 
 /**
@@ -192,3 +198,19 @@ export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[]
     timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
     children: <EuiText size="s">{comment.comment}</EuiText>,
   }));
+
+export const getFormattedBuilderEntries = (
+  indexPattern: IIndexPattern,
+  entries: EntriesArray
+): FormattedBuilderEntry[] => {
+  const { fields } = indexPattern;
+
+  return entries.map((entry) => {
+    const selectedField = fields.filter(({ name }) => entry.field === name);
+    return {
+      field: selectedField[0] ?? null,
+      operator: getExceptionOperatorSelect(entry),
+      value: getEntryValue(entry),
+    };
+  });
+};

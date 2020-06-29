@@ -27,7 +27,7 @@ import {
   isNotInListOperator,
   existsOperator,
   doesNotExistOperator,
-} from './operators';
+} from '../autocomplete/operators';
 import { OperatorTypeEnum } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {

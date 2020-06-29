@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ReactNode } from 'react';
-
-import { Operator, OperatorType } from '../../../lists_plugin_deps';
-
-export interface OperatorOption {
-  message: string;
-  value: string;
-  operator: Operator;
-  type: OperatorType;
-}
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { OperatorOption } from '../autocomplete/types';
 
 export interface FormattedEntry {
   fieldName: string;
@@ -48,4 +41,10 @@ export interface ExceptionsPagination {
   pageSize: number;
   totalItemCount: number;
   pageSizeOptions: number[];
+}
+
+export interface FormattedBuilderEntry {
+  field: IFieldType | null;
+  operator: OperatorOption;
+  value: string | string[];
 }
