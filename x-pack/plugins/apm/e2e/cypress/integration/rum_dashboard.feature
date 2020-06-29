@@ -6,10 +6,13 @@ Feature: RUM Dashboard
     Then should redirect to rum dashboard
       And should have correct client metrics
 
-  Scenario: Rum page filters
-    Given the user filters by os
-    When user applies the selected filter
+  Scenario Outline: Rum page filters
+    When the user filters by "<filterName>"
     Then it filters the client metrics
+    Examples:
+      | filterName |
+      | os         |
+      | location   |
 
   Scenario: Page load distribution percentiles
     Given a user browses the APM UI application for RUM Data
