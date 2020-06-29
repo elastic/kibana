@@ -56,7 +56,7 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
       source.icon = source.type.icon;
       source.image = source.type.image;
       source.typeTitle = source.type.title;
-      source.editUrl = `#/edit/${id}`;
+      source.editUrl = `/edit/${id}`;
 
       return source;
     };
