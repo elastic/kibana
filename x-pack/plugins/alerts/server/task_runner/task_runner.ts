@@ -255,7 +255,7 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues(instancesWithScheduledActions, (alertInstance: any) =>
+      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(instancesWithScheduledActions, (alertInstance: any) =>
         alertInstance.toRaw()
       ),
     };
