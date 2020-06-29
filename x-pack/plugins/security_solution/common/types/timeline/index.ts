@@ -137,11 +137,13 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 export enum TimelineStatus {
   active = 'active',
   draft = 'draft',
+  immutable = 'immutable',
 }
 
 export const TimelineStatusLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineStatus.active),
   runtimeTypes.literal(TimelineStatus.draft),
+  runtimeTypes.literal(TimelineStatus.immutable),
 ]);
 
 const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralRt);
@@ -149,6 +151,29 @@ const TimelineStatusLiteralWithNullRt = unionWithNullType(TimelineStatusLiteralR
 export type TimelineStatusLiteral = runtimeTypes.TypeOf<typeof TimelineStatusLiteralRt>;
 export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
   typeof TimelineStatusLiteralWithNullRt
+>;
+
+/**
+ * Template timeline type
+ */
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
+}
+
+export const TemplateTimelineTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TemplateTimelineType.elastic),
+  runtimeTypes.literal(TemplateTimelineType.custom),
+]);
+
+export const TemplateTimelineTypeLiteralWithNullRt = unionWithNullType(
+  TemplateTimelineTypeLiteralRt
+);
+
+export type TemplateTimelineTypeLiteral = runtimeTypes.TypeOf<typeof TemplateTimelineTypeLiteralRt>;
+export type TemplateTimelineTypeLiteralWithNull = runtimeTypes.TypeOf<
+  typeof TemplateTimelineTypeLiteralWithNullRt
 >;
 
 /*
@@ -273,6 +298,13 @@ export const TimelineResponseType = runtimeTypes.type({
   }),
 });
 
+export const TimelineErrorResponseType = runtimeTypes.type({
+  status_code: runtimeTypes.number,
+  message: runtimeTypes.string,
+});
+
+export interface TimelineErrorResponse
+  extends runtimeTypes.TypeOf<typeof TimelineErrorResponseType> {}
 export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
 
 /**
