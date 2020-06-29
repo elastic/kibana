@@ -14,8 +14,7 @@ export const DataStreamBadge: FunctionComponent = () => {
       content={i18n.translate(
         'xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamBadgeToolTip',
         {
-          defaultMessage:
-            'This is a backing index. Excluding this index when restoring may cause unintended data loss for a data stream.',
+          defaultMessage: 'This is a backing index for a data stream.',
         }
       )}
     >

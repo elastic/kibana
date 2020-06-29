@@ -135,7 +135,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesTitle"
-                defaultMessage="Indices"
+                defaultMessage="Indices and data streams"
               />
             </h3>
           </EuiTitle>
@@ -143,7 +143,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesDescription"
-            defaultMessage="Creates new indices if they don’t exist. Restores existing indices
+            defaultMessage="Creates new indices and data streams if they don’t exist. Restores existing indices
               if they are closed and have the same number of shards as the snapshot index."
           />
         }
@@ -155,7 +155,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.allIndicesLabel"
-                  defaultMessage="All indices, including system indices"
+                  defaultMessage="All indices and data streams, including system indices"
                 />
               }
               checked={isAllIndices}
@@ -185,7 +185,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                         <EuiFlexItem grow={false}>
                           <FormattedMessage
                             id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesLabel"
-                            defaultMessage="Select indices"
+                            defaultMessage="Select indices and data streams"
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -219,7 +219,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleListLink"
-                              defaultMessage="Select indices"
+                              defaultMessage="Select indices and data streams"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -230,7 +230,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     selectIndicesMode === 'list' ? (
                       <FormattedMessage
                         id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
-                        defaultMessage="{count} {count, plural, one {index} other {indices}} will be restored. {selectOrDeselectAllLink}"
+                        defaultMessage="{count} {count, plural, one {index or data stream} other {indices or data streams}} will be restored. {selectOrDeselectAllLink}"
                         values={{
                           count: restoreIndices && restoreIndices.length,
                           selectOrDeselectAllLink:
@@ -526,7 +526,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
             defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings."
+              templates with the same name. Also restores persistent settings and data streams."
           />
         }
         fullWidth
