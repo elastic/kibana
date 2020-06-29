@@ -8,16 +8,17 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
-import { getAllFieldsByName, WithSource } from '../../containers/source';
+import { getAllFieldsByName, useWithSource } from '../../containers/source';
 import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../add_filter_to_global_search_bar';
-import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '../top_n';
+import { StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 interface Props {
   draggableId?: DraggableId;
@@ -34,7 +35,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   field,
   onFilterAdded,
   showTopN,
-  timelineId = ACTIVE_TIMELINE_REDUX_ID,
+  timelineId,
   toggleTopN,
   value,
 }) => {
@@ -44,11 +45,16 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     kibana.services.data.query.filterManager,
   ]);
   const { getTimelineFilterManager } = useManageTimeline();
-  const filterManager = useMemo(() => getTimelineFilterManager(timelineId) ?? filterManagerBackup, [
-    timelineId,
-    getTimelineFilterManager,
-    filterManagerBackup,
-  ]);
+
+  const filterManager = useMemo(
+    () =>
+      timelineId === TimelineId.active ||
+      (draggableId != null && draggableId?.includes(TimelineId.active))
+        ? getTimelineFilterManager(TimelineId.active)
+        : filterManagerBackup,
+    [draggableId, timelineId, getTimelineFilterManager, filterManagerBackup]
+  );
+
   const filterForValue = useCallback(() => {
     const filter =
       value?.length === 0 ? createFilter(field, undefined) : createFilter(field, value);
@@ -78,6 +84,8 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
+
+  const { browserFields } = useWithSource();
 
   return (
     <>
@@ -117,40 +125,36 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         </EuiToolTip>
       )}
 
-      <WithSource sourceId="default">
-        {({ browserFields }) => (
+      <>
+        {allowTopN({
+          browserField: getAllFieldsByName(browserFields)[field],
+          fieldName: field,
+        }) && (
           <>
-            {allowTopN({
-              browserField: getAllFieldsByName(browserFields)[field],
-              fieldName: field,
-            }) && (
-              <>
-                {!showTopN && (
-                  <EuiToolTip content={i18n.SHOW_TOP(field)}>
-                    <EuiButtonIcon
-                      aria-label={i18n.SHOW_TOP(field)}
-                      color="text"
-                      data-test-subj="show-top-field"
-                      iconType="visBarVertical"
-                      onClick={toggleTopN}
-                    />
-                  </EuiToolTip>
-                )}
+            {!showTopN && (
+              <EuiToolTip content={i18n.SHOW_TOP(field)}>
+                <EuiButtonIcon
+                  aria-label={i18n.SHOW_TOP(field)}
+                  color="text"
+                  data-test-subj="show-top-field"
+                  iconType="visBarVertical"
+                  onClick={toggleTopN}
+                />
+              </EuiToolTip>
+            )}
 
-                {showTopN && (
-                  <StatefulTopN
-                    browserFields={browserFields}
-                    field={field}
-                    onFilterAdded={onFilterAdded}
-                    toggleTopN={toggleTopN}
-                    value={value}
-                  />
-                )}
-              </>
+            {showTopN && (
+              <StatefulTopN
+                browserFields={browserFields}
+                field={field}
+                onFilterAdded={onFilterAdded}
+                toggleTopN={toggleTopN}
+                value={value}
+              />
             )}
           </>
         )}
-      </WithSource>
+      </>
 
       {!showTopN && (
         <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>

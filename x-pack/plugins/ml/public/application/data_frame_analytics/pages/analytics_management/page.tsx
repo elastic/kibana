@@ -48,7 +48,7 @@ export const Page: FC = () => {
                 <h1>
                   <FormattedMessage
                     id="xpack.ml.dataframe.analyticsList.title"
-                    defaultMessage="Analytics jobs"
+                    defaultMessage="Data frame analytics jobs"
                   />
                   <span>&nbsp;</span>
                   <EuiBetaBadge

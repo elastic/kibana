@@ -1,9 +1,11 @@
 .lnsDimensionPopover {
   line-height: 0;
   flex-grow: 1;
+  max-width: calc(100% - #{$euiSizeL});
 }
 
 .lnsDimensionPopover__trigger {
   max-width: 100%;
   display: block;
+  word-break: break-word;
 }
