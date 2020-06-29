@@ -5,18 +5,20 @@
  */
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { EuiButton } from '@elastic/eui';
 import { Page } from '../../components/page';
+import { txtTitle, txtSubtitle, txtCreateATag } from './i18n';
 
 export const LandingPage: React.FC = () => {
   return (
     <Page
-      title={'Tags'}
-      subtitle={<p>Organize your visualizations, dashboards and other saved objects using tags.</p>}
+      title={txtTitle}
+      subtitle={<p>{txtSubtitle}</p>}
       callToAction={
-        <EuiButton fill href={'/asdf'}>
-          Create a tag
-        </EuiButton>
+        <Link to={'/create'}>
+          <EuiButton fill>{txtCreateATag}</EuiButton>
+        </Link>
       }
     >
       <div>Hello world</div>
