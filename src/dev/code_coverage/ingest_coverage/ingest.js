@@ -74,19 +74,22 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
   }
 }
 
-function logSend(actuallySent) {
-  return (redactedEsHostUrl) => (log) => (payload) => {
-    const { index, body } = payload;
-    log.verbose(
-      `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
+const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
+  const { index, body } = payload;
+  return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
 ${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
 \t### Index: ${green(index)}
 \t### payload.body: ${body}
 ${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
-`
-    );
+`;
+};
+
+function logSend(actuallySent) {
+  return (redactedEsHostUrl) => (log) => (payload) => {
+    log.verbose(sendMsg(actuallySent, redactedEsHostUrl, payload));
   };
 }
+
 function eitherSendOrNot(payload) {
   return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }
