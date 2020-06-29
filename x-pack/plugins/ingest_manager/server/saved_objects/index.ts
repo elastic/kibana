@@ -201,24 +201,23 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         output_id: { type: 'keyword' },
         inputs: {
           type: 'nested',
+          enabled: false,
           properties: {
-            type: { type: 'keyword', index: false },
-            enabled: { type: 'boolean', index: false },
-            processors: { type: 'keyword', index: false },
-            config: { type: 'flattened', index: false },
-            vars: { type: 'flattened', index: false },
+            type: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+            processors: { type: 'keyword' },
+            config: { type: 'flattened' },
+            vars: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
-                id: { type: 'keyword', index: false },
-                enabled: { type: 'boolean', index: false },
-                dataset: { type: 'keyword', index: false },
-                processors: { type: 'keyword', index: false },
-                config: { type: 'flattened', index: false },
-                // @ts-ignore doc_values is not in SavedObjectsFieldMapping
-                agent_stream: { type: 'flattened', index: false, doc_values: false },
-                // @ts-ignore doc_values is not in SavedObjectsFieldMapping
-                vars: { type: 'flattened', index: false, doc_values: false },
+                id: { type: 'keyword' },
+                enabled: { type: 'boolean' },
+                dataset: { type: 'keyword' },
+                processors: { type: 'keyword' },
+                config: { type: 'flattened' },
+                agent_stream: { type: 'flattened' },
+                vars: { type: 'flattened' },
               },
             },
           },
