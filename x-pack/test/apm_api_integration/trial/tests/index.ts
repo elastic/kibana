@@ -11,5 +11,6 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
   describe('APM specs (trial)', function () {
     this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
+    loadTestFile(require.resolve('./service_maps'));
   });
 }
