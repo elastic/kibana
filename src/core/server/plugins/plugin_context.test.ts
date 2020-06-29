@@ -22,14 +22,14 @@ import { first } from 'rxjs/operators';
 import { createPluginInitializerContext } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { Env } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { PluginManifest } from './types';
 import { Server } from '../server';
 import { fromRoot } from '../utils';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 let coreId: symbol;
 let env: Env;

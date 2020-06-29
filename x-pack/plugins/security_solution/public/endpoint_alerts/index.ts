@@ -6,7 +6,7 @@
 
 import { Reducer } from 'redux';
 import { SecuritySubPluginWithStore } from '../app/types';
-import { endpointAlertsRoutes } from './routes';
+import { EndpointAlertsRoutes } from './routes';
 import { alertListReducer } from './store/reducer';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { alertMiddlewareFactory } from './store/middleware';
@@ -47,7 +47,7 @@ export class EndpointAlerts {
     ];
 
     return {
-      routes: endpointAlertsRoutes(),
+      SubPluginRoutes: EndpointAlertsRoutes,
       store: {
         initialState: { alertList: undefined },
         /**

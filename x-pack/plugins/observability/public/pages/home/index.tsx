@@ -10,7 +10,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiImage,
   EuiSpacer,
@@ -21,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { appsSection, tryItOutItemsSection } from './section';
+import { appsSection } from './section';
 
 const Container = styled.div`
   min-height: calc(100vh - 48px);
@@ -93,7 +92,7 @@ export const Home = () => {
             <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.observability.home.sectionTitle', {
-                  defaultMessage: 'Observability built on the Elastic Stack',
+                  defaultMessage: 'Unified visibility across your entire ecosystem',
                 })}
               </h2>
             </EuiTitle>
@@ -101,7 +100,7 @@ export const Home = () => {
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.observability.home.sectionsubtitle', {
                 defaultMessage:
-                  'Bring your logs, metrics, and APM traces together at scale in a single stack so you can monitor and react to events happening anywhere in your environment.',
+                  'Monitor, analyze, and react to events happening anywhere in your environment by bringing logs, metrics, and traces together at scale in a single stack.',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -157,46 +156,6 @@ export const Home = () => {
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiHorizontalRule margin="xl" />
-
-          {/* Try it out */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>
-                    {i18n.translate('xpack.observability.home.tryItOut', {
-                      defaultMessage: 'Try it out',
-                    })}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          {/* Try it out sections */}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="center">
-              {tryItOutItemsSection.map((item) => (
-                <EuiFlexItem grow={false} key={item.id} style={{ width: '260px' }}>
-                  <EuiCard
-                    layout="horizontal"
-                    icon={<EuiIcon size="l" type={item.icon} />}
-                    title={
-                      <EuiTitle size="xs" className="title">
-                        <h3>{item.title}</h3>
-                      </EuiTitle>
-                    }
-                    description={item.description}
-                    target={item.target}
-                    href={item.href}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-            <EuiSpacer />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Page>

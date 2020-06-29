@@ -39,6 +39,8 @@ export class SampleUrlDrilldown implements Drilldown<UrlDrilldownConfig, {}> {
 
   public readonly order = 8;
 
+  readonly minimalLicense = 'gold'; // example of minimal license support
+
   public readonly getDisplayName = () => 'Go to URL (example)';
 
   public readonly euiIcon = 'link';

@@ -4,21 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FetchData, HasData } from './typings/data_handler';
+import { ObservabilityFetchDataResponse, FetchDataResponse } from './typings/fetch_data_response';
 import { ObservabilityApp } from '../typings/common';
 
-interface DataHandler {
-  fetchData: FetchData;
+export interface FetchDataParams {
+  // The start timestamp in milliseconds of the queried time interval
+  startTime: string;
+  // The end timestamp in milliseconds of the queried time interval
+  endTime: string;
+  // The aggregation bucket size in milliseconds if applicable to the data source
+  bucketSize: string;
+}
+
+export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
+  fetchDataParams: FetchDataParams
+) => Promise<T>;
+
+export type HasData = () => Promise<boolean>;
+
+interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+  fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData;
 }
 
 const dataHandlers: Partial<Record<ObservabilityApp, DataHandler>> = {};
 
-export type RegisterDataHandler = (params: { appName: ObservabilityApp } & DataHandler) => void;
-export const registerDataHandler: RegisterDataHandler = ({ appName, fetchData, hasData }) => {
+export function registerDataHandler<T extends ObservabilityApp>({
+  appName,
+  fetchData,
+  hasData,
+}: { appName: T } & DataHandler<T>) {
   dataHandlers[appName] = { fetchData, hasData };
-};
+}
 
-export function getDataHandler(appName: ObservabilityApp): DataHandler | undefined {
-  return dataHandlers[appName];
+export function getDataHandler<T extends ObservabilityApp>(appName: T) {
+  const dataHandler = dataHandlers[appName];
+  if (dataHandler) {
+    return dataHandler as DataHandler<T>;
+  }
 }

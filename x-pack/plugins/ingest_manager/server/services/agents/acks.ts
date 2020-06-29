@@ -140,9 +140,9 @@ export interface AcksService {
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
 
-  getAgentByAccessAPIKeyId: (
+  authenticateAgentWithAccessToken: (
     soClient: SavedObjectsClientContract,
-    accessAPIKeyId: string
+    request: KibanaRequest
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
