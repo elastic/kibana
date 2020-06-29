@@ -26,6 +26,7 @@ import { tableVisResponseHandler } from './table_vis_response_handler';
 import tableVisTemplate from './table_vis.html';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { getTableVisualizationControllerClass } from './vis_controller';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
 export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
   return {
@@ -39,6 +40,9 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
       defaultMessage: 'Display values in a table',
     }),
     visualization: getTableVisualizationControllerClass(core, context),
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.filter];
+    },
     visConfig: {
       defaults: {
         perPage: 10,

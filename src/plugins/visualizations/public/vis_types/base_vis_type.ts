@@ -19,11 +19,13 @@
 
 import _ from 'lodash';
 import { VisualizationControllerConstructor } from '../types';
+import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface BaseVisTypeOptions {
   name: string;
   title: string;
   description?: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   icon?: string;
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
@@ -45,6 +47,7 @@ export class BaseVisType {
   name: string;
   title: string;
   description: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   icon?: string;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
@@ -78,6 +81,7 @@ export class BaseVisType {
 
     this.name = opts.name;
     this.description = opts.description || '';
+    this.getSupportedTriggers = opts.getSupportedTriggers;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
