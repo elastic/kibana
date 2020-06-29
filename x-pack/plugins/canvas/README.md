@@ -107,7 +107,7 @@ setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
 }
 ```
 
-Now, let's add a new Element type.  In your `index.ts` add a new element definition. 
+Now, let's add a new Element type.  In your `index.ts` add a new element definition:
 
 ```typescript
 const elements = [
