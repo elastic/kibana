@@ -100,14 +100,12 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   }, [importState.loading, files, importList, http, type]);
 
   useEffect(() => {
-    const { error, loading, result } = importState;
-
-    if (!loading && result) {
-      handleSuccess(result);
-    } else if (!loading && error) {
-      handleError(error);
+    if (!importState.loading && importState.result) {
+      handleSuccess(importState.result);
+    } else if (!importState.loading && importState.error) {
+      handleError(importState.error);
     }
-  }, [handleError, handleSuccess, importState]);
+  }, [handleError, handleSuccess, importState.error, importState.loading, importState.result]);
 
   useEffect(() => {
     return handleCancel;
