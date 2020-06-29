@@ -185,7 +185,7 @@ PUT _ingest/pipeline/team_assignment
                 if (path.indexOf('x-pack/plugins/actions/') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/advanced_ui_actions/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('x-pack/plugins/alerts') == 0) ctx.team = 'kibana-alerting-services';
-                else if (path.indexOf('x-pack/plugins/alerting_builtinss') == 0) ctx.team = 'kibana-alerting-services';
+                else if (path.indexOf('x-pack/plugins/alerting_builtins') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/apm/') == 0) ctx.team = 'apm-ui';
                 else if (path.indexOf('x-pack/plugins/beats_management/') == 0) ctx.team = 'beats';
                 else if (path.indexOf('x-pack/plugins/canvas/') == 0) ctx.team = 'kibana-canvas';
