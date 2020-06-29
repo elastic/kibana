@@ -13,7 +13,7 @@ export const GetPackageConfigsRequestSchema = {
 
 export const GetOnePackageConfigRequestSchema = {
   params: schema.object({
-    datasourceId: schema.string(),
+    packageConfigId: schema.string(),
   }),
 };
 
@@ -28,6 +28,6 @@ export const UpdatePackageConfigRequestSchema = {
 
 export const DeletePackageConfigsRequestSchema = {
   body: schema.object({
-    datasourceIds: schema.arrayOf(schema.string()),
+    packageConfigIds: schema.arrayOf(schema.string()),
   }),
 };

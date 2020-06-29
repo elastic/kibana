@@ -11,7 +11,7 @@ import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../type
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { datasourceService } from '../..';
+import { packageConfigService } from '../..';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +27,7 @@ export async function removeInstallation(options: {
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
   const installedObjects = installation.installed || [];
 
-  const { total } = await datasourceService.list(savedObjectsClient, {
+  const { total } = await packageConfigService.list(savedObjectsClient, {
     kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 0,
     perPage: 0,
@@ -35,7 +35,7 @@ export async function removeInstallation(options: {
 
   if (total > 0)
     throw Boom.badRequest(
-      `unable to remove package with existing datasource(s) in use by agent(s)`
+      `unable to remove package with existing package config(s) in use by agent(s)`
     );
 
   // Delete the manager saved object with references to the asset objects

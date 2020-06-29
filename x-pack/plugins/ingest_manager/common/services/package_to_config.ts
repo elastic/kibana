@@ -40,23 +40,21 @@ const getStreamsForInputType = (
 };
 
 /*
- * This service creates a datasource inputs definition from defaults provided in package info
+ * This service creates a package config inputs definition from defaults provided in package info
  */
-export const packageToConfigDatasourceInputs = (
-  packageInfo: PackageInfo
-): PackageConfig['inputs'] => {
+export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageConfig['inputs'] => {
   const inputs: PackageConfig['inputs'] = [];
 
-  // Assume package will only ever ship one datasource for now
-  const packageDatasource: RegistryConfigTemplate | null =
+  // Assume package will only ever ship one package config template for now
+  const packageConfigTemplate: RegistryConfigTemplate | null =
     packageInfo.config_templates && packageInfo.config_templates[0]
       ? packageInfo.config_templates[0]
       : null;
 
-  // Create datasource input property
-  if (packageDatasource?.inputs?.length) {
-    // Map each package datasource input to agent config datasource input
-    packageDatasource.inputs.forEach((packageInput) => {
+  // Create package config input property
+  if (packageConfigTemplate?.inputs?.length) {
+    // Map each package package config input to agent config package config input
+    packageConfigTemplate.inputs.forEach((packageInput) => {
       // Reduces registry var def into config object entry
       const varsReducer = (
         configObject: PackageConfigConfigRecord,
@@ -72,7 +70,7 @@ export const packageToConfigDatasourceInputs = (
         return configObject;
       };
 
-      // Map each package input stream into datasource input stream
+      // Map each package input stream into package config input stream
       const streams: PackageConfigInputStream[] = getStreamsForInputType(
         packageInput.type,
         packageInfo
@@ -114,18 +112,18 @@ export const packageToConfigDatasourceInputs = (
  * @param packageInfo
  * @param configId
  * @param outputId
- * @param datasourceName
+ * @param packageConfigName
  */
-export const packageToConfigDatasource = (
+export const packageToPackageConfig = (
   packageInfo: PackageInfo,
   configId: string,
   outputId: string,
   namespace: string = '',
-  datasourceName?: string,
+  packageConfigName?: string,
   description?: string
 ): NewPackageConfig => {
   return {
-    name: datasourceName || `${packageInfo.name}-1`,
+    name: packageConfigName || `${packageInfo.name}-1`,
     namespace,
     description,
     package: {
@@ -136,6 +134,6 @@ export const packageToConfigDatasource = (
     enabled: true,
     config_id: configId,
     output_id: outputId,
-    inputs: packageToConfigDatasourceInputs(packageInfo),
+    inputs: packageToPackageConfigInputs(packageInfo),
   };
 };

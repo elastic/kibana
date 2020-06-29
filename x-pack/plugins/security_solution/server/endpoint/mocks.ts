@@ -12,7 +12,7 @@ import {
   ExternalCallback,
 } from '../../../ingest_manager/server';
 import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
-import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
 
 /**
  * Crates a mocked input contract for the `EndpointAppContextService#start()` method
@@ -57,7 +57,7 @@ export const createMockIngestManagerStartContract = (
     },
     agentService: createMockAgentService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    datasourceService: createDatasourceServiceMock(),
+    packageConfigService: createPackageConfigServiceMock(),
   };
 };
 

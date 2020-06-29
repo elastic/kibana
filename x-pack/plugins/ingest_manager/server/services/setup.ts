@@ -13,7 +13,7 @@ import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
-  packageToConfigDatasource,
+  packageToPackageConfig,
   PackageConfig,
   AgentConfig,
   Installation,
@@ -22,7 +22,7 @@ import {
   decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
-import { datasourceService } from './datasource';
+import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
@@ -69,13 +69,13 @@ export async function setupIngestManager(
   ]);
 
   // ensure default packages are added to the default conifg
-  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
-  if (!configWithDatasource) {
+  const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
+  if (!configWithPackageConfigs) {
     throw new Error('Config not found');
   }
   if (
-    configWithDatasource.package_configs.length &&
-    typeof configWithDatasource.package_configs[0] === 'string'
+    configWithPackageConfigs.package_configs.length &&
+    typeof configWithPackageConfigs.package_configs[0] === 'string'
   ) {
     throw new Error('Config not found');
   }
@@ -87,12 +87,14 @@ export async function setupIngestManager(
       continue;
     }
 
-    const isInstalled = configWithDatasource.package_configs.some((d: PackageConfig | string) => {
-      return typeof d !== 'string' && d.package?.name === installedPackage.name;
-    });
+    const isInstalled = configWithPackageConfigs.package_configs.some(
+      (d: PackageConfig | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
+      }
+    );
 
     if (!isInstalled) {
-      await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+      await addPackageToConfig(soClient, installedPackage, configWithPackageConfigs, defaultOutput);
     }
   }
 }
@@ -171,16 +173,16 @@ async function addPackageToConfig(
     pkgVersion: packageToInstall.version,
   });
 
-  const newDatasource = packageToConfigDatasource(
+  const newPackageConfig = packageToPackageConfig(
     packageInfo,
     config.id,
     defaultOutput.id,
     config.namespace
   );
-  newDatasource.inputs = await datasourceService.assignPackageStream(
+  newPackageConfig.inputs = await packageConfigService.assignPackageStream(
     packageInfo,
-    newDatasource.inputs
+    newPackageConfig.inputs
   );
 
-  await datasourceService.create(soClient, newDatasource);
+  await packageConfigService.create(soClient, newPackageConfig);
 }

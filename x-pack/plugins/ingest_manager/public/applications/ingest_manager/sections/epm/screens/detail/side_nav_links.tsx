@@ -19,7 +19,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.overviewLinkText', {
     defaultMessage: 'Overview',
   }),
-  'data-sources': i18n.translate('xpack.ingestManager.epm.packageDetailsNav.datasourcesLinkText', {
+  usages: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.datasourcesLinkText', {
     defaultMessage: 'Data sources',
   }),
   settings: i18n.translate('xpack.ingestManager.epm.packageDetailsNav.settingsLinkText', {
@@ -45,10 +45,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
         `;
         // Don't display Data Sources tab as we haven't implemented this yet
         // FIXME: Restore when we implement data sources page
-        if (
-          panel === 'data-sources' &&
-          (true || packageInstallStatus.status !== InstallStatus.installed)
-        )
+        if (panel === 'usages' && (true || packageInstallStatus.status !== InstallStatus.installed))
           return null;
 
         return (

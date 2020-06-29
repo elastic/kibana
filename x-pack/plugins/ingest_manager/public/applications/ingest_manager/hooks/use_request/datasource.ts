@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { sendRequest, useRequest } from './use_request';
-import { datasourceRouteService } from '../../services';
+import { packageConfigRouteService } from '../../services';
 import {
   CreatePackageConfigRequest,
   CreatePackageConfigResponse,
@@ -21,18 +21,18 @@ import {
 
 export const sendCreateDatasource = (body: CreatePackageConfigRequest['body']) => {
   return sendRequest<CreatePackageConfigResponse>({
-    path: datasourceRouteService.getCreatePath(),
+    path: packageConfigRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
   });
 };
 
 export const sendUpdateDatasource = (
-  datasourceId: string,
+  packageConfigId: string,
   body: UpdatePackageConfigRequest['body']
 ) => {
   return sendRequest<UpdatePackageConfigResponse>({
-    path: datasourceRouteService.getUpdatePath(datasourceId),
+    path: packageConfigRouteService.getUpdatePath(packageConfigId),
     method: 'put',
     body: JSON.stringify(body),
   });
@@ -40,7 +40,7 @@ export const sendUpdateDatasource = (
 
 export const sendDeleteDatasource = (body: DeletePackageConfigsRequest['body']) => {
   return sendRequest<DeletePackageConfigsResponse>({
-    path: datasourceRouteService.getDeletePath(),
+    path: packageConfigRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
   });
@@ -49,14 +49,14 @@ export const sendDeleteDatasource = (body: DeletePackageConfigsRequest['body']) 
 export function useGetDatasources(query: GetPackageConfigsRequest['query']) {
   return useRequest<GetPackageConfigsResponse>({
     method: 'get',
-    path: datasourceRouteService.getListPath(),
+    path: packageConfigRouteService.getListPath(),
     query,
   });
 }
 
-export const sendGetOneDatasource = (datasourceId: string) => {
+export const sendGetOneDatasource = (packageConfigId: string) => {
   return sendRequest<GetOnePackageConfigResponse>({
-    path: datasourceRouteService.getInfoPath(datasourceId),
+    path: packageConfigRouteService.getInfoPath(packageConfigId),
     method: 'get',
   });
 };

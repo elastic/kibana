@@ -23,7 +23,7 @@ export interface GetPackageConfigsResponse {
 
 export interface GetOnePackageConfigRequest {
   params: {
-    datasourceId: string;
+    packageConfigId: string;
   };
 }
 
@@ -49,7 +49,7 @@ export type UpdatePackageConfigResponse = CreatePackageConfigResponse;
 
 export interface DeletePackageConfigsRequest {
   body: {
-    datasourceIds: string[];
+    packageConfigIds: string[];
   };
 }
 

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PackageConfig, PackageConfigInput } from '../types';
-import { storedDatasourcesToAgentInputs } from './datasources_to_agent_inputs';
+import { storedPackageConfigsToAgentInputs } from './package_configs_to_agent_inputs';
 
-describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
-  const mockDatasource: PackageConfig = {
+describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
+  const mockPackageConfig: PackageConfig = {
     id: 'some-uuid',
-    name: 'mock-datasource',
+    name: 'mock-package-config',
     description: '',
     created_at: '',
     created_by: '',
@@ -74,13 +74,13 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
     ],
   };
 
-  it('returns no inputs for datasource with no inputs, or only disabled inputs', () => {
-    expect(storedDatasourcesToAgentInputs([mockDatasource])).toEqual([]);
+  it('returns no inputs for package config with no inputs, or only disabled inputs', () => {
+    expect(storedPackageConfigsToAgentInputs([mockPackageConfig])).toEqual([]);
 
     expect(
-      storedDatasourcesToAgentInputs([
+      storedPackageConfigsToAgentInputs([
         {
-          ...mockDatasource,
+          ...mockPackageConfig,
           package: {
             name: 'mock-package',
             title: 'Mock package',
@@ -91,9 +91,9 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
     ).toEqual([]);
 
     expect(
-      storedDatasourcesToAgentInputs([
+      storedPackageConfigsToAgentInputs([
         {
-          ...mockDatasource,
+          ...mockPackageConfig,
           inputs: [{ ...mockInput, enabled: false }],
         },
       ])
@@ -102,9 +102,9 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
 
   it('returns agent inputs', () => {
     expect(
-      storedDatasourcesToAgentInputs([
+      storedPackageConfigsToAgentInputs([
         {
-          ...mockDatasource,
+          ...mockPackageConfig,
           package: {
             name: 'mock-package',
             title: 'Mock package',
@@ -116,7 +116,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'some-uuid',
-        name: 'mock-datasource',
+        name: 'mock-package-config',
         type: 'test-logs',
         dataset: { namespace: 'default' },
         use_output: 'default',
@@ -144,9 +144,9 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
 
   it('returns agent inputs without disabled streams', () => {
     expect(
-      storedDatasourcesToAgentInputs([
+      storedPackageConfigsToAgentInputs([
         {
-          ...mockDatasource,
+          ...mockPackageConfig,
           inputs: [
             {
               ...mockInput,
@@ -158,7 +158,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
     ).toEqual([
       {
         id: 'some-uuid',
-        name: 'mock-datasource',
+        name: 'mock-package-config',
         type: 'test-logs',
         dataset: { namespace: 'default' },
         use_output: 'default',

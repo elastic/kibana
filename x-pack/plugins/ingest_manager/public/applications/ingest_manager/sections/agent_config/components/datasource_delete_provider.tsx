@@ -88,7 +88,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
       setIsLoading(true);
 
       try {
-        const { data } = await sendDeleteDatasource({ datasourceIds: datasources });
+        const { data } = await sendDeleteDatasource({ packageConfigIds: datasources });
         const successfulResults = data?.filter((result) => result.success) || [];
         const failedResults = data?.filter((result) => !result.success) || [];
 

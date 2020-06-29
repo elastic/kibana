@@ -16,7 +16,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { AgentConfig, PackageInfo, PackageConfig, NewPackageConfig } from '../../../types';
-import { packageToConfigDatasourceInputs } from '../../../services';
+import { packageToPackageConfigInputs } from '../../../services';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults } from './services';
 
@@ -54,7 +54,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
           title: packageInfo.title,
           version: packageInfo.version,
         },
-        inputs: packageToConfigDatasourceInputs(packageInfo),
+        inputs: packageToPackageConfigInputs(packageInfo),
       });
     }
 

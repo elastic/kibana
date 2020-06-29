@@ -7,7 +7,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeletePackageConfigsResponse,
-  packageToConfigDatasource,
+  packageToPackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
   PackageInfo,
@@ -33,17 +33,17 @@ function getDataset(st: string) {
   return st.split('.')[1];
 }
 
-class DatasourceService {
+class PackageConfigService {
   public async create(
     soClient: SavedObjectsClientContract,
-    datasource: NewPackageConfig,
+    packageConfig: NewPackageConfig,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<PackageConfig> {
     const isoDate = new Date().toISOString();
     const newSo = await soClient.create<PackageConfigSOAttributes>(
       SAVED_OBJECT_TYPE,
       {
-        ...datasource,
+        ...packageConfig,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -54,7 +54,7 @@ class DatasourceService {
     );
 
     // Assign it to the given agent config
-    await agentConfigService.assignDatasources(soClient, datasource.config_id, [newSo.id], {
+    await agentConfigService.assignPackageConfigs(soClient, packageConfig.config_id, [newSo.id], {
       user: options?.user,
     });
 
@@ -66,16 +66,16 @@ class DatasourceService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
-    datasources: NewPackageConfig[],
+    packageConfigs: NewPackageConfig[],
     configId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
     const { saved_objects: newSos } = await soClient.bulkCreate<Omit<PackageConfig, 'id'>>(
-      datasources.map((datasource) => ({
+      packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
-          ...datasource,
+          ...packageConfig,
           config_id: configId,
           revision: 1,
           created_at: isoDate,
@@ -87,7 +87,7 @@ class DatasourceService {
     );
 
     // Assign it to the given agent config
-    await agentConfigService.assignDatasources(
+    await agentConfigService.assignPackageConfigs(
       soClient,
       configId,
       newSos.map((newSo) => newSo.id),
@@ -106,18 +106,18 @@ class DatasourceService {
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<PackageConfig | null> {
-    const datasourceSO = await soClient.get<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
-    if (!datasourceSO) {
+    const packageConfigSO = await soClient.get<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
+    if (!packageConfigSO) {
       return null;
     }
 
-    if (datasourceSO.error) {
-      throw new Error(datasourceSO.error.message);
+    if (packageConfigSO.error) {
+      throw new Error(packageConfigSO.error.message);
     }
 
     return {
-      id: datasourceSO.id,
-      ...datasourceSO.attributes,
+      id: packageConfigSO.id,
+      ...packageConfigSO.attributes,
     };
   }
 
@@ -125,17 +125,17 @@ class DatasourceService {
     soClient: SavedObjectsClientContract,
     ids: string[]
   ): Promise<PackageConfig[] | null> {
-    const datasourceSO = await soClient.bulkGet<PackageConfigSOAttributes>(
+    const packageConfigSO = await soClient.bulkGet<PackageConfigSOAttributes>(
       ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
       }))
     );
-    if (!datasourceSO) {
+    if (!packageConfigSO) {
       return null;
     }
 
-    return datasourceSO.saved_objects.map((so) => ({
+    return packageConfigSO.saved_objects.map((so) => ({
       id: so.id,
       ...so.attributes,
     }));
@@ -147,7 +147,7 @@ class DatasourceService {
   ): Promise<{ items: PackageConfig[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
 
-    const datasources = await soClient.find<PackageConfigSOAttributes>({
+    const packageConfigs = await soClient.find<PackageConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -161,11 +161,11 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<PackageConfig>((datasourceSO) => ({
-        id: datasourceSO.id,
-        ...datasourceSO.attributes,
+      items: packageConfigs.saved_objects.map<PackageConfig>((packageConfigSO) => ({
+        id: packageConfigSO.id,
+        ...packageConfigSO.attributes,
       })),
-      total: datasources.total,
+      total: packageConfigs.total,
       page,
       perPage,
     };
@@ -174,24 +174,26 @@ class DatasourceService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasource: NewPackageConfig,
+    packageConfig: NewPackageConfig,
     options?: { user?: AuthenticatedUser }
   ): Promise<PackageConfig> {
-    const oldDatasource = await this.get(soClient, id);
+    const oldPackageConfig = await this.get(soClient, id);
 
-    if (!oldDatasource) {
-      throw new Error('Datasource not found');
+    if (!oldPackageConfig) {
+      throw new Error('Package config not found');
     }
 
     await soClient.update<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
-      ...datasource,
-      revision: oldDatasource.revision + 1,
+      ...packageConfig,
+      revision: oldPackageConfig.revision + 1,
       updated_at: new Date().toISOString(),
       updated_by: options?.user?.username ?? 'system',
     });
 
     // Bump revision of associated agent config
-    await agentConfigService.bumpRevision(soClient, datasource.config_id, { user: options?.user });
+    await agentConfigService.bumpRevision(soClient, packageConfig.config_id, {
+      user: options?.user,
+    });
 
     return (await this.get(soClient, id)) as PackageConfig;
   }
@@ -205,15 +207,15 @@ class DatasourceService {
 
     for (const id of ids) {
       try {
-        const oldDatasource = await this.get(soClient, id);
-        if (!oldDatasource) {
-          throw new Error('Datasource not found');
+        const oldPackageConfig = await this.get(soClient, id);
+        if (!oldPackageConfig) {
+          throw new Error('Package config not found');
         }
         if (!options?.skipUnassignFromAgentConfigs) {
-          await agentConfigService.unassignDatasources(
+          await agentConfigService.unassignPackageConfigs(
             soClient,
-            oldDatasource.config_id,
-            [oldDatasource.id],
+            oldPackageConfig.config_id,
+            [oldPackageConfig.id],
             {
               user: options?.user,
             }
@@ -235,7 +237,7 @@ class DatasourceService {
     return result;
   }
 
-  public async buildDatasourceFromPackage(
+  public async buildPackageConfigFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string
   ): Promise<NewPackageConfig | undefined> {
@@ -253,7 +255,7 @@ class DatasourceService {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
+        return packageToPackageConfig(pkgInfo, '', defaultOutputId);
       }
     }
   }
@@ -340,5 +342,5 @@ async function _assignPackageStreamToStream(
   return { ...stream };
 }
 
-export type DatasourceServiceInterface = DatasourceService;
-export const datasourceService = new DatasourceService();
+export type PackageConfigServiceInterface = PackageConfigService;
+export const packageConfigService = new PackageConfigService();

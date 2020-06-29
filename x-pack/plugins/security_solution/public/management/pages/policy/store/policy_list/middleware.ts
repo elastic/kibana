@@ -81,10 +81,10 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       });
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
-      const datasourceIds: DeletePackageConfigsRequest['body']['datasourceIds'] = [policyId];
+      const packageConfigIds: DeletePackageConfigsRequest['body']['packageConfigIds'] = [policyId];
       let apiResponse: DeletePackageConfigsResponse;
       try {
-        apiResponse = await sendDeleteDatasource(http, { body: { datasourceIds } });
+        apiResponse = await sendDeleteDatasource(http, { body: { packageConfigIds } });
       } catch (err) {
         dispatch({
           type: 'serverDeletedPolicyFailure',

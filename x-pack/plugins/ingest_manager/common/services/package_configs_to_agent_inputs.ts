@@ -6,26 +6,26 @@
 import { PackageConfig, FullAgentConfigInput, FullAgentConfigInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
-export const storedDatasourcesToAgentInputs = (
-  datasources: PackageConfig[]
+export const storedPackageConfigsToAgentInputs = (
+  packageConfigs: PackageConfig[]
 ): FullAgentConfigInput[] => {
   const fullInputs: FullAgentConfigInput[] = [];
 
-  datasources.forEach((datasource) => {
-    if (!datasource.enabled || !datasource.inputs || !datasource.inputs.length) {
+  packageConfigs.forEach((packageConfig) => {
+    if (!packageConfig.enabled || !packageConfig.inputs || !packageConfig.inputs.length) {
       return;
     }
-    datasource.inputs.forEach((input) => {
+    packageConfig.inputs.forEach((input) => {
       if (!input.enabled) {
         return;
       }
 
       const fullInput: FullAgentConfigInput = {
-        id: datasource.id || datasource.name,
-        name: datasource.name,
+        id: packageConfig.id || packageConfig.name,
+        name: packageConfig.name,
         type: input.type,
         dataset: {
-          namespace: datasource.namespace || 'default',
+          namespace: packageConfig.namespace || 'default',
         },
         use_output: DEFAULT_OUTPUT.name,
         ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
@@ -48,11 +48,11 @@ export const storedDatasourcesToAgentInputs = (
           }),
       };
 
-      if (datasource.package) {
+      if (packageConfig.package) {
         fullInput.meta = {
           package: {
-            name: datasource.package.name,
-            version: datasource.package.version,
+            name: packageConfig.package.name,
+            version: packageConfig.package.version,
           },
         };
       }

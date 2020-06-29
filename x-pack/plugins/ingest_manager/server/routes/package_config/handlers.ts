@@ -6,7 +6,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
-import { appContextService, datasourceService } from '../../services';
+import { appContextService, packageConfigService } from '../../services';
 import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
 import {
   GetPackageConfigsRequestSchema,
@@ -18,13 +18,16 @@ import {
 } from '../../types';
 import { CreatePackageConfigResponse, DeletePackageConfigsResponse } from '../../../common';
 
-export const getDatasourcesHandler: RequestHandler<
+export const getPackageConfigsHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetPackageConfigsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const { items, total, page, perPage } = await datasourceService.list(soClient, request.query);
+    const { items, total, page, perPage } = await packageConfigService.list(
+      soClient,
+      request.query
+    );
     return response.ok({
       body: {
         items,
@@ -42,23 +45,23 @@ export const getDatasourcesHandler: RequestHandler<
   }
 };
 
-export const getOneDatasourceHandler: RequestHandler<TypeOf<
+export const getOnePackageConfigHandler: RequestHandler<TypeOf<
   typeof GetOnePackageConfigRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const datasource = await datasourceService.get(soClient, request.params.datasourceId);
-    if (datasource) {
+    const packageConfig = await packageConfigService.get(soClient, request.params.packageConfigId);
+    if (packageConfig) {
       return response.ok({
         body: {
-          item: datasource,
+          item: packageConfig,
           success: true,
         },
       });
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Datasource not found' },
+        body: { message: 'Package config not found' },
       });
     }
   } catch (e) {
@@ -69,7 +72,7 @@ export const getOneDatasourceHandler: RequestHandler<TypeOf<
   }
 };
 
-export const createDatasourceHandler: RequestHandler<
+export const createPackageConfigHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof CreatePackageConfigRequestSchema.body>
@@ -80,8 +83,8 @@ export const createDatasourceHandler: RequestHandler<
   const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
-    // If we have external callbacks, then process those now before creating the actual datasource
-    const externalCallbacks = appContextService.getExternalCallbacks('datasourceCreate');
+    // If we have external callbacks, then process those now before creating the actual package config
+    const externalCallbacks = appContextService.getExternalCallbacks('packageConfigCreate');
     if (externalCallbacks && externalCallbacks.size > 0) {
       let updatedNewData: NewPackageConfig = newData;
 
@@ -93,7 +96,9 @@ export const createDatasourceHandler: RequestHandler<
           );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks
-          logger.error('An external registered [datasourceCreate] callback failed when executed');
+          logger.error(
+            'An external registered [packageConfigCreate] callback failed when executed'
+          );
           logger.error(error);
         }
       }
@@ -101,7 +106,7 @@ export const createDatasourceHandler: RequestHandler<
       newData = updatedNewData;
     }
 
-    // Make sure the datasource package is installed
+    // Make sure the associated package is installed
     if (newData.package?.name) {
       await ensureInstalledPackage({
         savedObjectsClient: soClient,
@@ -113,15 +118,15 @@ export const createDatasourceHandler: RequestHandler<
         pkgName: newData.package.name,
         pkgVersion: newData.package.version,
       });
-      newData.inputs = (await datasourceService.assignPackageStream(
+      newData.inputs = (await packageConfigService.assignPackageStream(
         pkgInfo,
         newData.inputs
       )) as TypeOf<typeof CreatePackageConfigRequestSchema.body>['inputs'];
     }
 
-    // Create datasource
-    const datasource = await datasourceService.create(soClient, newData, { user });
-    const body: CreatePackageConfigResponse = { item: datasource, success: true };
+    // Create package config
+    const packageConfig = await packageConfigService.create(soClient, newData, { user });
+    const body: CreatePackageConfigResponse = { item: packageConfig, success: true };
     return response.ok({
       body,
     });
@@ -134,7 +139,7 @@ export const createDatasourceHandler: RequestHandler<
   }
 };
 
-export const updateDatasourceHandler: RequestHandler<
+export const updatePackageConfigHandler: RequestHandler<
   TypeOf<typeof UpdatePackageConfigRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackageConfigRequestSchema.body>
@@ -142,34 +147,34 @@ export const updateDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const datasource = await datasourceService.get(soClient, request.params.datasourceId);
+    const packageConfig = await packageConfigService.get(soClient, request.params.packageConfigId);
 
-    if (!datasource) {
-      throw Boom.notFound('Datasource not found');
+    if (!packageConfig) {
+      throw Boom.notFound('Package config not found');
     }
 
     const newData = { ...request.body };
-    const pkg = newData.package || datasource.package;
-    const inputs = newData.inputs || datasource.inputs;
+    const pkg = newData.package || packageConfig.package;
+    const inputs = newData.inputs || packageConfig.inputs;
     if (pkg && (newData.inputs || newData.package)) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
       });
-      newData.inputs = (await datasourceService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
+      newData.inputs = (await packageConfigService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
         typeof CreatePackageConfigRequestSchema.body
       >['inputs'];
     }
 
-    const updatedDatasource = await datasourceService.update(
+    const updatedPackageConfig = await packageConfigService.update(
       soClient,
-      request.params.datasourceId,
+      request.params.packageConfigId,
       newData,
       { user }
     );
     return response.ok({
-      body: { item: updatedDatasource, success: true },
+      body: { item: updatedPackageConfig, success: true },
     });
   } catch (e) {
     return response.customError({
@@ -179,7 +184,7 @@ export const updateDatasourceHandler: RequestHandler<
   }
 };
 
-export const deleteDatasourceHandler: RequestHandler<
+export const deletePackageConfigHandler: RequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DeletePackageConfigsRequestSchema.body>
@@ -187,9 +192,9 @@ export const deleteDatasourceHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const body: DeletePackageConfigsResponse = await datasourceService.delete(
+    const body: DeletePackageConfigsResponse = await packageConfigService.delete(
       soClient,
-      request.body.datasourceIds,
+      request.body.packageConfigIds,
       { user }
     );
     return response.ok({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { datasourceService } from './datasource';
+import { packageConfigService } from './package_config';
 import { PackageInfo } from '../types';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -37,10 +37,10 @@ jest.mock('./epm/registry', () => {
   };
 });
 
-describe('Datasource service', () => {
+describe('Package config service', () => {
   describe('assignPackageStream', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await datasourceService.assignPackageStream(
+      const inputs = await packageConfigService.assignPackageStream(
         ({
           datasets: [
             {
@@ -101,7 +101,7 @@ describe('Datasource service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await datasourceService.assignPackageStream(
+      const inputs = await packageConfigService.assignPackageStream(
         ({
           datasets: [
             {

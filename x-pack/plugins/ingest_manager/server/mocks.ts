@@ -8,7 +8,7 @@ import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mock
 import { IngestManagerAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
-import { DatasourceServiceInterface } from './services/datasource';
+import { PackageConfigServiceInterface } from './services/package_config';
 
 export const createAppContextStartContractMock = (): IngestManagerAppContext => {
   return {
@@ -21,10 +21,10 @@ export const createAppContextStartContractMock = (): IngestManagerAppContext => 
   };
 };
 
-export const createDatasourceServiceMock = () => {
+export const createPackageConfigServiceMock = () => {
   return {
     assignPackageStream: jest.fn(),
-    buildDatasourceFromPackage: jest.fn(),
+    buildPackageConfigFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -32,5 +32,5 @@ export const createDatasourceServiceMock = () => {
     getByIDs: jest.fn(),
     list: jest.fn(),
     update: jest.fn(),
-  } as jest.Mocked<DatasourceServiceInterface>;
+  } as jest.Mocked<PackageConfigServiceInterface>;
 };

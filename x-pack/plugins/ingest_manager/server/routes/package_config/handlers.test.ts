@@ -7,23 +7,23 @@
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import { IRouter, KibanaRequest, Logger, RequestHandler, RouteConfig } from 'kibana/server';
 import { registerRoutes } from './index';
-import { DATASOURCE_API_ROUTES } from '../../../common/constants';
+import { PACKAGE_CONFIG_API_ROUTES } from '../../../common/constants';
 import { xpackMocks } from '../../../../../mocks';
 import { appContextService } from '../../services';
 import { createAppContextStartContractMock } from '../../mocks';
-import { DatasourceServiceInterface, ExternalCallback } from '../..';
+import { PackageConfigServiceInterface, ExternalCallback } from '../..';
 import { CreatePackageConfigRequestSchema } from '../../types/rest_spec';
-import { datasourceService } from '../../services';
+import { packageConfigService } from '../../services';
 
-const datasourceServiceMock = datasourceService as jest.Mocked<DatasourceServiceInterface>;
+const packageConfigServiceMock = packageConfigService as jest.Mocked<PackageConfigServiceInterface>;
 
-jest.mock('../../services/datasource', (): {
-  datasourceService: jest.Mocked<DatasourceServiceInterface>;
+jest.mock('../../services/package_config', (): {
+  packageConfigService: jest.Mocked<PackageConfigServiceInterface>;
 } => {
   return {
-    datasourceService: {
+    packageConfigService: {
       assignPackageStream: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
-      buildDatasourceFromPackage: jest.fn(),
+      buildPackageConfigFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
       create: jest.fn((soClient, newData) =>
         Promise.resolve({
@@ -52,7 +52,7 @@ jest.mock('../../services/epm/packages', () => {
   };
 });
 
-describe('When calling datasource', () => {
+describe('When calling package config', () => {
   let routerMock: jest.Mocked<IRouter>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
@@ -102,7 +102,7 @@ describe('When calling datasource', () => {
     // Set the routeConfig and routeHandler to the Create API
     beforeAll(() => {
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-        path.startsWith(DATASOURCE_API_ROUTES.CREATE_PATTERN)
+        path.startsWith(PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN)
       )!;
     });
 
@@ -151,8 +151,8 @@ describe('When calling datasource', () => {
       });
 
       beforeEach(() => {
-        appContextService.addExternalCallback('datasourceCreate', callbackOne);
-        appContextService.addExternalCallback('datasourceCreate', callbackTwo);
+        appContextService.addExternalCallback('packageConfigCreate', callbackOne);
+        appContextService.addExternalCallback('packageConfigCreate', callbackTwo);
       });
 
       afterEach(() => (callbackCallingOrder.length = 0));
@@ -164,7 +164,7 @@ describe('When calling datasource', () => {
         expect(callbackCallingOrder).toEqual(['one', 'two']);
       });
 
-      it('should feed datasource returned by last callback', async () => {
+      it('should feed package config returned by last callback', async () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe('When calling datasource', () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(datasourceServiceMock.create.mock.calls[0][1]).toEqual({
+        expect(packageConfigServiceMock.create.mock.calls[0][1]).toEqual({
           config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
@@ -268,8 +268,8 @@ describe('When calling datasource', () => {
         });
 
         beforeEach(() => {
-          appContextService.addExternalCallback('datasourceCreate', callbackThree);
-          appContextService.addExternalCallback('datasourceCreate', callbackFour);
+          appContextService.addExternalCallback('packageConfigCreate', callbackThree);
+          appContextService.addExternalCallback('packageConfigCreate', callbackFour);
         });
 
         it('should skip over callback exceptions and still execute other callbacks', async () => {
@@ -285,16 +285,16 @@ describe('When calling datasource', () => {
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
           expect(errorLogger.mock.calls).toEqual([
-            ['An external registered [datasourceCreate] callback failed when executed'],
+            ['An external registered [packageConfigCreate] callback failed when executed'],
             [new Error('callbackThree threw error on purpose')],
           ]);
         });
 
-        it('should create datasource with last successful returned datasource', async () => {
+        it('should create package config with last successful returned package config', async () => {
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
-          expect(datasourceServiceMock.create.mock.calls[0][1]).toEqual({
+          expect(packageConfigServiceMock.create.mock.calls[0][1]).toEqual({
             config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,

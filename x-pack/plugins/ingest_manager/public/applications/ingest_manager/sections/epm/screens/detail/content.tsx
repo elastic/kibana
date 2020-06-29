@@ -63,7 +63,7 @@ export function ContentPanel(props: ContentPanelProps) {
           latestVersion={latestVersion}
         />
       );
-    case 'data-sources':
+    case 'usages':
       return <DataSourcesPanel name={name} version={version} />;
     case 'overview':
     default:
