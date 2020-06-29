@@ -49,6 +49,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics', {
         useActualUrl: true,
       });
+      log.debug('Wait for initializing TSVB editor');
+      await this.checkVisualBuilderIsPresent();
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       // 2 sec sleep until https://github.com/elastic/kibana/issues/46353 is fixed
