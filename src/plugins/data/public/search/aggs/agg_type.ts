@@ -19,14 +19,15 @@
 
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { initParams } from './agg_params';
 
+import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+
+import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
 import { Adapters } from '../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
-import { KBN_FIELD_TYPES, IFieldFormat } from '../../../common';
 import { ISearchSource } from '../search_source';
 import { GetInternalStartServicesFn } from '../../types';
 
@@ -56,7 +57,7 @@ export interface AggTypeConfig<
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
-  getFormat?: (agg: TAggConfig) => IFieldFormat;
+  getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
@@ -195,14 +196,15 @@ export class AggType<
     abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
-   * Pick a format for the values produced by this agg type,
-   * overridden by several metrics that always output a simple
-   * number
+   * Get the serialized format for the values produced by this agg type,
+   * overridden by several metrics that always output a simple number.
+   * You can pass this output to fieldFormatters.deserialize to get
+   * the formatter instance.
    *
    * @param  {agg} agg - the agg to pick a format for
-   * @return {FieldFormat}
+   * @return {SerializedFieldFormat}
    */
-  getFormat: (agg: TAggConfig) => IFieldFormat;
+  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 
@@ -269,14 +271,12 @@ export class AggType<
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
 
-    this.getFormat =
-      config.getFormat ||
+    this.getSerializedFormat =
+      config.getSerializedFormat ||
       ((agg: TAggConfig) => {
-        const field = agg.getField();
-        const { fieldFormats } = getInternalStartServices();
-
-        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+        return agg.params.field ? agg.params.field.format.toJSON() : {};
       });
+
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
   }
 }

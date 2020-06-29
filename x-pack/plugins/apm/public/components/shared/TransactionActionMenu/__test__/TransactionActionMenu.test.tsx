@@ -63,9 +63,10 @@ const renderTransaction = async (
 
 describe('TransactionActionMenu component', () => {
   beforeAll(() => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: [],
-      status: 'success',
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
   });
   afterAll(() => {
@@ -257,7 +258,7 @@ describe('TransactionActionMenu component', () => {
   describe('Custom links', () => {
     beforeAll(() => {
       // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
-      spyOn(apmApi, 'callApmApi').and.returnValue({});
+      jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
     });
     afterAll(() => {
       jest.resetAllMocks();

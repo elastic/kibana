@@ -13,10 +13,14 @@
  * @param {Integer} index: index of the chart series, 0-3
  * @returns {String} Hex color to use for chart series at the given index
  */
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+
 export function getColor(app, index) {
   let seriesColors;
   if (app === 'elasticsearch') {
     seriesColors = ['#3ebeb0', '#3b73ac', '#f08656', '#6c478f'];
+  } else if (app === 'apm') {
+    seriesColors = euiPaletteColorBlind();
   } else {
     // for kibana, and fallback (e.g., Logstash and Beats)
     seriesColors = ['#e8488b', '#3b73ac', '#3cab63', '#6c478f'];

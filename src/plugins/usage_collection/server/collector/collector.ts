@@ -17,14 +17,38 @@
  * under the License.
  */
 
-import { Logger, APICaller } from 'kibana/server';
+import { Logger, LegacyAPICaller } from 'kibana/server';
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
+
+export type AllowedSchemaTypes =
+  | 'keyword'
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'long'
+  | 'date'
+  | 'float';
+
+export interface SchemaField {
+  type: string;
+}
+
+type Purify<T extends string> = { [P in T]: T }[T];
+
+export type MakeSchemaFrom<Base> = {
+  [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U>
+    ? { type: AllowedSchemaTypes }
+    : Base[Key] extends object
+    ? MakeSchemaFrom<Base[Key]>
+    : { type: AllowedSchemaTypes };
+};
 
 export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
-  fetch: (callCluster: APICaller) => Promise<T> | T;
+  schema?: MakeSchemaFrom<T>;
+  fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for

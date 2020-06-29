@@ -16,10 +16,7 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { GlobalTime } from '../../common/containers/global_time';
-import {
-  WithSource,
-  indicesExistOrDataTemporarilyUnavailable,
-} from '../../common/containers/source';
+import { useWithSource } from '../../common/containers/source';
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
@@ -28,6 +25,7 @@ import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../app/types';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -40,89 +38,89 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   filters = NO_FILTERS,
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
-}) => (
-  <>
-    <WithSource sourceId="default">
-      {({ indicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-          <StickyContainer>
-            <FiltersGlobal>
-              <SiemSearchBar id="global" indexPattern={indexPattern} />
-            </FiltersGlobal>
+}) => {
+  const { indicesExist, indexPattern } = useWithSource();
 
-            <WrapperPage>
-              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                <SidebarFlexItem grow={false}>
-                  <StatefulSidebar />
-                </SidebarFlexItem>
+  return (
+    <>
+      {indicesExist ? (
+        <StickyContainer>
+          <FiltersGlobal>
+            <SiemSearchBar id="global" indexPattern={indexPattern} />
+          </FiltersGlobal>
 
-                <EuiFlexItem grow={true}>
-                  <GlobalTime>
-                    {({ from, deleteQuery, setQuery, to }) => (
-                      <EuiFlexGroup direction="column" gutterSize="none">
-                        <EuiFlexItem grow={false}>
-                          <SignalsByCategory
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                          <EuiSpacer size="l" />
-                        </EuiFlexItem>
+          <WrapperPage>
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+              <SidebarFlexItem grow={false}>
+                <StatefulSidebar />
+              </SidebarFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <AlertsByCategory
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <GlobalTime>
+                  {({ from, deleteQuery, setQuery, to }) => (
+                    <EuiFlexGroup direction="column" gutterSize="none">
+                      <EuiFlexItem grow={false}>
+                        <SignalsByCategory
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                        <EuiSpacer size="l" />
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventsByDataset
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <AlertsByCategory
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventCounts
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-                  </GlobalTime>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </WrapperPage>
-          </StickyContainer>
-        ) : (
-          <OverviewEmpty />
-        )
-      }
-    </WithSource>
+                      <EuiFlexItem grow={false}>
+                        <EventsByDataset
+                          deleteQuery={deleteQuery}
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
 
-    <SpyRoute />
-  </>
-);
+                      <EuiFlexItem grow={false}>
+                        <EventCounts
+                          filters={filters}
+                          from={from}
+                          indexPattern={indexPattern}
+                          query={query}
+                          setQuery={setQuery}
+                          to={to}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </GlobalTime>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </WrapperPage>
+        </StickyContainer>
+      ) : (
+        <OverviewEmpty />
+      )}
+
+      <SpyRoute pageName={SecurityPageName.overview} />
+    </>
+  );
+};
 
 const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();

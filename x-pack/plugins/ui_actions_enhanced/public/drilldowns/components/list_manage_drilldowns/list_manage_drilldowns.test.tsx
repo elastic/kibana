@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import {
   DrilldownListItem,
   ListManageDrilldowns,
@@ -20,7 +19,7 @@ afterEach(cleanup);
 const drilldowns: DrilldownListItem[] = [
   { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
   { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
-  { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3' },
+  { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3', error: 'an error' },
 ];
 
 test('Render list of drilldowns', () => {
@@ -67,4 +66,9 @@ test('Can delete drilldowns', () => {
   fireEvent.click(screen.getByText(/Delete \(2\)/i));
 
   expect(fn).toBeCalledWith([drilldowns[1].id, drilldowns[2].id]);
+});
+
+test('Error is displayed', () => {
+  const screen = render(<ListManageDrilldowns drilldowns={drilldowns} />);
+  expect(screen.getByLabelText('an error')).toBeInTheDocument();
 });

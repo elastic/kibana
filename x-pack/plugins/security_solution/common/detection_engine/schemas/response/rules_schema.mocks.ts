@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { getListArrayMock } from '../types/lists.mock';
 
 import { RulesSchema } from './rules_schema';
 
@@ -64,38 +65,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
