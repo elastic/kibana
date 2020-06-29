@@ -106,7 +106,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   }, [details.host.id, formatUrl, queryParams]);
 
   const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
-  const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch};`;
+  const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
   const handleReassignEndpointsClick = useNavigateToAppEventHandler<
     AgentDetailsReassignConfigAction
   >(ingestAppId, {
