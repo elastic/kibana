@@ -5,9 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
-// @ts-ignore untyped local
 import { getInFlight } from '../../../state/selectors/resolved_args';
 import { State } from '../../../../types';
 import { RefreshControl as Component } from './refresh_control';

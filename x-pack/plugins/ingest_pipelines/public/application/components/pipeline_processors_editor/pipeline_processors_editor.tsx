@@ -14,19 +14,22 @@ import {
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
   ProcessorsTree,
-  SettingsFormFlyout,
   ProcessorRemoveModal,
   OnActionHandler,
   OnSubmitHandler,
+  ProcessorSettingsForm,
 } from './components';
 
+import { ProcessorInternal, OnUpdateHandlerArg, FormValidityState, OnFormUpdateArg } from './types';
+
 import {
-  ProcessorInternal,
-  ProcessorSelector,
-  OnUpdateHandlerArg,
-  FormValidityState,
-  OnFormUpdateArg,
-} from './types';
+  ON_FAILURE_STATE_SCOPE,
+  PROCESSOR_STATE_SCOPE,
+  isOnFailureSelector,
+} from './processors_reducer';
+
+const PROCESSORS_BASE_SELECTOR = [PROCESSOR_STATE_SCOPE];
+const ON_FAILURE_BASE_SELECTOR = [ON_FAILURE_STATE_SCOPE];
 
 import { serialize } from './serialize';
 import { getValue } from './utils';
@@ -40,9 +43,6 @@ export interface Props {
   onTestPipelineClick: () => void;
   onFlyoutOpen: () => void;
 }
-
-const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
-const ON_FAILURE_STATE_SCOPE: ProcessorSelector = ['onFailure'];
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
   function PipelineProcessorsEditor({
@@ -168,14 +168,14 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ProcessorsTree
-              baseSelector={PROCESSOR_STATE_SCOPE}
+              baseSelector={PROCESSORS_BASE_SELECTOR}
               processors={processors}
               onAction={onTreeAction}
               movingProcessor={movingProcessor}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <OnFailureProcessorsTitle />
@@ -197,7 +197,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             <EuiFlexItem grow={false}>
               <ProcessorsTree
                 data-test-subj="pipelineEditorOnFailureTree"
-                baseSelector={ON_FAILURE_STATE_SCOPE}
+                baseSelector={ON_FAILURE_BASE_SELECTOR}
                 processors={onFailureProcessors}
                 onAction={onTreeAction}
                 movingProcessor={movingProcessor}
@@ -206,8 +206,8 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
           ) : undefined}
         </EuiFlexGroup>
         {editorMode.id === 'editingProcessor' || editorMode.id === 'creatingProcessor' ? (
-          <SettingsFormFlyout
-            isOnFailureProcessor={editorMode.arg.selector.length > 1}
+          <ProcessorSettingsForm
+            isOnFailure={isOnFailureSelector(editorMode.arg.selector)}
             processor={editorMode.id === 'editingProcessor' ? editorMode.arg.processor : undefined}
             onOpen={onFlyoutOpen}
             onFormUpdate={onFormUpdate}

@@ -46,14 +46,17 @@ const serialDiffLabel = i18n.translate('data.search.aggs.metrics.serialDiffLabel
 export const getSerialDiffMetricAgg = ({
   getInternalStartServices,
 }: SerialDiffMetricAggDependencies) => {
+  const { subtype, params, getFormat, getSerializedFormat } = parentPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.SERIAL_DIFF,
       title: serialDiffTitle,
-      subtype: parentPipelineAggHelper.subtype,
       makeLabel: (agg) => makeNestedLabel(agg, serialDiffLabel),
-      params: [...parentPipelineAggHelper.params()],
-      getFormat: parentPipelineAggHelper.getFormat,
+      subtype,
+      params: [...params()],
+      getFormat,
+      getSerializedFormat,
     },
     {
       getInternalStartServices,

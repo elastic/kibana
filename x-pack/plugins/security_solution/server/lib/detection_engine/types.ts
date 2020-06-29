@@ -28,11 +28,11 @@ import {
   Version,
   MetaOrUndefined,
   RuleId,
-  ListAndOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 import { CallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { RuleType } from '../../../common/detection_engine/types';
+import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -62,7 +62,7 @@ export interface RuleTypeParams {
   type: RuleType;
   references: References;
   version: Version;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
