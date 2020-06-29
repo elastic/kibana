@@ -10,12 +10,9 @@ export const editorItemMessages = {
   moveButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
     defaultMessage: 'Move this processor',
   }),
-  editorButtonLabel: i18n.translate(
-    'xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel',
-    {
-      defaultMessage: 'Edit this processor',
-    }
-  ),
+  editButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.editButtonAriaLabel', {
+    defaultMessage: 'Edit this processor',
+  }),
   duplicateButtonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.item.moreMenu.duplicateButtonLabel',
     {
@@ -31,7 +28,7 @@ export const editorItemMessages = {
   cancelMoveButtonLabel: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.item.cancelMoveButtonAriaLabel',
     {
-      defaultMessage: 'Cancel moving this processor',
+      defaultMessage: 'Cancel move',
     }
   ),
   deleteButtonLabel: i18n.translate(
