@@ -420,7 +420,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
   getQueryLog,
   getDefaultQuery,
   FilterManager,
@@ -434,6 +433,7 @@ export {
 } from './query';
 
 export {
+  getTime,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
