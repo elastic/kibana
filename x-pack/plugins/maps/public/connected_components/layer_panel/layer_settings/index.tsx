@@ -26,11 +26,12 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
-    updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
-    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
-    updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
-    updateLabelsOnTop: (id, alpha) => dispatch(updateLabelsOnTop(id, alpha)),
+    updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
+    updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),
+    updateMaxZoom: (id: string, maxZoom: number) => dispatch(updateLayerMaxZoom(id, maxZoom)),
+    updateAlpha: (id: string, alpha: number) => dispatch(updateLayerAlpha(id, alpha)),
+    updateLabelsOnTop: (id: string, labelsOnTop: boolean) =>
+      dispatch(updateLabelsOnTop(id, labelsOnTop)),
   };
 }
 

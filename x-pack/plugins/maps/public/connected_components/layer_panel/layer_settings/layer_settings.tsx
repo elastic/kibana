@@ -19,14 +19,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
+import { ILayer } from '../../../classes/layers/layer';
 
 interface Props {
   layer: ILayer | null;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
-  updateMaxZoom: (layerId, maxZoom: number) => void;
-  updateAlpha: (layerId, alpha: number) => void;
-  updateLabelsOnTop: (layerId, labelsOnTop: boolean) => void;
+  updateMaxZoom: (layerId: string, maxZoom: number) => void;
+  updateAlpha: (layerId: string, alpha: number) => void;
+  updateLabelsOnTop: (layerId: string, labelsOnTop: boolean) => void;
 }
 
 export function LayerSettings(props: Props) {
@@ -36,22 +37,24 @@ export function LayerSettings(props: Props) {
 
   const minVisibilityZoom = props.layer.getMinSourceZoom();
   const maxVisibilityZoom = MAX_ZOOM;
+  const layerId = props.layer.getId();
+
   const onLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const label = event.target.value;
-    props.updateLabel(props.layer.getId(), label);
+    props.updateLabel(layerId, label);
   };
 
   const onZoomChange = (value: [string, string]) => {
-    props.updateMinZoom(props.layer.getId(), Math.max(minVisibilityZoom, parseInt(value[0], 10)));
-    props.updateMaxZoom(props.layer.getId(), Math.min(maxVisibilityZoom, parseInt(value[1], 10)));
+    props.updateMinZoom(layerId, Math.max(minVisibilityZoom, parseInt(value[0], 10)));
+    props.updateMaxZoom(layerId, Math.min(maxVisibilityZoom, parseInt(value[1], 10)));
   };
 
   const onAlphaChange = (alpha: number) => {
-    props.updateAlpha(props.layer.getId(), alpha);
+    props.updateAlpha(layerId, alpha);
   };
 
   const onLabelsOnTopChange = (event: EuiSwitchEvent) => {
-    props.updateLabelsOnTop(props.layer.getId(), event.target.checked);
+    props.updateLabelsOnTop(layerId, event.target.checked);
   };
 
   const renderZoomSliders = () => {
