@@ -142,7 +142,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     showComposableTemplateTable ? (
       <>
         <EuiSpacer size="l" />
-        <TemplateTable templates={filteredTemplates.templates} reload={reload} />
+        <TemplateTable
+          templates={filteredTemplates.templates}
+          reload={reload}
+          editTemplate={editTemplate}
+          history={history as ScopedHistory}
+        />
       </>
     ) : null;
 
