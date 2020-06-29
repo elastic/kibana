@@ -5,7 +5,7 @@
  */
 
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
-import { loginAndWaitForPage } from '../../integration/helpers';
+import { loginAndWaitForPage } from '../../../integration/helpers';
 
 /** The default time in ms to wait for a Cypress command to complete */
 export const DEFAULT_TIMEOUT = 60 * 1000;
@@ -40,4 +40,47 @@ Then(`should have correct client metrics`, () => {
   cy.get(clientMetrics).eq(1).invoke('text').snapshot();
 
   cy.get(clientMetrics).eq(0).invoke('text').snapshot();
+});
+
+Then(`should display percentile for page load chart`, () => {
+  const pMarkers = '[data-cy=percentile-markers] span';
+
+  cy.get('.euiLoadingChart').should('be.visible');
+
+  // wait for all loading to finish
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+
+  cy.get(pMarkers).eq(0).invoke('text').snapshot();
+
+  cy.get(pMarkers).eq(1).invoke('text').snapshot();
+
+  cy.get(pMarkers).eq(2).invoke('text').snapshot();
+
+  cy.get(pMarkers).eq(3).invoke('text').snapshot();
+});
+
+Then(`should display chart legend`, () => {
+  const chartLegend = 'div.echLegendItem__label';
+
+  // wait for all loading to finish
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.be.visible');
+
+  cy.get(chartLegend).eq(0).invoke('text').snapshot();
+});
+
+Then(`should display tooltip on hover`, () => {
+  cy.get('.euiLoadingChart').should('not.be.visible');
+
+  const pMarkers = '[data-cy=percentile-markers] span.euiToolTipAnchor';
+
+  // wait for all loading to finish
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  cy.get('.euiLoadingChart').should('not.be.visible');
+
+  const marker = cy.get(pMarkers).eq(0);
+  marker.invoke('show');
+  marker.trigger('mouseover', { force: true });
+  cy.get('span[data-cy=percentileTooltipTitle]').should('be.visible');
 });
