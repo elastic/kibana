@@ -19,7 +19,6 @@ PUT _ingest/pipeline/team_assignment
         "lang": "painless",
         "source": """
             String path = ctx.coveredFilePath; 
-
             if (path.indexOf('src/legacy/core_plugins/kibana/') == 0) {
 
                 if (path.indexOf('src/legacy/core_plugins/kibana/common/utils') == 0) ctx.team = 'kibana-app';
@@ -52,6 +51,8 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('src/legacy/core_plugins/region_map') == 0) ctx.team = 'maps';
                 else if (path.indexOf('src/legacy/core_plugins/status_page/public') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/legacy/core_plugins/testbed') == 0) ctx.team = 'kibana-platform';
+                // else if (path.indexOf('src/legacy/core_plugins/tests_bundle/') == 0) ctx.team = 'kibana-platform';
+                
                 else if (path.indexOf('src/legacy/core_plugins/tile_map') == 0) ctx.team = 'maps';
                 else if (path.indexOf('src/legacy/core_plugins/timelion') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('src/legacy/core_plugins/ui_metric/') == 0) ctx.team = 'pulse';
@@ -112,7 +113,7 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('src/plugins/home/public') == 0) ctx.team = 'kibana-core-ui';
                 else if (path.indexOf('src/plugins/home/server/tutorials') == 0) ctx.team = 'observability';
                 else if (path.indexOf('src/plugins/home/server/services/') == 0) ctx.team = 'kibana-core-ui';
-                else if (path.indexOf('src/plugins/home/server') == 0) ctx.team = 'kibana-core-ui';
+                else if (path.indexOf('src/plugins/home/') == 0) ctx.team = 'kibana-core-ui';
                 else if (path.indexOf('src/plugins/index_pattern_management/public/service') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/index_pattern_management/public') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('src/plugins/input_control_vis/') == 0) ctx.team = 'kibana-app';
@@ -123,6 +124,7 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('src/plugins/kibana_utils/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/management/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/kibana_usage_collection/') == 0) ctx.team = 'pulse';
+                else if (path.indexOf('src/plugins/legacy_export/') == 0) ctx.team = 'kibana-platform';
                 else if (path.indexOf('src/plugins/maps_legacy/') == 0) ctx.team = 'maps';
                 else if (path.indexOf('src/plugins/region_map/') == 0) ctx.team = 'maps';
                 else if (path.indexOf('src/plugins/tile_map/') == 0) ctx.team = 'maps';
@@ -182,8 +184,10 @@ PUT _ingest/pipeline/team_assignment
 
                 if (path.indexOf('x-pack/plugins/actions/') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/advanced_ui_actions/') == 0) ctx.team = 'kibana-app-arch';
-                else if (path.indexOf('x-pack/plugins/alerting') == 0) ctx.team = 'kibana-alerting-services';
+                else if (path.indexOf('x-pack/plugins/alerts') == 0) ctx.team = 'kibana-alerting-services';
+                else if (path.indexOf('x-pack/plugins/alerting_builtinss') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/apm/') == 0) ctx.team = 'apm-ui';
+                else if (path.indexOf('x-pack/plugins/beats_management/') == 0) ctx.team = 'beats';
                 else if (path.indexOf('x-pack/plugins/canvas/') == 0) ctx.team = 'kibana-canvas';
                 else if (path.indexOf('x-pack/plugins/case') == 0) ctx.team = 'siem';
                 else if (path.indexOf('x-pack/plugins/cloud/') == 0) ctx.team = 'kibana-platform';
@@ -191,6 +195,8 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/console_extensions/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/cross_cluster_replication/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/dashboard_enhanced') == 0) ctx.team = 'kibana-app';
+                else if (path.indexOf('x-pack/plugins/dashboard_mode') == 0) ctx.team = 'kibana-app';
+                else if (path.indexOf('x-pack/plugins/discover_enhanced') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('x-pack/plugins/embeddable_enhanced') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('x-pack/plugins/data_enhanced/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('x-pack/plugins/drilldowns/') == 0) ctx.team = 'kibana-app-arch';
@@ -200,6 +206,8 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/event_log/') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/features/') == 0) ctx.team = 'kibana-platform';
                 else if (path.indexOf('x-pack/plugins/file_upload') == 0) ctx.team = 'ml-ui';
+                else if (path.indexOf('x-pack/plugins/global_search') == 0) ctx.team = 'kibana-platform';
+                
                 else if (path.indexOf('x-pack/plugins/graph/') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('x-pack/plugins/grokdebugger/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/index_lifecycle_management/') == 0) ctx.team = 'es-ui';
@@ -207,6 +215,7 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/infra/') == 0) ctx.team = 'logs-metrics-ui';
                 else if (path.indexOf('x-pack/plugins/ingest_manager/') == 0) ctx.team = 'ingest-management';
                 else if (path.indexOf('x-pack/plugins/ingest_pipelines/') == 0) ctx.team = 'es-ui';
+                
                 else if (path.indexOf('x-pack/plugins/lens/') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('x-pack/plugins/license_management/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/licensing/') == 0) ctx.team = 'kibana-platform';
@@ -224,8 +233,10 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/rollup/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/searchprofiler/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/security/') == 0) ctx.team = 'kibana-security';
-                else if (path.indexOf('x-pack/plugins/siem/') == 0) ctx.team = 'siem';
+                else if (path.indexOf('x-pack/plugins/security_solution/') == 0) ctx.team = 'siem';
+                
                 else if (path.indexOf('x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules') == 0) ctx.team = 'security-intelligence-analytics';
+                else if (path.indexOf('x-pack/plugins/siem/') == 0) ctx.team = 'siem';
                 else if (path.indexOf('x-pack/plugins/snapshot_restore/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/spaces/') == 0) ctx.team = 'kibana-security';
                 else if (path.indexOf('x-pack/plugins/task_manager/') == 0) ctx.team = 'kibana-alerting-services';
@@ -234,7 +245,9 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/translations/') == 0) ctx.team = 'kibana-localization';
                 else if (path.indexOf('x-pack/plugins/triggers_actions_ui/') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/upgrade_assistant/') == 0) ctx.team = 'es-ui';
+                else if (path.indexOf('x-pack/plugins/ui_actions_enhanced') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('x-pack/plugins/uptime') == 0) ctx.team = 'uptime';
+                
                 else if (path.indexOf('x-pack/plugins/watcher/') == 0) ctx.team = 'es-ui';
                 else ctx.team = 'unknown';
 
