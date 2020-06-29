@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import { CrumbInfo, formatDate, StyledBreadcrumbs, BoldCode } from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { RelatedEventLimitWarning } from '../limit_warnings';
-import styled from 'styled-components';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -40,11 +40,11 @@ const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
   flex-flow: row wrap;
   display: block;
   align-items: baseline;
-  margin-top: .5em;
+  margin-top: 1em;
 
   & .euiCallOutHeader {
     display: inline;
-    margin-right: 0.5em;
+    margin-right: 0.25em;
   }
 
   & .euiText {
@@ -59,15 +59,25 @@ const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
 const DisplayList = memo(function DisplayList({
   crumbs,
   matchingEventEntries,
+  eventType,
+  processEntityId,
+  aggregateCountForEventType,
 }: {
   crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
   matchingEventEntries: MatchingEventEntry[];
+  eventType: string;
+  processEntityId: string;
+  aggregateCountForEventType: number;
 }) {
-
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      <StyledRelatedLimitWarning relatedEventEntityId={matchingEventEntries![0].entityId} />
+      <StyledRelatedLimitWarning
+        eventType={eventType}
+        aggregateCountForEventType={aggregateCountForEventType}
+        matchingEventEntries={matchingEventEntries}
+        relatedEventEntityId={processEntityId}
+      />
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
@@ -107,8 +117,6 @@ const DisplayList = memo(function DisplayList({
     </>
   );
 });
-
-
 
 export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({
   processEvent,
@@ -268,6 +276,14 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     );
   }
 
-  return <DisplayList crumbs={crumbs} matchingEventEntries={matchingEventEntries} />;
+  return (
+    <DisplayList
+      crumbs={crumbs}
+      aggregateCountForEventType={relatedStats.events.byCategory[eventType] || 0}
+      processEntityId={processEntityId}
+      matchingEventEntries={matchingEventEntries}
+      eventType={eventType}
+    />
+  );
 });
 ProcessEventListNarrowedByType.displayName = 'ProcessEventListNarrowedByType';

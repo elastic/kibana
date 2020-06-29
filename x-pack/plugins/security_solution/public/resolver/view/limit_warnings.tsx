@@ -23,7 +23,7 @@ const childrenLimitMessage = (
   <>
     <FormattedMessage
       id="xpack.securitySolution.endpoint.resolver.childrenLimitExceeded"
-      defaultMessage="Some child processes were not displayed to help focus the visual representation."
+      defaultMessage="Some children of the trigger event could not be displayed in this view."
     />
   </>
 );
@@ -37,15 +37,6 @@ const ancestorsLimitMessage = (
   </>
 );
 
-const relatedEventsLimitMessage = (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
-      defaultMessage="Some related events could not be displayed in this view."
-    />
-  </>
-);
-
 const titleMessage = (
   <>
     <FormattedMessage
@@ -55,21 +46,85 @@ const titleMessage = (
   </>
 );
 
+const RelatedEventsLimitMessage = React.memo(function RelatedEventsLimitMessage({
+  category,
+  numberOfEventsMissing,
+}: {
+  numberOfEventsMissing: number;
+  category: string;
+}) {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
+        defaultMessage="{numberOfEventsMissing} {category} events could not be displayed because the data limit has been reached."
+        values={{ numberOfEventsMissing, category }}
+      />
+    </>
+  );
+});
+
+const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
+  category,
+  numberOfEventsDisplayed,
+}: {
+  numberOfEventsDisplayed: number;
+  category: string;
+}) {
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.resolver.relatedLimitsExceededTitle"
+        defaultMessage="This list includes {numberOfEventsDisplayed} {category} events."
+        values={{ numberOfEventsDisplayed, category }}
+      />
+    </>
+  );
+});
+
 export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWarning({
   className,
   relatedEventEntityId,
+  eventType,
+  matchingEventEntries,
+  aggregateCountForEventType,
 }: {
   className?: string;
   relatedEventEntityId: string;
+  eventType: string;
+  matchingEventEntries: unknown[];
+  aggregateCountForEventType: number;
 }) {
   const relatedEventResponsesById = useSelector(selectors.relatedEventsByEntityId);
   const responseForThisNode = relatedEventResponsesById.get(relatedEventEntityId);
-  if(!responseForThisNode || responseForThisNode.nextEvent === null){
-    //return null;
+  if (!responseForThisNode || responseForThisNode.nextEvent === null) {
+    return null;
   }
+
+  /**
+   * Based on API limits, all related events may not be displayed.
+   */
+  const numberActuallyDisplayed = matchingEventEntries.length;
+  if (numberActuallyDisplayed >= aggregateCountForEventType) {
+    // No need to show the limit warning for this category if we've got the number of events we expected,
+    // even if the `nextEvent` cursor isn't null.
+    return null;
+  }
+  const numberMissing = aggregateCountForEventType - numberActuallyDisplayed;
   return (
-    <EuiCallOut color="warning" size="s" className={className} title={titleMessage}>
-      <p>{relatedEventsLimitMessage}</p>
+    <EuiCallOut
+      size="s"
+      className={className}
+      title={
+        <RelatedLimitTitleMessage
+          category={eventType}
+          numberOfEventsDisplayed={numberActuallyDisplayed}
+        />
+      }
+    >
+      <p>
+        <RelatedEventsLimitMessage category={eventType} numberOfEventsMissing={numberMissing} />
+      </p>
     </EuiCallOut>
   );
 });
@@ -91,12 +146,12 @@ export const LineageLimitWarning = React.memo(function LineageLimitWarning({
 
   if (!children && !ancestors) {
     // If there are no limits exceeded, display nothing
-    //return null;
+    return null;
   }
 
   return (
-    <aside role="note" className={className}>
-      <button title={'Some child processes were not displayed to help focus the visual representation.'}>&times;</button>
-    </aside>
+    <EuiCallOut color="warning" size="s" className={className} title={titleMessage}>
+      <p>{limitMessage}</p>
+    </EuiCallOut>
   );
 });
