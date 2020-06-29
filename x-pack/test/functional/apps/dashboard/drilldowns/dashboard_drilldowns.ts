@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
-      await pieChart.filterOnPieSlice('40,000');
+      await pieChart.clickOnPieSlice('40,000');
       await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
 
       const href = await dashboardDrilldownPanelActions.getActionHrefByText(
