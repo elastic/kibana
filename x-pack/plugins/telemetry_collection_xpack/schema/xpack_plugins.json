@@ -1,0 +1,247 @@
+{
+  "properties": {
+    "cloud": {
+      "properties": {
+        "isCloudEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fileUploadTelemetry": {
+      "properties": {
+        "filesUploadedTotalCount": {
+          "type": "long"
+        }
+      }
+    },
+    "mlTelemetry": {
+      "properties": {
+        "file_data_visualizer": {
+          "properties": {
+            "index_creation_count": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "spaces": {
+      "properties": {
+        "usesFeatureControls": {
+          "type": "boolean"
+        },
+        "disabledFeatures": {
+          "properties": {
+            "indexPatterns": {
+              "type": "long"
+            },
+            "discover": {
+              "type": "long"
+            },
+            "canvas": {
+              "type": "long"
+            },
+            "maps": {
+              "type": "long"
+            },
+            "siem": {
+              "type": "long"
+            },
+            "monitoring": {
+              "type": "long"
+            },
+            "graph": {
+              "type": "long"
+            },
+            "uptime": {
+              "type": "long"
+            },
+            "savedObjectsManagement": {
+              "type": "long"
+            },
+            "timelion": {
+              "type": "long"
+            },
+            "dev_tools": {
+              "type": "long"
+            },
+            "advancedSettings": {
+              "type": "long"
+            },
+            "infrastructure": {
+              "type": "long"
+            },
+            "visualize": {
+              "type": "long"
+            },
+            "logs": {
+              "type": "long"
+            },
+            "dashboard": {
+              "type": "long"
+            },
+            "ml": {
+              "type": "long"
+            },
+            "apm": {
+              "type": "long"
+            }
+          }
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "count": {
+          "type": "long"
+        }
+      }
+    },
+    "upgrade-assistant-telemetry": {
+      "properties": {
+        "features": {
+          "properties": {
+            "deprecation_logging": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "ui_open": {
+          "properties": {
+            "cluster": {
+              "type": "long"
+            },
+            "indices": {
+              "type": "long"
+            },
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_reindex": {
+          "properties": {
+            "close": {
+              "type": "long"
+            },
+            "open": {
+              "type": "long"
+            },
+            "start": {
+              "type": "long"
+            },
+            "stop": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "uptime": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "autoRefreshEnabled": {
+                  "type": "boolean"
+                },
+                "autorefreshInterval": {
+                  "type": "long"
+                },
+                "dateRangeEnd": {
+                  "type": "date"
+                },
+                "dateRangeStart": {
+                  "type": "date"
+                },
+                "monitor_frequency": {
+                  "type": "long"
+                },
+                "monitor_name_stats": {
+                  "properties": {
+                    "avg_length": {
+                      "type": "float"
+                    },
+                    "max_length": {
+                      "type": "long"
+                    },
+                    "min_length": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "monitor_page": {
+                  "type": "long"
+                },
+                "no_of_unique_monitors": {
+                  "type": "long"
+                },
+                "no_of_unique_observer_locations": {
+                  "type": "long"
+                },
+                "observer_location_name_stats": {
+                  "properties": {
+                    "avg_length": {
+                      "type": "float"
+                    },
+                    "max_length": {
+                      "type": "long"
+                    },
+                    "min_length": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "overview_page": {
+                  "type": "long"
+                },
+                "settings_page": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
