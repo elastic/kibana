@@ -18,8 +18,8 @@ import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
-import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
-import { hasMlCapabilitiesProvider } from '../lib/capabilities';
+import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -30,7 +30,7 @@ export type SharedServices = JobServiceProvider &
 export interface SharedServicesChecks {
   isFullLicense(): void;
   isMinimumLicense(): void;
-  getHasMlCapabilities(request: KibanaRequest): (capabilities: MlCapabilitiesKey[]) => void;
+  getHasMlCapabilities(request: KibanaRequest): HasMlCapabilities;
 }
 
 export function createSharedServices(

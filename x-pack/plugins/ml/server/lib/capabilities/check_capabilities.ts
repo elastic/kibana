@@ -50,6 +50,8 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
   capabilities.canDeleteAnnotation = false;
 }
 
+export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => void;
+
 export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
   return (request: KibanaRequest) => {
     return async (capabilities: MlCapabilitiesKey[]) => {
