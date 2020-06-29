@@ -23,7 +23,7 @@ const childrenLimitMessage = (
   <>
     <FormattedMessage
       id="xpack.securitySolution.endpoint.resolver.childrenLimitExceeded"
-      defaultMessage="Some children of the trigger event could not be displayed in this view."
+      defaultMessage="Some child processes were not displayed to help focus the visual representation."
     />
   </>
 );
@@ -91,12 +91,12 @@ export const LineageLimitWarning = React.memo(function LineageLimitWarning({
 
   if (!children && !ancestors) {
     // If there are no limits exceeded, display nothing
-    return null;
+    //return null;
   }
 
   return (
-    <EuiCallOut color="warning" size="s" className={className} title={titleMessage}>
-      <p>{limitMessage}</p>
-    </EuiCallOut>
+    <aside role="note" className={className}>
+      <button title={'Some child processes were not displayed to help focus the visual representation.'}>&times;</button>
+    </aside>
   );
 });

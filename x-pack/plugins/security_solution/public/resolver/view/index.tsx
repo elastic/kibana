@@ -72,25 +72,21 @@ const StyledResolverContainer = styled.div`
 const StyledLineageLimitWarning = styled(LineageLimitWarning)`
   position: absolute;
   right: 0;
-  bottom: 5px;
+  bottom: 0;
 
   flex-flow: row wrap;
   display: block;
   align-items: baseline;
   max-width: 19em;
 
-  & .euiCallOutHeader {
-    display: inline;
-    margin-right: 0.5em;
-  }
+  background: white;
 
-  & .euiText {
-    display: inline;
+  & p {
+    font-size: smaller;
   }
+  
 
-  & .euiText p {
-    display: inline;
-  }
+  
 `;
 
 export const Resolver = React.memo(function Resolver({
