@@ -142,8 +142,10 @@ export class AnnotationsTable extends Component {
         })
         .toPromise()
         .then((resp) => {
+          const buckets = resp.event.buckets;
+          const foundUser = buckets.findIndex((d) => d.key === 'user') > -1;
           this.setState({
-            filterOptions: resp.event.buckets,
+            filterOptions: foundUser ? buckets : [{ key: 'user', doc_count: 0 }, ...buckets],
           });
         })
         .catch((resp) => {
@@ -544,11 +546,14 @@ export class AnnotationsTable extends Component {
       },
     ];
 
-    if (this.props.chartDetails && this.props.chartDetails.entityData) {
+    if (
+      this.props.chartDetails?.entityData?.entities &&
+      this.props.chartDetails?.entityData?.entities.length > 0
+    ) {
       filters.push({
         type: 'field_value_toggle',
         field: 'partition_field_value',
-        name: 'Current Partition',
+        name: 'Current Series',
         value: this.props.chartDetails.entityData.entities[0].fieldValue,
       });
     }
