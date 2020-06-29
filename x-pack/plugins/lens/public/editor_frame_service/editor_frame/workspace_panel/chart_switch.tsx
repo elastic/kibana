@@ -206,7 +206,6 @@ export function ChartSwitch(props: Props) {
           className="lnsChartSwitch__triggerButton"
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
-          flush="left"
           iconSide="right"
           iconType="arrowDown"
           color="text"
