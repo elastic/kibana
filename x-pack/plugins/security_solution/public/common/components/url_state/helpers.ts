@@ -126,8 +126,9 @@ export const makeMapStateToProps = () => {
         ? {
             id: flyoutTimeline.savedObjectId != null ? flyoutTimeline.savedObjectId : '',
             isOpen: flyoutTimeline.show,
+            graphEventId: flyoutTimeline.graphEventId ?? '',
           }
-        : { id: '', isOpen: false };
+        : { id: '', isOpen: false, graphEventId: '' };
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
