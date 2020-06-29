@@ -61,8 +61,10 @@ export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
           },
           loggers: [
             {
-              context: '', // plugins.auditTrail prepended automatically
-              level: 'off',
+              // plugins.auditTrail prepended automatically
+              context: '',
+              // do not pipe in root log if disabled
+              level: config.logger.enabled ? 'debug' : 'off',
               appenders: ['auditTrailAppender'],
             },
           ],
@@ -81,7 +83,8 @@ export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
         kind: 'console',
         layout: {
           kind: 'pattern',
-          pattern: '[%level] %message %meta',
+          highlight: true,
+          // pattern: '[%level] %message %meta',
         },
       }
     );

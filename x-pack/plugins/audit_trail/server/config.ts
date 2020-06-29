@@ -10,6 +10,9 @@ import { PluginConfigDescriptor, config as _config } from '../../../../src/core/
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   appender: schema.maybe(_config.logging.appenders),
+  logger: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type AuditTrailConfigType = TypeOf<typeof configSchema>;
