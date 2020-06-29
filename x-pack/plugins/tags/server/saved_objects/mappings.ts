@@ -58,5 +58,8 @@ export const tagMappings = {
     createdAt: {
       type: 'date',
     },
+    updatedAt: {
+      type: 'date',
+    },
   },
 };
