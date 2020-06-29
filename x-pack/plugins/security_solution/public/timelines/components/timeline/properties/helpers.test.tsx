@@ -17,8 +17,9 @@ jest.mock('../../../../common/lib/kibana', () => {
     useKibana: jest.fn().mockReturnValue({
       services: {
         application: {
+          navigateToApp: jest.fn(),
           capabilities: {
-            securitySolution: {
+            siem: {
               crud: true,
             },
           },

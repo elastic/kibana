@@ -164,11 +164,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
-      isTlsEnabled: deps.http.isTlsEnabled,
       getServerInfo: deps.http.getServerInfo,
     },
-    metrics: {
-      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    logging: {
+      configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
@@ -211,12 +210,20 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
     elasticsearch: deps.elasticsearch,
+    http: {
+      auth: deps.http.auth,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
+    },
+    metrics: {
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

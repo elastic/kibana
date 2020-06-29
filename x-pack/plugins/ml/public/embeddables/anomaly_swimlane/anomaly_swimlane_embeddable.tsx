@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import {
   Embeddable,
@@ -25,12 +26,19 @@ import {
   RefreshInterval,
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
+export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+  i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+    defaultMessage: 'ML anomaly swim lane for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
+  });
+
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
   limit?: number;
 
@@ -43,9 +51,12 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
-export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
+export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
+  AnomalySwimlaneEmbeddableCustomOutput;
+
+export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
   limit?: number;
 }

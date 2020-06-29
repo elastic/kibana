@@ -8,12 +8,13 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
-import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import {
+  SIGNALS_ID,
+  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
-
-import { ListClient } from '../../../../../lists/server';
-
 import { getInputIndex } from './get_input_output_index';
 import {
   searchAfterAndBulkCreate,
@@ -21,7 +22,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, parseScheduleDates } from './utils';
+import { getGapBetweenRuns, parseScheduleDates, getListsClient, getExceptions } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -34,7 +35,6 @@ import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
-import { hasListsFeature } from '../feature_flags';
 
 export const signalRulesAlertType = ({
   logger,
@@ -55,7 +55,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
-    producer: 'siem',
+    producer: SERVER_APP_ID,
     async executor({
       previousStartedAt,
       alertId,
@@ -136,6 +136,18 @@ export const signalRulesAlertType = ({
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
       try {
+        const { listClient, exceptionsClient } = await getListsClient({
+          services,
+          updatedByUser,
+          spaceId,
+          lists,
+          savedObjectClient: services.savedObjectsClient,
+        });
+        const exceptionItems = await getExceptions({
+          client: exceptionsClient,
+          lists: exceptionsList,
+        });
+
         if (isMlRule(type)) {
           if (ml == null) {
             throw new Error('ML plugin unavailable during rule execution');
@@ -210,18 +222,6 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
-          let listClient: ListClient | undefined;
-          if (hasListsFeature()) {
-            if (lists == null) {
-              throw new Error('lists plugin unavailable during rule execution');
-            }
-            listClient = await lists.getListClient(
-              services.callCluster,
-              spaceId,
-              updatedByUser ?? 'elastic'
-            );
-          }
-
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -231,13 +231,12 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
-            // temporary filter out list type
-            lists: exceptionsList?.filter((item) => item.values_type !== 'list'),
+            lists: exceptionItems ?? [],
           });
 
           result = await searchAfterAndBulkCreate({
             listClient,
-            exceptionsList,
+            exceptionsList: exceptionItems ?? [],
             ruleParams: params,
             services,
             logger,

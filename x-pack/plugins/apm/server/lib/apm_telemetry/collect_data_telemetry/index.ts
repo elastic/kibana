@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge } from 'lodash';
-import { Logger, CallAPIOptions } from 'kibana/server';
+import { Logger, LegacyCallAPIOptions } from 'kibana/server';
 import { IndicesStatsParams, Client } from 'elasticsearch';
 import {
   ESSearchRequest,
@@ -21,7 +21,7 @@ type TelemetryTaskExecutor = (params: {
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
   indicesStats(
     params: IndicesStatsParams,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ): ReturnType<Client['indices']['stats']>;
   transportRequest: (params: {
     path: string;

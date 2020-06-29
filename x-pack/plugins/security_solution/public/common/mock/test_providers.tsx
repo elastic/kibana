@@ -19,9 +19,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
-import { createKibanaContextProviderMock } from './kibana_react';
+import { createKibanaContextProviderMock, createStartServices } from './kibana_react';
 import { FieldHook, useForm } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
+import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
 
 const state: State = mockGlobalState;
 
@@ -37,33 +38,25 @@ export const apolloClient = new ApolloClient({
 });
 
 export const apolloClientObservable = new BehaviorSubject(apolloClient);
-
-const localStorageMock = () => {
-  let store: Record<string, unknown> = {};
-
-  return {
-    getItem: (key: string) => {
-      return store[key] || null;
-    },
-    setItem: (key: string, value: unknown) => {
-      store[key] = value;
-    },
-    clear() {
-      store = {};
-    },
-  };
-};
+export const kibanaObservable = new BehaviorSubject(createStartServices());
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
+const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  ),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
@@ -83,7 +76,13 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  ),
 }) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

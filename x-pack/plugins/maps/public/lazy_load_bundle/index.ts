@@ -7,6 +7,7 @@
 import { AnyAction } from 'redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
+import { ReactElement } from 'react';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapStore, MapStoreState } from '../reducers/store';
@@ -36,6 +37,11 @@ interface LazyLoadedMapModules {
     initialLayers?: LayerDescriptor[]
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
+  renderApp: (context: unknown, params: unknown) => ReactElement<any>;
+  createSecurityLayerDescriptors: (
+    indexPatternId: string,
+    indexPatternTitle: string
+  ) => LayerDescriptor[];
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -45,7 +51,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
 
   loadModulesPromise = new Promise(async (resolve) => {
     const {
-      // @ts-ignore
+      // @ts-expect-error
       getMapsSavedObjectLoader,
       getQueryableUniqueIndexPatternIds,
       MapEmbeddable,
@@ -56,6 +62,9 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
+      // @ts-expect-error
+      renderApp,
+      createSecurityLayerDescriptors,
     } = await import('./lazy');
 
     resolve({
@@ -69,6 +78,8 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
+      renderApp,
+      createSecurityLayerDescriptors,
     });
   });
   return loadModulesPromise;

@@ -472,6 +472,7 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -887,7 +888,7 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
-        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/{,legacy/}plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
