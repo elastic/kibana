@@ -14,6 +14,8 @@ import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
+import { RelatedEventLimitWarning } from '../limit_warnings';
+import styled from 'styled-components';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -34,6 +36,26 @@ interface MatchingEventEntry {
   setQueryParams: () => void;
 }
 
+const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: .5em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.5em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
+`;
+
 const DisplayList = memo(function DisplayList({
   crumbs,
   matchingEventEntries,
@@ -41,9 +63,11 @@ const DisplayList = memo(function DisplayList({
   crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
   matchingEventEntries: MatchingEventEntry[];
 }) {
+
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
+      <StyledRelatedLimitWarning relatedEventEntityId={matchingEventEntries![0].entityId} />
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
@@ -83,6 +107,8 @@ const DisplayList = memo(function DisplayList({
     </>
   );
 });
+
+
 
 export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarrowedByType({
   processEvent,

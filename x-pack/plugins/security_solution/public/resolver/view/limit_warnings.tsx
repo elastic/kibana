@@ -37,6 +37,15 @@ const ancestorsLimitMessage = (
   </>
 );
 
+const relatedEventsLimitMessage = (
+  <>
+    <FormattedMessage
+      id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
+      defaultMessage="Some related events could not be displayed in this view."
+    />
+  </>
+);
+
 const titleMessage = (
   <>
     <FormattedMessage
@@ -45,6 +54,25 @@ const titleMessage = (
     />
   </>
 );
+
+export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWarning({
+  className,
+  relatedEventEntityId,
+}: {
+  className?: string;
+  relatedEventEntityId: string;
+}) {
+  const relatedEventResponsesById = useSelector(selectors.relatedEventsByEntityId);
+  const responseForThisNode = relatedEventResponsesById.get(relatedEventEntityId);
+  if(!responseForThisNode || responseForThisNode.nextEvent === null){
+    //return null;
+  }
+  return (
+    <EuiCallOut color="warning" size="s" className={className} title={titleMessage}>
+      <p>{relatedEventsLimitMessage}</p>
+    </EuiCallOut>
+  );
+});
 
 export const LineageLimitWarning = React.memo(function LineageLimitWarning({
   className,
