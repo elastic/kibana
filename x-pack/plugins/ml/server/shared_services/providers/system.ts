@@ -40,7 +40,6 @@ export function getMlSystemProvider(
       return {
         async mlCapabilities() {
           isMinimumLicense();
-          await hasMlCapabilities(['canAccessML']);
 
           const { isMlEnabledInSpace } =
             spaces !== undefined
