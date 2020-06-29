@@ -8,6 +8,7 @@
 
 import React from 'react';
 import ApolloClient from 'apollo-client';
+import { Dispatch } from 'redux';
 
 import { EuiText } from '@elastic/eui';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -17,10 +18,12 @@ import {
   TimelineRowActionOnClick,
 } from '../../../timelines/components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../../../timelines/components/timeline/body/constants';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../timelines/components/timeline/helpers';
 import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
@@ -174,23 +177,27 @@ export const getAlertActions = ({
   apolloClient,
   canUserCRUD,
   createTimeline,
+  dispatch,
   hasIndexWrite,
   onAlertStatusUpdateFailure,
   onAlertStatusUpdateSuccess,
   setEventsDeleted,
   setEventsLoading,
   status,
+  timelineId,
   updateTimelineIsLoading,
 }: {
   apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   createTimeline: CreateTimeline;
+  dispatch: Dispatch;
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
   onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   status: Status;
+  timelineId: string;
   updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineRowAction[] => {
   const openAlertActionComponent: TimelineRowAction = {
@@ -199,7 +206,7 @@ export const getAlertActions = ({
     dataTestSubj: 'open-alert-status',
     displayType: 'contextMenu',
     id: FILTER_OPEN,
-    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateAlertStatusAction({
         alertIds: [eventId],
@@ -210,7 +217,7 @@ export const getAlertActions = ({
         status,
         selectedStatus: FILTER_OPEN,
       }),
-    width: 26,
+    width: DEFAULT_ICON_BUTTON_WIDTH,
   };
 
   const closeAlertActionComponent: TimelineRowAction = {
@@ -219,7 +226,7 @@ export const getAlertActions = ({
     dataTestSubj: 'close-alert-status',
     displayType: 'contextMenu',
     id: FILTER_CLOSED,
-    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateAlertStatusAction({
         alertIds: [eventId],
@@ -230,7 +237,7 @@ export const getAlertActions = ({
         status,
         selectedStatus: FILTER_CLOSED,
       }),
-    width: 26,
+    width: DEFAULT_ICON_BUTTON_WIDTH,
   };
 
   const inProgressAlertActionComponent: TimelineRowAction = {
@@ -239,7 +246,7 @@ export const getAlertActions = ({
     dataTestSubj: 'in-progress-alert-status',
     displayType: 'contextMenu',
     id: FILTER_IN_PROGRESS,
-    isActionDisabled: !canUserCRUD || !hasIndexWrite,
+    isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
     onClick: ({ eventId }: TimelineRowActionOnClick) =>
       updateAlertStatusAction({
         alertIds: [eventId],
@@ -250,10 +257,13 @@ export const getAlertActions = ({
         status,
         selectedStatus: FILTER_IN_PROGRESS,
       }),
-    width: 26,
+    width: DEFAULT_ICON_BUTTON_WIDTH,
   };
 
   return [
+    {
+      ...getInvestigateInResolverAction({ dispatch, timelineId }),
+    },
     {
       ariaLabel: 'Send alert to timeline',
       content: i18n.ACTION_INVESTIGATE_IN_TIMELINE,
@@ -268,7 +278,7 @@ export const getAlertActions = ({
           ecsData,
           updateTimelineIsLoading,
         }),
-      width: 26,
+      width: DEFAULT_ICON_BUTTON_WIDTH,
     },
     // Context menu items
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
