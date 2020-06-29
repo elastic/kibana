@@ -5,12 +5,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(callAsCurrentUser: APICaller, name: string, phases: any): Promise<any> {
+async function createPolicy(
+  callAsCurrentUser: LegacyAPICaller,
+  name: string,
+  phases: any
+): Promise<any> {
   const body = {
     policy: {
       phases,
