@@ -30,11 +30,11 @@ export const useFormatUrl = (page: SecurityPageName) => {
   const formatUrl = useCallback(
     (path: string) => {
       const pathArr = path.split('?');
-      const formatedPath = `${pathArr[0]}${
+      const formattedPath = `${pathArr[0]}${
         isEmpty(pathArr[1]) ? search : `${pathArr[1]}${isEmpty(search) ? '' : `&${search}`}`
       }`;
       return getUrlForApp(`${APP_ID}:${page}`, {
-        path: formatedPath,
+        path: formattedPath,
       });
     },
     [getUrlForApp, page, search]
