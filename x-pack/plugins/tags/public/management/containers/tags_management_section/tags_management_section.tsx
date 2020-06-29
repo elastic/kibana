@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { TagsManagementServices } from '../../services';
-import { LandingPage } from '../landing_page';
-import { ServicesProvider } from '../../context';
+import { Provider } from '../../context';
+import { Section } from './section';
 
 export interface Props {
   services: TagsManagementServices;
@@ -15,10 +15,8 @@ export interface Props {
 
 export const TagsManagementSection: React.FC<Props> = ({ services }) => {
   return (
-    <ServicesProvider value={services}>
-      <div data-test-subj="TagsManagementSection">
-        <LandingPage />
-      </div>
-    </ServicesProvider>
+    <Provider services={services}>
+      <Section />
+    </Provider>
   );
 };

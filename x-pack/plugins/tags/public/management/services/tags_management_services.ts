@@ -12,5 +12,5 @@ export interface Params {
 }
 
 export class TagsManagementServices {
-  constructor(private readonly params: Params) {}
+  constructor(public readonly params: Params) {}
 }

@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './services';
+export { useServices } from './services';
+export { Provider } from './provider';
