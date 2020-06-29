@@ -41,7 +41,7 @@
 
 import {
   ElasticsearchServiceSetup,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
 } from './elasticsearch';
@@ -91,25 +91,24 @@ export {
 export { CoreId } from './core_context';
 export { CspConfig, ICspConfig } from './csp';
 export {
-  ClusterClient,
-  IClusterClient,
-  ICustomClusterClient,
-  Headers,
-  ScopedClusterClient,
-  IScopedClusterClient,
+  LegacyClusterClient,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+  LegacyScopedClusterClient,
+  ILegacyScopedClusterClient,
   ElasticsearchConfig,
-  ElasticsearchClientConfig,
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchClientConfig,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
-  APICaller,
+  LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
 } from './elasticsearch';
-export * from './elasticsearch/api_types';
+export * from './elasticsearch/legacy/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
@@ -127,6 +126,7 @@ export {
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
+  Headers,
   HttpAuth,
   HttpResponseOptions,
   HttpResponsePayload,
@@ -356,7 +356,7 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link ScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
+ *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
@@ -371,7 +371,7 @@ export interface RequestHandlerContext {
     };
     elasticsearch: {
       legacy: {
-        client: IScopedClusterClient;
+        client: ILegacyScopedClusterClient;
       };
     };
     uiSettings: {

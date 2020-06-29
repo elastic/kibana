@@ -6,7 +6,7 @@
 
 import { Readable } from 'stream';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   DeserializerOrUndefined,
@@ -23,7 +23,7 @@ export interface ImportListItemsToStreamOptions {
   serializer: SerializerOrUndefined;
   listId: string;
   stream: Readable;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -65,9 +65,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  callCluster: APICaller;
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   buffer: string[];
   type: Type;

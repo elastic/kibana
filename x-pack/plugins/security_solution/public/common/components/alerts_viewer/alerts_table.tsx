@@ -5,13 +5,16 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import * as i18n from './translations';
+
 export interface OwnProps {
   end: number;
   id: string;
@@ -64,8 +67,9 @@ const AlertsTableComponent: React.FC<Props> = ({
   startDate,
   pageFilters = [],
 }) => {
+  const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const { initializeTimeline } = useManageTimeline();
+  const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
@@ -74,6 +78,10 @@ const AlertsTableComponent: React.FC<Props> = ({
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
+    });
+    setTimelineRowActions({
+      id: timelineId,
+      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId })],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -317,7 +317,6 @@ describe('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'a',
@@ -340,7 +339,6 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
     });
 

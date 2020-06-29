@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export const APP_NAME = 'visualize';
+
 export const VisualizeConstants = {
   LANDING_PAGE_PATH: '/',
   WIZARD_STEP_1_PAGE_PATH: '/new',
@@ -24,7 +26,3 @@ export const VisualizeConstants = {
   CREATE_PATH: '/create',
   EDIT_PATH: '/edit',
 };
-
-export function createVisualizeEditUrl(id: string) {
-  return `${VisualizeConstants.EDIT_PATH}/${id}`;
-}

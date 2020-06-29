@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
 
 export interface GetListItemByValuesOptions {
   listId: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   type: Type;
   value: string[];
