@@ -79,7 +79,7 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
         clusterInfo,
         {
           ...clusterStats,
-          nodes: merge(clusterStats.nodes, { usage: nodesUsage }),
+          nodes: { ...clusterStats.nodes, usage: nodesUsage },
         },
         kibana,
         context
