@@ -51,7 +51,6 @@ describe('date_histogram', () => {
       indexPatternRefs: [],
       existingFields: {},
       currentIndexPatternId: '1',
-      showEmptyFields: false,
       isFirstExistenceFetch: false,
       indexPatterns: {
         1: {

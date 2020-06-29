@@ -42,7 +42,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -97,7 +96,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -149,7 +147,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -191,7 +188,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -226,7 +222,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -289,7 +284,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -343,7 +337,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -424,7 +417,6 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
-        showEmptyFields: false,
         isFirstExistenceFetch: false,
         layers: {
           first: {

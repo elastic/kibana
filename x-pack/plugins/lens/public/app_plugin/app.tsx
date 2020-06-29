@@ -44,7 +44,6 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
-  originatingApp: string | undefined;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -66,7 +65,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  originatingAppFromUrl,
+  originatingApp,
   navigation,
   onAppLeave,
   history,
@@ -78,13 +77,8 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (
-    id?: string,
-    returnToOrigin?: boolean,
-    originatingApp?: string | undefined,
-    newlyCreated?: boolean
-  ) => void;
-  originatingAppFromUrl?: string | undefined;
+  redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+  originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
 }) {
@@ -99,7 +93,6 @@ export function App({
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
       query: { query: '', language },
-      originatingApp: originatingAppFromUrl,
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
@@ -335,7 +328,7 @@ export function App({
           lastKnownDoc: newDoc,
         }));
         if (docId !== id || saveProps.returnToOrigin) {
-          redirectTo(id, saveProps.returnToOrigin, state.originatingApp, newlyCreated);
+          redirectTo(id, saveProps.returnToOrigin, newlyCreated);
         }
       })
       .catch((e) => {
@@ -375,7 +368,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!state.originatingApp && lastKnownDoc?.id
+                ...(!!originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -400,14 +393,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!state.originatingApp
+                    lastKnownDoc?.id && !!originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
+                  emphasize: !originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -530,7 +523,7 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={state.originatingApp}
+            originatingApp={originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{

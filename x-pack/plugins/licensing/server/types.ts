@@ -40,11 +40,18 @@ export interface RawLicense {
   mode: LicenseType;
 }
 
+/**
+ * The APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing.
+ * @public
+ */
+export interface LicensingRequestHandlerContext {
+  featureUsage: FeatureUsageServiceStart;
+  license: ILicense;
+}
+
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    licensing: {
-      license: ILicense;
-    };
+    licensing: LicensingRequestHandlerContext;
   }
 }
 

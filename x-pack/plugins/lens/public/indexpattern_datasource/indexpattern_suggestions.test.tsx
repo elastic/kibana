@@ -146,7 +146,6 @@ function testInitialState(): IndexPatternPrivateState {
         },
       },
     },
-    showEmptyFields: false,
     isFirstExistenceFetch: false,
   };
 }
@@ -306,7 +305,6 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
           isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
@@ -512,7 +510,6 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
           isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
@@ -1052,7 +1049,6 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns no suggestions if there are no columns', () => {
       expect(
         getDatasourceSuggestionsFromCurrentState({
-          showEmptyFields: false,
           isFirstExistenceFetch: false,
           indexPatternRefs: [],
           existingFields: {},
@@ -1359,7 +1355,6 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -1480,7 +1475,6 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -1535,7 +1529,6 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
         isFirstExistenceFetch: false,
         layers: {
           first: {
@@ -1567,7 +1560,6 @@ describe('IndexPattern Data Source suggestions', () => {
         existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
-        showEmptyFields: true,
         isFirstExistenceFetch: false,
         layers: {
           first: {

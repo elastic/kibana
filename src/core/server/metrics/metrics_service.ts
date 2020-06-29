@@ -45,12 +45,7 @@ export class MetricsService
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
     this.metricsCollector = new OpsMetricsCollector(http.server);
-
-    const metricsObservable = this.metrics$.asObservable();
-
-    return {
-      getOpsMetrics$: () => metricsObservable,
-    };
+    return {};
   }
 
   public async start(): Promise<InternalMetricsServiceStart> {
@@ -68,7 +63,11 @@ export class MetricsService
       this.refreshMetrics();
     }, config.interval.asMilliseconds());
 
-    return {};
+    const metricsObservable = this.metrics$.asObservable();
+
+    return {
+      getOpsMetrics$: () => metricsObservable,
+    };
   }
 
   private async refreshMetrics() {
