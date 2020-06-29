@@ -30,7 +30,6 @@ function isIntegerInRange(integer: number, min: number, max: number) {
   );
 }
 
-// eslint-disable-next-line import/no-default-export
 export class Ipv4Address {
   private value: number;
 

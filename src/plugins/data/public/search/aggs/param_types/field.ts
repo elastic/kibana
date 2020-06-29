@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IAggConfig } from '../agg_config';
-import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/common';
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { isNestedField, KBN_FIELD_TYPES } from '../../../../common';
