@@ -23,6 +23,7 @@ import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
+import { SavedObject } from '../../types';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -238,5 +239,64 @@ describe(`POST ${URL}`, () => {
       [{ fields: ['id'], id: 'existing', type: 'index-pattern' }],
       expect.anything() // options
     );
+  });
+
+  describe('trueCopy enabled', () => {
+    it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
+      savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [
+          { type: 'visualization', id: 'new-id-1' } as SavedObject,
+          { type: 'dashboard', id: 'new-id-2' } as SavedObject,
+        ],
+      });
+
+      const result = await supertest(httpSetup.server.listener)
+        .post(`${URL}?trueCopy=true`)
+        .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .send(
+          [
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"existing"}]}',
+            '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="retries"',
+            '',
+            '[{"type":"visualization","id":"my-vis","destinationId":"new-id-1"},{"type":"dashboard","id":"my-dashboard","destinationId":"new-id-2"}]',
+            '--EXAMPLE--',
+          ].join('\r\n')
+        )
+        .expect(200);
+
+      expect(result.body).toEqual({
+        success: true,
+        successCount: 2,
+        successResults: [
+          { type: 'visualization', id: 'my-vis', destinationId: 'new-id-1' },
+          { type: 'dashboard', id: 'my-dashboard', destinationId: 'new-id-2' },
+        ],
+      });
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: 'visualization',
+            id: 'new-id-1',
+            references: [{ name: 'ref_0', type: 'index-pattern', id: 'existing' }],
+            originId: undefined,
+          }),
+          expect.objectContaining({
+            type: 'dashboard',
+            id: 'new-id-2',
+            references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
+            originId: undefined,
+          }),
+        ],
+        expect.anything() // options
+      );
+    });
   });
 });

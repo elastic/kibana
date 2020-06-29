@@ -19,7 +19,6 @@
 
 import { savedObjectsClientMock } from '../../mocks';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectReference } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import { extractErrors } from './extract_errors';
@@ -33,7 +32,11 @@ const createObject = (type: string, id: string, originId?: string): SavedObject 
   type,
   id,
   attributes: {},
-  references: (Symbol() as unknown) as SavedObjectReference[],
+  references: [
+    { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
+    { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importIdMap entry
+    { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-3' }, // object that is present and has an importIdMap entry
+  ],
   ...(originId && { originId }),
 });
 
@@ -91,7 +94,11 @@ describe('#createSavedObjects', () => {
       type,
       id: retry ? `new-id-for-${id}` : id, // if this was a retry, we regenerated the id -- this is mocked below
       attributes,
-      references,
+      references: [
+        { name: 'name-1', type: 'other-type', id: 'other-id' }, // object that is not present
+        { name: 'name-2', type: MULTI_NS_TYPE, id: 'id-1' }, // object that is present, but does not have an importIdMap entry
+        { name: 'name-3', type: MULTI_NS_TYPE, id: 'id-foo' }, // object that is present and has an importIdMap entry
+      ],
       // if the import object had an originId, and/or if we regenerated the id, expect an originId to be included in the create args
       ...((originId || retry) && { originId: originId || id }),
     }));

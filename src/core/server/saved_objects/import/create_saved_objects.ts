@@ -52,17 +52,30 @@ export const createSavedObjects = async <T>(
     new Map<string, SavedObject<T>>()
   );
 
-  // use the import ID map to ensure that each object is being created with the correct ID also, ensure that the `originId` is set on the
-  // created object if it did not have one
-  const objectsToCreate = objects.map((object) => {
-    const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
-    if (importIdEntry) {
-      objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
-      const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
-      return { ...object, id: importIdEntry.id, originId };
-    }
-    return object;
-  });
+  const objectsToCreate = objects
+    .map((object) => {
+      // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
+      // the created object if it did not have one (or is omitted if specified)
+      const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
+      if (importIdEntry) {
+        objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
+        const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
+        return { ...object, id: importIdEntry.id, originId };
+      }
+      return object;
+    })
+    .map((object) => {
+      // use the import ID map to ensure that each reference is being created with the correct ID
+      const references = object.references?.map((reference) => {
+        const { type, id } = reference;
+        const importIdEntry = importIdMap.get(`${type}:${id}`);
+        if (importIdEntry) {
+          return { ...reference, id: importIdEntry.id };
+        }
+        return reference;
+      });
+      return { ...object, ...(references && { references }) };
+    });
   const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
     namespace,
     overwrite,
