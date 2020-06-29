@@ -22,11 +22,12 @@ import { BOUNDARIES_SOURCE, LayerTemplate } from './layer_template';
 const renderWizardArguments = {
   previewLayers: () => {},
   mapColors: [],
-  isIndexingTriggered: false,
-  onRemove: () => {},
-  onIndexReady: () => {},
-  importSuccessHandler: () => {},
-  importErrorHandler: () => {},
+  currentStepId: null,
+  enableNextBtn: () => {},
+  disableNextBtn: () => {},
+  startStepLoading: () => {},
+  stopStepLoading: () => {},
+  advanceToNextStep: () => {},
 };
 
 test('should render elasticsearch UI when left source is BOUNDARIES_SOURCE.ELASTICSEARCH', async () => {
