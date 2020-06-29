@@ -22,6 +22,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
   agentConfig?: AgentConfig;
 }> = memo(({ agent, agentConfig }) => {
   const { getHref } = useLink();
+
   return (
     <EuiDescriptionList>
       {[
