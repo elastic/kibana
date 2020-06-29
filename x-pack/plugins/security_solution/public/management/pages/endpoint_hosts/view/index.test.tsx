@@ -410,10 +410,10 @@ describe('when on the hosts page', () => {
     it('should include the link to reassignment in Ingest', async () => {
       coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
       const renderResult = render();
-      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToIngest');
-      expect(linkToLogs).not.toBeNull();
-      expect(linkToLogs.textContent).toEqual('Reassign Policy');
-      expect(linkToLogs.getAttribute('href')).toEqual(
+      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      expect(linkToReassign).not.toBeNull();
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
     });
@@ -422,9 +422,9 @@ describe('when on the hosts page', () => {
       beforeEach(async () => {
         coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
         const renderResult = render();
-        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToIngest');
+        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(linkToLogs);
+          reactTestingLibrary.fireEvent.click(linkToReassign);
         });
       });
 
