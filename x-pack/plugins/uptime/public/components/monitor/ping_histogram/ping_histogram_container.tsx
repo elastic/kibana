@@ -9,10 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
 import { esKuerySelector, selectPingHistogram, dateRangeSelector } from '../../../state/selectors';
-import { useMonitorId } from '../../../hooks';
+import { useAbsoluteDateRange, useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
 import { UptimeRefreshContext } from '../../../contexts';
-import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
 
 interface Props {
   height: string;

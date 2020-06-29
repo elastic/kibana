@@ -23,7 +23,7 @@ import { getMLJobId } from '../../../state/api/ml_anomaly';
 import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
-import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
+import { useAbsoluteDateRange } from '../../../hooks';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { from, to } = useSelector(dateRangeSelector);

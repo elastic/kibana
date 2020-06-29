@@ -24,7 +24,7 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
-import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
+import { useAbsoluteDateRange } from '../../../hooks';
 import { UptimeThemeContext } from '../../../contexts';
 
 interface DurationChartProps {

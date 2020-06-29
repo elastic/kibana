@@ -21,7 +21,7 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { UptimeThemeContext } from '../../../contexts';
-import { useAbsoluteDateRange } from '../../../hooks/use_absolute_date_range';
+import { useAbsoluteDateRange } from '../../../hooks';
 
 export interface MonitorBarSeriesProps {
   /**

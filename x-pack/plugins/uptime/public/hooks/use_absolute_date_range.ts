@@ -8,13 +8,13 @@ import moment from 'moment';
 import { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { dateRangeSelector } from '../state/selectors';
-import { useAbsoluteDate } from './use_absolute_date';
 import { setDateRange } from '../state/actions';
+import { parseAbsoluteDate } from '../lib/helper/url_params/parse_absolute_date';
 
 export const useAbsoluteDateRange = () => {
   const dateRange = useSelector(dateRangeSelector);
-  const from = useAbsoluteDate(dateRange.from);
-  const to = useAbsoluteDate(dateRange.to);
+  const from = parseAbsoluteDate(dateRange.from, 0);
+  const to = parseAbsoluteDate(dateRange.to, 0);
   const dispatch = useDispatch();
   const updateDateRange = useCallback(
     (absFrom: number, absTo: number) => {

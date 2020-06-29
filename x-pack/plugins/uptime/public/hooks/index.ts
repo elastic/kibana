@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './use_absolute_date_range';
 export * from './use_cert_status';
 export * from './update_kuery_string';
 export * from './use_monitor';
