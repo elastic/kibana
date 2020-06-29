@@ -6,26 +6,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Paginate as Component } from './paginate';
+import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
 
-interface InPaginateProps {
+export { PaginateProps, PaginateChildProps };
+export interface InPaginateProps {
   perPage?: number;
   startPage?: number;
   rows: any[];
   children: (props: PaginateChildProps) => React.ReactNode;
 }
-
-export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
-  pageNumber: number;
-  totalPages: number;
-  nextPageEnabled: boolean;
-  prevPageEnabled: boolean;
-  setPage: (num: number) => void;
-  nextPage: () => void;
-  prevPage: () => void;
-};
-
-export type PaginateChildProps = Omit<PaginateProps, 'children'>;
 
 export const Paginate: React.FunctionComponent<InPaginateProps> = ({
   perPage = 10,

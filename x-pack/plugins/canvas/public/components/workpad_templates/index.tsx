@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, FunctionComponent } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { RouterContext } from '../router';
-// @ts-ignore Untyped Local
+// @ts-expect-error
 import * as workpadService from '../../lib/workpad_service';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WorkpadTemplates as Component } from './workpad_templates';
@@ -19,9 +20,17 @@ interface WorkpadTemplatesProps {
   onClose: () => void;
 }
 
-export const WorkpadTemplates: React.FunctionComponent<WorkpadTemplatesProps> = ({ onClose }) => {
+const Creating: FunctionComponent<{ name: string }> = ({ name }) => (
+  <div>
+    <EuiLoadingSpinner size="l" /> Creating from template {name}
+  </div>
+);
+export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onClose }) => {
   const router = useContext(RouterContext);
   const [templates, setTemplates] = useState<CanvasTemplate[] | undefined>(undefined);
+  const [creatingFromTemplateName, setCreatingFromTemplateName] = useState<string | undefined>(
+    undefined
+  );
   const kibana = useKibana<UseKibanaProps>();
 
   useEffect(() => {
@@ -43,17 +52,23 @@ export const WorkpadTemplates: React.FunctionComponent<WorkpadTemplatesProps> = 
   }
 
   const createFromTemplate = async (template: CanvasTemplate) => {
+    setCreatingFromTemplateName(template.name);
     try {
       const result = await workpadService.createFromTemplate(template.id);
       if (router) {
         router.navigateTo('loadWorkpad', { id: result.data.id, page: 1 });
       }
     } catch (error) {
+      setCreatingFromTemplateName(undefined);
       kibana.services.canvas.notify.error(error, {
         title: `Couldn't create workpad from template`,
       });
     }
   };
+
+  if (creatingFromTemplateName) {
+    return <Creating name={creatingFromTemplateName} />;
+  }
 
   return (
     <Component

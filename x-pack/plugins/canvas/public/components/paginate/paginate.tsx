@@ -6,24 +6,25 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PaginateProps } from './';
+import { InPaginateProps } from './';
 
-export const Paginate: React.FunctionComponent<PaginateProps> = (props) => {
-  return (
-    <React.Fragment>
-      {props.children({
-        rows: props.rows,
-        perPage: props.perPage,
-        pageNumber: props.pageNumber,
-        totalPages: props.totalPages,
-        nextPageEnabled: props.nextPageEnabled,
-        prevPageEnabled: props.prevPageEnabled,
-        setPage: props.setPage,
-        nextPage: props.nextPage,
-        prevPage: props.prevPage,
-      })}
-    </React.Fragment>
-  );
+export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
+  pageNumber: number;
+  totalPages: number;
+  nextPageEnabled: boolean;
+  prevPageEnabled: boolean;
+  setPage: (num: number) => void;
+  nextPage: () => void;
+  prevPage: () => void;
+};
+
+export type PaginateChildProps = Omit<PaginateProps, 'children'>;
+
+export const Paginate: React.FunctionComponent<PaginateProps> = ({
+  children,
+  ...childrenProps
+}) => {
+  return <React.Fragment>{children(childrenProps)}</React.Fragment>;
 };
 
 Paginate.propTypes = {

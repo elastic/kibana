@@ -8,12 +8,12 @@ import { CanvasTemplate } from '../../types';
 export const light: CanvasTemplate = {
   id: 'workpad-template-890b80e5-a3eb-431d-b8ed-37587ffd32c3',
   name: 'Light',
-  css: '',
   help: 'Light color themed presentation deck',
   tags: ['presentation'],
   template_key: 'light-theme',
   template: {
     name: 'Light',
+    css: '',
     width: 1080,
     height: 720,
     page: 0,

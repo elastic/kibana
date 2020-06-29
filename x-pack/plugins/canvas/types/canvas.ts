@@ -16,9 +16,9 @@ export interface CanvasAsset {
 export interface CanvasElement {
   id: string;
   position: ElementPosition;
-  type?: 'element';
+  type: 'element';
   expression: string;
-  filter?: string;
+  filter: string;
 }
 
 export interface CanvasGroup {
@@ -52,13 +52,15 @@ export interface CanvasWorkpad {
   width: number;
 }
 
+type CanvasTemplateElement = Omit<CanvasElement, 'filter' | 'type'>;
+type CanvasTemplatePage = Omit<CanvasPage, 'elements'> & { elements: CanvasTemplateElement[] };
 export interface CanvasTemplate {
   id: string;
   name: string;
   help: string;
   tags: string[];
   template_key: string;
-  template?: Omit<CanvasWorkpad, 'id' | 'isWriteable'>;
+  template?: Omit<CanvasWorkpad, 'id' | 'isWriteable' | 'pages'> & { pages: CanvasTemplatePage[] };
 }
 
 export interface CanvasWorkpadBoundingBox {
