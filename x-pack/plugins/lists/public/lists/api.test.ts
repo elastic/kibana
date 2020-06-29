@@ -270,7 +270,7 @@ describe('Value Lists API', () => {
 
   describe('exportList', () => {
     beforeEach(() => {
-      httpMock.fetch.mockResolvedValue(getListResponseMock());
+      httpMock.fetch.mockResolvedValue({});
     });
 
     it('POSTs to the export endpoint', async () => {
@@ -319,23 +319,6 @@ describe('Value Lists API', () => {
         })
       ).rejects.toEqual('Invalid value "23" supplied to "list_id"');
       expect(httpMock.fetch).not.toHaveBeenCalled();
-    });
-
-    it('rejects with an error if response payload is invalid', async () => {
-      const abortCtrl = new AbortController();
-      const payload: ApiPayload<ExportListParams> = {
-        listId: 'list-id',
-      };
-      const badResponse = { ...getListResponseMock(), id: undefined };
-      httpMock.fetch.mockResolvedValue(badResponse);
-
-      await expect(
-        exportList({
-          http: httpMock,
-          ...payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 });

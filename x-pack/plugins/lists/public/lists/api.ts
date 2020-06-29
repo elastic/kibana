@@ -168,7 +168,6 @@ const exportListWithValidation = async ({
     { list_id: listId },
     (payload) => fromEither(validateEither(exportListItemQuerySchema, payload)),
     chain((payload) => tryCatch(() => exportList({ http, signal, ...payload }), String)),
-    chain((response) => fromEither(validateEither(listSchema, response))),
     flow(toPromise)
   );
 
