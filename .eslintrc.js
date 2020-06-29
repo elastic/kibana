@@ -1039,5 +1039,25 @@ module.exports = {
         ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
+
+    /**
+     * Lodash@3 to Lodash@4 migration help rule
+     */
+    {
+      files: ['**/*'],
+      excludedFiles: ['src/plugins/data/**/*', 'src/plugins/vis_type_vislib/**/*'],
+      rules: {
+        '@kbn/eslint/module_migration': [
+          'error',
+          [
+            {
+              from: 'lodash3',
+              to: 'lodash',
+              disallowedMessage: `Don't use 'lodash3', use the new lodash@4 with 'lodash'`,
+            },
+          ],
+        ],
+      },
+    },
   ],
 };
