@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_PATH } from '../common/constants';
 import { getShowMapVisualizationTypes, getVisualizations } from './kibana_services';
 
 export function getMapsVisTypeAlias() {
@@ -28,7 +28,7 @@ The Maps app offers more functionality and is easier to use.`,
 
   return {
     aliasApp: APP_ID,
-    aliasPath: `#/${MAP_SAVED_OBJECT_TYPE}`,
+    aliasPath: `/${MAP_PATH}`,
     name: APP_ID,
     title: i18n.translate('xpack.maps.visTypeAlias.title', {
       defaultMessage: 'Maps',

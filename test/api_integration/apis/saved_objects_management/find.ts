@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
                       type: 'index-pattern',
                     },
                   ],
+                  score: 0,
                   updated_at: '2017-09-21T18:51:23.794Z',
                   meta: {
                     editUrl:
@@ -220,7 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/discover#/960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             });
@@ -286,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
               inAppUrl: {
                 path:
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.index_patterns',
+                uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
             });
           }));

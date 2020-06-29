@@ -32,6 +32,7 @@ import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
+import { Immutable } from '../../../common/endpoint/types';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -145,7 +146,7 @@ export const AlertIndex = memo(() => {
     history.push(urlFromQueryParams(paramsWithoutFlyoutDetails));
   }, [history, queryParams]);
 
-  const timestampForRows: Map<AlertData, number> = useMemo(() => {
+  const timestampForRows: Map<Immutable<AlertData>, number> = useMemo(() => {
     return new Map(
       alertListData.map((alertData) => {
         return [alertData, alertData['@timestamp']];
@@ -203,7 +204,7 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
-        return row.file.malware_classification.score;
+        return row.file.Ext.malware_classification.score;
       }
       return null;
     },

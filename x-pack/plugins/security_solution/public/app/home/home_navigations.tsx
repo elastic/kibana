@@ -4,66 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getDetectionEngineUrl,
-  getOverviewUrl,
-  getNetworkUrl,
-  getTimelinesUrl,
-  getHostsUrl,
-  getCaseUrl,
-} from '../../common/components/link_to';
 import * as i18n from './translations';
-import { SiemPageName, SiemNavTab } from '../types';
-import { getManagementUrl } from '../../management';
+import { SecurityPageName } from '../types';
+import { SiemNavTab } from '../../common/components/navigation/types';
+import {
+  APP_OVERVIEW_PATH,
+  APP_ALERTS_PATH,
+  APP_HOSTS_PATH,
+  APP_NETWORK_PATH,
+  APP_TIMELINES_PATH,
+  APP_CASES_PATH,
+  APP_MANAGEMENT_PATH,
+  APP_ENDPOINT_ALERTS_PATH,
+} from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
-  [SiemPageName.overview]: {
-    id: SiemPageName.overview,
+  [SecurityPageName.overview]: {
+    id: SecurityPageName.overview,
     name: i18n.OVERVIEW,
-    href: getOverviewUrl(),
+    href: APP_OVERVIEW_PATH,
     disabled: false,
     urlKey: 'overview',
   },
-  [SiemPageName.hosts]: {
-    id: SiemPageName.hosts,
+  [SecurityPageName.alerts]: {
+    id: SecurityPageName.alerts,
+    name: i18n.Alerts,
+    href: APP_ALERTS_PATH,
+    disabled: false,
+    urlKey: 'alerts',
+  },
+  [SecurityPageName.hosts]: {
+    id: SecurityPageName.hosts,
     name: i18n.HOSTS,
-    href: getHostsUrl(),
+    href: APP_HOSTS_PATH,
     disabled: false,
     urlKey: 'host',
   },
-  [SiemPageName.network]: {
-    id: SiemPageName.network,
+  [SecurityPageName.network]: {
+    id: SecurityPageName.network,
     name: i18n.NETWORK,
-    href: getNetworkUrl(),
+    href: APP_NETWORK_PATH,
     disabled: false,
     urlKey: 'network',
   },
-  [SiemPageName.detections]: {
-    id: SiemPageName.detections,
-    name: i18n.DETECTION_ENGINE,
-    href: getDetectionEngineUrl(),
-    disabled: false,
-    urlKey: 'detections',
-  },
-  [SiemPageName.timelines]: {
-    id: SiemPageName.timelines,
+
+  [SecurityPageName.timelines]: {
+    id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
-    href: getTimelinesUrl(),
+    href: APP_TIMELINES_PATH,
     disabled: false,
     urlKey: 'timeline',
   },
-  [SiemPageName.case]: {
-    id: SiemPageName.case,
+  [SecurityPageName.case]: {
+    id: SecurityPageName.case,
     name: i18n.CASE,
-    href: getCaseUrl(null),
+    href: APP_CASES_PATH,
     disabled: false,
     urlKey: 'case',
   },
-  [SiemPageName.management]: {
-    id: SiemPageName.management,
+  [SecurityPageName.management]: {
+    id: SecurityPageName.management,
     name: i18n.MANAGEMENT,
-    href: getManagementUrl({ name: 'default' }),
+    href: APP_MANAGEMENT_PATH,
     disabled: false,
-    urlKey: SiemPageName.management,
+    urlKey: SecurityPageName.management,
+  },
+  [SecurityPageName.endpointAlerts]: {
+    id: SecurityPageName.endpointAlerts,
+    name: 'Endpoint Alerts', // No Need of i18n since, it is just temporary
+    href: APP_ENDPOINT_ALERTS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.management, // Just to make type happy, this should go away soon
   },
 };

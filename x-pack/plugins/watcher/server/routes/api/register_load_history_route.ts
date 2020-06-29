@@ -6,8 +6,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../lib/is_es_error';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { isEsError } from '../../shared_imports';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -18,7 +18,7 @@ const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
+function fetchHistoryItem(dataClient: ILegacyScopedClusterClient, watchHistoryItemId: string) {
   return dataClient.callAsCurrentUser('search', {
     index: INDEX_NAMES.WATCHER_HISTORY,
     body: {

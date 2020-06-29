@@ -97,13 +97,11 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-  serializeFieldFormat,
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -172,8 +170,10 @@ export {
   ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,
-  ISearchContext,
-  TSearchStrategyProvider,
+  ISearchSetup,
+  ISearchStart,
+  TStrategyTypes,
+  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
 } from './search';
@@ -202,6 +202,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,

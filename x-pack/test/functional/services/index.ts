@@ -52,6 +52,7 @@ import { TransformProvider } from './transform';
 import {
   DashboardDrilldownPanelActionsProvider,
   DashboardDrilldownsManageProvider,
+  DashboardPanelTimeRangeProvider,
 } from './dashboard';
 
 // define the name and providers for services that should be
@@ -97,4 +98,5 @@ export const services = {
   transform: TransformProvider,
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
+  dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
 };

@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient, IRouter } from 'src/core/server';
+import { LegacyScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
 import { License } from './services';
-import { isEsError, wrapEsError } from './lib';
+import { wrapEsError } from './lib';
+import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -30,4 +31,4 @@ export interface RouteDependencies {
   };
 }
 
-export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
