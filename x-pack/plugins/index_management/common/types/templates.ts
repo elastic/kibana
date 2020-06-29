@@ -21,6 +21,7 @@ export interface TemplateSerialized {
   composed_of?: string[];
   version?: number;
   priority?: number;
+  _meta?: { [key: string]: any };
 }
 
 /**
@@ -43,6 +44,7 @@ export interface TemplateDeserialized {
   ilmPolicy?: {
     name: string;
   };
+  _meta?: { [key: string]: any };
   _kbnMeta: {
     isManaged: boolean;
     isLegacy?: boolean;

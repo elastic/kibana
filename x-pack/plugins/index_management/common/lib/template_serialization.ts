@@ -13,7 +13,7 @@ import {
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf } = templateDeserialized;
+  const { version, priority, indexPatterns, template, composedOf, _meta } = templateDeserialized;
 
   return {
     version,
@@ -21,6 +21,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     template,
     index_patterns: indexPatterns,
     composed_of: composedOf,
+    _meta,
   };
 }
 
@@ -34,6 +35,7 @@ export function deserializeTemplate(
     index_patterns: indexPatterns,
     template = {},
     priority,
+    _meta,
     composed_of: composedOf,
   } = templateEs;
   const { settings } = template;
@@ -46,6 +48,7 @@ export function deserializeTemplate(
     template,
     ilmPolicy: settings?.index?.lifecycle,
     composedOf,
+    _meta,
     _kbnMeta: {
       isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
     },

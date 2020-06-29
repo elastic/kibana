@@ -126,6 +126,20 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
+  dataManagement.getComposableIndexTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
+
   dataManagement.saveComposableIndexTemplate = ca({
     urls: [
       {
@@ -153,5 +167,19 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
       },
     ],
     method: 'DELETE',
+  });
+
+  dataManagement.existsTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'HEAD',
   });
 };
