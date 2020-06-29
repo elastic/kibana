@@ -13,6 +13,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./agent_configuration'));
+    loadTestFile(require.resolve('./custom_link'));
     loadTestFile(require.resolve('./service_maps'));
   });
 }

@@ -13,7 +13,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const supertest = getService('supertest');
 
   describe('Service Maps', () => {
-    it('fails with a 403 forbidden', async () => {
+    it('should only be available to users with Platinum license (or higher)', async () => {
       const response = await supertest.get(
         '/api/apm/service-map?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
       );
