@@ -16,7 +16,6 @@ import {
   LegacyEndpointEvent,
   ResolverNodeStats,
   ResolverRelatedAlerts,
-  ResolverChildNode,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';

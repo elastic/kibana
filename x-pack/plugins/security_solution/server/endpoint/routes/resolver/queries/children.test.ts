@@ -25,7 +25,7 @@ describe('Children query', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const msearch: any = query.buildMSearch(['1234', '5678']);
     expect(msearch[0].index).toBe('index-pattern');
-    expect(msearch[1].query.bool.filter[0]).toStrictEqual({
+    expect(msearch[1].query.bool.filter[0].bool.should[0]).toStrictEqual({
       terms: { 'process.parent.entity_id': ['1234', '5678'] },
     });
   });
