@@ -45,7 +45,7 @@ export function registerDownloadExceptionListRoute(
 
       // The ApiKey must be associated with an enrolled Fleet agent
       try {
-        scopedSOClient = endpointContext.service.getScopedSavedObjects(req);
+        scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(scopedSOClient, req);
       } catch (err) {
         if (err.output.statusCode === 401) {

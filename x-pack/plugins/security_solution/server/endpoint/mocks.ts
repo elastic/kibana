@@ -46,7 +46,7 @@ export const createMockEndpointAppContextService = (
     stop: jest.fn(),
     getAgentService: jest.fn(),
     getManifestManager: mockManifestManager ?? jest.fn(),
-    getScopedSavedObjects: jest.fn(),
+    getScopedSavedObjectsClient: jest.fn(),
   };
 };
 

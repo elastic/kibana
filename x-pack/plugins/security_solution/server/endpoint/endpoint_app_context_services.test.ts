@@ -15,10 +15,10 @@ describe('test endpoint app context services', () => {
     const endpointAppContextService = new EndpointAppContextService();
     expect(endpointAppContextService.getManifestManager()).toEqual(undefined);
   });
-  it('should return undefined on getScopedSavedObjects if start is not called', async () => {
+  it('should return undefined on getScopedSavedObjectsClient if start is not called', async () => {
     const endpointAppContextService = new EndpointAppContextService();
     expect(
-      endpointAppContextService.getScopedSavedObjects(httpServerMock.createKibanaRequest())
+      endpointAppContextService.getScopedSavedObjectsClient(httpServerMock.createKibanaRequest())
     ).toEqual(undefined);
   });
 });

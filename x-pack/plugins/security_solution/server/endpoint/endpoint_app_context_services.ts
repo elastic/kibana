@@ -49,7 +49,7 @@ export class EndpointAppContextService {
     return this.manifestManager;
   }
 
-  public getScopedSavedObjects(req: KibanaRequest): SavedObjectsClient | undefined {
+  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClient | undefined {
     let client: SavedObjectsClient;
     if (this.savedObjectsStart !== undefined) {
       client = this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
