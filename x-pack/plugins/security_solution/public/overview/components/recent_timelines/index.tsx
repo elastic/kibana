@@ -24,6 +24,7 @@ import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import { FilterMode } from './types';
 import { LoadingPlaceholders } from '../loading_placeholders';
+import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../app/types';
 import { APP_ID } from '../../../../common/constants';
@@ -83,25 +84,25 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
     );
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
-
-    useEffect(
-      () =>
-        fetchAllTimeline({
-          pageInfo: {
-            pageIndex: 1,
-            pageSize: PAGE_SIZE,
-          },
-          search: '',
-          sort: {
-            sortField: SortFieldTimeline.updated,
-            sortOrder: Direction.desc,
-          },
-          onlyUserFavorite: filterBy === 'favorites',
-          timelineType: TimelineType.default,
-        }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterBy]
-    );
+    const timelineType = TimelineType.default;
+    const { templateTimelineType, timelineStatus } = useTimelineStatus({ timelineType });
+    useEffect(() => {
+      fetchAllTimeline({
+        pageInfo: {
+          pageIndex: 1,
+          pageSize: PAGE_SIZE,
+        },
+        search: '',
+        sort: {
+          sortField: SortFieldTimeline.updated,
+          sortOrder: Direction.desc,
+        },
+        onlyUserFavorite: filterBy === 'favorites',
+        status: timelineStatus,
+        timelineType,
+        templateTimelineType,
+      });
+    }, [fetchAllTimeline, filterBy, timelineStatus, timelineType, templateTimelineType]);
 
     return (
       <>

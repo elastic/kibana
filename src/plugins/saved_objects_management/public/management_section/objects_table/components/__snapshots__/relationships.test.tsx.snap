@@ -456,7 +456,7 @@ exports[`Relationships should render searches normally 1`] = `
                 "icon": "indexPatternApp",
                 "inAppUrl": Object {
                   "path": "/app/management/kibana/indexPatterns/patterns/1",
-                  "uiCapabilitiesPath": "management.kibana.index_patterns",
+                  "uiCapabilitiesPath": "management.kibana.indexPatterns",
                 },
                 "title": "My Index Pattern",
               },

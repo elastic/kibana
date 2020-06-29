@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'kibana/server';
+import { Logger, ILegacyCustomClusterClient, UiSettingsServiceStart } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { AlertServices } from '../../../../alerts/server';
 import { AlertCommonCluster } from '../../alerts/types';
@@ -23,7 +23,7 @@ export interface PreparedAlert {
 }
 
 async function getCallCluster(
-  monitoringCluster: ICustomClusterClient,
+  monitoringCluster: ILegacyCustomClusterClient,
   services: Pick<AlertServices, 'callCluster'>
 ): Promise<any> {
   if (!monitoringCluster) {
@@ -36,7 +36,7 @@ async function getCallCluster(
 export async function getPreparedAlert(
   alertType: string,
   getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-  monitoringCluster: ICustomClusterClient,
+  monitoringCluster: ILegacyCustomClusterClient,
   logger: Logger,
   ccsEnabled: boolean,
   services: Pick<AlertServices, 'callCluster' | 'savedObjectsClient'>,
