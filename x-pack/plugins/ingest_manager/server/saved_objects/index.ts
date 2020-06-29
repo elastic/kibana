@@ -212,7 +212,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: { type: 'keyword' },
+                dataset: {
+                  properties: {
+                    name: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                  },
+                },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
                 agent_stream: { type: 'flattened' },
