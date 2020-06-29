@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
@@ -19,7 +18,7 @@ const ItemRow = styled.div`
 `;
 
 const ItemTitle = styled.dt`
-  color: ${lightTheme.textColors.subdued};
+  color: ${({ theme }) => theme.eui.textColors.subdued};
 `;
 
 const ItemDescription = styled.dd``;

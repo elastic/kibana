@@ -15,7 +15,7 @@ import {
 } from '../tasks/configure_cases';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { CASES } from '../urls/navigation';
+import { CASES_URL } from '../urls/navigation';
 
 describe('Cases connectors', () => {
   before(() => {
@@ -25,7 +25,7 @@ describe('Cases connectors', () => {
   });
 
   it('Configures a new connector', () => {
-    loginAndWaitForPageWithoutDateRange(CASES);
+    loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
     addServiceNowConnector(serviceNowConnector);

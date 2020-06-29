@@ -11,6 +11,7 @@ export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
   IngestManagerStartContract,
+  ExternalCallback,
 } from './plugin';
 
 export const config = {
@@ -27,6 +28,7 @@ export const config = {
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
+      pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
@@ -40,6 +42,8 @@ export const config = {
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
+
+export { DatasourceServiceInterface } from './services/datasource';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

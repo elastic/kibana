@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,15 +24,6 @@ export const DocumentFieldsTreeEditor = () => {
   const addField = useCallback(() => {
     dispatch({ type: 'documentField.createField' });
   }, [dispatch]);
-
-  useEffect(() => {
-    /**
-     * If there aren't any fields yet, we display the create field form
-     */
-    if (status === 'idle' && fields.length === 0) {
-      addField();
-    }
-  }, [addField, fields, status]);
 
   const renderCreateField = () => {
     // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.

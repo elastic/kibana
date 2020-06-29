@@ -15,7 +15,8 @@
     "usageCollection",
     "share",
     "embeddable",
-    "uiActions"
+    "uiActions",
+    "kibanaLegacy"
   ],
   "optionalPlugins": [
     "security",

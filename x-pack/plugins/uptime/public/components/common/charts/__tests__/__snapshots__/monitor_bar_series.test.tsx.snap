@@ -8,6 +8,10 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
     class="echChart"
   >
     <div
+      class="echChartBackground"
+      style="background-color:transparent"
+    />
+    <div
       class="echChartStatus"
       data-ech-render-complete="false"
       data-ech-render-count="0"
@@ -17,15 +21,7 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
     />
     <div
       class="echContainer"
-    >
-      <div
-        class="echReactiveChart_unavailable"
-      >
-        <p>
-          No data to display
-        </p>
-      </div>
-    </div>
+    />
   </div>
 </div>
 `;
@@ -81,26 +77,61 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
     }
   }
 >
-  <MonitorBarSeries
-    histogramSeries={
-      Array [
-        Object {
-          "down": 1,
-          "timestamp": 124,
-          "up": 0,
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-        Object {
-          "down": 1,
-          "timestamp": 125,
-          "up": 0,
-        },
-        Object {
-          "down": 1,
-          "timestamp": 126,
-          "up": 0,
-        },
-      ]
+        "push": [Function],
+        "replace": [Function],
+      }
     }
-  />
+  >
+    <MonitorBarSeries
+      histogramSeries={
+        Array [
+          Object {
+            "down": 1,
+            "timestamp": 124,
+            "up": 0,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 125,
+            "up": 0,
+          },
+          Object {
+            "down": 1,
+            "timestamp": 126,
+            "up": 0,
+          },
+        ]
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

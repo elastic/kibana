@@ -6,6 +6,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
+import uuid from 'uuid';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { disableTemplate } from '../../../../common/constants';
@@ -19,25 +20,13 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
-import { TimelineById, TimelineState } from './types';
-
-const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
+import { TimelineById } from './types';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
-
-export const initialTimelineState: TimelineState = {
-  timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
-  showCallOutUnauthorizedMsg: false,
-  insertTimeline: null,
-};
 
 interface AddTimelineHistoryParams {
   id: string;
@@ -170,28 +159,38 @@ export const addNewTimeline = ({
   showRowRenderers = true,
   timelineById,
   timelineType,
-}: AddNewTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    id,
-    ...timelineDefaults,
-    columns,
-    dataProviders,
-    dateRange,
-    filters,
-    itemsPerPage,
-    kqlQuery,
-    sort,
-    show,
-    savedObjectId: null,
-    version: null,
-    isSaving: false,
-    isLoading: false,
-    showCheckboxes,
-    showRowRenderers,
-    timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
-  },
-});
+}: AddNewTimelineParams): TimelineById => {
+  const templateTimelineInfo =
+    !disableTemplate && timelineType === TimelineType.template
+      ? {
+          templateTimelineId: uuid.v4(),
+          templateTimelineVersion: 1,
+        }
+      : {};
+  return {
+    ...timelineById,
+    [id]: {
+      id,
+      ...timelineDefaults,
+      columns,
+      dataProviders,
+      dateRange,
+      filters,
+      itemsPerPage,
+      kqlQuery,
+      sort,
+      show,
+      savedObjectId: null,
+      version: null,
+      isSaving: false,
+      isLoading: false,
+      showCheckboxes,
+      showRowRenderers,
+      timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
+      ...templateTimelineInfo,
+    },
+  };
+};
 
 interface PinTimelineEventParams {
   id: string;
@@ -236,6 +235,26 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
+    },
+  };
+};
+
+export const updateGraphEventId = ({
+  id,
+  graphEventId,
+  timelineById,
+}: {
+  id: string;
+  graphEventId: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      graphEventId,
     },
   };
 };

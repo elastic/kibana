@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-fields: IIndexPatternFieldList;
+fields: IIndexPatternFieldList & {
+        toSpec: () => FieldSpec[];
+    };
 ```

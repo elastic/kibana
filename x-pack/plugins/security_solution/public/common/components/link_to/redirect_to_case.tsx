@@ -4,41 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { appendSearch } from './helpers';
-import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../../app/types';
 
-export type CaseComponentProps = RouteComponentProps<{
-  detailName: string;
-}>;
+export const getCaseUrl = (search: string | null) => `${appendSearch(search ?? undefined)}`;
 
-export const RedirectToCasePage = ({
-  match: {
-    params: { detailName },
-  },
-}: CaseComponentProps) => (
-  <RedirectWrapper
-    to={detailName ? `/${SiemPageName.case}/${detailName}` : `/${SiemPageName.case}`}
-  />
-);
+export const getCaseDetailsUrl = ({ id, search }: { id: string; search?: string | null }) =>
+  `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
 
-export const RedirectToCreatePage = () => <RedirectWrapper to={`/${SiemPageName.case}/create`} />;
-export const RedirectToConfigureCasesPage = () => (
-  <RedirectWrapper to={`/${SiemPageName.case}/configure`} />
-);
+export const getCreateCaseUrl = (search?: string | null) =>
+  `/create${appendSearch(search ?? undefined)}`;
 
-const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
-
-export const getCaseUrl = (search: string | null) =>
-  `${baseCaseUrl}${appendSearch(search ?? undefined)}`;
-
-export const getCaseDetailsUrl = ({ id, search }: { id: string; search: string | null }) =>
-  `${baseCaseUrl}/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
-
-export const getCreateCaseUrl = (search: string | null) =>
-  `${baseCaseUrl}/create${appendSearch(search ?? undefined)}`;
-
-export const getConfigureCasesUrl = (search: string) =>
-  `${baseCaseUrl}/configure${appendSearch(search ?? undefined)}`;
+export const getConfigureCasesUrl = (search?: string) =>
+  `/configure${appendSearch(search ?? undefined)}`;
