@@ -37,6 +37,7 @@ const ENV_CI = process.env.CI;
 
 describe('dev/mocha/junit report generation', () => {
   before(() => {
+    // We want JUnit report paths to be consistent for the tests. They are unique per execution in CI
     delete process.env.CI;
   });
 
