@@ -7,7 +7,6 @@
 import { Store } from 'redux';
 import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-export { ResolverAction } from './store/actions';
 import {
   ResolverEvent,
   ResolverNodeStats,
@@ -451,16 +450,6 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
-
-/**
- * Defines the externally provided properties that Resolver acknowledges.
- */
-export interface ResolverExternalProperties {
-  /**
-   * the `_id` of an ES document. This defines the origin of the Resolver graph.
-   */
-  databaseDocumentID?: string;
-}
 
 /**
  * Describes the basic Resolver graph layout.

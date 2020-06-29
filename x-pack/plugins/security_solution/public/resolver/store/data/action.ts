@@ -5,7 +5,6 @@
  */
 
 import { ResolverRelatedEvents, ResolverTree } from '../../../../common/endpoint/types';
-import { ResolverExternalProperties } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -68,7 +67,15 @@ interface ServerReturnedRelatedEventData {
  */
 interface AppReceivedNewExternalProperties {
   type: 'appReceivedNewExternalProperties';
-  payload: ResolverExternalProperties;
+  /**
+   * Defines the externally provided properties that Resolver acknowledges.
+   */
+  payload: {
+    /**
+     * the `_id` of an ES document. This defines the origin of the Resolver graph.
+     */
+    databaseDocumentID?: string;
+  };
 }
 
 export type DataAction =
