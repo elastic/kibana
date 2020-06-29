@@ -49,7 +49,7 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
-    'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
+    'src/legacy/core_plugins/**/*.{js,mjs,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
   ],
   moduleNameMapper: {
