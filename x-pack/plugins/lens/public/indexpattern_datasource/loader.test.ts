@@ -177,8 +177,7 @@ function mockClient() {
   } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/70104
-describe.skip('loader', () => {
+describe('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const cache = await loadIndexPatterns({
@@ -318,7 +317,6 @@ describe.skip('loader', () => {
           a: sampleIndexPatterns.a,
         },
         layers: {},
-        showEmptyFields: false,
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
         indexPatternId: 'a',
@@ -341,7 +339,6 @@ describe.skip('loader', () => {
           b: sampleIndexPatterns.b,
         },
         layers: {},
-        showEmptyFields: false,
       });
     });
 
