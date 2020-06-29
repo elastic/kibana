@@ -72,8 +72,8 @@ describe('manifest', () => {
               '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
           },
         },
-        manifestVersion: 'abcd',
-        schemaVersion: '1.0.0',
+        manifest_version: 'abcd',
+        schema_version: '1.0.0',
       });
     });
 

@@ -41,6 +41,11 @@ describe('policy details: ', () => {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: {
+                  manifest_version: 'baseline',
+                  schema_version: '1.0.0',
+                  artifacts: {},
+                },
                 policy: {
                   value: policyConfigFactory(),
                 },
