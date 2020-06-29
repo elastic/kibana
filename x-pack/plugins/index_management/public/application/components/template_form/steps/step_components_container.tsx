@@ -6,23 +6,20 @@
 import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
+import { documentationService } from '../../../services/documentation';
 import { WizardContent } from '../template_form';
-import { StepLogistics } from './step_logistics';
+import { StepComponents } from './step_components';
 
-interface Props {
-  isLegacy?: boolean;
-  isEditing?: boolean;
-}
-
-export const StepLogisticsContainer = ({ isEditing, isLegacy }: Props) => {
-  const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'logistics'>('logistics');
+export const StepComponentContainer = () => {
+  const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'components'>(
+    'components'
+  );
 
   return (
-    <StepLogistics
+    <StepComponents
       defaultValue={defaultValue}
       onChange={updateContent}
-      isEditing={isEditing}
-      isLegacy={isLegacy}
+      esDocsBase={documentationService.getEsDocsBase()}
     />
   );
 };

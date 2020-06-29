@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const StepAliasesContainer: React.FunctionComponent<Props> = ({ esDocsBase }) => {
-  const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps>('aliases');
+  const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps, 'aliases'>('aliases');
 
   return (
     <StepAliases defaultValue={defaultValue} onChange={updateContent} esDocsBase={esDocsBase} />

@@ -16,11 +16,19 @@ export const getTemplateDetailsLink = (name: string, isLegacy?: boolean, withHas
 };
 
 export const getTemplateEditLink = (name: string, isLegacy?: boolean) => {
-  return encodeURI(`/edit_template/${encodePathForReactRouter(name)}?legacy=${isLegacy === true}`);
+  let url = `/edit_template/${encodePathForReactRouter(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
+  }
+  return encodeURI(url);
 };
 
 export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
-  return encodeURI(`/clone_template/${encodePathForReactRouter(name)}?legacy=${isLegacy === true}`);
+  let url = `/clone_template/${encodePathForReactRouter(name)}`;
+  if (isLegacy) {
+    url = `${url}?legacy=true`;
+  }
+  return encodeURI(url);
 };
 
 export const decodePathFromReactRouter = (pathname: string): string => {
