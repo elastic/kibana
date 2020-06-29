@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Annotation } from '../../../../common/types/annotations';
+import {
+  Annotation,
+  EsAggregationResult,
+  FieldToBucket,
+} from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
 
@@ -22,7 +26,21 @@ export const annotations = {
       body,
     });
   },
-  indexAnnotation(obj: any) {
+  getUniqueAnnotationTerms(obj: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    fields: FieldToBucket[];
+  }) {
+    const body = JSON.stringify(obj);
+    return http$<{ annotationTerms: Record<string, EsAggregationResult> }>({
+      path: `${basePath()}/annotations/terms`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  indexAnnotation(obj: Annotation) {
     const body = JSON.stringify(obj);
     return http<any>({
       path: `${basePath()}/annotations/index`,

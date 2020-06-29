@@ -27,6 +27,8 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
   EuiTitle,
+  EuiPanel,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -283,6 +285,7 @@ export class Explorer extends React.Component {
 
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
+    const selectedJobIds = selectedJobs.map((job) => job.id);
 
     return (
       <ExplorerPage
@@ -332,79 +335,88 @@ export class Explorer extends React.Component {
             />
             <EuiSpacer size="m" />
 
-            {annotationsData.length > 0 && (
-              <>
+            <EuiAccordion
+              buttonContent={
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsTitle"
-                      defaultMessage="Annotations"
+                      defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
+                      values={{ count: annotationsData.length }}
                     />
                   </h2>
                 </EuiTitle>
-                <AnnotationsTable
-                  annotations={annotationsData}
-                  drillDown={true}
-                  numberBadge={false}
-                />
-                <AnnotationFlyout />
-                <EuiSpacer size="l" />
-              </>
-            )}
-
-            <EuiTitle className="panel-title">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.explorer.anomaliesTitle"
-                  defaultMessage="Anomalies"
-                />
-              </h2>
-            </EuiTitle>
-
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="l"
-              responsive={true}
-              className="ml-anomalies-controls"
+              }
             >
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-                    defaultMessage: 'Severity threshold',
-                  })}
-                >
-                  <SelectSeverity />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                <EuiFormRow
-                  label={i18n.translate('xpack.ml.explorer.intervalLabel', {
-                    defaultMessage: 'Interval',
-                  })}
-                >
-                  <SelectInterval />
-                </EuiFormRow>
-              </EuiFlexItem>
-              {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-                <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-                  <EuiFormRow label="&#8203;">
-                    <CheckboxShowCharts />
+              {annotationsData.length > 0 && (
+                <>
+                  <AnnotationsTable
+                    jobIds={selectedJobIds}
+                    annotations={annotationsData}
+                    drillDown={true}
+                    numberBadge={false}
+                  />
+                  <AnnotationFlyout />
+                  <EuiSpacer size="l" />
+                </>
+              )}
+            </EuiAccordion>
+
+            <EuiPanel>
+              <EuiTitle className="panel-title">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.explorer.anomaliesTitle"
+                    defaultMessage="Anomalies"
+                  />
+                </h2>
+              </EuiTitle>
+
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="l"
+                responsive={true}
+                className="ml-anomalies-controls"
+              >
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+                      defaultMessage: 'Severity threshold',
+                    })}
+                  >
+                    <SelectSeverity />
                   </EuiFormRow>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={i18n.translate('xpack.ml.explorer.intervalLabel', {
+                      defaultMessage: 'Interval',
+                    })}
+                  >
+                    <SelectInterval />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
+                  <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                    <EuiFormRow label="&#8203;">
+                      <CheckboxShowCharts />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
 
-            <EuiSpacer size="m" />
+              <EuiSpacer size="m" />
 
-            <div className="euiText explorer-charts">
-              {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
-            </div>
+              <div className="euiText explorer-charts">
+                {showCharts && <ExplorerChartsContainer {...{ ...chartsData, severity }} />}
+              </div>
 
-            <AnomaliesTable
-              bounds={bounds}
-              tableData={tableData}
-              influencerFilter={this.applyFilter}
-            />
+              <AnomaliesTable
+                bounds={bounds}
+                tableData={tableData}
+                influencerFilter={this.applyFilter}
+              />
+            </EuiPanel>
           </div>
         </div>
       </ExplorerPage>

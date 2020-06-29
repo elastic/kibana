@@ -73,8 +73,15 @@ export interface Annotation {
   annotation: string;
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
+  event?: string;
+  detector_index?: string;
+  partition_field_name?: string;
+  partition_field_value?: string;
+  over_field_name?: string;
+  over_field_value?: string;
+  by_field_name?: string;
+  by_field_value?: string;
 }
-
 export function isAnnotation(arg: any): arg is Annotation {
   return (
     arg.timestamp !== undefined &&
@@ -93,3 +100,16 @@ export function isAnnotations(arg: any): arg is Annotations {
   }
   return arg.every((d: Annotation) => isAnnotation(d));
 }
+
+export interface FieldToBucket {
+  key: string;
+  doc_count: number;
+}
+
+export interface TermAggregationResult {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: FieldToBucket[];
+}
+
+export type EsAggregationResult = Record<string, TermAggregationResult>;

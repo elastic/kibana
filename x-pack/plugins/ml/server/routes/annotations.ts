@@ -16,6 +16,7 @@ import {
   deleteAnnotationSchema,
   getAnnotationsSchema,
   indexAnnotationSchema,
+  getAnnotationTermsSchema,
 } from './schemas/annotations_schema';
 
 import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
@@ -64,6 +65,44 @@ export function annotationRoutes(
           context.ml!.mlClient.callAsCurrentUser
         );
         const resp = await getAnnotations(request.body);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup Annotations
+   *
+   * @api {post} /api/ml/annotations/terms Gets unique fields
+   * @apiName GetAnnotations
+   * @apiDescription Gets annotations.
+   *
+   * @apiSchema (body) getAnnotationsSchema
+   *
+   * @apiSuccess {Boolean} success
+   * @apiSuccess {Object} annotations
+   */
+  router.post(
+    {
+      path: '/api/ml/annotations/terms',
+      validate: {
+        body: getAnnotationTermsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetAnnotations'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { getUniqueTerms } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
+        const resp = await getUniqueTerms(request.body);
 
         return response.ok({
           body: resp,

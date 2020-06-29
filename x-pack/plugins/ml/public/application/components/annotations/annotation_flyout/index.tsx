@@ -7,6 +7,7 @@
 import React, { Component, Fragment, FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import {
   EuiButton,
@@ -21,12 +22,12 @@ import {
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
 import {
   annotation$,
@@ -35,21 +36,31 @@ import {
 } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+interface Entity {
+  fieldName: string;
+  fieldType: string;
+  fieldValue: string;
+}
 
 interface Props {
   annotation: AnnotationState;
+  chartDetails: {
+    entityData: { entities: Entity[] };
+    functionLabel: string;
+  };
 }
 
 interface State {
   isDeleteModalVisible: boolean;
+  applyAnnotationToSeries: boolean;
 }
 
 class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
+    applyAnnotationToSeries: false,
   };
 
   public annotationSub: Rx.Subscription | null = null;
@@ -150,12 +161,27 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public saveOrUpdateAnnotation = () => {
-    const { annotation } = this.props;
-
-    if (annotation === null) {
+    const { annotation: originalAnnotation, chartDetails } = this.props;
+    if (originalAnnotation === null) {
       return;
     }
+    const annotation = cloneDeep(originalAnnotation);
 
+    if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
+      chartDetails.entityData.entities.forEach((entity: Entity) => {
+        const { fieldName, fieldType, fieldValue } = entity;
+        // @ts-ignore
+        annotation[`${fieldType}_name`] = fieldName;
+        // @ts-ignore
+        annotation[`${fieldType}_value`] = fieldValue;
+      });
+    }
+    // Mark the annotation created by `user` instead of automatically generated
+    annotation.event = 'user';
+
+    // console.log('annotation', annotation);
+    // console.log('this.props', this.props);
+    //
     annotation$.next(null);
 
     ml.annotations
@@ -284,6 +310,23 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 onChange={this.annotationTextChangeHandler}
                 placeholder="..."
                 value={annotation.annotation}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiCheckbox
+                id={'xpack.ml.timeSeriesExplorer.annotationFlyout.applyToPartition'}
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.applyToPartitionTextLabel"
+                    defaultMessage="Apply annotation to partition"
+                  />
+                }
+                checked={this.state.applyAnnotationToSeries}
+                onChange={() =>
+                  this.setState({
+                    applyAnnotationToSeries: !this.state.applyAnnotationToSeries,
+                  })
+                }
               />
             </EuiFormRow>
           </EuiFlyoutBody>

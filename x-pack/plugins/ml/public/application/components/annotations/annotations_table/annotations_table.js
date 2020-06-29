@@ -73,6 +73,24 @@ export class AnnotationsTable extends Component {
         this.props.jobs[0] !== undefined
           ? this.props.jobs[0].job_id
           : undefined,
+      filters: false,
+      filterOptions: [],
+    };
+    this.sorting = {
+      sort: { field: 'timestamp', direction: 'asc' },
+    };
+    this.search = {
+      box: {
+        incremental: true,
+        schema: true,
+      },
+      filters: [
+        {
+          type: 'field_value_selection',
+          field: 'event',
+          name: 'Event type',
+        },
+      ],
     };
   }
 
@@ -95,12 +113,52 @@ export class AnnotationsTable extends Component {
         })
         .toPromise()
         .then((resp) => {
+          console.log('annotations', resp.annotations);
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
           }));
+        })
+        .catch((resp) => {
+          console.log('Error loading list of annotations for jobs list:', resp);
+          this.setState({
+            annotations: [],
+            errorMessage: 'Error loading the list of annotations for this job',
+            isLoading: false,
+            jobId: undefined,
+          });
+        });
+    }
+  }
+
+  getUniqueTerms() {
+    const jobIds = this.props.jobIds;
+
+    this.setState({
+      isLoading: true,
+    });
+
+    if (jobIds) {
+      // Load annotations for the selected job.
+      ml.annotations
+        .getUniqueAnnotationTerms({
+          jobIds: jobIds,
+          earliestMs: null,
+          latestMs: null,
+          fields: [
+            {
+              field: 'event',
+              missing: 'user',
+            },
+          ],
+        })
+        .toPromise()
+        .then((resp) => {
+          this.setState({
+            filterOptions: resp.event.buckets,
+          });
         })
         .catch((resp) => {
           console.log('Error loading list of annotations for jobs list:', resp);
@@ -127,6 +185,7 @@ export class AnnotationsTable extends Component {
   }
 
   annotationsRefreshSubscription = null;
+  annotationsSubscription = null;
 
   componentDidMount() {
     if (
@@ -134,10 +193,15 @@ export class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) &&
       this.props.jobs.length > 0
     ) {
-      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() =>
-        this.getAnnotations()
-      );
+      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => {
+        this.getAnnotations();
+        this.getUniqueTerms();
+      });
       annotationsRefreshed();
+    }
+
+    if (this.props.jobIds) {
+      this.annotationsSubscription = annotation$.subscribe(() => this.getUniqueTerms());
     }
   }
 
@@ -159,6 +223,9 @@ export class AnnotationsTable extends Component {
   componentWillUnmount() {
     if (this.annotationsRefreshSubscription !== null) {
       this.annotationsRefreshSubscription.unsubscribe();
+    }
+    if (this.annotationsSubscription !== null) {
+      this.annotationsSubscription.unsubscribe();
     }
   }
 
@@ -268,7 +335,7 @@ export class AnnotationsTable extends Component {
     }
 
     const annotations = this.props.annotations || this.state.annotations;
-
+    console.log('annotations', annotations);
     if (annotations.length === 0) {
       return (
         <EuiCallOut
@@ -348,6 +415,20 @@ export class AnnotationsTable extends Component {
         field: 'modified_username',
         name: i18n.translate('xpack.ml.annotationsTable.lastModifiedByColumnName', {
           defaultMessage: 'Last modified by',
+        }),
+        sortable: true,
+      },
+      {
+        field: 'event',
+        name: i18n.translate('xpack.ml.annotationsTable.eventColumnName', {
+          defaultMessage: 'Event',
+        }),
+        sortable: true,
+      },
+      {
+        field: 'partition_field_value',
+        name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
+          defaultMessage: 'Partition',
         }),
         sortable: true,
       },
@@ -462,7 +543,40 @@ export class AnnotationsTable extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
+    // console.log(
+    //   'this.props.chartDetails.entityData.entities[0].fieldValue',
+    //   this.props.chartDetails.entityData.entities[0].fieldValue
+    // );
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'event',
+        name: 'Event',
+        multiSelect: 'or',
+        options: this.state.filterOptions.map((field) => ({
+          value: field.key,
+          name: field.key,
+          view: `${field.key} (${field.doc_count})`,
+        })),
+      },
+    ];
 
+    if (this.props.chartDetails && this.props.chartDetails.entityData) {
+      filters.push({
+        type: 'field_value_toggle',
+        field: 'partition_field_value',
+        name: 'Current Partition',
+        value: this.props.chartDetails.entityData.entities[0].fieldValue,
+      });
+    }
+    const search = {
+      box: {
+        incremental: true,
+        schema: true,
+      },
+      defaultQuery: 'event:(user)',
+      filters: filters,
+    };
     return (
       <Fragment>
         <EuiInMemoryTable
@@ -473,12 +587,8 @@ export class AnnotationsTable extends Component {
           pagination={{
             pageSizeOptions: [5, 10, 25],
           }}
-          sorting={{
-            sort: {
-              field: 'timestamp',
-              direction: 'asc',
-            },
-          }}
+          sorting={this.sorting}
+          search={search}
           rowProps={getRowProps}
         />
       </Fragment>

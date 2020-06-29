@@ -28,6 +28,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import { getToastNotifications } from '../util/dependency_cache';
@@ -1106,6 +1107,7 @@ export class TimeSeriesExplorer extends React.Component {
      */
     let hasEmptyFieldValues = false;
 
+    console.log('chartDetails', chartDetails);
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
@@ -1311,25 +1313,30 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
-                {showAnnotations && focusAnnotationData.length > 0 && (
-                  <div>
+                <EuiAccordion
+                  id={'EuiAccordion-blah'}
+                  buttonContent={
                     <EuiTitle className="panel-title">
                       <h2>
                         <FormattedMessage
                           id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                          defaultMessage="Annotations"
+                          defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
+                          values={{ count: focusAnnotationData.length }}
                         />
                       </h2>
                     </EuiTitle>
-                    <AnnotationsTable
-                      annotations={focusAnnotationData}
-                      isSingleMetricViewerLinkVisible={false}
-                      isNumberBadgeVisible={true}
-                    />
-                    <EuiSpacer size="l" />
-                  </div>
-                )}
-                <AnnotationFlyout />
+                  }
+                >
+                  <AnnotationsTable
+                    chartDetails={chartDetails}
+                    jobIds={[this.props.selectedJobId]}
+                    annotations={focusAnnotationData}
+                    isSingleMetricViewerLinkVisible={false}
+                    isNumberBadgeVisible={true}
+                  />
+                  <EuiSpacer size="l" />
+                </EuiAccordion>
+                <AnnotationFlyout chartDetails={chartDetails} />
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage

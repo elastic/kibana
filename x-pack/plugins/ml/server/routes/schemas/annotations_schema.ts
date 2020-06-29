@@ -16,6 +16,14 @@ export const indexAnnotationSchema = schema.object({
   create_username: schema.maybe(schema.string()),
   modified_time: schema.maybe(schema.number()),
   modified_username: schema.maybe(schema.string()),
+  event: schema.maybe(schema.string()),
+  detector_index: schema.maybe(schema.string()),
+  partition_field_name: schema.maybe(schema.string()),
+  partition_field_value: schema.maybe(schema.string()),
+  over_field_name: schema.maybe(schema.string()),
+  over_field_value: schema.maybe(schema.string()),
+  by_field_name: schema.maybe(schema.string()),
+  by_field_value: schema.maybe(schema.string()),
   /** Document id */
   _id: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
@@ -26,6 +34,20 @@ export const getAnnotationsSchema = schema.object({
   earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   maxAnnotations: schema.number(),
+});
+
+export const getAnnotationTermsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
+  latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
+  fields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        field: schema.string(),
+        missing: schema.maybe(schema.string()),
+      })
+    )
+  ),
 });
 
 export const deleteAnnotationSchema = schema.object({ annotationId: schema.string() });
