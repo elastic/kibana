@@ -4,34 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaRequest, IKibanaResponse, KibanaResponseFactory } from 'kibana/server';
-import { TAGS_API_PATH } from '../../constants';
+import { schema } from '@kbn/config-schema';
+import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
 
-export const bodySchema = schema.object({
-  name: schema.string(),
-});
-
-export const createRoute = ({ router }: RouteParams) => {
+export const routeCreateTag = ({ router }: RouteParams) => {
   router.post(
     {
       path: `${TAGS_API_PATH}`,
       validate: {
-        body: bodySchema,
+        body: schema.object({
+          tag: schema.object({
+            title: schema.string(),
+            description: schema.string(),
+            color: schema.string(),
+          }),
+        }),
       },
     },
-    assertTagsContext(
-      async (
-        context,
-        req: KibanaRequest<unknown, unknown, TypeOf<typeof bodySchema>>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse> => {
-        return res.ok({
-          body: { foo: 'bar' },
-        });
-      }
-    )
+    assertTagsContext(async ({ tags }, req, res) => {
+      const body = await tags.tagsClient.create(req.body);
+      return res.ok({ body });
+    })
   );
 };

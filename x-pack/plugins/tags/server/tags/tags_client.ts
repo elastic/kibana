@@ -6,7 +6,7 @@
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { RawTag } from '../../common';
+import { RawTag, Tag } from '../../common';
 import { validateTagTitle, validateTagDescription, validateTagColor } from './validators';
 
 export type TagSavedObject = SavedObject<RawTag>;
@@ -26,7 +26,14 @@ export class TagsClient {
 
   constructor(private readonly params: TagsClientParams) {}
 
-  public async create({ tag }: TagsClientCreateParams): Promise<TagSavedObject> {
+  private tagSavedObjectToTag(savedObject: TagSavedObject): Tag {
+    return {
+      id: savedObject.id,
+      ...savedObject.attributes,
+    };
+  }
+
+  public async create({ tag }: TagsClientCreateParams): Promise<Tag> {
     const { savedObjectsClient, user } = this.params;
     const { title, description, color } = tag;
 
@@ -49,12 +56,12 @@ export class TagsClient {
       createdBy: username,
       updatedBy: username,
     };
-    const createdTag: TagSavedObject = await savedObjectsClient.create<RawTag>(
+    const savedObject: TagSavedObject = await savedObjectsClient.create<RawTag>(
       this.type,
       rawTag,
       {}
     );
 
-    return createdTag;
+    return this.tagSavedObjectToTag(savedObject);
   }
 }

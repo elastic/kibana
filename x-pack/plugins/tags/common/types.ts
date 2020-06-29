@@ -16,3 +16,7 @@ export interface RawTag {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Tag extends RawTag {
+  id: string;
+}
