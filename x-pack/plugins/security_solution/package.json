@@ -13,7 +13,8 @@
     "test:generate": "ts-node --project scripts/endpoint/cli_tsconfig.json scripts/endpoint/resolver_generator.ts"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.110"
+    "@types/lodash": "^4.14.110",
+    "@types/md5": "^2.2.0"
   },
   "dependencies": {
     "@types/rbush": "^3.0.0",

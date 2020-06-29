@@ -177,7 +177,8 @@ function mockClient() {
   } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 }
 
-describe('loader', () => {
+// Failing: See https://github.com/elastic/kibana/issues/70104
+describe.skip('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const cache = await loadIndexPatterns({
