@@ -24,6 +24,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./properties/properties_right');
@@ -96,6 +97,7 @@ describe('Timeline', () => {
       showCallOutUnauthorizedMsg: false,
       start: startDate,
       sort,
+      status: TimelineStatus.active,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
@@ -103,7 +105,11 @@ describe('Timeline', () => {
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<TimelineComponent {...props} />);
+      const wrapper = shallow(
+        <TestProviders>
+          <TimelineComponent {...props} />
+        </TestProviders>
+      );
 
       expect(wrapper).toMatchSnapshot();
     });
