@@ -113,7 +113,6 @@ describe('data generator', () => {
         percentWithRelated: 100,
         relatedEvents: 0,
         relatedAlerts: 0,
-        useAncestryArray: true,
         ancestryArraySize: ANCESTRY_LIMIT,
       });
       tree.ancestry.delete(tree.origin.id);
@@ -152,7 +151,6 @@ describe('data generator', () => {
           { category: RelatedEventCategory.Network, count: 1 },
         ],
         relatedAlerts,
-        useAncestryArray: true,
         ancestryArraySize: ANCESTRY_LIMIT,
       });
     });

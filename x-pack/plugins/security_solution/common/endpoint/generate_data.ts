@@ -39,7 +39,6 @@ interface EventOptions {
   eventCategory?: string | string[];
   processName?: string;
   ancestry?: string[];
-  useAncestryArray?: boolean;
   ancestryArrayLimit?: number;
   pid?: number;
   parentPid?: number;
@@ -289,7 +288,6 @@ export interface TreeOptions {
   percentWithRelated?: number;
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
-  useAncestryArray?: boolean;
   ancestryArraySize?: number;
 }
 
@@ -310,7 +308,6 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     percentWithRelated: options?.percentWithRelated ?? 30,
     percentTerminated: options?.percentTerminated ?? 100,
     alwaysGenMaxChildrenPerNode: options?.alwaysGenMaxChildrenPerNode ?? false,
-    useAncestryArray: options?.useAncestryArray ?? true,
     ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
   };
 }
@@ -523,9 +520,13 @@ export class EndpointDocGenerator {
    * @param options - Allows event field values to be specified
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
-    let ancestry: string[] | undefined;
-    if (options?.useAncestryArray === true || options?.ancestry !== undefined) {
-      ancestry = options.ancestry?.slice(0, options.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
+    // this will default to an empty array for the ancestry field if options.ancestry isn't included
+    let ancestry: string[] | undefined =
+      options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
+
+    // to disable the ancestry array set ancestryArrayLimit to 0
+    if (options?.ancestryArrayLimit !== undefined && options.ancestryArrayLimit <= 0) {
+      ancestry = undefined;
     }
 
     const processName = options.processName ? options.processName : randomProcessName();
@@ -758,7 +759,6 @@ export class EndpointDocGenerator {
     const startDate = new Date().getTime();
     const root = this.generateEvent({
       timestamp: startDate + 1000,
-      useAncestryArray: opts.useAncestryArray,
     });
     events.push(root);
     let ancestor = root;
@@ -802,7 +802,6 @@ export class EndpointDocGenerator {
           parentEntityID: root.process.parent?.entity_id,
           eventCategory: 'process',
           eventType: 'end',
-          useAncestryArray: opts.useAncestryArray,
         })
       );
     }
@@ -814,7 +813,6 @@ export class EndpointDocGenerator {
         // add the parent to the ancestry array
         ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext.ancestry ?? [])],
         ancestryArrayLimit: opts.ancestryArraySize,
-        useAncestryArray: opts.useAncestryArray,
         parentPid: ancestor.process.pid,
         pid: this.randomN(5000),
       });
@@ -832,7 +830,6 @@ export class EndpointDocGenerator {
             eventType: 'end',
             ancestry: ancestor.process.Ext.ancestry,
             ancestryArrayLimit: opts.ancestryArraySize,
-            useAncestryArray: opts.useAncestryArray,
           })
         );
       }
@@ -908,7 +905,6 @@ export class EndpointDocGenerator {
           ...(currentState.event.process.Ext.ancestry ?? []),
         ],
         ancestryArrayLimit: opts.ancestryArraySize,
-        useAncestryArray: opts.useAncestryArray,
       });
 
       maxChildren = this.randomN(opts.children + 1);
@@ -932,7 +928,6 @@ export class EndpointDocGenerator {
           eventType: 'end',
           ancestry: child.process.Ext.ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
-          useAncestryArray: opts.useAncestryArray,
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
