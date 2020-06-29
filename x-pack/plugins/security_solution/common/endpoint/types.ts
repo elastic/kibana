@@ -179,6 +179,8 @@ export interface OSFields {
   full: string;
   name: string;
   version: string;
+  platform: string;
+  family: string;
   Ext: OSFieldsExt;
 }
 
@@ -195,8 +197,10 @@ export interface OSFieldsExt {
 export interface Host {
   id: string;
   hostname: string;
+  name: string;
   ip: string[];
   mac: string[];
+  architecture: string;
   os: OSFields;
 }
 
