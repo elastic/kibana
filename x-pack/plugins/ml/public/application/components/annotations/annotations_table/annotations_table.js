@@ -120,7 +120,7 @@ export class AnnotationsTable extends Component {
   }
 
   getUniqueTerms() {
-    const jobIds = this.props.jobIds;
+    const { jobIds } = this.props;
 
     this.setState({
       isLoading: true,
@@ -147,10 +147,10 @@ export class AnnotationsTable extends Component {
           });
         })
         .catch((resp) => {
-          console.log('Error loading list of annotations for jobs list:', resp);
+          console.log('Error loading list of unique annotation terms for jobs list:', resp);
           this.setState({
             annotations: [],
-            errorMessage: 'Error loading the list of annotations for this job',
+            errorMessage: 'Error loading the list of annotation terms for this job',
             isLoading: false,
             jobId: undefined,
           });

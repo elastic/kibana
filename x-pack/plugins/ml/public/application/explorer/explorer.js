@@ -14,8 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-
 import {
+  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -286,7 +286,7 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = selectedJobs.map((job) => job.id);
-
+    const htmlId = htmlIdGenerator();
     return (
       <ExplorerPage
         jobSelectorProps={jobSelectorProps}
@@ -336,6 +336,7 @@ export class Explorer extends React.Component {
             <EuiSpacer size="m" />
 
             <EuiAccordion
+              id={htmlId}
               buttonContent={
                 <EuiTitle className="panel-title">
                   <h2>
