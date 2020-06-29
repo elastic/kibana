@@ -7,9 +7,8 @@ Feature: RUM Dashboard
       And should have correct client metrics
 
   Scenario: Rum page filters
-    Given a user click the filter
-    When the user select the filter
-    And user applies the selected filter
+    Given the user filters by os
+    When user applies the selected filter
     Then it filters the client metrics
 
   Scenario: Page load distribution percentiles
