@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { chunk } from 'lodash';
+import { Logger } from 'kibana/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -26,6 +27,7 @@ export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
+  logger: Logger;
 }
 
 async function getConnectionData({
@@ -138,6 +140,7 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
+  const { logger } = options;
   const [connectionData, servicesData] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
@@ -150,12 +153,18 @@ export async function getServiceMap(options: IEnvOptions) {
     (serviceData) => serviceData[SERVICE_NAME]
   );
 
-  // Get related service anomalies
-  const serviceAnomalies = await getServiceAnomalies(options, serviceNames);
+  let anomalies: ServiceAnomalies = [];
+  try {
+    // Get related service anomalies
+    anomalies = await getServiceAnomalies(options, serviceNames);
+  } catch (error) {
+    logger.warn('Unabled to retrieve anomaly detection data for service maps.');
+    logger.error(error);
+  }
 
   return transformServiceMapResponses({
     ...connectionData,
-    anomalies: serviceAnomalies,
+    anomalies,
     services: servicesData,
   });
 }
