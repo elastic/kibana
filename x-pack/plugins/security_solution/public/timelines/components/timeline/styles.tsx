@@ -29,7 +29,7 @@ export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
+  display: ${({ visible }) => (visible ? 'block' : 'none')};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
