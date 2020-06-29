@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import moment from 'moment';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -138,7 +138,9 @@ export function ApmServerInstances({ apms, setupMode }) {
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <Status stats={data.stats} />
+          <EuiPanel>
+            <Status stats={data.stats} />
+          </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable

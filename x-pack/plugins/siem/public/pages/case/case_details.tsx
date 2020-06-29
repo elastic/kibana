@@ -14,7 +14,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 import { getCaseUrl } from '../../components/link_to';
 import { navTabs } from '../home/home_navigations';
 import { CaseView } from './components/case_view';
-import { savedObjectReadOnly, CaseCallOut } from './components/callout';
+import { savedObjectReadOnlyErrorMessage, CaseCallOut } from './components/callout';
 
 export const CaseDetailsPage = React.memo(() => {
   const userPermissions = useGetUserSavedObjectPermissions();
@@ -30,8 +30,8 @@ export const CaseDetailsPage = React.memo(() => {
       <WrapperPage noPadding>
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
-            title={savedObjectReadOnly.title}
-            message={savedObjectReadOnly.description}
+            title={savedObjectReadOnlyErrorMessage.title}
+            messages={[{ ...savedObjectReadOnlyErrorMessage }]}
           />
         )}
         <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />

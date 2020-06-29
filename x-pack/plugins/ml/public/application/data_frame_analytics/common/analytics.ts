@@ -273,11 +273,13 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
 };
 
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
 };
 
 export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  if (arg === undefined) return false;
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'query_string';
 };

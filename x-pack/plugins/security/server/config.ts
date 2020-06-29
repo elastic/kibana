@@ -97,6 +97,7 @@ const providersConfigSchema = schema.object(
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
           maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+          useRelayStateDeepLink: schema.boolean({ defaultValue: false }),
         })
       )
     ),

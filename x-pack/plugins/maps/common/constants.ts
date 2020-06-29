@@ -25,7 +25,6 @@ export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
-export const TELEMETRY_TYPE = 'maps-telemetry';
 
 export const MAP_APP_PATH = `app/${APP_ID}`;
 export const GIS_API_PATH = `api/${APP_ID}`;
