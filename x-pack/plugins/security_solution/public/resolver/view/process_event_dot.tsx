@@ -414,13 +414,6 @@ const ProcessEventDotComponents = React.memo(
       });
     }, [dispatch, selfId]);
 
-    const handleRelatedAlertsRequest = useCallback(() => {
-      dispatch({
-        type: 'userSelectedRelatedAlerts',
-        payload: event,
-      });
-    }, [dispatch, event]);
-
     const history = useHistory();
     const urlSearch = history.location.search;
 
@@ -637,22 +630,16 @@ const ProcessEventDotComponents = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              <NodeSubMenu
-                count={grandTotal}
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuAction={handleRelatedEventRequest}
-                menuTitle={subMenuAssets.relatedEvents.title}
-                optionsWithActions={relatedEventStatusOrOptions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NodeSubMenu
-                buttonBorderColor={labelButtonFill}
-                buttonFill={colorMap.resolverBackground}
-                menuTitle={subMenuAssets.relatedAlerts.title}
-                menuAction={handleRelatedAlertsRequest}
-              />
+              {grandTotal > 0 && (
+                <NodeSubMenu
+                  count={grandTotal}
+                  buttonBorderColor={labelButtonFill}
+                  buttonFill={colorMap.resolverBackground}
+                  menuAction={handleRelatedEventRequest}
+                  menuTitle={subMenuAssets.relatedEvents.title}
+                  optionsWithActions={relatedEventStatusOrOptions}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </StyledActionsContainer>
