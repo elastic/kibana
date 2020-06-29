@@ -22,29 +22,8 @@ import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { InternalStartServices } from '../../../types';
-
-const buckets = [
-  {
-    to: 1024,
-    to_as_string: '1024.0',
-    doc_count: 20904,
-  },
-  {
-    from: 1024,
-    from_as_string: '1024.0',
-    to: 2560,
-    to_as_string: '2560.0',
-    doc_count: 23358,
-  },
-  {
-    from: 2560,
-    from_as_string: '2560.0',
-    doc_count: 174250,
-  },
-];
 
 describe('Range Agg', () => {
   let aggTypesDependencies: RangeBucketAggDependencies;
@@ -53,7 +32,6 @@ describe('Range Agg', () => {
     aggTypesDependencies = {
       getInternalStartServices: () =>
         (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
           notifications: notificationServiceMock.createStartContract(),
         } as unknown) as InternalStartServices),
     };
@@ -99,22 +77,9 @@ describe('Range Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };
-
-  describe('formatting', () => {
-    test('formats bucket keys properly', () => {
-      const aggConfigs = getAggConfigs();
-      const agg = aggConfigs.aggs[0];
-      const format = (val: any) => agg.fieldFormatter()(agg.getKey(val));
-
-      expect(format(buckets[0])).toBe('≥ -∞ and < 1 KB');
-      expect(format(buckets[1])).toBe('≥ 1 KB and < 2.5 KB');
-      expect(format(buckets[2])).toBe('≥ 2.5 KB and < +∞');
-    });
-  });
 
   describe('getSerializedFormat', () => {
     test('generates a serialized field format in the expected shape', () => {
