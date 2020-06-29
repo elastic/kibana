@@ -42,7 +42,12 @@ import {
   TimeRange,
 } from '../../../common';
 import { FilterManager } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
