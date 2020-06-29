@@ -7,9 +7,10 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
-import { ResolverState, ResolverAction } from '../../types';
+import { ResolverState } from '../../types';
 import { ResolverRelatedEvents } from '../../../../common/endpoint/types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
+import { ResolverAction } from '../actions';
 
 type MiddlewareFactory<S = ResolverState> = (
   context?: KibanaReactContextValue<StartServices>

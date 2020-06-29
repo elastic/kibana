@@ -11,13 +11,14 @@ import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
-import { Matrix3, ResolverAction, ResolverStore, SideEffectSimulator } from '../types';
+import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
 import { mockProcessEvent } from '../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../models/resolver_tree';
+import { ResolverAction } from '../store/actions';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;

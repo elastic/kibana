@@ -5,7 +5,8 @@
  */
 
 import { Reducer } from 'redux';
-import { DataState, ResolverAction } from '../../types';
+import { DataState } from '../../types';
+import { ResolverAction } from '../actions';
 
 const initialState: DataState = {
   relatedEventsStats: new Map(),

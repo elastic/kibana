@@ -10,10 +10,11 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
-import { ResolverState, ResolverAction } from '../../types';
+import { ResolverState } from '../../types';
 import * as selectors from '../selectors';
 import { StartServices } from '../../../types';
 import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../../common/constants';
+import { ResolverAction } from '../actions';
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
