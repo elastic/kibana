@@ -28,7 +28,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
-import { useKibana, useCurrentUser } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
 import { ExceptionItem } from '../../exception_builder/types';
@@ -47,7 +47,7 @@ export interface AddExceptionOnClick {
   ruleName: string;
   ruleExceptionLists: ExceptionListSchema[];
   exceptionListType: ExceptionListSchema['type'];
-  alertData: TimelineNonEcsData[] | null; // TODO: this can also be undefined
+  alertData: TimelineNonEcsData[] | undefined;
 }
 
 // TODO: What's the different between ECS data and Non ECS data
@@ -102,7 +102,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [createListError, setCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
   const { addExceptionList } = useApi(http);
-  const currentUser = useCurrentUser();
 
   const onError = useCallback(
     (error: Error) => {
@@ -172,19 +171,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldCloseAlert]
   );
 
-  const formatComment = useCallback(() => {
-    return {
-      comment,
-      created_at: new Date().toDateString(),
-      created_by: currentUser?.username ?? '',
-    };
-  }, [comment, currentUser]);
-
   const enrichExceptionItems = useCallback(() => {
     let enriched: ExceptionListItemSchema[] = [];
     enriched =
       comment !== ''
-        ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [formatComment()])
+        ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       const osTags = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
@@ -196,7 +187,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       enriched,
       exceptionListType === 'endpoint' ? 'agnostic' : 'single'
     );
-  }, [comment, exceptionItemsToAdd, formatComment, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback(() => {
     console.log(enrichExceptionItems());

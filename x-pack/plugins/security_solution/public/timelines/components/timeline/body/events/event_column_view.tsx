@@ -146,7 +146,7 @@ export const EventColumnView = React.memo<Props>(
                       isDisabled={
                         action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
                       }
-                      onClick={() => action.onClick({ eventId: id, ecsData })}
+                      onClick={() => action.onClick({ eventId: id, ecsData, data })}
                     />
                   </EuiToolTip>
                 </EventsTdContent>,

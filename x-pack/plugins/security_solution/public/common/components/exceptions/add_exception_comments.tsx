@@ -7,7 +7,6 @@
 import React, { memo, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
-  EuiButtonEmpty,
   EuiTextArea,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,6 +14,8 @@ import {
   EuiAccordion,
   EuiCommentList,
   EuiCommentProps,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Comment } from '../../../lists_plugin_deps';
 import * as i18n from './translations';
@@ -29,7 +30,13 @@ interface AddExceptionCommentsProps {
 
 const MyAvatar = styled(EuiAvatar)`
   ${({ theme }) => css`
-    margin-right: ${theme.eui.euiSizeM};
+    margin-right: ${theme.eui.paddingSizes.m};
+  `}
+`;
+
+const CommentToggleText = styled(EuiText)`
+  ${({ theme }) => css`
+    padding: ${theme.eui.paddingSizes.s};
   `}
 `;
 
@@ -48,9 +55,9 @@ export const AddExceptionComments = memo(function AddExceptionComments({
     [newCommentOnChange]
   );
 
-  const handleTriggerOnClick = useCallback(() => {
-    setShouldShowComments(!shouldShowComments);
-  }, [shouldShowComments]);
+  const handleTriggerOnClick = useCallback((isOpen: boolean) => {
+    setShouldShowComments(isOpen);
+  }, []);
 
   const shouldShowAccordion: boolean = useMemo(() => {
     return (
@@ -60,25 +67,19 @@ export const AddExceptionComments = memo(function AddExceptionComments({
     );
   }, [exceptionItemComments]);
 
-  // TODO: use onToggle on the accordion instead of rendering another button
-  const commentsAccordionTrigger = useMemo((): JSX.Element | null => {
+  const commentsAccordionTitle = useMemo(() => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
       return (
-        <EuiButtonEmpty
-          onClick={handleTriggerOnClick}
-          flush="left"
-          size="xs"
-          data-test-subj="addExceptionCommentsAccordionButton"
-        >
+        <CommentToggleText size="s" data-test-subj="addExceptionCommentsAccordionButton">
           {!shouldShowComments
             ? i18n.COMMENTS_SHOW(exceptionItemComments.length)
             : i18n.COMMENTS_HIDE(exceptionItemComments.length)}
-        </EuiButtonEmpty>
+        </CommentToggleText>
       );
     } else {
       return null;
     }
-  }, [shouldShowComments, exceptionItemComments, handleTriggerOnClick]);
+  }, [shouldShowComments, exceptionItemComments]);
 
   const formattedComments = useMemo((): EuiCommentProps[] => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
@@ -88,32 +89,32 @@ export const AddExceptionComments = memo(function AddExceptionComments({
     }
   }, [exceptionItemComments]);
 
-  // TODO: Add user full name to element title property
-  // TODO: Avatar should use the same logic as the one in EuiCommentList
-  // TODO: Figure out why dates are incorrect for new comments
-  // TODO: Placeholder intl
   return (
     <div>
       {shouldShowAccordion && (
         <EuiAccordion
           id={'add-exception-comments-accordion'}
-          buttonContent={commentsAccordionTrigger}
-          forceState={shouldShowComments ? 'open' : 'closed'}
+          buttonContent={commentsAccordionTitle}
           data-test-subj="addExceptionCommentsAccordion"
+          onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
         >
           <EuiCommentList comments={formattedComments} />
         </EuiAccordion>
       )}
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
-          <MyAvatar name={currentUser != null ? currentUser.fullName ?? '' : ''} size="l" />
+          <MyAvatar
+            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''} // TODO: Still need to standardize this
+            size="l"
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={1}>
           <EuiTextArea
-            placeholder="Add a new comment..."
+            placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
             aria-label="Use aria labels when no actual label is in use"
             value={newCommentValue}
             onChange={handleOnChange}
+            fullWidth={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

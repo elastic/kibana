@@ -10,6 +10,7 @@ import { capitalize, union } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
+import uuid from 'uuid';
 import * as i18n from './translations';
 import {
   FormattedEntry,
@@ -162,6 +163,10 @@ export const getOperatingSystems = (tags: string[]): string => {
   return osMatches;
 };
 
+export const getOsTagValues = (tags: string[]): string[] => {
+  return tags.filter((tag) => tag.startsWith('os:')).map((os) => os.substring(3).trim());
+};
+
 export const getTagsInclude = ({
   tags,
   regex,
@@ -185,7 +190,7 @@ export const getDescriptionListContent = (
   const details = [
     {
       title: i18n.OPERATING_SYSTEM,
-      value: getOperatingSystems(exceptionItem._tags),
+      value: getOperatingSystems(exceptionItem._tags ?? []),
     },
     {
       title: i18n.DATE_CREATED,
@@ -381,6 +386,34 @@ export const enrichExceptionItemsWithNamespace = (
   });
 };
 
+// TODO: should be shared with exeption_builder helpers file
+export const createExceptionItem = ({
+  listType,
+  listId,
+}: {
+  listType: string;
+  listId: string;
+}): ExceptionListItemSchema => {
+  const newItemId = uuid.v4();
+
+  return {
+    id: null,
+    list_id: listId,
+    item_id: newItemId,
+    name: newItemId,
+    _tags: [listType],
+    type: 'simple',
+    entries: [
+      {
+        field: '',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      },
+    ],
+  };
+};
+
 export const getMappedNonEcsValue = ({
   data,
   fieldName,
@@ -395,61 +428,69 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
+// TODO: abstract out types
 // TODO: should we use match or match_any for these default values?
 // TODO: check autocomplete or editing of text in builder
-export const defaultEndpointExceptionItems = (alertData: TimelineNonEcsData[]): EntriesArray => {
+export const defaultEndpointExceptionItems = (
+  listType: string,
+  listId: string,
+  alertData: TimelineNonEcsData[]
+): ExceptionListItemSchema[] => {
+  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
+  const [signatureSigner] =
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.signer' }) ?? [];
+  const [signatureTrusted] =
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.trusted' }) ?? [];
+  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? [];
+
   return [
     {
+      ...createExceptionItem({ listType, listId }),
       entries: [
         {
           field: 'file.path',
           operator: 'included',
           type: 'match',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? '',
+          value: filePath ?? '',
         },
       ],
     },
     {
+      ...createExceptionItem({ listType, listId }),
       entries: [
         {
           field: 'file.code_signature.signer',
           operator: 'included',
           type: 'match',
-          value:
-            getMappedNonEcsValue({
-              data: alertData,
-              fieldName: 'file.code_signature.signer',
-            }) ?? '',
+          value: signatureSigner ?? '',
         },
         {
           field: 'file.code_signature.trusted',
           operator: 'included',
           type: 'match',
-          value:
-            getMappedNonEcsValue({
-              data: alertData,
-              fieldName: 'file.code_signature.trusted',
-            }) ?? '',
+          value: signatureTrusted ?? '',
         },
       ],
     },
     {
+      ...createExceptionItem({ listType, listId }),
       entries: [
         {
           field: 'file.hash.sha1',
           operator: 'included',
           type: 'match',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? '',
+          value: sha1Hash ?? '',
         },
       ],
     },
     {
+      ...createExceptionItem({ listType, listId }),
       entries: [
         {
           field: 'event.category',
           operator: 'included',
           type: 'match_any',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? '',
+          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }) ?? [],
         },
       ],
     },

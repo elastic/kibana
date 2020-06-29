@@ -72,7 +72,7 @@ const addExceptionModalInitialState: AddExceptionOnClick = {
   ruleName: '',
   ruleExceptionLists: [],
   exceptionListType: 'detection',
-  alertData: null,
+  alertData: undefined,
 };
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
@@ -207,7 +207,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [dispatchToaster]
   );
 
-  // TODO: type
   const openAddExceptionModalCallback = useCallback(
     ({ ruleName, ruleExceptionLists, exceptionListType, alertData }: AddExceptionOnClick) => {
       if (alertData !== null && alertData !== undefined) {

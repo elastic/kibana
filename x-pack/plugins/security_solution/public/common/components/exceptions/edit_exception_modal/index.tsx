@@ -24,7 +24,7 @@ import {
   ExceptionListSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
-import { useKibana, useCurrentUser } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
 import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
@@ -33,6 +33,7 @@ import {
   enrichExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
   enrichExceptionItemsWithNamespace,
+  getOsTagValues,
 } from '../helpers';
 
 interface EditExceptionModalProps {
@@ -79,7 +80,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
-  const currentUser = useCurrentUser();
 
   const onError = useCallback(
     (error) => {
@@ -113,24 +113,16 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     [setShouldCloseAlert]
   );
 
-  const formatComment = useCallback(() => {
-    return {
-      comment,
-      created_at: new Date().toDateString(),
-      created_by: currentUser?.username ?? '',
-    };
-  }, [comment, currentUser]);
-
   const enrichExceptionItems = useCallback(() => {
     let enriched = [];
-    // TODO: only add new comment if it's not empty
     enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
       ...exceptionItem.comments,
-      ...(comment !== '' ? [formatComment()] : []),
+      ...(comment !== '' ? [{ comment }] : []),
     ]);
     if (exceptionListType === 'endpoint') {
       // TODO: dont hardcode 'windows'
-      enriched = enrichExceptionItemsWithOS(enriched, ['windows']);
+      const osTypes = exceptionItem._tags ? getOsTagValues(exceptionItem._tags) : ['windows'];
+      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
 
     // TODO: delete this. Namespace should be handled by the builder
@@ -140,7 +132,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     exceptionItem.comments,
     exceptionItem.namespace_type,
     comment,
-    formatComment,
     exceptionListType,
   ]);
 
