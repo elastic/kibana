@@ -38,8 +38,8 @@ describe('manifest_manager', () => {
       const entries = manifestWrapperDispatch.manifest.entries;
       const artifact = Object.values(entries)[0].artifact;
       expect(datasourceService.update.mock.calls[0][2].inputs[0].config.artifact_manifest).toEqual({
-        manifestVersion: 'baseline',
-        schemaVersion: '1.0.0',
+        manifest_version: 'baseline',
+        schema_version: '1.0.0',
         artifacts: {
           [artifact.identifier]: {
             sha256: artifact.sha256,

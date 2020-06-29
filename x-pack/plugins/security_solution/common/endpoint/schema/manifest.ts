@@ -17,8 +17,8 @@ export const manifestEntrySchema = t.exact(
 
 export const manifestSchema = t.exact(
   t.type({
-    manifestVersion,
-    schemaVersion: manifestSchemaVersion,
+    manifest_version: manifestVersion,
+    schema_version: manifestSchemaVersion,
     artifacts: t.record(identifier, manifestEntrySchema),
   })
 );
