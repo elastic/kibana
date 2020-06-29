@@ -13,7 +13,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FORMATTERS, InfraFormatterType } from '../../../../../infra/public';
+import { asPercent } from '../../../utils/formatters';
 
 interface TransactionBreakdownKpi {
   name: string;
@@ -65,9 +65,7 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <span>
-                  {FORMATTERS[InfraFormatterType.percent](kpi.percentage)}
-                </span>
+                <span>{asPercent(kpi.percentage, 1)}</span>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
