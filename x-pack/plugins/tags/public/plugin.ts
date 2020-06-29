@@ -18,7 +18,7 @@ import {
   ManagementStart,
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
-import { TagsManagementApp } from './application/tags_management_app';
+import { TagsManagementServices, TagsManagementSection } from './management';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -53,12 +53,13 @@ export class TagsPlugin
     kibanaSection.registerApp({
       id: 'tags',
       euiIconType: 'tag',
-      order: 10,
+      order: 0,
       title: i18n.translate('xpack.tags.Tags', {
         defaultMessage: 'Tags',
       }),
-      mount: ({ basePath, element, history, setBreadcrumbs }) => {
-        render(h(TagsManagementApp), element);
+      mount: ({ element, history, setBreadcrumbs }) => {
+        const services = new TagsManagementServices({ history, setBreadcrumbs });
+        render(h(TagsManagementSection, { services }), element);
         return () => {
           unmountComponentAtNode(element);
         };

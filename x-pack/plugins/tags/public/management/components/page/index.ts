@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export const TagsManagementApp: React.FC = () => {
-  return <div>This is tags app...</div>;
-};
+export * from './page';
