@@ -35,6 +35,7 @@ interface IncidentConfiguration {
 interface ServiceNowConfig {
   apiUrl: string;
   incidentConfiguration?: IncidentConfiguration;
+  isCaseOwned?: boolean;
 }
 
 interface ServiceNowSecrets {

@@ -34,7 +34,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionSecrets, editActionConfig, errors, editActionProperty }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
-  const { apiUrl, incidentConfiguration } = action.config;
+  const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
@@ -44,15 +44,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
 
-  useEffect(() => {
-    if (!action.consumer && editActionProperty) {
-      editActionProperty('consumer', 'alerts');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (action.consumer === 'case' && isEmpty(mapping)) {
+  if (action.isCaseOwned && isEmpty(mapping)) {
     editActionConfig('incidentConfiguration', {
       mapping: createDefaultMapping(connectorConfiguration.fields as any),
     });
@@ -160,7 +153,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {incidentConfiguration && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
+      {isCaseOwned && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup>

@@ -18,9 +18,6 @@
       },
       "secrets": {
         "type": "binary"
-      },
-      "consumer": {
-        "type": "keyword"
       }
     }
   },

@@ -64,7 +64,6 @@ interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
-  consumer?: string;
 }
 
 interface ActiveActionConnectorState {
@@ -87,7 +86,6 @@ export const ActionForm = ({
   setHasActionsDisabled,
   capabilities,
   docLinks,
-  consumer,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -133,11 +131,7 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(
-          loadedConnectors.filter(
-            (connector) => !connector.consumer || connector.consumer === 'alerts'
-          )
-        );
+        setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(

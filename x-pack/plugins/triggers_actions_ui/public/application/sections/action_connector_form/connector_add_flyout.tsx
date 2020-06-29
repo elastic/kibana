@@ -47,7 +47,6 @@ export const ConnectorAddFlyout = ({
   let hasErrors = false;
   const {
     http,
-    consumer,
     toastNotifications,
     capabilities,
     actionTypeRegistry,
@@ -62,7 +61,6 @@ export const ConnectorAddFlyout = ({
     actionTypeId: actionType?.id ?? '',
     config: {},
     secrets: {},
-    consumer,
   } as ActionConnector;
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
   const setActionProperty = (key: string, value: any) => {

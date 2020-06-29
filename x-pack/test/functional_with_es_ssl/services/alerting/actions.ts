@@ -27,7 +27,6 @@ export class Actions {
     actionTypeId: string;
     config: Record<string, any>;
     secrets: Record<string, any>;
-    consumer?: string;
   }) {
     this.log.debug(`creating action ${actionParams.name}`);
 

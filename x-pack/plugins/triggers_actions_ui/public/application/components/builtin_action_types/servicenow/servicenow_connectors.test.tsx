@@ -54,14 +54,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.webhook',
+      actionTypeId: '.servicenow',
       isPreconfigured: false,
-      name: 'webhook',
+      name: 'servicenow',
       config: {
         apiUrl: 'https://test/',
         incidentConfiguration: { mapping: [] },
+        isCaseOwned: true,
       },
-      consumer: 'case',
     } as ServiceNowActionConnector;
     const deps = {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,

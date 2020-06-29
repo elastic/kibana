@@ -41,6 +41,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
       incidentConfiguration: { mapping },
+      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
@@ -69,7 +70,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         updatedBy: { fullName: null, username: 'elastic' },
       },
     },
-    consumer: 'case',
   };
 
   let servicenowSimulatorURL: string = '<could not determine kibana url>';
@@ -94,9 +94,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: servicenowSimulatorURL,
               incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           })
           .expect(200);
 
@@ -108,8 +108,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: servicenowSimulatorURL,
             incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+            isCaseOwned: true,
           },
-          consumer: mockServiceNow.consumer,
         });
 
         const { body: fetchedAction } = await supertest
@@ -124,8 +124,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: servicenowSimulatorURL,
             incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+            isCaseOwned: true,
           },
-          consumer: mockServiceNow.consumer,
         });
       });
 
@@ -137,7 +137,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             name: 'A servicenow action',
             actionTypeId: '.servicenow',
             config: {},
-            consumer: mockServiceNow.consumer,
           })
           .expect(400)
           .then((resp: any) => {
@@ -160,9 +159,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
               incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           })
           .expect(400)
           .then((resp: any) => {
@@ -185,8 +184,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: servicenowSimulatorURL,
               incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
             },
-            consumer: mockServiceNow.consumer,
           })
           .expect(400)
           .then((resp: any) => {
@@ -208,9 +207,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           })
           .expect(200);
       });
@@ -225,9 +224,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: servicenowSimulatorURL,
               incidentConfiguration: { mapping: [] },
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           })
           .expect(400)
           .then((resp: any) => {
@@ -258,9 +257,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                   },
                 ],
               },
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           })
           .expect(400);
       });
@@ -278,9 +277,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: servicenowSimulatorURL,
               incidentConfiguration: mockServiceNow.config.incidentConfiguration,
+              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
-            consumer: mockServiceNow.consumer,
           });
         simulatedActionId = body.id;
       });

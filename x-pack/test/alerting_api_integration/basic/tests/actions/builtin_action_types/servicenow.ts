@@ -39,6 +39,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
       incidentConfiguration: { mapping: [...mapping] },
+      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
@@ -80,6 +81,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: servicenowSimulatorURL,
             incidentConfiguration: { ...mockServiceNow.config.incidentConfiguration },
+            isCaseOwned: true,
           },
           secrets: mockServiceNow.secrets,
         })
