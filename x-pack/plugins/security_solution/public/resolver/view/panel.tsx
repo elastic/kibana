@@ -51,6 +51,7 @@ const PanelContent = memo(function PanelContent() {
   const urlSearch = history.location.search;
   const dispatch = useResolverDispatch();
 
+  const { timestamp } = useContext(SideEffectContext);
   const queryParams: CrumbInfo = useMemo(() => {
     return { crumbId: '', crumbEvent: '', ...querystring.parse(urlSearch.slice(1)) };
   }, [urlSearch]);
@@ -84,7 +85,7 @@ const PanelContent = memo(function PanelContent() {
   const paramsSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === idFromParams);
   }, [graphableProcesses, idFromParams]);
-  const { timestamp } = useContext(SideEffectContext);
+
   const [lastUpdatedProcess, setLastUpdatedProcess] = useState<null | ResolverEvent>(null);
 
   /**
@@ -218,11 +219,19 @@ const PanelContent = memo(function PanelContent() {
   }, [panelToShow, dispatch]);
 
   const currentPanelView = useSelector(selectors.currentPanelView);
+  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+  const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
+  const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
 
   const panelInstance = useMemo(() => {
     if (currentPanelView === 'processDetails') {
       return (
-        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
+        <ProcessDetails
+          processEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          isProcessTerminated={isProcessTerminated}
+          isProcessOrigin={false}
+        />
       );
     }
 
@@ -261,7 +270,13 @@ const PanelContent = memo(function PanelContent() {
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
+    return (
+      <ProcessListWithCounts
+        pushToQueryParams={pushToQueryParams}
+        isProcessTerminated={isProcessTerminated}
+        isProcessOrigin={false}
+      />
+    );
   }, [
     uiSelectedEvent,
     crumbEvent,
@@ -269,6 +284,7 @@ const PanelContent = memo(function PanelContent() {
     pushToQueryParams,
     relatedStatsForIdFromParams,
     currentPanelView,
+    isProcessTerminated,
   ]);
 
   return <>{panelInstance}</>;
