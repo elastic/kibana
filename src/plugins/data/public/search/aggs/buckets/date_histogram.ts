@@ -27,28 +27,30 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { dateHistogramInterval, TimeRange } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
-import { TimefilterContract } from '../../../query';
-import { QuerySetup } from '../../../query/query_service';
+import {
+  dateHistogramInterval,
+  KBN_FIELD_TYPES,
+  TimeRange,
+  TimeRangeBounds,
+  UI_SETTINGS,
+} from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 import { ExtendedBounds } from './lib/extended_bounds';
 
-const detectedTimezone = moment.tz.guess();
-const tzOffset = moment().format('Z');
+type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
 
 const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
-  timefilter: TimefilterContract,
+  calculateBounds: CalculateBoundsFn,
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
   const bounds =
     agg.params.timeRange && (agg.fieldIsTimeField() || agg.params.interval === 'auto')
-      ? timefilter.calculateBounds(agg.params.timeRange)
+      ? calculateBounds(agg.params.timeRange)
       : undefined;
   const buckets = customBuckets || agg.buckets;
   buckets.setBounds(bounds);
@@ -56,9 +58,9 @@ const updateTimeBuckets = (
 };
 
 export interface DateHistogramBucketAggDependencies {
-  uiSettings: IUiSettingsClient;
-  query: QuerySetup;
+  calculateBounds: CalculateBoundsFn;
   getInternalStartServices: GetInternalStartServicesFn;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
@@ -83,9 +85,9 @@ export interface AggParamsDateHistogram extends BaseAggParams {
 }
 
 export const getDateHistogramBucketAgg = ({
-  uiSettings,
-  query,
+  calculateBounds,
   getInternalStartServices,
+  uiSettings,
 }: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>(
     {
@@ -123,14 +125,13 @@ export const getDateHistogramBucketAgg = ({
             get() {
               if (buckets) return buckets;
 
-              const { timefilter } = query.timefilter;
               buckets = new TimeBuckets({
                 'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
                 'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
                 dateFormat: uiSettings.get('dateFormat'),
                 'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
               });
-              updateTimeBuckets(this, timefilter, buckets);
+              updateTimeBuckets(this, calculateBounds, buckets);
 
               return buckets;
             },
@@ -195,8 +196,7 @@ export const getDateHistogramBucketAgg = ({
           default: 'auto',
           options: intervalOptions,
           write(agg, output, aggs) {
-            const { timefilter } = query.timefilter;
-            updateTimeBuckets(agg, timefilter);
+            updateTimeBuckets(agg, calculateBounds);
 
             const { useNormalizedEsInterval, scaleMetricValues } = agg.params;
             const interval = agg.buckets.getInterval(useNormalizedEsInterval);
@@ -257,6 +257,8 @@ export const getDateHistogramBucketAgg = ({
             if (!tz) {
               // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
               const isDefaultTimezone = uiSettings.isDefault('dateFormat:tz');
+              const detectedTimezone = moment.tz.guess();
+              const tzOffset = moment().format('Z');
               tz = isDefaultTimezone
                 ? detectedTimezone || tzOffset
                 : uiSettings.get('dateFormat:tz');
