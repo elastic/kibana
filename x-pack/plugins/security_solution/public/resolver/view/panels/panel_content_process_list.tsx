@@ -188,7 +188,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      {children !== null || ancestors !== null ? (
+      {children === true || ancestors === true ? (
         <StyledLineageLimitWarning numberDisplayed={numberOfProcesses} />
       ) : null}
       <EuiSpacer size="l" />
