@@ -14,7 +14,7 @@ const DEFAULT_INDEX_NAME = 'observability-annotations';
 // eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
-  const supertestWrite = getService('supertestAsApmWriteUser');
+  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
   const es = getService('es');
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {

@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertestWrite = getService('supertestAsApmWriteUser');
+  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
 
   function request({ method, url, data }: { method: string; url: string; data?: JsonObject }) {
     switch (method.toLowerCase()) {

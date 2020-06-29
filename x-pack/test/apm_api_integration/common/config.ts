@@ -44,7 +44,7 @@ export function createTestConfig(settings: Settings) {
     const services = xPackAPITestsConfig.get('services') as InheritedServices;
     const servers = xPackAPITestsConfig.get('servers');
 
-    const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.APM_READ_USER);
+    const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.apmReadUser);
 
     return {
       testFiles,
@@ -53,7 +53,11 @@ export function createTestConfig(settings: Settings) {
         ...services,
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
-        supertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.APM_WRITE_USER),
+        supertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.apmWriteUser),
+        supertestAsApmAnnotationsWriteUser: supertestAsApmUser(
+          servers.kibana,
+          ApmUser.apmAnnotationsWriteUser
+        ),
       },
       junit: {
         reportName: name,
