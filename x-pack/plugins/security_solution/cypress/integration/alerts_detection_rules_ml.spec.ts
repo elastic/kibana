@@ -7,6 +7,15 @@
 import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
 
 import {
+  CUSTOM_RULES_BTN,
+  RISK_SCORE,
+  RULE_NAME,
+  RULE_SWITCH,
+  RULES_ROW,
+  RULES_TABLE,
+  SEVERITY,
+} from '../screens/alerts_detection_rules';
+import {
   ABOUT_FALSE_POSITIVES,
   ABOUT_MITRE,
   ABOUT_RISK,
@@ -26,27 +35,12 @@ import {
   SCHEDULE_STEP,
   RULE_TYPE,
 } from '../screens/rule_details';
-import {
-  CUSTOM_RULES_BTN,
-  RISK_SCORE,
-  RULE_NAME,
-  RULE_SWITCH,
-  RULES_ROW,
-  RULES_TABLE,
-  SEVERITY,
-} from '../screens/alert_detection_rules';
 
 import {
-  createAndActivateRule,
-  fillAboutRuleAndContinue,
-  fillDefineMachineLearningRuleAndContinue,
-  selectMachineLearningRuleType,
-} from '../tasks/create_new_rule';
-import {
-  goToManageAlertDetectionRules,
+  goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
-} from '../tasks/detections';
+} from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
   filterByCustomRules,
@@ -54,7 +48,13 @@ import {
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/alert_detection_rules';
+} from '../tasks/alerts_detection_rules';
+import {
+  createAndActivateRule,
+  fillAboutRuleAndContinue,
+  fillDefineMachineLearningRuleAndContinue,
+  selectMachineLearningRuleType,
+} from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -73,7 +73,7 @@ describe('Detection rules, machine learning', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
     selectMachineLearningRuleType();

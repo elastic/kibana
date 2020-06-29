@@ -10,25 +10,25 @@ import {
   RULE_SWITCH,
   SECOND_RULE,
   SEVENTH_RULE,
-} from '../screens/alert_detection_rules';
+} from '../screens/alerts_detection_rules';
 
 import {
-  goToManageAlertDetectionRules,
+  goToManageAlertsDetectionRules,
   waitForAlertsPanelToBeLoaded,
   waitForAlertsIndexToBeCreated,
-} from '../tasks/detections';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+} from '../tasks/alerts';
 import {
   activateRule,
   sortByActivatedRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRuleToBeActivated,
-} from '../tasks/alert_detection_rules';
+} from '../tasks/alerts_detection_rules';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { ALERTS_URL } from '../urls/navigation';
 
-describe('Detection rules', () => {
+describe('Alerts detection rules', () => {
   before(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
@@ -41,7 +41,7 @@ describe('Detection rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     cy.get(RULE_NAME)
       .eq(FIFTH_RULE)

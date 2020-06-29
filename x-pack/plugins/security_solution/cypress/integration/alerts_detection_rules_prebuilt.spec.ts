@@ -10,8 +10,13 @@ import {
   RELOAD_PREBUILT_RULES_BTN,
   RULES_ROW,
   RULES_TABLE,
-} from '../screens/alert_detection_rules';
+} from '../screens/alerts_detection_rules';
 
+import {
+  goToManageAlertsDetectionRules,
+  waitForAlertsIndexToBeCreated,
+  waitForAlertsPanelToBeLoaded,
+} from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
@@ -22,12 +27,7 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
-} from '../tasks/alert_detection_rules';
-import {
-  goToManageAlertDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../tasks/detections';
+} from '../tasks/alerts_detection_rules';
 import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -35,7 +35,7 @@ import { ALERTS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
 
-describe('Detection rules, prebuilt rules', () => {
+describe('Alerts rules, prebuilt rules', () => {
   before(() => {
     esArchiverLoadEmptyKibana();
   });
@@ -51,7 +51,7 @@ describe('Detection rules, prebuilt rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
@@ -76,7 +76,7 @@ describe('Deleting prebuilt rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
