@@ -52,11 +52,8 @@ describe('manifest_manager', () => {
 
     test('ManifestManager can commit manifest', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
-      const artifactClient = getArtifactClientMock(savedObjectsClient);
-      const manifestClient = getManifestClientMock(savedObjectsClient);
       const manifestManager = getManifestManagerMock({
-        artifactClientMock: artifactClient,
-        manifestClientMock: manifestClient,
+        savedObjectsClientMock: savedObjectsClient,
       });
 
       const manifestWrapperRefresh = await manifestManager.refresh();
@@ -69,12 +66,21 @@ describe('manifest_manager', () => {
 
       await manifestManager.commit(manifestWrapperDispatch);
 
+      // created new artifact
+      expect(savedObjectsClient.create.mock.calls[0][0]).toEqual(
+        ArtifactConstants.SAVED_OBJECT_TYPE
+      );
+
+      // deleted old artifact
       expect(savedObjectsClient.delete).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,
         'abcd'
       );
 
-      // TODO: check manifestClient.create/update
+      // committed new manifest
+      expect(savedObjectsClient.create.mock.calls[1][0]).toEqual(
+        ManifestConstants.SAVED_OBJECT_TYPE
+      );
     });
   });
 });
