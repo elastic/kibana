@@ -1827,7 +1827,7 @@
                         "packageConfigs": [
                           {
                             "name": "endpoint",
-                            "title": "Endpoint data source",
+                            "title": "Endpoint package config",
                             "description": "Interact with the endpoint.",
                             "inputs": null,
                             "multiple": false
@@ -2119,7 +2119,7 @@
                           }
                         },
                         {
-                          "description": "The log package should be used to create data sources for all type of logs for which an package doesn't exist yet.\n",
+                          "description": "The log package should be used to create package configs for all type of logs for which an package doesn't exist yet.\n",
                           "download": "/epr/log/log-0.9.0.tar.gz",
                           "icons": [
                             {
