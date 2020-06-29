@@ -11,12 +11,16 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceStatsList } from './ServiceStatsList';
 
 interface ServiceStatsFetcherProps {
+  environment?: string;
   serviceName: string;
 }
 
-export function ServiceStatsFetcher({ serviceName }: ServiceStatsFetcherProps) {
+export function ServiceStatsFetcher({
+  environment,
+  serviceName,
+}: ServiceStatsFetcherProps) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end },
   } = useUrlParams();
 
   const { data = {} as ServiceNodeStats, status } = useFetcher(

@@ -12,10 +12,11 @@ import {
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
+import { popoverMinWidth } from '../cytoscapeOptions';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
-import { popoverMinWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
   isService: boolean;
@@ -77,7 +78,10 @@ export function Contents({
       )*/}
       <FlexColumnItem>
         {isService ? (
-          <ServiceStatsFetcher serviceName={selectedNodeServiceName} />
+          <ServiceStatsFetcher
+            environment={selectedNodeData[SERVICE_ENVIRONMENT]}
+            serviceName={selectedNodeServiceName}
+          />
         ) : (
           <Info {...selectedNodeData} />
         )}

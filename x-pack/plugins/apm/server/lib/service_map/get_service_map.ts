@@ -16,6 +16,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -77,6 +78,12 @@ async function getServicesData(options: IEnvOptions) {
   });
 
   const { filter } = projection.body.query.bool;
+
+  const environmentFilter = getEnvironmentUiFilterES(options.environment);
+
+  if (environmentFilter) {
+    filter.push(environmentFilter);
+  }
 
   const params = mergeProjection(projection, {
     body: {
