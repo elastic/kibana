@@ -77,7 +77,9 @@ export const useEditTimelineBatchActions = ({
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
             title={
               selectedItems?.length !== 1
-                ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0, timelineType)
+                ? timelineType === TimelineType.template
+                  ? i18n.SELECTED_TEMPLATES(selectedItems?.length ?? 0)
+                  : i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
                 : selectedItems[0]?.title ?? ''
             }
           />

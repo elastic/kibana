@@ -76,16 +76,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       timelineType,
     });
 
-    const nTimelines = useMemo(() => {
-      const singleTerm = timelineType === TimelineType.template ? 'template' : 'timeline';
-      const pluralTerm = timelineType === TimelineType.template ? 'templates' : 'timelines';
-
-      const defaultMessage = `Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {${singleTerm}} other {${pluralTerm}}} {with}`;
-
-      return (
+    const nTemplates = useMemo(
+      () => (
         <FormattedMessage
-          id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
-          defaultMessage={defaultMessage}
+          id="xpack.securitySolution.open.timeline.showingNTemplatesLabel"
+          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {template} other {templates}} {with}"
           values={{
             totalSearchResultsCount,
             with: (
@@ -95,8 +90,27 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             ),
           }}
         />
-      );
-    }, [timelineType, totalSearchResultsCount, query]);
+      ),
+      [totalSearchResultsCount, query]
+    );
+
+    const nTimelines = useMemo(
+      () => (
+        <FormattedMessage
+          id="xpack.securitySolution.open.timeline.showingNTimelinesLabel"
+          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
+          values={{
+            totalSearchResultsCount,
+            with: (
+              <span data-test-subj="selectable-query-text">
+                {query.trim().length ? `${i18n.WITH} "${query.trim()}"` : ''}
+              </span>
+            ),
+          }}
+        />
+      ),
+      [totalSearchResultsCount, query]
+    );
 
     const actionItemId = useMemo(
       () =>
@@ -200,14 +214,17 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               <UtilityBarGroup>
                 <UtilityBarText data-test-subj="query-message">
                   <>
-                    {i18n.SHOWING} {nTimelines}
+                    {i18n.SHOWING}{' '}
+                    {timelineType === TimelineType.template ? nTemplates : nTimelines}
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
 
               <UtilityBarGroup>
                 <UtilityBarText>
-                  {i18n.SELECTED_TIMELINES(selectedItems.length, timelineType!)}
+                  {timelineType === TimelineType.template
+                    ? i18n.SELECTED_TEMPLATES(selectedItems.length)
+                    : i18n.SELECTED_TIMELINES(selectedItems.length)}
                 </UtilityBarText>
                 <UtilityBarAction
                   iconSide="right"
