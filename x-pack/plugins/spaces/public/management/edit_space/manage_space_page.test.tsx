@@ -19,6 +19,13 @@ import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mock
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { Feature } from '../../../../features/public';
 
+// TODO: Temporary EUI mock
+jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
+  return {
+    EuiOverlayMask: (props: any) => <div>{props.children}</div>,
+  };
+});
+
 const space = {
   id: 'my-space',
   name: 'My Space',

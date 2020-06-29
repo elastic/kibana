@@ -55,6 +55,7 @@ describe('DeleteProvider', () => {
       wrapper.update();
     });
 
+    wrapper.update();
     const { title, confirmButtonText } = wrapper.find(EuiConfirmModal).props();
     expect(title).toMatchInlineSnapshot(`"Delete role mapping 'delete-me'?"`);
     expect(confirmButtonText).toMatchInlineSnapshot(`"Delete role mapping"`);
@@ -127,6 +128,7 @@ describe('DeleteProvider', () => {
       wrapper.update();
     });
 
+    wrapper.update();
     const { title, confirmButtonText } = wrapper.find(EuiConfirmModal).props();
     expect(title).toMatchInlineSnapshot(`"Delete 2 role mappings?"`);
     expect(confirmButtonText).toMatchInlineSnapshot(`"Delete role mappings"`);
@@ -204,6 +206,7 @@ describe('DeleteProvider', () => {
     });
 
     await act(async () => {
+      wrapper.update();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       await nextTick();
       wrapper.update();
@@ -268,6 +271,7 @@ describe('DeleteProvider', () => {
     });
 
     await act(async () => {
+      wrapper.update();
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       await nextTick();
       wrapper.update();
