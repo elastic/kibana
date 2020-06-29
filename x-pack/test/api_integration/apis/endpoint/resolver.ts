@@ -246,7 +246,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     percentWithRelated: 100,
     numTrees: 1,
     alwaysGenMaxChildrenPerNode: true,
-    useAncestryArray: true,
     ancestryArraySize: 2,
   };
 
