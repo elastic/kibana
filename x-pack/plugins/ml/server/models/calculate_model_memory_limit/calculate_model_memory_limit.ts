@@ -5,7 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
@@ -36,7 +36,7 @@ export interface ModelMemoryEstimate {
 /**
  * Retrieves overall and max bucket cardinalities.
  */
-const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
+const cardinalityCheckProvider = (callAsCurrentUser: LegacyAPICaller) => {
   const fieldsService = fieldsServiceProvider(callAsCurrentUser);
 
   return async (
@@ -123,7 +123,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
   };
 };
 
-export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
+export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICaller) {
   const getCardinalities = cardinalityCheckProvider(callAsCurrentUser);
 
   /**
