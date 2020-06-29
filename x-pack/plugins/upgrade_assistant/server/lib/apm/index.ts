@@ -7,13 +7,13 @@
 import { get } from 'lodash';
 import minimatch from 'minimatch';
 import { SemVer, valid } from 'semver';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 
 import { EnrichedDeprecationInfo } from '../../../common/types';
 import { FlatSettings } from '../reindexing/types';
 
 export async function getDeprecatedApmIndices(
-  clusterClient: IScopedClusterClient,
+  clusterClient: ILegacyScopedClusterClient,
   indexPatterns: string[] = []
 ): Promise<EnrichedDeprecationInfo[]> {
   const indices = await clusterClient.callAsCurrentUser('indices.getMapping', {
