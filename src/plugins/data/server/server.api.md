@@ -4,7 +4,6 @@
 
 ```ts
 
-import { APICaller as APICaller_2 } from 'kibana/server';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -94,6 +93,7 @@ import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType as KibanaConfigType_2 } from 'src/core/server/kibana_config';
 import { KibanaRequest as KibanaRequest_2 } from 'kibana/server';
+import { LegacyAPICaller as LegacyAPICaller_2 } from 'kibana/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
@@ -487,7 +487,7 @@ export const indexPatterns: {
 //
 // @public (undocumented)
 export class IndexPatternsFetcher {
-    constructor(callDataCluster: APICaller_2);
+    constructor(callDataCluster: LegacyAPICaller_2);
     getFieldsForTimePattern(options: {
         pattern: string;
         metaFields: string[];
