@@ -65,6 +65,8 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
   buffer: string[];
