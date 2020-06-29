@@ -33,7 +33,7 @@ export interface ManifestRefreshOpts {
   initialize?: boolean;
 }
 
-export interface NewManifestState {
+export interface WrappedManifest {
   manifest: Manifest;
   diffs: ManifestDiff[];
 }
@@ -105,7 +105,7 @@ export class ManifestManager {
     }
   }
 
-  public async refresh(opts?: ManifestRefreshOpts): Promise<NewManifestState | null> {
+  public async refresh(opts?: ManifestRefreshOpts): Promise<WrappedManifest | null> {
     let oldManifest: Manifest;
 
     // Get the last-dispatched manifest
@@ -130,7 +130,7 @@ export class ManifestManager {
     const diffs = newManifest.diff(oldManifest);
 
     // Create new artifacts
-    diffs.forEach(async (diff) => {
+    for (const diff of diffs) {
       if (diff.type === 'add') {
         const artifact = newManifest.getArtifact(diff.id);
         try {
@@ -146,7 +146,7 @@ export class ManifestManager {
           }
         }
       }
-    }, this);
+    }
 
     return {
       manifest: newManifest,
@@ -157,16 +157,23 @@ export class ManifestManager {
   /**
    * Dispatches the manifest by writing it to the endpoint datasource.
    *
-   * @return {boolean} True if dispatched.
+   * @return {WrappedManifest | null} WrappedManifest if all dispatched, else null
    */
-  public async dispatch(manifestState: NewManifestState | null): boolean {
-    if (manifestState === null) {
-      this.logger.debug('manifestState was null, aborting dispatch');
-      return false;
+  public async dispatch(wrappedManifest: WrappedManifest | null): WrappedManifest | null {
+    if (wrappedManifest === null) {
+      this.logger.debug('wrappedManifest was null, aborting dispatch');
+      return null;
     }
 
-    if (manifestState.diffs.length > 0) {
-      this.logger.info(`Dispatching new manifest with diffs: ${manifestState.diffs}`);
+    function showDiffs(diffs: ManifestDiff[]) {
+      return diffs.map((diff) => {
+        const op = diff.type === 'add' ? '(+)' : '(-)';
+        return `${op}${diff.id}`;
+      });
+    }
+
+    if (wrappedManifest.diffs.length > 0) {
+      this.logger.info(`Dispatching new manifest with diffs: ${showDiffs(wrappedManifest.diffs)}`);
 
       let paging = true;
       let success = true;
@@ -176,13 +183,13 @@ export class ManifestManager {
           kuery: 'ingest-datasources.package.name:endpoint',
         });
 
-        items.forEach(async (datasource) => {
+        for (const datasource of items) {
           const { id, revision, updated_at, updated_by, ...newDatasource } = datasource;
 
           if (newDatasource.inputs.length > 0) {
-            newDatasource.inputs[0].config.artifact_manifest = manifestState.manifest.toEndpointFormat();
+            newDatasource.inputs[0].config.artifact_manifest = wrappedManifest.manifest.toEndpointFormat();
 
-            this.datasourceService
+            await this.datasourceService
               .update(this.savedObjectsClient, id, newDatasource)
               .then((response) => {
                 this.logger.debug(`Updated datasource ${id}`);
@@ -196,49 +203,52 @@ export class ManifestManager {
             success = false;
             this.logger.debug(`Datasource ${id} has no inputs.`);
           }
-        }, this);
+        }
 
         paging = page * items.length < total;
       }
 
-      return success;
+      return success ? wrappedManifest : null;
     } else {
       this.logger.debug('No manifest diffs [no-op]');
     }
 
-    return false;
+    return null;
   }
 
-  public async commit(manifestState: NewManifestState | null) {
-    if (manifestState === null) {
-      this.logger.debug('manifestState was null, aborting commit');
+  public async commit(wrappedManifest: WrappedManifest | null) {
+    if (wrappedManifest === null) {
+      this.logger.debug('wrappedManifest was null, aborting commit');
       return;
     }
 
-    const manifestClient = this.getManifestClient(manifestState.manifest.getSchemaVersion());
+    const manifestClient = this.getManifestClient(wrappedManifest.manifest.getSchemaVersion());
 
     // Commit the new manifest
-    if (manifestState.manifest.getVersion() === undefined) {
-      await manifestClient.createManifest(manifestState.manifest.toSavedObject());
+    if (wrappedManifest.manifest.getVersion() === undefined) {
+      await manifestClient.createManifest(wrappedManifest.manifest.toSavedObject());
     } else {
-      const version = manifestState.manifest.getVersion();
+      const version = wrappedManifest.manifest.getVersion();
       if (version === 'baseline') {
         throw new Error('Updating existing manifest with baseline version. Bad state.');
       }
-      await manifestClient.updateManifest(manifestState.manifest.toSavedObject(), {
+      await manifestClient.updateManifest(wrappedManifest.manifest.toSavedObject(), {
         version,
       });
     }
 
+    this.logger.info(`Commited manifest ${wrappedManifest.manifest.getVersion()}`);
+
     // Clean up old artifacts
-    manifestState.diffs.forEach(async (diff) => {
+    for (const diff of wrappedManifest.diffs) {
       try {
         if (diff.type === 'delete') {
           await this.artifactClient.deleteArtifact(diff.id);
+          this.logger.info(`Cleaned up artifact ${diff.id}`);
         }
       } catch (err) {
         this.logger.error(err);
       }
-    }, this);
+    }
   }
 }

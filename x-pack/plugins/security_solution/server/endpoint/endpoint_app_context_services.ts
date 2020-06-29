@@ -24,7 +24,7 @@ export type EndpointAppContextServiceStartContract = Pick<
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
-  private savedObjectsStart: SavedObjectsServiceStart;
+  private savedObjectsStart: SavedObjectsServiceStart | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -49,9 +49,11 @@ export class EndpointAppContextService {
     return this.manifestManager;
   }
 
-  public getScopedSavedObjects(req: KibanaRequest) {
-    return this.savedObjectsStart.getScopedClient(req, {
-      excludedWrappers: ['security'],
-    });
+  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClient | undefined {
+    let client: SavedObjectsClient;
+    if (this.savedObjectsStart !== undefined) {
+      client = this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
+    }
+    return client;
   }
 }

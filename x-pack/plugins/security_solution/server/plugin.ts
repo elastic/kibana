@@ -34,7 +34,7 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import { PackagerTask, setupPackagerTask, ExceptionsCache } from './endpoint/lib/artifacts';
+import { ManifestTask, ExceptionsCache } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -80,7 +80,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
-  private exceptionsPackagerTask: PackagerTask | undefined;
+  private manifestTask: ManifestTask | undefined;
   private exceptionsCache: ExceptionsCache;
 
   constructor(context: PluginInitializerContext) {
@@ -228,7 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (plugins.taskManager && plugins.lists) {
       this.lists = plugins.lists;
-      this.exceptionsPackagerTask = setupPackagerTask({
+      this.manifestTask = new ManifestTask({
         endpointAppContext: endpointContext,
         taskManager: plugins.taskManager,
       });
@@ -264,14 +264,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       savedObjectsStart: core.savedObjects,
     });
 
-    if (this.exceptionsPackagerTask) {
-      this.exceptionsPackagerTask
-        .getTaskRunner({
-          taskManager: plugins.taskManager,
-        })
-        .run();
+    if (this.manifestTask) {
+      this.manifestTask.start({
+        taskManager: plugins.taskManager,
+      });
     } else {
-      this.logger.debug('Exceptions Packager not available.');
+      this.logger.debug('Manifest task not available.');
     }
 
     return {};

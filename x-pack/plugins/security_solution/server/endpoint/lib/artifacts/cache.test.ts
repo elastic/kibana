@@ -26,7 +26,7 @@ describe('ExceptionsCache tests', () => {
     expect(cacheResp).toEqual(undefined);
   });
 
-  test('it should handle cache clean', async () => {
+  test('it should handle cache eviction', async () => {
     cache.set('1', 'a');
     cache.set('2', 'b');
     cache.set('3', 'c');

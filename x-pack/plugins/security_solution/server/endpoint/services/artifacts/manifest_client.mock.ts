@@ -7,15 +7,12 @@
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 
 import { ManifestClient } from './manifest_client';
-import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
 
-export class ManifestClientMock extends ManifestClient {
-  public createManifest = jest.fn().mockResolvedValue(getInternalManifestMock());
-  public getManifest = jest.fn().mockResolvedValue(getInternalManifestMock());
-  public updateManifest = jest.fn().mockResolvedValue(getInternalManifestMock());
-  public deleteManifest = jest.fn().mockResolvedValue(getInternalManifestMock());
-}
-
-export const getManifestClientMock = (): ManifestClientMock => {
-  return new ManifestClientMock(savedObjectsClientMock.create(), '1.0.0');
+export const getManifestClientMock = (
+  savedObjectsClient?: typeof savedObjectsClientMock.create
+): ManifestClient => {
+  if (savedObjectsClient !== undefined) {
+    return new ManifestClient(savedObjectsClient, '1.0.0');
+  }
+  return new ManifestClient(savedObjectsClientMock.create(), '1.0.0');
 };

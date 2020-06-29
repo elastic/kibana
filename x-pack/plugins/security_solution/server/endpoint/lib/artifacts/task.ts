@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../../../../src/kibana/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -11,106 +12,97 @@ import {
 } from '../../../../../../plugins/task_manager/server';
 import { EndpointAppContext } from '../../types';
 
-const PackagerTaskConstants = {
+export const ManifestTaskConstants = {
   TIMEOUT: '1m',
   TYPE: 'securitySolution:endpoint:exceptions-packager',
   VERSION: '1.0.0',
 };
 
-export interface PackagerTask {
-  getTaskRunner: (context: PackagerTaskRunnerContext) => PackagerTaskRunner;
-}
-
-interface PackagerTaskRunner {
-  run: () => void;
-}
-
-interface PackagerTaskContext {
+export interface ManifestTaskSetupContract {
   endpointAppContext: EndpointAppContext;
   taskManager: TaskManagerSetupContract;
 }
 
-interface PackagerTaskRunnerContext {
+export interface ManifestTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
 
-export function setupPackagerTask(context: PackagerTaskContext): PackagerTask {
-  const getTaskId = (): string => {
-    return `${PackagerTaskConstants.TYPE}:${PackagerTaskConstants.VERSION}`;
+export class ManifestTask {
+  private endpointAppContext: EndpointAppContext;
+  private logger: Logger;
+
+  constructor(setupContract: ManifestTaskSetupContract) {
+    this.endpointAppContext = setupContract.endpointAppContext;
+    this.logger = this.endpointAppContext.logFactory.get(this.getTaskId());
+
+    setupContract.taskManager.registerTaskDefinitions({
+      [ManifestTaskConstants.TYPE]: {
+        title: 'Security Solution Endpoint Exceptions Handler',
+        type: ManifestTaskConstants.TYPE,
+        timeout: ManifestTaskConstants.TIMEOUT,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          return {
+            run: async () => {
+              await this.runTask(taskInstance.id);
+            },
+            cancel: async () => {},
+          };
+        },
+      },
+    });
+  }
+
+  public start = async (startContract: ManifestTaskStartContract) => {
+    try {
+      await startContract.taskManager.ensureScheduled({
+        id: this.getTaskId(),
+        taskType: ManifestTaskConstants.TYPE,
+        scope: ['securitySolution'],
+        schedule: {
+          // TODO: change this to '60s' before merging
+          interval: '5s',
+        },
+        state: {},
+        params: { version: ManifestTaskConstants.VERSION },
+      });
+    } catch (e) {
+      this.logger.debug(`Error scheduling task, received ${e.message}`);
+    }
   };
 
-  const logger = context.endpointAppContext.logFactory.get(
-    `endpoint_manifest_refresh_${getTaskId()}`
-  );
+  private getTaskId = (): string => {
+    return `${ManifestTaskConstants.TYPE}:${ManifestTaskConstants.VERSION}`;
+  };
 
-  const run = async (taskId: string) => {
+  private runTask = async (taskId: string) => {
     // Check that this task is current
-    if (taskId !== getTaskId()) {
+    if (taskId !== this.getTaskId()) {
       // old task, return
-      logger.debug(`Outdated task running: ${taskId}`);
+      this.logger.debug(`Outdated task running: ${taskId}`);
       return;
     }
 
-    const manifestManager = context.endpointAppContext.service.getManifestManager();
+    const manifestManager = this.endpointAppContext.service.getManifestManager();
 
     if (manifestManager === undefined) {
-      logger.debug('Manifest Manager not available.');
+      this.logger.debug('Manifest Manager not available.');
       return;
     }
 
-    try {
-      const manifestState = await manifestManager.refresh();
-      if (manifestState !== null) {
-        if (await manifestManager.dispatch(manifestState)) {
-          await manifestManager.commit(manifestState);
-          logger.debug(`Committed manifest ${manifestState.manifest.getVersion()}`);
+    manifestManager
+      .refresh()
+      .then((wrappedManifest) => {
+        if (wrappedManifest !== null) {
+          return manifestManager.dispatch(wrappedManifest);
         }
-      }
-    } catch (err) {
-      logger.error(err);
-    }
-  };
-
-  const getTaskRunner = (runnerContext: PackagerTaskRunnerContext): PackagerTaskRunner => {
-    return {
-      run: async () => {
-        const taskId = getTaskId();
-        try {
-          await runnerContext.taskManager.ensureScheduled({
-            id: taskId,
-            taskType: PackagerTaskConstants.TYPE,
-            scope: ['securitySolution'],
-            schedule: {
-              // TODO: change this to '60s' before merging
-              interval: '5s',
-            },
-            state: {},
-            params: { version: PackagerTaskConstants.VERSION },
-          });
-        } catch (e) {
-          logger.debug(`Error scheduling task, received ${e.message}`);
+      })
+      .then((wrappedManifest) => {
+        if (wrappedManifest !== null) {
+          return manifestManager.commit(wrappedManifest);
         }
-      },
-    };
-  };
-
-  context.taskManager.registerTaskDefinitions({
-    [PackagerTaskConstants.TYPE]: {
-      title: 'Security Solution Endpoint Exceptions Handler',
-      type: PackagerTaskConstants.TYPE,
-      timeout: PackagerTaskConstants.TIMEOUT,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        return {
-          run: async () => {
-            await run(taskInstance.id);
-          },
-          cancel: async () => {},
-        };
-      },
-    },
-  });
-
-  return {
-    getTaskRunner,
+      })
+      .catch((err) => {
+        this.logger.error(err);
+      });
   };
 }

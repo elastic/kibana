@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EndpointAppContextService } from './endpoint_app_context_services';
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 describe('test endpoint app context services', () => {
   it('should throw error on getAgentService if start is not called', async () => {
     const endpointAppContextService = new EndpointAppContextService();
     expect(() => endpointAppContextService.getAgentService()).toThrow(Error);
   });
-  it('should throw error on getManifestManager if start is not called', async () => {
+  it('should return undefined on getManifestManager if start is not called', async () => {
     const endpointAppContextService = new EndpointAppContextService();
-    expect(() => endpointAppContextService.getManifestManager()).toThrow(Error);
+    expect(endpointAppContextService.getManifestManager()).toEqual(undefined);
+  });
+  it('should return undefined on getScopedSavedObjectsClient if start is not called', async () => {
+    const endpointAppContextService = new EndpointAppContextService();
+    expect(
+      endpointAppContextService.getScopedSavedObjectsClient(httpServerMock.createKibanaRequest())
+    ).toEqual(undefined);
   });
 });

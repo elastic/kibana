@@ -40,9 +40,9 @@ export class ManifestEntry {
 
   public getRecord(): ManifestEntrySchema {
     return {
-      url: this.getUrl(),
       sha256: this.getSha256(),
       size: this.getSize(),
+      url: this.getUrl(),
     };
   }
 }

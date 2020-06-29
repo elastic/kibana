@@ -7,14 +7,12 @@
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 
 import { ArtifactClient } from './artifact_client';
-import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 
-export class ArtifactClientMock extends ArtifactClient {
-  public getArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
-  public createArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
-  public deleteArtifact = jest.fn().mockResolvedValue(getInternalArtifactMock());
-}
-
-export const getArtifactClientMock = (): ArtifactClientMock => {
-  return new ArtifactClientMock(savedObjectsClientMock.create());
+export const getArtifactClientMock = (
+  savedObjectsClient?: typeof savedObjectsClientMock.create
+): ArtifactClient => {
+  if (savedObjectsClient !== undefined) {
+    return new ArtifactClient(savedObjectsClient);
+  }
+  return new ArtifactClient(savedObjectsClientMock.create());
 };

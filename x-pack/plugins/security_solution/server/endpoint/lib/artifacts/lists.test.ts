@@ -8,8 +8,8 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getFullEndpointExceptionList } from './lists';
 import { EntriesArray } from '../../../../../lists/common/schemas/types/entries';
+import { getFullEndpointExceptionList } from './lists';
 
 describe('buildEventTypeSignal', () => {
   let mockExceptionClient: ExceptionListClient;

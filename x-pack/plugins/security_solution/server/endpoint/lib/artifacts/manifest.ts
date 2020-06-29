@@ -34,9 +34,11 @@ export class Manifest {
       (schemaVersion as unknown) as object,
       manifestSchemaVersion
     );
+
     if (errors != null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);
     }
+
     this.schemaVersion = validated;
   }
 
