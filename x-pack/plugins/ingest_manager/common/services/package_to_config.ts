@@ -5,8 +5,9 @@
  */
 import {
   PackageInfo,
-  RegistryDatasource,
+  RegistryConfigTemplate,
   RegistryVarsEntry,
+  RegistryStream,
   Datasource,
   DatasourceConfigRecord,
   DatasourceConfigRecordEntry,
@@ -15,6 +16,29 @@ import {
   NewDatasource,
 } from '../types';
 
+const getStreamsForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo
+): Array<RegistryStream & { dataset: { type: string; name: string } }> => {
+  const streams: Array<RegistryStream & { dataset: { type: string; name: string } }> = [];
+
+  (packageInfo.datasets || []).forEach((dataset) => {
+    (dataset.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          dataset: {
+            type: dataset.type,
+            name: dataset.name,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
+
 /*
  * This service creates a datasource inputs definition from defaults provided in package info
  */
@@ -22,8 +46,10 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
   const inputs: Datasource['inputs'] = [];
 
   // Assume package will only ever ship one datasource for now
-  const packageDatasource: RegistryDatasource | null =
-    packageInfo.datasources && packageInfo.datasources[0] ? packageInfo.datasources[0] : null;
+  const packageDatasource: RegistryConfigTemplate | null =
+    packageInfo.config_templates && packageInfo.config_templates[0]
+      ? packageInfo.config_templates[0]
+      : null;
 
   // Create datasource input property
   if (packageDatasource?.inputs?.length) {
@@ -45,19 +71,23 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
       };
 
       // Map each package input stream into datasource input stream
-      const streams: DatasourceInputStream[] = packageInput.streams
-        ? packageInput.streams.map((packageStream) => {
-            const stream: DatasourceInputStream = {
-              id: `${packageInput.type}-${packageStream.dataset}`,
-              enabled: packageStream.enabled === false ? false : true,
-              dataset: packageStream.dataset,
-            };
-            if (packageStream.vars && packageStream.vars.length) {
-              stream.vars = packageStream.vars.reduce(varsReducer, {});
-            }
-            return stream;
-          })
-        : [];
+      const streams: DatasourceInputStream[] = getStreamsForInputType(
+        packageInput.type,
+        packageInfo
+      ).map((packageStream) => {
+        const stream: DatasourceInputStream = {
+          id: `${packageInput.type}-${packageStream.dataset.name}`,
+          enabled: packageStream.enabled === false ? false : true,
+          dataset: {
+            name: packageStream.dataset.name,
+            type: packageStream.dataset.type,
+          },
+        };
+        if (packageStream.vars && packageStream.vars.length) {
+          stream.vars = packageStream.vars.reduce(varsReducer, {});
+        }
+        return stream;
+      });
 
       const input: DatasourceInput = {
         type: packageInput.type,

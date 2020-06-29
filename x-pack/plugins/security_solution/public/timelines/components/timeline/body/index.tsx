@@ -26,10 +26,13 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
+import { showGraphView } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
 import { useManageTimeline } from '../../manage_timeline';
+import { GraphOverlay } from '../../graph_overlay';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -38,6 +41,7 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
+  graphEventId?: string;
   height?: number;
   id: string;
   isEventViewer?: boolean;
@@ -56,6 +60,7 @@ export interface BodyProps {
   pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  show: boolean;
   showCheckboxes: boolean;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -72,6 +77,7 @@ export const Body = React.memo<BodyProps>(
     data,
     eventIdToNoteIds,
     getNotesByIds,
+    graphEventId,
     height,
     id,
     isEventViewer = false,
@@ -89,6 +95,7 @@ export const Body = React.memo<BodyProps>(
     pinnedEventIds,
     rowRenderers,
     selectedEventIds,
+    show,
     showCheckboxes,
     sort,
     toggleColumn,
@@ -108,7 +115,7 @@ export const Body = React.memo<BodyProps>(
           if (v.displayType === 'icon') {
             return acc + (v.width ?? 0);
           }
-          const addWidth = hasContextMenu ? 0 : 26;
+          const addWidth = hasContextMenu ? 0 : DEFAULT_ICON_BUTTON_WIDTH;
           hasContextMenu = true;
           return acc + addWidth;
         }, 0) ?? 0
@@ -127,7 +134,15 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
+        {showGraphView(graphEventId) && (
+          <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
+        )}
+        <TimelineBody
+          data-test-subj="timeline-body"
+          bodyHeight={height}
+          ref={containerElementRef}
+          visible={show && !showGraphView(graphEventId)}
+        >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}

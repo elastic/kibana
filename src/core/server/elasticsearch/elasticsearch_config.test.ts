@@ -367,6 +367,8 @@ test('#username throws if equal to "elastic", only while running from source', (
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingSnapshot();
+  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
+    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
+  );
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });

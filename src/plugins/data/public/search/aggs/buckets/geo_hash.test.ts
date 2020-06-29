@@ -81,7 +81,6 @@ describe('Geohash Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };
