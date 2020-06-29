@@ -11,8 +11,9 @@ import * as vector2 from '../../lib/vector2';
 import * as selectors from './selectors';
 import { clamp } from '../../lib/math';
 
-import { CameraState, ResolverAction, Vector2 } from '../../types';
+import { CameraState, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
+import { ResolverAction } from '../actions';
 
 /**
  * Used in tests.
