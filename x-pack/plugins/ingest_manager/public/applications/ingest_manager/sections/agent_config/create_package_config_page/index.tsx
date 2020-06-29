@@ -21,27 +21,31 @@ import {
   AgentConfig,
   PackageInfo,
   NewPackageConfig,
-  CreateDatasourceRouteState,
+  CreatePackageConfigRouteState,
 } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
-  sendCreateDatasource,
+  sendCreatePackageConfig,
   useCore,
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
 import { ConfirmDeployConfigModal } from '../components';
-import { CreateDatasourcePageLayout } from './components';
-import { CreateDatasourceFrom, DatasourceFormState } from './types';
-import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
+import { CreatePackageConfigPageLayout } from './components';
+import { CreatePackageConfigFrom, PackageConfigFormState } from './types';
+import {
+  PackageConfigValidationResults,
+  validatePackageConfig,
+  validationHasErrors,
+} from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
-import { StepConfigureDatasource } from './step_configure_datasource';
-import { StepDefineDatasource } from './step_define_datasource';
+import { StepConfigurePackage } from './step_configure_package';
+import { StepDefinePackageConfig } from './step_define_package_config';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
-export const CreateDatasourcePage: React.FunctionComponent = () => {
+export const CreatePackageConfigPage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
@@ -56,8 +60,8 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   } = useRouteMatch();
   const { getHref, getPath } = useLink();
   const history = useHistory();
-  const routeState = useIntraAppState<CreateDatasourceRouteState>();
-  const from: CreateDatasourceFrom = configId ? 'config' : 'package';
+  const routeState = useIntraAppState<CreatePackageConfigRouteState>();
+  const from: CreatePackageConfigFrom = configId ? 'config' : 'package';
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
 
   useEffect(() => {
@@ -90,8 +94,8 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   }, [agentConfigId, isFleetEnabled]);
   const [agentCount, setAgentCount] = useState<number>(0);
 
-  // New datasource state
-  const [datasource, setDatasource] = useState<NewPackageConfig>({
+  // New package config state
+  const [packageConfig, setPackageConfig] = useState<NewPackageConfig>({
     name: '',
     description: '',
     namespace: '',
@@ -101,11 +105,11 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     inputs: [],
   });
 
-  // Datasource validation state
-  const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
+  // Package config validation state
+  const [validationResults, setValidationResults] = useState<PackageConfigValidationResults>();
 
   // Form state
-  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
+  const [formState, setFormState] = useState<PackageConfigFormState>('INVALID');
 
   // Update package info method
   const updatePackageInfo = useCallback(
@@ -147,33 +151,36 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  // Update datasource method
-  const updateDatasource = (updatedFields: Partial<NewPackageConfig>) => {
-    const newDatasource = {
-      ...datasource,
+  // Update package config method
+  const updatePackageConfig = (updatedFields: Partial<NewPackageConfig>) => {
+    const newPackageConfig = {
+      ...packageConfig,
       ...updatedFields,
     };
-    setDatasource(newDatasource);
+    setPackageConfig(newPackageConfig);
 
     // eslint-disable-next-line no-console
-    console.debug('Datasource updated', newDatasource);
-    const newValidationResults = updateDatasourceValidation(newDatasource);
-    const hasPackage = newDatasource.package;
+    console.debug('Package config updated', newPackageConfig);
+    const newValidationResults = updatePackageConfigValidation(newPackageConfig);
+    const hasPackage = newPackageConfig.package;
     const hasValidationErrors = newValidationResults
       ? validationHasErrors(newValidationResults)
       : false;
-    const hasAgentConfig = newDatasource.config_id && newDatasource.config_id !== '';
+    const hasAgentConfig = newPackageConfig.config_id && newPackageConfig.config_id !== '';
     if (hasPackage && hasAgentConfig && !hasValidationErrors) {
       setFormState('VALID');
     }
   };
 
-  const updateDatasourceValidation = (newDatasource?: NewPackageConfig) => {
+  const updatePackageConfigValidation = (newPackageConfig?: NewPackageConfig) => {
     if (packageInfo) {
-      const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
+      const newValidationResult = validatePackageConfig(
+        newPackageConfig || packageConfig,
+        packageInfo
+      );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
-      console.debug('Datasource validation results', newValidationResult);
+      console.debug('Package config validation results', newValidationResult);
 
       return newValidationResult;
     }
@@ -199,10 +206,10 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     [routeState, navigateToApp]
   );
 
-  // Save datasource
-  const saveDatasource = async () => {
+  // Save package config
+  const savePackageConfig = async () => {
     setFormState('LOADING');
-    const result = await sendCreateDatasource(datasource);
+    const result = await sendCreatePackageConfig(packageConfig);
     setFormState('SUBMITTED');
     return result;
   };
@@ -216,7 +223,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    const { error, data } = await saveDatasource();
+    const { error, data } = await savePackageConfig();
     if (!error) {
       if (routeState && routeState.onSaveNavigateTo) {
         navigateToApp(
@@ -229,22 +236,22 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       }
 
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
-          defaultMessage: `Successfully added '{datasourceName}'`,
+        title: i18n.translate('xpack.ingestManager.createPackageConfig.addedNotificationTitle', {
+          defaultMessage: `Successfully added '{packageConfigName}'`,
           values: {
-            datasourceName: datasource.name,
+            packageConfigName: packageConfig.name,
           },
         }),
         text:
           agentCount && agentConfig
-            ? i18n.translate('xpack.ingestManager.createDatasource.addedNotificationMessage', {
+            ? i18n.translate('xpack.ingestManager.createPackageConfig.addedNotificationMessage', {
                 defaultMessage: `Fleet will deploy updates to all agents that use the '{agentConfigName}' configuration`,
                 values: {
                   agentConfigName: agentConfig.name,
                 },
               })
             : undefined,
-        'data-test-subj': 'datasourceCreateSuccessToast',
+        'data-test-subj': 'packageConfigCreateSuccessToast',
       });
     } else {
       notifications.toasts.addError(error, {
@@ -289,45 +296,54 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const steps: EuiStepProps[] = [
     from === 'package'
       ? {
-          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
-            defaultMessage: 'Select an agent configuration',
-          }),
+          title: i18n.translate(
+            'xpack.ingestManager.createPackageConfig.stepSelectAgentConfigTitle',
+            {
+              defaultMessage: 'Select an agent configuration',
+            }
+          ),
           children: stepSelectConfig,
         }
       : {
-          title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
+          title: i18n.translate('xpack.ingestManager.createPackageConfig.stepSelectPackageTitle', {
             defaultMessage: 'Select an integration',
           }),
           children: stepSelectPackage,
         },
     {
-      title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
-        defaultMessage: 'Define your data source',
-      }),
+      title: i18n.translate(
+        'xpack.ingestManager.createPackageConfig.stepDefinePackageConfigTitle',
+        {
+          defaultMessage: 'Define your integration',
+        }
+      ),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
       children:
         agentConfig && packageInfo ? (
-          <StepDefineDatasource
+          <StepDefinePackageConfig
             agentConfig={agentConfig}
             packageInfo={packageInfo}
-            datasource={datasource}
-            updateDatasource={updateDatasource}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
             validationResults={validationResults!}
           />
         ) : null,
     },
     {
-      title: i18n.translate('xpack.ingestManager.createDatasource.stepConfgiureDatasourceTitle', {
-        defaultMessage: 'Select the data you want to collect',
-      }),
+      title: i18n.translate(
+        'xpack.ingestManager.createPackageConfig.stepConfigurePackageConfigTitle',
+        {
+          defaultMessage: 'Select the data you want to collect',
+        }
+      ),
       status: !packageInfo || !agentConfig ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children:
         agentConfig && packageInfo ? (
-          <StepConfigureDatasource
+          <StepConfigurePackage
             packageInfo={packageInfo}
-            datasource={datasource}
-            updateDatasource={updateDatasource}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
           />
@@ -336,7 +352,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   ];
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="createDataSource">
+    <CreatePackageConfigPageLayout {...layoutProps} data-test-subj="createPackageConfig">
       {formState === 'CONFIRM' && agentConfig && (
         <ConfirmDeployConfigModal
           agentCount={agentCount}
@@ -374,10 +390,10 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
               color="ghost"
               href={cancelUrl}
               onClick={cancelClickHandler}
-              data-test-subj="createDatasourceCancelButton"
+              data-test-subj="createPackageConfigCancelButton"
             >
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.cancelButton"
+                id="xpack.ingestManager.createPackageConfig.cancelButton"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -390,17 +406,17 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
               iconType="save"
               color="primary"
               fill
-              data-test-subj="createDatasourceSaveButton"
+              data-test-subj="createPackageConfigSaveButton"
             >
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.saveButton"
-                defaultMessage="Save data source"
+                id="xpack.ingestManager.createPackageConfig.saveButton"
+                defaultMessage="Save integration"
               />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
-    </CreateDatasourcePageLayout>
+    </CreatePackageConfigPageLayout>
   );
 };
 
@@ -408,7 +424,7 @@ const ConfigurationBreadcrumb: React.FunctionComponent<{
   configName: string;
   configId: string;
 }> = ({ configName, configId }) => {
-  useBreadcrumbs('add_datasource_from_configuration', { configName, configId });
+  useBreadcrumbs('add_integration_from_configuration', { configName, configId });
   return null;
 };
 
@@ -416,6 +432,6 @@ const IntegrationBreadcrumb: React.FunctionComponent<{
   pkgTitle: string;
   pkgkey: string;
 }> = ({ pkgTitle, pkgkey }) => {
-  useBreadcrumbs('add_datasource_from_integration', { pkgTitle, pkgkey });
+  useBreadcrumbs('add_integration_to_configuration', { pkgTitle, pkgkey });
   return null;
 };

@@ -18,9 +18,9 @@ export type StaticPage =
 export type DynamicPage =
   | 'integration_details'
   | 'configuration_details'
-  | 'add_datasource_from_configuration'
-  | 'add_datasource_from_integration'
-  | 'edit_datasource'
+  | 'add_integration_from_configuration'
+  | 'add_integration_to_configuration'
+  | 'edit_integration'
   | 'fleet_agent_list'
   | 'fleet_agent_details';
 
@@ -44,9 +44,9 @@ export const PAGE_ROUTING_PATHS = {
   configurations_list: '/configs',
   configuration_details: '/configs/:configId/:tabId?',
   configuration_details_settings: '/configs/:configId/settings',
-  add_datasource_from_configuration: '/configs/:configId/add-datasource',
-  add_datasource_from_integration: '/integrations/:pkgkey/add-datasource',
-  edit_datasource: '/configs/:configId/edit-datasource/:datasourceId',
+  add_integration_from_configuration: '/configs/:configId/add-integration',
+  add_integration_to_configuration: '/integrations/:pkgkey/add-integration',
+  edit_integration: '/configs/:configId/edit-integration/:packageConfigId',
   fleet: '/fleet',
   fleet_agent_list: '/fleet/agents',
   fleet_agent_details: '/fleet/agents/:agentId/:tabId?',
@@ -71,10 +71,10 @@ export const pagePathGetters: {
   configurations: () => '/configs',
   configurations_list: () => '/configs',
   configuration_details: ({ configId, tabId }) => `/configs/${configId}${tabId ? `/${tabId}` : ''}`,
-  add_datasource_from_configuration: ({ configId }) => `/configs/${configId}/add-datasource`,
-  add_datasource_from_integration: ({ pkgkey }) => `/integrations/${pkgkey}/add-datasource`,
-  edit_datasource: ({ configId, datasourceId }) =>
-    `/configs/${configId}/edit-datasource/${datasourceId}`,
+  add_integration_from_configuration: ({ configId }) => `/configs/${configId}/add-integration`,
+  add_integration_to_configuration: ({ pkgkey }) => `/integrations/${pkgkey}/add-integration`,
+  edit_integration: ({ configId, packageConfigId }) =>
+    `/configs/${configId}/edit-integration/${packageConfigId}`,
   fleet: () => '/fleet',
   fleet_agent_list: ({ kuery }) => `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
   fleet_agent_details: ({ agentId, tabId }) =>

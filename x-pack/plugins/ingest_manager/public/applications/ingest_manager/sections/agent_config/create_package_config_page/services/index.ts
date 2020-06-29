@@ -5,9 +5,9 @@
  */
 export { isAdvancedVar } from './is_advanced_var';
 export {
-  DatasourceValidationResults,
-  DatasourceConfigValidationResults,
-  DatasourceInputValidationResults,
-  validateDatasource,
+  PackageConfigValidationResults,
+  PackageConfigConfigValidationResults,
+  PackageConfigInputValidationResults,
+  validatePackageConfig,
   validationHasErrors,
-} from './validate_datasource';
+} from './validate_package_config';

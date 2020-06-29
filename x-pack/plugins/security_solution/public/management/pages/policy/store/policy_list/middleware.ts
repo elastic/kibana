@@ -6,8 +6,8 @@
 
 import { GetPolicyListResponse, PolicyListState } from '../../types';
 import {
-  sendGetEndpointSpecificDatasources,
-  sendDeleteDatasource,
+  sendGetEndpointSpecificPackageConfigs,
+  sendDeletePackageConfig,
   sendGetFleetAgentStatusForConfig,
   sendGetEndpointSecurityPackage,
 } from './services/ingest';
@@ -56,7 +56,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       let response: GetPolicyListResponse;
 
       try {
-        response = await sendGetEndpointSpecificDatasources(http, {
+        response = await sendGetEndpointSpecificPackageConfigs(http, {
           query: {
             perPage: pageSize,
             page: pageIndex + 1,
@@ -84,7 +84,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
       const packageConfigIds: DeletePackageConfigsRequest['body']['packageConfigIds'] = [policyId];
       let apiResponse: DeletePackageConfigsResponse;
       try {
-        apiResponse = await sendDeleteDatasource(http, { body: { packageConfigIds } });
+        apiResponse = await sendDeletePackageConfig(http, { body: { packageConfigIds } });
       } catch (err) {
         dispatch({
           type: 'serverDeletedPolicyFailure',

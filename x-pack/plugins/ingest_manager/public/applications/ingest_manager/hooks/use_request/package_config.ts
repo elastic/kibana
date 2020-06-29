@@ -19,7 +19,7 @@ import {
   GetOnePackageConfigResponse,
 } from '../../../../../common/types/rest_spec';
 
-export const sendCreateDatasource = (body: CreatePackageConfigRequest['body']) => {
+export const sendCreatePackageConfig = (body: CreatePackageConfigRequest['body']) => {
   return sendRequest<CreatePackageConfigResponse>({
     path: packageConfigRouteService.getCreatePath(),
     method: 'post',
@@ -27,7 +27,7 @@ export const sendCreateDatasource = (body: CreatePackageConfigRequest['body']) =
   });
 };
 
-export const sendUpdateDatasource = (
+export const sendUpdatePackageConfig = (
   packageConfigId: string,
   body: UpdatePackageConfigRequest['body']
 ) => {
@@ -38,7 +38,7 @@ export const sendUpdateDatasource = (
   });
 };
 
-export const sendDeleteDatasource = (body: DeletePackageConfigsRequest['body']) => {
+export const sendDeletePackageConfig = (body: DeletePackageConfigsRequest['body']) => {
   return sendRequest<DeletePackageConfigsResponse>({
     path: packageConfigRouteService.getDeletePath(),
     method: 'post',
@@ -46,7 +46,7 @@ export const sendDeleteDatasource = (body: DeletePackageConfigsRequest['body']) 
   });
 };
 
-export function useGetDatasources(query: GetPackageConfigsRequest['query']) {
+export function useGetPackageConfigs(query: GetPackageConfigsRequest['query']) {
   return useRequest<GetPackageConfigsResponse>({
     method: 'get',
     path: packageConfigRouteService.getListPath(),
@@ -54,7 +54,7 @@ export function useGetDatasources(query: GetPackageConfigsRequest['query']) {
   });
 }
 
-export const sendGetOneDatasource = (packageConfigId: string) => {
+export const sendGetOnePackageConfig = (packageConfigId: string) => {
   return sendRequest<GetOnePackageConfigResponse>({
     path: packageConfigRouteService.getInfoPath(packageConfigId),
     method: 'get',

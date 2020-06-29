@@ -22,7 +22,7 @@ import {
 } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../../../../common/mock/endpoint';
 import { setPolicyListApiMockImplementation } from './test_mock_utils';
-import { INGEST_API_DATASOURCES } from './services/ingest';
+import { INGEST_API_PACKAGE_CONFIGS } from './services/ingest';
 import {
   createSpyMiddleware,
   MiddlewareActionSpyHelper,
@@ -165,7 +165,7 @@ describe('policy list store concerns', () => {
       },
     });
     await waitForAction('serverReturnedPolicyListData');
-    expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+    expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
       query: {
         kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         page: 1,
@@ -188,7 +188,7 @@ describe('policy list store concerns', () => {
     it('uses pagination params from url', async () => {
       dispatchUserChangedUrl('?page_size=50&page_index=0');
       await waitForAction('serverReturnedPolicyListData');
-      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
@@ -211,7 +211,7 @@ describe('policy list store concerns', () => {
     it('accepts only positive numbers for page_index and page_size', async () => {
       dispatchUserChangedUrl('?page_size=-50&page_index=-99');
       await waitForAction('serverReturnedPolicyListData');
-      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
@@ -222,7 +222,7 @@ describe('policy list store concerns', () => {
     it('it ignores non-numeric values for page_index and page_size', async () => {
       dispatchUserChangedUrl('?page_size=fifty&page_index=ten');
       await waitForAction('serverReturnedPolicyListData');
-      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
@@ -233,7 +233,7 @@ describe('policy list store concerns', () => {
     it('accepts only known values for `page_size`', async () => {
       dispatchUserChangedUrl('?page_size=300&page_index=10');
       await waitForAction('serverReturnedPolicyListData');
-      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 11,
@@ -262,7 +262,7 @@ describe('policy list store concerns', () => {
       expect(endpointPackageVersion(store.getState())).toEqual('0.5.0');
       fakeCoreStart.http.get.mockClear();
       dispatchUserChangedUrl('?page_size=10&page_index=11');
-      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
+      expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_PACKAGE_CONFIGS, {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 12,

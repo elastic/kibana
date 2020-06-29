@@ -18,34 +18,34 @@ import {
 import { AgentConfig, PackageInfo, PackageConfig, NewPackageConfig } from '../../../types';
 import { packageToPackageConfigInputs } from '../../../services';
 import { Loading } from '../../../components';
-import { DatasourceValidationResults } from './services';
+import { PackageConfigValidationResults } from './services';
 
-export const StepDefineDatasource: React.FunctionComponent<{
+export const StepDefinePackageConfig: React.FunctionComponent<{
   agentConfig: AgentConfig;
   packageInfo: PackageInfo;
-  datasource: NewPackageConfig;
-  updateDatasource: (fields: Partial<NewPackageConfig>) => void;
-  validationResults: DatasourceValidationResults;
-}> = ({ agentConfig, packageInfo, datasource, updateDatasource, validationResults }) => {
+  packageConfig: NewPackageConfig;
+  updatePackageConfig: (fields: Partial<NewPackageConfig>) => void;
+  validationResults: PackageConfigValidationResults;
+}> = ({ agentConfig, packageInfo, packageConfig, updatePackageConfig, validationResults }) => {
   // Form show/hide states
   const [isShowingAdvancedDefine, setIsShowingAdvancedDefine] = useState<boolean>(false);
 
-  // Update datasource's package and config info
+  // Update package config's package and config info
   useEffect(() => {
-    const dsPackage = datasource.package;
-    const currentPkgKey = dsPackage ? `${dsPackage.name}-${dsPackage.version}` : '';
+    const pkg = packageConfig.package;
+    const currentPkgKey = pkg ? `${pkg.name}-${pkg.version}` : '';
     const pkgKey = `${packageInfo.name}-${packageInfo.version}`;
 
-    // If package has changed, create shell datasource with input&stream values based on package info
+    // If package has changed, create shell package config with input&stream values based on package info
     if (currentPkgKey !== pkgKey) {
-      // Existing datasources on the agent config using the package name, retrieve highest number appended to datasource name
+      // Existing package configs on the agent config using the package name, retrieve highest number appended to package config name
       const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
       const dsWithMatchingNames = (agentConfig.package_configs as PackageConfig[])
         .filter((ds) => Boolean(ds.name.match(dsPackageNamePattern)))
         .map((ds) => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
         .sort();
 
-      updateDatasource({
+      updatePackageConfig({
         name: `${packageInfo.name}-${
           dsWithMatchingNames.length ? dsWithMatchingNames[dsWithMatchingNames.length - 1] + 1 : 1
         }`,
@@ -58,14 +58,20 @@ export const StepDefineDatasource: React.FunctionComponent<{
       });
     }
 
-    // If agent config has changed, update datasource's config ID and namespace
-    if (datasource.config_id !== agentConfig.id) {
-      updateDatasource({
+    // If agent config has changed, update package config's config ID and namespace
+    if (packageConfig.config_id !== agentConfig.id) {
+      updatePackageConfig({
         config_id: agentConfig.id,
         namespace: agentConfig.namespace,
       });
     }
-  }, [datasource.package, datasource.config_id, agentConfig, packageInfo, updateDatasource]);
+  }, [
+    packageConfig.package,
+    packageConfig.config_id,
+    agentConfig,
+    packageInfo,
+    updatePackageConfig,
+  ]);
 
   return validationResults ? (
     <>
@@ -76,19 +82,19 @@ export const StepDefineDatasource: React.FunctionComponent<{
             error={validationResults.name}
             label={
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNameInputLabel"
-                defaultMessage="Data source name"
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNameInputLabel"
+                defaultMessage="Configuration name"
               />
             }
           >
             <EuiFieldText
-              value={datasource.name}
+              value={packageConfig.name}
               onChange={(e) =>
-                updateDatasource({
+                updatePackageConfig({
                   name: e.target.value,
                 })
               }
-              data-test-subj="datasourceNameInput"
+              data-test-subj="packageConfigNameInput"
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -96,14 +102,14 @@ export const StepDefineDatasource: React.FunctionComponent<{
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.stepConfigure.datasourceDescriptionInputLabel"
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigDescriptionInputLabel"
                 defaultMessage="Description"
               />
             }
             labelAppend={
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.inputVarFieldOptionalLabel"
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.inputVarFieldOptionalLabel"
                   defaultMessage="Optional"
                 />
               </EuiText>
@@ -112,9 +118,9 @@ export const StepDefineDatasource: React.FunctionComponent<{
             error={validationResults.description}
           >
             <EuiFieldText
-              value={datasource.description}
+              value={packageConfig.description}
               onChange={(e) =>
-                updateDatasource({
+                updatePackageConfig({
                   description: e.target.value,
                 })
               }
@@ -130,7 +136,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
         onClick={() => setIsShowingAdvancedDefine(!isShowingAdvancedDefine)}
       >
         <FormattedMessage
-          id="xpack.ingestManager.createDatasource.stepConfigure.advancedOptionsToggleLinkText"
+          id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
           defaultMessage="Advanced options"
         />
       </EuiButtonEmpty>
@@ -145,7 +151,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
                 error={validationResults.namespace}
                 label={
                   <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNamespaceInputLabel"
+                    id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNamespaceInputLabel"
                     defaultMessage="Namespace"
                   />
                 }
@@ -153,14 +159,16 @@ export const StepDefineDatasource: React.FunctionComponent<{
                 <EuiComboBox
                   noSuggestions
                   singleSelection={true}
-                  selectedOptions={datasource.namespace ? [{ label: datasource.namespace }] : []}
+                  selectedOptions={
+                    packageConfig.namespace ? [{ label: packageConfig.namespace }] : []
+                  }
                   onCreateOption={(newNamespace: string) => {
-                    updateDatasource({
+                    updatePackageConfig({
                       namespace: newNamespace,
                     });
                   }}
                   onChange={(newNamespaces: Array<{ label: string }>) => {
-                    updateDatasource({
+                    updatePackageConfig({
                       namespace: newNamespaces.length ? newNamespaces[0].label : '',
                     });
                   }}

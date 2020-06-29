@@ -4,45 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, Fragment } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
   EuiText,
-  EuiTextColor,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiTitle,
+  EuiTextColor,
   EuiIconTip,
 } from '@elastic/eui';
-import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
-import { DatasourceInputVarField } from './datasource_input_var_field';
+import { PackageConfigInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
+import {
+  isAdvancedVar,
+  PackageConfigConfigValidationResults,
+  validationHasErrors,
+} from '../services';
+import { PackageConfigInputVarField } from './package_config_input_var_field';
 
-export const DatasourceInputConfig: React.FunctionComponent<{
-  packageInputVars?: RegistryVarsEntry[];
-  datasourceInput: PackageConfigInput;
-  updateDatasourceInput: (updatedInput: Partial<PackageConfigInput>) => void;
-  inputVarsValidationResults: DatasourceConfigValidationResults;
+export const PackageConfigInputStreamConfig: React.FunctionComponent<{
+  packageInputStream: RegistryStream;
+  packageConfigInputStream: PackageConfigInputStream;
+  updatePackageConfigInputStream: (updatedStream: Partial<PackageConfigInputStream>) => void;
+  inputStreamValidationResults: PackageConfigConfigValidationResults;
   forceShowErrors?: boolean;
 }> = ({
-  packageInputVars,
-  datasourceInput,
-  updateDatasourceInput,
-  inputVarsValidationResults,
+  packageInputStream,
+  packageConfigInputStream,
+  updatePackageConfigInputStream,
+  inputStreamValidationResults,
   forceShowErrors,
 }) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   // Errors state
-  const hasErrors = forceShowErrors && validationHasErrors(inputVarsValidationResults);
+  const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
 
   const requiredVars: RegistryVarsEntry[] = [];
   const advancedVars: RegistryVarsEntry[] = [];
 
-  if (packageInputVars) {
-    packageInputVars.forEach((varDef) => {
+  if (packageInputStream.vars && packageInputStream.vars.length) {
+    packageInputStream.vars.forEach((varDef) => {
       if (isAdvancedVar(varDef)) {
         advancedVars.push(varDef);
       } else {
@@ -52,61 +57,64 @@ export const DatasourceInputConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGroup alignItems="flexStart">
+    <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <EuiTitle size="s">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <h4>
-                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </EuiTextColor>
-              </h4>
-            </EuiFlexItem>
-            {hasErrors ? (
+        <EuiSwitch
+          label={
+            <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.ingestManager.createDatasource.stepConfigure.inputConfigErrorsTooltip"
-                      defaultMessage="Fix configuration errors"
-                    />
-                  }
-                  position="right"
-                  type="alert"
-                  iconProps={{ color: 'danger' }}
-                />
+                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                  {packageInputStream.title}
+                </EuiTextColor>
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsDescription"
-              defaultMessage="The following settings are applicable to all streams."
-            />
-          </p>
-        </EuiText>
+              {hasErrors ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ingestManager.createPackageConfig.stepConfigure.streamLevelErrorsTooltip"
+                        defaultMessage="Fix configuration errors"
+                      />
+                    }
+                    position="right"
+                    type="alert"
+                    iconProps={{ color: 'danger' }}
+                  />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          }
+          checked={packageConfigInputStream.enabled}
+          onChange={(e) => {
+            const enabled = e.target.checked;
+            updatePackageConfigInputStream({
+              enabled,
+            });
+          }}
+        />
+        {packageInputStream.description ? (
+          <Fragment>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <ReactMarkdown source={packageInputStream.description} />
+            </EuiText>
+          </Fragment>
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map((varDef) => {
             const { name: varName, type: varType } = varDef;
-            const value = datasourceInput.vars![varName].value;
+            const value = packageConfigInputStream.vars![varName].value;
             return (
               <EuiFlexItem key={varName}>
-                <DatasourceInputVarField
+                <PackageConfigInputVarField
                   varDef={varDef}
                   value={value}
                   onChange={(newValue: any) => {
-                    updateDatasourceInput({
+                    updatePackageConfigInputStream({
                       vars: {
-                        ...datasourceInput.vars,
+                        ...packageConfigInputStream.vars,
                         [varName]: {
                           type: varType,
                           value: newValue,
@@ -114,7 +122,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                       },
                     });
                   }}
-                  errors={inputVarsValidationResults.vars![varName]}
+                  errors={inputStreamValidationResults.vars![varName]}
                   forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
@@ -132,7 +140,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                     flush="left"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.createDatasource.stepConfigure.toggleAdvancedOptionsButtonText"
+                      id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
                       defaultMessage="Advanced options"
                     />
                   </EuiButtonEmpty>
@@ -141,16 +149,16 @@ export const DatasourceInputConfig: React.FunctionComponent<{
               {isShowingAdvanced
                 ? advancedVars.map((varDef) => {
                     const { name: varName, type: varType } = varDef;
-                    const value = datasourceInput.vars![varName].value;
+                    const value = packageConfigInputStream.vars![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
-                        <DatasourceInputVarField
+                        <PackageConfigInputVarField
                           varDef={varDef}
                           value={value}
                           onChange={(newValue: any) => {
-                            updateDatasourceInput({
+                            updatePackageConfigInputStream({
                               vars: {
-                                ...datasourceInput.vars,
+                                ...packageConfigInputStream.vars,
                                 [varName]: {
                                   type: varType,
                                   value: newValue,
@@ -158,7 +166,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={inputVarsValidationResults.vars![varName]}
+                          errors={inputStreamValidationResults.vars![varName]}
                           forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>

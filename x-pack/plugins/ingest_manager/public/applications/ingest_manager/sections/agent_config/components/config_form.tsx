@@ -174,7 +174,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.ingestManager.agentConfigForm.namespaceFieldDescription"
-            defaultMessage="Apply a default namespace to data sources that use this configuration. Data sources can specify their own namespaces."
+            defaultMessage="Apply a default namespace to integrations that use this configuration. Integrations can specify their own namespaces."
           />
         }
       >
@@ -336,7 +336,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                     'xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText',
                     {
                       defaultMessage:
-                        'Enable this option to bootstrap your configuration with a data source that collects system metrics and information.',
+                        'Enable this option to bootstrap your configuration with an integration that collects system metrics and information.',
                     }
                   )}
                   position="right"

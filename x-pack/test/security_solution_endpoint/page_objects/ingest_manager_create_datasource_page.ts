@@ -16,28 +16,28 @@ export function IngestManagerCreateDatasource({ getService, getPageObjects }: Ft
      * Validates that the page shown is the Datasource Create Page
      */
     async ensureOnCreatePageOrFail() {
-      await testSubjects.existOrFail('createDataSource_header');
+      await testSubjects.existOrFail('createPackageConfig_header');
     },
 
     /**
      * Finds and returns the Cancel button on the sticky bottom bar
      */
     async findCancelButton() {
-      return await testSubjects.find('createDatasourceCancelButton');
+      return await testSubjects.find('createPackageConfigCancelButton');
     },
 
     /**
      * Finds and returns the Cancel back link at the top of the create page
      */
     async findBackLink() {
-      return await testSubjects.find('createDataSource_cancelBackLink');
+      return await testSubjects.find('createPackageConfig_cancelBackLink');
     },
 
     /**
      * Finds and returns the save button on the sticky bottom bar
      */
     async findDSaveButton() {
-      return await testSubjects.find('createDatasourceSaveButton');
+      return await testSubjects.find('createPackageConfigSaveButton');
     },
 
     /**
@@ -67,21 +67,21 @@ export function IngestManagerCreateDatasource({ getService, getPageObjects }: Ft
       // Because of the bottom sticky bar, we need to scroll section 2 into view
       // so that `setValue()` enters the data on the input field.
       await testSubjects.scrollIntoView('dataCollectionSetupStep');
-      await testSubjects.setValue('datasourceNameInput', name);
+      await testSubjects.setValue('packageConfigNameInput', name);
     },
 
     /**
      * Waits for the save Notification toast to be visible
      */
     async waitForSaveSuccessNotification() {
-      await testSubjects.existOrFail('datasourceCreateSuccessToast');
+      await testSubjects.existOrFail('packageConfigCreateSuccessToast');
     },
 
     /**
      * Validates that the page shown is the Datasource Edit Page
      */
     async ensureOnEditPageOrFail() {
-      await testSubjects.existOrFail('editDataSource_header');
+      await testSubjects.existOrFail('editPackageConfig_header');
     },
 
     /**

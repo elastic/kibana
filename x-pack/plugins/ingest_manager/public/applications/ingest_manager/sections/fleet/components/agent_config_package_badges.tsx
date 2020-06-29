@@ -14,7 +14,7 @@ interface Props {
   agentConfigId: string;
 }
 
-export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ agentConfigId }) => {
+export const AgentConfigPackageBadges: React.FunctionComponent<Props> = ({ agentConfigId }) => {
   const agentConfigRequest = useGetOneAgentConfig(agentConfigId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
 
@@ -26,7 +26,7 @@ export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ ag
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentReassignConfig.configDescription"
-          defaultMessage="The selected agent configuration will collect data for {count, plural, one {{countValue} data source} other {{countValue} data sources}}:"
+          defaultMessage="The selected agent configuration will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
           values={{
             count: agentConfig.package_configs.length,
             countValue: <b>{agentConfig.package_configs.length}</b>,
@@ -34,8 +34,8 @@ export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ ag
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {(agentConfig.package_configs as PackageConfig[]).map((datasource, idx) => {
-        if (!datasource.package) {
+      {(agentConfig.package_configs as PackageConfig[]).map((packageConfig, idx) => {
+        if (!packageConfig.package) {
           return null;
         }
         return (
@@ -43,13 +43,13 @@ export const AgentConfigDatasourceBadges: React.FunctionComponent<Props> = ({ ag
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
                 <PackageIcon
-                  packageName={datasource.package.name}
-                  version={datasource.package.version}
+                  packageName={packageConfig.package.name}
+                  version={packageConfig.package.version}
                   size="s"
                   tryApi={true}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{datasource.package.title}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{packageConfig.package.title}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiBadge>
         );

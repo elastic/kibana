@@ -3,17 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   DeleteAgentConfigRequest,
-  DeleteDatasourcesRequest,
-  GetDatasourcesResponse,
+  DeletePackageConfigsRequest,
+  GetPackageConfigsResponse,
   GetFullAgentConfigResponse,
   GetPackagesResponse,
 } from '../../../plugins/ingest_manager/common';
@@ -23,8 +22,8 @@ import { Immutable } from '../../../plugins/security_solution/common/endpoint/ty
 const INGEST_API_ROOT = '/api/ingest_manager';
 const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;
 const INGEST_API_AGENT_CONFIGS_DELETE = `${INGEST_API_AGENT_CONFIGS}/delete`;
-const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
-const INGEST_API_DATASOURCES_DELETE = `${INGEST_API_DATASOURCES}/delete`;
+const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_configs`;
+const INGEST_API_PACKAGE_CONFIGS_DELETE = `${INGEST_API_PACKAGE_CONFIGS}/delete`;
 const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 
 const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
@@ -35,15 +34,15 @@ const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
 export interface PolicyTestResourceInfo {
   /** The Ingest agent configuration created */
   agentConfig: Immutable<CreateAgentConfigResponse['item']>;
-  /** The Ingest datasource created and added to agent configuration.
+  /** The Ingest Package Config created and added to agent configuration.
    * This is where Endpoint Policy is stored.
    */
-  datasource: Immutable<CreateDatasourceResponse['item']>;
+  packageConfig: Immutable<CreatePackageConfigResponse['item']>;
   /**
    * Information about the endpoint package
    */
   packageInfo: Immutable<GetPackagesResponse['response'][0]>;
-  /** will clean up (delete) the objects created (agent config + datasource) */
+  /** will clean up (delete) the objects created (agent config + Package Config) */
   cleanup: () => Promise<void>;
 }
 
@@ -127,7 +126,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     },
 
     /**
-     * Creates an Ingest Agent Configuration and adds to it the Endpoint Datasource that
+     * Creates an Ingest Agent Configuration and adds to it the Endpoint Package Config that
      * stores the Policy configuration data
      */
     async createPolicy(): Promise<PolicyTestResourceInfo> {
@@ -152,10 +151,10 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       // Retrieve the Endpoint package information
       const endpointPackageInfo = await retrieveEndpointPackageInfo();
 
-      // create datasource and associated it to agent config
-      let datasource: CreateDatasourceResponse['item'];
+      // create Package Config and associated it to agent config
+      let packageConfig: CreatePackageConfigResponse['item'];
       try {
-        const newDatasourceData: CreateDatasourceRequest['body'] = {
+        const newPackageConfigData: CreatePackageConfigRequest['body'] = {
           name: 'Protect East Coast',
           description: 'Protect the worlds data - but in the East Coast',
           config_id: agentConfig!.id,
@@ -180,33 +179,35 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const { body: createResponse }: { body: CreateDatasourceResponse } = await supertest
-          .post(INGEST_API_DATASOURCES)
+        const {
+          body: createResponse,
+        }: { body: CreatePackageConfigResponse } = await supertest
+          .post(INGEST_API_PACKAGE_CONFIGS)
           .set('kbn-xsrf', 'xxx')
-          .send(newDatasourceData)
+          .send(newPackageConfigData)
           .expect(200);
-        datasource = createResponse.item;
+        packageConfig = createResponse.item;
       } catch (error) {
-        return logSupertestApiErrorAndThrow(`Unable to create Datasource via Ingest!`, error);
+        return logSupertestApiErrorAndThrow(`Unable to create Package Config via Ingest!`, error);
       }
 
       return {
         agentConfig,
-        datasource,
+        packageConfig,
         packageInfo: endpointPackageInfo!,
         async cleanup() {
-          // Delete Datasource
+          // Delete Package Config
           try {
-            const deleteDatasourceData: DeleteDatasourcesRequest['body'] = {
-              datasourceIds: [datasource.id],
+            const deletePackageConfigData: DeletePackageConfigsRequest['body'] = {
+              packageConfigIds: [packageConfig.id],
             };
             await supertest
-              .post(INGEST_API_DATASOURCES_DELETE)
+              .post(INGEST_API_PACKAGE_CONFIGS_DELETE)
               .set('kbn-xsrf', 'xxx')
-              .send(deleteDatasourceData)
+              .send(deletePackageConfigData)
               .expect(200);
           } catch (error) {
-            logSupertestApiErrorAndThrow('Unable to delete Datasource via Ingest!', error);
+            logSupertestApiErrorAndThrow('Unable to delete Package Config via Ingest!', error);
           }
 
           // Delete Agent config
@@ -227,45 +228,47 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     },
 
     /**
-     * Deletes a policy (Datasource) by using the policy name
+     * Deletes a policy (Package Config) by using the policy name
      * @param name
      */
     async deletePolicyByName(name: string) {
-      let datasourceList: GetDatasourcesResponse['items'];
+      let packageConfigList: GetPackageConfigsResponse['items'];
       try {
-        const { body: datasourcesResponse }: { body: GetDatasourcesResponse } = await supertest
-          .get(INGEST_API_DATASOURCES)
+        const {
+          body: packageConfigsResponse,
+        }: { body: GetPackageConfigsResponse } = await supertest
+          .get(INGEST_API_PACKAGE_CONFIGS)
           .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.name: ${name}` })
+          .query({ kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.name: ${name}` })
           .send()
           .expect(200);
-        datasourceList = datasourcesResponse.items;
+        packageConfigList = packageConfigsResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(
-          `Unable to get list of datasources with name=${name}`,
+          `Unable to get list of Package Configs with name=${name}`,
           error
         );
       }
 
-      if (datasourceList.length === 0) {
+      if (packageConfigList.length === 0) {
         throw new Error(`Policy named '${name}' was not found!`);
       }
 
-      if (datasourceList.length > 1) {
-        throw new Error(`Found ${datasourceList.length} Policies - was expecting only one!`);
+      if (packageConfigList.length > 1) {
+        throw new Error(`Found ${packageConfigList.length} Policies - was expecting only one!`);
       }
 
       try {
-        const deleteDatasourceData: DeleteDatasourcesRequest['body'] = {
-          datasourceIds: [datasourceList[0].id],
+        const deletePackageConfigData: DeletePackageConfigsRequest['body'] = {
+          packageConfigIds: [packageConfigList[0].id],
         };
         await supertest
-          .post(INGEST_API_DATASOURCES_DELETE)
+          .post(INGEST_API_PACKAGE_CONFIGS_DELETE)
           .set('kbn-xsrf', 'xxx')
-          .send(deleteDatasourceData)
+          .send(deletePackageConfigData)
           .expect(200);
       } catch (error) {
-        logSupertestApiErrorAndThrow('Unable to delete Datasource via Ingest!', error);
+        logSupertestApiErrorAndThrow('Unable to delete Package Config via Ingest!', error);
       }
     },
   };

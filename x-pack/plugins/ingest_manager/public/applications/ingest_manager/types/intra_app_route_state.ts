@@ -8,13 +8,13 @@ import { ApplicationStart } from 'kibana/public';
 import { PackageConfig } from './';
 
 /**
- * Supported routing state for the create datasource page routes
+ * Supported routing state for the create package config page routes
  */
-export interface CreateDatasourceRouteState {
-  /** On a successful save of the datasource, use navigate to the given app */
+export interface CreatePackageConfigRouteState {
+  /** On a successful save of the package config, use navigate to the given app */
   onSaveNavigateTo?:
     | Parameters<ApplicationStart['navigateToApp']>
-    | ((newDatasource: PackageConfig) => Parameters<ApplicationStart['navigateToApp']>);
+    | ((newPackageConfig: PackageConfig) => Parameters<ApplicationStart['navigateToApp']>);
   /** On cancel, navigate to the given app */
   onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
   /** Url to be used on cancel links */
@@ -33,5 +33,5 @@ export interface AgentConfigDetailsDeployAgentAction {
  * All possible Route states.
  */
 export type AnyIntraAppRouteState =
-  | CreateDatasourceRouteState
+  | CreatePackageConfigRouteState
   | AgentConfigDetailsDeployAgentAction;

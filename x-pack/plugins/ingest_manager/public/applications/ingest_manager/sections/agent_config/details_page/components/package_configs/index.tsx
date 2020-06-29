@@ -6,18 +6,18 @@
 
 import React, { memo } from 'react';
 import { AgentConfig, PackageConfig } from '../../../../../types';
-import { NoDatasources } from './no_datasources';
-import { DatasourcesTable } from './datasources_table';
+import { NoPackageConfigs } from './no_package_configs';
+import { PackageConfigsTable } from './package_configs_table';
 
-export const ConfigDatasourcesView = memo<{ config: AgentConfig }>(({ config }) => {
+export const ConfigPackageConfigsView = memo<{ config: AgentConfig }>(({ config }) => {
   if (config.package_configs.length === 0) {
-    return <NoDatasources configId={config.id} />;
+    return <NoPackageConfigs configId={config.id} />;
   }
 
   return (
-    <DatasourcesTable
+    <PackageConfigsTable
       config={config}
-      datasources={(config.package_configs || []) as PackageConfig[]}
+      packageConfigs={(config.package_configs || []) as PackageConfig[]}
     />
   );
 });

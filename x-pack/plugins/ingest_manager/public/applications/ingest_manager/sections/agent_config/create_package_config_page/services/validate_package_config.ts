@@ -21,47 +21,47 @@ type Errors = string[] | null;
 
 type ValidationEntry = Record<string, Errors>;
 
-export interface DatasourceConfigValidationResults {
+export interface PackageConfigConfigValidationResults {
   vars?: ValidationEntry;
 }
 
-export type DatasourceInputValidationResults = DatasourceConfigValidationResults & {
-  streams?: Record<PackageConfigInputStream['id'], DatasourceConfigValidationResults>;
+export type PackageConfigInputValidationResults = PackageConfigConfigValidationResults & {
+  streams?: Record<PackageConfigInputStream['id'], PackageConfigConfigValidationResults>;
 };
 
-export interface DatasourceValidationResults {
+export interface PackageConfigValidationResults {
   name: Errors;
   description: Errors;
   namespace: Errors;
-  inputs: Record<PackageConfigInput['type'], DatasourceInputValidationResults> | null;
+  inputs: Record<PackageConfigInput['type'], PackageConfigInputValidationResults> | null;
 }
 
 /*
- * Returns validation information for a given datasource configuration and package info
- * Note: this method assumes that `datasource` is correctly structured for the given package
+ * Returns validation information for a given package config and package info
+ * Note: this method assumes that `packageConfig` is correctly structured for the given package
  */
-export const validateDatasource = (
-  datasource: NewPackageConfig,
+export const validatePackageConfig = (
+  packageConfig: NewPackageConfig,
   packageInfo: PackageInfo
-): DatasourceValidationResults => {
-  const validationResults: DatasourceValidationResults = {
+): PackageConfigValidationResults => {
+  const validationResults: PackageConfigValidationResults = {
     name: null,
     description: null,
     namespace: null,
     inputs: {},
   };
 
-  if (!datasource.name.trim()) {
+  if (!packageConfig.name.trim()) {
     validationResults.name = [
-      i18n.translate('xpack.ingestManager.datasourceValidation.nameRequiredErrorMessage', {
+      i18n.translate('xpack.ingestManager.packageConfigValidation.nameRequiredErrorMessage', {
         defaultMessage: 'Name is required',
       }),
     ];
   }
 
-  if (!datasource.namespace.trim()) {
+  if (!packageConfig.namespace.trim()) {
     validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.datasourceValidation.namespaceRequiredErrorMessage', {
+      i18n.translate('xpack.ingestManager.packageConfigValidation.namespaceRequiredErrorMessage', {
         defaultMessage: 'Namespace is required',
       }),
     ];
@@ -93,13 +93,13 @@ export const validateDatasource = (
     return datasets;
   }, {} as Record<string, RegistryStream[]>);
 
-  // Validate each datasource input with either its own config fields or streams
-  datasource.inputs.forEach((input) => {
+  // Validate each package config input with either its own config fields or streams
+  packageConfig.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
 
-    const inputValidationResults: DatasourceInputValidationResults = {
+    const inputValidationResults: PackageConfigInputValidationResults = {
       vars: undefined,
       streams: {},
     };
@@ -117,7 +117,7 @@ export const validateDatasource = (
     if (inputConfigs.length) {
       inputValidationResults.vars = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
-          ? validateDatasourceConfig(configEntry, inputVarsByName[name])
+          ? validatePackageConfigConfig(configEntry, inputVarsByName[name])
           : null;
         return results;
       }, {} as ValidationEntry);
@@ -128,7 +128,7 @@ export const validateDatasource = (
     // Validate each input stream with config fields
     if (input.streams.length) {
       input.streams.forEach((stream) => {
-        const streamValidationResults: DatasourceConfigValidationResults = {};
+        const streamValidationResults: PackageConfigConfigValidationResults = {};
 
         // Validate stream-level config fields
         if (stream.vars) {
@@ -146,7 +146,7 @@ export const validateDatasource = (
             (results, [name, configEntry]) => {
               results[name] =
                 input.enabled && stream.enabled
-                  ? validateDatasourceConfig(configEntry, streamVarsByName[name])
+                  ? validatePackageConfigConfig(configEntry, streamVarsByName[name])
                   : null;
               return results;
             },
@@ -171,7 +171,7 @@ export const validateDatasource = (
   return validationResults;
 };
 
-const validateDatasourceConfig = (
+const validatePackageConfigConfig = (
   configEntry: PackageConfigConfigRecordEntry,
   varDef: RegistryVarsEntry
 ): string[] | null => {
@@ -186,7 +186,7 @@ const validateDatasourceConfig = (
   if (varDef.required) {
     if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.datasourceValidation.requiredErrorMessage', {
+        i18n.translate('xpack.ingestManager.packageConfigValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -201,9 +201,12 @@ const validateDatasourceConfig = (
       parsedValue = safeLoad(value);
     } catch (e) {
       errors.push(
-        i18n.translate('xpack.ingestManager.datasourceValidation.invalidYamlFormatErrorMessage', {
-          defaultMessage: 'Invalid YAML format',
-        })
+        i18n.translate(
+          'xpack.ingestManager.packageConfigValidation.invalidYamlFormatErrorMessage',
+          {
+            defaultMessage: 'Invalid YAML format',
+          }
+        )
       );
     }
   }
@@ -211,7 +214,7 @@ const validateDatasourceConfig = (
   if (varDef.multi) {
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.datasourceValidation.invalidArrayErrorMessage', {
+        i18n.translate('xpack.ingestManager.packageConfigValidation.invalidArrayErrorMessage', {
           defaultMessage: 'Invalid format',
         })
       );
@@ -221,7 +224,7 @@ const validateDatasourceConfig = (
       (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
     ) {
       errors.push(
-        i18n.translate('xpack.ingestManager.datasourceValidation.requiredErrorMessage', {
+        i18n.translate('xpack.ingestManager.packageConfigValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -236,9 +239,9 @@ const validateDatasourceConfig = (
 
 export const validationHasErrors = (
   validationResults:
-    | DatasourceValidationResults
-    | DatasourceInputValidationResults
-    | DatasourceConfigValidationResults
+    | PackageConfigValidationResults
+    | PackageConfigInputValidationResults
+    | PackageConfigConfigValidationResults
 ) => {
   const flattenedValidation = getFlattenedObject(validationResults);
 

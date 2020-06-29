@@ -12,9 +12,9 @@ import {
   policyDetailsForUpdate,
 } from './selectors';
 import {
-  sendGetDatasource,
+  sendGetPackageConfig,
   sendGetFleetAgentStatusForConfig,
-  sendPutDatasource,
+  sendPutPackageConfig,
 } from '../policy_list/services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
@@ -33,7 +33,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        policyItem = (await sendGetDatasource(http, id)).item;
+        policyItem = (await sendGetPackageConfig(http, id)).item;
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
@@ -66,7 +66,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       let apiResponse: UpdatePolicyResponse;
       try {
-        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
+        apiResponse = await sendPutPackageConfig(http, id, updatedPolicyItem);
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',

@@ -35,7 +35,7 @@ export {
   CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
-  // API schemas - Datasource
+  // API schemas - Package config
   CreatePackageConfigRequest,
   CreatePackageConfigResponse,
   UpdatePackageConfigRequest,

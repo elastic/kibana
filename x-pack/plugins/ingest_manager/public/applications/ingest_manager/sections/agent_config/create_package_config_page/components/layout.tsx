@@ -18,10 +18,10 @@ import {
 import { WithHeaderLayout } from '../../../../layouts';
 import { AgentConfig, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
-import { CreateDatasourceFrom } from '../types';
+import { CreatePackageConfigFrom } from '../types';
 
-export const CreateDatasourcePageLayout: React.FunctionComponent<{
-  from: CreateDatasourceFrom;
+export const CreatePackageConfigPageLayout: React.FunctionComponent<{
+  from: CreatePackageConfigFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
   agentConfig?: AgentConfig;
@@ -49,7 +49,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           data-test-subj={`${dataTestSubj}_cancelBackLink`}
         >
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.cancelLinkText"
+            id="xpack.ingestManager.createPackageConfig.cancelLinkText"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -59,13 +59,13 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           <h1>
             {from === 'edit' ? (
               <FormattedMessage
-                id="xpack.ingestManager.editDatasource.pageTitle"
-                defaultMessage="Edit data source"
+                id="xpack.ingestManager.editPackageConfig.pageTitle"
+                defaultMessage="Edit integration"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.pageTitle"
-                defaultMessage="Add data source"
+                id="xpack.ingestManager.createPackageConfig.pageTitle"
+                defaultMessage="Add integration"
               />
             )}
           </h1>
@@ -76,17 +76,17 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
         <EuiText color="subdued" size="s">
           {from === 'edit' ? (
             <FormattedMessage
-              id="xpack.ingestManager.editDatasource.pageDescription"
-              defaultMessage="Follow the instructions below to edit this data source."
+              id="xpack.ingestManager.editPackageConfig.pageDescription"
+              defaultMessage="Follow the instructions below to edit this integration."
             />
           ) : from === 'config' ? (
             <FormattedMessage
-              id="xpack.ingestManager.createDatasource.pageDescriptionfromConfig"
+              id="xpack.ingestManager.createPackageConfig.pageDescriptionfromConfig"
               defaultMessage="Follow the instructions below to add an integration to this agent configuration."
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.createDatasource.pageDescriptionfromPackage"
+              id="xpack.ingestManager.createPackageConfig.pageDescriptionfromPackage"
               defaultMessage="Follow the instructions below to add this integration to an agent configuration."
             />
           )}
@@ -102,7 +102,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.agentConfigurationNameLabel"
+                id="xpack.ingestManager.createPackageConfig.agentConfigurationNameLabel"
                 defaultMessage="Configuration"
               />
             </EuiDescriptionListTitle>
@@ -115,7 +115,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
           <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.packageNameLabel"
+                id="xpack.ingestManager.createPackageConfig.packageNameLabel"
                 defaultMessage="Integration"
               />
             </EuiDescriptionListTitle>

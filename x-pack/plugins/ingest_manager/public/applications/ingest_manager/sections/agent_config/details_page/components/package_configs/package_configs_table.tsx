@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { AgentConfig, PackageConfig } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
-import { DatasourceDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
+import { PackageConfigDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
 import { useConfigRefresh } from '../../hooks';
 
-interface InMemoryDatasource extends PackageConfig {
+interface InMemoryPackageConfig extends PackageConfig {
   streams: { total: number; enabled: number };
   inputTypes: string[];
   packageName?: string;
@@ -31,11 +31,11 @@ interface InMemoryDatasource extends PackageConfig {
 }
 
 interface Props {
-  datasources: PackageConfig[];
+  packageConfigs: PackageConfig[];
   config: AgentConfig;
   // Pass through props to InMemoryTable
-  loading?: EuiInMemoryTableProps<InMemoryDatasource>['loading'];
-  message?: EuiInMemoryTableProps<InMemoryDatasource>['message'];
+  loading?: EuiInMemoryTableProps<InMemoryPackageConfig>['loading'];
+  message?: EuiInMemoryTableProps<InMemoryPackageConfig>['message'];
 }
 
 interface FilterOption {
@@ -46,8 +46,8 @@ interface FilterOption {
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
-export const DatasourcesTable: React.FunctionComponent<Props> = ({
-  datasources: originalDatasources,
+export const PackageConfigsTable: React.FunctionComponent<Props> = ({
+  packageConfigs: originalPackageConfigs,
   config,
   ...rest
 }) => {
@@ -55,75 +55,80 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
   const hasWriteCapabilities = useCapabilities().write;
   const refreshConfig = useConfigRefresh();
 
-  // With the datasources provided on input, generate the list of datasources
+  // With the package configs provided on input, generate the list of package configs
   // used in the InMemoryTable (flattens some values for search) as well as
   // the list of options that will be used in the filters dropdowns
-  const [datasources, namespaces, inputTypes] = useMemo((): [
-    InMemoryDatasource[],
+  const [packageConfigs, namespaces, inputTypes] = useMemo((): [
+    InMemoryPackageConfig[],
     FilterOption[],
     FilterOption[]
   ] => {
     const namespacesValues: string[] = [];
     const inputTypesValues: string[] = [];
-    const mappedDatasources = originalDatasources.map<InMemoryDatasource>((datasource) => {
-      if (datasource.namespace && !namespacesValues.includes(datasource.namespace)) {
-        namespacesValues.push(datasource.namespace);
+    const mappedPackageConfigs = originalPackageConfigs.map<InMemoryPackageConfig>(
+      (packageConfig) => {
+        if (packageConfig.namespace && !namespacesValues.includes(packageConfig.namespace)) {
+          namespacesValues.push(packageConfig.namespace);
+        }
+
+        const dsInputTypes: string[] = [];
+        const streams = packageConfig.inputs.reduce(
+          (streamSummary, input) => {
+            if (!inputTypesValues.includes(input.type)) {
+              inputTypesValues.push(input.type);
+            }
+            if (!dsInputTypes.includes(input.type)) {
+              dsInputTypes.push(input.type);
+            }
+
+            streamSummary.total += input.streams.length;
+            streamSummary.enabled += input.enabled
+              ? input.streams.filter((stream) => stream.enabled).length
+              : 0;
+
+            return streamSummary;
+          },
+          { total: 0, enabled: 0 }
+        );
+
+        dsInputTypes.sort(stringSortAscending);
+
+        return {
+          ...packageConfig,
+          streams,
+          inputTypes: dsInputTypes,
+          packageName: packageConfig.package?.name ?? '',
+          packageTitle: packageConfig.package?.title ?? '',
+          packageVersion: packageConfig.package?.version ?? '',
+        };
       }
-
-      const dsInputTypes: string[] = [];
-      const streams = datasource.inputs.reduce(
-        (streamSummary, input) => {
-          if (!inputTypesValues.includes(input.type)) {
-            inputTypesValues.push(input.type);
-          }
-          if (!dsInputTypes.includes(input.type)) {
-            dsInputTypes.push(input.type);
-          }
-
-          streamSummary.total += input.streams.length;
-          streamSummary.enabled += input.enabled
-            ? input.streams.filter((stream) => stream.enabled).length
-            : 0;
-
-          return streamSummary;
-        },
-        { total: 0, enabled: 0 }
-      );
-
-      dsInputTypes.sort(stringSortAscending);
-
-      return {
-        ...datasource,
-        streams,
-        inputTypes: dsInputTypes,
-        packageName: datasource.package?.name ?? '',
-        packageTitle: datasource.package?.title ?? '',
-        packageVersion: datasource.package?.version ?? '',
-      };
-    });
+    );
 
     namespacesValues.sort(stringSortAscending);
     inputTypesValues.sort(stringSortAscending);
 
     return [
-      mappedDatasources,
+      mappedPackageConfigs,
       namespacesValues.map(toFilterOption),
       inputTypesValues.map(toFilterOption),
     ];
-  }, [originalDatasources]);
+  }, [originalPackageConfigs]);
 
   const columns = useMemo(
-    (): EuiInMemoryTableProps<InMemoryDatasource>['columns'] => [
+    (): EuiInMemoryTableProps<InMemoryPackageConfig>['columns'] => [
       {
         field: 'name',
-        name: i18n.translate('xpack.ingestManager.configDetails.datasourcesTable.nameColumnTitle', {
-          defaultMessage: 'Data source',
-        }),
+        name: i18n.translate(
+          'xpack.ingestManager.configDetails.packageConfigsTable.nameColumnTitle',
+          {
+            defaultMessage: 'Name',
+          }
+        ),
       },
       {
         field: 'description',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.descriptionColumnTitle',
+          'xpack.ingestManager.configDetails.packageConfigsTable.descriptionColumnTitle',
           {
             defaultMessage: 'Description',
           }
@@ -133,19 +138,19 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       {
         field: 'packageTitle',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.packageNameColumnTitle',
+          'xpack.ingestManager.configDetails.packageConfigsTable.packageNameColumnTitle',
           {
             defaultMessage: 'Integration',
           }
         ),
-        render(packageTitle: string, datasource: InMemoryDatasource) {
+        render(packageTitle: string, packageConfig: InMemoryPackageConfig) {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {datasource.package && (
+              {packageConfig.package && (
                 <EuiFlexItem grow={false}>
                   <PackageIcon
-                    packageName={datasource.package.name}
-                    version={datasource.package.version}
+                    packageName={packageConfig.package.name}
+                    version={packageConfig.package.version}
                     size="m"
                     tryApi={true}
                   />
@@ -159,24 +164,24 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       {
         field: 'namespace',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.namespaceColumnTitle',
+          'xpack.ingestManager.configDetails.packageConfigsTable.namespaceColumnTitle',
           {
             defaultMessage: 'Namespace',
           }
         ),
-        render: (namespace: InMemoryDatasource['namespace']) => {
+        render: (namespace: InMemoryPackageConfig['namespace']) => {
           return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
         },
       },
       {
         field: 'streams',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.streamsCountColumnTitle',
+          'xpack.ingestManager.configDetails.packageConfigsTable.streamsCountColumnTitle',
           {
             defaultMessage: 'Streams',
           }
         ),
-        render: (streams: InMemoryDatasource['streams']) => {
+        render: (streams: InMemoryPackageConfig['streams']) => {
           return (
             <>
               <EuiTextColor>{streams.enabled}</EuiTextColor>
@@ -187,67 +192,67 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       },
       {
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle',
+          'xpack.ingestManager.configDetails.packageConfigsTable.actionsColumnTitle',
           {
             defaultMessage: 'Actions',
           }
         ),
         actions: [
           {
-            render: (datasource: InMemoryDatasource) => (
+            render: (packageConfig: InMemoryPackageConfig) => (
               <ContextMenuActions
                 items={[
-                  // FIXME: implement View datasource action
+                  // FIXME: implement View package config action
                   // <EuiContextMenuItem
                   //   disabled
                   //   icon="inspect"
                   //   onClick={() => {}}
-                  //   key="datasourceView"
+                  //   key="packageConfigView"
                   // >
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.configDetails.datasourcesTable.viewActionTitle"
-                  //     defaultMessage="View data source"
+                  //     id="xpack.ingestManager.configDetails.packageConfigsTable.viewActionTitle"
+                  //     defaultMessage="View integration"
                   //   />
                   // </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     disabled={!hasWriteCapabilities}
                     icon="pencil"
-                    href={getHref('edit_datasource', {
+                    href={getHref('edit_integration', {
                       configId: config.id,
-                      datasourceId: datasource.id,
+                      packageConfigId: packageConfig.id,
                     })}
-                    key="datasourceEdit"
+                    key="packageConfigEdit"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.configDetails.datasourcesTable.editActionTitle"
-                      defaultMessage="Edit data source"
+                      id="xpack.ingestManager.configDetails.packageConfigsTable.editActionTitle"
+                      defaultMessage="Edit integration"
                     />
                   </EuiContextMenuItem>,
-                  // FIXME: implement Copy datasource action
-                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="datasourceCopy">
+                  // FIXME: implement Copy package config action
+                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packageConfigCopy">
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle"
-                  //     defaultMessage="Copy data source"
+                  //     id="xpack.ingestManager.configDetails.packageConfigsTable.copyActionTitle"
+                  //     defaultMessage="Copy integration"
                   //   />
                   // </EuiContextMenuItem>,
-                  <DatasourceDeleteProvider agentConfig={config} key="datasourceDelete">
-                    {(deleteDatasourcePrompt) => {
+                  <PackageConfigDeleteProvider agentConfig={config} key="packageConfigDelete">
+                    {(deletePackageConfigsPrompt) => {
                       return (
                         <DangerEuiContextMenuItem
                           disabled={!hasWriteCapabilities}
                           icon="trash"
                           onClick={() => {
-                            deleteDatasourcePrompt([datasource.id], refreshConfig);
+                            deletePackageConfigsPrompt([packageConfig.id], refreshConfig);
                           }}
                         >
                           <FormattedMessage
-                            id="xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle"
-                            defaultMessage="Delete data source"
+                            id="xpack.ingestManager.configDetails.packageConfigsTable.deleteActionTitle"
+                            defaultMessage="Delete integration"
                           />
                         </DangerEuiContextMenuItem>
                       );
                     }}
-                  </DatasourceDeleteProvider>,
+                  </PackageConfigDeleteProvider>,
                 ]}
               />
             ),
@@ -259,9 +264,9 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiInMemoryTable<InMemoryDatasource>
+    <EuiInMemoryTable<InMemoryPackageConfig>
       itemId="id"
-      items={datasources}
+      items={packageConfigs}
       columns={columns}
       sorting={{
         sort: {
@@ -273,14 +278,14 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       search={{
         toolsRight: [
           <EuiButton
-            key="addDatasourceButton"
+            key="addPackageConfigButton"
             isDisabled={!hasWriteCapabilities}
             iconType="plusInCircle"
-            href={getHref('add_datasource_from_configuration', { configId: config.id })}
+            href={getHref('add_integration_from_configuration', { configId: config.id })}
           >
             <FormattedMessage
-              id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-              defaultMessage="Add data source"
+              id="xpack.ingestManager.configDetails.addPackageConfigButtonText"
+              defaultMessage="Add integration"
             />
           </EuiButton>,
         ],

@@ -8,23 +8,23 @@ import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useCore, sendRequest, sendDeleteDatasource, useConfig } from '../../../hooks';
+import { useCore, sendRequest, sendDeletePackageConfig, useConfig } from '../../../hooks';
 import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AgentConfig } from '../../../types';
 
 interface Props {
   agentConfig: AgentConfig;
-  children: (deleteDatasourcePrompt: DeleteAgentConfigDatasourcePrompt) => React.ReactElement;
+  children: (deletePackageConfigsPrompt: DeletePackageConfigsPrompt) => React.ReactElement;
 }
 
-export type DeleteAgentConfigDatasourcePrompt = (
-  datasourcesToDelete: string[],
+export type DeletePackageConfigsPrompt = (
+  packageConfigsToDelete: string[],
   onSuccess?: OnSuccessCallback
 ) => void;
 
-type OnSuccessCallback = (datasourcesDeleted: string[]) => void;
+type OnSuccessCallback = (packageConfigsDeleted: string[]) => void;
 
-export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
+export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
   agentConfig,
   children,
 }) => {
@@ -32,7 +32,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
-  const [datasources, setDatasources] = useState<string[]>([]);
+  const [packageConfigs, setPackageConfigs] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
@@ -60,13 +60,13 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
     [agentConfig.id, isFleetEnabled, isLoadingAgentsCount]
   );
 
-  const deleteDatasourcesPrompt = useMemo(
-    (): DeleteAgentConfigDatasourcePrompt => (datasourcesToDelete, onSuccess = () => undefined) => {
-      if (!Array.isArray(datasourcesToDelete) || datasourcesToDelete.length === 0) {
-        throw new Error('No datasources specified for deletion');
+  const deletePackageConfigsPrompt = useMemo(
+    (): DeletePackageConfigsPrompt => (packageConfigsToDelete, onSuccess = () => undefined) => {
+      if (!Array.isArray(packageConfigsToDelete) || packageConfigsToDelete.length === 0) {
+        throw new Error('No package configs specified for deletion');
       }
       setIsModalOpen(true);
-      setDatasources(datasourcesToDelete);
+      setPackageConfigs(packageConfigsToDelete);
       fetchAgentsCount();
       onSuccessCallback.current = onSuccess;
     },
@@ -75,7 +75,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
 
   const closeModal = useMemo(
     () => () => {
-      setDatasources([]);
+      setPackageConfigs([]);
       setIsLoading(false);
       setIsLoadingAgentsCount(false);
       setIsModalOpen(false);
@@ -83,12 +83,12 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
     []
   );
 
-  const deleteDatasources = useMemo(
+  const deletePackageConfigs = useMemo(
     () => async () => {
       setIsLoading(true);
 
       try {
-        const { data } = await sendDeleteDatasource({ packageConfigIds: datasources });
+        const { data } = await sendDeletePackageConfig({ packageConfigIds: packageConfigs });
         const successfulResults = data?.filter((result) => result.success) || [];
         const failedResults = data?.filter((result) => !result.success) || [];
 
@@ -96,16 +96,16 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
           const hasMultipleSuccesses = successfulResults.length > 1;
           const successMessage = hasMultipleSuccesses
             ? i18n.translate(
-                'xpack.ingestManager.deleteDatasource.successMultipleNotificationTitle',
+                'xpack.ingestManager.deletePackageConfig.successMultipleNotificationTitle',
                 {
-                  defaultMessage: 'Deleted {count} data sources',
+                  defaultMessage: 'Deleted {count} integrations',
                   values: { count: successfulResults.length },
                 }
               )
             : i18n.translate(
-                'xpack.ingestManager.deleteDatasource.successSingleNotificationTitle',
+                'xpack.ingestManager.deletePackageConfig.successSingleNotificationTitle',
                 {
-                  defaultMessage: "Deleted data source '{id}'",
+                  defaultMessage: "Deleted integration '{id}'",
                   values: { id: successfulResults[0].id },
                 }
               );
@@ -116,16 +116,16 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
           const hasMultipleFailures = failedResults.length > 1;
           const failureMessage = hasMultipleFailures
             ? i18n.translate(
-                'xpack.ingestManager.deleteDatasource.failureMultipleNotificationTitle',
+                'xpack.ingestManager.deletePackageConfig.failureMultipleNotificationTitle',
                 {
-                  defaultMessage: 'Error deleting {count} data sources',
+                  defaultMessage: 'Error deleting {count} integrations',
                   values: { count: failedResults.length },
                 }
               )
             : i18n.translate(
-                'xpack.ingestManager.deleteDatasource.failureSingleNotificationTitle',
+                'xpack.ingestManager.deletePackageConfig.failureSingleNotificationTitle',
                 {
-                  defaultMessage: "Error deleting data source '{id}'",
+                  defaultMessage: "Error deleting integration '{id}'",
                   values: { id: failedResults[0].id },
                 }
               );
@@ -137,14 +137,14 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
         }
       } catch (e) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.deleteDatasource.fatalErrorNotificationTitle', {
-            defaultMessage: 'Error deleting data source',
+          i18n.translate('xpack.ingestManager.deletePackageConfig.fatalErrorNotificationTitle', {
+            defaultMessage: 'Error deleting integration',
           })
         );
       }
       closeModal();
     },
-    [closeModal, datasources, notifications.toasts]
+    [closeModal, packageConfigs, notifications.toasts]
   );
 
   const renderModal = () => {
@@ -157,31 +157,31 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.deleteMultipleTitle"
-              defaultMessage="Delete {count, plural, one {data source} other {# data sources}}?"
-              values={{ count: datasources.length }}
+              id="xpack.ingestManager.deletePackageConfig.confirmModal.deleteMultipleTitle"
+              defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
+              values={{ count: packageConfigs.length }}
             />
           }
           onCancel={closeModal}
-          onConfirm={deleteDatasources}
+          onConfirm={deletePackageConfigs}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.cancelButtonLabel"
+              id="xpack.ingestManager.deletePackageConfig.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isLoading || isLoadingAgentsCount ? (
               <FormattedMessage
-                id="xpack.ingestManager.deleteDatasource.confirmModal.loadingButtonLabel"
+                id="xpack.ingestManager.deletePackageConfig.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.deleteDatasource.confirmModal.confirmButtonLabel"
-                defaultMessage="Delete {agentConfigsCount, plural, one {data source} other {data sources}}"
+                id="xpack.ingestManager.deletePackageConfig.confirmModal.confirmButtonLabel"
+                defaultMessage="Delete {agentConfigsCount, plural, one {integration} other {integrations}}"
                 values={{
-                  agentConfigsCount: datasources.length,
+                  agentConfigsCount: packageConfigs.length,
                 }}
               />
             )
@@ -191,7 +191,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
         >
           {isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.loadingAgentsCountMessage"
+              id="xpack.ingestManager.deletePackageConfig.confirmModal.loadingAgentsCountMessage"
               defaultMessage="Checking affected agents…"
             />
           ) : agentsCount ? (
@@ -200,14 +200,14 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
                 color="danger"
                 title={
                   <FormattedMessage
-                    id="xpack.ingestManager.deleteDatasource.confirmModal.affectedAgentsTitle"
+                    id="xpack.ingestManager.deletePackageConfig.confirmModal.affectedAgentsTitle"
                     defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
                     values={{ agentsCount }}
                   />
                 }
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.deleteDatasource.confirmModal.affectedAgentsMessage"
+                  id="xpack.ingestManager.deletePackageConfig.confirmModal.affectedAgentsMessage"
                   defaultMessage="Fleet has detected that {agentConfigName} is already in use by some of your agents."
                   values={{
                     agentConfigName: <strong>{agentConfig.name}</strong>,
@@ -219,7 +219,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
           ) : null}
           {!isLoadingAgentsCount && (
             <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.generalMessage"
+              id="xpack.ingestManager.deletePackageConfig.confirmModal.generalMessage"
               defaultMessage="This action can not be undone. Are you sure you wish to continue?"
             />
           )}
@@ -230,7 +230,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      {children(deleteDatasourcesPrompt)}
+      {children(deletePackageConfigsPrompt)}
       {renderModal()}
     </Fragment>
   );

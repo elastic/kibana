@@ -64,7 +64,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
       <EuiText size="s">
         <FormattedMessage
           id="xpack.ingestManager.createAgentConfig.flyoutTitleDescription"
-          defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add data sources to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
+          defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add integrations to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
         />
       </EuiText>
     </EuiFlyoutHeader>

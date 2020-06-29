@@ -22,25 +22,28 @@ import {
   useBreadcrumbs,
   useCore,
   useConfig,
-  sendUpdateDatasource,
+  sendUpdatePackageConfig,
   sendGetAgentStatus,
   sendGetOneAgentConfig,
-  sendGetOneDatasource,
+  sendGetOnePackageConfig,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { ConfirmDeployConfigModal } from '../components';
-import { CreateDatasourcePageLayout } from '../create_datasource_page/components';
+import { CreatePackageConfigPageLayout } from '../create_package_config_page/components';
 import {
-  DatasourceValidationResults,
-  validateDatasource,
+  PackageConfigValidationResults,
+  validatePackageConfig,
   validationHasErrors,
-} from '../create_datasource_page/services';
-import { DatasourceFormState, CreateDatasourceFrom } from '../create_datasource_page/types';
-import { StepConfigureDatasource } from '../create_datasource_page/step_configure_datasource';
-import { StepDefineDatasource } from '../create_datasource_page/step_define_datasource';
+} from '../create_package_config_page/services';
+import {
+  PackageConfigFormState,
+  CreatePackageConfigFrom,
+} from '../create_package_config_page/types';
+import { StepConfigurePackage } from '../create_package_config_page/step_configure_package';
+import { StepDefinePackageConfig } from '../create_package_config_page/step_define_package_config';
 
-export const EditDatasourcePage: React.FunctionComponent = () => {
+export const EditPackageConfigPage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
@@ -50,7 +53,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
   const {
-    params: { configId, datasourceId },
+    params: { configId, packageConfigId },
   } = useRouteMatch();
   const history = useHistory();
   const { getHref, getPath } = useLink();
@@ -64,12 +67,12 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     return () => subscription.unsubscribe();
   });
 
-  // Agent config, package info, and datasource states
+  // Agent config, package info, and package config states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<Error>();
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [datasource, setDatasource] = useState<NewPackageConfig>({
+  const [packageConfig, setPackageConfig] = useState<NewPackageConfig>({
     name: '',
     description: '',
     namespace: '',
@@ -79,20 +82,20 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     inputs: [],
   });
 
-  // Retrieve agent config, package, and datasource info
+  // Retrieve agent config, package, and package config info
   useEffect(() => {
     const getData = async () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const [{ data: agentConfigData }, { data: datasourceData }] = await Promise.all([
+        const [{ data: agentConfigData }, { data: packageConfigData }] = await Promise.all([
           sendGetOneAgentConfig(configId),
-          sendGetOneDatasource(datasourceId),
+          sendGetOnePackageConfig(packageConfigId),
         ]);
         if (agentConfigData?.item) {
           setAgentConfig(agentConfigData.item);
         }
-        if (datasourceData?.item) {
+        if (packageConfigData?.item) {
           const {
             id,
             revision,
@@ -101,11 +104,11 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             created_at,
             updated_by,
             updated_at,
-            ...restOfDatasource
-          } = datasourceData.item;
+            ...restOfPackageConfig
+          } = packageConfigData.item;
           // Remove `compiled_stream` from all stream info, we assign this after saving
-          const newDatasource = {
-            ...restOfDatasource,
+          const newPackageConfig = {
+            ...restOfPackageConfig,
             inputs: inputs.map((input) => {
               const { streams, ...restOfInput } = input;
               return {
@@ -117,14 +120,14 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
               };
             }),
           };
-          setDatasource(newDatasource);
-          if (datasourceData.item.package) {
+          setPackageConfig(newPackageConfig);
+          if (packageConfigData.item.package) {
             const { data: packageData } = await sendGetPackageInfoByKey(
-              `${datasourceData.item.package.name}-${datasourceData.item.package.version}`
+              `${packageConfigData.item.package.name}-${packageConfigData.item.package.version}`
             );
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(validateDatasource(newDatasource, packageData.response));
+              setValidationResults(validatePackageConfig(newPackageConfig, packageData.response));
               setFormState('VALID');
             }
           }
@@ -135,7 +138,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       setIsLoadingData(false);
     };
     getData();
-  }, [configId, datasourceId]);
+  }, [configId, packageConfigId]);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
@@ -152,21 +155,21 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
   }, [configId, isFleetEnabled]);
 
-  // Datasource validation state
-  const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
+  // Package config validation state
+  const [validationResults, setValidationResults] = useState<PackageConfigValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  // Update datasource method
-  const updateDatasource = (updatedFields: Partial<NewPackageConfig>) => {
-    const newDatasource = {
-      ...datasource,
+  // Update package config method
+  const updatePackageConfig = (updatedFields: Partial<NewPackageConfig>) => {
+    const newPackageConfig = {
+      ...packageConfig,
       ...updatedFields,
     };
-    setDatasource(newDatasource);
+    setPackageConfig(newPackageConfig);
 
     // eslint-disable-next-line no-console
-    console.debug('Datasource updated', newDatasource);
-    const newValidationResults = updateDatasourceValidation(newDatasource);
+    console.debug('Package config updated', newPackageConfig);
+    const newValidationResults = updatePackageConfigValidation(newPackageConfig);
     const hasValidationErrors = newValidationResults
       ? validationHasErrors(newValidationResults)
       : false;
@@ -175,12 +178,15 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
   };
 
-  const updateDatasourceValidation = (newDatasource?: NewPackageConfig) => {
+  const updatePackageConfigValidation = (newPackageConfig?: NewPackageConfig) => {
     if (packageInfo) {
-      const newValidationResult = validateDatasource(newDatasource || datasource, packageInfo);
+      const newValidationResult = validatePackageConfig(
+        newPackageConfig || packageConfig,
+        packageInfo
+      );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
-      console.debug('Datasource validation results', newValidationResult);
+      console.debug('Package config validation results', newValidationResult);
 
       return newValidationResult;
     }
@@ -189,11 +195,11 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   // Cancel url
   const cancelUrl = getHref('configuration_details', { configId });
 
-  // Save datasource
-  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
-  const saveDatasource = async () => {
+  // Save package config
+  const [formState, setFormState] = useState<PackageConfigFormState>('INVALID');
+  const savePackageConfig = async () => {
     setFormState('LOADING');
-    const result = await sendUpdateDatasource(datasourceId, datasource);
+    const result = await sendUpdatePackageConfig(packageConfigId, packageConfig);
     setFormState('SUBMITTED');
     return result;
   };
@@ -207,19 +213,19 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    const { error } = await saveDatasource();
+    const { error } = await savePackageConfig();
     if (!error) {
       history.push(getPath('configuration_details', { configId }));
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationTitle', {
-          defaultMessage: `Successfully updated '{datasourceName}'`,
+        title: i18n.translate('xpack.ingestManager.editPackageConfig.updatedNotificationTitle', {
+          defaultMessage: `Successfully updated '{packageConfigName}'`,
           values: {
-            datasourceName: datasource.name,
+            packageConfigName: packageConfig.name,
           },
         }),
         text:
           agentCount && agentConfig
-            ? i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationMessage', {
+            ? i18n.translate('xpack.ingestManager.editPackageConfig.updatedNotificationMessage', {
                 defaultMessage: `Fleet will deploy updates to all agents that use the '{agentConfigName}' configuration`,
                 values: {
                   agentConfigName: agentConfig.name,
@@ -236,28 +242,28 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   const layoutProps = {
-    from: 'edit' as CreateDatasourceFrom,
+    from: 'edit' as CreatePackageConfigFrom,
     cancelUrl,
     agentConfig,
     packageInfo,
   };
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="editDataSource">
+    <CreatePackageConfigPageLayout {...layoutProps} data-test-subj="editPackageConfig">
       {isLoadingData ? (
         <Loading />
       ) : loadingError || !agentConfig || !packageInfo ? (
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.editDatasource.errorLoadingDataTitle"
+              id="xpack.ingestManager.editPackageConfig.errorLoadingDataTitle"
               defaultMessage="Error loading data"
             />
           }
           error={
             loadingError ||
-            i18n.translate('xpack.ingestManager.editDatasource.errorLoadingDataMessage', {
-              defaultMessage: 'There was an error loading this data source information',
+            i18n.translate('xpack.ingestManager.editPackageConfig.errorLoadingDataMessage', {
+              defaultMessage: 'There was an error loading this intergration information',
             })
           }
         />
@@ -276,35 +282,35 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             steps={[
               {
                 title: i18n.translate(
-                  'xpack.ingestManager.editDatasource.stepDefineDatasourceTitle',
+                  'xpack.ingestManager.editPackageConfig.stepDefinePackageConfigTitle',
                   {
-                    defaultMessage: 'Define your data source',
+                    defaultMessage: 'Define your integration',
                   }
                 ),
                 children: (
-                  <StepDefineDatasource
+                  <StepDefinePackageConfig
                     agentConfig={agentConfig}
                     packageInfo={packageInfo}
-                    datasource={datasource}
-                    updateDatasource={updateDatasource}
+                    packageConfig={packageConfig}
+                    updatePackageConfig={updatePackageConfig}
                     validationResults={validationResults!}
                   />
                 ),
               },
               {
                 title: i18n.translate(
-                  'xpack.ingestManager.editDatasource.stepConfgiureDatasourceTitle',
+                  'xpack.ingestManager.editPackageConfig.stepConfigurePackageConfigTitle',
                   {
                     defaultMessage: 'Select the data you want to collect',
                   }
                 ),
                 children: (
-                  <StepConfigureDatasource
+                  <StepConfigurePackage
                     from={'edit'}
                     packageInfo={packageInfo}
-                    datasource={datasource}
-                    datasourceId={datasourceId}
-                    updateDatasource={updateDatasource}
+                    packageConfig={packageConfig}
+                    packageConfigId={packageConfigId}
+                    updatePackageConfig={updatePackageConfig}
                     validationResults={validationResults!}
                     submitAttempted={formState === 'INVALID'}
                   />
@@ -327,7 +333,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" href={cancelUrl}>
                   <FormattedMessage
-                    id="xpack.ingestManager.editDatasource.cancelButton"
+                    id="xpack.ingestManager.editPackageConfig.cancelButton"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -342,8 +348,8 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                   fill
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.editDatasource.saveButton"
-                    defaultMessage="Save data source"
+                    id="xpack.ingestManager.editPackageConfig.saveButton"
+                    defaultMessage="Save integration"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -351,7 +357,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           </EuiBottomBar>
         </>
       )}
-    </CreateDatasourcePageLayout>
+    </CreatePackageConfigPageLayout>
   );
 };
 
@@ -359,6 +365,6 @@ const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string
   configName,
   configId,
 }) => {
-  useBreadcrumbs('edit_datasource', { configName, configId });
+  useBreadcrumbs('edit_integration', { configName, configId });
   return null;
 };

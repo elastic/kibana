@@ -76,7 +76,7 @@ export const StepSelectConfig: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingPackageTitle"
+            id="xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingPackageTitle"
             defaultMessage="Error loading package information"
           />
         }
@@ -91,7 +91,7 @@ export const StepSelectConfig: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingAgentConfigsTitle"
+            id="xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingAgentConfigsTitle"
             defaultMessage="Error loading agent configurations"
           />
         }
@@ -127,7 +127,7 @@ export const StepSelectConfig: React.FunctionComponent<{
               <EuiFlexItem grow={false}>
                 <EuiTextColor color="subdued">
                   <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.StepSelectConfig.agentConfigAgentsCountText"
+                    id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
                     defaultMessage="{count, plural, one {# agent} other {# agents}}"
                     values={{
                       count: agentConfigsById[option.key!].agents || 0,
@@ -142,7 +142,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           }}
           searchProps={{
             placeholder: i18n.translate(
-              'xpack.ingestManager.createDatasource.StepSelectConfig.filterAgentConfigsInputPlaceholder',
+              'xpack.ingestManager.createPackageConfig.StepSelectConfig.filterAgentConfigsInputPlaceholder',
               {
                 defaultMessage: 'Search for agent configurations',
               }
@@ -173,7 +173,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingSelectedAgentConfigTitle"
+                id="xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingSelectedAgentConfigTitle"
                 defaultMessage="Error loading selected agent config"
               />
             }

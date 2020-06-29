@@ -25,9 +25,9 @@ import {
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
-import { DatasourceInputValidationResults, validationHasErrors } from '../services';
-import { DatasourceInputConfig } from './datasource_input_config';
-import { DatasourceInputStreamConfig } from './datasource_input_stream_config';
+import { PackageConfigInputValidationResults, validationHasErrors } from '../services';
+import { PackageConfigInputConfig } from './package_config_input_config';
+import { PackageConfigInputStreamConfig } from './package_config_input_stream';
 
 const FlushHorizontalRule = styled(EuiHorizontalRule)`
   margin-left: -${(props) => props.theme.eui.paddingSizes.m};
@@ -35,18 +35,18 @@ const FlushHorizontalRule = styled(EuiHorizontalRule)`
   width: auto;
 `;
 
-export const DatasourceInputPanel: React.FunctionComponent<{
+export const PackageConfigInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>;
-  datasourceInput: PackageConfigInput;
-  updateDatasourceInput: (updatedInput: Partial<PackageConfigInput>) => void;
-  inputValidationResults: DatasourceInputValidationResults;
+  packageConfigInput: PackageConfigInput;
+  updatePackageConfigInput: (updatedInput: Partial<PackageConfigInput>) => void;
+  inputValidationResults: PackageConfigInputValidationResults;
   forceShowErrors?: boolean;
 }> = ({
   packageInput,
   packageInputStreams,
-  datasourceInput,
-  updateDatasourceInput,
+  packageConfigInput,
+  updatePackageConfigInput,
   inputValidationResults,
   forceShowErrors,
 }) => {
@@ -78,7 +78,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                     <EuiIconTip
                       content={
                         <FormattedMessage
-                          id="xpack.ingestManager.createDatasource.stepConfigure.inputLevelErrorsTooltip"
+                          id="xpack.ingestManager.createPackageConfig.stepConfigure.inputLevelErrorsTooltip"
                           defaultMessage="Fix configuration errors"
                         />
                       }
@@ -90,12 +90,12 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                 ) : null}
               </EuiFlexGroup>
             }
-            checked={datasourceInput.enabled}
+            checked={packageConfigInput.enabled}
             onChange={(e) => {
               const enabled = e.target.checked;
-              updateDatasourceInput({
+              updatePackageConfigInput({
                 enabled,
-                streams: datasourceInput.streams.map((stream) => ({
+                streams: packageConfigInput.streams.map((stream) => ({
                   ...stream,
                   enabled,
                 })),
@@ -108,13 +108,13 @@ export const DatasourceInputPanel: React.FunctionComponent<{
             <EuiFlexItem>
               <EuiText color="subdued">
                 <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.streamsEnabledCountText"
+                  id="xpack.ingestManager.createPackageConfig.stepConfigure.streamsEnabledCountText"
                   defaultMessage="{count} / {total, plural, one {# stream} other {# streams}} enabled"
                   values={{
                     count: (
                       <EuiTextColor color="default">
                         <strong>
-                          {datasourceInput.streams.filter((stream) => stream.enabled).length}
+                          {packageConfigInput.streams.filter((stream) => stream.enabled).length}
                         </strong>
                       </EuiTextColor>
                     ),
@@ -131,7 +131,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                 aria-label={
                   isShowingStreams
                     ? i18n.translate(
-                        'xpack.ingestManager.createDatasource.stepConfigure.hideStreamsAriaLabel',
+                        'xpack.ingestManager.createPackageConfig.stepConfigure.hideStreamsAriaLabel',
                         {
                           defaultMessage: 'Hide {type} streams',
                           values: {
@@ -140,7 +140,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                         }
                       )
                     : i18n.translate(
-                        'xpack.ingestManager.createDatasource.stepConfigure.showStreamsAriaLabel',
+                        'xpack.ingestManager.createPackageConfig.stepConfigure.showStreamsAriaLabel',
                         {
                           defaultMessage: 'Show {type} streams',
                           values: {
@@ -161,10 +161,10 @@ export const DatasourceInputPanel: React.FunctionComponent<{
       {/* Input level configuration */}
       {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
         <Fragment>
-          <DatasourceInputConfig
+          <PackageConfigInputConfig
             packageInputVars={packageInput.vars}
-            datasourceInput={datasourceInput}
-            updateDatasourceInput={updateDatasourceInput}
+            packageConfigInput={packageConfigInput}
+            updatePackageConfigInput={updatePackageConfigInput}
             inputVarsValidationResults={{ vars: inputValidationResults.vars }}
             forceShowErrors={forceShowErrors}
           />
@@ -176,21 +176,21 @@ export const DatasourceInputPanel: React.FunctionComponent<{
       {isShowingStreams ? (
         <EuiFlexGroup direction="column">
           {packageInputStreams.map((packageInputStream) => {
-            const datasourceInputStream = datasourceInput.streams.find(
+            const packageConfigInputStream = packageConfigInput.streams.find(
               (stream) => stream.dataset.name === packageInputStream.dataset.name
             );
-            return datasourceInputStream ? (
+            return packageConfigInputStream ? (
               <EuiFlexItem key={packageInputStream.dataset.name}>
-                <DatasourceInputStreamConfig
+                <PackageConfigInputStreamConfig
                   packageInputStream={packageInputStream}
-                  datasourceInputStream={datasourceInputStream}
+                  packageConfigInputStream={packageConfigInputStream}
                   updatePackageConfigInputStream={(
                     updatedStream: Partial<PackageConfigInputStream>
                   ) => {
-                    const indexOfUpdatedStream = datasourceInput.streams.findIndex(
+                    const indexOfUpdatedStream = packageConfigInput.streams.findIndex(
                       (stream) => stream.dataset.name === packageInputStream.dataset.name
                     );
-                    const newStreams = [...datasourceInput.streams];
+                    const newStreams = [...packageConfigInput.streams];
                     newStreams[indexOfUpdatedStream] = {
                       ...newStreams[indexOfUpdatedStream],
                       ...updatedStream,
@@ -201,19 +201,19 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                     };
 
                     // Update input enabled state if needed
-                    if (!datasourceInput.enabled && updatedStream.enabled) {
+                    if (!packageConfigInput.enabled && updatedStream.enabled) {
                       updatedInput.enabled = true;
                     } else if (
-                      datasourceInput.enabled &&
+                      packageConfigInput.enabled &&
                       !newStreams.find((stream) => stream.enabled)
                     ) {
                       updatedInput.enabled = false;
                     }
 
-                    updateDatasourceInput(updatedInput);
+                    updatePackageConfigInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![datasourceInputStream.id]
+                    inputValidationResults.streams![packageConfigInputStream.id]
                   }
                   forceShowErrors={forceShowErrors}
                 />

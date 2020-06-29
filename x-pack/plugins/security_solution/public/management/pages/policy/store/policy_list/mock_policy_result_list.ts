@@ -27,7 +27,7 @@ export const mockPolicyResultList: (options?: {
   const policies = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     const generator = new EndpointDocGenerator('seed');
-    policies.push(generator.generatePolicyDatasource());
+    policies.push(generator.generatePolicyPackageConfig());
   }
   const mock: GetPolicyListResponse = {
     items: policies,

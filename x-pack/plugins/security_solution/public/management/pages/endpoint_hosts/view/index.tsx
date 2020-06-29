@@ -37,7 +37,7 @@ import { PolicyEmptyState, EndpointsEmptyState } from '../../../components/manag
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
-  CreateDatasourceRouteState,
+  CreatePackageConfigRouteState,
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
@@ -118,11 +118,11 @@ export const HostList = () => {
     [history, queryParams]
   );
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
     'ingestManager',
     {
       path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
       }`,
       state: {
         onCancelNavigateTo: [

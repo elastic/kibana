@@ -18,7 +18,7 @@ import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '..
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { registerDatasource } from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
+import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -31,7 +31,7 @@ export interface IngestManagerSetup {}
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerDatasource: typeof registerDatasource;
+  registerPackageConfigComponent: typeof registerPackageConfigComponent;
   success: Promise<true>;
 }
 
@@ -102,7 +102,7 @@ export class IngestManagerPlugin
 
     return {
       success: successPromise,
-      registerDatasource,
+      registerPackageConfigComponent,
     };
   }
 

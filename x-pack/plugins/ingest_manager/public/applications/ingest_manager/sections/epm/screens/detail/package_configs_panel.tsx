@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiTitle } from '@elastic/eui';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
 
-interface DataSourcesPanelProps {
+interface PackageConfigsPanelProps {
   name: string;
   version: string;
 }
-export const DataSourcesPanel = ({ name, version }: DataSourcesPanelProps) => {
+export const PackageConfigsPanel = ({ name, version }: PackageConfigsPanelProps) => {
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
@@ -23,11 +22,5 @@ export const DataSourcesPanel = ({ name, version }: DataSourcesPanelProps) => {
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed)
     return <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />;
-  return (
-    <Fragment>
-      <EuiTitle size="xs">
-        <span>Data Sources</span>
-      </EuiTitle>
-    </Fragment>
-  );
+  return null;
 };

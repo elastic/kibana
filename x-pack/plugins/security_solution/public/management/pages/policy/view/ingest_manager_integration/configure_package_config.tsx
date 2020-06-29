@@ -10,20 +10,20 @@ import { EuiCallOut, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
-  CustomConfigureDatasourceContent,
-  CustomConfigureDatasourceProps,
+  CustomConfigurePackageConfigContent,
+  CustomConfigurePackageConfigProps,
 } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath } from '../../../../common/routing';
 
 /**
- * Exports Endpoint-specific datasource configuration instructions
- * for use in the Ingest app create / edit datasource config
+ * Exports Endpoint-specific package config instructions
+ * for use in the Ingest app create / edit package config
  */
-export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
-  ({ from, datasourceId }: CustomConfigureDatasourceProps) => {
+export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigContent>(
+  ({ from, packageConfigId }: CustomConfigurePackageConfigProps) => {
     let policyUrl = '';
-    if (from === 'edit' && datasourceId) {
-      policyUrl = getPolicyDetailPath(datasourceId);
+    if (from === 'edit' && packageConfigId) {
+      policyUrl = getPolicyDetailPath(packageConfigId);
     }
 
     return (
@@ -38,7 +38,7 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiCallOut
-          data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
+          data-test-subj={`endpointPackageConfig_${from === 'edit' ? 'edit' : 'create'}`}
           iconType="iInCircle"
           title={i18n.translate(
             'xpack.securitySolution.endpoint.ingestManager.policyConfiguration.calloutTitle',
@@ -52,7 +52,7 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
               {from === 'edit' ? (
                 <>
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.ingestManager.editDatasource.endpointConfiguration"
+                    id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
                     defaultMessage="You can make changes to the Policy Configuration in the Security app. Fleet will deploy changes to your agents whenever your Policy changes."
                   />
                   <EuiSpacer />
@@ -65,14 +65,14 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
                     // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.endpoint.ingestManager.editDatasource.configurePolicyLink"
+                      id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.configurePolicyLink"
                       defaultMessage="Configure Policy"
                     />
                   </LinkToApp>
                 </>
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.createDatasource.endpointConfiguration"
+                  id="xpack.securitySolution.endpoint.ingestManager.createPackageConfig.endpointConfiguration"
                   defaultMessage="Any agents that use this agent configuration will use a basic policy. You can make changes to this policy in the Security app, and Fleet will deploy those changes to your agents."
                 />
               )}
@@ -84,4 +84,4 @@ export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent
   }
 );
 
-ConfigureEndpointDatasource.displayName = 'ConfigureEndpointDatasource';
+ConfigureEndpointPackageConfig.displayName = 'ConfigureEndpointPackageConfig';

@@ -8,7 +8,7 @@ import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useConfig, useBreadcrumbs } from '../../hooks';
-import { CreateDatasourcePage } from '../agent_config/create_datasource_page';
+import { CreatePackageConfigPage } from '../agent_config/create_package_config_page';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 
@@ -19,8 +19,8 @@ export const EPMApp: React.FunctionComponent = () => {
   return epm.enabled ? (
     <Router>
       <Switch>
-        <Route path={PAGE_ROUTING_PATHS.add_datasource_from_integration}>
-          <CreateDatasourcePage />
+        <Route path={PAGE_ROUTING_PATHS.add_integration_to_configuration}>
+          <CreatePackageConfigPage />
         </Route>
         <Route path={PAGE_ROUTING_PATHS.integration_details}>
           <Detail />

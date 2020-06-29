@@ -9,9 +9,9 @@ import {
   NewPackageConfig,
   RegistryConfigTemplate,
 } from '../../../../types';
-import { validateDatasource, validationHasErrors } from './validate_datasource';
+import { validatePackageConfig, validationHasErrors } from './validate_package_config';
 
-describe('Ingest Manager - validateDatasource()', () => {
+describe('Ingest Manager - validatePackageConfig()', () => {
   const mockPackage = ({
     name: 'mock-package',
     title: 'Mock package',
@@ -92,9 +92,9 @@ describe('Ingest Manager - validateDatasource()', () => {
     ],
     config_templates: [
       {
-        name: 'datasource1',
-        title: 'Datasource 1',
-        description: 'test datasource',
+        name: 'pkgConfig1',
+        title: 'Package config 1',
+        description: 'test package config',
         inputs: [
           {
             type: 'foo',
@@ -141,8 +141,8 @@ describe('Ingest Manager - validateDatasource()', () => {
     ],
   } as unknown) as PackageInfo;
 
-  const validDatasource: NewPackageConfig = {
-    name: 'datasource1-1',
+  const validPackageConfig: NewPackageConfig = {
+    name: 'pkgConfig1-1',
     namespace: 'default',
     config_id: 'test-config',
     enabled: true,
@@ -226,8 +226,8 @@ describe('Ingest Manager - validateDatasource()', () => {
     ],
   };
 
-  const invalidDatasource: NewPackageConfig = {
-    ...validDatasource,
+  const invalidPackageConfig: NewPackageConfig = {
+    ...validPackageConfig,
     name: '',
     inputs: [
       {
@@ -350,12 +350,14 @@ describe('Ingest Manager - validateDatasource()', () => {
     },
   };
 
-  it('returns no errors for valid datasource configuration', () => {
-    expect(validateDatasource(validDatasource, mockPackage)).toEqual(noErrorsValidationResults);
+  it('returns no errors for valid package config', () => {
+    expect(validatePackageConfig(validPackageConfig, mockPackage)).toEqual(
+      noErrorsValidationResults
+    );
   });
 
-  it('returns errors for invalid datasource configuration', () => {
-    expect(validateDatasource(invalidDatasource, mockPackage)).toEqual({
+  it('returns errors for invalid package config', () => {
+    expect(validatePackageConfig(invalidPackageConfig, mockPackage)).toEqual({
       name: ['Name is required'],
       description: null,
       namespace: null,
@@ -395,14 +397,17 @@ describe('Ingest Manager - validateDatasource()', () => {
   });
 
   it('returns no errors for disabled inputs', () => {
-    const disabledInputs = invalidDatasource.inputs.map((input) => ({ ...input, enabled: false }));
-    expect(validateDatasource({ ...validDatasource, inputs: disabledInputs }, mockPackage)).toEqual(
-      noErrorsValidationResults
-    );
+    const disabledInputs = invalidPackageConfig.inputs.map((input) => ({
+      ...input,
+      enabled: false,
+    }));
+    expect(
+      validatePackageConfig({ ...validPackageConfig, inputs: disabledInputs }, mockPackage)
+    ).toEqual(noErrorsValidationResults);
   });
 
-  it('returns only datasource and input-level errors for disabled streams', () => {
-    const inputsWithDisabledStreams = invalidDatasource.inputs.map((input) =>
+  it('returns only package config and input-level errors for disabled streams', () => {
+    const inputsWithDisabledStreams = invalidPackageConfig.inputs.map((input) =>
       input.streams
         ? {
             ...input,
@@ -411,7 +416,10 @@ describe('Ingest Manager - validateDatasource()', () => {
         : input
     );
     expect(
-      validateDatasource({ ...invalidDatasource, inputs: inputsWithDisabledStreams }, mockPackage)
+      validatePackageConfig(
+        { ...invalidPackageConfig, inputs: inputsWithDisabledStreams },
+        mockPackage
+      )
     ).toEqual({
       name: ['Name is required'],
       description: null,
@@ -453,9 +461,9 @@ describe('Ingest Manager - validateDatasource()', () => {
     });
   });
 
-  it('returns no errors for packages with no datasources', () => {
+  it('returns no errors for packages with no package configs', () => {
     expect(
-      validateDatasource(validDatasource, {
+      validatePackageConfig(validPackageConfig, {
         ...mockPackage,
         config_templates: undefined,
       })
@@ -466,7 +474,7 @@ describe('Ingest Manager - validateDatasource()', () => {
       inputs: null,
     });
     expect(
-      validateDatasource(validDatasource, {
+      validatePackageConfig(validPackageConfig, {
         ...mockPackage,
         config_templates: [],
       })
@@ -480,7 +488,7 @@ describe('Ingest Manager - validateDatasource()', () => {
 
   it('returns no errors for packages with no inputs', () => {
     expect(
-      validateDatasource(validDatasource, {
+      validatePackageConfig(validPackageConfig, {
         ...mockPackage,
         config_templates: [{} as RegistryConfigTemplate],
       })
@@ -491,7 +499,7 @@ describe('Ingest Manager - validateDatasource()', () => {
       inputs: null,
     });
     expect(
-      validateDatasource(validDatasource, {
+      validatePackageConfig(validPackageConfig, {
         ...mockPackage,
         config_templates: [({ inputs: [] } as unknown) as RegistryConfigTemplate],
       })
@@ -545,7 +553,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
     ).toBe(false);
   });
 
-  it('returns true for datasource validation results with errors', () => {
+  it('returns true for package config validation results with errors', () => {
     expect(
       validationHasErrors({
         name: ['name error'],
@@ -587,7 +595,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
     ).toBe(true);
   });
 
-  it('returns false for datasource validation results with no errors', () => {
+  it('returns false for package config validation results with no errors', () => {
     expect(
       validationHasErrors({
         name: null,

@@ -6,9 +6,9 @@
 
 import {
   INGEST_API_EPM_PACKAGES,
-  sendGetDatasource,
+  sendGetPackageConfig,
   sendGetEndpointSecurityPackage,
-  sendGetEndpointSpecificDatasources,
+  sendGetEndpointSpecificPackageConfigs,
 } from './ingest';
 import { httpServiceMock } from '../../../../../../../../../../src/core/public/mocks';
 import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../../../ingest_manager/common';
@@ -21,20 +21,20 @@ describe('ingest service', () => {
     http = httpServiceMock.createStartContract();
   });
 
-  describe('sendGetEndpointSpecificDatasources()', () => {
+  describe('sendGetEndpointSpecificPackageConfigs()', () => {
     it('auto adds kuery to api request', async () => {
-      await sendGetEndpointSpecificDatasources(http);
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
+      await sendGetEndpointSpecificPackageConfigs(http);
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs', {
         query: {
           kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
         },
       });
     });
     it('supports additional KQL to be defined on input for query params', async () => {
-      await sendGetEndpointSpecificDatasources(http, {
+      await sendGetEndpointSpecificPackageConfigs(http, {
         query: { kuery: 'someValueHere', page: 1, perPage: 10 },
       });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources', {
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs', {
         query: {
           kuery: `someValueHere and ${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           perPage: 10,
@@ -44,14 +44,14 @@ describe('ingest service', () => {
     });
   });
 
-  describe('sendGetDatasource()', () => {
+  describe('sendGetPackageConfig()', () => {
     it('builds correct API path', async () => {
-      await sendGetDatasource(http, '123');
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources/123', undefined);
+      await sendGetPackageConfig(http, '123');
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs/123', undefined);
     });
     it('supports http options', async () => {
-      await sendGetDatasource(http, '123', { query: { page: 1 } });
-      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/datasources/123', {
+      await sendGetPackageConfig(http, '123', { query: { page: 1 } });
+      expect(http.get).toHaveBeenCalledWith('/api/ingest_manager/package_configs/123', {
         query: {
           page: 1,
         },

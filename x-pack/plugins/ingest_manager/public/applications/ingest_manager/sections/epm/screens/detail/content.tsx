@@ -14,7 +14,7 @@ import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { DataSourcesPanel } from './data_sources_panel';
+import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
@@ -64,7 +64,7 @@ export function ContentPanel(props: ContentPanelProps) {
         />
       );
     case 'usages':
-      return <DataSourcesPanel name={name} version={version} />;
+      return <PackageConfigsPanel name={name} version={version} />;
     case 'overview':
     default:
       return <OverviewPanel {...props} />;

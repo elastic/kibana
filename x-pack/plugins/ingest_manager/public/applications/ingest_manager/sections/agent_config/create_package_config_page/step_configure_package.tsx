@@ -9,9 +9,9 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@ela
 import { i18n } from '@kbn/i18n';
 import { PackageInfo, RegistryStream, NewPackageConfig, PackageConfigInput } from '../../../types';
 import { Loading } from '../../../components';
-import { DatasourceValidationResults, validationHasErrors } from './services';
-import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
-import { CreateDatasourceFrom } from './types';
+import { PackageConfigValidationResults, validationHasErrors } from './services';
+import { PackageConfigInputPanel, CustomPackageConfig } from './components';
+import { CreatePackageConfigFrom } from './types';
 
 const findStreamsForInputType = (
   inputType: string,
@@ -35,27 +35,27 @@ const findStreamsForInputType = (
   return streams;
 };
 
-export const StepConfigureDatasource: React.FunctionComponent<{
-  from?: CreateDatasourceFrom;
+export const StepConfigurePackage: React.FunctionComponent<{
+  from?: CreatePackageConfigFrom;
   packageInfo: PackageInfo;
-  datasource: NewPackageConfig;
-  datasourceId?: string;
-  updateDatasource: (fields: Partial<NewPackageConfig>) => void;
-  validationResults: DatasourceValidationResults;
+  packageConfig: NewPackageConfig;
+  packageConfigId?: string;
+  updatePackageConfig: (fields: Partial<NewPackageConfig>) => void;
+  validationResults: PackageConfigValidationResults;
   submitAttempted: boolean;
 }> = ({
   from = 'config',
   packageInfo,
-  datasource,
-  datasourceId,
-  updateDatasource,
+  packageConfig,
+  packageConfigId,
+  updatePackageConfig,
   validationResults,
   submitAttempted,
 }) => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Configure inputs (and their streams)
-  // Assume packages only export one datasource for now
+  // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
     packageInfo.config_templates &&
     packageInfo.config_templates[0] &&
@@ -63,30 +63,30 @@ export const StepConfigureDatasource: React.FunctionComponent<{
     packageInfo.config_templates[0].inputs.length ? (
       <EuiFlexGroup direction="column">
         {packageInfo.config_templates[0].inputs.map((packageInput) => {
-          const datasourceInput = datasource.inputs.find(
+          const packageConfigInput = packageConfig.inputs.find(
             (input) => input.type === packageInput.type
           );
           const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
-          return datasourceInput ? (
+          return packageConfigInput ? (
             <EuiFlexItem key={packageInput.type}>
-              <DatasourceInputPanel
+              <PackageConfigInputPanel
                 packageInput={packageInput}
                 packageInputStreams={packageInputStreams}
-                datasourceInput={datasourceInput}
-                updateDatasourceInput={(updatedInput: Partial<PackageConfigInput>) => {
-                  const indexOfUpdatedInput = datasource.inputs.findIndex(
+                packageConfigInput={packageConfigInput}
+                updatePackageConfigInput={(updatedInput: Partial<PackageConfigInput>) => {
+                  const indexOfUpdatedInput = packageConfig.inputs.findIndex(
                     (input) => input.type === packageInput.type
                   );
-                  const newInputs = [...datasource.inputs];
+                  const newInputs = [...packageConfig.inputs];
                   newInputs[indexOfUpdatedInput] = {
                     ...newInputs[indexOfUpdatedInput],
                     ...updatedInput,
                   };
-                  updateDatasource({
+                  updatePackageConfig({
                     inputs: newInputs,
                   });
                 }}
-                inputValidationResults={validationResults!.inputs![datasourceInput.type]}
+                inputValidationResults={validationResults!.inputs![packageConfigInput.type]}
                 forceShowErrors={submitAttempted}
               />
             </EuiFlexItem>
@@ -95,11 +95,11 @@ export const StepConfigureDatasource: React.FunctionComponent<{
       </EuiFlexGroup>
     ) : (
       <EuiPanel>
-        <CustomConfigureDatasource
+        <CustomPackageConfig
           from={from}
           packageName={packageInfo.name}
-          datasource={datasource}
-          datasourceId={datasourceId}
+          packageConfig={packageConfig}
+          packageConfigId={packageConfigId}
         />
       </EuiPanel>
     );
@@ -112,16 +112,16 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.ingestManager.createDatasource.stepConfigure.validationErrorTitle',
+              'xpack.ingestManager.createPackageConfig.stepConfigure.validationErrorTitle',
               {
-                defaultMessage: 'Your data source configuration has errors',
+                defaultMessage: 'Your integration configuration has errors',
               }
             )}
             color="danger"
           >
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.createDatasource.stepConfigure.validationErrorText"
+                id="xpack.ingestManager.createPackageConfig.stepConfigure.validationErrorText"
                 defaultMessage="Please fix the above errors before continuing"
               />
             </p>

@@ -103,7 +103,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * @param onEditPage
      */
     async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**
