@@ -29,7 +29,6 @@ import { Adapters } from '../../../../../plugins/inspector/public';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import { ISearchSource } from '../search_source';
-import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -64,10 +63,6 @@ export interface AggTypeConfig<
 
 // TODO need to make a more explicit interface for this
 export type IAggType = AggType;
-
-export interface AggTypeDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
@@ -223,10 +218,7 @@ export class AggType<
    * @private
    * @param {object} config - used to set the properties of the AggType
    */
-  constructor(
-    config: AggTypeConfig<TAggConfig>,
-    { getInternalStartServices }: AggTypeDependencies
-  ) {
+  constructor(config: AggTypeConfig<TAggConfig>) {
     this.name = config.name;
     this.type = config.type || 'metrics';
     this.dslName = config.dslName || config.name;
@@ -263,7 +255,7 @@ export class AggType<
         });
       }
 
-      this.params = initParams(params, { getInternalStartServices });
+      this.params = initParams(params);
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;

@@ -24,7 +24,6 @@ import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { isNestedField, KBN_FIELD_TYPES } from '../../../../common';
 import { Field as IndexPatternField } from '../../../index_patterns';
-import { GetInternalStartServicesFn } from '../../../types';
 
 const filterByType = propFilter('type');
 
@@ -32,20 +31,13 @@ export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 
-export interface FieldParamTypeDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;
   filterFieldTypes: FieldTypes;
   onlyAggregatable: boolean;
 
-  constructor(
-    config: Record<string, any>,
-    { getInternalStartServices }: FieldParamTypeDependencies
-  ) {
+  constructor(config: Record<string, any>) {
     super(config);
 
     this.filterFieldTypes = config.filterFieldTypes || '*';

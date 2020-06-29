@@ -26,16 +26,53 @@ import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
 import { IndexPattern, IIndexPatternFieldList } from '../../index_patterns';
+import { Field } from '../../../common';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
+  const indexPatternFields = [
+    {
+      name: '@timestamp',
+      type: 'date',
+      esTypes: ['date'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+    {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+    {
+      name: 'machine.os.keyword',
+      type: 'string',
+      esTypes: ['string'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+  ] as Field[];
 
   beforeEach(() => {
     jest.restoreAllMocks();
     mockDataServices();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
+    indexPatternFields.forEach((f) => indexPattern.fields.push(f));
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -488,6 +525,9 @@ describe('AggConfig', () => {
             "enabled": Array [
               true,
             ],
+            "field": Array [
+              "machine.os.keyword",
+            ],
             "id": Array [
               "1",
             ],
@@ -547,6 +587,9 @@ describe('AggConfig', () => {
                 "arguments": Object {
                   "enabled": Array [
                     true,
+                  ],
+                  "field": Array [
+                    "bytes",
                   ],
                   "id": Array [
                     "1-orderAgg",
