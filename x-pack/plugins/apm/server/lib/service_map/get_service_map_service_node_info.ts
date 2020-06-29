@@ -19,6 +19,8 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getErrorRate } from '../errors/get_error_rate';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -27,6 +29,7 @@ interface Options {
 }
 
 interface TaskParameters {
+  serviceName?: string;
   setup: Setup;
   minutes: number;
   filter: ESFilter[];
@@ -42,12 +45,18 @@ export async function getServiceMapServiceNodeInfo({
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...(environment ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }] : []),
   ];
+
+  const environmentFilter = getEnvironmentUiFilterES(environment);
+
+  if (environmentFilter) {
+    filter.push(environmentFilter);
+  }
 
   const minutes = Math.abs((end - start) / (1000 * 60));
 
   const taskParams = {
+    serviceName,
     setup,
     minutes,
     filter,
@@ -59,7 +68,7 @@ export async function getServiceMapServiceNodeInfo({
     cpuStats,
     memoryStats,
   ] = await Promise.all([
-    getErrorStats({ serviceName, setup, environment }),
+    getErrorStats(taskParams),
     getTransactionStats(taskParams),
     getCpuStats(taskParams),
     getMemoryStats(taskParams),
@@ -74,18 +83,20 @@ export async function getServiceMapServiceNodeInfo({
 }
 
 async function getErrorStats({
-  environment,
+  filter,
   serviceName,
   setup,
 }: {
-  environment?: string;
+  filter: ESFilter[];
   serviceName: string;
   setup: Options['setup'];
 }) {
   const { average, noHits } = await getErrorRate({
     serviceName,
-    environment,
-    setup: { ...setup, uiFiltersES: [] },
+    setup: {
+      ...setup,
+      uiFiltersES: filter,
+    },
   });
 
   return { avgErrorRate: noHits ? null : average };

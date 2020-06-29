@@ -8,7 +8,6 @@ import mean from 'lodash.mean';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -23,12 +22,10 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 export async function getErrorRate({
   serviceName,
   groupId,
-  environment,
   setup,
 }: {
   serviceName: string;
   groupId?: string;
-  environment?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
@@ -36,7 +33,6 @@ export async function getErrorRate({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...(environment ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }] : []),
     ...uiFiltersES,
   ];
 
