@@ -81,6 +81,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     },
   };
@@ -160,6 +161,7 @@ describe('SIEM Navigation', () => {
         timeline: {
           id: '',
           isOpen: false,
+          graphEventId: '',
         },
         timerange: {
           global: {
@@ -266,7 +268,7 @@ describe('SIEM Navigation', () => {
         search: '',
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false },
+        timeline: { id: '', isOpen: false, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],

@@ -220,6 +220,20 @@ export const TAB_TEMPLATES = i18n.translate(
   }
 );
 
+export const FILTER_ELASTIC_TIMELINES = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateFilter.elasticTitle',
+  {
+    defaultMessage: 'Elastic templates',
+  }
+);
+
+export const FILTER_CUSTOM_TIMELINES = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateFilter.customizedTitle',
+  {
+    defaultMessage: 'Custom templates',
+  }
+);
+
 export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTimelineTitle',
   {
@@ -230,7 +244,7 @@ export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a SIEM timeline (as exported from the Timeline view) to import',
+    defaultMessage: 'Select a Security timeline (as exported from the Timeline view) to import',
   }
 );
 
@@ -280,3 +294,10 @@ export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: 
       defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
+
+export const TEMPLATE_CALL_OUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.timelines.components.templateCallOutMessageTitle',
+  {
+    defaultMessage: 'Now you can add timeline templates and link it to rules.',
+  }
+);
