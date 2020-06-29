@@ -329,6 +329,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         />
         <HistogramBarSeries
           id="discover-histogram"
+          minBarHeight={2}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

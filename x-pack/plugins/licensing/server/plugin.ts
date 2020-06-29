@@ -128,7 +128,10 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       pollingFrequency.asMilliseconds()
     );
 
-    core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
+    core.http.registerRouteHandlerContext(
+      'licensing',
+      createRouteHandlerContext(license$, core.getStartServices)
+    );
 
     registerRoutes(core.http.createRouter(), core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));

@@ -46,6 +46,10 @@ describe('HostList store concerns', () => {
         policyResponseLoading: false,
         policyResponseError: undefined,
         location: undefined,
+        policyItems: [],
+        selectedPolicyId: undefined,
+        policyItemsLoading: false,
+        endpointPackageInfo: undefined,
       });
     });
 

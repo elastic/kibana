@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
+import { SerializedAction } from './types';
+import { LicenseType } from '../../../licensing/public';
 import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
-import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
 
 /**
  * This is a convenience interface for registering new action factories.
@@ -27,6 +28,12 @@ export interface ActionFactoryDefinition<
    * identify this action factory when presenting it to the user in UI.
    */
   id: string;
+
+  /**
+   * Minimal licence level
+   * Empty means no licence restrictions
+   */
+  readonly minimalLicense?: LicenseType;
 
   /**
    * This method should return a definition of a new action, normally used to
