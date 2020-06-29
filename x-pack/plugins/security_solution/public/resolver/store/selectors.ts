@@ -56,6 +56,19 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+/**
+ * If we need to fetch, this is the entity ID to fetch.
+ */
+export const databaseDocumentIDToFetch = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToFetch
+);
+
+export const databaseDocumentIDToAbort = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToAbort
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
@@ -156,15 +169,6 @@ export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasErr
 export const graphableProcesses = composeSelectors(
   dataStateSelector,
   dataSelectors.graphableProcesses
-);
-
-/**
- * Select the `ancestors` and `children` limits that were reached or exceeded
- * during the request for the current tree.
- */
-export const lineageLimitsReached = composeSelectors(
-  dataStateSelector,
-  dataSelectors.limitsReached
 );
 
 /**

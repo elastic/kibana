@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
-import { IndexedProcessTree, AdjacentProcessMap } from '../types';
-import { ResolverEvent } from '../../../common/endpoint/types';
-import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
+import { uniquePidForProcess, uniqueParentPidForProcess } from '../process_event';
+import { IndexedProcessTree, AdjacentProcessMap } from '../../types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
+import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
 
 /**
  * Create a new IndexedProcessTree from an array of ProcessEvents

@@ -512,6 +512,11 @@ export interface EndpointEvent {
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**
+ * The response body for the resolver '/entity' index API
+ */
+export type ResolverEntityIndex = Array<{ entity_id: string }>;
+
+/**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
  * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
  * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
