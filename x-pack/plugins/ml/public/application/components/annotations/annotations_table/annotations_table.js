@@ -79,19 +79,6 @@ export class AnnotationsTable extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
-    this.search = {
-      box: {
-        incremental: true,
-        schema: true,
-      },
-      filters: [
-        {
-          type: 'field_value_selection',
-          field: 'event',
-          name: 'Event type',
-        },
-      ],
-    };
   }
 
   getAnnotations() {
@@ -113,7 +100,6 @@ export class AnnotationsTable extends Component {
         })
         .toPromise()
         .then((resp) => {
-          console.log('annotations', resp.annotations);
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
             errorMessage: undefined,
@@ -335,7 +321,7 @@ export class AnnotationsTable extends Component {
     }
 
     const annotations = this.props.annotations || this.state.annotations;
-    console.log('annotations', annotations);
+
     if (annotations.length === 0) {
       return (
         <EuiCallOut
@@ -543,10 +529,7 @@ export class AnnotationsTable extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
-    // console.log(
-    //   'this.props.chartDetails.entityData.entities[0].fieldValue',
-    //   this.props.chartDetails.entityData.entities[0].fieldValue
-    // );
+
     const filters = [
       {
         type: 'field_value_selection',

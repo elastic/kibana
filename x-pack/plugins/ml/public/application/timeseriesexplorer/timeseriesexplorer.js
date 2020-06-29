@@ -1107,7 +1107,6 @@ export class TimeSeriesExplorer extends React.Component {
      */
     let hasEmptyFieldValues = false;
 
-    console.log('chartDetails', chartDetails);
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (

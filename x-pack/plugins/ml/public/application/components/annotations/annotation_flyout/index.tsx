@@ -179,9 +179,6 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     // Mark the annotation created by `user` instead of automatically generated
     annotation.event = 'user';
 
-    // console.log('annotation', annotation);
-    // console.log('this.props', this.props);
-    //
     annotation$.next(null);
 
     ml.annotations
