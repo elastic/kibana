@@ -3,28 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { flatten, findIndex, isEqual } from 'lodash';
-import { ValuesType } from 'utility-types';
+import { flatten, findIndex, isEqual, take, sortBy } from 'lodash';
+import { ValuesType, Unionize } from 'utility-types';
 import moment from 'moment';
+import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
-  TRANSACTION_DURATION,
-  TRANSACTION_SAMPLED,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
-import {
-  SortOptions,
-  AggregationInputMap,
-} from '../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
+import { getSamples, getAvg, getSum, getPercentiles } from './get_metrics';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -41,13 +38,24 @@ interface TopTraceOptions {
 export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
+
+export type TransactionGroupRequestBase = ESSearchRequest & {
+  body: {
+    aggs: {
+      transaction_groups: Unionize<
+        Pick<AggregationOptionsByType, 'composite' | 'terms'>
+      >;
+    };
+  };
+};
+
+export type TransactionGroupSetup = Setup & SetupTimeRange & SetupUIFilters;
+
 export async function transactionGroupsFetcher(
   options: Options,
-  setup: Setup & SetupTimeRange & SetupUIFilters,
+  setup: TransactionGroupSetup,
   bucketSize: number
 ) {
-  const { client } = setup;
-
   const projection = getTransactionGroupsProjection({
     setup,
     options,
@@ -89,124 +97,16 @@ export async function transactionGroupsFetcher(
     },
   });
 
-  function withAggs<T extends AggregationInputMap>(aggs: T) {
-    return {
-      ...request,
-      body: {
-        ...request.body,
-        aggs: {
-          ...request.body.aggs,
-          transaction_groups: {
-            ...request.body.aggs.transaction_groups,
-            aggs,
-          },
-        },
-      },
-    };
-  }
-
-  async function getSamples() {
-    const params = withAggs({
-      sample: {
-        top_hits: {
-          size: 1,
-        },
-      },
-    });
-
-    const sort: SortOptions = [
-      { _score: 'desc' as const }, // sort by _score to ensure that buckets with sampled:true ends up on top
-      { '@timestamp': { order: 'desc' as const } },
-    ];
-
-    const response = await client.search({
-      ...params,
-      body: {
-        ...params.body,
-        query: {
-          ...params.body.query,
-          bool: {
-            ...params.body.query.bool,
-            should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
-          },
-        },
-        sort,
-      },
-    });
-
-    return response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      return {
-        key: bucket.key,
-        count: bucket.doc_count,
-        sample: bucket.sample.hits.hits[0]._source as Transaction,
-      };
-    });
-  }
-
-  async function getAvg() {
-    const params = withAggs({
-      avg: {
-        avg: {
-          field: TRANSACTION_DURATION,
-        },
-      },
-    });
-
-    const response = await client.search(params);
-
-    return response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      return {
-        key: bucket.key,
-        avg: bucket.avg.value,
-      };
-    });
-  }
-
-  async function getSum() {
-    const params = withAggs({
-      sum: {
-        sum: {
-          field: TRANSACTION_DURATION,
-        },
-      },
-    });
-
-    const response = await client.search(params);
-
-    return response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      return {
-        key: bucket.key,
-        sum: bucket.sum.value,
-      };
-    });
-  }
-
-  async function getPercentiles() {
-    const params = withAggs({
-      p95: {
-        percentiles: {
-          field: TRANSACTION_DURATION,
-          hdr: { number_of_significant_value_digits: 2 },
-          percents: [95],
-        },
-      },
-    });
-
-    const response = await client.search(params);
-
-    return response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      return {
-        key: bucket.key,
-        p95: Object.values(bucket.p95.values)[0],
-      };
-    });
-  }
+  const params = {
+    request,
+    setup,
+  };
 
   const metrics = await Promise.all([
-    getSamples(),
-    getAvg(),
-    getSum(),
-    !isTopTraces ? getPercentiles() : Promise.resolve(undefined),
+    getSamples(params),
+    getAvg(params),
+    getSum(params),
+    !isTopTraces ? getPercentiles(params) : Promise.resolve(undefined),
   ]);
 
   const items: TransactionGroupData[] = [];
@@ -265,10 +165,14 @@ export async function transactionGroupsFetcher(
     .filter((item) => item.sample);
 
   return {
-    items: itemsWithRelativeImpact,
+    items: take(
+      // sort by impact by default so most impactful services are not cut off
+      sortBy(itemsWithRelativeImpact, 'impact').reverse(),
+      bucketSize
+    ),
     // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
     // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
-    isAggregationAccurate: bucketSize >= items.length,
+    isAggregationAccurate: bucketSize >= itemsWithRelativeImpact.length,
     bucketSize,
   };
 }
