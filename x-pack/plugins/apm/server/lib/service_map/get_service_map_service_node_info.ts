@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../typings/elasticsearch';
-import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { ESFilter } from '../../../typings/elasticsearch';
 import { getErrorRate } from '../errors/get_error_rate';
-import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 
 interface Options {
   setup: Setup & SetupTimeRange;
