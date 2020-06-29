@@ -31,14 +31,16 @@ export interface PipelineFormProps {
   isEditing?: boolean;
 }
 
+const defaultFormValue = Object.freeze({
+  name: '',
+  description: '',
+  processors: [],
+  on_failure: [],
+  version: '',
+});
+
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
-  defaultValue = {
-    name: '',
-    description: '',
-    processors: [],
-    on_failure: [],
-    version: '',
-  },
+  defaultValue = defaultFormValue,
   onSave,
   isSaving,
   saveError,

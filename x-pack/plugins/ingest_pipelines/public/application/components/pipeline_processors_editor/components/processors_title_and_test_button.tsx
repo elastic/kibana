@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { usePipelineProcessorsContext } from '../context';
 
+import { LoadFromJsonButton } from './load_from_json';
+
 export interface Props {
   onTestPipelineClick: () => void;
   isTestButtonDisabled: boolean;
@@ -24,7 +26,7 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
   return (
     <EuiFlexGroup
       alignItems="center"
-      gutterSize="none"
+      gutterSize="s"
       justifyContent="spaceBetween"
       responsive={false}
     >
@@ -54,6 +56,9 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
             }}
           />
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <LoadFromJsonButton onDone={() => {}} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton

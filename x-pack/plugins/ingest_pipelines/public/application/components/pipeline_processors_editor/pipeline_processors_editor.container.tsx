@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 
 import { Processor } from '../../../../common/types';
 
@@ -49,9 +49,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         processors: originalProcessors,
         onFailure: originalOnFailureProcessors,
       }),
-    // TODO: Re-add the dependency on the props and make the state set-able
-    // when new props come in so that this component will be controllable
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+    [originalProcessors, originalOnFailureProcessors]
   );
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
   const { processors, onFailure } = processorsState;

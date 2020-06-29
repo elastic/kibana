@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const editorItemMessages = {
+export const i18nTexts = {
   moveButtonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.moveButtonLabel', {
     defaultMessage: 'Move this processor',
   }),
