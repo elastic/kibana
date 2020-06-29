@@ -124,37 +124,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertJobDescriptionValue(jobDescription);
     },
 
-    async assertSourceIndexInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutSourceIndexSelect > comboBoxInput');
-    },
-
-    async assertSourceIndexSelection(expectedSelection: string[]) {
-      const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobFlyoutSourceIndexSelect > comboBoxInput'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Source index should be '${expectedSelection}' (got '${actualSelection}')`
-      );
-    },
-
-    async assertExcludedFieldsSelection(expectedSelection: string[]) {
-      const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobFlyoutExcludesSelect > comboBoxInput'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
-      );
-    },
-
-    async selectSourceIndex(sourceIndex: string) {
-      await comboBox.set(
-        'mlAnalyticsCreateJobFlyoutSourceIndexSelect > comboBoxInput',
-        sourceIndex
-      );
-      await this.assertSourceIndexSelection([sourceIndex]);
-    },
+    // async assertExcludedFieldsSelection(expectedSelection: string[]) {
+    //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
+    //     'mlAnalyticsCreateJobWizardExcludesSelect'
+    //   );
+    //   expect(actualSelection).to.eql(
+    //     expectedSelection,
+    //     `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
+    //   );
+    // },
 
     async assertDestIndexInputExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
@@ -384,22 +362,27 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async getHeaderText() {
-      return await testSubjects.getVisibleText('mlDataFrameAnalyticsFlyoutHeaderTitle');
+      return await testSubjects.getVisibleText('mlDataFrameAnalyticsWizardHeaderTitle');
     },
 
-    async assertInitialCloneJobForm(job: DataFrameAnalyticsConfig) {
+    async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {
       const jobType = Object.keys(job.analysis)[0];
       await this.assertJobTypeSelection(jobType);
-      await this.assertJobIdValue(''); // id should be empty
-      await this.assertJobDescriptionValue(String(job.description));
-      await this.assertSourceIndexSelection(job.source.index as string[]);
-      await this.assertDestIndexValue(''); // destination index should be empty
       if (isClassificationAnalysis(job.analysis) || isRegressionAnalysis(job.analysis)) {
         await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
       }
-      await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+      // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+    },
+
+    async assertInitialCloneJobAdditionalOptionsStep(job: DataFrameAnalyticsConfig) {
       await this.assertModelMemoryValue(job.model_memory_limit);
+    },
+
+    async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {
+      await this.assertJobIdValue(''); // id should be empty
+      await this.assertJobDescriptionValue(String(job.description));
+      await this.assertDestIndexValue(''); // destination index should be empty
     },
 
     async assertCreationCalloutMessagesExist() {

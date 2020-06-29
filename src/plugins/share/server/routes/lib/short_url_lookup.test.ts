@@ -20,7 +20,7 @@
 import { shortUrlLookupProvider, ShortUrlLookupService, UrlAttributes } from './short_url_lookup';
 import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
@@ -35,7 +35,7 @@ describe('shortUrlLookupProvider', () => {
     savedObjects = savedObjectsClientMock.create();
     savedObjects.create.mockResolvedValue({ id: ID } as SavedObject<UrlAttributes>);
     deps = { savedObjects };
-    shortUrl = shortUrlLookupProvider({ logger: loggingServiceMock.create().get() });
+    shortUrl = shortUrlLookupProvider({ logger: loggingSystemMock.create().get() });
   });
 
   describe('generateUrlId', () => {

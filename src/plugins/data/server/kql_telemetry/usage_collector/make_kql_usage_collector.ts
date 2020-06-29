@@ -17,18 +17,22 @@
  * under the License.
  */
 
-import { fetchProvider } from './fetch';
+import { fetchProvider, Usage } from './fetch';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 export async function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,
   kibanaIndex: string
 ) {
-  const fetch = fetchProvider(kibanaIndex);
-  const kqlUsageCollector = usageCollection.makeUsageCollector({
+  const kqlUsageCollector = usageCollection.makeUsageCollector<Usage>({
     type: 'kql',
-    fetch,
+    fetch: fetchProvider(kibanaIndex),
     isReady: () => true,
+    schema: {
+      optInCount: { type: 'long' },
+      optOutCount: { type: 'long' },
+      defaultQueryLanguage: { type: 'keyword' },
+    },
   });
 
   usageCollection.registerCollector(kqlUsageCollector);

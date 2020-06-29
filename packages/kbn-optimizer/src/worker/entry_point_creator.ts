@@ -17,9 +17,13 @@
  * under the License.
  */
 
-module.exports = function ({ entries }: { entries: Array<{ importId: string; relPath: string }> }) {
-  const lines = entries.map(({ importId, relPath }) => [
-    `__kbnBundles__.define('${importId}', __webpack_require__, require.resolve('./${relPath}'))`,
+module.exports = function ({
+  entries,
+}: {
+  entries: Array<{ importId: string; requirePath: string }>;
+}) {
+  const lines = entries.map(({ importId, requirePath }) => [
+    `__kbnBundles__.define('${importId}', __webpack_require__, require.resolve('${requirePath}'))`,
   ]);
 
   return {

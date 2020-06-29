@@ -23,7 +23,7 @@ export const appsSection: ISection[] = [
     icon: 'logoLogging',
     description: i18n.translate('xpack.observability.section.apps.logs.description', {
       defaultMessage:
-        'The Elastic Stack (sometimes known as the ELK Stack) is the most popular open source logging platform.',
+        'Centralize logs from any source. Search, tail, automate anomaly detection, and visualize trends so you can take action quicker.',
     }),
   },
   {
@@ -34,7 +34,7 @@ export const appsSection: ISection[] = [
     icon: 'logoAPM',
     description: i18n.translate('xpack.observability.section.apps.apm.description', {
       defaultMessage:
-        'See exactly where your application is spending time so you can quickly fix issues and feel good about the code you push.',
+        'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
     }),
   },
   {
@@ -45,7 +45,7 @@ export const appsSection: ISection[] = [
     icon: 'logoMetrics',
     description: i18n.translate('xpack.observability.section.apps.metrics.description', {
       defaultMessage:
-        'Already using the Elastic Stack for logs? Add metrics in just a few steps and correlate metrics and logs in one place.',
+        'Analyze metrics from your infrastructure, apps, and services. Discover trends, forecast behavior, get alerts on anomalies, and more.',
     }),
   },
   {
@@ -56,29 +56,7 @@ export const appsSection: ISection[] = [
     icon: 'logoUptime',
     description: i18n.translate('xpack.observability.section.apps.uptime.description', {
       defaultMessage:
-        'React to availability issues across your apps and services before they affect users.',
+        'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users’ experience.',
     }),
-  },
-];
-
-export const tryItOutItemsSection: ISection[] = [
-  {
-    id: 'demo',
-    title: i18n.translate('xpack.observability.section.tryItOut.demo.title', {
-      defaultMessage: 'Demo Playground',
-    }),
-    icon: 'play',
-    description: '',
-    href: 'https://demo.elastic.co/',
-    target: '_blank',
-  },
-  {
-    id: 'sampleData',
-    title: i18n.translate('xpack.observability.section.tryItOut.sampleData.title', {
-      defaultMessage: 'Add sample data',
-    }),
-    icon: 'documents',
-    description: '',
-    href: '/app/home#/tutorial_directory/sampleData',
   },
 ];

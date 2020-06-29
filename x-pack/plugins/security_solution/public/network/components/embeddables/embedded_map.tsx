@@ -22,7 +22,8 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { SetQuery } from './types';
-import { MapEmbeddable } from '../../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 

@@ -21,6 +21,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -99,7 +100,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // wait for Task Manager to execute the rule and update status
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await waitFor(async () => {
+          const { body: statusBody } = await supertest
+            .post(DETECTION_ENGINE_RULES_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ids: [body[0].id] })
+            .expect(200);
+          return statusBody[body[0].id].current_status?.status === 'succeeded';
+        });
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
           .set('kbn-xsrf', 'true')

@@ -22,7 +22,6 @@ export const storybookAliases = {
   canvas: 'x-pack/plugins/canvas/scripts/storybook_new.js',
   codeeditor: 'src/plugins/kibana_react/public/code_editor/scripts/storybook.ts',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/scripts/storybook.js',
-  drilldowns: 'x-pack/plugins/drilldowns/scripts/storybook.js',
   embeddable: 'src/plugins/embeddable/scripts/storybook.js',
   infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
   security_solution: 'x-pack/plugins/security_solution/scripts/storybook.js',

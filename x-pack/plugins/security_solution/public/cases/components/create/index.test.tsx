@@ -20,7 +20,7 @@ jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_in
 jest.mock('../../containers/use_post_case');
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { wait } from '../../../common/lib/helpers';
-import { SiemPageName } from '../../../app/types';
+
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
 );
@@ -110,7 +110,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
-    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(`/${SiemPageName.case}`);
+    expect(mockHistory.push).toHaveBeenCalledWith('/');
   });
   it('should redirect to new case when caseData is there', () => {
     const sampleId = '777777';
@@ -122,9 +122,7 @@ describe('Create case', () => {
         </Router>
       </TestProviders>
     );
-    expect(mockHistory.replace.mock.calls[0][0].pathname).toEqual(
-      `/${SiemPageName.case}/${sampleId}`
-    );
+    expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/777777');
   });
 
   it('should render spinner when loading', () => {
