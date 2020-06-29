@@ -38,7 +38,7 @@ export async function mountApp(
 
   const stateTransfer = embeddable?.getStateTransfer(params.history);
   const { originatingApp } =
-    stateTransfer?.getIncomingOriginatingApp({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   const instance = await createEditorFrame();
 

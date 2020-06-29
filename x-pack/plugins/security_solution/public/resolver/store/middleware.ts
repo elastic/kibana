@@ -112,7 +112,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
             query: { events: 100 },
           }
         );
-
         api.dispatch({
           type: 'serverReturnedRelatedEventData',
           payload: result,

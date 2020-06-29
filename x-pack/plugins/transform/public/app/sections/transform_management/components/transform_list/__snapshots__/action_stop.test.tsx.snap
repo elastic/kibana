@@ -9,6 +9,7 @@ exports[`Transform: Transform List Actions <StopAction /> Minimal initialization
   <EuiButtonEmpty
     aria-label="Stop"
     color="text"
+    data-test-subj="transformActionStop"
     disabled={true}
     iconType="stop"
     onClick={[Function]}
