@@ -84,7 +84,7 @@ Now that the Kibana plugin boilerplate is out of the way, you can start adding f
 
 Let's start by adding a new function.
 
-In your `index.ts` add a new function definition
+In your `index.ts` add a new function definition:
 
 ```typescript
 const canvasFunctions = [
