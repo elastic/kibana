@@ -36,12 +36,10 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
   return globby
     .sync(
       Array.from(
-        new Set(
-          [
-            ...scanDirs.map(nestedScanDirPaths),
-            ...paths.map((path) => `${path}/kibana.json`),
-          ].flat()
-        )
+        new Set([
+          ...scanDirs.map(nestedScanDirPaths).reduce((dirs, current) => [...dirs, ...current], []),
+          ...paths.map((path) => `${path}/kibana.json`),
+        ])
       ),
       {
         absolute: true,
