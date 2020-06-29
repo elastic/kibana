@@ -18,6 +18,7 @@
  */
 import { parse } from 'query-string';
 
+/** @internal */
 export function parseQueryString() {
   // window.location.search is an empty string
   // get search from href

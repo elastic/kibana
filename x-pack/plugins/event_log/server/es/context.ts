@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ClusterClient } from 'src/core/server';
+import { Logger, LegacyClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
 import { initializeEs } from './init';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import { createReadySignal, ReadySignal } from '../lib/ready_signal';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
 export interface EsContext {
   logger: Logger;
