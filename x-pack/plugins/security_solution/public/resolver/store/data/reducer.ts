@@ -89,5 +89,3 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return state;
   }
 };
-
-// TODO, handle abort scenario
