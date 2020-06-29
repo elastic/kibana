@@ -13,6 +13,7 @@ import {
 } from '@elastic/charts';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
+import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
   percentiles?: Record<string, number>;
@@ -21,15 +22,15 @@ interface Props {
 function generateAnnotationData(
   values?: Record<string, number>
 ): LineAnnotationDatum[] {
-  return Object.entries(values ?? {}).map((value, index) => ({
-    dataValue: value[1],
+  return Object.entries(values ?? {}).map((value) => ({
+    dataValue: Math.round(value[1] / 1000),
     details: `${(+value[0]).toFixed(0)}`,
   }));
 }
 
 const PercentileMarker = styled.span`
   position: relative;
-  bottom: 140px;
+  bottom: 205px;
 `;
 
 export const PercentileAnnotations = ({ percentiles }: Props) => {
@@ -43,6 +44,18 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
     },
   };
 
+  const PercentileTooltip = ({
+    annotation,
+  }: {
+    annotation: LineAnnotationDatum;
+  }) => {
+    return (
+      <span data-cy="percentileTooltipTitle">
+        {annotation.details}th Percentile
+      </span>
+    );
+  };
+
   return (
     <>
       {dataValues.map((annotation, index) => (
@@ -52,7 +65,19 @@ export const PercentileAnnotations = ({ percentiles }: Props) => {
           domainType={AnnotationDomainTypes.XDomain}
           dataValues={[annotation]}
           style={style}
-          marker={<PercentileMarker>{annotation.details}th</PercentileMarker>}
+          hideTooltips={true}
+          marker={
+            <PercentileMarker data-cy="percentile-markers">
+              <EuiToolTip
+                title={<PercentileTooltip annotation={annotation} />}
+                content={
+                  <span>Pages loaded: {Math.round(annotation.dataValue)}</span>
+                }
+              >
+                <>{annotation.details}th</>
+              </EuiToolTip>
+            </PercentileMarker>
+          }
         />
       ))}
     </>

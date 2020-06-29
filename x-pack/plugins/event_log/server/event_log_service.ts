@@ -6,13 +6,13 @@
 
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { ClusterClient } from 'src/core/server';
+import { LegacyClusterClient } from 'src/core/server';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 type SystemLogger = Plugin['systemLogger'];
