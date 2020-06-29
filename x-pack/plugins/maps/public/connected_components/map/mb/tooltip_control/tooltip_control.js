@@ -78,7 +78,7 @@ export class TooltipControl extends React.Component {
         // - As undefined value
         // - As empty object literal
         // To avoid ambiguity, normalize properties to empty object literal.
-        const mbProperties = mbFeature.properties ? mbFeature : {};
+        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
         //This keeps track of first properties (assuming these will be identical for features in different tiles
         uniqueFeatures.push({
           id: featureId,
