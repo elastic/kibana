@@ -6,11 +6,11 @@
 
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
-import { Logger, ClusterClient } from '../../../../../src/core/server';
+import { Logger, LegacyClusterClient } from '../../../../../src/core/server';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
-export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface ConstructorOpts {

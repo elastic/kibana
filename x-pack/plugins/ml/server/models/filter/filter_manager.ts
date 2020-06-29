@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
@@ -58,9 +58,9 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _client: IScopedClusterClient['callAsCurrentUser'];
+  private _client: ILegacyScopedClusterClient['callAsCurrentUser'];
 
-  constructor(client: IScopedClusterClient['callAsCurrentUser']) {
+  constructor(client: ILegacyScopedClusterClient['callAsCurrentUser']) {
     this._client = client;
   }
 
