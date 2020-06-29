@@ -105,6 +105,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
         viewBySwimlaneFieldName,
         viewBySwimlaneData: getDefaultSwimlaneData(),
         viewByFromPage: 1,
+        viewBySwimlaneDataLoading: true,
       };
       break;
 
