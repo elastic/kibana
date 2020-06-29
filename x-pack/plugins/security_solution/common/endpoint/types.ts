@@ -498,7 +498,7 @@ export interface EndpointEvent {
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
     Ext: {
-      ancestry?: string[];
+      ancestry: string[];
     };
   };
   user?: {

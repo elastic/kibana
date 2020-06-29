@@ -390,6 +390,7 @@ export class EndpointDocGenerator {
    * @param ts - Timestamp to put in the event
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
+   * @param ancestryArray - an array of ancestors for the generated alert
    */
   public generateAlert(
     ts = new Date().getTime(),
@@ -455,9 +456,7 @@ export class EndpointDocGenerator {
           sha256: 'fake sha256',
         },
         Ext: {
-          // simulate a finite ancestry array size, the endpoint limits the ancestry array to 20 entries we'll use
-          // 2 so that the backend can handle that case
-          ancestry: ancestryArray.slice(0, ANCESTRY_LIMIT),
+          ancestry: ancestryArray,
           code_signature: [
             {
               trusted: false,
@@ -521,13 +520,8 @@ export class EndpointDocGenerator {
    */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     // this will default to an empty array for the ancestry field if options.ancestry isn't included
-    let ancestry: string[] | undefined =
+    const ancestry: string[] =
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
-
-    // to disable the ancestry array set ancestryArrayLimit to 0
-    if (options?.ancestryArrayLimit !== undefined && options.ancestryArrayLimit <= 0) {
-      ancestry = undefined;
-    }
 
     const processName = options.processName ? options.processName : randomProcessName();
     const detailRecordForEventType =

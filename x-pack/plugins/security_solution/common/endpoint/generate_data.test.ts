@@ -101,6 +101,30 @@ describe('data generator', () => {
     expect(processEvent.process.name).not.toBeNull();
   });
 
+  describe('creates events with an empty ancestry array', () => {
+    let tree: Tree;
+    beforeEach(() => {
+      tree = generator.generateTree({
+        alwaysGenMaxChildrenPerNode: true,
+        ancestors: 3,
+        children: 3,
+        generations: 3,
+        percentTerminated: 100,
+        percentWithRelated: 100,
+        relatedEvents: 0,
+        relatedAlerts: 0,
+        ancestryArraySize: 0,
+      });
+      tree.ancestry.delete(tree.origin.id);
+    });
+
+    it('creates all events with an empty ancestry array', () => {
+      for (const event of tree.allEvents) {
+        expect(event.process.Ext.ancestry.length).toEqual(0);
+      }
+    });
+  });
+
   describe('creates an origin alert when no related alerts are requested', () => {
     let tree: Tree;
     beforeEach(() => {
