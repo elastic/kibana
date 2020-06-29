@@ -27,7 +27,7 @@ done
 
 # Need to override COVERAGE_INGESTION_KIBANA_ROOT since mocha json file has original intake worker path
 COVERAGE_SUMMARY_FILE=target/kibana-coverage/mocha-combined/coverage-summary.json
-COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
+export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
 
 node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt
 
