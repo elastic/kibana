@@ -344,7 +344,8 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' }
+      { one: '1', two: '2' },
+      expect.any(Object)
     );
   });
 
@@ -376,7 +377,8 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      {}
+      {},
+      undefined
     );
   });
 
@@ -391,11 +393,12 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      {}
+      {},
+      undefined
     );
   });
 
-  test('calls getAuthHeaders and filters results for a real request', async () => {
+  test('calls getAuthHeaders and creates Auditor for a real request', async () => {
     clusterClient = new ClusterClient(
       mockEsConfig,
       mockLogger,
@@ -407,7 +410,8 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' }
+      { one: '1', two: '2' },
+      expect.any(Object)
     );
   });
 
@@ -423,11 +427,30 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: 'foo', two: '2' }
+      { one: 'foo', two: '2' },
+      expect.any(Object)
     );
   });
 
   test("doesn't call getAuthHeaders for a fake request", async () => {
+    clusterClient = new ClusterClient(
+      mockEsConfig,
+      mockLogger,
+      auditTrailServiceMock.createAuditorFactory,
+      () => ({})
+    );
+    clusterClient.asScoped({ headers: { one: 'foo' } });
+
+    expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockScopedClusterClient).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function),
+      { one: 'foo' },
+      undefined
+    );
+  });
+
+  test("doesn't create Auditor for a fake request", async () => {
     const getAuthHeaders = jest.fn();
     clusterClient = new ClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
     clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
@@ -447,7 +470,8 @@ describe('#asScoped', () => {
     expect(MockScopedClusterClient).toHaveBeenCalledWith(
       expect.any(Function),
       expect.any(Function),
-      { one: '1', two: '2' }
+      { one: '1', two: '2' },
+      undefined
     );
   });
 });

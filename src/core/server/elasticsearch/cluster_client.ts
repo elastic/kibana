@@ -20,7 +20,7 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { ElasticsearchErrorHelpers } from './errors';
-import { Auditor, AuditorFactory } from '../audit_trail';
+import { AuditorFactory } from '../audit_trail';
 import { GetAuthHeaders, isRealRequest, LegacyRequest } from '../http';
 import { filterHeaders, Headers, KibanaRequest, ensureRawRequest } from '../http/router';
 import { Logger } from '../logging';
@@ -136,8 +136,6 @@ export class ClusterClient implements IClusterClient {
    */
   private scopedClient?: Client;
 
-  private auditor?: Auditor;
-
   /**
    * Indicates whether this cluster client (and all internal raw Elasticsearch JS clients) has been closed.
    */
@@ -213,17 +211,22 @@ export class ClusterClient implements IClusterClient {
         })
       );
     }
+
+    return new ScopedClusterClient(
+      this.callAsInternalUser,
+      this.callAsCurrentUser,
+      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist),
+      this.getScopedScopedAuditor(request)
+    );
+  }
+
+  private getScopedScopedAuditor(request?: ScopeableRequest) {
     if (request && isRealRequest(request)) {
       const kibanaRequest =
         request instanceof KibanaRequest ? request : KibanaRequest.from(request);
       const auditorFactory = this.getAuditorFactory();
-      this.auditor = auditorFactory.asScoped(kibanaRequest);
+      return auditorFactory.asScoped(kibanaRequest);
     }
-    return new ScopedClusterClient(
-      this.callAsInternalUser,
-      this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
-    );
   }
 
   /**
@@ -241,13 +244,6 @@ export class ClusterClient implements IClusterClient {
     options?: CallAPIOptions
   ) => {
     this.assertIsNotClosed();
-
-    if (this.auditor) {
-      this.auditor!.add({
-        message: endpoint,
-        type: 'elasticsearch.call',
-      });
-    }
 
     return await (callAPI.bind(null, this.scopedClient!) as APICaller)(
       endpoint,
