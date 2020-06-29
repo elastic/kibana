@@ -17,7 +17,7 @@ export const indexAnnotationSchema = schema.object({
   modified_time: schema.maybe(schema.number()),
   modified_username: schema.maybe(schema.string()),
   event: schema.maybe(schema.string()),
-  detector_index: schema.maybe(schema.string()),
+  detector_index: schema.maybe(schema.number()),
   partition_field_name: schema.maybe(schema.string()),
   partition_field_value: schema.maybe(schema.string()),
   over_field_name: schema.maybe(schema.string()),

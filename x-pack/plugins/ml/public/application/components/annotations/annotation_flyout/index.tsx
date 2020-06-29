@@ -50,6 +50,7 @@ interface Props {
     entityData: { entities: Entity[] };
     functionLabel: string;
   };
+  detectorIndex: number;
 }
 
 interface State {
@@ -161,7 +162,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public saveOrUpdateAnnotation = () => {
-    const { annotation: originalAnnotation, chartDetails } = this.props;
+    const { annotation: originalAnnotation, chartDetails, detectorIndex } = this.props;
     if (originalAnnotation === null) {
       return;
     }
@@ -175,6 +176,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
         // @ts-ignore
         annotation[`${fieldType}_value`] = fieldValue;
       });
+      annotation.detector_index = detectorIndex;
     }
     // Mark the annotation created by `user` instead of automatically generated
     annotation.event = 'user';
@@ -315,7 +317,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 label={
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.annotationFlyout.applyToPartitionTextLabel"
-                    defaultMessage="Apply annotation to partition"
+                    defaultMessage="Apply annotation to this series"
                   />
                 }
                 checked={this.state.applyAnnotationToSeries}

@@ -74,7 +74,7 @@ export interface Annotation {
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
   event?: string;
-  detector_index?: string;
+  detector_index?: number;
   partition_field_name?: string;
   partition_field_value?: string;
   over_field_name?: string;

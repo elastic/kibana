@@ -45,11 +45,6 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "sortable": true,
         },
         Object {
-          "field": "partition_field_value",
-          "name": "Partition",
-          "sortable": true,
-        },
-        Object {
           "actions": Array [
             Object {
               "render": [Function],

@@ -173,7 +173,6 @@ export class AnnotationsTable extends Component {
   }
 
   annotationsRefreshSubscription = null;
-  annotationsSubscription = null;
 
   componentDidMount() {
     if (
@@ -189,12 +188,12 @@ export class AnnotationsTable extends Component {
     }
 
     if (this.props.jobIds) {
-      this.annotationsSubscription = annotation$.subscribe(() => this.getUniqueTerms());
+      this.getUniqueTerms();
     }
   }
 
   previousJobId = undefined;
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (
       Array.isArray(this.props.jobs) &&
       this.props.jobs.length > 0 &&
@@ -203,17 +202,19 @@ export class AnnotationsTable extends Component {
       this.state.isLoading === false &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
+      this.getUniqueTerms();
       annotationsRefreshed();
       this.previousJobId = this.props.jobs[0].job_id;
+    }
+
+    if (prevProps.annotations !== this.props.annotations && this.props.jobIds) {
+      this.getUniqueTerms();
     }
   }
 
   componentWillUnmount() {
     if (this.annotationsRefreshSubscription !== null) {
       this.annotationsRefreshSubscription.unsubscribe();
-    }
-    if (this.annotationsSubscription !== null) {
-      this.annotationsSubscription.unsubscribe();
     }
   }
 
@@ -413,13 +414,6 @@ export class AnnotationsTable extends Component {
         }),
         sortable: true,
       },
-      {
-        field: 'partition_field_value',
-        name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
-          defaultMessage: 'Partition',
-        }),
-        sortable: true,
-      },
     ];
 
     const jobIds = _.uniq(annotations.map((a) => a.job_id));
@@ -516,15 +510,6 @@ export class AnnotationsTable extends Component {
       });
     }
 
-    columns.push({
-      align: RIGHT_ALIGNMENT,
-      width: '60px',
-      name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions,
-    });
-
     const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
@@ -550,6 +535,37 @@ export class AnnotationsTable extends Component {
       this.props.chartDetails?.entityData?.entities &&
       this.props.chartDetails?.entityData?.entities.length > 0
     ) {
+      this.props.chartDetails?.entityData?.entities.forEach((entity) => {
+        if (entity.fieldType === 'partition_field') {
+          columns.push({
+            field: 'partition_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.partitionColumnName', {
+              defaultMessage: 'Partition',
+            }),
+            sortable: true,
+          });
+        }
+
+        if (entity.fieldType === 'over_field') {
+          columns.push({
+            field: 'over_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.overColumnName', {
+              defaultMessage: 'Over',
+            }),
+            sortable: true,
+          });
+        }
+        if (entity.fieldType === 'by_field') {
+          columns.push({
+            field: 'over_field_value',
+            name: i18n.translate('xpack.ml.annotationsTable.byColumnName', {
+              defaultMessage: 'By',
+            }),
+            sortable: true,
+          });
+        }
+      });
+
       filters.push({
         type: 'field_value_toggle',
         field: 'partition_field_value',
@@ -565,6 +581,16 @@ export class AnnotationsTable extends Component {
       defaultQuery: 'event:(user)',
       filters: filters,
     };
+
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      width: '60px',
+      name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      actions,
+    });
+
     return (
       <Fragment>
         <EuiInMemoryTable

@@ -1328,6 +1328,7 @@ export class TimeSeriesExplorer extends React.Component {
                 >
                   <AnnotationsTable
                     chartDetails={chartDetails}
+                    detectorIndex={selectedDetectorIndex}
                     jobIds={[this.props.selectedJobId]}
                     annotations={focusAnnotationData}
                     isSingleMetricViewerLinkVisible={false}
@@ -1335,7 +1336,10 @@ export class TimeSeriesExplorer extends React.Component {
                   />
                   <EuiSpacer size="l" />
                 </EuiAccordion>
-                <AnnotationFlyout chartDetails={chartDetails} />
+                <AnnotationFlyout
+                  chartDetails={chartDetails}
+                  detectorIndex={selectedDetectorIndex}
+                />
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage
