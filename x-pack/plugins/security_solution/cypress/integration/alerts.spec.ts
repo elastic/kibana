@@ -9,7 +9,7 @@ import {
   SHOWING_ALERTS,
   ALERTS,
   TAKE_ACTION_POPOVER_BTN,
-} from '../screens/detections';
+} from '../screens/alerts';
 
 import {
   closeFirstAlert,
@@ -24,13 +24,13 @@ import {
   waitForAlertsToBeLoaded,
   markInProgressFirstAlert,
   goToInProgressAlerts,
-} from '../tasks/detections';
+} from '../tasks/alerts';
 import { esArchiverLoad } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { ALERTS_URL } from '../urls/navigation';
 
-describe('Detections', () => {
+describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');

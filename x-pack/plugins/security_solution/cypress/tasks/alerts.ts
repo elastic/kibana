@@ -22,7 +22,7 @@ import {
   OPEN_SELECTED_ALERTS_BTN,
   MARK_ALERT_IN_PROGRESS_BTN,
   MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
-} from '../screens/detections';
+} from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 
 export const closeFirstAlert = () => {
@@ -43,7 +43,7 @@ export const goToClosedAlerts = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click({ force: true });
 };
 
-export const goToManageAlertDetectionRules = () => {
+export const goToManageAlertsDetectionRules = () => {
   cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
 };
 

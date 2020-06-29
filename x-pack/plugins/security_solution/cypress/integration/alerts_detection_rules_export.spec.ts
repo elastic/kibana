@@ -5,13 +5,13 @@
  */
 
 import {
-  goToManageAlertDetectionRules,
+  goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
-} from '../tasks/detections';
+} from '../tasks/alerts';
+import { exportFirstRule } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { exportFirstRule } from '../tasks/alert_detection_rules';
 
 import { ALERTS_URL } from '../urls/navigation';
 
@@ -35,7 +35,7 @@ describe('Export rules', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
-    goToManageAlertDetectionRules();
+    goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then((xhr) => {
       cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {
