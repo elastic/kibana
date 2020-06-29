@@ -80,19 +80,19 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
-**Start server (basic)**
+**Start server**
 
 ```
-node scripts/functional_tests_server --config x-pack/test/apm_api_integration/basic/config.ts
+node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts
 ```
 
-**Run tests (basic)**
+**Run tests**
 
 ```
-node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts
+node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='APM specs'
 ```
 
-APM tests are located in `x-pack/test/apm_api_integration/basic/tests`.
+APM tests are located in `x-pack/test/api_integration/apis/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### Linting
