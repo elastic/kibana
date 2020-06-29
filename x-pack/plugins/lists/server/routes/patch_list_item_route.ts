@@ -29,7 +29,7 @@ export const patchListItemRoute = (router: IRouter): void => {
       try {
         const { value, id, meta } = request.body;
         const lists = getListClient(context);
-        // TODO: Double check this and ensure it works as a patch and not just an update
+        // TODO: This looks like just a regular update, implement a patchListItem API and add plumbing for that.
         const listItem = await lists.updateListItem({
           id,
           meta,

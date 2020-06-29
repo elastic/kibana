@@ -29,7 +29,7 @@ export const patchListRoute = (router: IRouter): void => {
       try {
         const { name, description, id, meta } = request.body;
         const lists = getListClient(context);
-        // TODO: Fix this, this is not really a patch but rather just a plain update at the moment
+        // TODO: This looks like just a regular update, implement a patchListItem API and add plumbing for that.
         const list = await lists.updateList({ description, id, meta, name });
         if (list == null) {
           return siemResponse.error({

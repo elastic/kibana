@@ -10,10 +10,10 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-LISTS=(${@:-./lists/new/list_ip.json})
+LISTS=(${@:-./lists/new/lists/ip.json})
 
 # Example: ./post_list.sh
-# Example: ./post_list.sh ./lists/new/list_ip.json
+# Example: ./post_list.sh ./lists/new/lists/ip.json
 for LIST in "${LISTS[@]}"
 do {
   [ -e "$LIST" ] || continue
