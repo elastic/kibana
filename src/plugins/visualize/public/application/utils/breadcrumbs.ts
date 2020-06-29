@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisualizeConstants } from './visualize_constants';
+import { VisualizeConstants } from '../visualize_constants';
 
 export function getLandingBreadcrumbs() {
   return [
@@ -28,28 +28,6 @@ export function getLandingBreadcrumbs() {
         defaultMessage: 'Visualize',
       }),
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
-    },
-  ];
-}
-
-export function getWizardStep1Breadcrumbs() {
-  return [
-    ...getLandingBreadcrumbs(),
-    {
-      text: i18n.translate('visualize.wizard.step1Breadcrumb', {
-        defaultMessage: 'Create',
-      }),
-    },
-  ];
-}
-
-export function getWizardStep2Breadcrumbs() {
-  return [
-    ...getLandingBreadcrumbs(),
-    {
-      text: i18n.translate('visualize.wizard.step2Breadcrumb', {
-        defaultMessage: 'Create',
-      }),
     },
   ];
 }
@@ -65,11 +43,11 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs($route: any) {
+export function getEditBreadcrumbs(text: string) {
   return [
     ...getLandingBreadcrumbs(),
     {
-      text: $route.current.locals.resolved.savedVis.title,
+      text,
     },
   ];
 }

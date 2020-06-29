@@ -18,13 +18,13 @@
  */
 
 import { get, omit } from 'lodash';
-import { VisualizeAppState } from '../../types';
+import { VisualizeAppState } from '../types';
 
 /**
  * Creates a new instance of AppState based on the table vis state.
  *
  * Dashboards have a similar implementation; see
- * core_plugins/kibana/public/dashboard/lib/migrate_app_state
+ * src/plugins/dashboard/public/application/lib/migrate_app_state.ts
  *
  * @param appState {VisualizeAppState}
  */
