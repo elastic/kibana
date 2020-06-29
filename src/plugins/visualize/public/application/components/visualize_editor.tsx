@@ -67,8 +67,7 @@ export const VisualizeEditor = () => {
 
   useEffect(() => {
     const { originatingApp: value } =
-      services.embeddable.getStateTransfer(services.scopedHistory).getIncomingOriginatingApp() ||
-      {};
+      services.embeddable.getStateTransfer(services.scopedHistory).getIncomingEditorState() || {};
     setOriginatingApp(value);
   }, [services]);
 
