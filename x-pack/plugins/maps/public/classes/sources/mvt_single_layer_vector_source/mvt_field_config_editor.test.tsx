@@ -10,21 +10,21 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
-import { MVTFieldType } from '../../../../common/constants';
+import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 test('should render field editor', async () => {
   const fields = [
     {
       name: 'foo',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'food',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'fooz',
-      type: MVTFieldType.NUMBER,
+      type: MVT_FIELD_TYPE.NUMBER,
     },
   ];
   const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);
@@ -36,15 +36,15 @@ test('should render error for empty name', async () => {
   const fields = [
     {
       name: 'foo',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: '',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'fooz',
-      type: MVTFieldType.NUMBER,
+      type: MVT_FIELD_TYPE.NUMBER,
     },
   ];
   const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);
@@ -56,15 +56,15 @@ test('should render error for dupes', async () => {
   const fields = [
     {
       name: 'foo',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'bar',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'foo',
-      type: MVTFieldType.NUMBER,
+      type: MVT_FIELD_TYPE.NUMBER,
     },
   ];
   const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);

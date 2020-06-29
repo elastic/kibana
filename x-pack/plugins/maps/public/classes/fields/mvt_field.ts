@@ -5,13 +5,13 @@
  */
 
 import { AbstractField, IField } from './field';
-import { FIELD_ORIGIN, MVTFieldType } from '../../../common/constants';
+import { FIELD_ORIGIN, MVT_FIELD_TYPE } from '../../../common/constants';
 import { ITiledSingleLayerVectorSource, IVectorSource } from '../sources/vector_source';
 import { MVTFieldDescriptor } from '../../../common/descriptor_types';
 
 export class MVTField extends AbstractField implements IField {
   private readonly _source: ITiledSingleLayerVectorSource;
-  private readonly _type: MVTFieldType;
+  private readonly _type: MVT_FIELD_TYPE;
   constructor({
     fieldName,
     type,
@@ -21,7 +21,7 @@ export class MVTField extends AbstractField implements IField {
     fieldName: string;
     source: ITiledSingleLayerVectorSource;
     origin: FIELD_ORIGIN;
-    type: MVTFieldType;
+    type: MVT_FIELD_TYPE;
   }) {
     super({ fieldName, origin });
     this._source = source;
@@ -40,9 +40,9 @@ export class MVTField extends AbstractField implements IField {
   }
 
   async getDataType(): Promise<string> {
-    if (this._type === MVTFieldType.STRING) {
+    if (this._type === MVT_FIELD_TYPE.STRING) {
       return 'string';
-    } else if (this._type === MVTFieldType.NUMBER) {
+    } else if (this._type === MVT_FIELD_TYPE.NUMBER) {
       return 'number';
     } else {
       throw new Error(`Unrecognized MVT field-type ${this._type}`);

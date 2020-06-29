@@ -19,14 +19,14 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
-import { MVTFieldType } from '../../../../common/constants';
+import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 function makeOption({
   value,
   icon,
   message,
 }: {
-  value: MVTFieldType;
+  value: MVT_FIELD_TYPE;
   icon: string;
   message: string;
 }) {
@@ -45,14 +45,14 @@ function makeOption({
 
 const FIELD_TYPE_OPTIONS = [
   {
-    value: MVTFieldType.STRING,
+    value: MVT_FIELD_TYPE.STRING,
     icon: 'string',
     message: i18n.translate('xpack.maps.mvtSource.stringFieldLabel', {
       defaultMessage: 'string',
     }),
   },
   {
-    value: MVTFieldType.NUMBER,
+    value: MVT_FIELD_TYPE.NUMBER,
     icon: 'number',
     message: i18n.translate('xpack.maps.mvtSource.numberFieldLabel', {
       defaultMessage: 'number',
@@ -116,14 +116,14 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _addField = () => {
     const newFields: MVTFieldDescriptor[] = this.state.currentFields.slice();
     newFields.push({
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
       name: '',
     });
     this._fieldChange(newFields);
   };
 
   _renderFieldTypeDropDown(mvtFieldConfig: MVTFieldDescriptor, index: number) {
-    const onChange = (type: MVTFieldType) => {
+    const onChange = (type: MVT_FIELD_TYPE) => {
       const newFields = this.state.currentFields.slice();
       newFields[index] = {
         type,

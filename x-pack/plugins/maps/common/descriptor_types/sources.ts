@@ -12,7 +12,7 @@ import {
   RENDER_AS,
   SORT_ORDER,
   SCALING_TYPES,
-  MVTFieldType,
+  MVT_FIELD_TYPE,
 } from '../constants';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
@@ -104,7 +104,7 @@ export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
 
 export type MVTFieldDescriptor = {
   name: string;
-  type: MVTFieldType;
+  type: MVT_FIELD_TYPE;
 };
 
 export type TiledSingleLayerVectorSourceSettings = {

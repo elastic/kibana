@@ -222,7 +222,7 @@ export enum SCALING_TYPES {
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
 
-export enum MVTFieldType {
+export enum MVT_FIELD_TYPE {
   STRING = 'String',
   NUMBER = 'Number',
 }

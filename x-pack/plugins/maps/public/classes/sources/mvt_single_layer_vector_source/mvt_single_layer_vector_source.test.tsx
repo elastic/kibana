@@ -5,7 +5,7 @@
  */
 
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { MVTFieldType, SOURCE_TYPES } from '../../../../common/constants';
+import { MVT_FIELD_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {
@@ -37,7 +37,7 @@ describe('canFormatFeatureProperties', () => {
   it('true if at least one matching tooltip', async () => {
     const descriptorWithTooltips = {
       ...descriptor,
-      fields: [{ name: 'foobar', type: MVTFieldType.STRING }],
+      fields: [{ name: 'foobar', type: MVT_FIELD_TYPE.STRING }],
       tooltipProperties: ['foo', 'foobar', 'bar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
@@ -46,7 +46,7 @@ describe('canFormatFeatureProperties', () => {
   it('false if no matching tooltip', async () => {
     const descriptorWithTooltips = {
       ...descriptor,
-      fields: [{ name: 'foobar', type: MVTFieldType.STRING }],
+      fields: [{ name: 'foobar', type: MVT_FIELD_TYPE.STRING }],
       tooltipProperties: ['foo', 'bar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
@@ -60,15 +60,15 @@ describe('filterAndFormatPropertiesToHtml', () => {
     fields: [
       {
         name: 'foo',
-        type: MVTFieldType.STRING,
+        type: MVT_FIELD_TYPE.STRING,
       },
       {
         name: 'food',
-        type: MVTFieldType.STRING,
+        type: MVT_FIELD_TYPE.STRING,
       },
       {
         name: 'fooz',
-        type: MVTFieldType.NUMBER,
+        type: MVT_FIELD_TYPE.NUMBER,
       },
     ],
     tooltipProperties: ['foo', 'fooz'],

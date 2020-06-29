@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
-import { MVTFieldType } from '../../../../common/constants';
+import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 const defaultSettings = {
   handleChange: () => {},
@@ -18,15 +18,15 @@ const defaultSettings = {
   fields: [
     {
       name: 'foo',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'food',
-      type: MVTFieldType.STRING,
+      type: MVT_FIELD_TYPE.STRING,
     },
     {
       name: 'fooz',
-      type: MVTFieldType.NUMBER,
+      type: MVT_FIELD_TYPE.NUMBER,
     },
   ],
   minSourceZoom: 4,
