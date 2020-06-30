@@ -17,13 +17,13 @@ interface Props {
 export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
   const { min: minP, max: maxP } = percentileRange ?? {};
 
   return useFetcher(
     (callApmApi) => {
-      if (start && end && field && value) {
+      if (start && end && serviceName && field && value) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution/breakdown',
           params: {

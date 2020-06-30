@@ -22,11 +22,11 @@ const ClFlexGroup = styled(EuiFlexGroup)`
 export function ClientMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
