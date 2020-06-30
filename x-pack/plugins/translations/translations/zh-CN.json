@@ -14745,7 +14745,6 @@
     "xpack.securitySolution.timeline.rangePicker.oneYear": "1 年",
     "xpack.securitySolution.timeline.searchOrFilter.eventTypeAllEvent": "所有事件",
     "xpack.securitySolution.timeline.searchOrFilter.eventTypeRawEvent": "原始事件",
-    "xpack.securitySolution.timeline.searchOrFilter.eventTypeSignalEvent": "信号事件",
     "xpack.securitySolution.timeline.searchOrFilter.filterDescription": "来自上述数据提供程序的事件按相邻 KQL 进行筛选",
     "xpack.securitySolution.timeline.searchOrFilter.filterKqlPlaceholder": "筛选事件",
     "xpack.securitySolution.timeline.searchOrFilter.filterKqlSelectedText": "筛选",
