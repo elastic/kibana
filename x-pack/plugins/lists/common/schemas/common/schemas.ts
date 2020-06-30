@@ -190,6 +190,7 @@ export const esDataTypeRangeTerm = t.union([
 export type EsDataTypeRangeTerm = t.TypeOf<typeof esDataTypeRangeTerm>;
 
 export const esDataTypeGeoPointRange = t.exact(t.type({ lat: t.string, lon: t.string }));
+export type EsDataTypeGeoPointRange = t.TypeOf<typeof esDataTypeGeoPointRange>;
 
 export const esDataTypeGeoPoint = t.union([
   t.exact(t.type({ geo_point })),
@@ -199,27 +200,27 @@ export const esDataTypeGeoPoint = t.union([
 export type EsDataTypeGeoPoint = t.TypeOf<typeof esDataTypeGeoPoint>;
 
 export const esDataTypeGeoShape = t.union([
-  t.type({ geo_shape: t.string }),
-  t.type({ shape: t.string }),
+  t.exact(t.type({ geo_shape: t.string })),
+  t.exact(t.type({ shape: t.string })),
 ]);
 
 export type EsDataTypeGeoShape = t.TypeOf<typeof esDataTypeGeoShape>;
 
 export const esDataTypeSingle = t.union([
-  t.type({ binary }),
-  t.type({ boolean }),
-  t.type({ byte }),
-  t.type({ date }),
-  t.type({ date_nanos }),
-  t.type({ double }),
-  t.type({ float }),
-  t.type({ half_float }),
-  t.type({ integer }),
-  t.type({ ip }),
-  t.type({ keyword }),
-  t.type({ long }),
-  t.type({ short }),
-  t.type({ text }),
+  t.exact(t.type({ binary })),
+  t.exact(t.type({ boolean })),
+  t.exact(t.type({ byte })),
+  t.exact(t.type({ date })),
+  t.exact(t.type({ date_nanos })),
+  t.exact(t.type({ double })),
+  t.exact(t.type({ float })),
+  t.exact(t.type({ half_float })),
+  t.exact(t.type({ integer })),
+  t.exact(t.type({ ip })),
+  t.exact(t.type({ keyword })),
+  t.exact(t.type({ long })),
+  t.exact(t.type({ short })),
+  t.exact(t.type({ text })),
 ]);
 
 export type EsDataTypeSingle = t.TypeOf<typeof esDataTypeSingle>;
