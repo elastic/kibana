@@ -90,7 +90,7 @@ See {kibana-ref}/canvas.html[Canvas].
 // end::canvas-def[]
 
 [[glossary-canvas-language]] Canvas expression language::
-// tag::ccanvas-language-def[]
+// tag::canvas-language-def[]
 A pipeline-based expression language for manipulating and visualizing data.
 Includes dozens of functions and other capabilities, such as table transforms,
 type casting, and sub-expressions. Supports TinyMath functions for complex math calculations.
@@ -354,11 +354,11 @@ Timestamped data such as logs, metrics, and events that is indexed on an ongoing
 
 
 [[glossary-TSVB-data]] TSVB ::
-// tag::TSVB-def[]
+// tag::tsvb-def[]
 A time series data visualizer that allows you to combine an
 infinite number of aggregations to display complex data.
 See {kibana-ref}/TSVB.html[TSVB].
-// end::TSVB-def[]
+// end::tsvb-def[]
 
 
 [float]
