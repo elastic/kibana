@@ -7,7 +7,13 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext, APICaller } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+  LegacyAPICaller,
+} from 'src/core/server';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
@@ -16,7 +22,7 @@ import { License } from './services';
 import { IndexLifecycleManagementConfig } from './config';
 import { isEsError } from './shared_imports';
 
-const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: APICaller) => {
+const indexLifecycleDataEnricher = async (indicesList: any, callAsCurrentUser: LegacyAPICaller) => {
   if (!indicesList || !indicesList.length) {
     return;
   }

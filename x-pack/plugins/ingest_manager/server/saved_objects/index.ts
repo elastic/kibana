@@ -68,6 +68,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         default_api_key: { type: 'binary', index: false },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text', index: false },
+        packages: { type: 'keyword' },
       },
     },
   },
@@ -213,7 +214,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: { type: 'keyword' },
+                dataset: {
+                  properties: {
+                    name: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                  },
+                },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
                 agent_stream: { type: 'flattened' },

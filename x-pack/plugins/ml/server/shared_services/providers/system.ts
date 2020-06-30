@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, KibanaRequest } from 'kibana/server';
+import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
 import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
@@ -18,7 +18,7 @@ import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/t
 
 export interface MlSystemProvider {
   mlSystemProvider(
-    callAsCurrentUser: APICaller,
+    callAsCurrentUser: LegacyAPICaller,
     request: KibanaRequest
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
@@ -36,7 +36,7 @@ export function getMlSystemProvider(
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(callAsCurrentUser: APICaller, request: KibanaRequest) {
+    mlSystemProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
       return {
         async mlCapabilities() {
           isMinimumLicense();
