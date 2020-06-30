@@ -49,12 +49,6 @@ interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-/**
- * The search plugin exposes a method `registerSearchStrategy` for other plugins
- * to add their own custom search strategies.
- *
- * It also comes with two search strategy implementations - SYNC_SEARCH_STRATEGY and ES_SEARCH_STRATEGY.
- */
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
