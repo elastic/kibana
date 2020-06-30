@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, FC } from 'react';
+import React, { useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui'; // EuiToolTip
 
 import {
   checkPermission,
-  createPermissionFailureMessage,
+  // createPermissionFailureMessage,
 } from '../../../../../capabilities/check_capabilities';
+import { DataFrameAnalyticsListRow } from './common';
 
-// import { EditAnalyticsFlyout } from '../edit_analytics_flyout';
+import { EditAnalyticsFlyout } from './edit_analytics_flyout';
 
 interface EditActionProps {
   item: DataFrameAnalyticsListRow;
@@ -46,8 +47,8 @@ export const EditAction: FC<EditActionProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  // if (!canCreateTransform) {
-  //   const content = createCapabilityFailureMessage('canStartStopTransform');
+  // if (!canCreateDataFrameAnalytics) {
+  //   const content = createCapabilityFailureMessage('canCreateDataFrameAnalytics');
 
   //   return (
   //     <EuiToolTip position="top" content={content}>
@@ -59,7 +60,7 @@ export const EditAction: FC<EditActionProps> = ({ item }) => {
   return (
     <>
       {editButton}
-      {/* {isFlyoutVisible && <EditAnalyticsFlyout closeFlyout={closeFlyout} config={config} />} */}
+      {isFlyoutVisible && <EditAnalyticsFlyout closeFlyout={closeFlyout} item={item} />}
     </>
   );
 };

@@ -72,6 +72,14 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  updateDataFrameAnalytics(analyticsId: string, updateConfig: any) {
+    const body = JSON.stringify(updateConfig);
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}/_update`,
+      method: 'POST',
+      body,
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
