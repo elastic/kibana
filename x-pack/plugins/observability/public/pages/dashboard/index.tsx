@@ -56,7 +56,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
       ? getBucketSize({
           start: moment.utc(startTime).valueOf(),
           end: moment.utc(endTime).valueOf(),
-          minInterval: 'auto',
+          minInterval: '60s',
         })
       : undefined;
 
