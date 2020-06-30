@@ -28,6 +28,7 @@ export * from './split_panel';
 export * from './react_router_navigate';
 export { ValidatedDualRange, Value } from './validated_range';
 export * from './notifications';
+export * from './toasts';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
