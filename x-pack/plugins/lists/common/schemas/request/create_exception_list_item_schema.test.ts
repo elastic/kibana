@@ -8,6 +8,9 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { getCreateCommentsArrayMock } from '../types/create_comments.mock';
+import { getCommentsMock } from '../types/comments.mock';
+import { CommentsArray } from '../types';
 
 import {
   CreateExceptionListItemSchema,
@@ -26,7 +29,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not accept an undefined for "description"', () => {
+  test('it should not validate an undefined for "description"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
     delete payload.description;
     const decoded = createExceptionListItemSchema.decode(payload);
@@ -38,7 +41,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not accept an undefined for "name"', () => {
+  test('it should not validate an undefined for "name"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
     delete payload.name;
     const decoded = createExceptionListItemSchema.decode(payload);
@@ -50,7 +53,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not accept an undefined for "type"', () => {
+  test('it should not validate an undefined for "type"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
     delete payload.type;
     const decoded = createExceptionListItemSchema.decode(payload);
@@ -62,7 +65,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not accept an undefined for "list_id"', () => {
+  test('it should not validate an undefined for "list_id"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.list_id;
     const decoded = createExceptionListItemSchema.decode(inputPayload);
@@ -74,7 +77,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should accept an undefined for "meta" but strip it out and generate a correct body not counting the auto generated uuid', () => {
+  test('it should validate an undefined for "meta" but strip it out and generate a correct body not counting the auto generated uuid', () => {
     const payload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete payload.meta;
@@ -87,7 +90,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "comments" but return an array and generate a correct body not counting the auto generated uuid', () => {
+  test('it should validate an undefined for "comments" but return an array and generate a correct body not counting the auto generated uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.comments;
@@ -100,7 +103,34 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "entries" but return an array', () => {
+  test('it should validate "comments" array', () => {
+    const inputPayload = {
+      ...getCreateExceptionListItemSchemaMock(),
+      comments: getCreateCommentsArrayMock(),
+    };
+    const decoded = createExceptionListItemSchema.decode(inputPayload);
+    const checked = exactCheck(inputPayload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    delete (message.schema as CreateExceptionListItemSchema).item_id;
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(inputPayload);
+  });
+
+  test('it should NOT validate "comments" with "created_at" or "created_by" values', () => {
+    const inputPayload: Omit<CreateExceptionListItemSchema, 'comments'> & {
+      comments?: CommentsArray;
+    } = {
+      ...getCreateExceptionListItemSchemaMock(),
+      comments: [getCommentsMock()],
+    };
+    const decoded = createExceptionListItemSchema.decode(inputPayload);
+    const checked = exactCheck(inputPayload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "created_at,created_by"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should validate an undefined for "entries" but return an array', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.entries;
@@ -113,7 +143,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "namespace_type" but return enum "single" and generate a correct body not counting the auto generated uuid', () => {
+  test('it should validate an undefined for "namespace_type" but return enum "single" and generate a correct body not counting the auto generated uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.namespace_type;
@@ -126,7 +156,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
+  test('it should validate an undefined for "tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.tags;
@@ -139,7 +169,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
+  test('it should validate an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload._tags;
@@ -152,7 +182,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "item_id" and auto generate a uuid', () => {
+  test('it should validate an undefined for "item_id" and auto generate a uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.item_id;
     const decoded = createExceptionListItemSchema.decode(inputPayload);
@@ -164,7 +194,7 @@ describe('create_exception_list_item_schema', () => {
     );
   });
 
-  test('it should accept an undefined for "item_id" and generate a correct body not counting the uuid', () => {
+  test('it should validate an undefined for "item_id" and generate a correct body not counting the uuid', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.item_id;
     const decoded = createExceptionListItemSchema.decode(inputPayload);

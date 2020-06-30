@@ -34,10 +34,64 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
-  it('should show a table', async () => {
+  it('should NOT display timeline', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('hostListTable');
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
+  it('should show the empty state when there are no hosts or polices', async () => {
+    const renderResult = render();
+    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
+  });
+
+  describe('when there are policies, but no hosts', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const hostListData = mockHostResultList({ total: 0 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(hostListData));
+        const hostAction: AppAction = {
+          type: 'serverReturnedHostList',
+          payload: hostListData,
+        };
+        store.dispatch(hostAction);
+
+        jest.clearAllMocks();
+
+        const policyListData = mockPolicyResultList({ total: 3 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(policyListData));
+        const policyAction: AppAction = {
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyListData.items,
+          },
+        };
+        store.dispatch(policyAction);
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show the no hosts empty state', async () => {
+      const renderResult = render();
+      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
+      expect(emptyEndpointsTable).not.toBeNull();
+    });
+
+    it('should display the onboarding steps', async () => {
+      const renderResult = render();
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+
+    it('should show policy selection', async () => {
+      const renderResult = render();
+      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
+      expect(onboardingPolicySelect).not.toBeNull();
+    });
   });
 
   describe('when there is no selected host in the url', () => {
@@ -156,6 +210,7 @@ describe('when on the hosts page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
+    let agentId: string;
     const dispatchServerReturnedHostPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
@@ -219,6 +274,8 @@ describe('when on the hosts page', () => {
           },
         },
       };
+
+      agentId = hostDetails.metadata.elastic.agent.id;
 
       coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
       coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
@@ -348,6 +405,32 @@ describe('when on the hosts page', () => {
       expect(
         policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
       ).not.toBeNull();
+    });
+
+    it('should include the link to reassignment in Ingest', async () => {
+      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+      const renderResult = render();
+      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      expect(linkToReassign).not.toBeNull();
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+      );
+    });
+
+    describe('when link to reassignment in Ingest is clicked', () => {
+      beforeEach(async () => {
+        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+        const renderResult = render();
+        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(linkToReassign);
+        });
+      });
+
+      it('should navigate to Ingest without full page refresh', () => {
+        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
+      });
     });
 
     it('should include the link to logs', async () => {
