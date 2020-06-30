@@ -81,9 +81,9 @@ export const TimeExpressionSelect: React.FC<Props> = ({
             />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
-          description="within"
+          description={labels.ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION}
           id="timerange"
-          value={`last ${numUnits}`}
+          value={labels.ENTER_NUMBER_OF_TIME_UNITS_VALUE(numUnits)}
         />
       </EuiFlexItem>
       <EuiFlexItem>

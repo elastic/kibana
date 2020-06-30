@@ -99,6 +99,71 @@ export const ENTER_NUMBER_OF_TIME_UNITS = i18n.translate(
   }
 );
 
+export const ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.timerangeValueField.expression',
+  {
+    defaultMessage: 'within',
+  }
+);
+
+export const ENTER_NUMBER_OF_TIME_UNITS_VALUE = (value: number) =>
+  i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeValueField.value', {
+    defaultMessage: 'last {value}',
+    values: { value },
+  });
+
+export const ENTER_AVAILABILITY_RANGE_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.popover.ariaLabel',
+  {
+    defaultMessage: 'Specify availability tracking time range',
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.ariaLabel',
+  {
+    defaultMessage: `Enter the number of units for the alert's availability check.`,
+  }
+);
+
+export const ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.timerangeValueField.expression',
+  {
+    defaultMessage: 'within the last',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.ariaLabel',
+  {
+    defaultMessage: 'Specify availability thresholds for this alert',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_INPUT_ARIA_LABEL = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.input.ariaLabel',
+  {
+    defaultMessage: 'Input an availability threshold to check for this alert',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.availability.threshold.description',
+  {
+    defaultMessage: 'matching monitors are up in',
+    description:
+      'This fragment explains that an alert will fire for monitors matching user-specified criteria',
+  }
+);
+
+export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: number) =>
+  i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
+    defaultMessage: '< {value}% of checks',
+    description:
+      'This fragment specifies criteria that will cause an alert to fire for uptime monitors',
+    values: { value },
+  });
+
 export const ADD_FILTER = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter', {
   defaultMessage: `Add filter`,
 });
