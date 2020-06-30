@@ -13,12 +13,18 @@ import {
   EuiForm,
   EuiColorPicker,
   EuiCallOut,
+  EuiInputPopover,
+  EuiFieldText,
+  EuiSpacer,
+  EuiIcon,
+  EuiFormControlLayout,
+  EuiColorPickerSwatch,
 } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { getColorForPanel } from './metric_color_configuration';
+import { getColor } from './color_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -91,7 +97,7 @@ export function DimensionEditor({
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
 
-  const color = getColorForPanel(layer, accessor, state.layers);
+  const color = getColor(layer, accessor);
   return (
     <EuiForm>
       <EuiFormRow
@@ -154,7 +160,6 @@ export function DimensionEditor({
       >
         <>
           <EuiColorPicker
-            color={color}
             disabled={!!layer.splitAccessor}
             onChange={(newColor) => {
               const newYConfigs = [...(layer.yConfig || [])];
@@ -172,7 +177,15 @@ export function DimensionEditor({
               }
               setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
             }}
+            color={color}
+            secondaryInputDisplay="top"
+            button={<EuiColorPickerSwatch color={color} aria-label="Select a new color" />}
           />
+          {!!layer.splitAccessor && !color && (
+            <div>default color is displayed, you cannot edit series with split accessor</div>
+          )}
+          {!layer.splitAccessor && !color && <div>default color is displayed</div>}
+          {!layer.splitAccessor && color && <div>custom color is displayed</div>}
         </>
       </EuiFormRow>
       {!!layer.splitAccessor && (
