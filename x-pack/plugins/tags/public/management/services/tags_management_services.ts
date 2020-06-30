@@ -5,12 +5,12 @@
  */
 
 import { ScopedHistory, ChromeBreadcrumb, CoreSetup } from 'kibana/public';
-import { TagsClient } from '../../services';
+import { TagsServiceSetup } from '../../services';
 
 export interface Params {
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  tagsClient: TagsClient;
+  tags: TagsServiceSetup;
   toasts: CoreSetup['notifications']['toasts'];
 }
 

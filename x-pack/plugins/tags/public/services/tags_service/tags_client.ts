@@ -9,19 +9,24 @@ import {
   TAGS_API_PATH,
   TagsClientCreateParams,
   TagsClientCreateResult,
-} from '../../common';
-import { HttpSetup, HttpStart } from '../../../../../src/core/public';
+  TagsClientGetAllResult,
+} from '../../../common';
+import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
-export interface Params {
+export interface TagsClientParams {
   http: HttpSetup | HttpStart;
 }
 
 export class TagsClient implements ITagsClient {
-  constructor(private readonly params: Params) {}
+  constructor(private readonly params: TagsClientParams) {}
 
   public async create(params: TagsClientCreateParams): Promise<TagsClientCreateResult> {
     return await this.params.http.post<TagsClientCreateResult>(TAGS_API_PATH, {
       body: JSON.stringify(params),
     });
+  }
+
+  public async getAll(): Promise<TagsClientGetAllResult> {
+    return await this.params.http.get<TagsClientGetAllResult>(TAGS_API_PATH);
   }
 }

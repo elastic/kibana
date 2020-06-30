@@ -26,7 +26,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
 
   const handleSubmit = async () => {
     try {
-      const { tag } = await services.params.tagsClient.create({
+      const { tag } = await services.params.tags.client.create({
         tag: {
           title,
           color,

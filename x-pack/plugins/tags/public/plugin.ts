@@ -19,7 +19,7 @@ import {
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
-import { TagsClient } from './services';
+import { TagsService, TagsServiceSetup, TagsServiceStart } from './services';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -30,11 +30,11 @@ export interface TagsPluginStartDependencies {
 }
 
 export interface TagsPluginSetup {
-  tagsClient: TagsClient;
+  tags: TagsServiceSetup;
 }
 
 export interface TagsPluginStart {
-  tagsClient: TagsClient;
+  tags: TagsServiceStart;
 }
 
 export class TagsPlugin
@@ -45,7 +45,8 @@ export class TagsPlugin
       TagsPluginSetupDependencies,
       TagsPluginStartDependencies
     > {
-  private tagsClient!: TagsClient;
+  private readonly tagsService = new TagsService();
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -54,7 +55,7 @@ export class TagsPlugin
   ): TagsPluginSetup {
     const { http, notifications } = core;
 
-    this.tagsClient = new TagsClient({ http });
+    const tags = this.tagsService.setup({ http });
 
     const kibanaSection = plugins.management.sections.getSection(ManagementSectionId.Kibana);
 
@@ -69,7 +70,7 @@ export class TagsPlugin
         const services = new TagsManagementServices({
           history,
           setBreadcrumbs,
-          tagsClient: this.tagsClient,
+          tags,
           toasts: notifications.toasts,
         });
         render(h(TagsManagementSection, { services }), element);
@@ -80,13 +81,13 @@ export class TagsPlugin
     });
 
     return {
-      tagsClient: this.tagsClient,
+      tags,
     };
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
     return {
-      tagsClient: this.tagsClient,
+      tags: this.tagsService.start(),
     };
   }
 }
