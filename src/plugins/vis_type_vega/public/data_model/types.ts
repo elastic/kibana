@@ -195,8 +195,8 @@ type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
 
 export interface TooltipConfig {
   position?: ToolTipPositions;
-  padding?: any;
-  centerOnMark?: any;
+  padding?: number | Padding;
+  centerOnMark?: boolean | number;
 }
 
 export interface DstObj {
