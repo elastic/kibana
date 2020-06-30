@@ -20,6 +20,8 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -210,6 +212,7 @@ describe('when on the hosts page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
+    let agentId: string;
     const dispatchServerReturnedHostPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
@@ -274,8 +277,9 @@ describe('when on the hosts page', () => {
         },
       };
 
+      agentId = hostDetails.metadata.elastic.agent.id;
+
       coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
-      coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
 
       reactTestingLibrary.act(() => {
         history.push({
@@ -404,26 +408,28 @@ describe('when on the hosts page', () => {
       ).not.toBeNull();
     });
 
-    it('should include the link to logs', async () => {
+    it('should include the link to reassignment in Ingest', async () => {
+      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
       const renderResult = render();
-      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-      expect(linkToLogs).not.toBeNull();
-      expect(linkToLogs.textContent).toEqual('Endpoint Logs');
-      expect(linkToLogs.getAttribute('href')).toEqual(
-        "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
+      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      expect(linkToReassign).not.toBeNull();
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
     });
 
-    describe('when link to logs is clicked', () => {
+    describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
+        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
         const renderResult = render();
-        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(linkToLogs);
+          reactTestingLibrary.fireEvent.click(linkToReassign);
         });
       });
 
-      it('should navigate to logs without full page refresh', () => {
+      it('should navigate to Ingest without full page refresh', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });

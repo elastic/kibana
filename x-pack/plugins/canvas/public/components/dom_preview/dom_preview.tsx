@@ -71,6 +71,7 @@ export class DomPreview extends PureComponent<Props> {
     }
 
     const thumb = this._original.cloneNode(true);
+    thumb.id += '-thumb';
 
     const originalStyle = window.getComputedStyle(this._original, null);
     const originalWidth = parseInt(originalStyle.getPropertyValue('width'), 10);

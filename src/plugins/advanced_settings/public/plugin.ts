@@ -17,8 +17,8 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { ManagementApp, ManagementSectionId } from '../../management/public';
+import { CoreSetup, Plugin } from 'kibana/public';
+import { ManagementSectionId } from '../../management/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -30,11 +30,10 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
-  private managementApp?: ManagementApp;
   public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
     const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
 
-    this.managementApp = kibanaSection.registerApp({
+    kibanaSection.registerApp({
       id: 'settings',
       title,
       order: 3,
@@ -51,11 +50,7 @@ export class AdvancedSettingsPlugin
     };
   }
 
-  public start(core: CoreStart) {
-    if (!core.application.capabilities.management.kibana.settings) {
-      this.managementApp!.disable();
-    }
-
+  public start() {
     return {
       component: component.start,
     };

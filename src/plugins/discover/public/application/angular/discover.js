@@ -943,6 +943,22 @@ function discoverController(
     $route.reload();
   };
 
+  $scope.onSkipBottomButtonClick = function () {
+    // show all the Rows
+    $scope.minimumVisibleRows = $scope.hits;
+
+    // delay scrolling to after the rows have been rendered
+    const bottomMarker = $element.find('#discoverBottomMarker');
+    $timeout(() => {
+      bottomMarker.focus();
+      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
+      // so the browser will show a highlight: remove the focus once scrolled
+      $timeout(() => {
+        bottomMarker.blur();
+      }, 0);
+    }, 0);
+  };
+
   $scope.newQuery = function () {
     history.push('/');
   };
@@ -995,7 +1011,11 @@ function discoverController(
       $scope.indexPattern.popularizeField(columnName, 1);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    setAppState({ columns });
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort = $scope.state.sort.length
+      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
+      : [];
+    setAppState({ columns, sort });
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
@@ -1005,17 +1025,6 @@ function discoverController(
 
   $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
-  };
-
-  $scope.scrollToBottom = function () {
-    // delay scrolling to after the rows have been rendered
-    $timeout(() => {
-      $element.find('#discoverBottomMarker').focus();
-    }, 0);
-  };
-
-  $scope.showAllRows = function () {
-    $scope.minimumVisibleRows = $scope.hits;
   };
 
   async function setupVisualization() {

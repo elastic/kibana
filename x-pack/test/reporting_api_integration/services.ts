@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import { filter, first, mapTo, switchMap, timeout } from 'rxjs/operators';
 import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
 import { services as xpackServices } from '../functional/services';
+import { services as apiIntegrationServices } from '../api_integration/services';
 import { FtrProviderContext } from './ftr_provider_context';
 
 interface PDFAppCounts {
@@ -185,5 +186,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
 export const services = {
   ...xpackServices,
+  usageAPI: apiIntegrationServices.usageAPI,
   reportingAPI: ReportingAPIProvider,
 };

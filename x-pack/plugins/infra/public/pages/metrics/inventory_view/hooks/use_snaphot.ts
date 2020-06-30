@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -62,12 +61,6 @@ export function useSnapshot(
     } as SnapshotRequest),
     decodeResponse
   );
-
-  useEffect(() => {
-    (async () => {
-      await makeRequest();
-    })();
-  }, [makeRequest]);
 
   return {
     error: (error && error.message) || null,
