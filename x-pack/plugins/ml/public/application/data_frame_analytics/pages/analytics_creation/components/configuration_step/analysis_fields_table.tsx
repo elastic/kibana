@@ -108,6 +108,7 @@ export const AnalysisFieldsTable: FC<{
     } else if (includes.length > 0) {
       setFormState({ includes });
     }
+    setMinimumFieldsRequiredMessage(undefined);
   }, [tableItems]);
 
   useEffect(() => {
@@ -138,32 +139,20 @@ export const AnalysisFieldsTable: FC<{
 
   const filters = [
     {
-      type: 'field_value_selection',
+      type: 'field_value_toggle_group',
       field: 'is_included',
-      name: i18n.translate('xpack.ml.dataframe.analytics.create.excludedFilterLabel', {
-        defaultMessage: 'Is included',
-      }),
-      multiSelect: false,
-      options: [
+      items: [
         {
           value: true,
-          view: (
-            <EuiText grow={false}>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
-                defaultMessage: 'Yes',
-              })}
-            </EuiText>
-          ),
+          name: i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
+            defaultMessage: 'Is included',
+          }),
         },
         {
           value: false,
-          view: (
-            <EuiText grow={false}>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
-                defaultMessage: 'No',
-              })}
-            </EuiText>
-          ),
+          name: i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
+            defaultMessage: 'Is not included',
+          }),
         },
       ],
     },
@@ -180,7 +169,7 @@ export const AnalysisFieldsTable: FC<{
       >
         <Fragment />
       </EuiFormRow>
-      {tableItems.length > 0 && (
+      {tableItems.length > 0 && minimumFieldsRequiredMessage === undefined && (
         <EuiText size="xs">
           {i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsCount', {
             defaultMessage:
