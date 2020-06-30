@@ -20,6 +20,7 @@
 export * from './constants';
 export * from './es_query';
 export * from './field_formats';
+export * from './field_mapping';
 export * from './index_patterns';
 export * from './kbn_field_types';
 export * from './query';
@@ -27,4 +28,3 @@ export * from './search';
 export * from './search/aggs';
 export * from './types';
 export * from './utils';
-export * from './field_mapping';

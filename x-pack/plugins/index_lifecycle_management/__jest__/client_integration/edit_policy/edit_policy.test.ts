@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers/setup_environment';
 
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
-import { DELETE_PHASE_POLICY } from './contants';
+import { DELETE_PHASE_POLICY } from './constants';
 
 import { API_BASE_PATH } from '../../../common/constants';
 
