@@ -206,10 +206,14 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
           '*.mappings._meta.beat',
           // Does it have `ecs.version` in the mappings? => It follows the ECS conventions
           '*.mappings.properties.ecs.properties.version.type',
-          // If `dataset.type` is a `constant_keyword`, it can be reported as a type
-          '*.mappings.properties.dataset.properties.type.value',
-          // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
-          '*.mappings.properties.dataset.properties.name.value',
+
+          // Disable the fields below because they are still pending to be confirmed:
+          // https://github.com/elastic/ecs/pull/845
+          // TODO: Re-enable when the final fields are confirmed
+          // // If `dataset.type` is a `constant_keyword`, it can be reported as a type
+          // '*.mappings.properties.dataset.properties.type.value',
+          // // If `dataset.name` is a `constant_keyword`, it can be reported as the dataset
+          // '*.mappings.properties.dataset.properties.name.value',
         ],
       }),
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
