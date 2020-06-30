@@ -26,6 +26,7 @@ import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
+import { Resources } from '../../components/app/resources';
 
 interface Props {
   routeParams: RouteParams<'/dashboard'>;
@@ -78,48 +79,55 @@ export const DashboardPage = ({ routeParams }: Props) => {
 
       <EuiHorizontalRule />
 
-      <EuiFlexGroup direction="column">
-        {hasData?.infra_logs && (
-          <EuiFlexItem>
-            <LogsSection
-              startTime={startTime}
-              endTime={endTime}
-              bucketSize={bucketSize?.intervalString}
-            />
-          </EuiFlexItem>
-        )}
-        {hasData?.infra_metrics && (
-          <EuiFlexItem>
-            <MetricsSection
-              startTime={startTime}
-              endTime={endTime}
-              bucketSize={bucketSize?.intervalString}
-            />
-          </EuiFlexItem>
-        )}
-        {hasData?.apm && (
-          <EuiFlexItem>
-            <APMSection
-              startTime={startTime}
-              endTime={endTime}
-              bucketSize={bucketSize?.intervalString}
-            />
-          </EuiFlexItem>
-        )}
-        {hasData?.uptime && (
-          <EuiFlexItem>
-            <UptimeSection
-              startTime={startTime}
-              endTime={endTime}
-              bucketSize={bucketSize?.intervalString}
-            />
-          </EuiFlexItem>
-        )}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={9}>
+          <EuiFlexGroup direction="column">
+            {hasData?.infra_logs && (
+              <EuiFlexItem>
+                <LogsSection
+                  startTime={startTime}
+                  endTime={endTime}
+                  bucketSize={bucketSize?.intervalString}
+                />
+              </EuiFlexItem>
+            )}
+            {hasData?.infra_metrics && (
+              <EuiFlexItem>
+                <MetricsSection
+                  startTime={startTime}
+                  endTime={endTime}
+                  bucketSize={bucketSize?.intervalString}
+                />
+              </EuiFlexItem>
+            )}
+            {hasData?.apm && (
+              <EuiFlexItem>
+                <APMSection
+                  startTime={startTime}
+                  endTime={endTime}
+                  bucketSize={bucketSize?.intervalString}
+                />
+              </EuiFlexItem>
+            )}
+            {hasData?.uptime && (
+              <EuiFlexItem>
+                <UptimeSection
+                  startTime={startTime}
+                  endTime={endTime}
+                  bucketSize={bucketSize?.intervalString}
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <Resources />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGrid columns={2} gutterSize="s">
+      <EuiFlexGrid columns={1} gutterSize="s">
         {emptySections
           .filter(({ id }) => hasData && !hasData[id])
           .map((app) => {
