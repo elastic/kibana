@@ -10,7 +10,7 @@ import { SharedServicesChecks } from '../shared_services';
 
 export interface ModulesProvider {
   modulesProvider(
-    callAsCurrentUser: APICaller,
+    callAsCurrentUser: LegacyAPICaller,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): {
