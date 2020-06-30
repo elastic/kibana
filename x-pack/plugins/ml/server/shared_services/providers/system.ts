@@ -36,7 +36,7 @@ export function getMlSystemProvider(
 ): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      // const hasMlCapabilities = getHasMlCapabilities(request);
       return {
         async mlCapabilities() {
           isMinimumLicense();
@@ -61,7 +61,6 @@ export function getMlSystemProvider(
         },
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();
-          await hasMlCapabilities(['canAccessML']);
 
           const info = await callAsCurrentUser('ml.info');
           const cloudId = cloud && cloud.cloudId;

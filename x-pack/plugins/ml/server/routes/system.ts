@@ -113,9 +113,6 @@ export function systemRoutes(
     {
       path: '/api/ml/ml_capabilities',
       validate: false,
-      options: {
-        tags: ['access:ml:canAccessML'],
-      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
