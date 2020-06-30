@@ -1776,15 +1776,15 @@
             "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
-                  "type": "text"
+                  "type": "text", "index": false
                 }
               }
             },
             "numLinks": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "numVertices": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "title": {
               "type": "text"
@@ -1793,7 +1793,7 @@
               "type": "integer"
             },
             "wsState": {
-              "type": "text"
+              "type": "text", "index": false
             }
           }
         },
@@ -2775,32 +2775,32 @@
               "type": "text"
             },
             "hits": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
-                  "type": "text"
+                  "type": "text", "index": false
                 }
               }
             },
             "timelion_chart_height": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "timelion_columns": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "timelion_interval": {
-              "type": "keyword"
+              "type": "keyword", "index": false
             },
             "timelion_other_interval": {
-              "type": "keyword"
+              "type": "keyword", "index": false
             },
             "timelion_rows": {
-              "type": "integer"
+              "type": "integer", "index": false
             },
             "timelion_sheet": {
-              "type": "text"
+              "type": "text", "index": false
             },
             "title": {
               "type": "text"
