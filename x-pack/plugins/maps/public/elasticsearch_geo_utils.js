@@ -400,8 +400,9 @@ export function getBoundingBoxGeometry(geometry) {
 export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
-  const left = minLon;
-  const right = maxLon;
+  const lonDelta = maxLon - minLon;
+  const left = lonDelta > 360 ? -180 : minLon;
+  const right = lonDelta > 360 ? 180 : maxLon;
   const top = clampToLatBounds(maxLat);
   const bottom = clampToLatBounds(minLat);
   const topLeft = [left, top];
