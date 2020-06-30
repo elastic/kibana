@@ -110,9 +110,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               id: policyInfo.datasource.id,
               dataset: { namespace: 'default' },
               name: 'Protect East Coast',
-              package: {
-                name: 'endpoint',
-                version: policyInfo.packageInfo.version,
+              meta: {
+                package: {
+                  name: 'endpoint',
+                  version: policyInfo.packageInfo.version,
+                },
               },
               policy: {
                 linux: {

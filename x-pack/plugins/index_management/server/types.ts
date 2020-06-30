@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient, IRouter } from 'src/core/server';
+import { LegacyScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { License, IndexDataEnricher } from './services';
@@ -41,4 +41,4 @@ export interface Index {
   [key: string]: any;
 }
 
-export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
