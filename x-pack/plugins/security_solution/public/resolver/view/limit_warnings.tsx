@@ -25,7 +25,7 @@ const LineageTitleMessage = React.memo(function RelatedEventsLimitMessage({
   return (
     <>
       <FormattedMessage
-        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitExceeded"
+        id="xpack.securitySolution.endpoint.resolver.relatedEventLimitTitle"
         defaultMessage="This list includes {numberOfEntries} process events."
         values={{ numberOfEntries }}
       />
