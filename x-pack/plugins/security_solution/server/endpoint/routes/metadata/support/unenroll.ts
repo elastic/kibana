@@ -18,13 +18,15 @@ export async function findAllUnenrolledAgentIds(
       page: pageNum,
       perPage: pageSize,
       showInactive: true,
-      kuery: 'fleet-agents.package:endpoint',
+      kuery: 'fleet-agents.packages:endpoint',
     };
   };
+
   let page = 1;
 
   const result: string[] = [];
   let hasMore = true;
+
   while (hasMore) {
     const unenrolledAgents = await agentService.listAgents(soClient, searchOptions(page++));
     result.push(...unenrolledAgents.agents.map((agent: Agent) => agent.id));

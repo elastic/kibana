@@ -18,7 +18,7 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 
 interface HitSource {
@@ -139,7 +139,6 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const logger = metadataRequestContext.endpointAppContext.logFactory.get('metadata');
   const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
@@ -151,26 +150,35 @@ export async function getHostData(
   }
 
   const hostMetadata: HostMetadata = response.hits.hits[0]._source;
-  let isAgentActive = false;
+  const agent = await findAgent(metadataRequestContext, hostMetadata);
+
+  if (agent && !agent.active) {
+    throw Boom.badRequest('the requested endpoint is unenrolled');
+  }
+
+  return enrichHostMetadata(hostMetadata, metadataRequestContext);
+}
+
+async function findAgent(
+  metadataRequestContext: MetadataRequestContext,
+  hostMetadata: HostMetadata
+): Promise<Agent | undefined> {
+  const logger = metadataRequestContext.endpointAppContext.logFactory.get('metadata');
   try {
-    const agent = await metadataRequestContext.endpointAppContext.service
+    return await metadataRequestContext.endpointAppContext.service
       .getAgentService()
       .getAgent(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
         hostMetadata.elastic.agent.id
       );
-    isAgentActive = agent.active;
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       logger.warn(`agent with id ${hostMetadata.elastic.agent.id} not found`);
+      return undefined;
     } else {
       throw e;
     }
   }
-  if (!isAgentActive) {
-    throw Boom.badRequest('the requested endpoint is unenrolled');
-  }
-  return enrichHostMetadata(response.hits.hits[0]._source, metadataRequestContext);
 }
 
 async function mapToHostResultList(
@@ -202,7 +210,7 @@ async function mapToHostResultList(
   }
 }
 
-async function enrichHostMetadata(
+export async function enrichHostMetadata(
   hostMetadata: HostMetadata,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostInfo> {

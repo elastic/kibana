@@ -277,6 +277,10 @@ describe('test endpoint route', () => {
         params: { id: response.hits.hits[0]._id },
       });
 
+      mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
+        throw Boom.notFound('Agent not found');
+      });
+
       mockAgentService.getAgent = jest.fn().mockImplementation(() => {
         throw Boom.notFound('Agent not found');
       });
