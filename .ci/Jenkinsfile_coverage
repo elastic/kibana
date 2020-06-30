@@ -28,13 +28,13 @@ def handleIngestion(timestamp) {
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
   kibanaCoverage.generateReports("### Merge coverage reports")
   kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(timestamp, '### Injest && Upload')
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, '### Ingest && Upload')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
 def handleFail() {
   def buildStatus = buildUtils.getBuildStatus()
-  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
+  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED' && buildStatus != 'UNSTABLE') {
     slackNotifications.sendFailedBuild(
       channel: '#kibana-qa',
       username: 'Kibana QA'
