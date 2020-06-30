@@ -10,8 +10,8 @@ import { ConfigSchema } from './config';
 import { ListPlugin } from './plugin';
 
 // exporting these since its required at top level in siem plugin
-export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export { ListClient } from './services/lists/list_client';
+export { ExceptionListClient } from './services/exception_lists/exception_list_client';
 export { ListPluginSetup } from './types';
 
 export const config = { schema: ConfigSchema };
