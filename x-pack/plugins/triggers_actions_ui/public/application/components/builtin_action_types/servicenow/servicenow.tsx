@@ -10,7 +10,7 @@ import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { ServiceNowActionConnector, ServiceNowActionParams } from './types';
 import * as i18n from './translations';
-import { isUrlInvalid } from '../../../lib/value_validators';
+import { isValidUrl } from '../../../lib/value_validators';
 
 const validateConnector = (action: ServiceNowActionConnector): ValidationResult => {
   const validationResult = { errors: {} };
@@ -25,7 +25,7 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
-  if (isUrlInvalid(action.config.apiUrl)) {
+  if (isValidUrl(action.config.apiUrl)) {
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
   }
 
@@ -49,7 +49,6 @@ export function getActionType(): ActionTypeModel<
     iconClass: logo,
     selectMessage: i18n.SERVICENOW_DESC,
     actionTypeTitle: connectorConfiguration.name,
-    // minimumLicenseRequired: 'platinum',
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
