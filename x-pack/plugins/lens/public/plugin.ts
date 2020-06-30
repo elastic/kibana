@@ -92,11 +92,11 @@ export class LensPlugin {
       PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
+      charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory: core
         .getStartServices()
         .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
-      chartsThemeService: charts.theme,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

@@ -13,6 +13,7 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;
@@ -56,6 +57,7 @@ describe('Fields Accordion', () => {
       },
       query: { query: '', language: 'lucene' },
       filters: [],
+      chartsThemeService: chartPluginMock.createSetupContract().theme,
     };
 
     defaultProps = {

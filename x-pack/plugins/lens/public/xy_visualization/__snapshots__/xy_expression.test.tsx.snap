@@ -5,6 +5,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -73,6 +74,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -141,6 +143,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -209,6 +212,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -277,6 +281,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -349,6 +354,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -421,6 +427,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}

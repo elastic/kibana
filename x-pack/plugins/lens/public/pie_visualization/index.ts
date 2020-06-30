@@ -16,7 +16,7 @@ export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
-  chartsThemeService: ChartsPluginSetup['theme'];
+  charts: ChartsPluginSetup;
 }
 
 export interface PieVisualizationPluginStartPlugins {
@@ -28,19 +28,14 @@ export class PieVisualization {
 
   setup(
     core: CoreSetup,
-    {
-      expressions,
-      formatFactory,
-      editorFrame,
-      chartsThemeService,
-    }: PieVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => pie);
 
     expressions.registerRenderer(
       getPieRenderer({
         formatFactory,
-        chartsThemeService,
+        chartsThemeService: charts.theme,
       })
     );
 
