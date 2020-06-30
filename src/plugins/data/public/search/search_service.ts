@@ -135,7 +135,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
-      search: this.searchInterceptor.search,
+      search,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {
