@@ -19,7 +19,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useHostLogsUrl, useHostIngestUrl } from '../hooks';
+import { useHostSelector, useHostIngestUrl } from '../hooks';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
@@ -47,7 +47,6 @@ const LinkToExternalApp = styled.div`
 `;
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { url: logsUrl, appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
   const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl();
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
@@ -68,12 +67,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           defaultMessage: 'Last Seen',
         }),
         description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.alerts', {
-          defaultMessage: 'Alerts',
-        }),
-        description: '0',
       },
     ];
   }, [details]);
@@ -225,22 +218,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
-      <EuiHorizontalRule margin="m" />
-      <LinkToExternalApp>
-        <LinkToApp
-          appId={logsAppId}
-          appPath={logsAppPath}
-          href={logsUrl}
-          data-test-subj="hostDetailsLinkToLogs"
-        >
-          <EuiIcon type="logsApp" className="linkToAppIcon" />
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
-            defaultMessage="Endpoint Logs"
-          />
-          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-        </LinkToApp>
-      </LinkToExternalApp>
     </>
   );
 });
