@@ -137,25 +137,30 @@ export const ComponentTemplateForm = ({
     </>
   ) : null;
 
-  const buildTemplateObject = (initialTemplate: ComponentTemplateDeserialized) => (
+  const buildComponentTemplateObject = (initialTemplate: ComponentTemplateDeserialized) => (
     wizardData: WizardContent
-  ): ComponentTemplateDeserialized => ({
-    ...initialTemplate,
-    ...wizardData.logistics,
-    template: {
-      settings: wizardData.settings,
-      mappings: wizardData.mappings,
-      aliases: wizardData.aliases,
-    },
-  });
+  ): ComponentTemplateDeserialized => {
+    const componentTemplate = {
+      ...initialTemplate,
+      name: wizardData.logistics.name,
+      version: wizardData.logistics.version,
+      _meta: wizardData.logistics._meta,
+      template: {
+        settings: wizardData.settings,
+        mappings: wizardData.mappings,
+        aliases: wizardData.aliases,
+      },
+    };
+    return componentTemplate;
+  };
 
   const onSaveTemplate = useCallback(
     async (wizardData: WizardContent) => {
-      const template = buildTemplateObject(defaultValue)(wizardData);
+      const componentTemplate = buildComponentTemplateObject(defaultValue)(wizardData);
 
       // This will strip an empty string if "version" is not set, as well as an empty "_meta" object
       onSave(
-        stripEmptyFields(template, {
+        stripEmptyFields(componentTemplate, {
           types: ['string', 'object'],
         }) as ComponentTemplateDeserialized
       );
@@ -195,7 +200,9 @@ export const ComponentTemplateForm = ({
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-        <StepReviewContainer getComponentTemplateData={buildTemplateObject(defaultValue)} />
+        <StepReviewContainer
+          getComponentTemplateData={buildComponentTemplateObject(defaultValue)}
+        />
       </FormWizardStep>
     </FormWizard>
   );

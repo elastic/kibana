@@ -54,11 +54,11 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
     );
 
-    useEffect(() => {
-      const validate = async () => {
-        return (await form.submit()).isValid;
-      };
+    const validate = async () => {
+      return (await form.submit()).isValid;
+    };
 
+    useEffect(() => {
       onChange({
         isValid: form.isValid,
         validate,
@@ -67,7 +67,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-      const subscription = form.subscribe(({ data, validate, isValid }) => {
+      const subscription = form.subscribe(({ data, isValid }) => {
         onChange({
           isValid,
           validate,
