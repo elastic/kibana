@@ -42,7 +42,7 @@ const getParsedValue = (data: any, defaultValue: any) =>
 const mergeQueries = (first: Query | Query[] = [], second: Query | Query[]) =>
   uniqBy<Query>(
     [...(Array.isArray(first) ? first : [first]), ...(Array.isArray(second) ? second : [second])],
-    (n: any) => JSON.stringify(n.query) as any
+    (n: any) => JSON.stringify(n.query)
   );
 
 export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
