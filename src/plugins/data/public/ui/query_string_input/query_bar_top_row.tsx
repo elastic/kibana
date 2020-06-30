@@ -289,6 +289,7 @@ export function QueryBarTopRow(props: Props) {
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
+          className="kbnQueryBar__datePicker"
         />
       </EuiFlexItem>
     );

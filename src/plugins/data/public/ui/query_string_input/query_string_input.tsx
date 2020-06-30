@@ -264,16 +264,17 @@ export class QueryStringInputUI extends Component<Props, State> {
 
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
-          event.preventDefault();
           if (isSuggestionsVisible && index !== null) {
+            event.preventDefault();
             this.incrementIndex(index);
-          } else {
+          } else if (this.getQueryString() === '') {
+            event.preventDefault();
             this.setState({ isSuggestionsVisible: true, index: 0 });
           }
           break;
         case KEY_CODES.UP:
-          event.preventDefault();
           if (isSuggestionsVisible && index !== null) {
+            event.preventDefault();
             this.decrementIndex(index);
           }
           break;
@@ -451,6 +452,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
+  private onInputBlur = () => {
+    if (this.state.isSuggestionsVisible) {
+      this.setState({ isSuggestionsVisible: false, index: null });
+    }
+    this.handleBlurHeight();
+    if (this.props.onChangeQueryInputFocus) {
+      this.props.onChangeQueryInputFocus(false);
+    }
+  };
+
   private onClickSuggestion = (suggestion: QuerySuggestion) => {
     if (!this.inputRef) {
       return;
@@ -584,6 +595,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onKeyUp={this.onKeyUp}
                 onChange={this.onInputChange}
                 onClick={this.onClickInput}
+                onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
                 className="kbnQueryBar__textarea"
                 fullWidth
