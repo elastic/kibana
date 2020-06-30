@@ -92,8 +92,9 @@ function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
 
 function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
   const packages = config.inputs.reduce<string[]>((acc, input) => {
-    if (input.package && input.package.name && acc.indexOf(input.package.name) < 0) {
-      return [input.package.name, ...acc];
+    const packageName = input.meta?.package?.name;
+    if (packageName && acc.indexOf(packageName) < 0) {
+      return [packageName, ...acc];
     }
     return acc;
   }, []);

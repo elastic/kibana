@@ -139,9 +139,11 @@ describe('test agent acks services', () => {
                   name: 'system-1',
                   type: 'logs',
                   use_output: 'default',
-                  package: {
-                    name: 'system',
-                    version: '0.3.0',
+                  meta: {
+                    package: {
+                      name: 'system',
+                      version: '0.3.0',
+                    },
                   },
                   dataset: {
                     namespace: 'default',
@@ -279,9 +281,11 @@ describe('test agent acks services', () => {
                   name: 'system-1',
                   type: 'logs',
                   use_output: 'default',
-                  package: {
-                    name: 'system',
-                    version: '0.3.0',
+                  meta: {
+                    package: {
+                      name: 'system',
+                      version: '0.3.0',
+                    },
                   },
                   dataset: {
                     namespace: 'default',
