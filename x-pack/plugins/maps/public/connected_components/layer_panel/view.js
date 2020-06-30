@@ -52,10 +52,6 @@ export class LayerPanel extends React.Component {
     this._isMounted = false;
   }
 
-  componentDidUpdate() {
-    this.loadImmutableSourceProperties();
-  }
-
   loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
       return;

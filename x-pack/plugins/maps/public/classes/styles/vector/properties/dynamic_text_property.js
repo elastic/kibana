@@ -13,7 +13,7 @@ export class DynamicTextProperty extends DynamicStyleProperty {
       // Fields that support auto-domain are normalized with a field-formatter and stored into a computed-field
       // Otherwise, the raw value is just carried over and no computed field is created.
       const targetName = this._field.supportsAutoDomain()
-        ? getComputedFieldName(this._styleName, this._field.getName())
+        ? getComputedFieldName(this._styleName, this.getFieldName())
         : this._field.getName();
       mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
     } else {
