@@ -8,6 +8,7 @@ import * as t from 'io-ts';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { DashboardPage } from '../pages/dashboard';
+import { jsonRt } from './json_rt';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -40,6 +41,8 @@ export const routes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
+        refreshPaused: jsonRt.pipe(t.boolean),
+        refreshInterval: jsonRt.pipe(t.number),
       }),
     },
   },

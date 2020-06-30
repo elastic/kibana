@@ -11,6 +11,5 @@ export function useQueryParams<T = {}>(): T {
   urlSearchParms.forEach((value, key) => {
     params[key] = value;
   });
-  // TODO: check it later
   return (params as unknown) as T;
 }

@@ -21,7 +21,7 @@ const App = () => {
           const path = key as keyof typeof routes;
           const route = routes[path];
           const Wrapper = () => {
-            const { query, path: pathParams } = useUrlParams<typeof path>(route);
+            const { query, path: pathParams } = useUrlParams(route.params);
             return route.handler({ query, path: pathParams });
           };
           return <Route key={path} path={path} exact={true} component={Wrapper} />;

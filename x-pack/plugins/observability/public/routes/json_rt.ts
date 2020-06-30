@@ -12,7 +12,6 @@ export const jsonRt = new t.Type<any, string, unknown>(
   (input, context) =>
     either.chain(t.string.validate(input, context), (str) => {
       try {
-        console.log('#############3', str);
         return t.success(JSON.parse(str));
       } catch (e) {
         return t.failure(input, context);

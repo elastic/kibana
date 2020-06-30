@@ -8,7 +8,6 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
-import { useQueryParams } from '../../../hooks/use_query_params';
 import { fromQuery, toQuery } from '../../../utils/url';
 
 export interface TimePickerTime {
@@ -16,37 +15,28 @@ export interface TimePickerTime {
   to: string;
 }
 
-interface TimePickerQuickRange extends TimePickerTime {
+export interface TimePickerQuickRange extends TimePickerTime {
   display: string;
 }
 
-interface TimePickerRefreshInterval {
+export interface TimePickerRefreshInterval {
   pause: boolean;
   value: number;
 }
 
-interface QueryParams {
+interface Props {
   rangeFrom: string;
   rangeTo: string;
   refreshPaused: boolean;
   refreshInterval: number;
 }
 
-interface Props {
-  rangeFrom: string;
-  rangeTo: string;
-}
-
-export const DatePicker = ({ rangeFrom, rangeTo }: Props) => {
+export const DatePicker = ({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) => {
   const location = useLocation();
   const history = useHistory();
 
-  // TODO: check if it can be done in another way
   const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-  );
-  const timePickerRefreshInterval = useKibanaUISettings<TimePickerRefreshInterval>(
-    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
   );
 
   const commonlyUsedRanges = timePickerQuickRanges.map(({ from, to, display }) => ({
@@ -72,35 +62,28 @@ export const DatePicker = ({ rangeFrom, rangeTo }: Props) => {
 
   function onRefreshChange({
     isPaused,
-    refreshInterval,
+    refreshInterval: interval,
   }: {
     isPaused: boolean;
     refreshInterval: number;
   }) {
-    updateUrl({ refreshPaused: isPaused, refreshInterval });
+    updateUrl({ refreshPaused: isPaused, refreshInterval: interval });
   }
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     updateUrl({ rangeFrom: start, rangeTo: end });
   }
 
-  // TODO: maybe use Generics to specify what this component expects
-  const {
-    refreshPaused = timePickerRefreshInterval.pause,
-    refreshInterval = timePickerRefreshInterval.value,
-  } = useQueryParams<QueryParams>();
-
   return (
     <EuiSuperDatePicker
       start={rangeFrom}
       end={rangeTo}
       onTimeChange={onTimeChange}
-      // TODO: should be automatically cast to boolean
-      isPaused={Boolean(refreshPaused)}
-      // TODO: should be automatically cast to number
-      refreshInterval={+refreshInterval}
+      isPaused={refreshPaused}
+      refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
+      onRefresh={onTimeChange}
     />
   );
 };

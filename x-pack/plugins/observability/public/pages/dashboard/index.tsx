@@ -13,7 +13,11 @@ import { APMSection } from '../../components/app/section/apm';
 import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
-import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
+import {
+  DatePicker,
+  TimePickerTime,
+  TimePickerRefreshInterval,
+} from '../../components/shared/data_picker';
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
@@ -32,8 +36,16 @@ export const DashboardPage = ({ routeParams }: Props) => {
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+  const timePickerRefreshInterval = useKibanaUISettings<TimePickerRefreshInterval>(
+    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
+  );
 
-  const { rangeFrom = timePickerTime.from, rangeTo = timePickerTime.to } = routeParams.query;
+  const {
+    rangeFrom = timePickerTime.from,
+    rangeTo = timePickerTime.to,
+    refreshInterval = timePickerRefreshInterval.value,
+    refreshPaused = timePickerRefreshInterval.pause,
+  } = routeParams.query;
 
   const startTime = getParsedDate(rangeFrom);
   const endTime = getParsedDate(rangeTo, { roundUp: true });
@@ -53,7 +65,12 @@ export const DashboardPage = ({ routeParams }: Props) => {
     >
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <DatePicker rangeFrom={rangeFrom} rangeTo={rangeTo} />
+          <DatePicker
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            refreshInterval={refreshInterval}
+            refreshPaused={refreshPaused}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
