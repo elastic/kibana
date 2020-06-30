@@ -30,7 +30,14 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import {
+  Bundle,
+  BundleRefs,
+  WorkerConfig,
+  parseDirPath,
+  DisallowedSyntaxPlugin,
+  validateThemeTagList,
+} from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
@@ -135,7 +142,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           exclude: /node_modules/,
           oneOf: [
             {
-              resourceQuery: /dark|light/,
+              resourceQuery: /^\?v\d(light|dark)$/,
               use: [
                 {
                   loader: 'style-loader',
@@ -203,19 +210,23 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                     webpackImporter: false,
                     implementation: require('node-sass'),
                     sassOptions(loaderContext: webpack.loader.LoaderContext) {
-                      const darkMode = loaderContext.resourceQuery === '?dark';
+                      const darkMode = loaderContext.resourceQuery.includes('dark');
 
                       return {
                         outputStyle: 'nested',
                         includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                         sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: (url: string) => {
-                          if (darkMode && url.includes('eui_colors_light')) {
-                            return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                          }
+                        importer: !darkMode
+                          ? undefined
+                          : (url: string) => {
+                              if (url.includes('eui_colors_light')) {
+                                return {
+                                  file: url.replace('eui_colors_light', 'eui_colors_dark'),
+                                };
+                              }
 
-                          return { file: url };
-                        },
+                              return { file: url };
+                            },
                       };
                     },
                   },
@@ -224,6 +235,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             },
             {
               loader: require.resolve('./theme_loader'),
+              options: {
+                themeTags: worker.themeTags,
+              },
             },
           ],
         },
