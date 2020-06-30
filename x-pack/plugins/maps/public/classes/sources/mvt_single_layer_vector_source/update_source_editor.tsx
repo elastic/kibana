@@ -48,10 +48,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
       const sanitizedTooltips = [];
       for (let i = 0; i < this.props.tooltipFields.length; i++) {
         const tooltipName = this.props.tooltipFields[i].getName();
-        let hasMatch = false;
         for (let j = 0; j < settings.fields.length; j++) {
           if (settings.fields[j].name === tooltipName) {
-            hasMatch = true;
             sanitizedTooltips.push(tooltipName);
             break;
           }
