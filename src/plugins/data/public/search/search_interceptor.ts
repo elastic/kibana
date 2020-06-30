@@ -138,7 +138,7 @@ export class SearchInterceptor {
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timer(this.requestTimeout);
     const subscription = timeout$.subscribe(() => {
-      timeoutController.abort()
+      timeoutController.abort();
     });
     this.timeoutSubscriptions.add(subscription);
 
