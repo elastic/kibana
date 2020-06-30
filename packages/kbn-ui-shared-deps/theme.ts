@@ -19,9 +19,11 @@
 
 import Theme from '@elastic/eui/dist/eui_theme_light.json';
 
+const globals: any = typeof window === 'undefined' ? {} : window;
+
 export let euiLightVars: typeof Theme;
 export let euiDarkVars: typeof Theme;
-if ((window as any).__kbnThemeVersion__ === 'v7') {
+if (globals.__kbnThemeVersion__ === 'v7') {
   euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
 } else {
@@ -33,7 +35,7 @@ if ((window as any).__kbnThemeVersion__ === 'v7') {
  * EUI Theme vars that automatically adjust to light/dark theme
  */
 export let euiThemeVars: typeof Theme;
-if ((window as any).__kbnDarkTheme__) {
+if (globals.__kbnDarkTheme__) {
   euiThemeVars = euiDarkVars;
 } else {
   euiThemeVars = euiLightVars;
