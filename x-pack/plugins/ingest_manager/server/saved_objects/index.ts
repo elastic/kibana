@@ -253,7 +253,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
         es_index_patterns: {
-          dynamic: 'false',
+          enabled: false,
           type: 'object',
         },
         installed: {
