@@ -19,9 +19,11 @@
 
 export {
   Collector,
+  Purify,
   AllowedSchemaTypes,
   SchemaField,
   MakeSchemaFrom,
   CollectorOptions,
+  CollectorFormatForBulkUpload,
 } from './collector';
 export { UsageCollector } from './usage_collector';

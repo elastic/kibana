@@ -18,4 +18,14 @@
  */
 
 export { UsageCollectionServiceConfigType, config } from './config';
+export {
+  CollectorOptions as UsageCollectionCollectorOptions,
+  CollectorFormatForBulkUpload as UsageCollectionCollectorFormatForBulkUpload,
+  Collector as UsageCollectionCollector,
+  Purify as UsageCollectionPurify,
+  UsageCollector as UsageCollectionUsageCollector,
+  MakeSchemaFrom as UsageCollectionMakeSchemaFrom,
+  AllowedSchemaTypes as UsageCollectionAllowedSchemaTypes,
+} from './collectors';
+export { UsageCollectionCollectorSet } from './collector_set';
 export { UsageCollectionService, UsageCollectionSetup } from './usage_collection_service';

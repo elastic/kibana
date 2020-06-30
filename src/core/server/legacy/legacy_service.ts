@@ -327,6 +327,19 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
+      usageCollection: {
+        makeStatsCollector: setupDeps.core.usageCollection.makeStatsCollector,
+        makeUsageCollector: setupDeps.core.usageCollection.makeUsageCollector,
+        registerCollector: setupDeps.core.usageCollection.registerCollector,
+        // The ones below are not needed in the legacy world but keeping them there to match types
+        isUsageCollector: setupDeps.core.usageCollection.isUsageCollector,
+        areAllCollectorsReady: setupDeps.core.usageCollection.areAllCollectorsReady,
+        bulkFetchUsage: setupDeps.core.usageCollection.bulkFetchUsage,
+        toObject: setupDeps.core.usageCollection.toObject,
+        toApiFieldNames: setupDeps.core.usageCollection.toApiFieldNames,
+        getFilteredCollectorSet: setupDeps.core.usageCollection.getFilteredCollectorSet,
+        getCollectorByType: setupDeps.core.usageCollection.getCollectorByType,
+      },
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },

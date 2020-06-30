@@ -29,6 +29,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) | Registry holding information about all the registered [saved object types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. |
+|  [UsageCollectionCollector](./kibana-plugin-core-server.usagecollectioncollector.md) | Collector for reporting system stats |
+|  [UsageCollectionUsageCollector](./kibana-plugin-core-server.usagecollectionusagecollector.md) | Collector for reporting Usage stats |
 
 ## Enumerations
 
@@ -196,6 +198,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
 |  [URLMeaningfulParts](./kibana-plugin-core-server.urlmeaningfulparts.md) | We define our own typings because the current version of @<!-- -->types/node declares properties to be optional "hostname?: string". Although, parse call returns "hostname: null \| string". |
+|  [UsageCollectionCollectorOptions](./kibana-plugin-core-server.usagecollectioncollectoroptions.md) | Collector definition |
+|  [UsageCollectionCollectorSet](./kibana-plugin-core-server.usagecollectioncollectorset.md) |  |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 |  [UuidServiceSetup](./kibana-plugin-core-server.uuidservicesetup.md) | APIs to access the application's instance uuid. |
 
@@ -289,4 +293,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [StringValidation](./kibana-plugin-core-server.stringvalidation.md) | Allows regex objects or a regex string |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [UsageCollectionAllowedSchemaTypes](./kibana-plugin-core-server.usagecollectionallowedschematypes.md) | Allowed types in the schema definition |
+|  [UsageCollectionMakeSchemaFrom](./kibana-plugin-core-server.usagecollectionmakeschemafrom.md) | Schema definition of the returned object in the fetch method |
+|  [UsageCollectionPurify](./kibana-plugin-core-server.usagecollectionpurify.md) |  |
+|  [UsageCollectionSetup](./kibana-plugin-core-server.usagecollectionsetup.md) |  |
 

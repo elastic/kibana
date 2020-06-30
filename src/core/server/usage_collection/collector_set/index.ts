@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
+export { CollectorSet, UsageCollectionCollectorSet } from './collector_set';

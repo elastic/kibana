@@ -20,21 +20,15 @@
 import {
   PluginInitializerContext,
   UsageCollectionSetup,
-  AllowedSchemaTypes,
-  MakeSchemaFrom,
-  SchemaField,
-  CollectorOptions,
-  Collector,
+  UsageCollectionCollectorOptions,
+  UsageCollectionCollector,
 } from '../../../core/server';
 import { UsageCollectionPlugin } from './plugin';
 
 export {
   UsageCollectionSetup,
-  AllowedSchemaTypes,
-  MakeSchemaFrom,
-  SchemaField,
-  CollectorOptions,
-  Collector,
+  UsageCollectionCollectorOptions as CollectorOptions,
+  UsageCollectionCollector as Collector,
 };
 // export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>

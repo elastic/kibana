@@ -22,21 +22,15 @@ import { UsageCollectionSetup } from './';
 function createSetupContract() {
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
     areAllCollectorsReady: jest.fn(),
-    bulkFetch: jest.fn(),
     bulkFetchUsage: jest.fn(),
-    getCollectorByType: jest.fn(),
     getFilteredCollectorSet: jest.fn(),
-    // @ts-ignore jest.fn doesn't play nice with type guards
-    isUsageCollector: jest.fn(),
-    makeCollectorSetFromArray: jest.fn(),
     makeStatsCollector: jest.fn(),
-    map: jest.fn(),
-    maximumWaitTimeForAllCollectorsInS: 0,
-    some: jest.fn(),
     toApiFieldNames: jest.fn(),
     toObject: jest.fn(),
     makeUsageCollector: jest.fn(),
     registerCollector: jest.fn(),
+    // @ts-expect-error-next-line jest.fn doesn't play nice with type guards
+    isUsageCollector: jest.fn(),
   };
 
   usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);

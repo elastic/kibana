@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorSet } from '../../plugins/usage_collection/server/collector';
+import { BehaviorSubject } from 'rxjs';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 import { Usage } from './constants';
+import { CollectorSet } from '../../core/server/usage_collection/collector_set';
 
 const { makeUsageCollector } = new CollectorSet({
   logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
+  maximumWaitTimeForAllCollectorsInS$: new BehaviorSubject(0),
 });
 
 export const myCollector = makeUsageCollector<Usage>({

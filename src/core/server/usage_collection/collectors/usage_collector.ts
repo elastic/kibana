@@ -19,10 +19,15 @@
 
 import { Collector } from './collector';
 
+/**
+ * @public
+ * Collector for reporting Usage stats
+ */
 export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
   T,
   U
 > {
+  /** @internal */
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: 'kibana_stats',

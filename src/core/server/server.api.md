@@ -91,6 +91,8 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { LegacyAPICaller as LegacyAPICaller_2 } from 'kibana/server';
+import { Logger as Logger_2 } from 'kibana/server';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -459,6 +461,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     status: StatusServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
+    // (undocumented)
+    usageCollection: UsageCollectionSetup;
     // (undocumented)
     uuid: UuidServiceSetup;
 }
@@ -2625,6 +2629,108 @@ export interface URLMeaningfulParts {
     query: ParsedQuery;
     // (undocumented)
     slashes?: boolean | null;
+}
+
+// @public
+export type UsageCollectionAllowedSchemaTypes = 'keyword' | 'text' | 'number' | 'boolean' | 'long' | 'date' | 'float';
+
+// @public
+export class UsageCollectionCollector<T = unknown, U = T> {
+    constructor(log: Logger_2, { type, init, fetch, formatForBulkUpload, isReady, ...options }: UsageCollectionCollectorOptions<T, U>);
+    // @internal (undocumented)
+    protected defaultFormatterForBulkUpload(result: T): {
+        type: string;
+        payload: U;
+    };
+    // (undocumented)
+    readonly fetch: UsageCollectionCollectorOptions<T, U>['fetch'];
+    // @internal (undocumented)
+    formatForBulkUpload(result: T): {
+        type: string;
+        payload: U;
+    };
+    // (undocumented)
+    readonly init?: UsageCollectionCollectorOptions<T, U>['init'];
+    // (undocumented)
+    readonly isReady: UsageCollectionCollectorOptions<T, U>['isReady'];
+    // (undocumented)
+    protected readonly log: Logger_2;
+    // (undocumented)
+    readonly type: UsageCollectionCollectorOptions<T, U>['type'];
+}
+
+// @internal
+export type UsageCollectionCollectorFormatForBulkUpload<T, U> = (result: T) => {
+    type: string;
+    payload: U;
+};
+
+// @public
+export interface UsageCollectionCollectorOptions<T = unknown, U = T> {
+    fetch: (callCluster: LegacyAPICaller_2) => Promise<T> | T;
+    // @internal
+    formatForBulkUpload?: UsageCollectionCollectorFormatForBulkUpload<T, U>;
+    init?: Function;
+    isReady: () => Promise<boolean> | boolean;
+    schema?: UsageCollectionMakeSchemaFrom<T>;
+    type: string;
+}
+
+// @public (undocumented)
+export interface UsageCollectionCollectorSet {
+    // @internal (undocumented)
+    areAllCollectorsReady: (collectorSet?: UsageCollectionCollectorSet) => Promise<boolean>;
+    // @internal (undocumented)
+    bulkFetchUsage: (callCluster: LegacyAPICaller) => Promise<Array<{
+        type: string;
+        result: unknown;
+    }>>;
+    // @internal (undocumented)
+    getCollectorByType: (type: string) => UsageCollectionCollector | undefined;
+    // @internal (undocumented)
+    getFilteredCollectorSet: (filter: (col: UsageCollectionCollector) => boolean) => UsageCollectionCollectorSet;
+    // @internal (undocumented)
+    isUsageCollector: (x: UsageCollectionUsageCollector | any) => x is UsageCollectionUsageCollector;
+    makeStatsCollector: <T, U>(options: UsageCollectionCollectorOptions<T, U>) => UsageCollectionCollector<T, U>;
+    makeUsageCollector: <T, U = T>(options: UsageCollectionCollectorOptions<T, U>) => UsageCollectionUsageCollector<T, U>;
+    registerCollector: <T, U>(collector: UsageCollectionCollector<T, U>) => void;
+    // @internal
+    toApiFieldNames: (apiData: any) => any;
+    // @internal
+    toObject: <Result, T>(statsData: Array<{
+        type: string;
+        result: T;
+    }>) => Result;
+}
+
+// @public
+export type UsageCollectionMakeSchemaFrom<Base> = {
+    [Key in UsageCollectionPurify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U> ? {
+        type: UsageCollectionAllowedSchemaTypes;
+    } : Base[Key] extends object ? UsageCollectionMakeSchemaFrom<Base[Key]> : {
+        type: UsageCollectionAllowedSchemaTypes;
+    };
+};
+
+// @public (undocumented)
+export type UsageCollectionPurify<T extends string> = {
+    [P in T]: T;
+}[T];
+
+// @public (undocumented)
+export type UsageCollectionSetup = Pick<UsageCollectionCollectorSet, 'makeStatsCollector' | 'makeUsageCollector' | 'registerCollector' | 'areAllCollectorsReady' | 'bulkFetchUsage' | 'toObject' | 'toApiFieldNames' | 'getFilteredCollectorSet' | 'isUsageCollector' | 'getCollectorByType'>;
+
+// @public
+export class UsageCollectionUsageCollector<T = unknown, U = {
+    usage: {
+        [key: string]: T;
+    };
+}> extends UsageCollectionCollector<T, U> {
+    // @internal (undocumented)
+    protected defaultFormatterForBulkUpload(result: T): {
+        type: string;
+        payload: U;
+    };
 }
 
 // @public

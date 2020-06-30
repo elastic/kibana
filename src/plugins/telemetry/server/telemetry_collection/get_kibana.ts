@@ -85,6 +85,7 @@ export async function getKibana(
   usageCollection: UsageCollectionSetup,
   callWithInternalUser: LegacyAPICaller
 ): Promise<KibanaUsageStats> {
-  const usage = await usageCollection.bulkFetch(callWithInternalUser);
-  return usageCollection.toObject(usage);
+  const collectorSet = usageCollection.getFilteredCollectorSet(() => true);
+  const usage = await collectorSet.bulkFetch(callWithInternalUser);
+  return collectorSet.toObject(usage);
 }

@@ -49,7 +49,7 @@ import { uuidServiceMock } from '../uuid/uuid_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
-import { coreMock } from '../mocks';
+import { coreMock, usageCollectionServiceMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
@@ -96,6 +96,7 @@ beforeEach(() => {
         contracts: new Map([['plugin-id', 'plugin-value']]),
       },
       rendering: renderingServiceMock,
+      usageCollection: usageCollectionServiceMock.createSetupContract(),
       uuid: uuidSetup,
       status: statusServiceMock.createInternalSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),

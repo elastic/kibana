@@ -284,7 +284,17 @@ export {
   resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
-export { UsageCollectionSetup } from './usage_collection';
+export {
+  UsageCollectionSetup,
+  UsageCollectionCollectorSet,
+  UsageCollectionCollectorOptions,
+  UsageCollectionCollectorFormatForBulkUpload,
+  UsageCollectionCollector,
+  UsageCollectionPurify,
+  UsageCollectionUsageCollector,
+  UsageCollectionMakeSchemaFrom,
+  UsageCollectionAllowedSchemaTypes,
+} from './usage_collection';
 
 export {
   IUiSettingsClient,

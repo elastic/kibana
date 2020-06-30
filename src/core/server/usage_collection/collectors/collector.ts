@@ -19,8 +19,18 @@
 
 import { Logger, LegacyAPICaller } from 'kibana/server';
 
+/**
+ * @internal
+ * A hook for allowing the fetched data payload to be organized into a typed
+ * data model for internal bulk upload. See defaultFormatterForBulkUpload for
+ * a generic example.
+ */
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
+/**
+ * @public
+ * Allowed types in the schema definition
+ */
 export type AllowedSchemaTypes =
   | 'keyword'
   | 'text'
@@ -34,8 +44,13 @@ export interface SchemaField {
   type: string;
 }
 
-type Purify<T extends string> = { [P in T]: T }[T];
+/** @public */
+export type Purify<T extends string> = { [P in T]: T }[T];
 
+/**
+ * @public
+ * Schema definition of the returned object in the fetch method
+ */
 export type MakeSchemaFrom<Base> = {
   [Key in Purify<Extract<keyof Base, string>>]: Base[Key] extends Array<infer U>
     ? { type: AllowedSchemaTypes }
@@ -44,20 +59,46 @@ export type MakeSchemaFrom<Base> = {
     : { type: AllowedSchemaTypes };
 };
 
+/**
+ * @public
+ * Collector definition
+ */
 export interface CollectorOptions<T = unknown, U = T> {
+  /**
+   * The name of the collector (it will be reported under stack_stats.kibana.plugins[type])
+   */
   type: string;
+  /**
+   * Optional init function to set up the collector during startup. Only called once at the time of registering
+   */
   init?: Function;
+  /**
+   * Schema definition of the returned object in the fetch method
+   */
   schema?: MakeSchemaFrom<T>;
+  /**
+   * Method to fetch the stats to report.
+   * The returned object is embedded in the final telemetry payload
+   * @param callCluster An Elasticsearch client with the Kibana user (or the front-end user in case they manually trigger the request)
+   */
   fetch: (callCluster: LegacyAPICaller) => Promise<T> | T;
-  /*
+  /**
+   * @internal
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
    * a generic example.
    */
   formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
+  /**
+   * A method that must return `true` when ready to report stats.
+   */
   isReady: () => Promise<boolean> | boolean;
 }
 
+/**
+ * @public
+ * Collector for reporting system stats
+ */
 export class Collector<T = unknown, U = T> {
   public readonly type: CollectorOptions<T, U>['type'];
   public readonly init?: CollectorOptions<T, U>['init'];
@@ -97,6 +138,7 @@ export class Collector<T = unknown, U = T> {
     this._formatForBulkUpload = formatForBulkUpload;
   }
 
+  /** @internal */
   public formatForBulkUpload(result: T) {
     if (this._formatForBulkUpload) {
       return this._formatForBulkUpload(result);
@@ -105,6 +147,7 @@ export class Collector<T = unknown, U = T> {
     }
   }
 
+  /** @internal */
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: this.type,

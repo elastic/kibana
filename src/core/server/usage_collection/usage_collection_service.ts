@@ -23,11 +23,25 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
-import { CollectorSet } from './collector_set';
+import { CollectorSet, UsageCollectionCollectorSet } from './collector_set';
 import { config, UsageCollectionServiceConfigType } from './config';
 
-// TODO: Be more explicit with the exported APIs
-export type UsageCollectionSetup = CollectorSet;
+/**
+ * @public
+ */
+export type UsageCollectionSetup = Pick<
+  UsageCollectionCollectorSet,
+  | 'makeStatsCollector'
+  | 'makeUsageCollector'
+  | 'registerCollector'
+  | 'areAllCollectorsReady'
+  | 'bulkFetchUsage'
+  | 'toObject'
+  | 'toApiFieldNames'
+  | 'getFilteredCollectorSet'
+  | 'isUsageCollector'
+  | 'getCollectorByType'
+>;
 
 export class UsageCollectionService implements CoreService<UsageCollectionSetup, void> {
   private readonly logger: Logger;
@@ -46,8 +60,19 @@ export class UsageCollectionService implements CoreService<UsageCollectionSetup,
   }
 
   public async setup() {
-    // TODO: Be more explicit with the exported APIs
-    return this.collectorSet;
+    return {
+      makeStatsCollector: this.collectorSet.makeStatsCollector,
+      makeUsageCollector: this.collectorSet.makeUsageCollector,
+      registerCollector: this.collectorSet.registerCollector,
+      // Most of these below may be removed when bulk_uploader.js and register_stats.js are revisited for monitoring
+      isUsageCollector: this.collectorSet.isUsageCollector,
+      areAllCollectorsReady: this.collectorSet.areAllCollectorsReady,
+      bulkFetchUsage: this.collectorSet.bulkFetchUsage,
+      toObject: this.collectorSet.toObject,
+      toApiFieldNames: this.collectorSet.toApiFieldNames,
+      getFilteredCollectorSet: this.collectorSet.getFilteredCollectorSet,
+      getCollectorByType: this.collectorSet.getCollectorByType,
+    };
   }
 
   public start() {
