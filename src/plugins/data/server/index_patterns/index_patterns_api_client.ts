@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export * from './_pattern_cache';
-export * from './flatten_hit';
-export * from './format_hit';
-export * from './index_pattern';
-export * from './index_patterns';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index_patterns/types';
+
+export class IndexPatternsApiServer implements IIndexPatternsApiClient {
+  async getFieldsForTimePattern(options: GetFieldsOptions = {}) {
+    throw new Error('IndexPatternsApiServer - getFieldsForTimePattern not defined');
+  }
+  async getFieldsForWildcard(options: GetFieldsOptions = {}) {
+    throw new Error('IndexPatternsApiServer - getFieldsForWildcard not defined');
+  }
+}

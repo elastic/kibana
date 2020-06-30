@@ -66,7 +66,7 @@ const savedObjectsClient = {
   create: jest.fn(),
   get: jest.fn().mockImplementation(() => object),
   update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
-    if (object._version !== version) {
+    if (object.version !== version) {
       throw new Object({
         res: {
           status: 409,
@@ -74,10 +74,10 @@ const savedObjectsClient = {
       });
     }
     object.attributes.title = body.title;
-    object._version += 'a';
+    object.version += 'a';
     return {
-      id: object._id,
-      _version: object._version,
+      id: object.id,
+      version: object.version,
     };
   }),
 };
@@ -109,6 +109,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     fieldFormats: fieldFormatsMock,
     onNotification: () => {},
     onError: () => {},
+    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
   });
 
   setDocsourcePayload(id, payload);
@@ -382,8 +383,8 @@ describe('IndexPattern', () => {
 
   test('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
-      _id: 'foo',
-      _version: 'foo',
+      id: 'foo',
+      version: 'foo',
       attributes: {
         title: 'something',
       },
@@ -397,6 +398,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await pattern.init();
 
@@ -411,6 +413,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await samePattern.init();
 
