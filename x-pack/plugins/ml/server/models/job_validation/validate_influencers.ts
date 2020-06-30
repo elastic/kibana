@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -14,7 +14,7 @@ const INFLUENCER_LOW_THRESHOLD = 0;
 const INFLUENCER_HIGH_THRESHOLD = 4;
 const DETECTOR_FIELD_NAMES_THRESHOLD = 1;
 
-export async function validateInfluencers(callWithRequest: APICaller, job: CombinedJob) {
+export async function validateInfluencers(callWithRequest: LegacyAPICaller, job: CombinedJob) {
   validateJobObject(job);
 
   const messages = [];

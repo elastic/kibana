@@ -29,7 +29,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryOptIn,
@@ -63,7 +63,7 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ICustomClusterClient;
+  private elasticsearchClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();

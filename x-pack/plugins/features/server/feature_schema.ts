@@ -130,7 +130,7 @@ export function validateFeature(feature: FeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  function validateAppEntry(privilegeId: string, entry: string[] = []) {
+  function validateAppEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeApp) => unseenApps.delete(privilegeApp));
 
     const unknownAppEntries = difference(entry, app);
@@ -143,7 +143,7 @@ export function validateFeature(feature: FeatureConfig) {
     }
   }
 
-  function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
+  function validateCatalogueEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeCatalogue) => unseenCatalogue.delete(privilegeCatalogue));
 
     const unknownCatalogueEntries = difference(entry || [], catalogue);
@@ -158,7 +158,7 @@ export function validateFeature(feature: FeatureConfig) {
 
   function validateManagementEntry(
     privilegeId: string,
-    managementEntry: Record<string, string[]> = {}
+    managementEntry: Record<string, readonly string[]> = {}
   ) {
     Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
       if (unseenManagement.has(managementSectionId)) {

@@ -19,7 +19,7 @@
 
 import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
 
 export interface KibanaUsageStats {
@@ -83,7 +83,7 @@ export function handleKibanaStats(
 
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
-  callWithInternalUser: APICaller
+  callWithInternalUser: LegacyAPICaller
 ): Promise<KibanaUsageStats> {
   const usage = await usageCollection.bulkFetch(callWithInternalUser);
   return usageCollection.toObject(usage);

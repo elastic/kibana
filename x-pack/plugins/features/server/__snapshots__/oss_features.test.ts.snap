@@ -248,11 +248,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -273,11 +273,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {

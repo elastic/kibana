@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export * from './timefilter/types';
+
 export interface Query {
   query: string | { [key: string]: any };
   language: string;

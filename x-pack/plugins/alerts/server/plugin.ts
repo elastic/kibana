@@ -29,7 +29,7 @@ import {
   RequestHandler,
   SharedGlobalConfig,
   ElasticsearchServiceStart,
-  IClusterClient,
+  ILegacyClusterClient,
 } from '../../../../src/core/server';
 
 import {
@@ -270,7 +270,7 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
-      getScopedCallCluster(clusterClient: IClusterClient) {
+      getScopedCallCluster(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
     });
