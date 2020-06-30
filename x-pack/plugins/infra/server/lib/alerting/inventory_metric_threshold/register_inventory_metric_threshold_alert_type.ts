@@ -35,6 +35,7 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
           schema.string({ validate: validateIsStringElasticsearchJSONFilter })
         ),
         sourceId: schema.string(),
+        alertOnNoData: schema.maybe(schema.boolean()),
       },
       { unknowns: 'allow' }
     ),
