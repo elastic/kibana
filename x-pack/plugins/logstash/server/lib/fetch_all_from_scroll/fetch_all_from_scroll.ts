@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 import { SearchResponse } from 'elasticsearch';
 
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
@@ -11,7 +11,7 @@ import { Hits } from '../../types';
 
 export async function fetchAllFromScroll(
   response: SearchResponse<any>,
-  callWithRequest: APICaller,
+  callWithRequest: LegacyAPICaller,
   hits: Hits = []
 ): Promise<Hits> {
   const newHits = response.hits?.hits || [];
