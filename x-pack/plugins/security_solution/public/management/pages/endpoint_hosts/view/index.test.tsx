@@ -20,6 +20,8 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
