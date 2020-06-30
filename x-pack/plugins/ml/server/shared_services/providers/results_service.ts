@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
 import { resultsServiceProvider } from '../../models/results_service';
 
 export interface ResultsServiceProvider {
-  resultsServiceProvider(callAsCurrentUser: APICaller): ReturnType<typeof resultsServiceProvider>;
+  resultsServiceProvider(
+    callAsCurrentUser: LegacyAPICaller
+  ): ReturnType<typeof resultsServiceProvider>;
 }
 
 export function getResultsServiceProvider(isFullLicense: LicenseCheck): ResultsServiceProvider {
   return {
-    resultsServiceProvider(callAsCurrentUser: APICaller) {
+    resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
       isFullLicense();
       return resultsServiceProvider(callAsCurrentUser);
     },

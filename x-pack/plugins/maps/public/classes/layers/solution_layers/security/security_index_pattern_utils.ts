@@ -6,9 +6,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import minimatch from 'minimatch';
-import { SimpleSavedObject } from 'src/core/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternSavedObjectAttrs } from 'src/plugins/data/common/index_patterns/index_patterns/index_patterns';
 import { getIndexPatternService, getUiSettings } from '../../../../kibana_services';
 
 export type IndexPatternMeta = {
@@ -29,13 +26,13 @@ export async function getSecurityIndexPatterns(): Promise<IndexPatternMeta[]> {
 
   const indexPatternCache = await getIndexPatternService().getCache();
   return indexPatternCache!
-    .filter((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
+    .filter((savedObject) => {
       return (securityIndexPatternTitles as string[]).some((indexPatternTitle) => {
         // glob matching index pattern title
         return minimatch(indexPatternTitle, savedObject?.attributes?.title);
       });
     })
-    .map((savedObject: SimpleSavedObject<IndexPatternSavedObjectAttrs>) => {
+    .map((savedObject) => {
       return {
         id: savedObject.id,
         title: savedObject.attributes.title,

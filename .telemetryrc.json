@@ -1,0 +1,25 @@
+[
+  {
+    "output": "src/plugins/telemetry/schema/legacy_oss_plugins.json",
+    "root": "src/legacy/core_plugins/",
+    "exclude": [
+      "src/legacy/core_plugins/testbed",
+      "src/legacy/core_plugins/elasticsearch",
+      "src/legacy/core_plugins/tests_bundle"
+    ]
+  },
+  {
+    "output": "src/plugins/telemetry/schema/oss_plugins.json",
+    "root": "src/plugins/",
+    "exclude": [
+      "src/plugins/kibana_react/",
+      "src/plugins/testbed/",
+      "src/plugins/kibana_utils/",
+      "src/plugins/kibana_usage_collection/server/collectors/kibana/kibana_usage_collector.ts",
+      "src/plugins/kibana_usage_collection/server/collectors/application_usage/telemetry_application_usage_collector.ts",
+      "src/plugins/kibana_usage_collection/server/collectors/management/telemetry_management_collector.ts",
+      "src/plugins/kibana_usage_collection/server/collectors/ui_metric/telemetry_ui_metric_collector.ts",
+      "src/plugins/telemetry/server/collectors/usage/telemetry_usage_collector.ts"
+    ]
+  }
+]

@@ -15,7 +15,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
 import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
@@ -26,8 +26,8 @@ import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
  */
 
 const savedObjectTypes: { [key: string]: SavedObjectsType } = {
-  [GLOBAL_SETTINGS_SAVED_OBJET_TYPE]: {
-    name: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
+    name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -65,9 +65,10 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         config_revision: { type: 'integer' },
         config_newest_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'keyword' },
+        default_api_key: { type: 'binary', index: false },
         updated_at: { type: 'date' },
-        current_error_events: { type: 'text' },
+        current_error_events: { type: 'text', index: false },
+        packages: { type: 'keyword' },
       },
     },
   },
@@ -82,7 +83,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_id: { type: 'keyword' },
         type: { type: 'keyword' },
-        data: { type: 'binary' },
+        data: { type: 'binary', index: false },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
@@ -129,7 +130,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
-        monitoring_enabled: { type: 'keyword' },
+        monitoring_enabled: { type: 'keyword', index: false },
       },
     },
     migrations: {
@@ -147,7 +148,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         name: { type: 'keyword' },
         type: { type: 'keyword' },
-        api_key: { type: 'binary' },
+        api_key: { type: 'binary', index: false },
         api_key_id: { type: 'keyword' },
         config_id: { type: 'keyword' },
         created_at: { type: 'date' },
@@ -170,9 +171,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
-        ca_sha256: { type: 'keyword' },
-        fleet_enroll_username: { type: 'binary' },
-        fleet_enroll_password: { type: 'binary' },
+        ca_sha256: { type: 'keyword', index: false },
+        fleet_enroll_username: { type: 'binary', index: false },
+        fleet_enroll_password: { type: 'binary', index: false },
         config: { type: 'flattened' },
       },
     },
@@ -201,6 +202,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         output_id: { type: 'keyword' },
         inputs: {
           type: 'nested',
+          enabled: false,
           properties: {
             type: { type: 'keyword' },
             enabled: { type: 'boolean' },
@@ -212,7 +214,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: { type: 'keyword' },
+                dataset: {
+                  properties: {
+                    name: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                  },
+                },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
                 agent_stream: { type: 'flattened' },

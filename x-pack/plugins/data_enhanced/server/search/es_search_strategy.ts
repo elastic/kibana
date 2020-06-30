@@ -8,7 +8,7 @@ import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { APICaller, SharedGlobalConfig } from '../../../../../src/core/server';
+import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
   ISearch,
@@ -59,7 +59,7 @@ export const enhancedEsSearchStrategyProvider = (
 };
 
 async function asyncSearch(
-  caller: APICaller,
+  caller: LegacyAPICaller,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
@@ -93,7 +93,7 @@ async function asyncSearch(
 }
 
 async function rollupSearch(
-  caller: APICaller,
+  caller: LegacyAPICaller,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
