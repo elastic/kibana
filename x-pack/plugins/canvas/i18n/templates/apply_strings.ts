@@ -45,6 +45,6 @@ export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
       });
     }
 
-    return () => template;
+    return template;
   });
 };
