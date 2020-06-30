@@ -52,7 +52,7 @@ export class TagsPlugin
     core: CoreSetup<TagsPluginStartDependencies, unknown>,
     plugins: TagsPluginSetupDependencies
   ): TagsPluginSetup {
-    const { http } = core;
+    const { http, notifications } = core;
 
     this.tagsClient = new TagsClient({ http });
 
@@ -70,6 +70,7 @@ export class TagsPlugin
           history,
           setBreadcrumbs,
           tagsClient: this.tagsClient,
+          toasts: notifications.toasts,
         });
         render(h(TagsManagementSection, { services }), element);
         return () => {

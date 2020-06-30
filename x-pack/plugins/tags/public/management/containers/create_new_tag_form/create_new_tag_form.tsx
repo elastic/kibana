@@ -6,9 +6,11 @@
 
 import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { useToasts } from '../../../../../../../src/plugins/kibana_react/public';
 import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
 import { useServices } from '../../context';
 import { Tag } from '../../../../common';
+import { txtCouldNotCreate } from './i18n';
 
 export interface Props {
   onCreate?: (tag: Tag) => void;
@@ -17,6 +19,7 @@ export interface Props {
 export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
   const services = useServices();
   const isMounted = useMountedState();
+  const toasts = useToasts();
   const [title, setTitle] = useState('');
   const [color, setColor] = useState('#ffffff');
   const [description, setDescription] = useState('');
@@ -31,11 +34,17 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
         },
       });
       if (!isMounted()) return;
-      alert('created');
+      toasts.addSuccess({
+        title: (
+          <span>
+            Tag <code>{tag.title}</code> created.
+          </span>
+        ),
+      });
       if (onCreate) onCreate(tag);
     } catch (error) {
       if (!isMounted()) return;
-      alert(error.message);
+      toasts.addError(error, { title: txtCouldNotCreate });
     }
   };
 

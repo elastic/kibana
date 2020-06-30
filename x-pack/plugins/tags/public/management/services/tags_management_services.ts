@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScopedHistory, ChromeBreadcrumb } from 'kibana/public';
+import { ScopedHistory, ChromeBreadcrumb, CoreSetup } from 'kibana/public';
 import { TagsClient } from '../../services';
 
 export interface Params {
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   tagsClient: TagsClient;
+  toasts: CoreSetup['notifications']['toasts'];
 }
 
 export class TagsManagementServices {
