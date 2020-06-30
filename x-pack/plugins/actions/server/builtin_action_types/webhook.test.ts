@@ -121,7 +121,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring webhook action: unable to parse host name from Url"'
+      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
     );
   });
 
