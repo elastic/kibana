@@ -25,7 +25,7 @@ export async function fetchUptimeOverviewData({
 
   const response: UptimeFetchDataResponse = {
     title: 'Uptime',
-    appLink: '/app/uptime#/', // Todo is there some sort of helper that handles subpaths?
+    appLink: '/app/uptime#/',
     stats: {
       monitors: {
         type: 'number',

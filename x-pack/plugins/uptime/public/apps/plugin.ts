@@ -67,7 +67,6 @@ export class UptimePlugin
       });
     }
 
-    // This doesn't actually work
     plugins.observability.dashboard.register({
       appName: 'uptime',
       hasData: async () => {
