@@ -7,7 +7,7 @@
 import { TagsPlugin } from './plugin';
 import { PluginInitializerContext } from '../../../../src/core/server';
 
-export { RawTag, Tag, ITagsClient, TagsClientCreateParams } from '../common';
+export { RawTag, RawTagWithId, ITagsClient, TagsClientCreateParams } from '../common';
 
 export const plugin = (initContext: PluginInitializerContext) => new TagsPlugin(initContext);
 

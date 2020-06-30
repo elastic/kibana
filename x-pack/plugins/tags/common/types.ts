@@ -17,7 +17,7 @@ export interface RawTag {
   updatedAt: string;
 }
 
-export interface Tag extends RawTag {
+export interface RawTagWithId extends RawTag {
   id: string;
 }
 
@@ -26,11 +26,11 @@ export interface TagsClientCreateParams {
 }
 
 export interface TagsClientCreateResult {
-  tag: Tag;
+  tag: RawTagWithId;
 }
 
 export interface TagsClientGetAllResult {
-  tags: Tag[];
+  tags: RawTagWithId[];
 }
 
 export interface ITagsClient {

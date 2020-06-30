@@ -6,7 +6,7 @@
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { RawTag, Tag, ITagsClient, TagsClientCreateParams } from '../../common';
+import { RawTag, RawTagWithId, ITagsClient, TagsClientCreateParams } from '../../common';
 import { validateTagTitle, validateTagDescription, validateTagColor } from './validators';
 
 export type TagSavedObject = SavedObject<RawTag>;
@@ -22,14 +22,14 @@ export class TagsClient implements ITagsClient {
 
   constructor(private readonly params: TagsClientParams) {}
 
-  private readonly tagSavedObjectToTag = (savedObject: TagSavedObject): Tag => {
+  private readonly tagSavedObjectToTag = (savedObject: TagSavedObject): RawTagWithId => {
     return {
       id: savedObject.id,
       ...savedObject.attributes,
     };
   };
 
-  public async create({ tag }: TagsClientCreateParams): Promise<{ tag: Tag }> {
+  public async create({ tag }: TagsClientCreateParams): Promise<{ tag: RawTagWithId }> {
     const { savedObjectsClient, user } = this.params;
     const { title, description, color } = tag;
 
@@ -61,7 +61,7 @@ export class TagsClient implements ITagsClient {
     return { tag: this.tagSavedObjectToTag(savedObject) };
   }
 
-  public async getAll(): Promise<{ tags: Tag[] }> {
+  public async getAll(): Promise<{ tags: RawTagWithId[] }> {
     const { savedObjectsClient } = this.params;
 
     const result = await savedObjectsClient.find<RawTag>({
