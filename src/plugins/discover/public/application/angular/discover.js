@@ -995,7 +995,10 @@ function discoverController(
       $scope.indexPattern.popularizeField(columnName, 1);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    const sort = $scope.state.sort.filter(s => s[0] !== columnName);
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort = $scope.state.sort.length
+      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
+      : [];
     setAppState({ columns, sort });
   };
 
