@@ -8,7 +8,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { ThemeContext } from 'styled-components';
 import { EuiText } from '@elastic/eui';
-import { ISection } from '../../../pages/home/section';
+import { ISection } from '../../../typings/section';
 
 interface Props {
   section: ISection;

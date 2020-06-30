@@ -25,7 +25,7 @@ import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_sett
 import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
-import { appsSection } from '../home/section';
+import { emptySections } from './emptySection';
 
 interface Props {
   routeParams: RouteParams<'/dashboard'>;
@@ -119,7 +119,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
       <EuiSpacer size="s" />
 
       <EuiFlexGrid columns={2} gutterSize="s">
-        {appsSection
+        {emptySections
           .filter(({ id }) => hasData && !hasData[id])
           .map((app) => {
             return (
