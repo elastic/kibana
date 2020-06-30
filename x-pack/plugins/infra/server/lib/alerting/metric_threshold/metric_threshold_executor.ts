@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
-import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
   stateToAlertMessage,
-} from './messages';
+} from '../common/messages';
+import { AlertStates } from './types';
+import { evaluateAlert } from './lib/evaluate_alert';
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function (options: AlertExecutorOptions) {
