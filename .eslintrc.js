@@ -334,6 +334,7 @@ module.exports = {
      */
     {
       files: [
+        'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
         'test/*/config.ts',
