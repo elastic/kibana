@@ -53,9 +53,7 @@ export interface ExternalServiceIncidentResponse {
   pushedDate: string;
 }
 
-export interface ExternalServiceParams {
-  [index: string]: any;
-}
+export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;

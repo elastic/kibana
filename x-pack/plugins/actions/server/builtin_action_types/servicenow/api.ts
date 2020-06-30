@@ -128,13 +128,11 @@ export const transformFields = ({
         date: params.updatedAt ?? params.createdAt,
         user:
           (params.updatedBy != null
-            ? params.updatedBy.fullName
-              ? params.updatedBy.fullName
-              : params.updatedBy.username
+            ? params.updatedBy.fullName || params.updatedBy.username
             : params.createdBy.fullName
             ? params.createdBy.fullName
             : params.createdBy.username) ?? '',
-        previousValue: currentIncident ? currentIncident[cur.key] : '',
+        previousValue: currentIncident ? (currentIncident[cur.key] as string) : '',
       }).value,
     };
   }, {});

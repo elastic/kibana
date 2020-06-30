@@ -67,13 +67,13 @@ async function executor(
   });
 
   if (!api[subAction]) {
-    const errorMessage = '[Action][ExternalService] Unsupported subAction type.';
+    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
 
   if (subAction !== 'pushToService') {
-    const errorMessage = '[Action][ExternalService] subAction not implemented.';
+    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }

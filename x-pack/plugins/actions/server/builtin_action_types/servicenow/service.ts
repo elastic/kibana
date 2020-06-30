@@ -54,22 +54,17 @@ export const createExternalService = ({
   };
 
   const findIncidents = async (params?: Record<string, string>) => {
-    const query = params
-      ? Object.keys(params).reduce((res, pkey) => `${res}${pkey}=${params[pkey]}&`, '?')
-      : '';
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}${query}`,
+        url: incidentUrl,
+        params,
       });
 
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
       throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to find incidents by query ${query}. Error: ${error.message}`
-        )
+        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
       );
     }
   };
@@ -80,7 +75,7 @@ export const createExternalService = ({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
-        data: { ...incident },
+        data: { ...(incident as Record<string, unknown>) },
       });
 
       return {
@@ -101,7 +96,7 @@ export const createExternalService = ({
       const res = await patch({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
-        data: { ...incident },
+        data: { ...(incident as Record<string, unknown>) },
       });
 
       return {

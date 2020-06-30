@@ -21,13 +21,15 @@ export const request = async <T = unknown>({
   url,
   method = 'get',
   data,
+  params,
 }: {
   axios: AxiosInstance;
   url: string;
   method?: Method;
   data?: T;
+  params?: unknown;
 }): Promise<AxiosResponse> => {
-  const res = await axios(url, { method, data: data ?? {} });
+  const res = await axios(url, { method, data: data ?? {}, params });
   throwIfNotAlive(res.status, res.headers['content-type']);
   return res;
 };
