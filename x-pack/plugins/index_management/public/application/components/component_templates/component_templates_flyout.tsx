@@ -57,7 +57,7 @@ export const ComponentTemplatesFlyout = ({ onClose }: Props) => {
               <ComponentTemplates
                 isLoading={isLoading}
                 components={components ?? []}
-                list={{ isSelectable: true }}
+                listItemProps={{ isSelectable: true }}
               />
             );
           }}

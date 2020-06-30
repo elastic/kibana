@@ -71,7 +71,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
   clearSaveError,
   isEditing,
 }) => {
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(2);
   const [validation, setValidation] = useState<ValidationState>({
     1: defaultValidation,
     2: defaultValidation,
