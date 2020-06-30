@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import {
   DATA_DATASETS_INDEX_PATTERNS_UNIQUE,
   DataPatternName,
@@ -191,7 +191,7 @@ interface IndexMappings {
   };
 }
 
-export async function getDataTelemetry(callCluster: APICaller) {
+export async function getDataTelemetry(callCluster: LegacyAPICaller) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
