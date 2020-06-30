@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export * from './_pattern_cache';
-export * from './flatten_hit';
-export * from './format_hit';
-export * from './index_pattern';
-export * from './index_patterns';
+// @ts-expect-error
+export default function ({ loadTestFile }) {
+  describe('data plugin', () => {
+    loadTestFile(require.resolve('./index_patterns'));
+  });
+}

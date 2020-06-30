@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export * from './_pattern_cache';
-export * from './flatten_hit';
-export * from './format_hit';
-export * from './index_pattern';
-export * from './index_patterns';
+import { PluginInitializer } from 'kibana/server';
+import {
+  IndexPatternsTestPlugin,
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart,
+} from './plugin';
+
+export const plugin: PluginInitializer<
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart
+> = () => new IndexPatternsTestPlugin();
