@@ -25,7 +25,6 @@ import { createSearchSource, SearchSource, SearchSourceDependencies } from './se
 import { getEsClient, LegacyApiCaller } from './legacy';
 import { getForceNow } from '../query/timefilter/lib/get_force_now';
 import { calculateBounds, TimeRange } from '../../common/query';
-
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
