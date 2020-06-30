@@ -16,29 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SkipBottomButton } from './skip_bottom_button';
 
-import { deepFreeze } from '../../../../utils/deep_freeze';
-
-deepFreeze({
-  foo: {
-    bar: {
-      baz: 1,
-    },
-  },
-}).foo.bar.baz = 2;
-
-deepFreeze({
-  foo: [
-    {
-      bar: 1,
-    },
-  ],
-}).foo[0].bar = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo[0] = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo.push(2);
+export function createSkipBottomButtonDirective(reactDirective: any) {
+  return reactDirective(SkipBottomButton, [['onClick', { watchDepth: 'reference' }]]);
+}
