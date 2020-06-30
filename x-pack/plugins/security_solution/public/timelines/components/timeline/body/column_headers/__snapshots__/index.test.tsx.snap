@@ -6,13 +6,13 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
 >
   <styled.div>
     <styled.div
-      actionsColumnWidth={115}
+      actionsColumnWidth={76}
       data-test-subj="actions-container"
-      justifyContent="space-between"
     >
       <styled.div>
         <styled.div
           textAlign="center"
+          width={24}
         >
           <Connect(Component)
             browserFields={

@@ -24,6 +24,7 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
+import { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -58,6 +59,7 @@ export const getTimelinesTableColumns = ({
   onOpenTimeline,
   onToggleShowNotes,
   showExtendedColumns,
+  timelineType,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
@@ -68,6 +70,7 @@ export const getTimelinesTableColumns = ({
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
+  timelineType: TimelineTypeLiteralWithNull;
 }) => {
   return [
     ...getCommonColumns({
@@ -76,7 +79,7 @@ export const getTimelinesTableColumns = ({
       onToggleShowNotes,
     }),
     ...getExtendedColumnsIfEnabled(showExtendedColumns),
-    ...getIconHeaderColumns(),
+    ...getIconHeaderColumns({ timelineType }),
     ...getActionsColumns({
       actionTimelineToShow,
       deleteTimelines,
@@ -105,6 +108,7 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  timelineType: TimelineTypeLiteralWithNull;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
@@ -134,6 +138,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     sortField,
     sortDirection,
     tableRef,
+    timelineType,
     totalSearchResultsCount,
   }) => {
     const pagination = {
@@ -174,6 +179,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
+          timelineType,
         })}
         compressed
         data-test-subj="timelines-table"
