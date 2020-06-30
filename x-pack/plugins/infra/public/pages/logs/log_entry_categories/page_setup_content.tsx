@@ -46,7 +46,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
           <EuiSpacer />
           <EuiButton fill onClick={openFlyout}>
             <FormattedMessage
-              id="xpack.infra.logs.logEntryCategories.setupCta"
+              id="xpack.infra.logs.logEntryCategories.showAnalysisSetupButtonLabel"
               defaultMessage="ML setup"
             />
           </EuiButton>
