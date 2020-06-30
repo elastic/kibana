@@ -267,7 +267,9 @@ export class QueryStringInputUI extends Component<Props, State> {
           if (isSuggestionsVisible && index !== null) {
             event.preventDefault();
             this.incrementIndex(index);
-          } else if (this.getQueryString() === '') {
+            // Note to engineers. `isSuggestionVisible` does not mean the suggestions are visible.
+            // This should likely be fixed, it's more that suggestions can be shown.
+          } else if ((isSuggestionsVisible && index == null) || this.getQueryString() === '') {
             event.preventDefault();
             this.setState({ isSuggestionsVisible: true, index: 0 });
           }
