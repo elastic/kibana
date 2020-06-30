@@ -25,6 +25,9 @@ export interface ReturnPrePackagedRules {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
+  timelinesInstalled: number | null;
+  timelinesNotInstalled: number | null;
+  timelinesNotUpdated: number | null;
 }
 
 interface UsePrePackagedRuleProps {
@@ -60,6 +63,9 @@ export const usePrePackagedRules = ({
       | 'rulesInstalled'
       | 'rulesNotInstalled'
       | 'rulesNotUpdated'
+      | 'timelinesInstalled'
+      | 'timelinesNotInstalled'
+      | 'timelinesNotUpdated'
     >
   >({
     createPrePackagedRules: null,
@@ -68,6 +74,9 @@ export const usePrePackagedRules = ({
     rulesInstalled: null,
     rulesNotInstalled: null,
     rulesNotUpdated: null,
+    timelinesInstalled: null,
+    timelinesNotInstalled: null,
+    timelinesNotUpdated: null,
   });
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -92,6 +101,9 @@ export const usePrePackagedRules = ({
             rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
             rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
             rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+            timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
+            timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
+            timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
           });
         }
       } catch (error) {
@@ -103,6 +115,9 @@ export const usePrePackagedRules = ({
             rulesInstalled: null,
             rulesNotInstalled: null,
             rulesNotUpdated: null,
+            timelinesInstalled: null,
+            timelinesNotInstalled: null,
+            timelinesNotUpdated: null,
           });
           errorToToaster({ title: i18n.RULE_FETCH_FAILURE, error, dispatchToaster });
         }
@@ -156,6 +171,9 @@ export const usePrePackagedRules = ({
                       rulesInstalled: prePackagedRuleStatusResponse.rules_installed,
                       rulesNotInstalled: prePackagedRuleStatusResponse.rules_not_installed,
                       rulesNotUpdated: prePackagedRuleStatusResponse.rules_not_updated,
+                      timelinesInstalled: prePackagedRuleStatusResponse.timelines_installed,
+                      timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
+                      timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
                     });
                     displaySuccessToast(i18n.RULE_PREPACKAGED_SUCCESS, dispatchToaster);
                     stopTimeOut();

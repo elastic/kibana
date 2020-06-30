@@ -167,6 +167,32 @@ const getTimelineTypeFilter = (
   return filters.filter((f) => f != null).join(' and ');
 };
 
+export const getExistingPrepackagedTimelines = async (
+  request: FrameworkRequest,
+  countsOnly?: boolean
+): Promise<{
+  totalCount: number;
+  timeline: TimelineSavedObject[];
+}> => {
+  const pageInfo = countsOnly
+    ? {
+        perPage: 1,
+        page: 1,
+      }
+    : {};
+  const elasticTemplateTimelineOptions = {
+    type: timelineSavedObjectType,
+    ...pageInfo,
+    filter: getTimelineTypeFilter(
+      TimelineType.template,
+      TemplateTimelineType.elastic,
+      TimelineStatus.immutable
+    ),
+  };
+
+  return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
+};
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -213,17 +239,6 @@ export const getAllTimeline = async (
     filter: getTimelineTypeFilter(TimelineType.template, null, null),
   };
 
-  const elasticTemplateTimelineOptions = {
-    type: timelineSavedObjectType,
-    perPage: 1,
-    page: 1,
-    filter: getTimelineTypeFilter(
-      TimelineType.template,
-      TemplateTimelineType.elastic,
-      TimelineStatus.immutable
-    ),
-  };
-
   const customTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
@@ -247,7 +262,7 @@ export const getAllTimeline = async (
     getAllSavedTimeline(request, options),
     getAllSavedTimeline(request, timelineOptions),
     getAllSavedTimeline(request, templateTimelineOptions),
-    getAllSavedTimeline(request, elasticTemplateTimelineOptions),
+    getExistingPrepackagedTimelines(request, true),
     getAllSavedTimeline(request, customTemplateTimelineOptions),
     getAllSavedTimeline(request, favoriteTimelineOptions),
   ]);

@@ -12,6 +12,9 @@ import {
   rules_custom_installed,
   rules_not_installed,
   rules_not_updated,
+  timelines_installed,
+  timelines_not_installed,
+  timelines_not_updated,
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -21,6 +24,9 @@ export const prePackagedRulesStatusSchema = t.exact(
     rules_installed,
     rules_not_installed,
     rules_not_updated,
+    timelines_installed,
+    timelines_not_installed,
+    timelines_not_updated,
   })
 );
 

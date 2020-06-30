@@ -11,6 +11,10 @@ import { createListStream } from '../../../../../../../src/legacy/utils';
 import { importTimelines } from '../../timeline/routes/utils/import_timelines';
 import { FrameworkRequest } from '../../framework';
 import { ImportTimelineResultSchema } from '../../timeline/routes/schemas/import_timelines_schema';
+import { getTimelinesToInstall } from './get_timelines_to_install';
+import { getTimelinesToUpdate } from './get_timelines_to_update';
+import { getExistingPrepackagedTimelines } from '../../timeline/saved_object';
+import { TimelineSavedObject } from '../../../../common/types/timeline';
 
 export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {
@@ -31,11 +35,12 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
     });
   });
 
-export const loadData = (
+const loadData = <T>(
   readStream: Readable,
-  maxTimelineImportExportSize: number,
-  bulkInsert: (docs: Readable) => Promise<ImportTimelineResultSchema | string>
-): Promise<ImportTimelineResultSchema | string> => {
+  bulkInsert: (docs: Readable | string[]) => Promise<T | string>,
+  encoding?: 'utf-8' | null,
+  maxTimelineImportExportSize?: number | null
+): Promise<T | string> => {
   return new Promise((resolved, reject) => {
     let docs: string[] = [];
     let isPaused: boolean = false;
@@ -46,7 +51,7 @@ export const loadData = (
         try {
           const docstmp = createListStream(docs.join('\n'));
 
-          const bulkInsertResult = await bulkInsert(docstmp);
+          const bulkInsertResult = await bulkInsert(encoding === 'utf-8' ? docs : docstmp);
           resolved(bulkInsertResult);
         } catch (err) {
           reject(err);
@@ -77,14 +82,18 @@ export const loadData = (
 
       docs.push(line);
 
-      if (docs.length >= maxTimelineImportExportSize && !isPaused) {
+      if (
+        maxTimelineImportExportSize != null &&
+        docs.length >= maxTimelineImportExportSize &&
+        !isPaused
+      ) {
         lineStream.pause();
 
         const docstmp = createListStream(docs.join('\n'));
         docs = [];
 
         try {
-          await bulkInsert(docstmp);
+          await bulkInsert(encoding === 'utf-8' ? docs : docstmp);
           lineStream.resume();
         } catch (err) {
           closeWithError(err);
@@ -129,7 +138,67 @@ export const installPrepackagedTimelines = async (
     };
   }
 
-  return loadData(readStream, maxTimelineImportExportSize, (docs) =>
-    importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)
+  return loadData<ImportTimelineResultSchema>(
+    readStream,
+    (docs: string[] | Readable) =>
+      importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable),
+    null,
+    maxTimelineImportExportSize
+  );
+};
+
+interface CheckTimelinesStatus {
+  timelinesToInstall: [];
+  timelinesToUpdate: [];
+  prepackagedTimelines: [];
+}
+
+export const checkTimelinesStatus = async (
+  frameworkRequest: FrameworkRequest,
+  filePath?: string,
+  fileName?: string
+): Promise<CheckTimelinesStatus | string> => {
+  let readStream;
+  let timeline: {
+    totalCount: number;
+    timeline: TimelineSavedObject[];
+  };
+  const dir = resolve(join(__dirname, filePath ?? './prepackaged_timelines'));
+  const file = fileName ?? 'index.ndjson';
+  const dataPath = path.join(dir, file);
+
+  try {
+    readStream = await getReadables(dataPath);
+    timeline = await getExistingPrepackagedTimelines(frameworkRequest, false);
+  } catch (err) {
+    return {
+      timelinesToInstall: [],
+      timelinesToUpdate: [],
+      prepackagedTimelines: [],
+    };
+  }
+
+  return loadData<CheckTimelinesStatus>(
+    readStream,
+    (timelinesFromFileSystem: Readable | string[]) => {
+      const parsedTimelinesFromFileSystem = timelinesFromFileSystem.map((t) => JSON.parse(t));
+      const prepackagedTimelines = timeline.timeline ?? [];
+
+      const timelinesToInstall = getTimelinesToInstall(
+        parsedTimelinesFromFileSystem,
+        prepackagedTimelines
+      );
+      const timelinesToUpdate = getTimelinesToUpdate(
+        parsedTimelinesFromFileSystem,
+        prepackagedTimelines
+      );
+
+      return {
+        timelinesToInstall,
+        timelinesToUpdate,
+        prepackagedTimelines,
+      };
+    },
+    'utf-8'
   );
 };

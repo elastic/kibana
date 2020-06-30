@@ -14,19 +14,21 @@ import * as i18n from './translations';
 interface UpdatePrePackagedRulesCallOutProps {
   loading: boolean;
   numberOfUpdatedRules: number;
+  numberOfUpdatedTimelines: number;
   updateRules: () => void;
 }
 
 const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCallOutProps> = ({
   loading,
   numberOfUpdatedRules,
+  numberOfUpdatedTimelines,
   updateRules,
 }) => {
   const { services } = useKibana();
   return (
     <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
       <p>
-        {i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules)}
+        {i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules, numberOfUpdatedTimelines)}
         <br />
         <EuiLink
           href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
@@ -36,7 +38,7 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
         </EuiLink>
       </p>
       <EuiButton onClick={updateRules} size="s" isLoading={loading}>
-        {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules)}
+        {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules, numberOfUpdatedTimelines)}
       </EuiButton>
     </EuiCallOut>
   );

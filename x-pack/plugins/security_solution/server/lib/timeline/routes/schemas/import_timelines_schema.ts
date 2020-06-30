@@ -32,6 +32,8 @@ export const ImportTimelinesSchemaRt = rt.intersection([
   }),
 ]);
 
+export type ImportTimelinesSchema = rt.TypeOf<typeof ImportTimelinesSchemaRt>;
+
 const ReadableRt = new rt.Type<Readable, Readable, unknown>(
   'ReadableRt',
   (u): u is Readable => u instanceof Readable,

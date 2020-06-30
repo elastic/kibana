@@ -25,7 +25,12 @@ import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
-import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
+import {
+  getPrePackagedRuleStatus,
+  getPrePackagedTimelineStatus,
+  redirectToDetections,
+  userHasNoPermissions,
+} from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
@@ -54,6 +59,9 @@ const RulesPageComponent: React.FC = () => {
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
+    timelinesInstalled,
+    timelinesNotInstalled,
+    timelinesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
@@ -65,6 +73,12 @@ const RulesPageComponent: React.FC = () => {
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated
+  );
+
+  const prePackagedTimelineStatus = getPrePackagedTimelineStatus(
+    timelinesInstalled,
+    timelinesNotInstalled,
+    timelinesNotUpdated
   );
   const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
 
@@ -132,7 +146,8 @@ const RulesPageComponent: React.FC = () => {
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            {prePackagedRuleStatus === 'ruleNotInstalled' && (
+            {(prePackagedRuleStatus === 'ruleNotInstalled' ||
+              prePackagedTimelineStatus === 'timelinesNotInstalled') && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="indexOpen"
@@ -182,10 +197,12 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </DetectionEngineHeaderPage>
-        {prePackagedRuleStatus === 'ruleNeedUpdate' && (
+        {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
+          prePackagedTimelineStatus === 'timelineNeedUpdate') && (
           <UpdatePrePackagedRulesCallOut
             loading={loadingCreatePrePackagedRules}
             numberOfUpdatedRules={rulesNotUpdated ?? 0}
+            numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
             updateRules={handleCreatePrePackagedRules}
           />
         )}

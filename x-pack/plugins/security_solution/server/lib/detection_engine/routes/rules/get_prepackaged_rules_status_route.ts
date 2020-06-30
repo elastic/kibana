@@ -17,8 +17,16 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
+import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
+import { ConfigType } from '../../../../config';
+import { SetupPlugins } from '../../../../plugin';
+import { checkTimelinesStatus } from '../../rules/install_prepacked_timelines';
 
-export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
+export const getPrepackagedRulesStatusRoute = (
+  router: IRouter,
+  config: ConfigType,
+  security: SetupPlugins['security']
+) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
@@ -46,14 +54,25 @@ export const getPrepackagedRulesStatusRoute = (router: IRouter) => {
           filter: 'alert.attributes.tags:"__internal_immutable:false"',
           fields: undefined,
         });
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
+        const {
+          timelinesToInstall,
+          timelinesToUpdate,
+          prepackagedTimelines,
+        } = await checkTimelinesStatus(frameworkRequest);
+
         const prepackagedRulesStatus: PrePackagedRulesStatusSchema = {
           rules_custom_installed: customRules.total,
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
+          timelines_installed: prepackagedTimelines.length,
+          timelines_not_installed: timelinesToInstall.length,
+          timelines_not_updated: timelinesToUpdate.length,
         };
         const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
         if (errors != null) {
