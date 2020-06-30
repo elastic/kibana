@@ -13,6 +13,8 @@ import { RawTagWithId } from '../../../../common';
 import { txtTagCreated, txtCouldNotCreate } from './i18n';
 import { useUnmount$ } from '../../hooks/use_unmount';
 
+const defaultColor = '#27BAB1';
+
 export interface Props {
   onCreate?: (tag: RawTagWithId) => void;
 }
@@ -22,7 +24,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
   const { manager, params } = useServices();
   const toasts = useToasts();
   const [title, setTitle] = useState('');
-  const [color, setColor] = useState('#ffffff');
+  const [color, setColor] = useState(defaultColor);
   const [description, setDescription] = useState('');
 
   const handleSubmit = async () => {

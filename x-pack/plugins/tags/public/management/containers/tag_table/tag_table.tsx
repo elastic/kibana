@@ -4,36 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiLoadingElastic,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { EuiInMemoryTable, EuiBadge, EuiButton } from '@elastic/eui';
 import { RawTagWithId } from '../../../../common';
 import { useServices } from '../../context';
+
+const pagination = {
+  initialPageSize: 25,
+  pageSizeOptions: [25, 100],
+};
 
 export const TagTable: React.FC = () => {
   const { manager } = useServices();
   const initializing = manager.useInitializing();
   const tagMap = manager.useTags();
   const tags = useMemo(() => Object.values(tagMap).map(({ data }) => data), [tagMap]);
-
-  if (initializing) {
-    return (
-      <>
-        <EuiSpacer />
-        <EuiFlexGroup gutterSize="xl" component="div" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingElastic size="xxl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-      </>
-    );
-  }
+  const [selection, onSelectionChange] = useState<RawTagWithId[]>([]);
 
   return (
     <EuiInMemoryTable<RawTagWithId>
@@ -44,7 +30,9 @@ export const TagTable: React.FC = () => {
           field: 'title',
           name: 'Tag',
           sortable: true,
-          render: (value: string, record: RawTagWithId) => <div>{value}</div>,
+          render: (value: string, record: RawTagWithId) => (
+            <EuiBadge color={record.color}>{value}</EuiBadge>
+          ),
         },
         {
           field: 'description',
@@ -53,15 +41,24 @@ export const TagTable: React.FC = () => {
         },
       ]}
       hasActions
-      pagination={true}
+      pagination={pagination}
       sorting={true}
       search={{
         box: {
           placeholder: 'Search',
         },
+        toolsLeft: !selection.length ? undefined : (
+          <EuiButton color="danger" iconType="trash" onClick={() => {}}>
+            Delete {selection.length} tags
+          </EuiButton>
+        ),
       }}
-      loading={false}
+      loading={initializing}
       message={undefined}
+      selection={{
+        onSelectionChange,
+        selectable: () => true,
+      }}
     />
   );
 };
