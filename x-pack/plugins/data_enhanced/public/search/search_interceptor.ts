@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromEvent, Observable, throwError, EMPTY, timer } from 'rxjs';
-import { mergeMap, expand, takeUntil, catchError, finalize } from 'rxjs/operators';
+import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
+import { mergeMap, expand, takeUntil, catchError, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../src/plugins/data/common';
+import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
 import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
 
@@ -73,13 +73,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     };
 
     const { combinedSignal, cleanup } = this.setupTimers(options);
-    this.pendingCount$.next(++this.pendingCount);
+    const aborted$ = from(toPromise(combinedSignal));
 
-    const aborted$ = fromEvent(combinedSignal, 'abort').pipe(
-      mergeMap(() => {
-        return throwError(new AbortError());
-      })
-    );
+    this.pendingCount$.next(++this.pendingCount);
 
     return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
       expand((response: IAsyncSearchResponse) => {
@@ -96,20 +92,20 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            if (combinedSignal.aborted) return throwError(new AbortError());
             return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
           })
         );
       }),
       takeUntil(aborted$),
-      catchError((e) => {
-        // If we haven't received the response to the initial request, including the ID, then
-        // we don't need to send a follow-up request to delete this search. Otherwise, we
-        // send the follow-up request to delete this search, then throw an abort error.
-        if (id !== undefined) {
-          this.deps.http.delete(`/internal/search/es/${id}`);
-        }
-        return throwError(e);
+      tap({
+        error: () => {
+          // If we haven't received the response to the initial request, including the ID, then
+          // we don't need to send a follow-up request to delete this search. Otherwise, we
+          // send the follow-up request to delete this search, then throw an abort error.
+          if (id !== undefined) {
+            this.deps.http.delete(`/internal/search/es/${id}`);
+          }
+        },
       }),
       finalize(() => {
         this.pendingCount$.next(--this.pendingCount);
