@@ -60,7 +60,7 @@ describe('AuditTrailService', () => {
         expect(scopedMock).toHaveBeenCalledWith(kibanaRequest);
       });
 
-      it('passes auditable event to every auditor', () => {
+      it('passes auditable event to an auditor', () => {
         const addEventMock = jest.fn();
         const auditorFactory = {
           asScoped() {
