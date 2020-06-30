@@ -17,35 +17,41 @@
  * under the License.
  */
 
-export const setSVGElementGetBBox = (width: number, height: number, x: number = 0, y: number = 0) =>
-  Object.defineProperties(window.SVGElement.prototype, {
-    getBBox: {
-      get: () =>
-        function () {
-          return {
-            x,
-            y,
-            width,
-            height,
-          };
-        },
-      configurable: true,
+export const setSVGElementGetBBox = (
+  width: number,
+  height: number,
+  x: number = 0,
+  y: number = 0
+) => {
+  const SVGElementPrototype = SVGElement.prototype as any;
+  const originalGetBBox = SVGElementPrototype.getBBox;
+
+  // getBBox is not in the SVGElement.prototype object by default, so we cannot use jest.spyOn for that case
+  SVGElementPrototype.getBBox = jest.fn(() => ({
+    x,
+    y,
+    width,
+    height,
+  }));
+
+  return {
+    mockRestore: () => {
+      SVGElementPrototype.getBBox = originalGetBBox;
     },
-  });
+  };
+};
 
 export const setHTMLElementOffset = (width: number, height: number) => {
-  Object.defineProperties(window.HTMLElement.prototype, {
-    offsetWidth: {
-      get() {
-        return width;
-      },
-      configurable: true,
+  const offsetWidthSpy = jest.spyOn(window.HTMLElement.prototype, 'offsetWidth', 'get');
+  offsetWidthSpy.mockReturnValue(width);
+
+  const offsetHeightSpy = jest.spyOn(window.HTMLElement.prototype, 'offsetHeight', 'get');
+  offsetHeightSpy.mockReturnValue(height);
+
+  return {
+    mockRestore: () => {
+      offsetWidthSpy.mockRestore();
+      offsetHeightSpy.mockRestore();
     },
-    offsetHeight: {
-      get() {
-        return height;
-      },
-      configurable: true,
-    },
-  });
+  };
 };
