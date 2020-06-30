@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { UI_SETTINGS } from 'src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { APMConfig } from '../..';
 import {
