@@ -22,6 +22,5 @@ export function createContextErrorMessageDirective(reactDirective: any) {
   return reactDirective(ContextErrorMessage, [
     ['status', { watchDepth: 'reference' }],
     ['reason', { watchDepth: 'reference' }],
-    ['queryParameters', { watchDepth: 'reference' }],
   ]);
 }
