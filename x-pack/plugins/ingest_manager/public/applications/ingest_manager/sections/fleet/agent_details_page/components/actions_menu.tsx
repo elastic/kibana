@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
@@ -14,16 +14,26 @@ import { useAgentRefresh } from '../hooks';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
-}> = memo(({ agent }) => {
+  assignFlyoutOpenByDefault?: boolean;
+  onCancelReassign?: () => void;
+}> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign }) => {
   const hasWriteCapabilites = useCapabilities().write;
   const refreshAgent = useAgentRefresh();
-  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(false);
+  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
+
+  const onClose = useMemo(() => {
+    if (onCancelReassign) {
+      return onCancelReassign;
+    } else {
+      return () => setIsReassignFlyoutOpen(false);
+    }
+  }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
   return (
     <>
       {isReassignFlyoutOpen && (
         <EuiPortal>
-          <AgentReassignConfigFlyout agent={agent} onClose={() => setIsReassignFlyoutOpen(false)} />
+          <AgentReassignConfigFlyout agent={agent} onClose={onClose} />
         </EuiPortal>
       )}
       <ContextMenuActions
