@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should render source creation editor (fields should _not_ be included) 1`] = `
-<Fragment>
+<EuiPanel>
   <EuiFormRow
     describedByIds={Array []}
     display="row"
@@ -26,5 +26,5 @@ exports[`should render source creation editor (fields should _not_ be included) 
     maxSourceZoom={24}
     minSourceZoom={0}
   />
-</Fragment>
+</EuiPanel>
 `;
