@@ -73,6 +73,7 @@ describe('Load from JSON ModalProvider', () => {
     find('confirmModalConfirmButton').simulate('click');
     const errorCallout = find('loadJsonConfirmationModal.errorCallOut');
     expect(errorCallout.text()).toContain('Please ensure the JSON is a valid pipeline object.');
+    expect(onDone).toHaveBeenCalledTimes(0);
   });
 
   it('passes through a valid pipeline object', () => {
@@ -80,7 +81,7 @@ describe('Load from JSON ModalProvider', () => {
     find('button').simulate('click');
     expect(exists('loadJsonConfirmationModal'));
     const validPipeline = JSON.stringify({
-      processors: [{ set: { field: 'test', value: 123 } }],
+      processors: [{ set: { field: 'test', value: 123 } }, { badType1: null }, { badType2: 1 }],
       on_failure: [
         {
           gsub: {
@@ -94,5 +95,33 @@ describe('Load from JSON ModalProvider', () => {
     find('mockCodeEditor').simulate('change', { jsonString: validPipeline });
     find('confirmModalConfirmButton').simulate('click');
     expect(!exists('loadJsonConfirmationModal'));
+    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "on_failure": Array [
+          Object {
+            "gsub": Object {
+              "field": "_index",
+              "pattern": "(.monitoring-\\\\w+-)6(-.+)",
+              "replacement": "$17$2",
+            },
+          },
+        ],
+        "processors": Array [
+          Object {
+            "set": Object {
+              "field": "test",
+              "value": 123,
+            },
+          },
+          Object {
+            "badType1": null,
+          },
+          Object {
+            "badType2": 1,
+          },
+        ],
+      }
+    `);
   });
 });
