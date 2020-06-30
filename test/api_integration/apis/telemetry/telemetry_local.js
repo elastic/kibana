@@ -113,6 +113,7 @@ export default function ({ getService }) {
         'cluster_stats.nodes.plugins',
         'cluster_stats.nodes.process',
         'cluster_stats.nodes.versions',
+        'cluster_stats.nodes.usage',
         'cluster_stats.status',
         'cluster_stats.timestamp',
         'cluster_uuid',

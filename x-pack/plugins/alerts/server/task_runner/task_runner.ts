@@ -19,6 +19,7 @@ import {
   Services,
   AlertInfoParams,
   AlertTaskState,
+  RawAlertInstance,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -165,9 +166,9 @@ export class TaskRunner {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues(
+    const alertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
       alertRawInstances,
-      (rawAlertInstance) => new AlertInstance(rawAlertInstance as any)
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
 
     const originalAlertInstanceIds = Object.keys(alertInstances);
@@ -194,7 +195,7 @@ export class TaskRunner {
         alertId,
         services: {
           ...services,
-          alertInstanceFactory: createAlertInstanceFactory(alertInstances as any),
+          alertInstanceFactory: createAlertInstanceFactory(alertInstances),
         },
         params,
         state: alertTypeState,
@@ -254,8 +255,9 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues(instancesWithScheduledActions, (alertInstance: any) =>
-        alertInstance.toRaw()
+      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(
+        instancesWithScheduledActions,
+        (alertInstance) => alertInstance.toRaw()
       ),
     };
   }
