@@ -140,7 +140,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   });
 
   return (
-    <div className="snapshotRestore__restoreForm__stepLogistics">
+    <div
+      data-test-subj="snapshotRestoreStepLogistics"
+      className="snapshotRestore__restoreForm__stepLogistics"
+    >
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

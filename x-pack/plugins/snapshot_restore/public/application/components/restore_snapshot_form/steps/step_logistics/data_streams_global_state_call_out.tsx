@@ -46,7 +46,12 @@ interface Props {
 
 export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataStreamsCount }) => {
   return (
-    <EuiCallOut title={i18nTexts.callout.title(dataStreamsCount)} iconType="alert" color="warning">
+    <EuiCallOut
+      data-test-subj="dataStreamWarningCallOut"
+      title={i18nTexts.callout.title(dataStreamsCount)}
+      iconType="alert"
+      color="warning"
+    >
       {i18nTexts.callout.body()}
     </EuiCallOut>
   );
