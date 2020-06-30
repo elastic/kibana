@@ -454,7 +454,7 @@ export function XYChart({
               }
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
-              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
+              // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
               return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
             },
           };
@@ -469,13 +469,21 @@ export function XYChart({
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
               return <BarSeries key={index} {...seriesProps} />;
-            default:
+            case 'area_stacked':
+              return <AreaSeries key={index} {...seriesProps} />;
+            case 'area':
               return (
                 <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
               );
+            default:
+              return assertNever(seriesType);
           }
         }
       )}
     </Chart>
   );
+}
+
+function assertNever(x: never): never {
+  throw new Error('Unexpected series type: ' + x);
 }

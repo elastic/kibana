@@ -327,11 +327,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       ]
     }
     enableHistogramMode={false}
-    fit={
-      Object {
-        "type": "none",
-      }
-    }
     id="d"
     key="0"
     name={[Function]}

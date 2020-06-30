@@ -84,10 +84,7 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const [open, setOpen] = useState(false);
   const hasNonBarSeries = props.state?.layers.some(
-    (layer) =>
-      layer.seriesType === 'line' ||
-      layer.seriesType === 'area' ||
-      layer.seriesType === 'area_stacked'
+    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
   return (
     <EuiFlexGroup justifyContent="flexEnd">
@@ -119,7 +116,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             helpText={
               !hasNonBarSeries &&
               i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                defaultMessage: 'This setting only applies to line and area charts.',
+                defaultMessage:
+                  'This setting only applies to line charts and unstacked area charts.',
               })
             }
           >
