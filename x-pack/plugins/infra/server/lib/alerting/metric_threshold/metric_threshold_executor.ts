@@ -36,7 +36,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults));
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${group}::${alertId}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
