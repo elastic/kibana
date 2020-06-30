@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let _httpClient: any;
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { HttpSetup } from 'src/core/public/http';
 
-export function init(httpClient: any): void {
+let _httpClient: HttpSetup;
+
+export function init(httpClient: HttpSetup): void {
   _httpClient = httpClient;
 }
 
@@ -20,14 +23,14 @@ function getFullPath(path: string): string {
   return apiPrefix;
 }
 
-export function sendPost(path: string, payload: any): any {
+export function sendPost(path: string, payload: any) {
   return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, query: any): any {
+export function sendGet(path: string, query?: any) {
   return _httpClient.get(getFullPath(path), { query });
 }
 
-export function sendDelete(path: string): any {
+export function sendDelete(path: string) {
   return _httpClient.delete(getFullPath(path));
 }
