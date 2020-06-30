@@ -130,12 +130,12 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
-  const recreateMlJobForReconfiguration = useCallback(() => {
+  const viewSetupFlyoutForReconfiguration = useCallback(() => {
     viewSetupForReconfiguration();
     setIsFlyoutOpen(true);
   }, [viewSetupForReconfiguration]);
 
-  const recreateMlJobForUpdate = useCallback(() => {
+  const viewSetupFlyoutForUpdate = useCallback(() => {
     viewSetupForUpdate();
     setIsFlyoutOpen(true);
   }, [viewSetupForUpdate]);
@@ -226,8 +226,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
               hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
-              onRecreateMlJobForReconfiguration={recreateMlJobForReconfiguration}
-              onRecreateMlJobForUpdate={recreateMlJobForUpdate}
+              onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
+              onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -244,7 +244,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
             <EuiPanel paddingSize="m">
               <AnomaliesResults
                 isLoading={isLoading}
-                viewSetupForReconfiguration={recreateMlJobForReconfiguration}
+                viewSetupForReconfiguration={viewSetupFlyoutForReconfiguration}
                 results={logEntryRate}
                 setTimeRange={handleChartTimeRangeChange}
                 timeRange={queryTimeRange.value}
