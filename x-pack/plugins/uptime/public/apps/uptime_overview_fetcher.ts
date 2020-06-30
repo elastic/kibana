@@ -7,12 +7,22 @@
 import { fetchPingHistogram, fetchSnapshotCount } from '../state/api';
 import { UptimeFetchDataResponse } from '../../../observability/public/typings/fetch_data_response';
 
-export async function fetchUptimeOverviewData({ startTime, endTime, bucketSize }) {
+export async function fetchUptimeOverviewData({
+  startTime,
+  endTime,
+  bucketSize,
+}: {
+  startTime: string;
+  endTime: string;
+  bucketSize: string;
+}) {
   const snapshot = await fetchSnapshotCount({
     dateRangeStart: startTime,
     dateRangeEnd: endTime,
   });
-  const pings = await fetchPingHistogram({ dateStart: startTime, dateEnd: endTime });
+
+  const pings = await fetchPingHistogram({ dateStart: startTime, dateEnd: endTime, bucketSize });
+
   const response: UptimeFetchDataResponse = {
     title: 'Uptime',
     appLink: '/app/uptime#/', // Todo is there some sort of helper that handles subpaths?

@@ -11,7 +11,6 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { UptimeFetchDataResponse } from '../../../observability/public/typings/fetch_data_response';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
