@@ -26,7 +26,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
     margin-bottom: 16px;
   }
   .euiAccordion__childWrapper {
-    margin-top: 16px;
+    margin-top: 8px;
   }
 `;
 

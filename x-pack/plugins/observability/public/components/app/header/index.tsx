@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -24,17 +25,18 @@ const Wrapper = styled.div<{ restrictWidth?: number }>`
 
 interface Props {
   color: string;
+  showAddData?: boolean;
   restrictWidth?: number;
 }
 
-export const Header = ({ color, restrictWidth }: Props) => {
+export const Header = ({ color, restrictWidth, showAddData = false }: Props) => {
   return (
     <Container color={color}>
       <Wrapper restrictWidth={restrictWidth}>
-        <EuiSpacer size="xxl" />
+        <EuiSpacer size="l" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="xxl" />
+            <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
@@ -45,8 +47,16 @@ export const Header = ({ color, restrictWidth }: Props) => {
               </h1>
             </EuiTitle>
           </EuiFlexItem>
+          {showAddData && (
+            <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+              {/* TODO: caue: what is the URL here? */}
+              <EuiButtonEmpty href="https://www.elastic.co" iconType="plusInCircle">
+                {i18n.translate('xpack.observability.home.addData', { defaultMessage: 'Add data' })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
-        <EuiSpacer size="xxl" />
+        <EuiSpacer size="l" />
       </Wrapper>
     </Container>
   );

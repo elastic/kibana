@@ -53,7 +53,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
             ) : (
               <>
                 <EuiSpacer size="s" />
-                <EuiProgress value={stat.value} max={1} />
+                <EuiProgress value={stat.value} max={1} style={{ width: '100px' }} />
               </>
             );
 

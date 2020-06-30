@@ -63,6 +63,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
+      showAddData
     >
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>

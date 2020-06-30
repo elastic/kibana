@@ -28,16 +28,20 @@ interface Props {
   bodyColor: string;
   children?: React.ReactNode;
   restrictWidth?: number;
+  showAddData?: boolean;
 }
 
-export const WithHeaderLayout = ({ headerColor, bodyColor, children, restrictWidth }: Props) => (
+export const WithHeaderLayout = ({
+  headerColor,
+  bodyColor,
+  children,
+  restrictWidth,
+  showAddData,
+}: Props) => (
   <Container color={bodyColor}>
-    <Header color={headerColor} restrictWidth={restrictWidth} />
+    <Header color={headerColor} restrictWidth={restrictWidth} showAddData={showAddData} />
     <Page restrictWidth={restrictWidth}>
-      <EuiPageBody>
-        <EuiSpacer size="m" />
-        {children}
-      </EuiPageBody>
+      <EuiPageBody>{children}</EuiPageBody>
     </Page>
   </Container>
 );
