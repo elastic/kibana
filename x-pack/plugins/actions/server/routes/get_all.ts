@@ -19,9 +19,6 @@ export const getAllActionRoute = (router: IRouter, licenseState: ILicenseState) 
     {
       path: `${BASE_ACTION_API_PATH}`,
       validate: {},
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

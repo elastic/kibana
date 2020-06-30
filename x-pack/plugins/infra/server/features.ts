@@ -20,7 +20,7 @@ export const METRICS_FEATURE = {
     all: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra', 'alerting-read', 'alerting-all'],
       savedObject: {
         all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
         read: ['index-pattern'],
@@ -40,7 +40,7 @@ export const METRICS_FEATURE = {
     read: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra', 'alerting-read', 'alerting-all'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
         read: ['infrastructure-ui-source', 'index-pattern'],

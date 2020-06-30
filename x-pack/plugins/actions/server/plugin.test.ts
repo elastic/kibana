@@ -8,6 +8,7 @@ import { PluginInitializerContext, RequestHandlerContext } from '../../../../src
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
@@ -43,6 +44,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
     });
 
@@ -200,6 +202,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),

@@ -8,12 +8,14 @@ import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
+export const ACTION_SAVED_OBJECT_TYPE = 'action';
+
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   savedObjects.registerType({
-    name: 'action',
+    name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action,
@@ -24,7 +26,7 @@ export function setupSavedObjects(
   // - `config` will be included in AAD
   // - everything else excluded from AAD
   encryptedSavedObjects.registerType({
-    type: 'action',
+    type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['name']),
   });

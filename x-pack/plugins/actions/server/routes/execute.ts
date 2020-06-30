@@ -32,9 +32,6 @@ export const executeActionRoute = (router: IRouter, licenseState: ILicenseState)
         body: bodySchema,
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

@@ -137,7 +137,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: ['securitySolution', 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: [
               'alert',
@@ -165,7 +165,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: ['securitySolution', 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
             read: [

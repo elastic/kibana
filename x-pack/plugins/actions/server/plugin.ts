@@ -29,6 +29,8 @@ import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_m
 import { LicensingPluginSetup } from '../../licensing/server';
 import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 import { ActionsConfig } from './config';
 import { Services, ActionType, PreConfiguredAction } from './types';
@@ -53,6 +55,9 @@ import {
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import { setupSavedObjects } from './saved_objects';
+import { ACTIONS_FEATURE } from './feature';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -78,6 +83,8 @@ export interface ActionsPluginsSetup {
   spaces?: SpacesPluginSetup;
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -97,6 +104,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private spaces?: SpacesServiceSetup;
+  private security?: SecurityPluginSetup;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
@@ -131,6 +139,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
+    plugins.features.registerFeature(ACTIONS_FEATURE);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -167,6 +176,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.serverBasePath = core.http.basePath.serverBasePath;
     this.actionExecutor = actionExecutor;
     this.spaces = plugins.spaces?.spacesService;
+    this.security = plugins.security;
 
     registerBuiltInActionTypes({
       logger: this.logger,
@@ -227,6 +237,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       kibanaIndex,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
+      security,
     } = this;
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
@@ -287,6 +298,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
           preconfiguredActions,
           request,
+          authorization: new ActionsAuthorization({
+            request,
+            authorization: security?.authz,
+            auditLogger: new ActionsAuthorizationAuditLogger(
+              security?.audit.getLogger(ACTIONS_FEATURE.id)
+            ),
+          }),
           actionExecutor: actionExecutor!,
           executionEnqueuer: createExecutionEnqueuerFunction({
             taskManager: plugins.taskManager,
@@ -322,6 +340,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
       actionExecutor,
+      security,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -340,6 +359,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
             request,
+            authorization: new ActionsAuthorization({
+              request,
+              authorization: security?.authz,
+              auditLogger: new ActionsAuthorizationAuditLogger(
+                security?.audit.getLogger(ACTIONS_FEATURE.id)
+              ),
+            }),
             actionExecutor: actionExecutor!,
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,

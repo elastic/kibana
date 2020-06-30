@@ -31,9 +31,6 @@ export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) 
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-all'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,

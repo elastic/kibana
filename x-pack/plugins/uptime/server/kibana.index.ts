@@ -39,14 +39,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: [
-          'uptime-read',
-          'uptime-write',
-          'actions-read',
-          'actions-all',
-          'alerting-read',
-          'alerting-all',
-        ],
+        api: ['uptime-read', 'uptime-write', 'alerting-read', 'alerting-all'],
         savedObject: {
           all: [umDynamicSettings.name, 'alert', 'action', 'action_task_params'],
           read: [],
@@ -66,7 +59,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+        api: ['uptime-read', 'alerting-read', 'alerting-all'],
         savedObject: {
           all: ['alert', 'action', 'action_task_params'],
           read: [umDynamicSettings.name],

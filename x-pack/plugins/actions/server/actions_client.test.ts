@@ -22,11 +22,14 @@ import {
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { KibanaRequest } from 'kibana/server';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 
 const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
+const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
 const request = {} as KibanaRequest;
 
@@ -62,10 +65,81 @@ beforeEach(() => {
     actionExecutor,
     executionEnqueuer,
     request,
+    authorization: (authorization as unknown) as ActionsAuthorization,
   });
 });
 
 describe('create()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to create this type of action', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+        },
+        references: [],
+      };
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        executor,
+      });
+      savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+    });
+
+    test('throws when user is not authorised to create this type of action', async () => {
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+        },
+        references: [],
+      };
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        executor,
+      });
+      savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to create a "my-action-type" action`)
+      );
+
+      await expect(
+        actionsClient.create({
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-action-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to create a "my-action-type" action]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('create', 'my-action-type');
+    });
+  });
+
   test('creates an action with all given properties', async () => {
     const savedObjectCreateResult = {
       id: '1',
@@ -244,6 +318,7 @@ describe('create()', () => {
       actionExecutor,
       executionEnqueuer,
       request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
     });
 
     const savedObjectCreateResult = {
@@ -313,6 +388,116 @@ describe('create()', () => {
 });
 
 describe('get()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to get the type of action', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'type',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+        },
+        references: [],
+      });
+
+      await actionsClient.get({ id: '1' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('ensures user is authorised to get preconfigured type of action', async () => {
+      actionsClient = new ActionsClient({
+        actionTypeRegistry,
+        savedObjectsClient,
+        scopedClusterClient,
+        defaultKibanaIndex,
+        actionExecutor,
+        executionEnqueuer,
+        request,
+        authorization: (authorization as unknown) as ActionsAuthorization,
+        preconfiguredActions: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: 'my-action-type',
+            secrets: {
+              test: 'test1',
+            },
+            isPreconfigured: true,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+      });
+
+      await actionsClient.get({ id: 'testPreconfigured' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'type',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-action-type',
+          config: {},
+        },
+        references: [],
+      });
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get a "my-action-type" action`)
+      );
+
+      await expect(actionsClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "my-action-type" action]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to create preconfigured of action', async () => {
+      actionsClient = new ActionsClient({
+        actionTypeRegistry,
+        savedObjectsClient,
+        scopedClusterClient,
+        defaultKibanaIndex,
+        actionExecutor,
+        executionEnqueuer,
+        request,
+        authorization: (authorization as unknown) as ActionsAuthorization,
+        preconfiguredActions: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: 'my-action-type',
+            secrets: {
+              test: 'test1',
+            },
+            isPreconfigured: true,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+      });
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get a "my-action-type" action`)
+      );
+
+      await expect(actionsClient.get({ id: 'testPreconfigured' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "my-action-type" action]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+  });
+
   test('calls savedObjectsClient with id', async () => {
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
@@ -343,6 +528,7 @@ describe('get()', () => {
       actionExecutor,
       executionEnqueuer,
       request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -371,6 +557,78 @@ describe('get()', () => {
 });
 
 describe('getAll()', () => {
+  describe('authorization', () => {
+    function getAllOperation(): ReturnType<ActionsClient['getAll']> {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      });
+
+      actionsClient = new ActionsClient({
+        actionTypeRegistry,
+        savedObjectsClient,
+        scopedClusterClient,
+        defaultKibanaIndex,
+        actionExecutor,
+        executionEnqueuer,
+        request,
+        authorization: (authorization as unknown) as ActionsAuthorization,
+        preconfiguredActions: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            secrets: {},
+            isPreconfigured: true,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+      });
+      return actionsClient.getAll();
+    }
+
+    test('ensures user is authorised to get the type of action', async () => {
+      await getAllOperation();
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get all actions`)
+      );
+
+      await expect(getAllOperation()).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get all actions]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+  });
+
   test('calls savedObjectsClient with parameters', async () => {
     const expectedResult = {
       total: 1,
@@ -407,6 +665,7 @@ describe('getAll()', () => {
       actionExecutor,
       executionEnqueuer,
       request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -443,6 +702,74 @@ describe('getAll()', () => {
 });
 
 describe('getBulk()', () => {
+  describe('authorization', () => {
+    function getBulkOperation(): ReturnType<ActionsClient['getBulk']> {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '1',
+            type: 'action',
+            attributes: {
+              actionTypeId: 'test',
+              name: 'test',
+              config: {
+                foo: 'bar',
+              },
+            },
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      });
+
+      actionsClient = new ActionsClient({
+        actionTypeRegistry,
+        savedObjectsClient,
+        scopedClusterClient,
+        defaultKibanaIndex,
+        actionExecutor,
+        executionEnqueuer,
+        request,
+        authorization: (authorization as unknown) as ActionsAuthorization,
+        preconfiguredActions: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            secrets: {},
+            isPreconfigured: true,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+      });
+      return actionsClient.getBulk(['1', 'testPreconfigured']);
+    }
+
+    test('ensures user is authorised to get the type of action', async () => {
+      await getBulkOperation();
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get all actions`)
+      );
+
+      await expect(getBulkOperation()).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get all actions]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+  });
+
   test('calls getBulk savedObjectsClient with parameters', async () => {
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -475,6 +802,7 @@ describe('getBulk()', () => {
       actionExecutor,
       executionEnqueuer,
       request,
+      authorization: (authorization as unknown) as ActionsAuthorization,
       preconfiguredActions: [
         {
           id: 'testPreconfigured',
@@ -514,6 +842,25 @@ describe('getBulk()', () => {
 });
 
 describe('delete()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to delete actions', async () => {
+      await actionsClient.delete({ id: '1' });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to delete all actions`)
+      );
+
+      await expect(actionsClient.delete({ id: '1' })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to delete all actions]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+    });
+  });
+
   test('calls savedObjectsClient with id', async () => {
     const expectedResult = Symbol();
     savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
@@ -530,6 +877,60 @@ describe('delete()', () => {
 });
 
 describe('update()', () => {
+  describe('authorization', () => {
+    function updateOperation(): ReturnType<ActionsClient['update']> {
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        executor,
+      });
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+        },
+        references: [],
+      });
+      savedObjectsClient.update.mockResolvedValueOnce({
+        id: 'my-action',
+        type: 'action',
+        attributes: {
+          actionTypeId: 'my-action-type',
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+        references: [],
+      });
+      return actionsClient.update({
+        id: 'my-action',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      });
+    }
+    test('ensures user is authorised to update actions', async () => {
+      await updateOperation();
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to update all actions`)
+      );
+
+      await expect(updateOperation()).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to update all actions]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+  });
+
   test('updates an action with all given properties', async () => {
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -742,6 +1143,35 @@ describe('update()', () => {
 });
 
 describe('execute()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to excecute actions', async () => {
+      await actionsClient.execute({
+        actionId: 'action-id',
+        params: {
+          name: 'my name',
+        },
+      });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to execute all actions`)
+      );
+
+      await expect(
+        actionsClient.execute({
+          actionId: 'action-id',
+          params: {
+            name: 'my name',
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+  });
+
   test('calls the actionExecutor with the appropriate parameters', async () => {
     const actionId = uuid.v4();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
@@ -765,6 +1195,35 @@ describe('execute()', () => {
 });
 
 describe('enqueueExecution()', () => {
+  describe('authorization', () => {
+    test('ensures user is authorised to excecute actions', async () => {
+      await actionsClient.enqueueExecution({
+        id: uuid.v4(),
+        params: {},
+        spaceId: 'default',
+        apiKey: null,
+      });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to execute all actions`)
+      );
+
+      await expect(
+        actionsClient.enqueueExecution({
+          id: uuid.v4(),
+          params: {},
+          spaceId: 'default',
+          apiKey: null,
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+    });
+  });
+
   test('calls the executionEnqueuer with the appropriate parameters', async () => {
     const opts = {
       id: uuid.v4(),

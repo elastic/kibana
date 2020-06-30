@@ -20,14 +20,7 @@ export const APM_FEATURE = {
   privileges: {
     all: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'apm_write',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm', 'apm_write', 'alerting-read', 'alerting-all'],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
@@ -46,13 +39,7 @@ export const APM_FEATURE = {
     },
     read: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm', 'alerting-read', 'alerting-all'],
       catalogue: ['apm'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
