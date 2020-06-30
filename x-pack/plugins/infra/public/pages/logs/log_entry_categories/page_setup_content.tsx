@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -19,7 +19,7 @@ interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContent> = ({
+export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContentProps> = ({
   onOpenSetup,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
