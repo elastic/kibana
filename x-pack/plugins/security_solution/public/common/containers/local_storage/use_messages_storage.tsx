@@ -12,6 +12,7 @@ export interface UseMessagesStorage {
   addMessage: (plugin: string, id: string) => void;
   removeMessage: (plugin: string, id: string) => void;
   clearAllMessages: (plugin: string) => void;
+  hasMessage: (plugin: string, id: string) => boolean;
 }
 
 export const useMessagesStorage = (): UseMessagesStorage => {
@@ -26,6 +27,14 @@ export const useMessagesStorage = (): UseMessagesStorage => {
     (plugin: string, id: string) => {
       const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
       storage.set(`${plugin}-messages`, [...pluginStorage, id]);
+    },
+    [storage]
+  );
+
+  const hasMessage = useCallback(
+    (plugin: string, id: string): boolean => {
+      const pluginStorage = storage.get(`${plugin}-messages`) ?? [];
+      return pluginStorage.filter((val: string) => val === id).length > 0;
     },
     [storage]
   );
@@ -48,5 +57,6 @@ export const useMessagesStorage = (): UseMessagesStorage => {
     addMessage,
     clearAllMessages,
     removeMessage,
+    hasMessage,
   };
 };
