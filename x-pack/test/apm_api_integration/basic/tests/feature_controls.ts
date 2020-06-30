@@ -7,9 +7,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertest = getService('supertestAsApmWriteUser');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');

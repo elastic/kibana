@@ -19,5 +19,5 @@ yarn percy exec -t 500 -- -- \
     --kibana-install-dir "$installDir" \
     --config test/visual_regression/config.ts;
 
-cd "$KIBANA_DIR"
-source "test/scripts/jenkins_xpack_page_load_metrics.sh"
+# cd "$KIBANA_DIR"
+# source "test/scripts/jenkins_xpack_page_load_metrics.sh"

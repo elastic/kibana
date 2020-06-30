@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-rawResponse: SearchResponse<Hits>;
+rawResponse: SearchResponse<any>;
 ```

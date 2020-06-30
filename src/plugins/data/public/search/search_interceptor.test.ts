@@ -19,12 +19,15 @@
 
 import { CoreStart } from '../../../../core/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
+import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+jest.useFakeTimers();
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
@@ -68,7 +71,7 @@ describe('SearchInterceptor', () => {
       }
     });
 
-    test('Observable should fail if fetch times out (test merged signal)', async (done) => {
+    test('Observable should fail if fetch times out (test merged signal)', async () => {
       mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
         return new Promise((resolve, reject) => {
           options.signal.addEventListener('abort', () => {
@@ -87,12 +90,15 @@ describe('SearchInterceptor', () => {
       const error = (e: any) => {
         expect(next).not.toBeCalled();
         expect(e).toBeInstanceOf(AbortError);
-        done();
       };
       response.subscribe({ next, error });
+
+      jest.advanceTimersByTime(5000);
+
+      await flushPromises();
     });
 
-    test('Observable should fail if user aborts (test merged signal)', async (done) => {
+    test('Observable should fail if user aborts (test merged signal)', async () => {
       const abortController = new AbortController();
       mockCoreStart.http.fetch.mockImplementationOnce((options: any) => {
         return new Promise((resolve, reject) => {
@@ -112,10 +118,12 @@ describe('SearchInterceptor', () => {
       const error = (e: any) => {
         expect(next).not.toBeCalled();
         expect(e).toBeInstanceOf(AbortError);
-        done();
       };
       response.subscribe({ next, error });
       setTimeout(() => abortController.abort(), 200);
+      jest.advanceTimersByTime(5000);
+
+      await flushPromises();
     });
 
     test('Immediatelly aborts if passed an aborted abort signal', async (done) => {

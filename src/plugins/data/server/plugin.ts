@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService } from './index_patterns';
+import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -38,6 +44,7 @@ export interface DataPluginSetup {
 export interface DataPluginStart {
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 export interface DataPluginSetupDependencies {
@@ -52,12 +59,14 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
+    this.logger = initializerContext.logger.get('data');
   }
 
   public setup(
@@ -79,9 +88,14 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   }
 
   public start(core: CoreStart) {
+    const fieldFormats = this.fieldFormats.start();
     return {
       search: this.searchService.start(),
-      fieldFormats: this.fieldFormats.start(),
+      fieldFormats,
+      indexPatterns: this.indexPatterns.start(core, {
+        fieldFormats,
+        logger: this.logger.get('indexPatterns'),
+      }),
     };
   }
 

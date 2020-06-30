@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import pRetry from 'p-retry';
-import { Logger, APICaller } from 'src/core/server';
+import { Logger, LegacyAPICaller } from 'src/core/server';
 
 export interface MappingsObject {
   type: string;
@@ -29,7 +29,7 @@ export async function createOrUpdateIndex({
 }: {
   index: string;
   mappings: MappingsDefinition;
-  apiCaller: APICaller;
+  apiCaller: LegacyAPICaller;
   logger: Logger;
 }) {
   try {
@@ -79,7 +79,7 @@ function createNewIndex({
   mappings,
 }: {
   index: string;
-  apiCaller: APICaller;
+  apiCaller: LegacyAPICaller;
   mappings: MappingsDefinition;
 }) {
   return apiCaller('indices.create', {
@@ -98,7 +98,7 @@ function updateExistingIndex({
   mappings,
 }: {
   index: string;
-  apiCaller: APICaller;
+  apiCaller: LegacyAPICaller;
   mappings: MappingsDefinition;
 }) {
   return apiCaller('indices.putMapping', {

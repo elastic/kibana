@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import { loadingServiceMock } from './http_service.test.mocks';
 
