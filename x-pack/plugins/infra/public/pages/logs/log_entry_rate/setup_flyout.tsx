@@ -96,7 +96,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
           <h3>
             <FormattedMessage
               id="xpack.infra.logs.setupFlyout.setupFlyoutTitle"
-              defaultMessage="Anomaly detection with Machine learning"
+              defaultMessage="Anomaly detection with Machine Learning"
             />
           </h3>
         </EuiTitle>
