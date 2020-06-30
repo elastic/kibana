@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 
 const alertTypeMetric = {
@@ -33,7 +33,7 @@ const alertTypeMetric = {
   },
 };
 
-export async function getTotalCountAggregations(callCluster: APICaller, kibanaInex: string) {
+export async function getTotalCountAggregations(callCluster: LegacyAPICaller, kibanaInex: string) {
   const throttleTimeMetric = {
     scripted_metric: {
       init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
@@ -286,7 +286,7 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
   };
 }
 
-export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: string) {
+export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaInex: string) {
   const searchResult: SearchResponse<unknown> = await callCluster('search', {
     index: kibanaInex,
     rest_total_hits_as_int: true,

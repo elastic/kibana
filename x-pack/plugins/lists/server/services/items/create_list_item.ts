@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   IdOrUndefined,
@@ -22,7 +22,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;

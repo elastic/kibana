@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from 'src/core/server';
+import { ILegacyClusterClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
   MappingsDefinition,
@@ -17,7 +17,7 @@ export const createApmCustomLinkIndex = async ({
   config,
   logger,
 }: {
-  esClient: IClusterClient;
+  esClient: ILegacyClusterClient;
   config: APMConfig;
   logger: Logger;
 }) => {
