@@ -15,7 +15,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
 import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
@@ -26,8 +26,8 @@ import { migrateAgentConfigToV790 } from './migrations/agent_config_v790';
  */
 
 const savedObjectTypes: { [key: string]: SavedObjectsType } = {
-  [GLOBAL_SETTINGS_SAVED_OBJET_TYPE]: {
-    name: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+  [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
+    name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -68,6 +68,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         default_api_key: { type: 'keyword' },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text' },
+        packages: { type: 'keyword' },
       },
     },
   },
@@ -212,7 +213,12 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: { type: 'keyword' },
+                dataset: {
+                  properties: {
+                    name: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                  },
+                },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
                 agent_stream: { type: 'flattened' },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { ILegacyClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { HTTPAuthorizationHeader } from './http_authentication';
 import { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';
@@ -15,7 +15,7 @@ import { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';
  */
 export interface ConstructorOptions {
   logger: Logger;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   license: SecurityLicense;
 }
 
@@ -116,7 +116,7 @@ export interface InvalidateAPIKeyResult {
  */
 export class APIKeys {
   private readonly logger: Logger;
-  private readonly clusterClient: IClusterClient;
+  private readonly clusterClient: ILegacyClusterClient;
   private readonly license: SecurityLicense;
 
   constructor({ logger, clusterClient, license }: ConstructorOptions) {
