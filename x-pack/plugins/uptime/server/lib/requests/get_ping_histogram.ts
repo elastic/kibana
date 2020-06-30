@@ -8,7 +8,6 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { getFilterClause } from '../helper';
 import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
-import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
@@ -42,8 +41,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   if (bucketSize) {
     seriesHistogram.date_histogram = {
       field: '@timestamp',
-      fixed_interval:
-        bucketSize || getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT) + 'ms',
+      fixed_interval: bucketSize,
       missing: 0,
     };
   } else {
