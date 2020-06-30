@@ -20,17 +20,23 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../../../../plugins/expressions/public';
 import { getIndexPatterns } from '../../services';
+import { IndexPatternSpec } from '../../../common/index_patterns';
 
-const name = 'indexPatternLoad';
+const name = 'indexPattern';
 
 type Input = null;
-type Output = Promise<IndexPatternSpec>;
+type Output = Promise<{ type: 'index_pattern'; value: IndexPatternSpec }>;
 
 interface Arguments {
   id: string;
 }
 
-export const indexPatternLoad = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const indexPatternLoad = (): ExpressionFunctionDefinition<
+  typeof name,
+  Input,
+  Arguments,
+  Output
+> => ({
   name,
   type: 'index_pattern',
   inputTypes: ['null'],
@@ -41,7 +47,7 @@ export const indexPatternLoad = (): ExpressionFunctionDefinition<typeof name, In
     id: {
       types: ['string'],
       required: true,
-      help:  i18n.translate('data.functions.indexPatternLoad.id.help', {
+      help: i18n.translate('data.functions.indexPatternLoad.id.help', {
         defaultMessage: 'index pattern id to load',
       }),
     },
@@ -51,6 +57,6 @@ export const indexPatternLoad = (): ExpressionFunctionDefinition<typeof name, In
 
     const indexPattern = await indexPatterns.get(args.id);
 
-    return indexPattern.toSpec();
+    return { type: 'index_pattern', value: indexPattern.toSpec() };
   },
 });
