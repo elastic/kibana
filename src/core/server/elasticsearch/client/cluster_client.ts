@@ -50,15 +50,19 @@ export interface IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements IClusterClient {
-  private readonly internalFacade: ClientFacade;
+  private readonly internalClient: Client;
   private readonly scopedClient: Client;
+
+  private readonly internalFacade: ClientFacade;
+  private isClosed = false;
 
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.internalFacade = getClientFacade(configureClient(config, { logger }));
+    this.internalClient = configureClient(config, { logger });
+    this.internalFacade = getClientFacade(this.internalClient);
     this.scopedClient = configureClient(config, { logger, scoped: true });
   }
 
@@ -70,6 +74,20 @@ export class ClusterClient implements IClusterClient {
     const headers = this.getScopedHeaders(request);
     const scopedWrapper = getClientFacade(this.scopedClient, headers);
     return new ScopedClusterClient(this.internalFacade, scopedWrapper);
+  }
+
+  /**
+   * Closes the cluster client. After that client cannot be used and one should
+   * create a new client instance to be able to interact with Elasticsearch API.
+   */
+  public close() {
+    if (this.isClosed) {
+      return;
+    }
+
+    this.isClosed = true;
+    this.internalClient.close();
+    this.scopedClient.close();
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
