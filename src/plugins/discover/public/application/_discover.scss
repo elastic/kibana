@@ -100,16 +100,6 @@ discover-app {
 
 .dscSkipButton {
   position: absolute;
-  left: -10000px;
+  right: $euiSizeM;
   top: $euiSizeXS;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-
-  &:focus {
-    left: initial;
-    right: $euiSize;
-    width: auto;
-    height: auto;
-  }
 }
