@@ -22,12 +22,12 @@ export class TagsClient implements ITagsClient {
 
   constructor(private readonly params: TagsClientParams) {}
 
-  private tagSavedObjectToTag(savedObject: TagSavedObject): Tag {
+  private readonly tagSavedObjectToTag = (savedObject: TagSavedObject): Tag => {
     return {
       id: savedObject.id,
       ...savedObject.attributes,
     };
-  }
+  };
 
   public async create({ tag }: TagsClientCreateParams): Promise<{ tag: Tag }> {
     const { savedObjectsClient, user } = this.params;
@@ -59,5 +59,18 @@ export class TagsClient implements ITagsClient {
     );
 
     return { tag: this.tagSavedObjectToTag(savedObject) };
+  }
+
+  public async getAll(): Promise<{ tags: Tag[] }> {
+    const { savedObjectsClient } = this.params;
+
+    const result = await savedObjectsClient.find<RawTag>({
+      type: this.type,
+      perPage: 1000,
+    });
+
+    return {
+      tags: result.saved_objects.map(this.tagSavedObjectToTag),
+    };
   }
 }

@@ -29,6 +29,11 @@ export interface TagsClientCreateResult {
   tag: Tag;
 }
 
+export interface TagsClientGetAllResult {
+  tags: Tag[];
+}
+
 export interface ITagsClient {
   create(params: TagsClientCreateParams): Promise<TagsClientCreateResult>;
+  getAll(): Promise<TagsClientGetAllResult>;
 }

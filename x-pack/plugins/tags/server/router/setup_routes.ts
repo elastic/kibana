@@ -5,8 +5,10 @@
  */
 
 import { createTag } from './routes/create_tag';
+import { getAllTags } from './routes/get_all_tags';
 import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
   createTag(params);
+  getAllTags(params);
 };
