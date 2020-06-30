@@ -52,11 +52,12 @@ export interface ValueListsFormProps {
 }
 
 export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError, onSuccess }) => {
+  const ctrl = useRef(new AbortController());
   const [files, setFiles] = useState<FileList | null>(null);
   const [type, setType] = useState<Type>(defaultListType);
   const filePickerRef = useRef<EuiFilePicker | null>(null);
   const { http } = useKibana().services;
-  const { start: importList, abort: abortImport, ...importState } = useImportList();
+  const { start: importList, ...importState } = useImportList();
 
   // EuiRadioGroup's onChange only infers 'string' from our options
   const handleRadioChange = useCallback((t: string) => setType(t as Type), [setType]);
@@ -71,8 +72,8 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   }, [setType]);
 
   const handleCancel = useCallback(() => {
-    abortImport();
-  }, [abortImport]);
+    ctrl.current.abort();
+  }, []);
 
   const handleSuccess = useCallback(
     (response: ListSchema) => {
@@ -90,10 +91,12 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
 
   const handleImport = useCallback(() => {
     if (!importState.loading && files && files.length) {
+      ctrl.current = new AbortController();
       importList({
         file: files[0],
         listId: undefined,
         http,
+        signal: ctrl.current.signal,
         type,
       });
     }
