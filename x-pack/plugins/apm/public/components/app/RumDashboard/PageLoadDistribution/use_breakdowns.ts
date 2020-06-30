@@ -43,6 +43,6 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
         });
       }
     },
-    [end, start, uiFilters, field, value, minP, maxP]
+    [end, start, serviceName, uiFilters, field, value, minP, maxP]
   );
 };

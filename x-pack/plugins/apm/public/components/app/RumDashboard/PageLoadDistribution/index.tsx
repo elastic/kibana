@@ -57,7 +57,14 @@ export const PageLoadDistribution = () => {
         });
       }
     },
-    [end, start, uiFilters, percentileRange.min, percentileRange.max]
+    [
+      end,
+      start,
+      serviceName,
+      uiFilters,
+      percentileRange.min,
+      percentileRange.max,
+    ]
   );
 
   const onPercentileChange = (min: number, max: number) => {

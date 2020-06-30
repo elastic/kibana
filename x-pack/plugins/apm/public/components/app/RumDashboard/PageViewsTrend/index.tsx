@@ -40,7 +40,7 @@ export const PageViewsTrend = () => {
         });
       }
     },
-    [end, start, uiFilters, breakdowns]
+    [end, start, serviceName, uiFilters, breakdowns]
   );
 
   const onBreakdownChange = (values: BreakdownItem[]) => {

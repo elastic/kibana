@@ -35,7 +35,7 @@ export function ClientMetrics() {
         });
       }
     },
-    [start, end, uiFilters]
+    [start, end, serviceName, uiFilters]
   );
 
   const STAT_STYLE = { width: '240px' };

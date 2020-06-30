@@ -45,7 +45,7 @@ const ServiceNameFilter = ({ serviceNames }: Props) => {
     if (!serviceName && serviceNames.length > 0) {
       updateServiceName(serviceNames[0]);
     }
-  }, [serviceNames]);
+  }, [serviceNames, serviceName]);
 
   return (
     <>
