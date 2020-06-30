@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
 
 // mock callWithRequest
-const callWithRequest: APICaller = (method: string) => {
+const callWithRequest: LegacyAPICaller = (method: string) => {
   return new Promise((resolve) => {
     if (method === 'fieldCaps') {
       resolve({ fields: [] });

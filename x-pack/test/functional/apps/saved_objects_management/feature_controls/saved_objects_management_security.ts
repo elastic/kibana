@@ -310,19 +310,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('listing', () => {
-        it('redirects to Kibana home', async () => {
+        it(`doesn't display  management section`, async () => {
+          await PageObjects.settings.navigateTo();
+          await testSubjects.existOrFail('managementHome'); // this ensures we've gotten to the management page
+          await testSubjects.missingOrFail('objects');
+        });
+
+        it(`can't navigate to listing page`, async () => {
           await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
             shouldUseHashForSubUrl: false,
           });
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('homeApp');
+
+          await testSubjects.existOrFail('managementHome');
         });
       });
 
       describe('edit visualization', () => {
-        it('redirects to Kibana home', async () => {
+        it('redirects to management home', async () => {
           await PageObjects.common.navigateToUrl(
             'management',
             'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
@@ -333,7 +339,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             }
           );
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('homeApp');
+          await testSubjects.existOrFail('managementHome');
         });
       });
     });

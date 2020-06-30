@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { MSearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
@@ -44,7 +44,7 @@ export interface QueryInfo {
  * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
  */
 export class MultiSearcher {
-  constructor(private readonly client: IScopedClusterClient) {}
+  constructor(private readonly client: ILegacyScopedClusterClient) {}
 
   /**
    * Perform the multi search on the passed in queries
