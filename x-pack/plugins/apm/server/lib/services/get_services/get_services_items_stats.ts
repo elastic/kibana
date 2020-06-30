@@ -28,7 +28,7 @@ interface AggregationParams {
   projection: ServicesItemsProjection;
 }
 
-export const getTransactionDurationAvg = async ({
+export const getTransactionDurationAverages = async ({
   setup,
   projection,
 }: AggregationParams) => {
@@ -74,12 +74,12 @@ export const getTransactionDurationAvg = async ({
   }
 
   return aggregations.services.buckets.map((bucket) => ({
-    name: bucket.key as string,
-    value: bucket.average.value,
+    serviceName: bucket.key as string,
+    avgResponseTime: bucket.average.value,
   }));
 };
 
-export const getAgentName = async ({
+export const getAgentNames = async ({
   setup,
   projection,
 }: AggregationParams) => {
@@ -136,8 +136,8 @@ export const getAgentName = async ({
   }
 
   return aggregations.services.buckets.map((bucket) => ({
-    name: bucket.key as string,
-    value: (bucket.agent_name.hits.hits[0]?._source as {
+    serviceName: bucket.key as string,
+    agentName: (bucket.agent_name.hits.hits[0]?._source as {
       agent: {
         name: string;
       };
@@ -145,7 +145,7 @@ export const getAgentName = async ({
   }));
 };
 
-export const getTransactionRate = async ({
+export const getTransactionRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
@@ -190,13 +190,13 @@ export const getTransactionRate = async ({
   return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
     const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
-      name: bucket.key as string,
-      value: transactionsPerMinute,
+      serviceName: bucket.key as string,
+      transactionsPerMinute,
     };
   });
 };
 
-export const getErrorRate = async ({
+export const getErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
@@ -231,10 +231,10 @@ export const getErrorRate = async ({
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
   return aggregations.services.buckets.map((bucket) => {
-    const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
+    const errorsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
-      name: bucket.key as string,
-      value: transactionsPerMinute,
+      serviceName: bucket.key as string,
+      errorsPerMinute,
     };
   });
 };
@@ -295,7 +295,7 @@ export const getEnvironments = async ({
   }
 
   return aggregations.services.buckets.map((bucket) => ({
-    name: bucket.key as string,
-    value: bucket.environments.buckets.map((env) => env.key as string),
+    serviceName: bucket.key as string,
+    environments: bucket.environments.buckets.map((env) => env.key as string),
   }));
 };
