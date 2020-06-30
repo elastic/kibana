@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Elasticsearch B.V licenses this file to you under the MIT License.
+# See `packages/elastic-safer-lodash-set/LICENSE` more information.
+
 clean_up () {
   exit_code=$?
   rm -fr .tmp
