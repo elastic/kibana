@@ -45,7 +45,7 @@ See {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
 [[glossary-annotation]] annotation ::
 // tag::annotation-def[]
 A way to augment a data display with descriptive domain knowledge.
-// end::alerts-annotation-def[]
+// end::annotation-def[]
 
 
 [[glossary-app]] app ::
