@@ -13,7 +13,7 @@ import { LegacyEsProvider } from './legacy_es';
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 // @ts-ignore not ts yet
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
-// @ts-ignore not ts yet
+
 import { UsageAPIProvider } from './usage_api';
 import {
   InfraOpsGraphQLClientProvider,
