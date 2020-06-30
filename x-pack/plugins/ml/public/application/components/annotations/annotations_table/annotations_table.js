@@ -51,6 +51,7 @@ import {
   annotationsRefreshed,
 } from '../../../services/annotations_service';
 
+const DETECTOR_INDEX = 'detector_index';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
@@ -67,6 +68,8 @@ export class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
+      queryText: 'event:(user)',
+      searchError: undefined,
       jobId:
         Array.isArray(this.props.jobs) &&
         this.props.jobs.length > 0 &&
@@ -77,6 +80,11 @@ export class AnnotationsTable extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+  }
+
+  setQueryText(queryText) {
+    this.setState({ queryText });
   }
 
   getAnnotations() {
@@ -123,47 +131,6 @@ export class AnnotationsTable extends Component {
     }
   }
 
-  getUniqueTerms() {
-    const { jobIds } = this.props;
-
-    this.setState({
-      isLoading: true,
-    });
-
-    if (jobIds) {
-      // Load annotations for the selected job.
-      ml.annotations
-        .getUniqueAnnotationTerms({
-          jobIds: jobIds,
-          earliestMs: null,
-          latestMs: null,
-          fields: [
-            {
-              field: 'event',
-              missing: 'user',
-            },
-          ],
-        })
-        .toPromise()
-        .then((resp) => {
-          const buckets = resp.event.buckets;
-          const foundUser = buckets.findIndex((d) => d.key === 'user') > -1;
-          this.setState({
-            filterOptions: foundUser ? buckets : [{ key: 'user', doc_count: 0 }, ...buckets],
-          });
-        })
-        .catch((resp) => {
-          console.log('Error loading list of unique annotation terms for jobs list:', resp);
-          this.setState({
-            annotations: [],
-            errorMessage: 'Error loading the list of annotation terms for this job',
-            isLoading: false,
-            jobId: undefined,
-          });
-        });
-    }
-  }
-
   getJob(jobId) {
     // check if the job was supplied via props and matches the supplied jobId
     if (Array.isArray(this.props.jobs) && this.props.jobs.length > 0) {
@@ -176,6 +143,56 @@ export class AnnotationsTable extends Component {
     return mlJobService.getJob(jobId);
   }
 
+  handleSearchChange({ query, queryText, error }) {
+    if (error) {
+      this.setState({ searchError: error });
+    }
+    const { _indexedClauses, clauses } = query.ast;
+    if (_indexedClauses.is && 'current_series' in _indexedClauses.is) {
+      const tempClauses = clauses.filter(
+        (clause) => !(clause.type === 'is' && clause.flag === 'current_series')
+      );
+
+      if (this.props.chartDetails?.entityData?.entities) {
+        this.props.chartDetails?.entityData?.entities.forEach(({ fieldType, fieldValue }) => {
+          const field = `${fieldType}_value`;
+
+          if (!(field in _indexedClauses.field)) {
+            tempClauses.push({
+              field: field,
+              match: 'must',
+              operator: 'eq',
+              type: 'field',
+              value: fieldValue,
+            });
+          } else {
+            const idx = tempClauses.findIndex((clause) => clause.field === field);
+            tempClauses.splice(idx, 1);
+          }
+        });
+      }
+
+      if (this.props.detectorIndex !== undefined) {
+        if (!(DETECTOR_INDEX in _indexedClauses.field)) {
+          tempClauses.push({
+            field: DETECTOR_INDEX,
+            match: 'must',
+            operator: 'eq',
+            type: 'field',
+            value: this.props.detectorIndex.toString(),
+          });
+        } else {
+          const idx = tempClauses.findIndex((clause) => clause.field === DETECTOR_INDEX);
+          tempClauses.splice(idx, 1);
+        }
+      }
+      this.setQueryText(query.syntax.print({ clauses: tempClauses }));
+    } else {
+      this.setQueryText(queryText);
+    }
+    return true;
+  }
+
   annotationsRefreshSubscription = null;
 
   componentDidMount() {
@@ -186,14 +203,9 @@ export class AnnotationsTable extends Component {
     ) {
       this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => {
         this.getAnnotations();
-        // getUniqueTerms();
       });
       annotationsRefreshed();
     }
-
-    // if (this.props.jobIds) {
-    //   this.getUniqueTerms();
-    // }
   }
 
   previousJobId = undefined;
@@ -306,6 +318,8 @@ export class AnnotationsTable extends Component {
   render() {
     const { isSingleMetricViewerLinkVisible = true, isNumberBadgeVisible = false } = this.props;
 
+    const { queryText, searchError } = this.state;
+
     if (this.props.annotations === undefined) {
       if (this.state.isLoading === true) {
         return (
@@ -412,6 +426,7 @@ export class AnnotationsTable extends Component {
           defaultMessage: 'Event',
         }),
         sortable: true,
+        width: '10%',
       },
     ];
 
@@ -450,11 +465,9 @@ export class AnnotationsTable extends Component {
             defaultMessage="Edit annotation"
           />
         );
-        const editAnnotationsTooltipAriaLabelText = (
-          <FormattedMessage
-            id="xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel"
-            defaultMessage="Edit annotation"
-          />
+        const editAnnotationsTooltipAriaLabelText = i18n.translate(
+          'xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel',
+          { defaultMessage: 'Edit annotation' }
         );
         return (
           <EuiToolTip position="bottom" content={editAnnotationsTooltipText}>
@@ -483,17 +496,14 @@ export class AnnotationsTable extends Component {
               defaultMessage="Job configuration not supported in Single Metric Viewer"
             />
           );
-          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable ? (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel"
-              defaultMessage="Open in Single Metric Viewer"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel"
-              defaultMessage="Job configuration not supported in Single Metric Viewer"
-            />
-          );
+          const openInSingleMetricViewerAriaLabelText = isDrillDownAvailable
+            ? i18n.translate('xpack.ml.annotationsTable.openInSingleMetricViewerAriaLabel', {
+                defaultMessage: 'Open in Single Metric Viewer',
+              })
+            : i18n.translate(
+                'xpack.ml.annotationsTable.jobConfigurationNotSupportedInSingleMetricViewerAriaLabel',
+                { defaultMessage: 'Job configuration not supported in Single Metric Viewer' }
+              );
 
           return (
             <EuiToolTip position="bottom" content={openInSingleMetricViewerTooltipText}>
@@ -561,7 +571,7 @@ export class AnnotationsTable extends Component {
         }
         if (entity.fieldType === 'by_field') {
           columns.push({
-            field: 'over_field_value',
+            field: 'by_field_value',
             name: i18n.translate('xpack.ml.annotationsTable.byColumnName', {
               defaultMessage: 'By',
             }),
@@ -571,33 +581,44 @@ export class AnnotationsTable extends Component {
       });
 
       filters.push({
-        type: 'field_value_toggle',
-        field: 'partition_field_value',
+        type: 'is',
+        field: 'current_series',
         name: 'Current Series',
         value: this.props.chartDetails.entityData.entities[0].fieldValue,
       });
     }
     const search = {
+      query: queryText,
+      onChange: this.handleSearchChange,
       box: {
         incremental: true,
         schema: true,
       },
-      defaultQuery: 'event:(user)',
       filters: filters,
     };
 
-    columns.push({
-      align: RIGHT_ALIGNMENT,
-      width: '60px',
-      name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
-        defaultMessage: 'Actions',
-      }),
-      actions,
-    });
+    columns.push(
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '60px',
+        name: i18n.translate('xpack.ml.annotationsTable.actionsColumnName', {
+          defaultMessage: 'Actions',
+        }),
+        actions,
+      },
+      {
+        field: 'detector_index',
+        name: i18n.translate('xpack.ml.annotationsTable.detectorColumnName', {
+          defaultMessage: 'Detector',
+        }),
+        width: '0px',
+      }
+    );
 
     return (
       <Fragment>
         <EuiInMemoryTable
+          error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
           items={annotations}

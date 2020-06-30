@@ -95,7 +95,11 @@ export function getFocusData(
       .pipe(
         catchError(() => {
           // silent fail
-          return of({ annotations: {} as Record<string, Annotation[]> });
+          return of({
+            annotations: {} as Record<string, Annotation[]>,
+            aggregations: {},
+            success: false,
+          });
         })
       ),
     // Plus query for forecast data if there is a forecastId stored in the appState.
