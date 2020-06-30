@@ -8,6 +8,7 @@ import {
   Annotation,
   EsAggregationResult,
   FieldToBucket,
+  GetAnnotationsResponse,
 } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
@@ -18,9 +19,10 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
+    fields: FieldToBucket[];
   }) {
     const body = JSON.stringify(obj);
-    return http$<{ annotations: Record<string, Annotation[]> }>({
+    return http$<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
       method: 'POST',
       body,

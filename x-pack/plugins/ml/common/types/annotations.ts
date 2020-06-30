@@ -102,6 +102,11 @@ export function isAnnotations(arg: any): arg is Annotations {
 }
 
 export interface FieldToBucket {
+  field: string;
+  missing?: string | number;
+}
+
+export interface FieldToBucketResult {
   key: string;
   doc_count: number;
 }
@@ -109,7 +114,13 @@ export interface FieldToBucket {
 export interface TermAggregationResult {
   doc_count_error_upper_bound: number;
   sum_other_doc_count: number;
-  buckets: FieldToBucket[];
+  buckets: FieldToBucketResult[];
 }
 
 export type EsAggregationResult = Record<string, TermAggregationResult>;
+
+export interface GetAnnotationsResponse {
+  aggregations?: EsAggregationResult;
+  annotations: Record<string, Annotations>;
+  success: boolean;
+}

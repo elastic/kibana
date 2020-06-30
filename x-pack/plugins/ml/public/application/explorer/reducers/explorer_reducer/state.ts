@@ -20,9 +20,13 @@ import {
   OverallSwimlaneData,
   SwimlaneData,
 } from '../../explorer_utils';
+import { Annotations, EsAggregationResult } from '../../../../../common/types/annotations';
 
 export interface ExplorerState {
-  annotationsData: any[];
+  annotations: {
+    annotationsData: Annotations;
+    aggregations: EsAggregationResult;
+  };
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -58,7 +62,10 @@ function getDefaultIndexPattern() {
 
 export function getExplorerDefaultState(): ExplorerState {
   return {
-    annotationsData: [],
+    annotations: {
+      annotationsData: [],
+      aggregations: {},
+    },
     bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,

@@ -37,6 +37,7 @@ export interface FocusData {
   showForecastCheckbox?: any;
   focusAnnotationData?: any;
   focusForecastData?: any;
+  focusAggregations?: any;
 }
 
 export function getFocusData(
@@ -84,6 +85,12 @@ export function getFocusData(
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        fields: [
+          {
+            field: 'event',
+            missing: 'user',
+          },
+        ],
       })
       .pipe(
         catchError(() => {
@@ -146,13 +153,14 @@ export function getFocusData(
             d.key = String.fromCharCode(65 + i);
             return d;
           });
+
+        refreshFocusData.focusAggregations = annotations.aggregations;
       }
 
       if (forecastData) {
         refreshFocusData.focusForecastData = processForecastResults(forecastData.results);
         refreshFocusData.showForecastCheckbox = refreshFocusData.focusForecastData.length > 0;
       }
-
       return refreshFocusData;
     })
   );

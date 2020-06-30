@@ -145,6 +145,7 @@ export class Explorer extends React.Component {
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
   _unsubscribeAll = new Subject();
+  htmlIdGen = htmlIdGenerator();
 
   componentDidMount() {
     limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
@@ -220,7 +221,7 @@ export class Explorer extends React.Component {
     const { showCharts, severity } = this.props;
 
     const {
-      annotationsData,
+      annotations,
       chartsData,
       filterActive,
       filterPlaceHolder,
@@ -234,6 +235,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
+    const { annotationsData, aggregations } = annotations;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -286,7 +288,6 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = selectedJobs.map((job) => job.id);
-    const htmlId = htmlIdGenerator();
     return (
       <ExplorerPage
         jobSelectorProps={jobSelectorProps}
@@ -336,7 +337,7 @@ export class Explorer extends React.Component {
             <EuiSpacer size="m" />
 
             <EuiAccordion
-              id={htmlId}
+              id={this.htmlIdGen()}
               buttonContent={
                 <EuiTitle className="panel-title">
                   <h2>
@@ -354,6 +355,7 @@ export class Explorer extends React.Component {
                   <AnnotationsTable
                     jobIds={selectedJobIds}
                     annotations={annotationsData}
+                    aggregations={aggregations}
                     drillDown={true}
                     numberBadge={false}
                   />

@@ -243,7 +243,7 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
           ),
         }),
       (
-        { annotationsData, overallState, tableData },
+        { annotationsData, aggregations, overallState, tableData },
         { influencers, viewBySwimlaneState }
       ): Partial<ExplorerState> => {
         return {

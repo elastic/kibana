@@ -73,8 +73,6 @@ export class AnnotationsTable extends Component {
         this.props.jobs[0] !== undefined
           ? this.props.jobs[0].job_id
           : undefined,
-      filters: false,
-      filterOptions: [],
     };
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
@@ -97,6 +95,12 @@ export class AnnotationsTable extends Component {
           earliestMs: null,
           latestMs: null,
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+          fields: [
+            {
+              field: 'event',
+              missing: 'user',
+            },
+          ],
         })
         .toPromise()
         .then((resp) => {
@@ -182,18 +186,18 @@ export class AnnotationsTable extends Component {
     ) {
       this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => {
         this.getAnnotations();
-        this.getUniqueTerms();
+        // getUniqueTerms();
       });
       annotationsRefreshed();
     }
 
-    if (this.props.jobIds) {
-      this.getUniqueTerms();
-    }
+    // if (this.props.jobIds) {
+    //   this.getUniqueTerms();
+    // }
   }
 
   previousJobId = undefined;
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     if (
       Array.isArray(this.props.jobs) &&
       this.props.jobs.length > 0 &&
@@ -202,13 +206,8 @@ export class AnnotationsTable extends Component {
       this.state.isLoading === false &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
-      this.getUniqueTerms();
       annotationsRefreshed();
       this.previousJobId = this.props.jobs[0].job_id;
-    }
-
-    if (prevProps.annotations !== this.props.annotations && this.props.jobIds) {
-      this.getUniqueTerms();
     }
   }
 
@@ -516,14 +515,19 @@ export class AnnotationsTable extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
-
+    let filterOptions = [];
+    if (this.props.aggregations?.event?.buckets) {
+      const buckets = this.props.aggregations.event.buckets;
+      const foundUser = buckets.findIndex((d) => d.key === 'user') > -1;
+      filterOptions = foundUser ? buckets : [{ key: 'user', doc_count: 0 }, ...buckets];
+    }
     const filters = [
       {
         type: 'field_value_selection',
         field: 'event',
         name: 'Event',
         multiSelect: 'or',
-        options: this.state.filterOptions.map((field) => ({
+        options: filterOptions.map((field) => ({
           value: field.key,
           name: field.key,
           view: `${field.key} (${field.doc_count})`,

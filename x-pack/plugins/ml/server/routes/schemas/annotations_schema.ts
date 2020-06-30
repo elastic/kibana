@@ -34,12 +34,6 @@ export const getAnnotationsSchema = schema.object({
   earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   maxAnnotations: schema.number(),
-});
-
-export const getAnnotationTermsSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
-  earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
-  latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   fields: schema.maybe(
     schema.arrayOf(
       schema.object({

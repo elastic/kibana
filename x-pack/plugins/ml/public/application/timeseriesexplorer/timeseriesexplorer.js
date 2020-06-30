@@ -126,6 +126,8 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
+    focusAggregations: {},
+    focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
     fullRefresh: true,
@@ -1026,6 +1028,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityValues,
       focusAggregationInterval,
       focusAnnotationData,
+      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1331,6 +1334,7 @@ export class TimeSeriesExplorer extends React.Component {
                     detectorIndex={selectedDetectorIndex}
                     jobIds={[this.props.selectedJobId]}
                     annotations={focusAnnotationData}
+                    aggregations={focusAggregations}
                     isSingleMetricViewerLinkVisible={false}
                     isNumberBadgeVisible={true}
                   />

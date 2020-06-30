@@ -548,6 +548,12 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        fields: [
+          {
+            field: 'event',
+            missing: 'user',
+          },
+        ],
       })
       .toPromise()
       .then((resp) => {
@@ -563,16 +569,17 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
           }
         });
 
-        return resolve(
-          annotationsData
+        return resolve({
+          annotationsData: annotationsData
             .sort((a, b) => {
               return a.timestamp - b.timestamp;
             })
             .map((d, i) => {
               d.key = String.fromCharCode(65 + i);
               return d;
-            })
-        );
+            }),
+          aggregations: resp.aggregations,
+        });
       })
       .catch((resp) => {
         console.log('Error loading list of annotations for jobs list:', resp);

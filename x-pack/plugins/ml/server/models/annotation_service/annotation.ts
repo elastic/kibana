@@ -29,23 +29,21 @@ interface EsResult {
   _id: string;
 }
 
-export interface IndexAnnotationArgs {
-  jobIds: string[];
-  earliestMs: number;
-  latestMs: number;
-  maxAnnotations: number;
-}
-
 export interface FieldToBucket {
   field: string;
   missing?: string | number;
 }
 
-export interface UniqueTermArgs {
+export interface IndexAnnotationArgs {
   jobIds: string[];
   earliestMs: number;
   latestMs: number;
-  fields: FieldToBucket[];
+  maxAnnotations: number;
+  fields?: FieldToBucket[];
+}
+
+export interface AggTerm {
+  terms: FieldToBucket;
 }
 
 export interface GetParams {
@@ -56,9 +54,8 @@ export interface GetParams {
 
 export interface GetResponse {
   success: true;
-  annotations: {
-    [key: string]: Annotations;
-  };
+  annotations: Record<string, Annotations>;
+  aggregations: EsAggregationResult;
 }
 
 export interface IndexParams {
@@ -111,139 +108,17 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
     return await callAsCurrentUser('index', params);
   }
 
-  async function getUniqueTerms({ jobIds, earliestMs, latestMs, fields }: UniqueTermArgs) {
-    const boolCriteria: object[] = [];
-
-    if (earliestMs !== null && latestMs !== null) {
-      boolCriteria.push({
-        bool: {
-          must_not: [
-            {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      timestamp: {
-                        lte: earliestMs,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      end_timestamp: {
-                        lte: earliestMs,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      timestamp: {
-                        gte: latestMs,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      end_timestamp: {
-                        gte: latestMs,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-    }
-
-    boolCriteria.push({
-      exists: { field: 'annotation' },
-    });
-
-    if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
-      let jobIdFilterStr = '';
-      _.each(jobIds, (jobId, i: number) => {
-        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
-      });
-      boolCriteria.push({
-        query_string: {
-          analyze_wildcard: false,
-          query: jobIdFilterStr,
-        },
-      });
-    }
-
-    interface AggTerm {
-      terms: FieldToBucket;
-    }
-    const aggs: Record<string, AggTerm> = {};
-    fields.forEach((fieldToBucket) => {
-      aggs[fieldToBucket.field] = {
-        terms: {
-          ...fieldToBucket,
-        },
-      };
-    });
-
-    const params: GetParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
-                  analyze_wildcard: false,
-                },
-              },
-              {
-                bool: {
-                  must: boolCriteria,
-                },
-              },
-            ],
-          },
-        },
-        aggs,
-      },
-    };
-    try {
-      const resp = await callAsCurrentUser('search', params);
-
-      if (resp.error !== undefined && resp.message !== undefined) {
-        // No need to translate, this will not be exposed in the UI.
-        throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
-      }
-
-      const results = _.get(resp, ['aggregations'], {}) as EsAggregationResult;
-      return results;
-    } catch (error) {
-      throw Boom.badRequest(error);
-    }
-  }
-
   async function getAnnotations({
     jobIds,
     earliestMs,
     latestMs,
     maxAnnotations,
+    fields,
   }: IndexAnnotationArgs) {
     const obj: GetResponse = {
       success: true,
       annotations: {},
+      aggregations: {},
     };
 
     const boolCriteria: object[] = [];
@@ -326,6 +201,17 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
       });
     }
 
+    const aggs: Record<string, AggTerm> = {};
+    if (fields) {
+      fields.forEach((fieldToBucket) => {
+        aggs[fieldToBucket.field] = {
+          terms: {
+            ...fieldToBucket,
+          },
+        };
+      });
+    }
+
     const params: GetParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
@@ -347,6 +233,7 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
             ],
           },
         },
+        ...(fields ? { aggs } : {}),
       },
     };
 
@@ -366,6 +253,10 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
         return { ...d._source, event: d._source?.event ?? 'user', _id: d._id } as Annotation;
       });
 
+      const aggregations = _.get(resp, ['aggregations'], {}) as EsAggregationResult;
+      if (fields) {
+        obj.aggregations = aggregations;
+      }
       if (isAnnotations(docs) === false) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations didn't pass integrity check.`);
@@ -399,6 +290,5 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
     getAnnotations,
     indexAnnotation,
     deleteAnnotation,
-    getUniqueTerms,
   };
 }
