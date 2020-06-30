@@ -17,17 +17,8 @@
  * under the License.
  */
 
-import { ConnectableObservable, Observable, Subscription, Subject } from 'rxjs';
-import {
-  filter,
-  first,
-  map,
-  publishReplay,
-  switchMap,
-  take,
-  shareReplay,
-  takeUntil,
-} from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
@@ -35,26 +26,14 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import {
   LegacyClusterClient,
-  ILegacyClusterClient,
   ILegacyCustomClusterClient,
   LegacyElasticsearchClientConfig,
-  LegacyCallAPIOptions,
 } from './legacy';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import {
-  InternalElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ScopeableRequest,
-} from './types';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
-
-/** @internal */
-interface CoreClusterClients {
-  config: ElasticsearchConfig;
-  legacyClient: LegacyClusterClient;
-}
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -65,14 +44,13 @@ export class ElasticsearchService
   implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscription?: Subscription;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private createLegacyClient?: (
     type: string,
     clientConfig?: Partial<LegacyElasticsearchClientConfig>
   ) => ILegacyCustomClusterClient;
-  private legacyClient?: ILegacyClusterClient;
+  private legacyClient?: LegacyClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -85,77 +63,11 @@ export class ElasticsearchService
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
-    const clients$ = this.config$.pipe(
-      filter(() => {
-        if (this.subscription !== undefined) {
-          this.log.error('Clients cannot be changed after they are created');
-          return false;
-        }
-
-        return true;
-      }),
-      switchMap(
-        (config) =>
-          new Observable<CoreClusterClients>((subscriber) => {
-            this.log.debug('Creating elasticsearch client');
-
-            const coreClients = {
-              config,
-              legacyClient: this.createLegacyClusterClient(
-                'data',
-                config,
-                deps.http.getAuthHeaders
-              ),
-            };
-
-            subscriber.next(coreClients);
-
-            return () => {
-              this.log.debug('Closing elasticsearch client');
-
-              coreClients.legacyClient.close();
-            };
-          })
-      ),
-      publishReplay(1)
-    ) as ConnectableObservable<CoreClusterClients>;
-
-    this.subscription = clients$.connect();
-
     const config = await this.config$.pipe(first()).toPromise();
-
-    const legacyClient$ = clients$.pipe(map((clients) => clients.legacyClient));
-
-    const legacyClient = {
-      async callAsInternalUser(
-        endpoint: string,
-        clientParams: Record<string, any> = {},
-        options?: LegacyCallAPIOptions
-      ) {
-        const _client = await legacyClient$.pipe(take(1)).toPromise();
-        return await _client.callAsInternalUser(endpoint, clientParams, options);
-      },
-      asScoped(request: ScopeableRequest) {
-        return {
-          callAsInternalUser: legacyClient.callAsInternalUser,
-          async callAsCurrentUser(
-            endpoint: string,
-            clientParams: Record<string, any> = {},
-            options?: LegacyCallAPIOptions
-          ) {
-            const _client = await legacyClient$.pipe(take(1)).toPromise();
-            return await _client
-              .asScoped(request)
-              .callAsCurrentUser(endpoint, clientParams, options);
-          },
-        };
-      },
-    };
-
-    this.legacyClient = legacyClient;
+    this.legacyClient = this.createLegacyClusterClient('data', config, deps.http.getAuthHeaders);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: legacyClient.callAsInternalUser,
+      callWithInternalUser: this.legacyClient.callAsInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
@@ -172,15 +84,15 @@ export class ElasticsearchService
 
     return {
       legacy: {
-        config$: clients$.pipe(map((clients) => clients.config)),
-        client: legacyClient,
+        config$: this.config$,
+        client: this.legacyClient,
         createClient: this.createLegacyClient,
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-  public async start() {
+  public async start(): Promise<ElasticsearchServiceStart> {
     if (
       typeof this.legacyClient === 'undefined' ||
       typeof this.createLegacyClient === 'undefined'
@@ -198,10 +110,10 @@ export class ElasticsearchService
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    if (this.subscription !== undefined) {
-      this.subscription.unsubscribe();
-    }
     this.stop$.next();
+    if (this.legacyClient) {
+      this.legacyClient.close();
+    }
   }
 
   private createLegacyClusterClient(
