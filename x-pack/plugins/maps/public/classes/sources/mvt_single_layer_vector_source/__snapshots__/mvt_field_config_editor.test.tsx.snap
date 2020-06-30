@@ -289,7 +289,7 @@ exports[`should render field editor 1`] = `
         aria-label="Fieldname"
         isInvalid={false}
         onChange={[Function]}
-        placeholder=""
+        placeholder="Field name"
         value="foo"
       />
     </EuiFlexItem>
@@ -365,7 +365,7 @@ exports[`should render field editor 1`] = `
         aria-label="Fieldname"
         isInvalid={false}
         onChange={[Function]}
-        placeholder=""
+        placeholder="Field name"
         value="bar"
       />
     </EuiFlexItem>

@@ -162,20 +162,15 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         break;
       }
     }
-    const isInvalid = emptyName || hasDupes;
-    const placeholderText = isInvalid
-      ? i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
-          defaultMessage: 'Field name',
-        })
-      : '';
-
     return (
       <EuiFieldText
         value={mvtFieldConfig.name}
         onChange={onChange}
         aria-label={'Fieldname'}
-        placeholder={placeholderText}
-        isInvalid={isInvalid}
+        placeholder={i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
+          defaultMessage: 'Field name',
+        })}
+        isInvalid={emptyName || hasDupes}
       />
     );
   }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should not render when no layername 1`] = `
+exports[`should not render fields-editor when there is no layername 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}

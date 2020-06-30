@@ -32,7 +32,7 @@ test('should render without fields', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test('should not render when no layername', async () => {
+test('should not render fields-editor when there is no layername', async () => {
   const settings = { ...defaultSettings, layerName: '' };
   const component = shallow(<MVTSingleLayerSourceSettings {...settings} />);
   expect(component).toMatchSnapshot();
