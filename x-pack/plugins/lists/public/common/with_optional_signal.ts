@@ -10,6 +10,12 @@ interface SignalArgs {
 
 export type OptionalSignalArgs<Args> = Omit<Args, 'signal'> & Partial<SignalArgs>;
 
+/**
+ *
+ * @param fn an async function receiving an AbortSignal argument
+ *
+ * @returns An async function where the AbortSignal argument is optional
+ */
 export const withOptionalSignal = <Args extends SignalArgs, Result>(fn: (args: Args) => Result) => (
   args: OptionalSignalArgs<Args>
 ): Result => {

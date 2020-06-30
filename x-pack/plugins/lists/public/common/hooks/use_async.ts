@@ -15,6 +15,12 @@ export interface Async<Args extends unknown[], Result> {
   start: (...args: Args) => void;
 }
 
+/**
+ *
+ * @param fn Async function
+ *
+ * @returns An {@link AsyncTask} containing the underlying task's state along with a start callback
+ */
 export const useAsync = <Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>
 ): Async<Args, Result> => {

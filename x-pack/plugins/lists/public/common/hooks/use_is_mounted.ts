@@ -8,6 +8,10 @@ import { useCallback, useEffect, useRef } from 'react';
 
 type GetIsMounted = () => boolean;
 
+/**
+ *
+ * @returns A {@link GetIsMounted} getter function returning whether the component is currently mounted
+ */
 export const useIsMounted = (): GetIsMounted => {
   const isMounted = useRef(false);
   const getIsMounted: GetIsMounted = useCallback(() => isMounted.current, []);
