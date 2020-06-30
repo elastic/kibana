@@ -9,11 +9,11 @@
 import * as t from 'io-ts';
 
 import { list_id, type } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { Identity } from '../../types';
 
 export const importListItemQuerySchema = t.exact(t.partial({ list_id, type }));
 
 export type ImportListItemQuerySchemaPartial = Identity<t.TypeOf<typeof importListItemQuerySchema>>;
-export type ImportListItemQuerySchema = RequiredKeepUndefined<
-  t.TypeOf<typeof importListItemQuerySchema>
->;
+
+export type ImportListItemQuerySchema = t.TypeOf<typeof importListItemQuerySchema>;
+export type ImportListItemQuerySchemaEncoded = t.OutputOf<typeof importListItemQuerySchema>;

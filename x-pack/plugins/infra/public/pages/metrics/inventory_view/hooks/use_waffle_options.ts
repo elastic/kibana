@@ -39,6 +39,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
     steps: 10,
     reverseColors: false,
   },
+  source: 'default',
   sort: { by: 'name', direction: 'desc' },
 };
 
@@ -161,36 +162,44 @@ export const WaffleSortOptionRT = rt.type({
   direction: rt.keyof({ asc: null, desc: null }),
 });
 
-export const WaffleOptionsStateRT = rt.type({
-  metric: SnapshotMetricInputRT,
-  groupBy: SnapshotGroupByRT,
-  nodeType: ItemTypeRT,
-  view: rt.string,
-  customOptions: rt.array(
-    rt.type({
-      text: rt.string,
-      field: rt.string,
-    })
-  ),
-  boundsOverride: rt.type({
-    min: rt.number,
-    max: rt.number,
+export const WaffleOptionsStateRT = rt.intersection([
+  rt.type({
+    metric: SnapshotMetricInputRT,
+    groupBy: SnapshotGroupByRT,
+    nodeType: ItemTypeRT,
+    view: rt.string,
+    customOptions: rt.array(
+      rt.type({
+        text: rt.string,
+        field: rt.string,
+      })
+    ),
+    boundsOverride: rt.type({
+      min: rt.number,
+      max: rt.number,
+    }),
+    autoBounds: rt.boolean,
+    accountId: rt.string,
+    region: rt.string,
+    customMetrics: rt.array(SnapshotCustomMetricInputRT),
+    legend: WaffleLegendOptionsRT,
+    sort: WaffleSortOptionRT,
   }),
-  autoBounds: rt.boolean,
-  accountId: rt.string,
-  region: rt.string,
-  customMetrics: rt.array(SnapshotCustomMetricInputRT),
-  legend: WaffleLegendOptionsRT,
-  sort: WaffleSortOptionRT,
-});
+  rt.partial({ source: rt.string }),
+]);
 
 export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;
 export type WaffleOptionsState = rt.TypeOf<typeof WaffleOptionsStateRT>;
 const encodeUrlState = (state: WaffleOptionsState) => {
   return WaffleOptionsStateRT.encode(state);
 };
-const decodeUrlState = (value: unknown) =>
-  pipe(WaffleOptionsStateRT.decode(value), fold(constant(undefined), identity));
+const decodeUrlState = (value: unknown) => {
+  const state = pipe(WaffleOptionsStateRT.decode(value), fold(constant(undefined), identity));
+  if (state) {
+    state.source = 'url';
+  }
+  return state;
+};
 
 export const WaffleOptions = createContainer(useWaffleOptions);
 export const [WaffleOptionsProvider, useWaffleOptionsContext] = WaffleOptions;

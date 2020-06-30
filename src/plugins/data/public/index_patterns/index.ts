@@ -34,4 +34,11 @@ export {
   IIndexPatternFieldList,
 } from '../../common/index_patterns';
 
-export { IndexPatternsService, IndexPatternsContract, IndexPattern } from './index_patterns';
+export {
+  IndexPatternsService,
+  IndexPatternsContract,
+  IndexPattern,
+  IndexPatternsApiClient,
+} from './index_patterns';
+export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
+export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
