@@ -586,6 +586,16 @@ export const ComponentStrings = {
         defaultMessage: 'Delete',
       }),
   },
+  PalettePicker: {
+    getEmptyPaletteLabel: () =>
+      i18n.translate('xpack.canvas.palettePicker.emptyPaletteLabel', {
+        defaultMessage: 'None',
+      }),
+    getNoPaletteFoundErrorTitle: () =>
+      i18n.translate('xpack.canvas.palettePicker.noPaletteFoundErrorTitle', {
+        defaultMessage: 'Color palette not found',
+      }),
+  },
   SavedElementsModal: {
     getAddNewElementDescription: () =>
       i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
@@ -1593,6 +1603,13 @@ export const ComponentStrings = {
     getTemplateSearchPlaceholder: () =>
       i18n.translate('xpack.canvas.workpadTemplate.searchPlaceholder', {
         defaultMessage: 'Find template',
+      }),
+    getCreatingTemplateLabel: (templateName: string) =>
+      i18n.translate('xpack.canvas.workpadTemplate.creatingTemplateLabel', {
+        defaultMessage: `Creating from template '{templateName}'`,
+        values: {
+          templateName,
+        },
       }),
   },
 };

@@ -24,7 +24,7 @@ let persistAlertInstances = false; // eslint-disable-line
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
-    const instanceID = 'test-*';
+    const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
       executor({
         services,
@@ -118,8 +118,8 @@ describe('The metric threshold alert type', () => {
           ],
         },
       });
-    const instanceIdA = 'test-a';
-    const instanceIdB = 'test-b';
+    const instanceIdA = 'a::test';
+    const instanceIdB = 'b::test';
     test('sends an alert when all groups pass the threshold', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
@@ -175,20 +175,20 @@ describe('The metric threshold alert type', () => {
         },
       });
     test('sends an alert when all criteria cross the threshold', async () => {
-      const instanceID = 'test-*';
+      const instanceID = '*::test';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
-      const instanceID = 'test-*';
+      const instanceID = '*::test';
       await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
-      const instanceIdA = 'test-a';
-      const instanceIdB = 'test-b';
+      const instanceIdA = 'a::test';
+      const instanceIdB = 'b::test';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'something');
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceIdA).alertState).toBe(AlertStates.ALERT);
@@ -196,7 +196,7 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceIdB).alertState).toBe(AlertStates.OK);
     });
     test('sends all criteria to the action context', async () => {
-      const instanceID = 'test-*';
+      const instanceID = '*::test';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason.split('\n');
@@ -210,7 +210,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the count aggregator', () => {
-    const instanceID = 'test-*';
+    const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
         services,
@@ -236,7 +236,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p99 aggregator', () => {
-    const instanceID = 'test-*';
+    const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
         services,
@@ -262,7 +262,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe('querying with the p95 aggregator', () => {
-    const instanceID = 'test-*';
+    const instanceID = '*::test';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
         services,
@@ -288,7 +288,7 @@ describe('The metric threshold alert type', () => {
     });
   });
   describe("querying a metric that hasn't reported data", () => {
-    const instanceID = 'test-*';
+    const instanceID = '*::test';
     const execute = (alertOnNoData: boolean) =>
       executor({
         services,
@@ -317,7 +317,7 @@ describe('The metric threshold alert type', () => {
   });
 
   // describe('querying a metric that later recovers', () => {
-  //   const instanceID = 'test-*';
+  //   const instanceID = '*::test';
   //   const execute = (threshold: number[]) =>
   //     executor({
   //       services,

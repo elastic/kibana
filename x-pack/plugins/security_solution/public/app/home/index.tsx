@@ -14,10 +14,7 @@ import { HeaderGlobal } from '../../common/components/header_global';
 import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
-import {
-  WithSource,
-  indicesExistOrDataTemporarilyUnavailable,
-} from '../../common/containers/source';
+import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 
@@ -60,31 +57,28 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
   );
 
   const [showTimeline] = useShowTimeline();
+  const { browserFields, indexPattern, indicesExist } = useWithSource();
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
       <Main data-test-subj="pageContainer">
-        <WithSource sourceId="default">
-          {({ browserFields, indexPattern, indicesExist }) => (
-            <DragDropContextWrapper browserFields={browserFields}>
-              <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-              {indicesExistOrDataTemporarilyUnavailable(indicesExist) && showTimeline && (
-                <>
-                  <AutoSaveWarningMsg />
-                  <Flyout
-                    flyoutHeight={flyoutHeight}
-                    timelineId="timeline-1"
-                    usersViewing={usersViewing}
-                  />
-                </>
-              )}
-
-              {children}
-            </DragDropContextWrapper>
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          {indicesExist && showTimeline && (
+            <>
+              <AutoSaveWarningMsg />
+              <Flyout
+                flyoutHeight={flyoutHeight}
+                timelineId="timeline-1"
+                usersViewing={usersViewing}
+              />
+            </>
           )}
-        </WithSource>
+
+          {children}
+        </DragDropContextWrapper>
       </Main>
 
       <HelpMenu />

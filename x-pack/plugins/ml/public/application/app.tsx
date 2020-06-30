@@ -78,11 +78,13 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
   });
 
-  const mlLicense = setLicenseCache(deps.licensing);
+  deps.kibanaLegacy.loadFontAwesome();
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
+  const mlLicense = setLicenseCache(deps.licensing, [
+    () => ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element),
+  ]);
 
   return () => {
     mlLicense.unsubscribe();

@@ -64,9 +64,9 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { validateTimeRange } from '../helpers/validate_time_range';
 import {
   esFilters,
-  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
@@ -114,7 +114,7 @@ app.config(($routeProvider) => {
       };
     },
   };
-  $routeProvider.when('/:id?', {
+  const discoverRoute = {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -177,7 +177,10 @@ app.config(($routeProvider) => {
         });
       },
     },
-  });
+  };
+
+  $routeProvider.when('/view/:id?', discoverRoute);
+  $routeProvider.when('/', discoverRoute);
 });
 
 app.directive('discoverApp', function () {
@@ -415,7 +418,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/view/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -747,7 +750,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/view/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -782,6 +785,10 @@ function discoverController(
     if (!init.complete) return;
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
+    if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
+      $scope.resultState = 'none';
+      return;
+    }
 
     // Abort any in-progress requests before fetching again
     if (abortController) abortController.abort();
@@ -848,7 +855,7 @@ function discoverController(
       x: {
         accessor: 0,
         label: agg.makeLabel(),
-        format: fieldFormats.serialize(agg),
+        format: agg.toSerializedFieldFormat(),
         params: {
           date: true,
           interval: moment.duration(esValue, esUnit),
@@ -860,7 +867,7 @@ function discoverController(
       },
       y: {
         accessor: 1,
-        format: fieldFormats.serialize(metric),
+        format: metric.toSerializedFieldFormat(),
         label: metric.makeLabel(),
       },
     };
@@ -914,20 +921,42 @@ function discoverController(
   }
 
   $scope.updateTime = function () {
-    //this is the timerange for the histogram, should be refactored
+    const { from, to } = timefilter.getTime();
+    // this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
-      from: dateMath.parse(timefilter.getTime().from),
-      to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
+      from: dateMath.parse(from),
+      to: dateMath.parse(to, { roundUp: true }),
     };
   };
 
   $scope.toMoment = function (datetime) {
+    if (!datetime) {
+      return;
+    }
     return moment(datetime).format(config.get('dateFormat'));
   };
 
   $scope.resetQuery = function () {
-    history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    history.push(
+      $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
+    );
     $route.reload();
+  };
+
+  $scope.onSkipBottomButtonClick = function () {
+    // show all the Rows
+    $scope.minimumVisibleRows = $scope.hits;
+
+    // delay scrolling to after the rows have been rendered
+    const bottomMarker = $element.find('#discoverBottomMarker');
+    $timeout(() => {
+      bottomMarker.focus();
+      // The anchor tag is not technically empty (it's a hack to make Safari scroll)
+      // so the browser will show a highlight: remove the focus once scrolled
+      $timeout(() => {
+        bottomMarker.blur();
+      }, 0);
+    }, 0);
   };
 
   $scope.newQuery = function () {
@@ -982,7 +1011,11 @@ function discoverController(
       $scope.indexPattern.popularizeField(columnName, 1);
     }
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    setAppState({ columns });
+    // The state's sort property is an array of [sortByColumn,sortDirection]
+    const sort = $scope.state.sort.length
+      ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
+      : [];
+    setAppState({ columns, sort });
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
@@ -992,17 +1025,6 @@ function discoverController(
 
   $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
-  };
-
-  $scope.scrollToBottom = function () {
-    // delay scrolling to after the rows have been rendered
-    $timeout(() => {
-      $element.find('#discoverBottomMarker').focus();
-    }, 0);
-  };
-
-  $scope.showAllRows = function () {
-    $scope.minimumVisibleRows = $scope.hits;
   };
 
   async function setupVisualization() {

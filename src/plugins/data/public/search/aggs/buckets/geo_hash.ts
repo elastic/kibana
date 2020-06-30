@@ -54,6 +54,7 @@ export const getGeoHashBucketAgg = ({ getInternalStartServices }: GeoHashBucketA
     {
       name: BUCKET_TYPES.GEOHASH_GRID,
       title: geohashGridTitle,
+      makeLabel: () => geohashGridTitle,
       params: [
         {
           name: 'field',

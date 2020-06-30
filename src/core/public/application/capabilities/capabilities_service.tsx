@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { Capabilities } from '../../../types/capabilities';
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze } from '../../../utils';
 import { HttpStart } from '../../http';
 
 interface StartDeps {

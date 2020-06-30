@@ -5,11 +5,12 @@
  */
 
 import { first, zip } from 'lodash';
+import { Unit } from '@elastic/datemath';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { IScopedClusterClient } from '../../../../../../../src/core/server';
+import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MetricExpressionParams } from './types';
@@ -18,14 +19,14 @@ import { evaluateAlert } from './lib/evaluate_alert';
 const MAX_ITERATIONS = 50;
 
 interface PreviewMetricThresholdAlertParams {
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   params: {
     criteria: MetricExpressionParams[];
     groupBy: string | undefined | string[];
     filterQuery: string | undefined;
   };
   config: InfraSource['configuration'];
-  lookback: 'h' | 'd' | 'w' | 'M';
+  lookback: Unit;
   alertInterval: string;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
@@ -35,7 +36,7 @@ export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
   iterations?: number,
   precalculatedNumberOfGroups?: number
-) => Promise<Array<number | null | typeof TOO_MANY_BUCKETS_PREVIEW_EXCEPTION>> = async (
+) => Promise<Array<number | null>> = async (
   {
     callCluster,
     params,
@@ -76,13 +77,6 @@ export const previewMetricThresholdAlert: (
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
     const previewResults = await Promise.all(
       groups.map(async (group) => {
-        const tooManyBuckets = alertResults.some((alertResult) =>
-          isTooManyBucketsPreviewException(alertResult[group])
-        );
-        if (tooManyBuckets) {
-          return TOO_MANY_BUCKETS_PREVIEW_EXCEPTION;
-        }
-
         const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
         if (isNoData) {
           return null;
@@ -135,7 +129,7 @@ export const previewMetricThresholdAlert: (
 
       // Bail out if it looks like this is going to take too long
       if (slicedLookback <= 0 || iterations > MAX_ITERATIONS || slices > MAX_ITERATIONS) {
-        return [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION];
+        throw new Error(`${TOO_MANY_BUCKETS_PREVIEW_EXCEPTION}:${maxBuckets * MAX_ITERATIONS}`);
       }
 
       const slicedRequests = [...Array(slices)].map((_, i) => {
