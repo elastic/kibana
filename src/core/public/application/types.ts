@@ -19,6 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { History } from 'history';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -30,7 +31,6 @@ import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
-import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
