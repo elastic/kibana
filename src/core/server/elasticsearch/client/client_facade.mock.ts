@@ -21,6 +21,9 @@ import { ClientFacade } from './client_facade';
 
 const createFacadeMock = () => {
   const mock: DeeplyMockedKeys<ClientFacade> = {
+    transport: {
+      request: jest.fn(),
+    },
     /* GENERATED */
     asyncSearch: {
       delete: jest.fn(),

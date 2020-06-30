@@ -22,6 +22,7 @@ import {
   RequestBody,
   RequestNDBody,
   TransportRequestOptions,
+  TransportRequestParams,
   TransportRequestPromise,
 } from '@elastic/elasticsearch/lib/Transport';
 import * as RequestParams from '@elastic/elasticsearch/api/requestParams';
@@ -32,6 +33,12 @@ import * as RequestParams from '@elastic/elasticsearch/api/requestParams';
  * @public
  */
 export interface ClientFacade {
+  transport: {
+    request(
+      params: TransportRequestParams,
+      options?: TransportRequestOptions
+    ): Promise<ApiResponse>;
+  };
   /* GENERATED */
   asyncSearch: {
     delete<TResponse = Record<string, any>, TContext = unknown>(

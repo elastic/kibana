@@ -47,6 +47,9 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
   };
 
   return {
+    transport: {
+      request: (params, options) => client.transport.request(params, addHeaders(options)),
+    },
     /* GENERATED */
     asyncSearch: {
       delete: (params, options) => client.asyncSearch.delete(params, addHeaders(options)),
