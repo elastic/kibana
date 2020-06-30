@@ -19,7 +19,6 @@ export function loadInitialState() {
       [restricted.id]: restricted,
     },
     layers: {},
-    showEmptyFields: false,
   };
   return result;
 }

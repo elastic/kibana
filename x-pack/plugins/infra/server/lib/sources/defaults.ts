@@ -19,6 +19,8 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
     tiebreaker: '_doc',
     timestamp: '@timestamp',
   },
+  inventoryDefaultView: '0',
+  metricsExplorerDefaultView: '0',
   logColumns: [
     {
       timestampColumn: {
