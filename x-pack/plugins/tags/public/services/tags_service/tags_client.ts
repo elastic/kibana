@@ -18,15 +18,17 @@ export interface TagsClientParams {
 }
 
 export class TagsClient implements ITagsClient {
+  private readonly path = TAGS_API_PATH;
+
   constructor(private readonly params: TagsClientParams) {}
 
   public async create(params: TagsClientCreateParams): Promise<TagsClientCreateResult> {
-    return await this.params.http.post<TagsClientCreateResult>(TAGS_API_PATH, {
+    return await this.params.http.post<TagsClientCreateResult>(this.path, {
       body: JSON.stringify(params),
     });
   }
 
   public async getAll(): Promise<TagsClientGetAllResult> {
-    return await this.params.http.get<TagsClientGetAllResult>(TAGS_API_PATH);
+    return await this.params.http.get<TagsClientGetAllResult>(this.path);
   }
 }

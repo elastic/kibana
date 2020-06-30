@@ -5,17 +5,17 @@
  */
 
 import { TagsClientParams, TagsClient } from './tags_client';
-import { TagsManager } from './tags_manager';
+import { TagManager } from './tags_manager';
 
 export type TagsServiceSetupParams = TagsClientParams;
 
 export class TagsService {
   public client?: TagsClient;
-  public manager?: TagsManager;
+  public manager?: TagManager;
 
   setup(params: TagsServiceSetupParams) {
     this.client = new TagsClient(params);
-    this.manager = new TagsManager({ client: this.client });
+    this.manager = new TagManager({ client: this.client });
 
     return {
       client: this.client,

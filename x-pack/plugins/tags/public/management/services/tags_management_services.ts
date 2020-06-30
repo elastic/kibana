@@ -5,7 +5,7 @@
  */
 
 import { ScopedHistory, ChromeBreadcrumb, CoreSetup } from 'kibana/public';
-import { TagsServiceSetup } from '../../services';
+import { TagsServiceSetup, TagManager } from '../../services';
 
 export interface Params {
   history: ScopedHistory;
@@ -15,5 +15,9 @@ export interface Params {
 }
 
 export class TagsManagementServices {
-  constructor(public readonly params: Params) {}
+  public readonly manager: TagManager;
+
+  constructor(public readonly params: Params) {
+    this.manager = params.tags.manager;
+  }
 }

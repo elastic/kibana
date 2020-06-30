@@ -4,13 +4,84 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ITagsClient } from '../../../common';
-import { TagsClient } from './tags_client';
+/* eslint-disable max-classes-per-file, react-hooks/rules-of-hooks */
+
+import { useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
+import useObservable from 'react-use/lib/useObservable';
+import { ITagsClient, RawTagWithId } from '../../../common';
 
 export interface TagsManagerParams {
   client: ITagsClient;
 }
 
-export class TagsManager {
+export class Tag {
+  public readonly data$: BehaviorSubject<RawTagWithId>;
+
+  public get data(): RawTagWithId {
+    return this.data$.getValue();
+  }
+
+  public get id(): string {
+    return this.data.id;
+  }
+
+  constructor(data: RawTagWithId) {
+    this.data$ = new BehaviorSubject<RawTagWithId>(data);
+  }
+}
+
+export type TagMap = Record<string, Tag>;
+
+export type TagListState = 'start' | 'loading' | 'reloading' | 'error' | 'data';
+
+export class TagList {
   constructor(private readonly params: TagsManagerParams) {}
+
+  public readonly state$ = new BehaviorSubject<TagListState>('start');
+
+  public readonly error$ = new BehaviorSubject<Error | null>(null);
+
+  private readonly data$$ = new BehaviorSubject<TagMap>({});
+  public get data$(): BehaviorSubject<TagMap> {
+    if (this.state$.getValue() === 'start') {
+      this.state$.next('loading');
+      this.params.client.getAll().then(
+        (response) => {
+          const tags: Record<string, Tag> = {};
+          for (const rawTag of response.tags) tags[rawTag.id] = new Tag(rawTag);
+          this.data$$.next(tags);
+          this.state$.next('data');
+        },
+        (error) => {
+          this.error$.next(error);
+          this.state$.next('error');
+        }
+      );
+    }
+    return this.data$$;
+  }
+
+  public readonly initializing$ = this.state$.pipe(
+    map((state) => state === 'start' || state === 'loading')
+  );
+
+  public readonly useInitializing = () => {
+    return useObservable(this.initializing$, true);
+  };
+
+  public readonly useData = () => {
+    const observable = useMemo(() => this.data$, []);
+    return useObservable(observable, observable.getValue());
+  };
+}
+
+export class TagManager {
+  constructor(private readonly params: TagsManagerParams) {}
+
+  private readonly list = new TagList(this.params);
+
+  public readonly useInitializing = this.list.useInitializing;
+  public readonly useTags = this.list.useData;
 }
