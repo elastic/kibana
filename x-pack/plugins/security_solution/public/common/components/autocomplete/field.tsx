@@ -55,10 +55,6 @@ export const FieldComponent: React.FC<OperatorProps> = ({
     onChange(newValues);
   };
 
-  useEffect(() => {
-    return () => console.log('unmounting');
-  }, []);
-
   return (
     <EuiComboBox
       placeholder={placeholder}

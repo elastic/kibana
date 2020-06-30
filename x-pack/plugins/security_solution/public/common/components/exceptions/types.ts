@@ -6,11 +6,16 @@
 import { ReactNode } from 'react';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
+import {
+  EntriesArray,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../lists_plugin_deps';
 
 export interface FormattedEntry {
   fieldName: string;
-  operator: string | null;
-  value: string | string[] | null;
+  operator: string | undefined;
+  value: string | string[] | undefined;
   isNested: boolean;
 }
 
@@ -43,8 +48,25 @@ export interface ExceptionsPagination {
   pageSizeOptions: number[];
 }
 
-export interface FormattedBuilderEntry {
-  field: IFieldType | null;
+export interface FormattedBuilderEntryBase {
+  field: IFieldType | undefined;
   operator: OperatorOption;
-  value: string | string[];
+  value: string | string[] | undefined;
 }
+
+export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
+  parent?: string;
+  nested?: FormattedBuilderEntryBase[];
+}
+
+export type CreateExceptionListItemBuilderSchema = Omit<
+  CreateExceptionListItemSchema,
+  'meta' | 'entries'
+> & {
+  meta: { temporaryUuid: string };
+  entries: EntriesArray;
+};
+
+export type ExceptionsBuilderExceptionItem =
+  | ExceptionListItemSchema
+  | CreateExceptionListItemBuilderSchema;

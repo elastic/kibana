@@ -8,37 +8,45 @@ import React from 'react';
 import { EuiText, EuiCommentProps, EuiAvatar } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import moment from 'moment';
+import uuid from 'uuid';
 
 import * as i18n from './translations';
-import { FormattedEntry, DescriptionListItem, FormattedBuilderEntry } from './types';
+import {
+  FormattedEntry,
+  DescriptionListItem,
+  FormattedBuilderEntry,
+  CreateExceptionListItemBuilderSchema,
+} from './types';
 import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
-import { OperatorOption, OperatorType } from '../autocomplete/types';
+import { OperatorOption } from '../autocomplete/types';
 import {
   CommentsArray,
   Entry,
   EntriesArray,
   ExceptionListItemSchema,
+  NamespaceType,
+  OperatorTypeEnum,
   entriesNested,
   entriesExists,
   entriesList,
 } from '../../../lists_plugin_deps';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
  *
  * @param entry a single ExceptionItem entry
  */
-export const getOperatorType = (entry: Entry): OperatorType => {
+export const getOperatorType = (entry: Entry): OperatorTypeEnum => {
   switch (entry.type) {
     case 'match':
-      return OperatorType.MATCH;
+      return OperatorTypeEnum.MATCH;
     case 'match_any':
-      return OperatorType.MATCH_ANY;
+      return OperatorTypeEnum.MATCH_ANY;
     case 'list':
-      return OperatorType.LIST;
+      return OperatorTypeEnum.LIST;
     default:
-      return OperatorType.EXISTS;
+      return OperatorTypeEnum.EXISTS;
   }
 };
 
@@ -75,7 +83,12 @@ export const getExceptionOperatorFromSelect = (value: string): OperatorOption =>
 export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => {
   const formattedEntries = entries.map((entry) => {
     if (entriesNested.is(entry)) {
-      const parent = { fieldName: entry.field, operator: null, value: null, isNested: false };
+      const parent = {
+        fieldName: entry.field,
+        operator: undefined,
+        value: undefined,
+        isNested: false,
+      };
       return entry.entries.reduce<FormattedEntry[]>(
         (acc, nestedEntry) => {
           const formattedEntry = formatEntry({
@@ -95,11 +108,11 @@ export const getFormattedEntries = (entries: EntriesArray): FormattedEntry[] => 
   return formattedEntries.flat();
 };
 
-export const getEntryValue = (entry: Entry): string | string[] | null => {
+export const getEntryValue = (entry: Entry): string | string[] | undefined => {
   if (entriesList.is(entry)) {
-    return entry.list.id;
+    return entry.list.id ?? '';
   } else if (entriesExists.is(entry)) {
-    return null;
+    return undefined;
   } else {
     return entry.value;
   }
@@ -204,13 +217,95 @@ export const getFormattedBuilderEntries = (
   entries: EntriesArray
 ): FormattedBuilderEntry[] => {
   const { fields } = indexPattern;
-
   return entries.map((entry) => {
-    const selectedField = fields.filter(({ name }) => entry.field === name);
-    return {
-      field: selectedField[0] ?? null,
-      operator: getExceptionOperatorSelect(entry),
-      value: getEntryValue(entry),
-    };
+    if (entriesNested.is(entry)) {
+      return {
+        parent: entry.field,
+        operator: isOperator,
+        nested: getFormattedBuilderEntries(indexPattern, entry.entries),
+        field: undefined,
+        value: undefined,
+      };
+    } else {
+      const [selectedField] = fields.filter(
+        ({ name }) => entry.field != null && entry.field === name
+      );
+      return {
+        field: selectedField,
+        operator: getExceptionOperatorSelect(entry),
+        value: getEntryValue(entry),
+      };
+    }
   });
+};
+
+export const getValueFromOperator = (
+  field: IFieldType | undefined,
+  selectedOperator: OperatorOption
+): Entry => {
+  const fieldValue = field != null ? field.name : '';
+  switch (selectedOperator.type) {
+    case 'match':
+      return {
+        field: fieldValue,
+        type: OperatorTypeEnum.MATCH,
+        operator: selectedOperator.operator,
+        value: '',
+      };
+    case 'match_any':
+      return {
+        field: fieldValue,
+        type: OperatorTypeEnum.MATCH_ANY,
+        operator: selectedOperator.operator,
+        value: [],
+      };
+    case 'list':
+      return {
+        field: fieldValue,
+        type: OperatorTypeEnum.LIST,
+        operator: selectedOperator.operator,
+        list: { id: '', type: 'ip' },
+      };
+    default:
+      return {
+        field: fieldValue,
+        type: OperatorTypeEnum.EXISTS,
+        operator: selectedOperator.operator,
+      };
+  }
+};
+
+export const getNewExceptionItem = ({
+  listType,
+  listId,
+  namespaceType,
+  ruleName,
+}: {
+  listType: 'detection' | 'endpoint';
+  listId: string;
+  namespaceType: NamespaceType;
+  ruleName: string;
+}): CreateExceptionListItemBuilderSchema => {
+  return {
+    _tags: [listType],
+    comments: [],
+    description: `${ruleName} - exception list item`,
+    entries: [
+      {
+        field: '',
+        operator: 'included',
+        type: 'match',
+        value: '',
+      },
+    ],
+    item_id: undefined,
+    list_id: listId,
+    meta: {
+      temporaryUuid: uuid.v4(),
+    },
+    name: `${ruleName} - exception list item`,
+    namespace_type: namespaceType,
+    tags: [],
+    type: 'simple',
+  };
 };

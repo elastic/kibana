@@ -169,7 +169,7 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'exists',
-          value: null,
+          value: undefined,
         },
       ];
       expect(result).toEqual(expected);
@@ -221,13 +221,13 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'exists',
-          value: null,
+          value: undefined,
         },
         {
           fieldName: 'host.name',
           isNested: false,
-          operator: null,
-          value: null,
+          operator: undefined,
+          value: undefined,
         },
         {
           fieldName: 'host.name.host.name',
