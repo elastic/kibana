@@ -179,6 +179,7 @@ export function DimensionEditor({
             }}
             color={color}
             secondaryInputDisplay="top"
+            compressed={true}
             button={<EuiColorPickerSwatch color={color} aria-label="Select a new color" />}
           />
           {!!layer.splitAccessor && !color && (
