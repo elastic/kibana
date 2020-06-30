@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import uuid from 'uuid';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -33,7 +34,6 @@ import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -240,7 +240,8 @@ export const getTopNavConfig = (
                   return;
                 }
                 const input = {
-                  savedVis: { ...vis.serialize() },
+                  ...vis.serialize(),
+                  id: uuid.v4(),
                 };
                 embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
                   state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
