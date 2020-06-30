@@ -155,7 +155,7 @@ export class PageManager extends Component<Props, State> {
   };
 
   renderPage = (page: CanvasPage, i: number) => {
-    const { isWriteable, onRemovePage, selectedPage, workpadId, workpadCSS } = this.props;
+    const { isWriteable, selectedPage, workpadId, workpadCSS } = this.props;
     const pageNumber = i + 1;
 
     return (
