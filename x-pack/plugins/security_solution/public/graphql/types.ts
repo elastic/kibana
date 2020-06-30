@@ -360,6 +360,11 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
+}
+
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -764,6 +769,8 @@ export interface Ecs {
 
   _index?: Maybe<string>;
 
+  agent?: Maybe<AgentEcsField>;
+
   auditd?: Maybe<AuditdEcsFields>;
 
   destination?: Maybe<DestinationEcsFields>;
@@ -809,6 +816,10 @@ export interface Ecs {
   file?: Maybe<FileFields>;
 
   system?: Maybe<SystemEcsField>;
+}
+
+export interface AgentEcsField {
+  type?: Maybe<string[]>;
 }
 
 export interface AuditdEcsFields {
@@ -1265,6 +1276,8 @@ export interface ProcessEcsFields {
   ppid?: Maybe<number[]>;
 
   args?: Maybe<string[]>;
+
+  entity_id?: Maybe<string[]>;
 
   executable?: Maybe<string[]>;
 
@@ -2110,6 +2123,16 @@ export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
   totalCount?: Maybe<number>;
+
+  defaultTimelineCount?: Maybe<number>;
+
+  templateTimelineCount?: Maybe<number>;
+
+  elasticTemplateTimelineCount?: Maybe<number>;
+
+  customTemplateTimelineCount?: Maybe<number>;
+
+  favoriteCount?: Maybe<number>;
 }
 
 export interface Mutation {
@@ -2247,6 +2270,10 @@ export interface GetAllTimelineQueryArgs {
   onlyUserFavorite?: Maybe<boolean>;
 
   timelineType?: Maybe<TimelineType>;
+
+  templateTimelineType?: Maybe<TemplateTimelineType>;
+
+  status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4308,6 +4335,8 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
+    templateTimelineType?: Maybe<TemplateTimelineType>;
+    status?: Maybe<TimelineStatus>;
   };
 
   export type Query = {
@@ -4320,6 +4349,16 @@ export namespace GetAllTimeline {
     __typename?: 'ResponseTimelines';
 
     totalCount: Maybe<number>;
+
+    defaultTimelineCount: Maybe<number>;
+
+    templateTimelineCount: Maybe<number>;
+
+    elasticTemplateTimelineCount: Maybe<number>;
+
+    customTemplateTimelineCount: Maybe<number>;
+
+    favoriteCount: Maybe<number>;
 
     timeline: (Maybe<Timeline>)[];
   };
@@ -4606,6 +4645,8 @@ export namespace GetTimelineQuery {
 
     event: Maybe<Event>;
 
+    agent: Maybe<Agent>;
+
     auditd: Maybe<Auditd>;
 
     file: Maybe<File>;
@@ -4727,6 +4768,12 @@ export namespace GetTimelineQuery {
     start: Maybe<string[]>;
 
     timezone: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+  };
+
+  export type Agent = {
+    __typename?: 'AgentEcsField';
 
     type: Maybe<string[]>;
   };
@@ -5155,6 +5202,8 @@ export namespace GetTimelineQuery {
     ppid: Maybe<number[]>;
 
     args: Maybe<string[]>;
+
+    entity_id: Maybe<string[]>;
 
     executable: Maybe<string[]>;
 

@@ -13,14 +13,11 @@ import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
 import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-
 import { buildSiemResponse, transformError } from '../../detection_engine/routes/utils';
 
-import { importTimelines, ImportedTimeline } from './utils/import_timelines';
+import { importTimelines } from './utils/import_timelines';
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
 import { buildFrameworkRequest } from './utils/common';
-
-export type PromiseFromStreams = ImportedTimeline;
 
 export const importTimelinesRoute = (
   router: IRouter,
@@ -72,7 +69,6 @@ export const importTimelinesRoute = (
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);
-
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

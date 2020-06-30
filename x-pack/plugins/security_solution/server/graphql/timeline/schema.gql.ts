@@ -136,6 +136,11 @@ export const timelineSchema = gql`
     immutable
   }
 
+  enum TemplateTimelineType {
+    elastic
+    custom
+  }
+
   input TimelineInput {
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
@@ -278,6 +283,11 @@ export const timelineSchema = gql`
   type ResponseTimelines {
     timeline: [TimelineResult]!
     totalCount: Float
+    defaultTimelineCount: Float
+    templateTimelineCount: Float
+    elasticTemplateTimelineCount: Float
+    customTemplateTimelineCount: Float
+    favoriteCount: Float
   }
 
   #########################
@@ -286,7 +296,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {
