@@ -104,6 +104,16 @@ export const relatedEventsReady = composeSelectors(
 );
 
 /**
+ * Business logic lookup functions by ECS category by entity id.
+ * Example usage:
+ * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ */
+export const relatedEventInfoByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventInfoByEntityId
+);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const uiActiveDescendantId = composeSelectors(

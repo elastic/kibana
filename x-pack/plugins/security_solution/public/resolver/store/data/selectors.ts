@@ -32,6 +32,7 @@ import {
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import { isometricTaxiLayout } from '../../models/indexed_process_tree/isometric_taxi_layout';
+import { primaryEventCategory } from '../../../../common/endpoint/models/event';
 
 /**
  * If there is currently a request.
@@ -168,6 +169,96 @@ export function hasMoreAncestors(state: DataState): boolean {
 }
 
 /**
+ * A map of `entity_id`s to functions that provide information about
+ * related events by ECS `.category` Primarily to avoid having business logic
+ * in UI components.
+ */
+export const relatedEventInfoByEntityId = createSelector(
+  relatedEventsByEntityId,
+  relatedEventsStats,
+  function selectLineageLimitInfo(
+    /* eslint-disable no-shadow */
+    relatedEventsByEntityId,
+    relatedEventsStats
+    /* eslint-enable no-shadow */
+  ) {
+    const relatedEventInfoEntries = [...(relatedEventsStats || new Map()).entries()].map(
+      ([entityId, stats]) => {
+        const eventsResponseForThisEntry = relatedEventsByEntityId.get(entityId);
+        const hasMoreEvents =
+          eventsResponseForThisEntry && eventsResponseForThisEntry.nextEvent !== null;
+        /**
+         * Get the "aggregate" total for the event category (i.e. _all_ events that would qualify as being "in category")
+         * For a set like `[DNS,File][File,DNS][Registry]` The first and second events would contribute to the aggregate total for DNS being 2.
+         * This is currently aligned with how the backed provides this information.
+         *
+         * @param eventCategory {string} The ECS category like 'file','dns',etc.
+         */
+        const getAggregateTotalForCategory = (eventCategory: string): number => {
+          return stats.events.byCategory[eventCategory] || 0;
+        };
+        /**
+         * Get all the related events in the category provided.
+         *
+         * @param eventCategory {string} The ECS category like 'file','dns',etc.
+         */
+        const getMatchingEventsForCategory = (eventCategory: string): ResolverEvent[] => {
+          if (!eventsResponseForThisEntry) {
+            return [];
+          }
+          return eventsResponseForThisEntry.events.filter((resolverEvent) => {
+            return primaryEventCategory(resolverEvent) === eventCategory;
+          });
+        };
+        /**
+         * The number of events that occurred before the API limit was reached.
+         *
+         * @param eventCategory {string} The ECS category like 'file','dns',etc.
+         */
+        const getNumberActuallyDisplayedForCategory = (eventCategory: string): number => {
+          return getMatchingEventsForCategory(eventCategory)?.length || 0;
+        };
+        /**
+         * The total number counted by the backend - the number displayed
+         *
+         * @param eventCategory {string} The ECS category like 'file','dns',etc.
+         */
+        const getNumberNotDisplayedForCategory = (eventCategory: string): number => {
+          return (
+            getAggregateTotalForCategory(eventCategory) -
+            getNumberActuallyDisplayedForCategory(eventCategory)
+          );
+        };
+        /**
+         * `true` when the `nextEvent` cursor appeared in the results and we are short on the number needed to
+         * fullfill the aggregate count.
+         *
+         * @param eventCategory {string} The ECS category like 'file','dns',etc.
+         */
+        const shouldShowLimitForCategory = (eventCategory: string): boolean => {
+          if (hasMoreEvents && getNumberNotDisplayedForCategory(eventCategory) > 0) {
+            return true;
+          }
+          return false;
+        };
+
+        const entryValue = {
+          shouldShowLimitForCategory,
+          getNumberNotDisplayedForCategory,
+          getNumberActuallyDisplayedForCategory,
+        };
+
+        const entry: [string, typeof entryValue] = [entityId, entryValue];
+
+        return entry;
+      }
+    );
+
+    return new Map(relatedEventInfoEntries);
+  }
+);
+
+/**
  * If we need to fetch, this is the ID to fetch.
  */
 export function databaseDocumentIDToFetch(state: DataState): string | null {
@@ -285,6 +376,7 @@ export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
     };
   }
 );
+
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
  */

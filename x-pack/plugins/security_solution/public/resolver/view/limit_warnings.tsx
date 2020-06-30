@@ -75,19 +75,17 @@ const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
 export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWarning({
   className,
   eventType,
-  matchingEventEntries,
-  aggregateCountForEventType,
+  numberActuallyDisplayed,
+  numberMissing,
 }: {
   className?: string;
   eventType: string;
-  matchingEventEntries: unknown[];
-  aggregateCountForEventType: number;
+  numberActuallyDisplayed: number;
+  numberMissing: number;
 }) {
   /**
    * Based on API limits, all related events may not be displayed.
    */
-  const numberActuallyDisplayed = matchingEventEntries.length;
-  const numberMissing = aggregateCountForEventType - numberActuallyDisplayed;
   return (
     <EuiCallOut
       size="s"

@@ -61,29 +61,26 @@ const DisplayList = memo(function DisplayList({
   matchingEventEntries,
   eventType,
   processEntityId,
-  aggregateCountForEventType,
 }: {
   crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
   matchingEventEntries: MatchingEventEntry[];
   eventType: string;
   processEntityId: string;
-  aggregateCountForEventType: number;
 }) {
-  const relatedEventResponsesById = useSelector(selectors.relatedEventsByEntityId);
-  const responseForThisNode = relatedEventResponsesById.get(processEntityId);
-  const shouldShowLimitWarning =
-    responseForThisNode &&
-    responseForThisNode.nextEvent !== null &&
-    matchingEventEntries.length < aggregateCountForEventType;
+  const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
+  const lookupsForThisNode = relatedLookupsByCategory.get(processEntityId);
+  const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
+  const numberDisplayed = lookupsForThisNode?.getNumberActuallyDisplayedForCategory(eventType);
+  const numberMissing = lookupsForThisNode?.getNumberNotDisplayedForCategory(eventType);
 
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
-      {shouldShowLimitWarning ? (
+      {shouldShowLimitWarning && numberDisplayed && numberMissing ? (
         <StyledRelatedLimitWarning
           eventType={eventType}
-          aggregateCountForEventType={aggregateCountForEventType}
-          matchingEventEntries={matchingEventEntries}
+          numberActuallyDisplayed={numberDisplayed}
+          numberMissing={numberMissing}
         />
       ) : null}
       <EuiSpacer size="l" />
@@ -287,7 +284,6 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   return (
     <DisplayList
       crumbs={crumbs}
-      aggregateCountForEventType={relatedStats.events.byCategory[eventType] || 0}
       processEntityId={processEntityId}
       matchingEventEntries={matchingEventEntries}
       eventType={eventType}
