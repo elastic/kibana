@@ -109,26 +109,61 @@ exports[`CertMonitors shallow renders expected elements for valid props 1`] = `
     }
   }
 >
-  <CertMonitors
-    monitors={
-      Array [
-        Object {
-          "id": "bad-ssl-dashboard",
-          "name": "",
-          "url": "https://badssl.com/dashboard/",
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-        Object {
-          "id": "elastic-co",
-          "name": "elastic",
-          "url": "https://www.elastic.co/",
-        },
-        Object {
-          "id": "extended-validation",
-          "name": "",
-          "url": "https://extended-validation.badssl.com/",
-        },
-      ]
+        "push": [Function],
+        "replace": [Function],
+      }
     }
-  />
+  >
+    <CertMonitors
+      monitors={
+        Array [
+          Object {
+            "id": "bad-ssl-dashboard",
+            "name": "",
+            "url": "https://badssl.com/dashboard/",
+          },
+          Object {
+            "id": "elastic-co",
+            "name": "elastic",
+            "url": "https://www.elastic.co/",
+          },
+          Object {
+            "id": "extended-validation",
+            "name": "",
+            "url": "https://extended-validation.badssl.com/",
+          },
+        ]
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

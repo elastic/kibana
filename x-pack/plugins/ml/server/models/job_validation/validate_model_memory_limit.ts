@@ -5,7 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
@@ -16,7 +16,7 @@ import { MlInfoResponse } from '../../../common/types/ml_server_info';
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
 
 export async function validateModelMemoryLimit(
-  callWithRequest: APICaller,
+  callWithRequest: LegacyAPICaller,
   job: CombinedJob,
   duration?: { start?: number; end?: number }
 ) {
