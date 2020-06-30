@@ -26,7 +26,7 @@ export async function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client, dynamicIndexPattern } = setup;
+  const { client } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
@@ -35,7 +35,6 @@ export async function getLocalUIFilters({
   return Promise.all(
     localFilterNames.map(async (name) => {
       const query = getLocalFilterQuery({
-        indexPattern: dynamicIndexPattern,
         uiFilters,
         projection,
         localUIFilterName: name,
