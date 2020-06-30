@@ -26,10 +26,6 @@ export interface State {
   currentMinSourceZoom: number;
   currentMaxSourceZoom: number;
   currentFields: MVTFieldDescriptor[];
-  previousLayerName: string;
-  previousMinSourceZoom: number;
-  previousMaxSourceZoom: number;
-  previousFields: MVTFieldDescriptor[];
 }
 
 export interface Props {
@@ -43,49 +39,11 @@ export interface Props {
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   state = {
-    currentLayerName: '',
-    currentMinSourceZoom: MIN_ZOOM,
-    currentMaxSourceZoom: MAX_ZOOM,
-    currentFields: [],
-    previousLayerName: '',
-    previousMinSourceZoom: MIN_ZOOM,
-    previousMaxSourceZoom: MAX_ZOOM,
-    previousFields: [],
+    currentLayerName: this.props.layerName,
+    currentMinSourceZoom: this.props.minSourceZoom,
+    currentMaxSourceZoom: this.props.maxSourceZoom,
+    currentFields: _.cloneDeep(this.props.fields),
   };
-
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    const newSettings = {
-      layerName: nextProps.layerName,
-      fields: nextProps.fields,
-      minSourceZoom: nextProps.minSourceZoom,
-      maxSourceZoom: nextProps.maxSourceZoom,
-    };
-
-    const previous = prevState
-      ? {
-          layerName: prevState.previousLayerName,
-          fields: prevState.previousFields,
-          minSourceZoom: prevState.previousMinSourceZoom,
-          maxSourceZoom: prevState.previousMaxSourceZoom,
-        }
-      : null;
-
-    if (_.isEqual(previous, newSettings)) {
-      return null;
-    }
-
-    const clonedFields = _.cloneDeep(nextProps.fields);
-    return {
-      currentLayerName: nextProps.layerName,
-      currentMinSourceZoom: nextProps.minSourceZoom,
-      currentMaxSourceZoom: nextProps.maxSourceZoom,
-      currentFields: clonedFields,
-      previousLayerName: nextProps.layerName,
-      previousMinSourceZoom: nextProps.minSourceZoom,
-      previousMaxSourceZoom: nextProps.maxSourceZoom,
-      previousFields: clonedFields,
-    };
-  }
 
   _handleChange = _.debounce(() => {
     this.props.handleChange({

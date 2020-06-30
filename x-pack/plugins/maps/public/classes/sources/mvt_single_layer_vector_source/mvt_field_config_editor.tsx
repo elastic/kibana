@@ -65,28 +65,14 @@ export interface Props {
   onChange: (fields: MVTFieldDescriptor[]) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {
-  previousFields: MVTFieldDescriptor[];
   currentFields: MVTFieldDescriptor[];
 }
 
 export class MVTFieldConfigEditor extends Component<Props, State> {
   state: State = {
-    currentFields: [],
-    previousFields: [],
+    currentFields: _.cloneDeep(this.props.fields),
   };
-
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    if (_.isEqual(nextProps.fields, prevState.previousFields)) {
-      return null;
-    }
-    const clonedFields = _.cloneDeep(nextProps.fields);
-    return {
-      currentFields: clonedFields,
-      previousFields: clonedFields,
-    };
-  }
 
   _notifyChange = _.debounce(() => {
     const invalid = this.state.currentFields.some((field: MVTFieldDescriptor) => {
