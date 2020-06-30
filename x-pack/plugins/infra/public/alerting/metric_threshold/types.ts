@@ -51,3 +51,12 @@ export interface ExpressionChartData {
   id: string;
   series: ExpressionChartSeries;
 }
+
+export interface AlertParams {
+  criteria: MetricExpression[];
+  groupBy?: string;
+  filterQuery?: string;
+  sourceId?: string;
+  filterQueryText?: string;
+  alertOnNoData?: boolean;
+}

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-conflictDescriptions?: Record<string, string[]>;
+conflictDescriptions?: FieldSpecConflictDescriptions;
 ```

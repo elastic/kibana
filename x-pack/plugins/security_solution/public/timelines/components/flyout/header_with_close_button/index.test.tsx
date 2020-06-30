@@ -7,6 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { FlyoutHeaderWithCloseButton } from '.';
 
@@ -40,14 +41,16 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('FlyoutHeaderWithCloseButton', () => {
+  const props = {
+    onClose: jest.fn(),
+    timelineId: 'test',
+    timelineType: TimelineType.default,
+    usersViewing: ['elastic'],
+  };
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
       <TestProviders>
-        <FlyoutHeaderWithCloseButton
-          onClose={jest.fn()}
-          timelineId={'test'}
-          usersViewing={['elastic']}
-        />
+        <FlyoutHeaderWithCloseButton {...props} />
       </TestProviders>
     );
     expect(EmptyComponent.find('FlyoutHeaderWithCloseButton')).toMatchSnapshot();
@@ -55,13 +58,13 @@ describe('FlyoutHeaderWithCloseButton', () => {
 
   test('it should invoke onClose when the close button is clicked', () => {
     const closeMock = jest.fn();
+    const testProps = {
+      ...props,
+      onClose: closeMock,
+    };
     const wrapper = mount(
       <TestProviders>
-        <FlyoutHeaderWithCloseButton
-          onClose={closeMock}
-          timelineId={'test'}
-          usersViewing={['elastic']}
-        />
+        <FlyoutHeaderWithCloseButton {...testProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="close-timeline"] button').first().simulate('click');

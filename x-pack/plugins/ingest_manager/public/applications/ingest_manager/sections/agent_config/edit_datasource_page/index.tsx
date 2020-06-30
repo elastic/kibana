@@ -242,7 +242,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   return (
-    <CreateDatasourcePageLayout {...layoutProps}>
+    <CreateDatasourcePageLayout {...layoutProps} data-test-subj="editDataSource">
       {isLoadingData ? (
         <Loading />
       ) : loadingError || !agentConfig || !packageInfo ? (

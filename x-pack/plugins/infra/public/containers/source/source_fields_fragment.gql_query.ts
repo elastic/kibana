@@ -12,6 +12,8 @@ export const sourceConfigurationFieldsFragment = gql`
     description
     logAlias
     metricAlias
+    inventoryDefaultView
+    metricsExplorerDefaultView
     fields {
       container
       host
