@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromEvent, Observable, throwError, NEVER, EMPTY, timer } from 'rxjs';
-import { mergeMap, expand, takeUntil } from 'rxjs/operators';
+import { fromEvent, Observable, throwError, EMPTY, timer } from 'rxjs';
+import { mergeMap, expand, takeUntil, catchError, finalize } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
   SearchInterceptor,
@@ -42,8 +42,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    */
   public runBeyondTimeout = () => {
     this.hideToast();
-    this.timeoutSubscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.timeoutSubscriptions.clear();
+    this.timeoutSubscriptions.unsubscribe();
   };
 
   protected showToast = () => {
@@ -67,48 +66,55 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
   ): Observable<IAsyncSearchResponse> {
     let { id } = request;
-    const syncSearch = super.search;
 
     request.params = {
       ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
       ...request.params,
     };
 
-    const aborted$ = options?.signal
-      ? fromEvent(options.signal, 'abort').pipe(
-          mergeMap(() => {
-            // If we haven't received the response to the initial request, including the ID, then
-            // we don't need to send a follow-up request to delete this search. Otherwise, we
-            // send the follow-up request to delete this search, then throw an abort error.
-            if (id !== undefined) {
-              this.deps.http.delete(`/internal/search/es/${id}`);
-            }
-            return throwError(new AbortError());
-          })
-        )
-      : NEVER;
+    const { combinedSignal, cleanup } = this.setupTimers(options);
+    this.pendingCount$.next(++this.pendingCount);
 
-    return (syncSearch.call(this, request, options) as Observable<IAsyncSearchResponse>).pipe(
-      expand((response) => {
-        const { is_partial: isPartial, is_running: isRunning } = response;
+    const aborted$ = fromEvent(combinedSignal, 'abort').pipe(
+      mergeMap(() => {
+        return throwError(new AbortError());
+      })
+    );
+
+    return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
+      expand((response: IAsyncSearchResponse) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (isPartial && !isRunning)) {
+        if (!response || (!response.is_running && response.is_partial)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!isRunning) return EMPTY;
+        if (!response.is_running) return EMPTY;
 
         id = response.id;
         // Delay by the given poll interval
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return syncSearch.call(this, { id }, options) as Observable<IAsyncSearchResponse>;
+            if (combinedSignal.aborted) return throwError(new AbortError());
+            return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
           })
         );
       }),
-      takeUntil(aborted$)
+      takeUntil(aborted$),
+      catchError((e) => {
+        // If we haven't received the response to the initial request, including the ID, then
+        // we don't need to send a follow-up request to delete this search. Otherwise, we
+        // send the follow-up request to delete this search, then throw an abort error.
+        if (id !== undefined) {
+          this.deps.http.delete(`/internal/search/es/${id}`);
+        }
+        return throwError(e);
+      }),
+      finalize(() => {
+        this.pendingCount$.next(--this.pendingCount);
+        cleanup();
+      })
     );
   }
 }

@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import {
-  BehaviorSubject,
-  throwError,
-  timer,
-  Subscription,
-  defer,
-  fromEvent,
-  from,
-  Observable,
-} from 'rxjs';
-import { takeUntil, finalize, mergeMapTo, filter, tap } from 'rxjs/operators';
+import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
+import { finalize, filter, catchError } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
-import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
@@ -53,17 +43,17 @@ export class SearchInterceptor {
   /**
    * The number of pending search requests.
    */
-  private pendingCount = 0;
+  protected pendingCount = 0;
 
   /**
    * Observable that emits when the number of pending requests changes.
    */
-  private pendingCount$ = new BehaviorSubject(this.pendingCount);
+  protected pendingCount$ = new BehaviorSubject(this.pendingCount);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
    */
-  protected timeoutSubscriptions: Set<Subscription> = new Set();
+  protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
    * The current long-running toast (if there is one).
@@ -98,6 +88,20 @@ export class SearchInterceptor {
     return this.pendingCount$.asObservable();
   };
 
+  protected runSearch(
+    request: IEsSearchRequest,
+    combinedSignal: AbortSignal
+  ): Observable<IEsSearchResponse> {
+    return from(
+      this.deps.http.fetch({
+        path: `/internal/search/es`,
+        method: 'POST',
+        body: JSON.stringify(request),
+        signal: combinedSignal,
+      })
+    );
+  }
+
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
@@ -116,14 +120,8 @@ export class SearchInterceptor {
       const { combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(++this.pendingCount);
 
-      return from(
-        this.deps.http.fetch({
-          path: `/internal/search/es`,
-          method: 'POST',
-          body: JSON.stringify(request),
-          signal: combinedSignal,
-        })
-      ).pipe(
+      return this.runSearch(request, combinedSignal).pipe(
+        catchError((e) => throwError(e)),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -157,7 +155,7 @@ export class SearchInterceptor {
 
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
-      this.timeoutSubscriptions.delete(subscription);
+      this.timeoutSubscriptions.remove(subscription);
       notificationSubscription.unsubscribe();
     };
 

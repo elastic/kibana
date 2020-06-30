@@ -41,7 +41,7 @@ describe('SearchInterceptor', () => {
   });
 
   describe('search', () => {
-    test('Observable should resolve if fetch is successful', async (done) => {
+    test('Observable should resolve if fetch is successful', async () => {
       const mockResponse: any = { result: 200 };
       mockCoreStart.http.fetch.mockResolvedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
@@ -49,14 +49,11 @@ describe('SearchInterceptor', () => {
       };
       const response = searchInterceptor.search(mockRequest);
 
-      const next = (result: IEsSearchResponse) => {
-        expect(result).toBe(mockResponse);
-        done();
-      };
-      response.subscribe({ next });
+      const result = await response.toPromise();
+      expect(result).toBe(mockResponse);
     });
 
-    test('Observable should fail if fetch has an error', async (done) => {
+    test('Observable should fail if fetch has an error', async () => {
       const mockResponse: any = { result: 500 };
       mockCoreStart.http.fetch.mockRejectedValueOnce(mockResponse);
       const mockRequest: IEsSearchRequest = {
@@ -64,11 +61,11 @@ describe('SearchInterceptor', () => {
       };
       const response = searchInterceptor.search(mockRequest);
 
-      const error = (e: any) => {
+      try {
+        await response.toPromise();
+      } catch (e) {
         expect(e).toBe(mockResponse);
-        done();
-      };
-      response.subscribe({ error });
+      }
     });
 
     test('Observable should fail if fetch times out (test merged signal)', async (done) => {
