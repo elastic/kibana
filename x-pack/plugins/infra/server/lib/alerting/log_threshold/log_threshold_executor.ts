@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertServices } from '../../../../../alerting/server';
+import { AlertExecutorOptions, AlertServices } from '../../../../../alerts/server';
 import {
   AlertStates,
   Comparator,
@@ -26,7 +26,7 @@ const checkValueAgainstComparatorMap: {
 };
 
 export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackendLibs) =>
-  async function({ services, params }: AlertExecutorOptions) {
+  async function ({ services, params }: AlertExecutorOptions) {
     const { count, criteria } = params as LogDocumentCountAlertParams;
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
@@ -90,10 +90,10 @@ const getESQuery = (
 
   const positiveComparators = getPositiveComparators();
   const negativeComparators = getNegativeComparators();
-  const positiveCriteria = criteria.filter(criterion =>
+  const positiveCriteria = criteria.filter((criterion) =>
     positiveComparators.includes(criterion.comparator)
   );
-  const negativeCriteria = criteria.filter(criterion =>
+  const negativeCriteria = criteria.filter((criterion) =>
     negativeComparators.includes(criterion.comparator)
   );
   // Positive assertions (things that "must" match)
@@ -122,7 +122,7 @@ type Filter = {
 const buildFiltersForCriteria = (criteria: LogDocumentCountAlertParams['criteria']) => {
   let filters: Filter[] = [];
 
-  criteria.forEach(criterion => {
+  criteria.forEach((criterion) => {
     const criterionQuery = buildCriterionQuery(criterion);
     if (criterionQuery) {
       filters = [...filters, criterionQuery];

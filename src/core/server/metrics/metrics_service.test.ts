@@ -30,7 +30,7 @@ const testInterval = 100;
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
 
 describe('MetricsService', () => {
-  const httpMock = httpServiceMock.createSetupContract();
+  const httpMock = httpServiceMock.createInternalSetupContract();
   let metricsService: MetricsService;
 
   beforeEach(() => {
@@ -75,17 +75,14 @@ describe('MetricsService', () => {
     it('resets the collector after each collection', async () => {
       mockOpsCollector.collect.mockResolvedValue(dummyMetrics);
 
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       // `advanceTimersByTime` only ensure the interval handler is executed
       // however the `reset` call is executed after the async call to `collect`
       // meaning that we are going to miss the call if we don't wait for the
       // actual observable emission that is performed after
-      const waitForNextEmission = () =>
-        getOpsMetrics$()
-          .pipe(take(1))
-          .toPromise();
+      const waitForNextEmission = () => getOpsMetrics$().pipe(take(1)).toPromise();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);
@@ -112,8 +109,8 @@ describe('MetricsService', () => {
 
   describe('#stop', () => {
     it('stops the metrics interval', async () => {
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
@@ -128,8 +125,8 @@ describe('MetricsService', () => {
     });
 
     it('completes the metrics observable', async () => {
-      const { getOpsMetrics$ } = await metricsService.setup({ http: httpMock });
-      await metricsService.start();
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
 
       let completed = false;
 

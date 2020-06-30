@@ -8,20 +8,22 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  TRANSACTION_DURATION
+  TRANSACTION_DURATION,
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
+  alerts: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -34,23 +36,24 @@ const paramsSchema = schema.object({
   aggregationType: schema.oneOf([
     schema.literal('avg'),
     schema.literal('95th'),
-    schema.literal('99th')
-  ])
+    schema.literal('99th'),
+  ]),
+  environment: schema.string(),
 });
 
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerting,
-  config$
+  alerts,
+  config$,
 }: RegisterAlertParams) {
-  alerting.registerType({
+  alerts.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: paramsSchema
+      params: paramsSchema,
     },
     actionVariables: {
       context: [
@@ -58,22 +61,23 @@ export function registerTransactionDurationAlertType({
           description: i18n.translate(
             'xpack.apm.registerTransactionDurationAlertType.variables.serviceName',
             {
-              defaultMessage: 'Service name'
+              defaultMessage: 'Service name',
             }
           ),
-          name: 'serviceName'
+          name: 'serviceName',
         },
         {
           description: i18n.translate(
             'xpack.apm.registerTransactionDurationAlertType.variables.transactionType',
             {
-              defaultMessage: 'Transaction type'
+              defaultMessage: 'Transaction type',
             }
           ),
-          name: 'transactionType'
-        }
-      ]
+          name: 'transactionType',
+        },
+      ],
     },
+    producer: 'apm',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
@@ -81,8 +85,13 @@ export function registerTransactionDurationAlertType({
 
       const indices = await getApmIndices({
         config,
-        savedObjectsClient: services.savedObjectsClient
+        savedObjectsClient: services.savedObjectsClient,
       });
+
+      const environmentTerm =
+        alertParams.environment === ENVIRONMENT_ALL
+          ? []
+          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -94,46 +103,47 @@ export function registerTransactionDurationAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
-                    }
-                  }
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                    },
+                  },
                 },
                 {
                   term: {
-                    [PROCESSOR_EVENT]: 'transaction'
-                  }
+                    [PROCESSOR_EVENT]: 'transaction',
+                  },
                 },
                 {
                   term: {
-                    [SERVICE_NAME]: alertParams.serviceName
-                  }
+                    [SERVICE_NAME]: alertParams.serviceName,
+                  },
                 },
                 {
                   term: {
-                    [TRANSACTION_TYPE]: alertParams.transactionType
-                  }
-                }
-              ]
-            }
+                    [TRANSACTION_TYPE]: alertParams.transactionType,
+                  },
+                },
+                ...environmentTerm,
+              ],
+            },
           },
           aggs: {
             agg:
               alertParams.aggregationType === 'avg'
                 ? {
                     avg: {
-                      field: TRANSACTION_DURATION
-                    }
+                      field: TRANSACTION_DURATION,
+                    },
                   }
                 : {
                     percentiles: {
                       field: TRANSACTION_DURATION,
                       percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99
-                      ]
-                    }
-                  }
-          }
-        }
+                        alertParams.aggregationType === '95th' ? 95 : 99,
+                      ],
+                    },
+                  },
+          },
+        },
       };
 
       const response: ESSearchResponse<
@@ -147,7 +157,7 @@ export function registerTransactionDurationAlertType({
 
       const { agg } = response.aggregations;
 
-      const value = 'values' in agg ? agg.values[0] : agg.value;
+      const value = 'values' in agg ? agg.values[0] : agg?.value;
 
       if (value && value > alertParams.threshold * 1000) {
         const alertInstance = services.alertInstanceFactory(
@@ -155,11 +165,11 @@ export function registerTransactionDurationAlertType({
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
           transactionType: alertParams.transactionType,
-          serviceName: alertParams.serviceName
+          serviceName: alertParams.serviceName,
         });
       }
 
       return {};
-    }
+    },
   });
 }

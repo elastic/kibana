@@ -44,7 +44,7 @@ describe('state selectors', () => {
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
-      lastRefresh: 125,
+      searchText: '',
     },
     monitorStatus: {
       status: null,
@@ -107,6 +107,7 @@ describe('state selectors', () => {
         loading: false,
       },
     },
+    selectedFilters: null,
   };
 
   it('selects base path from state', () => {

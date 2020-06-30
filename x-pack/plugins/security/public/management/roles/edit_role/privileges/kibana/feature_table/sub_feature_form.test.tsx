@@ -27,7 +27,7 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
 };
 
 const featureId = 'with_sub_features';
-const subFeature = kibanaFeatures.find(kf => kf.id === featureId)!.subFeatures[0];
+const subFeature = kibanaFeatures.find((kf) => kf.id === featureId)!.subFeatures[0];
 const securedSubFeature = new SecuredSubFeature(subFeature.toRaw());
 
 describe('SubFeatureForm', () => {
@@ -57,8 +57,8 @@ describe('SubFeatureForm', () => {
     const checkboxes = wrapper.find(EuiCheckbox);
     const buttonGroups = wrapper.find(EuiButtonGroup);
 
-    expect(checkboxes.everyWhere(checkbox => checkbox.props().disabled === true)).toBe(true);
-    expect(buttonGroups.everyWhere(checkbox => checkbox.props().isDisabled === true)).toBe(true);
+    expect(checkboxes.everyWhere((checkbox) => checkbox.props().disabled === true)).toBe(true);
+    expect(buttonGroups.everyWhere((checkbox) => checkbox.props().isDisabled === true)).toBe(true);
   });
 
   it('fires onChange when an independent privilege is selected', () => {

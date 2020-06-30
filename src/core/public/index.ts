@@ -35,6 +35,8 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
@@ -79,7 +81,6 @@ import {
 
 export { CoreContext, CoreSystem } from './core_system';
 export {
-  RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
@@ -104,6 +105,7 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
+  PublicAppInfo,
   AppBase,
   AppMount,
   AppMountDeprecated,
@@ -120,6 +122,9 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
+  LegacyApp,
+  PublicLegacyAppInfo,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -185,6 +190,8 @@ export {
 } from './notifications';
 
 export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -357,3 +364,5 @@ export {
   UiSettingsState,
   NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

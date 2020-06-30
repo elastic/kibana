@@ -7,7 +7,7 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { Client, SearchParams } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -22,9 +22,9 @@ const COMMON_HEADERS = {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es: Client = getService('legacyEs');
-  const callCluster: APICaller = (((path: 'search', searchParams: SearchParams) => {
+  const callCluster: LegacyAPICaller = (((path: 'search', searchParams: SearchParams) => {
     return es[path].call(es, searchParams);
-  }) as unknown) as APICaller;
+  }) as unknown) as LegacyAPICaller;
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -91,9 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should delete older telemetry documents while running', async () => {
-      const olderDate = moment()
-        .subtract(100, 'days')
-        .valueOf();
+      const olderDate = moment().subtract(100, 'days').valueOf();
 
       // @ts-ignore optional type: string
       await es.index({
@@ -122,16 +120,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should aggregate the individual events into daily totals by type', async () => {
       // Dates are set to midnight in the aggregation, so let's make this easier for the test
-      const date1 = moment()
-        .utc()
-        .subtract(10, 'days')
-        .startOf('day')
-        .valueOf();
-      const date2 = moment()
-        .utc()
-        .subtract(20, 'days')
-        .startOf('day')
-        .valueOf();
+      const date1 = moment().utc().subtract(10, 'days').startOf('day').valueOf();
+      const date2 = moment().utc().subtract(20, 'days').startOf('day').valueOf();
 
       function getEvent(name: string, date: number, type = 'regular') {
         return {

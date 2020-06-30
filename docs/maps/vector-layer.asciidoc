@@ -2,12 +2,15 @@
 [[vector-layer]]
 == Vector layer
 
-The vector layer displays points, lines, and polygons.
+Vector layers display points, lines, and polygons.
 
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
 
-You can create a vector layer from the following sources:
+To add a vector layer to your map, click *Add layer*, then select one of the following layers:
+
+*Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 *Configured GeoJSON*:: Vector data from hosted GeoJSON configured in kibana.yml.
 See map.regionmap.* in <<settings>> for details.
@@ -18,14 +21,12 @@ The index must contain at least one field mapped as {ref}/geo-point.html[geo_poi
 NOTE: Document results are limited to the `index.max_result_window` index setting, which defaults to 10000.
 Use <<maps-aggregations, aggregations>> to plot large data sets.
 
-*Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
-Set *Show as* to *grid rectangles* or *clusters*.
-The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
-
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
+
+*Upload Geojson*:: Index GeoJSON data in Elasticsearch.
 
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]

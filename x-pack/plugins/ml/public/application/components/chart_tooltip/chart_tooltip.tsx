@@ -27,7 +27,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
   const refCallback = useRef<ChildrenArg['triggerRef']>();
 
   useEffect(() => {
-    const subscription = service.tooltipState$.subscribe(tooltipState => {
+    const subscription = service.tooltipState$.subscribe((tooltipState) => {
       if (refCallback.current) {
         // update trigger
         refCallback.current(tooltipState.target);
@@ -96,6 +96,11 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
 
   return (
     <TooltipTrigger
+      modifiers={{
+        preventOverflow: {
+          boundariesElement: 'window',
+        },
+      }}
       placement="right-start"
       trigger="none"
       tooltipShown={isTooltipShown}

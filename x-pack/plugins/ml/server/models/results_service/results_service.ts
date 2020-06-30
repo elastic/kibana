@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -30,7 +30,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(callAsCurrentUser: APICaller) {
+export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -89,7 +89,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
     }
 
     // Add in term queries for each of the specified criteria.
-    criteriaFields.forEach(criteria => {
+    criteriaFields.forEach((criteria) => {
       boolCriteria.push({
         term: {
           [criteria.fieldName]: criteria.fieldValue,
@@ -105,7 +105,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
     if (influencers.length > 0) {
       boolCriteria.push({
         bool: {
-          should: influencers.map(influencer => {
+          should: influencers.map((influencer) => {
             return {
               nested: {
                 path: 'influencers',
@@ -169,7 +169,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
     };
     if (resp.hits.total !== 0) {
       let records: AnomalyRecordDoc[] = [];
-      resp.hits.hits.forEach(hit => {
+      resp.hits.hits.forEach((hit) => {
         records.push(hit._source);
       });
 
@@ -195,7 +195,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
         tableData.examplesByJobId = {};
 
         const categoryIdsByJobId: { [key: string]: any } = {};
-        categoryAnomalies.forEach(anomaly => {
+        categoryAnomalies.forEach((anomaly) => {
           if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
@@ -206,7 +206,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
 
         const categoryJobIds = Object.keys(categoryIdsByJobId);
         await Promise.all(
-          categoryJobIds.map(async jobId => {
+          categoryJobIds.map(async (jobId) => {
             const examplesByCategoryId = await getCategoryExamples(
               jobId,
               categoryIdsByJobId[jobId],
@@ -358,7 +358,7 @@ export function resultsServiceProvider(callAsCurrentUser: APICaller) {
       []
     );
     const timestampByJobId: { [key: string]: number | undefined } = {};
-    bucketsByJobId.forEach(bucket => {
+    bucketsByJobId.forEach((bucket) => {
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
 

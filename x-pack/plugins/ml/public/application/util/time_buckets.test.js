@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { TimeBuckets, getBoundsRoundedToInterval, calcEsInterval } from './time_buckets';
 
 describe('ML - time buckets', () => {
@@ -13,8 +14,8 @@ describe('ML - time buckets', () => {
 
   beforeEach(() => {
     const timeBucketsConfig = {
-      'histogram:maxBars': 100,
-      'histogram:barTarget': 50,
+      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: 100,
+      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: 50,
     };
 
     autoBuckets = new TimeBuckets(timeBucketsConfig);
@@ -231,14 +232,14 @@ describe('ML - time buckets', () => {
         expression: '3d',
       });
       expect(calcEsInterval(moment.duration(7, 'd'))).toEqual({
-        value: 1,
-        unit: 'w',
-        expression: '1w',
+        value: 7,
+        unit: 'd',
+        expression: '7d',
       });
       expect(calcEsInterval(moment.duration(1, 'w'))).toEqual({
-        value: 1,
-        unit: 'w',
-        expression: '1w',
+        value: 7,
+        unit: 'd',
+        expression: '7d',
       });
       expect(calcEsInterval(moment.duration(4, 'w'))).toEqual({
         value: 28,
@@ -246,19 +247,19 @@ describe('ML - time buckets', () => {
         expression: '28d',
       });
       expect(calcEsInterval(moment.duration(1, 'M'))).toEqual({
-        value: 1,
-        unit: 'M',
-        expression: '1M',
+        value: 30,
+        unit: 'd',
+        expression: '30d',
       });
       expect(calcEsInterval(moment.duration(12, 'M'))).toEqual({
-        value: 1,
-        unit: 'y',
-        expression: '1y',
+        value: 365,
+        unit: 'd',
+        expression: '365d',
       });
       expect(calcEsInterval(moment.duration(1, 'y'))).toEqual({
-        value: 1,
-        unit: 'y',
-        expression: '1y',
+        value: 365,
+        unit: 'd',
+        expression: '365d',
       });
     });
   });

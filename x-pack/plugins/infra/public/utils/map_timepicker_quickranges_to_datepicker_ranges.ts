@@ -11,7 +11,7 @@ export const mapKibanaQuickRangesToDatePickerRanges = (
   timepickerQuickRanges: TimePickerQuickRange[] | undefined
 ): EuiSuperDatePickerCommonRange[] =>
   timepickerQuickRanges
-    ? timepickerQuickRanges.map(r => ({
+    ? timepickerQuickRanges.map((r) => ({
         start: r.from,
         end: r.to,
         label: r.display,

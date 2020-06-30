@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
@@ -49,7 +48,7 @@ const createMockStorage = () => ({
 
 describe('Transform: <DefinePivotForm />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const searchItems = {
       indexPattern: {

@@ -30,7 +30,7 @@ const validKeys = [
   'width',
 ];
 
-const sanitizeWorkpad = function(workpad) {
+const sanitizeWorkpad = function (workpad) {
   const workpadKeys = Object.keys(workpad);
 
   for (const key of workpadKeys) {
@@ -42,17 +42,17 @@ const sanitizeWorkpad = function(workpad) {
   return workpad;
 };
 
-const getApiPath = function() {
+const getApiPath = function () {
   const basePath = platformService.getService().coreStart.http.basePath.get();
   return `${basePath}${API_ROUTE_WORKPAD}`;
 };
 
-const getApiPathStructures = function() {
+const getApiPathStructures = function () {
   const basePath = platformService.getService().coreStart.http.basePath.get();
   return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 };
 
-const getApiPathAssets = function() {
+const getApiPathAssets = function () {
   const basePath = platformService.getService().coreStart.http.basePath.get();
   return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
 };

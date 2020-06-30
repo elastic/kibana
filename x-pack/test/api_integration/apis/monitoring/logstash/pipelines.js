@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import pipelinesFixture from './fixtures/pipelines';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -52,7 +52,7 @@ export default function({ getService }) {
           .send({ timeRange, pagination: { ...pagination, index: page }, sort })
           .expect(200);
 
-        return body.pipelines.map(pipeline => pipeline.id);
+        return body.pipelines.map((pipeline) => pipeline.id);
       }
 
       const ids = [...(await getIds(0)), ...(await getIds(1)), ...(await getIds(2))];

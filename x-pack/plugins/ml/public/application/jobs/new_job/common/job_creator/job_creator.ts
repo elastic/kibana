@@ -155,7 +155,7 @@ export class JobCreator {
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
-    const bs = parseInterval(bucketSpan);
+    const bs = parseInterval(bucketSpan, true);
     this._bucketSpanMs = bs === null ? 0 : bs.asMilliseconds();
   }
 
@@ -617,7 +617,7 @@ export class JobCreator {
     }
 
     if (this._job_config.analysis_config.influencers !== undefined) {
-      this._job_config.analysis_config.influencers.forEach(i => this.addInfluencer(i));
+      this._job_config.analysis_config.influencers.forEach((i) => this.addInfluencer(i));
     }
 
     if (
@@ -630,7 +630,7 @@ export class JobCreator {
 
     this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
-      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map(f => ({
+      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map((f) => ({
         id: f,
         name: f,
         type: ES_FIELD_TYPES.KEYWORD,

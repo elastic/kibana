@@ -10,8 +10,8 @@ import { EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
-
+import moment from 'moment-timezone';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../shared_imports';
 import { TransformListRow } from '../../../../common';
 import { ExpandedRowDetailsPane, SectionConfig } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
@@ -61,6 +61,44 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const state: SectionConfig = {
     title: 'State',
     items: stateItems,
+    position: 'right',
+  };
+
+  const configItems: Item[] = [
+    {
+      title: 'transform_id',
+      description: item.id,
+    },
+    {
+      title: 'transform_version',
+      description: item.config.version,
+    },
+    {
+      title: 'description',
+      description: item.config.description ?? '',
+    },
+    {
+      title: 'create_time',
+      description:
+        formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
+    },
+    {
+      title: 'source_index',
+      description: Array.isArray(item.config.source.index)
+        ? item.config.source.index[0]
+        : item.config.source.index,
+    },
+    {
+      title: 'destination_index',
+      description: Array.isArray(item.config.dest.index)
+        ? item.config.dest.index[0]
+        : item.config.dest.index,
+    },
+  ];
+
+  const general: SectionConfig = {
+    title: 'General',
+    items: configItems,
     position: 'left',
   };
 
@@ -108,15 +146,15 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const checkpointing: SectionConfig = {
     title: 'Checkpointing',
     items: checkpointingItems,
-    position: 'left',
+    position: 'right',
   };
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: Object.entries(item.stats.stats).map(s => {
+    items: Object.entries(item.stats.stats).map((s) => {
       return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
-    position: 'right',
+    position: 'left',
   };
 
   const tabs = [
@@ -124,12 +162,23 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       id: `transform-details-tab-${item.id}`,
       'data-test-subj': 'transformDetailsTab',
       name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformSettingsLabel',
+        'xpack.transform.transformList.transformDetails.tabs.transformDetailsLabel',
         {
-          defaultMessage: 'Transform details',
+          defaultMessage: 'Details',
         }
       ),
-      content: <ExpandedRowDetailsPane sections={[state, checkpointing, stats]} />,
+      content: <ExpandedRowDetailsPane sections={[general, state, checkpointing]} />,
+    },
+    {
+      id: `transform-stats-tab-${item.id}`,
+      'data-test-subj': 'transformStatsTab',
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
+        {
+          defaultMessage: 'Stats',
+        }
+      ),
+      content: <ExpandedRowDetailsPane sections={[stats]} />,
     },
     {
       id: `transform-json-tab-${item.id}`,

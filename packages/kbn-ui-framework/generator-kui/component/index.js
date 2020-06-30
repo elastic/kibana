@@ -49,7 +49,7 @@ module.exports = class extends Generator {
         type: 'confirm',
         default: true,
       },
-    ]).then(answers => {
+    ]).then((answers) => {
       this.config = answers;
 
       if (!answers.name || !answers.name.trim()) {
@@ -62,7 +62,7 @@ module.exports = class extends Generator {
   writing() {
     const config = this.config;
 
-    const writeComponent = isStatelessFunction => {
+    const writeComponent = (isStatelessFunction) => {
       const componentName = utils.makeComponentName(config.name);
       const cssClassName = utils.lowerCaseFirstLetter(componentName);
       const fileName = config.name;

@@ -21,14 +21,14 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
         body: schema.object({
           spaces: schema.arrayOf(
             schema.string({
-              validate: value => {
+              validate: (value) => {
                 if (!SPACE_ID_REGEX.test(value)) {
                   return `lower case, a-z, 0-9, "_", and "-" are allowed`;
                 }
               },
             }),
             {
-              validate: spaceIds => {
+              validate: (spaceIds) => {
                 if (!spaceIds.length) {
                   return 'must specify one or more space ids';
                 } else if (uniq(spaceIds).length !== spaceIds.length) {

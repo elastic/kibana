@@ -57,6 +57,7 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
+        "dashboards",
         "kibana",
       ],
       "catalogue": Array [
@@ -92,6 +93,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
+        "dashboards",
         "kibana",
       ],
       "catalogue": Array [
@@ -127,6 +129,7 @@ Array [
         "console",
       ],
       "app": Array [
+        "dev_tools",
         "kibana",
       ],
       "catalogue": Array [
@@ -151,6 +154,7 @@ Array [
         "console",
       ],
       "app": Array [
+        "dev_tools",
         "kibana",
       ],
       "catalogue": Array [
@@ -177,6 +181,7 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
+        "discover",
         "kibana",
       ],
       "catalogue": Array [
@@ -187,11 +192,10 @@ Array [
         "all": Array [
           "search",
           "query",
+          "index-pattern",
           "url",
         ],
-        "read": Array [
-          "index-pattern",
-        ],
+        "read": Array [],
       },
       "ui": Array [
         "show",
@@ -205,6 +209,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
+        "discover",
         "kibana",
       ],
       "catalogue": Array [
@@ -235,11 +240,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -260,11 +265,11 @@ Array [
         "kibana",
       ],
       "catalogue": Array [
-        "index_patterns",
+        "indexPatterns",
       ],
       "management": Object {
         "kibana": Array [
-          "index_patterns",
+          "indexPatterns",
         ],
       },
       "savedObject": Object {
@@ -400,8 +405,9 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",
@@ -432,8 +438,9 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",

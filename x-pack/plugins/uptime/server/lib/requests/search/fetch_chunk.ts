@@ -26,12 +26,12 @@ export const fetchChunk: ChunkFetcher = async (
   searchAfter: any,
   size: number
 ): Promise<ChunkResult> => {
-  const { monitorIds, checkGroups, searchAfter: foundSearchAfter } = await findPotentialMatches(
+  const { monitorIds, searchAfter: foundSearchAfter } = await findPotentialMatches(
     queryContext,
     searchAfter,
     size
   );
-  const matching = await refinePotentialMatches(queryContext, monitorIds, checkGroups);
+  const matching = await refinePotentialMatches(queryContext, monitorIds);
 
   return {
     monitorGroups: matching,

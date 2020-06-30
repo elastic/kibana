@@ -37,10 +37,10 @@ export async function getIndexPatternObject(req, indexPatternString) {
   // getting the index pattern fields
   const indexPatterns = indexPatternObjects.saved_objects
     .filter(
-      obj =>
+      (obj) =>
         obj.attributes.title === indexPatternString || (defaultIndex && obj.id === defaultIndex)
     )
-    .map(indexPattern => {
+    .map((indexPattern) => {
       const { title, fields, timeFieldName } = indexPattern.attributes;
       return {
         title,

@@ -48,9 +48,7 @@ function foldObject(hash: number, o: any, seen: any[]) {
     return foldValue(h, o[key], key, seen);
   }
 
-  return Object.keys(o)
-    .sort()
-    .reduce(foldKey, hash);
+  return Object.keys(o).sort().reduce(foldKey, hash);
 }
 
 function foldValue(input: number, value: any, key: string, seen: any[]) {

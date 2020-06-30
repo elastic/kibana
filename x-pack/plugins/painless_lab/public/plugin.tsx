@@ -40,7 +40,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         defaultMessage: 'Simulate and debug painless code.',
       }),
       icon: '',
-      path: '/app/kibana#/dev_tools/painless_lab',
+      path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
@@ -106,7 +106,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {

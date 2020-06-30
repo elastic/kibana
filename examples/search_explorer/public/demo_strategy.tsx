@@ -81,7 +81,7 @@ export class DemoStrategy extends React.Component<Props, State> {
             <EuiFormRow label="What is your name?">
               <EuiFieldText
                 value={this.state.name}
-                onChange={e => this.setState({ name: e.target.value })}
+                onChange={(e) => this.setState({ name: e.target.value })}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -90,7 +90,7 @@ export class DemoStrategy extends React.Component<Props, State> {
             <EuiFormRow label="How are you feeling today?">
               <EuiFieldText
                 value={this.state.mood}
-                onChange={e => this.setState({ mood: e.target.value })}
+                onChange={(e) => this.setState({ mood: e.target.value })}
               />
             </EuiFormRow>
           </EuiFlexItem>

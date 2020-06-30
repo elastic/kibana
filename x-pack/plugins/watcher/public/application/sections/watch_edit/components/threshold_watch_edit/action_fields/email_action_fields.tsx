@@ -24,7 +24,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
 }) => {
   const { to, subject, body } = action;
-  const toOptions = to ? to.map(label => ({ label })) : [];
+  const toOptions = to ? to.map((label) => ({ label })) : [];
 
   return (
     <Fragment>
@@ -48,12 +48,12 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
-            editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
+            editAction({ key: 'to', value: newOptions.map((newOption) => newOption.label) });
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction({
               key: 'to',
-              value: selectedOptions.map(selectedOption => selectedOption.label),
+              value: selectedOptions.map((selectedOption) => selectedOption.label),
             });
           }}
           onBlur={() => {
@@ -81,7 +81,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'subject', value: e.target.value });
           }}
         />
@@ -101,7 +101,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           value={body || ''}
           name="body"
           data-test-subj="emailBodyInput"
-          onChange={e => {
+          onChange={(e) => {
             editAction({ key: 'body', value: e.target.value });
           }}
         />

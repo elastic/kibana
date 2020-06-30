@@ -20,7 +20,7 @@ interface Props {
 export function OverwrittenSessionPage({ authc, basePath }: Props) {
   const [username, setUsername] = useState<string | null>(null);
   useEffect(() => {
-    authc.getCurrentUser().then(user => setUsername(user.username));
+    authc.getCurrentUser().then((user) => setUsername(user.username));
   }, [authc]);
 
   if (username == null) {

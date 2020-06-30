@@ -22,7 +22,7 @@ export function getClusterStatus(req, lsIndexPattern, { clusterUuid }) {
   checkParam(lsIndexPattern, 'lsIndexPattern in logstash/getClusterStatus');
 
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getLogstashForClusters(req, lsIndexPattern, clusters).then(clusterStatus =>
+  return getLogstashForClusters(req, lsIndexPattern, clusters).then((clusterStatus) =>
     get(clusterStatus, '[0].stats')
   );
 }

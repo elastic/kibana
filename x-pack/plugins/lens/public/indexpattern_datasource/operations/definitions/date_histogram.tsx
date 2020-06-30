@@ -78,7 +78,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&
@@ -88,7 +88,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     );
   },
   transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
     if (
       newField &&
       newField.aggregationRestrictions &&
@@ -138,7 +138,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
-        currentField => currentField.name === currentColumn.sourceField
+        (currentField) => currentField.name === currentColumn.sourceField
       );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
@@ -216,7 +216,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                       }
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
-                      onChange={e => {
+                      onChange={(e) => {
                         setInterval({
                           ...interval,
                           value: e.target.value,
@@ -228,7 +228,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                     <EuiSelect
                       data-test-subj="lensDateHistogramUnit"
                       value={interval.unit}
-                      onChange={e => {
+                      onChange={(e) => {
                         setInterval({
                           ...interval,
                           unit: e.target.value,

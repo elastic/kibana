@@ -30,7 +30,7 @@ describe('cusum.js', () => {
   });
 
   it('progressively adds the numbers in the list', () => {
-    return invoke(fn, [seriesList]).then(r => {
+    return invoke(fn, [seriesList]).then((r) => {
       expect(_.map(r.output.list[1].data, 1)).to.eql([100, 150, 200, 220]);
     });
   });

@@ -7,7 +7,7 @@
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
 import { first } from 'rxjs/operators';
-import { loggingServiceMock, coreMock } from 'src/core/server/mocks';
+import { loggingSystemMock, coreMock } from 'src/core/server/mocks';
 import { createConfig$, ConfigSchema } from './config';
 
 describe('config schema', () => {
@@ -54,15 +54,13 @@ describe('createConfig$()', () => {
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
     const contextMock = coreMock.createPluginInitializerContext({});
-    const config = await createConfig$(contextMock)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(contextMock).pipe(first()).toPromise();
     expect(config).toEqual({
       config: { encryptionKey: 'ab'.repeat(16) },
       usingEphemeralEncryptionKey: true,
     });
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
           "Generating a random key for xpack.encryptedSavedObjects.encryptionKey. To be able to decrypt encrypted saved objects attributes after restart, please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml",
@@ -75,14 +73,12 @@ describe('createConfig$()', () => {
     const contextMock = coreMock.createPluginInitializerContext({
       encryptionKey: 'supersecret',
     });
-    const config = await createConfig$(contextMock)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(contextMock).pipe(first()).toPromise();
     expect(config).toEqual({
       config: { encryptionKey: 'supersecret' },
       usingEphemeralEncryptionKey: false,
     });
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
+    expect(loggingSystemMock.collect(contextMock.logger).warn).toEqual([]);
   });
 });

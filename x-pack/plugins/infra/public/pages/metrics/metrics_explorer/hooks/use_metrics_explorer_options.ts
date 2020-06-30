@@ -5,7 +5,8 @@
  */
 
 import createContainer from 'constate';
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { MetricsExplorerColor } from '../../../../../common/color_palette';
 import {
   MetricsExplorerAggregation,
@@ -37,10 +38,12 @@ export interface MetricsExplorerChartOptions {
 export interface MetricsExplorerOptions {
   metrics: MetricsExplorerOptionsMetric[];
   limit?: number;
-  groupBy?: string;
+  groupBy?: string | string[];
   filterQuery?: string;
   aggregation: MetricsExplorerAggregation;
   forceInterval?: boolean;
+  dropLastBucket?: boolean;
+  source?: string;
 }
 
 export interface MetricsExplorerTimeOptions {
@@ -82,6 +85,13 @@ export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
 export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   aggregation: 'avg',
   metrics: DEFAULT_METRICS,
+  source: 'default',
+};
+
+export const DEFAULT_METRICS_EXPLORER_VIEW_STATE = {
+  options: DEFAULT_OPTIONS,
+  chartOptions: DEFAULT_CHART_OPTIONS,
+  currentTimerange: DEFAULT_TIMERANGE,
 };
 
 function parseJsonOrDefault<Obj>(value: string | null, defaultValue: Obj): Obj {
@@ -121,6 +131,21 @@ export const useMetricsExplorerOptions = () => {
     DEFAULT_CHART_OPTIONS
   );
   const [isAutoReloading, setAutoReloading] = useState<boolean>(false);
+
+  const { metricThresholdPrefill } = useAlertPrefillContext();
+  // For Jest compatibility; including metricThresholdPrefill as a dep in useEffect causes an
+  // infinite loop in test environment
+  const prefillContext = useMemo(() => metricThresholdPrefill, [metricThresholdPrefill]);
+
+  useEffect(() => {
+    if (prefillContext) {
+      const { setPrefillOptions } = prefillContext;
+      const { metrics, groupBy, filterQuery } = options;
+
+      setPrefillOptions({ metrics, groupBy, filterQuery });
+    }
+  }, [options, prefillContext]);
+
   return {
     defaultViewState: {
       options: DEFAULT_OPTIONS,

@@ -80,7 +80,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     defaultMessage: 'Type',
   });
   const typeOptions = types
-    ? types.map(type => {
+    ? types.map((type) => {
         return { value: type, text: type };
       })
     : [{ value: 'any', text: 'any' }];
@@ -224,7 +224,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
-        onChange={optionId => handleValueChange(id, optionId.replace(`${id}-`, ''))}
+        onChange={(optionId) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={`${id}ButtonGroup`}
@@ -257,7 +257,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             data-test-subj="fieldFilterSearchInput"
             compressed
             fullWidth
-            onChange={event => onChange('name', event.currentTarget.value)}
+            onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
             value={value}
           />

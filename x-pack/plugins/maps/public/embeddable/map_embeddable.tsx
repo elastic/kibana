@@ -8,19 +8,13 @@ import _ from 'lodash';
 import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import {
-  Embeddable,
-  IContainer,
-  EmbeddableOutput,
-} from '../../../../../src/plugins/embeddable/public';
+import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
-  IIndexPattern,
   TimeRange,
   Filter,
   Query,
@@ -41,8 +35,10 @@ import {
   hideViewControl,
   setHiddenLayers,
   setMapSettings,
-} from '../actions/map_actions';
-import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
@@ -51,15 +47,12 @@ import {
 } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
+import { LayerDescriptor } from '../../common/descriptor_types';
 
-import { MapEmbeddableInput, MapEmbeddableConfig } from './types';
+import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
 export { MapEmbeddableInput, MapEmbeddableConfig };
-
-export interface MapEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns: IIndexPattern[];
-}
 
 const GisMap = lazy(() => import('../connected_components/gis_map'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
@@ -67,7 +60,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
 
   private _renderTooltipContent?: RenderToolTipContent;
   private _eventHandlers?: EventHandlers;
-  private _layerList: unknown[];
+  private _layerList: LayerDescriptor[];
   private _store: MapStore;
   private _subscription: Subscription;
   private _prevTimeRange?: TimeRange;
@@ -102,7 +95,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._settings = config.settings;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -145,9 +138,9 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch(
+    this._store.dispatch<any>(
       setQuery({
-        filters: filters.filter(filter => !filter.meta.disabled),
+        filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         refresh,
@@ -216,9 +209,9 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       );
     }
 
-    this._store.dispatch(replaceLayerList(this._layerList));
+    this._store.dispatch<any>(replaceLayerList(this._layerList));
     if (this.input.hiddenLayers) {
-      this._store.dispatch(setHiddenLayers(this.input.hiddenLayers));
+      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
     }
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
@@ -246,9 +239,9 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     });
   }
 
-  async setLayerList(layerList: unknown[]) {
+  async setLayerList(layerList: LayerDescriptor[]) {
     this._layerList = layerList;
-    return await this._store.dispatch(replaceLayerList(this._layerList));
+    return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
   addFilters = (filters: Filter[]) => {

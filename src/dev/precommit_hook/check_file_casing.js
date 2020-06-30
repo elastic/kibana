@@ -35,7 +35,7 @@ const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function listPaths(paths) {
-  return paths.map(path => ` - ${path}`).join('\n');
+  return paths.map((path) => ` - ${path}`).join('\n');
 }
 
 /**
@@ -78,7 +78,7 @@ async function checkForKebabCase(log, files) {
 
       return acc.concat(
         parents.filter(
-          parent =>
+          (parent) =>
             matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) &&
             NON_KEBAB_CASE_RE.test(basename(parent))
         )
@@ -109,7 +109,7 @@ async function checkForSnakeCase(log, files) {
   const errorPaths = [];
   const warningPaths = [];
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const path = file.getRelativePath();
 
     if (TEMPORARILY_IGNORED_PATHS.includes(path)) {

@@ -158,25 +158,25 @@ class TimeseriesChartIntl extends Component {
 
     this.focusValuesLine = d3.svg
       .line()
-      .x(function(d) {
+      .x(function (d) {
         return focusXScale(d.date);
       })
-      .y(function(d) {
+      .y(function (d) {
         return focusYScale(d.value);
       })
-      .defined(d => d.value !== null);
+      .defined((d) => d.value !== null);
     this.focusBoundedArea = d3.svg
       .area()
-      .x(function(d) {
+      .x(function (d) {
         return focusXScale(d.date) || 1;
       })
-      .y0(function(d) {
+      .y0(function (d) {
         return focusYScale(d.upper);
       })
-      .y1(function(d) {
+      .y1(function (d) {
         return focusYScale(d.lower);
       })
-      .defined(d => d.lower !== null && d.upper !== null);
+      .defined((d) => d.lower !== null && d.upper !== null);
 
     this.contextXScale = d3.time.scale().range([0, vizWidth]);
     this.contextYScale = d3.scale.linear().range([contextChartHeight, contextChartLineTopMargin]);
@@ -274,10 +274,7 @@ class TimeseriesChartIntl extends Component {
 
     const fieldFormat = this.fieldFormat;
 
-    const svg = chartElement
-      .append('svg')
-      .attr('width', svgWidth)
-      .attr('height', svgHeight);
+    const svg = chartElement.append('svg').attr('width', svgWidth).attr('height', svgHeight);
 
     let contextDataMin;
     let contextDataMax;
@@ -290,11 +287,11 @@ class TimeseriesChartIntl extends Component {
           ? contextChartData
           : contextChartData.concat(contextForecastData);
 
-      contextDataMin = d3.min(combinedData, d => Math.min(d.value, d.lower));
-      contextDataMax = d3.max(combinedData, d => Math.max(d.value, d.upper));
+      contextDataMin = d3.min(combinedData, (d) => Math.min(d.value, d.lower));
+      contextDataMax = d3.max(combinedData, (d) => Math.max(d.value, d.upper));
     } else {
-      contextDataMin = d3.min(contextChartData, d => d.value);
-      contextDataMax = d3.max(contextChartData, d => d.value);
+      contextDataMin = d3.min(contextChartData, (d) => d.value);
+      contextDataMax = d3.max(contextChartData, (d) => d.value);
     }
 
     // Set the size of the left margin according to the width of the largest y axis tick label.
@@ -324,14 +321,14 @@ class TimeseriesChartIntl extends Component {
       .data(focusYScale.ticks())
       .enter()
       .append('text')
-      .text(d => {
+      .text((d) => {
         if (fieldFormat !== undefined) {
           return fieldFormat.convert(d, 'text');
         } else {
           return focusYScale.tickFormat()(d);
         }
       })
-      .each(function() {
+      .each(function () {
         maxYAxisLabelWidth = Math.max(
           this.getBBox().width + focusYAxis.tickPadding(),
           maxYAxisLabelWidth
@@ -359,10 +356,7 @@ class TimeseriesChartIntl extends Component {
       );
 
     // Mask to hide annotations overflow
-    const annotationsMask = svg
-      .append('defs')
-      .append('mask')
-      .attr('id', ANNOTATION_MASK_ID);
+    const annotationsMask = svg.append('defs').append('mask').attr('id', ANNOTATION_MASK_ID);
 
     annotationsMask
       .append('rect')
@@ -622,7 +616,7 @@ class TimeseriesChartIntl extends Component {
       (focusForecastData !== undefined && focusForecastData.length > 0)
     ) {
       if (this.fieldFormat !== undefined) {
-        this.focusYAxis.tickFormat(d => this.fieldFormat.convert(d, 'text'));
+        this.focusYAxis.tickFormat((d) => this.fieldFormat.convert(d, 'text'));
       } else {
         // Use default tick formatter.
         this.focusYAxis.tickFormat(null);
@@ -637,7 +631,7 @@ class TimeseriesChartIntl extends Component {
         combinedData = data.concat(focusForecastData);
       }
 
-      yMin = d3.min(combinedData, d => {
+      yMin = d3.min(combinedData, (d) => {
         let metricValue = d.value;
         if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
           // If an anomaly coincides with a gap in the data, use the anomaly actual value.
@@ -653,7 +647,7 @@ class TimeseriesChartIntl extends Component {
         }
         return metricValue;
       });
-      yMax = d3.max(combinedData, d => {
+      yMax = d3.max(combinedData, (d) => {
         let metricValue = d.value;
         if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
           // If an anomaly coincides with a gap in the data, use the anomaly actual value.
@@ -681,7 +675,7 @@ class TimeseriesChartIntl extends Component {
       // between annotation labels, chart lines and anomalies.
       if (focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
-        const maxLevel = d3.max(Object.keys(levels).map(key => levels[key]));
+        const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization
         yMax = yMax * (1 + (maxLevel + 1) / 5);
       }
@@ -698,9 +692,11 @@ class TimeseriesChartIntl extends Component {
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
     focusChart.select('.x.axis').call(
-      this.focusXAxis.ticks(numTicksForDateFormat(this.vizWidth), xAxisTickFormat).tickFormat(d => {
-        return moment(d).format(xAxisTickFormat);
-      })
+      this.focusXAxis
+        .ticks(numTicksForDateFormat(this.vizWidth), xAxisTickFormat)
+        .tickFormat((d) => {
+          return moment(d).format(xAxisTickFormat);
+        })
     );
     focusChart.select('.y.axis').call(this.focusYAxis);
 
@@ -740,7 +736,7 @@ class TimeseriesChartIntl extends Component {
       .selectAll('.metric-value')
       .data(
         data.filter(
-          d =>
+          (d) =>
             (d.value !== null || typeof d.anomalyScore === 'number') &&
             !showMultiBucketAnomalyMarker(d)
         )
@@ -753,20 +749,20 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('circle')
       .attr('r', LINE_CHART_ANOMALY_RADIUS)
-      .on('mouseover', function(d) {
+      .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
       .on('mouseout', () => this.props.tooltipService.hide());
 
     // Update all dots to new positions.
     dots
-      .attr('cx', d => {
+      .attr('cx', (d) => {
         return this.focusXScale(d.date);
       })
-      .attr('cy', d => {
+      .attr('cy', (d) => {
         return this.focusYScale(d.value);
       })
-      .attr('class', d => {
+      .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (_.has(d, 'anomalyScore')) {
           markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
@@ -778,7 +774,9 @@ class TimeseriesChartIntl extends Component {
     const multiBucketMarkers = d3
       .select('.focus-chart-markers')
       .selectAll('.multi-bucket')
-      .data(data.filter(d => d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true));
+      .data(
+        data.filter((d) => d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true)
+      );
 
     // Remove multi-bucket markers that are no longer needed.
     multiBucketMarkers.exit().remove();
@@ -787,14 +785,8 @@ class TimeseriesChartIntl extends Component {
     multiBucketMarkers
       .enter()
       .append('path')
-      .attr(
-        'd',
-        d3.svg
-          .symbol()
-          .size(MULTI_BUCKET_SYMBOL_SIZE)
-          .type('cross')
-      )
-      .on('mouseover', function(d) {
+      .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+      .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
       .on('mouseout', () => this.props.tooltipService.hide());
@@ -803,15 +795,15 @@ class TimeseriesChartIntl extends Component {
     multiBucketMarkers
       .attr(
         'transform',
-        d => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`
+        (d) => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`
       )
-      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
+      .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
     // Add rectangular markers for any scheduled events.
     const scheduledEventMarkers = d3
       .select('.focus-chart-markers')
       .selectAll('.scheduled-event-marker')
-      .data(data.filter(d => d.scheduledEvents !== undefined));
+      .data(data.filter((d) => d.scheduledEvents !== undefined));
 
     // Remove markers that are no longer needed i.e. if number of chart points has decreased.
     scheduledEventMarkers.exit().remove();
@@ -828,8 +820,8 @@ class TimeseriesChartIntl extends Component {
 
     // Update all markers to new positions.
     scheduledEventMarkers
-      .attr('x', d => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-      .attr('y', d => this.focusYScale(d.value) - 3);
+      .attr('x', (d) => this.focusXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
+      .attr('y', (d) => this.focusYScale(d.value) - 3);
 
     // Plot any forecast data in scope.
     if (focusForecastData !== undefined) {
@@ -854,17 +846,17 @@ class TimeseriesChartIntl extends Component {
         .enter()
         .append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
-        .on('mouseover', function(d) {
+        .on('mouseover', function (d) {
           showFocusChartTooltip(d, this);
         })
         .on('mouseout', () => this.props.tooltipService.hide());
 
       // Update all dots to new positions.
       forecastDots
-        .attr('cx', d => {
+        .attr('cx', (d) => {
           return this.focusXScale(d.date);
         })
-        .attr('cy', d => {
+        .attr('cy', (d) => {
           return this.focusYScale(d.value);
         })
         .attr('class', 'metric-value')
@@ -895,14 +887,14 @@ class TimeseriesChartIntl extends Component {
       );
 
     const zoomOptions = [{ durationMs: autoZoomDuration, label: 'auto' }];
-    _.each(ZOOM_INTERVAL_OPTIONS, option => {
+    _.each(ZOOM_INTERVAL_OPTIONS, (option) => {
       if (option.duration.asSeconds() > minSecs && option.duration.asSeconds() < boundsSecs) {
         zoomOptions.push({ durationMs: option.duration.asMilliseconds(), label: option.label });
       }
     });
     xPos += zoomLabel.node().getBBox().width + 4;
 
-    _.each(zoomOptions, option => {
+    _.each(zoomOptions, (option) => {
       const text = zoomGroup
         .append('a')
         .attr('data-ms', option.durationMs)
@@ -949,7 +941,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     const chartElement = d3.select(this.rootNode);
-    chartElement.selectAll('.focus-zoom a').on('click', function() {
+    chartElement.selectAll('.focus-zoom a').on('click', function () {
       d3.event.preventDefault();
       setZoomInterval(d3.select(this).attr('data-ms'));
     });
@@ -968,7 +960,7 @@ class TimeseriesChartIntl extends Component {
     const combinedData =
       contextForecastData === undefined ? data : data.concat(contextForecastData);
     const valuesRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-    _.each(combinedData, item => {
+    _.each(combinedData, (item) => {
       valuesRange.min = Math.min(item.value, valuesRange.min);
       valuesRange.max = Math.max(item.value, valuesRange.max);
     });
@@ -981,7 +973,7 @@ class TimeseriesChartIntl extends Component {
       (contextForecastData !== undefined && contextForecastData.length > 0)
     ) {
       const boundsRange = { min: Number.MAX_VALUE, max: Number.MIN_VALUE };
-      _.each(combinedData, item => {
+      _.each(combinedData, (item) => {
         boundsRange.min = Math.min(item.lower, boundsRange.min);
         boundsRange.max = Math.max(item.upper, boundsRange.max);
       });
@@ -1034,7 +1026,7 @@ class TimeseriesChartIntl extends Component {
       .outerTickSize(0)
       .tickPadding(0)
       .ticks(numTicksForDateFormat(cxtWidth, xAxisTickFormat))
-      .tickFormat(d => {
+      .tickFormat((d) => {
         return moment(d).format(xAxisTickFormat);
       });
 
@@ -1042,16 +1034,16 @@ class TimeseriesChartIntl extends Component {
 
     const contextBoundsArea = d3.svg
       .area()
-      .x(d => {
+      .x((d) => {
         return this.contextXScale(d.date);
       })
-      .y0(d => {
+      .y0((d) => {
         return this.contextYScale(Math.min(chartLimits.max, Math.max(d.lower, chartLimits.min)));
       })
-      .y1(d => {
+      .y1((d) => {
         return this.contextYScale(Math.max(chartLimits.min, Math.min(d.upper, chartLimits.max)));
       })
-      .defined(d => d.lower !== null && d.upper !== null);
+      .defined((d) => d.lower !== null && d.upper !== null);
 
     if (modelPlotEnabled === true) {
       cxtGroup
@@ -1063,19 +1055,15 @@ class TimeseriesChartIntl extends Component {
 
     const contextValuesLine = d3.svg
       .line()
-      .x(d => {
+      .x((d) => {
         return this.contextXScale(d.date);
       })
-      .y(d => {
+      .y((d) => {
         return this.contextYScale(d.value);
       })
-      .defined(d => d.value !== null);
+      .defined((d) => d.value !== null);
 
-    cxtGroup
-      .append('path')
-      .datum(data)
-      .attr('class', 'values-line')
-      .attr('d', contextValuesLine);
+    cxtGroup.append('path').datum(data).attr('class', 'values-line').attr('d', contextValuesLine);
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
 
     // Create the path elements for the forecast value line and bounds area.
@@ -1107,10 +1095,7 @@ class TimeseriesChartIntl extends Component {
       .y(this.contextYScale);
 
     // Draw the x axis on top of the mask so that the labels are visible.
-    cxtGroup
-      .append('g')
-      .attr('class', 'x axis context-chart-axis')
-      .call(xAxis);
+    cxtGroup.append('g').attr('class', 'x axis context-chart-axis').call(xAxis);
 
     // Move the x axis labels up so that they are inside the contact chart area.
     cxtGroup.selectAll('.x.context-chart-axis text').attr('dy', cxtChartHeight - 5);
@@ -1120,7 +1105,7 @@ class TimeseriesChartIntl extends Component {
     this.drawContextBrush(cxtGroup);
   }
 
-  drawContextBrush = contextGroup => {
+  drawContextBrush = (contextGroup) => {
     const { contextChartSelected } = this.props;
 
     const brush = this.brush;
@@ -1128,10 +1113,7 @@ class TimeseriesChartIntl extends Component {
     const mask = this.mask;
 
     // Create the brush for zooming in to the focus area of interest.
-    brush
-      .x(contextXScale)
-      .on('brush', brushing)
-      .on('brushend', brushed);
+    brush.x(contextXScale).on('brush', brushing).on('brushend', brushed);
 
     contextGroup
       .append('g')
@@ -1143,15 +1125,9 @@ class TimeseriesChartIntl extends Component {
 
     // move the left and right resize areas over to
     // be under the handles
-    contextGroup
-      .selectAll('.w rect')
-      .attr('x', -10)
-      .attr('width', 10);
+    contextGroup.selectAll('.w rect').attr('x', -10).attr('width', 10);
 
-    contextGroup
-      .selectAll('.e rect')
-      .attr('x', 0)
-      .attr('width', 10);
+    contextGroup.selectAll('.e rect').attr('x', 0).attr('width', 10);
 
     const handleBrushExtent = brush.extent();
 
@@ -1219,7 +1195,7 @@ class TimeseriesChartIntl extends Component {
       }
 
       // Set the color of the swimlane cells according to whether they are inside the selection.
-      contextGroup.selectAll('.swimlane-cell').style('fill', d => {
+      contextGroup.selectAll('.swimlane-cell').style('fill', (d) => {
         const cellMs = d.date.getTime();
         if (cellMs < selectionMin || cellMs > selectionMax) {
           return anomalyGrayScale(d.score);
@@ -1248,15 +1224,9 @@ class TimeseriesChartIntl extends Component {
     // Need to use the min(earliest) and max(earliest) of the context chart
     // aggregation to align the axes of the chart and swimlane elements.
     const xAxisDomain = this.calculateContextXAxisDomain();
-    const x = d3.time
-      .scale()
-      .range([0, swlWidth])
-      .domain(xAxisDomain);
+    const x = d3.time.scale().range([0, swlWidth]).domain(xAxisDomain);
 
-    const y = d3.scale
-      .linear()
-      .range([swlHeight, 0])
-      .domain([0, swlHeight]);
+    const y = d3.scale.linear().range([swlHeight, 0]).domain([0, swlHeight]);
 
     const xAxis = d3.svg
       .axis()
@@ -1281,10 +1251,7 @@ class TimeseriesChartIntl extends Component {
       .attr('transform', 'translate(0,' + swlHeight + ')')
       .call(xAxis);
 
-    axes
-      .append('g')
-      .attr('class', 'y axis')
-      .call(yAxis);
+    axes.append('g').attr('class', 'y axis').call(yAxis);
 
     const earliest = xAxisDomain[0].getTime();
     const latest = xAxisDomain[1].getTime();
@@ -1294,27 +1261,23 @@ class TimeseriesChartIntl extends Component {
       cellWidth = 1;
     }
 
-    const cells = swlGroup
-      .append('g')
-      .attr('class', 'swimlane-cells')
-      .selectAll('rect')
-      .data(data);
+    const cells = swlGroup.append('g').attr('class', 'swimlane-cells').selectAll('rect').data(data);
 
     cells
       .enter()
       .append('rect')
-      .attr('x', d => {
+      .attr('x', (d) => {
         return x(d.date);
       })
       .attr('y', 0)
       .attr('rx', 0)
       .attr('ry', 0)
-      .attr('class', d => {
+      .attr('class', (d) => {
         return d.score > 0 ? 'swimlane-cell' : 'swimlane-cell-hidden';
       })
       .attr('width', cellWidth)
       .attr('height', swlHeight)
-      .style('fill', d => {
+      .style('fill', (d) => {
         return anomalyColorScale(d.score);
       });
   };
@@ -1675,28 +1638,24 @@ class TimeseriesChartIntl extends Component {
         selectedMarker
           .enter()
           .append('path')
-          .attr(
-            'd',
-            d3.svg
-              .symbol()
-              .size(MULTI_BUCKET_SYMBOL_SIZE)
-              .type('cross')
-          )
-          .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
+          .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+          .attr('transform', (d) => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
           .attr(
             'class',
-            d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id} highlighted`
+            (d) =>
+              `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id} highlighted`
           );
       } else {
         selectedMarker
           .enter()
           .append('circle')
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
-          .attr('cx', d => focusXScale(d.date))
-          .attr('cy', d => focusYScale(d.value))
+          .attr('cx', (d) => focusXScale(d.date))
+          .attr('cy', (d) => focusYScale(d.value))
           .attr(
             'class',
-            d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore).id} highlighted`
+            (d) =>
+              `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore).id} highlighted`
           );
       }
 
@@ -1713,9 +1672,7 @@ class TimeseriesChartIntl extends Component {
   }
 
   unhighlightFocusChartAnomaly() {
-    d3.select('.focus-chart-markers')
-      .selectAll('.anomaly-marker.highlighted')
-      .remove();
+    d3.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
     this.props.tooltipService.hide();
   }
 
@@ -1732,7 +1689,7 @@ class TimeseriesChartIntl extends Component {
   }
 }
 
-export const TimeseriesChart = props => {
+export const TimeseriesChart = (props) => {
   const annotationProp = useObservable(annotation$);
   if (annotationProp === undefined) {
     return null;

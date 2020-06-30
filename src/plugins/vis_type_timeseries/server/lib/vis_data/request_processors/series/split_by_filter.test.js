@@ -47,7 +47,7 @@ describe('splitByFilter(req, panel, series)', () => {
   });
 
   test('returns a valid filter with a query_string', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = splitByFilter(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {
@@ -73,7 +73,7 @@ describe('splitByFilter(req, panel, series)', () => {
 
   test('calls next and does not add a filter', () => {
     series.split_mode = 'terms';
-    const next = jest.fn(doc => doc);
+    const next = jest.fn((doc) => doc);
     const doc = splitByFilter(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

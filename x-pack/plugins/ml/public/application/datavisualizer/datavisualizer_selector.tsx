@@ -182,10 +182,7 @@ export const DatavisualizerSelector: FC = () => {
                     }
                     description={startTrialDescription()}
                     footer={
-                      <EuiButton
-                        target="_blank"
-                        href="kibana#/management/elasticsearch/license_management/home"
-                      >
+                      <EuiButton target="_blank" href="management/stack/license_management/home">
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                           defaultMessage="Start trial"

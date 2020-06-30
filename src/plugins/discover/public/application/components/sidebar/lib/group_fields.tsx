@@ -45,9 +45,9 @@ export function groupFields(
   }
 
   const popular = fields
-    .filter(field => !columns.includes(field.name) && field.count)
+    .filter((field) => !columns.includes(field.name) && field.count)
     .sort((a: IndexPatternField, b: IndexPatternField) => (b.count || 0) - (a.count || 0))
-    .map(field => field.name)
+    .map((field) => field.name)
     .slice(0, popularLimit);
 
   const compareFn = (a: IndexPatternField, b: IndexPatternField) => {

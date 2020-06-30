@@ -132,7 +132,7 @@ export const PingListComponent = (props: Props) => {
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
-        locations.map(name => ({
+        locations.map((name) => ({
           text: name,
           'data-test-subj': `xpack.uptime.pingList.locationOptions.${name}`,
           value: name,
@@ -288,7 +288,7 @@ export const PingListComponent = (props: Props) => {
               })}
               data-test-subj="xpack.uptime.pingList.statusSelect"
               value={status}
-              onChange={selected => {
+              onChange={(selected) => {
                 setStatus(selected.target.value);
               }}
             />
@@ -308,7 +308,7 @@ export const PingListComponent = (props: Props) => {
                 defaultMessage: 'Location',
               })}
               data-test-subj="xpack.uptime.pingList.locationSelect"
-              onChange={selected => {
+              onChange={(selected) => {
                 setSelectedLocation(selected.target.value);
               }}
             />

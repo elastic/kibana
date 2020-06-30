@@ -209,7 +209,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
       const expectedResponse = {
         itemsDeleted: [],
-        errors: names.map(name => ({
+        errors: names.map((name) => ({
           name,
           error: {
             cause: mockEsError.message,

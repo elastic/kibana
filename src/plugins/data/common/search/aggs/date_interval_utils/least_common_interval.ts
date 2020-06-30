@@ -69,7 +69,7 @@ export function leastCommonInterval(a: string, b: string): string {
   }
 
   // Otherwise find the biggest non-calendar unit that divides evenly
-  const lcmUnit = unitsDesc.find(unit => {
+  const lcmUnit = unitsDesc.find((unit) => {
     const unitInfo = unitsMap[unit];
     return !!(unitInfo.type !== 'calendar' && lcmMs % unitInfo.base === 0);
   });

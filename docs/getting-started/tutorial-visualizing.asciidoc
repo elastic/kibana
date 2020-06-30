@@ -1,7 +1,7 @@
 [[tutorial-visualizing]]
 === Visualize your data
 
-In the Visualize application, you can shape your data using a variety
+In *Visualize*, you can shape your data using a variety
 of charts, tables, and maps, and more. In this tutorial, you'll create four
 visualizations:
 
@@ -14,21 +14,20 @@ visualizations:
 [[tutorial-visualize-pie]]
 === Pie chart
 
-You'll use the pie chart to
+Use the pie chart to
 gain insight into the account balances in the bank account data.
 
-. Open *Visualize* to show the overview page.
-. Click *Create new visualization*. You'll see all the visualization
-types in Kibana.
+. Open then menu, then go to *Visualize*.
+. Click *Create visualization*.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-wizard-step-1.png[]
 . Click *Pie*.
 
-. In *Choose a source*, select the `ba*` index pattern.
+. On the *Choose a source* window, select `ba*`.
 +
 Initially, the pie contains a single "slice."
-That's because the default search matched all documents.
+That's because the default search matches all documents.
 +
 To specify which slices to display in the pie, you use an Elasticsearch
 {ref}/search-aggregations.html[bucket aggregation]. This aggregation
@@ -39,8 +38,8 @@ each range.
 
 . In the *Buckets* pane, click *Add > Split slices.*
 +
-.. In the *Aggregation* dropdown, select *Range*.
-.. In the *Field* dropdown, select *balance*.
+.. From the *Aggregation* dropdown, select *Range*.
+.. From the *Field* dropdown, select *balance*.
 .. Click *Add range* four times to bring the total number of ranges to six.
 .. Define the following ranges:
 +
@@ -52,7 +51,7 @@ each range.
 15000       30999
 31000       50000
 
-. Click *Apply changes* image:images/apply-changes-button.png[].
+. Click *Update*.
 +
 Now you can see what proportion of the 1000 accounts fall into each balance
 range.
@@ -63,56 +62,54 @@ image::images/tutorial-visualize-pie-2.png[]
 . Add another bucket aggregation that looks at the ages of the account
 holders.
 
-.. At the bottom of the *Buckets* pane, click *Add*.
-.. For *sub-bucket type,* select *Split slices*.
-.. In the *Sub aggregation* dropdown, select *Terms*.
-.. In the *Field* dropdown, select *age*.
+.. In the *Buckets* pane, click *Add*, then click *Split slices*.
+.. From the *Sub aggregation* dropdown, select *Terms*.
+.. From the *Field* dropdown, select *age*.
 
-. Click  *Apply changes* image:images/apply-changes-button.png[].
+. Click  *Update*.
 +
-Now you can see the break down of the ages of the account holders, displayed
+The break down of the ages of the account holders are displayed
 in a ring around the balance ranges.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-pie-3.png[]
 
-. To save this chart so you can use it later, click *Save* in
-the top menu bar and enter `Pie Example`.
+. Click *Save*, then enter `Pie Example` in the *Title* field.
 
 [float]
 [[tutorial-visualize-bar]]
 === Bar chart
 
-You'll use a bar chart to look at the Shakespeare data set and compare
+Use a bar chart to look at the Shakespeare data set and compare
 the number of speaking parts in the plays.
 
-. Create a *Vertical Bar* chart and set the search source to `shakes*`.
+. Click *Create visualization > Vertical Bar*, then set the source to `shakes*`.
 +
 Initially, the chart is a single bar that shows the total count
 of documents that match the default wildcard query.
 
-. Show the number of speaking parts per play along the Y-axis.
+. Show the number of speaking parts per play along the y-axis.
 
 .. In the *Metrics* pane, expand *Y-axis*.
-.. Set *Aggregation* to *Unique Count*.
-.. Set *Field* to *speaker*.
-.. In the *Custom label* box, enter `Speaking Parts`.
+.. From the *Aggregation* dropdown, select *Unique Count*.
+.. From the *Field* dropdown, select *speaker*.
+.. In the *Custom label* field, enter `Speaking Parts`.
 
-. Click  *Apply changes* image:images/apply-changes-button.png[].
+. Click *Update*.
 
-. Show the plays along the X-axis.
+. Show the plays along the x-axis.
 
 .. In the *Buckets* pane, click *Add > X-axis*.
-.. Set *Aggregation* to *Terms*.
-.. Set *Field* to *play_name*.
-.. To list plays alphabetically, in the *Order* dropdown, select *Ascending*.
-.. Give the axis a custom label, `Play Name`.
+.. From the *Aggregation* dropdown, select *Terms*.
+.. From the *Field* dropdown, select *play_name*.
+.. To list the plays alphabetically, select *Ascending* from the *Order* dropdown.
+.. In the *Custom label* field, enter `Play Name`.
 
-. Click  *Apply changes* image:images/apply-changes-button.png[].
+. Click *Update*.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-bar-1.5.png[]
-. *Save* this chart with the name `Bar Example`.
+. *Save* the chart with the name `Bar Example`.
 +
 Hovering over a bar shows a tooltip with the number of speaking parts for
 that play.
@@ -126,24 +123,24 @@ as `not analyzed`.
 [[tutorial-visualize-markdown]]
 === Markdown
 
-Create a Markdown widget to add formatted text to your dashboard.
+Add formatted text to your dashboard with a markdown tool.
 
-. Create a *Markdown* visualization.
-. Copy the following text into the text box.
+. Click *Create visualization > Markdown*.
+. In the text field, enter the following:
 +
 [source,markdown]
 # This is a tutorial dashboard!
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
 
-. Click *Apply changes* image:images/apply-changes-button.png[].
+. Click *Update*.
 +
 The Markdown renders in the preview pane.
 +
 [role="screenshot"]
 image::images/tutorial-visualize-md-2.png[]
 
-. *Save* this visualization with the name `Markdown Example`.
+. *Save* the tool with the name `Markdown Example`.
 
 [float]
 [[tutorial-visualize-map]]
@@ -151,34 +148,32 @@ image::images/tutorial-visualize-md-2.png[]
 
 Using <<maps>>, you can visualize geographic information in the log file sample data.
 
-. Click *Maps* in the New Visualization
-menu to create a Map.
+. Click *Create visualization > Maps*.
 
 . Set the time.
 .. In the time filter, click *Show dates*.
 .. Click the start date, then *Absolute*.
 .. Set the *Start date* to May 18, 2015.
-.. In the time filter, click *now*, then *Absolute*.
+.. Click *now*, then *Absolute*.
 .. Set the *End date* to May 20, 2015.
 .. Click *Update*
 
 . Map the geo coordinates from the log files.
 
+.. Click *Add layer > Clusters and Grids*.
+.. From the *Index pattern* dropdown, select *logstash*.
 .. Click *Add layer*.
-.. Click the *Grid aggregation* data source.
-.. Set *Index pattern* to *logstash*.
-.. Click the *Add layer* button.
 
-. Set the layer style.
-.. For *Fill color*, select the yellow to red color ramp.
-.. For *Border color*, select white.
+. Set the *Layer Style*.
+.. From the *Fill color* dropdown, select the yellow to red color ramp.
+.. From the *Border color* dropdown, select white.
 .. Click *Save & close*.
 +
-The map now looks like this:
+The map looks like this:
 +
 [role="screenshot"]
 image::images/tutorial-visualize-map-2.png[]
 
 . Navigate the map by clicking and dragging.  Use the controls
 to zoom the map and set filters.
-. *Save* this map with the name `Map Example`.
+. *Save* the map with the name `Map Example`.

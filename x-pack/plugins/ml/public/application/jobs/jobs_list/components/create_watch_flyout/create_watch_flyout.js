@@ -81,9 +81,9 @@ export class CreateWatchFlyoutUI extends Component {
     });
   };
 
-  showFlyout = jobId => {
+  showFlyout = (jobId) => {
     loadFullJob(jobId)
-      .then(job => {
+      .then((job) => {
         const bucketSpan = job.analysis_config.bucket_span;
         mlCreateWatchService.config.includeInfluencers = job.analysis_config.influencers.length > 0;
 
@@ -94,7 +94,7 @@ export class CreateWatchFlyoutUI extends Component {
           isFlyoutVisible: true,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -103,11 +103,11 @@ export class CreateWatchFlyoutUI extends Component {
     const { toasts } = this.props.kibana.services.notifications;
     mlCreateWatchService
       .createNewWatch(this.state.jobId)
-      .then(resp => {
+      .then((resp) => {
         toasts.addSuccess(getSuccessToast(resp.id, resp.url));
         this.closeFlyout(true);
       })
-      .catch(error => {
+      .catch((error) => {
         toasts.addDanger(
           i18n.translate(
             'xpack.ml.jobsList.createWatchFlyout.watchNotSavedErrorNotificationMessage',

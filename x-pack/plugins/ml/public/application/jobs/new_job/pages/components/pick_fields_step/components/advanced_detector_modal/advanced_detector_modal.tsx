@@ -91,7 +91,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // list of aggregation combobox options.
 
   const aggOptions: EuiComboBoxOptionOption[] = aggs
-    .filter(agg => filterAggs(agg, usingScriptFields))
+    .filter((agg) => filterAggs(agg, usingScriptFields))
     .map(createAggOption);
 
   // fields available for the selected agg
@@ -110,7 +110,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ].sort(comboBoxOptionsSort);
 
-  const eventRateField = fields.find(f => f.id === EVENT_RATE_FIELD_ID);
+  const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
   const onOptionChange = (func: (p: EuiComboBoxOptionOption) => any) => (
     selectedOptions: EuiComboBoxOptionOption[]
@@ -119,15 +119,15 @@ export const AdvancedDetectorModal: FC<Props> = ({
   };
 
   function getAgg(title: string) {
-    return aggs.find(a => a.id === title) || null;
+    return aggs.find((a) => a.id === title) || null;
   }
   function getField(title: string) {
     if (title === mlCategory.id) {
       return mlCategory;
     }
     return (
-      fields.find(f => f.id === title) ||
-      jobCreator.additionalFields.find(f => f.id === title) ||
+      fields.find((f) => f.id === title) ||
+      jobCreator.additionalFields.find((f) => f.id === title) ||
       null
     );
   }
@@ -301,7 +301,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 fullWidth={true}
                 placeholder={descriptionPlaceholder}
                 value={descriptionOption}
-                onChange={e => setDescriptionOption(e.target.value)}
+                onChange={(e) => setDescriptionOption(e.target.value)}
                 data-test-subj="mlAdvancedDetectorDescriptionInput"
               />
             </DescriptionDescription>

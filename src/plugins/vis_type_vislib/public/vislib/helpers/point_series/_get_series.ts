@@ -53,7 +53,7 @@ export function getSeries(table: Table, chart: Chart) {
       return;
     }
 
-    aspects.y.forEach(function(y) {
+    aspects.y.forEach(function (y) {
       const point = partGetPoint(row, rowIndex, y, zAspect);
       if (!point) {
         return;

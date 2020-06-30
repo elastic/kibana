@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -37,7 +37,7 @@ export default function({ getService }) {
             },
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             // loose uuid validation
             expect(resp.body)
               .to.have.property('id')
@@ -83,7 +83,7 @@ export default function({ getService }) {
             },
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             // loose uuid validation
             expect(resp.body)
               .to.have.property('id')

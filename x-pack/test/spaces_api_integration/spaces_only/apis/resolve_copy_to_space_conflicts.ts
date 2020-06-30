@@ -24,7 +24,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
   describe('resolve copy to spaces conflicts', () => {
-    originSpaces.forEach(spaceId => {
+    originSpaces.forEach((spaceId) => {
       resolveCopyToSpaceConflictsTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {

@@ -6,14 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-  // @ts-ignore (elastic/eui#1557) EuiImage is not exported yet
-  EuiImage,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
 
 import { CanvasAsset } from '../../../types';
 
@@ -46,7 +39,7 @@ export class AssetPicker extends PureComponent<Props> {
 
     return (
       <EuiFlexGrid id="canvasAssetPicker" className="canvasAssetPicker" gutterSize="s" columns={4}>
-        {assets.map(asset => (
+        {assets.map((asset) => (
           <EuiFlexItem
             key={asset.id}
             id={asset.id === selected ? 'canvasAssetPicker__selectedAsset' : ''}

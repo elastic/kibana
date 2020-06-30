@@ -6,7 +6,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
 
   return {

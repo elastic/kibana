@@ -237,7 +237,7 @@ describe('#getAll', () => {
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
           const username = Symbol();
@@ -289,7 +289,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-            savedObjects.map(savedObject => savedObject.id),
+            savedObjects.map((savedObject) => savedObject.id),
             privilege
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
@@ -348,7 +348,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
-            savedObjects.map(savedObject => savedObject.id),
+            savedObjects.map((savedObject) => savedObject.id),
             privilege
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);

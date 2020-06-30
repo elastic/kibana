@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -23,8 +23,6 @@ import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { MetricExplorerViewState } from '../hooks/use_metric_explorer_state';
-import { metricsExplorerViewSavedObjectName } from '../../../../../common/saved_objects/metrics_explorer_view';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 import { ToolbarPanel } from '../../../../components/toolbar_panel';
@@ -34,15 +32,13 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
-  defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
-  onGroupByChange: (groupBy: string | null) => void;
+  onGroupByChange: (groupBy: string | null | string[]) => void;
   onFilterQuerySubmit: (query: string) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
-  onViewStateChange: (vs: MetricExplorerViewState) => void;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -57,11 +53,9 @@ export const MetricsExplorerToolbar = ({
   onAggregationChange,
   chartOptions,
   onChartOptionsChange,
-  defaultViewState,
-  onViewStateChange,
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
-  const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+  const [timepickerQuickRanges] = useKibanaUiSetting(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
   return (
@@ -123,14 +117,11 @@ export const MetricsExplorerToolbar = ({
 
         <EuiFlexItem grow={false}>
           <SavedViewsToolbarControls
-            defaultViewState={defaultViewState}
             viewState={{
               options,
               chartOptions,
               currentTimerange: timeRange,
             }}
-            viewType={metricsExplorerViewSavedObjectName}
-            onViewChange={onViewStateChange}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginRight: 5 }}>

@@ -21,7 +21,7 @@ import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue
 const VISIBLE_LEGEND_COUNT = 4;
 
 function getHiddenLegendCount(series) {
-  return series.filter(serie => serie.hideLegend).length;
+  return series.filter((serie) => serie.hideLegend).length;
 }
 
 export class InnerCustomPlot extends PureComponent {
@@ -30,41 +30,41 @@ export class InnerCustomPlot extends PureComponent {
     isDrawing: false,
     selectionStart: null,
     selectionEnd: null,
-    showAnnotations: true
+    showAnnotations: true,
   };
 
   getEnabledSeries = createSelector(
-    state => state.visibleSeries,
-    state => state.seriesEnabledState,
+    (state) => state.visibleSeries,
+    (state) => state.seriesEnabledState,
     (visibleSeries, seriesEnabledState) =>
       visibleSeries.filter((serie, i) => !seriesEnabledState[i])
   );
 
   getOptions = createSelector(
-    state => state.width,
-    state => state.yMin,
-    state => state.yMax,
-    state => state.height,
-    state => state.stackBy,
+    (state) => state.width,
+    (state) => state.yMin,
+    (state) => state.yMax,
+    (state) => state.height,
+    (state) => state.stackBy,
     (width, yMin, yMax, height, stackBy) => ({
       width,
       yMin,
       yMax,
       height,
-      stackBy
+      stackBy,
     })
   );
 
   getPlotValues = createSelector(
-    state => state.visibleSeries,
-    state => state.enabledSeries,
-    state => state.options,
+    (state) => state.visibleSeries,
+    (state) => state.enabledSeries,
+    (state) => state.options,
     getPlotValues
   );
 
   getVisibleSeries = createSelector(
-    state => state.series,
-    series => {
+    (state) => state.series,
+    (series) => {
       return series.slice(
         0,
         VISIBLE_LEGEND_COUNT + getHiddenLegendCount(series)
@@ -72,7 +72,7 @@ export class InnerCustomPlot extends PureComponent {
     }
   );
 
-  clickLegend = i => {
+  clickLegend = (i) => {
     this.setState(({ seriesEnabledState }) => {
       const nextSeriesEnabledState = this.props.series.map((value, _i) => {
         const disabledValue = seriesEnabledState[_i];
@@ -80,7 +80,7 @@ export class InnerCustomPlot extends PureComponent {
       });
 
       return {
-        seriesEnabledState: nextSeriesEnabledState
+        seriesEnabledState: nextSeriesEnabledState,
       };
     });
   };
@@ -89,25 +89,25 @@ export class InnerCustomPlot extends PureComponent {
     this.props.onMouseLeave(...args);
   };
 
-  onMouseDown = node =>
+  onMouseDown = (node) =>
     this.setState({
       isDrawing: true,
       selectionStart: node.x,
-      selectionEnd: null
+      selectionEnd: null,
     });
 
   onMouseUp = () => {
     if (this.state.isDrawing && this.state.selectionEnd !== null) {
       const [start, end] = [
         this.state.selectionStart,
-        this.state.selectionEnd
+        this.state.selectionEnd,
       ].sort();
       this.props.onSelectionEnd({ start, end });
     }
     this.setState({ isDrawing: false });
   };
 
-  onHover = node => {
+  onHover = (node) => {
     this.props.onHover(node.x);
 
     if (this.state.isDrawing) {
@@ -137,19 +137,19 @@ export class InnerCustomPlot extends PureComponent {
     const visibleSeries = this.getVisibleSeries({ series });
     const enabledSeries = this.getEnabledSeries({
       visibleSeries,
-      seriesEnabledState: this.state.seriesEnabledState
+      seriesEnabledState: this.state.seriesEnabledState,
     });
     const options = this.getOptions(this.props);
 
-    const hasValidCoordinates = flatten(series.map(s => s.data)).some(p =>
+    const hasValidCoordinates = flatten(series.map((s) => s.data)).some((p) =>
       isValidCoordinateValue(p.y)
     );
-    const noHits = !hasValidCoordinates;
+    const noHits = this.props.noHits || !hasValidCoordinates;
 
     const plotValues = this.getPlotValues({
       visibleSeries,
       enabledSeries: enabledSeries,
-      options
+      options,
     });
 
     if (isEmpty(plotValues)) {
@@ -168,7 +168,7 @@ export class InnerCustomPlot extends PureComponent {
             tickFormatX={this.props.tickFormatX}
           />
 
-          {this.state.showAnnotations && !isEmpty(annotations) && (
+          {this.state.showAnnotations && !isEmpty(annotations) && !noHits && (
             <AnnotationsPlot
               plotValues={plotValues}
               width={width}
@@ -202,11 +202,11 @@ export class InnerCustomPlot extends PureComponent {
           hiddenSeriesCount={hiddenSeriesCount}
           clickLegend={this.clickLegend}
           seriesEnabledState={this.state.seriesEnabledState}
-          hasAnnotations={!isEmpty(annotations)}
+          hasAnnotations={!isEmpty(annotations) && !noHits}
           showAnnotations={this.state.showAnnotations}
           onAnnotationsToggle={() => {
             this.setState(({ showAnnotations }) => ({
-              showAnnotations: !showAnnotations
+              showAnnotations: !showAnnotations,
             }));
           }}
         />
@@ -231,16 +231,19 @@ InnerCustomPlot.propTypes = {
     PropTypes.shape({
       type: PropTypes.string,
       id: PropTypes.string,
-      firstSeen: PropTypes.number
+      firstSeen: PropTypes.number,
     })
-  )
+  ),
+  noHits: PropTypes.bool,
 };
 
 InnerCustomPlot.defaultProps = {
-  formatTooltipValue: p => p.y,
+  formatTooltipValue: (p) => p.y,
   tickFormatX: undefined,
-  tickFormatY: y => y,
-  truncateLegends: false
+  tickFormatY: (y) => y,
+  truncateLegends: false,
+  xAxisTickSizeOuter: 0,
+  noHits: false,
 };
 
 export default makeWidthFlexible(InnerCustomPlot);

@@ -73,7 +73,7 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
@@ -100,12 +100,12 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-      saved_objects: savedObjects.filter(obj => obj.type === 'visualization' && obj.id === '3'),
+      saved_objects: savedObjects.filter((obj) => obj.type === 'visualization' && obj.id === '3'),
     });
     const result = await resolveSavedObjectsImportErrors({
       readStream,
@@ -161,12 +161,12 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
+      saved_objects: savedObjects.filter((obj) => obj.type === 'index-pattern' && obj.id === '1'),
     });
     const result = await resolveSavedObjectsImportErrors({
       readStream,
@@ -223,12 +223,12 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.filter(obj => obj.type === 'dashboard' && obj.id === '4'),
+      saved_objects: savedObjects.filter((obj) => obj.type === 'dashboard' && obj.id === '4'),
     });
     const result = await resolveSavedObjectsImportErrors({
       readStream,
@@ -296,12 +296,12 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(savedObject => ({
+      saved_objects: savedObjects.map((savedObject) => ({
         type: savedObject.type,
         id: savedObject.id,
         error: {
@@ -315,7 +315,7 @@ describe('resolveImportErrors()', () => {
     const result = await resolveSavedObjectsImportErrors({
       readStream,
       objectLimit: 4,
-      retries: savedObjects.map(obj => ({
+      retries: savedObjects.map((obj) => ({
         type: obj.type,
         id: obj.id,
         overwrite: false,
@@ -495,7 +495,7 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
         this.push(null);
       },
@@ -540,12 +540,12 @@ describe('resolveImportErrors()', () => {
     const readStream = new Readable({
       objectMode: true,
       read() {
-        savedObjects.forEach(obj => this.push(obj));
+        savedObjects.forEach((obj) => this.push(obj));
         this.push(null);
       },
     });
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.filter(obj => obj.type === 'index-pattern' && obj.id === '1'),
+      saved_objects: savedObjects.filter((obj) => obj.type === 'index-pattern' && obj.id === '1'),
     });
     const result = await resolveSavedObjectsImportErrors({
       readStream,

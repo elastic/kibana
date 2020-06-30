@@ -12,7 +12,7 @@ export type TelemetryAggregatedStats = TelemetryLocalStats & {
   stack_stats: { xpack?: object };
 };
 
-export const getStatsWithXpack: StatsGetter<{}, TelemetryAggregatedStats> = async function(
+export const getStatsWithXpack: StatsGetter<{}, TelemetryAggregatedStats> = async function (
   clustersDetails,
   config,
   context
@@ -21,7 +21,7 @@ export const getStatsWithXpack: StatsGetter<{}, TelemetryAggregatedStats> = asyn
   const clustersLocalStats = await getLocalStats(clustersDetails, config, context);
   const xpack = await getXPackUsage(callCluster).catch(() => undefined); // We want to still report something (and do not lose the license) even when this method fails.
 
-  return clustersLocalStats.map(localStats => {
+  return clustersLocalStats.map((localStats) => {
     if (xpack) {
       return {
         ...localStats,

@@ -33,7 +33,7 @@ export const MonitorDurationComponent = ({
 }: DurationChartProps) => {
   return (
     <EuiPanel paddingSize="m">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h4>

@@ -66,7 +66,7 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-      this.getFullPath = () => `/app/kibana#/discover/${String(id)}`;
+      this.getFullPath = () => `/app/discover#/view/${String(id)}`;
     }
   }
 

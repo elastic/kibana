@@ -120,7 +120,7 @@ export class MetricPanelConfig extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>

@@ -109,7 +109,21 @@ export const createFilterFromOptions = (
   }
   if (options.groupBy) {
     const id = series.id.replace('"', '\\"');
-    filters.push(`${options.groupBy} : "${id}"`);
+    const groupByFilters = Array.isArray(options.groupBy)
+      ? options.groupBy
+          .map((field, index) => {
+            if (!series.keys) {
+              return null;
+            }
+            const value = series.keys[index];
+            if (!value) {
+              return null;
+            }
+            return `${field}: "${value.replace('"', '\\"')}"`;
+          })
+          .join(' and ')
+      : `${options.groupBy} : "${id}"`;
+    filters.push(groupByFilters);
   }
   return { language: 'kuery', query: filters.join(' and ') };
 };
@@ -158,8 +172,8 @@ export const createTSVBLink = (
   };
 
   return {
-    app: 'kibana',
-    hash: '/visualize/create',
+    app: 'visualize',
+    hash: '/create',
     search: {
       type: 'metrics',
       _g: encode(globalState),

@@ -195,7 +195,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
           <>
             <EuiSpacer size="m" />
             <TimeRangePicker
-              setTimeRange={value => {
+              setTimeRange={(value) => {
                 setFormState({
                   timeRange: value,
                 });

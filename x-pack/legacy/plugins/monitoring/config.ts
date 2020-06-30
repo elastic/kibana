@@ -36,14 +36,9 @@ export const config = (Joi: any) => {
       elasticsearch: Joi.object({
         customHeaders: Joi.object().default({}),
         logQueries: Joi.boolean().default(false),
-        requestHeadersWhitelist: Joi.array()
-          .items()
-          .single()
-          .default(DEFAULT_REQUEST_HEADERS),
+        requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
         sniffOnStart: Joi.boolean().default(false),
-        sniffInterval: Joi.number()
-          .allow(false)
-          .default(false),
+        sniffInterval: Joi.number().allow(false).default(false),
         sniffOnConnectionFault: Joi.boolean().default(false),
         hosts: Joi.array()
           .items(Joi.string().uri({ scheme: ['http', 'https'] }))
@@ -53,12 +48,8 @@ export const config = (Joi: any) => {
         requestTimeout: Joi.number().default(30000),
         pingTimeout: Joi.number().default(30000),
         ssl: Joi.object({
-          verificationMode: Joi.string()
-            .valid('none', 'certificate', 'full')
-            .default('full'),
-          certificateAuthorities: Joi.array()
-            .single()
-            .items(Joi.string()),
+          verificationMode: Joi.string().valid('none', 'certificate', 'full').default('full'),
+          certificateAuthorities: Joi.array().single().items(Joi.string()),
           certificate: Joi.string(),
           key: Joi.string(),
           keyPassphrase: Joi.string(),
@@ -85,14 +76,9 @@ export const config = (Joi: any) => {
     elasticsearch: Joi.object({
       customHeaders: Joi.object().default({}),
       logQueries: Joi.boolean().default(false),
-      requestHeadersWhitelist: Joi.array()
-        .items()
-        .single()
-        .default(DEFAULT_REQUEST_HEADERS),
+      requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
       sniffOnStart: Joi.boolean().default(false),
-      sniffInterval: Joi.number()
-        .allow(false)
-        .default(false),
+      sniffInterval: Joi.number().allow(false).default(false),
       sniffOnConnectionFault: Joi.boolean().default(false),
       hosts: Joi.array()
         .items(Joi.string().uri({ scheme: ['http', 'https'] }))
@@ -102,12 +88,8 @@ export const config = (Joi: any) => {
       requestTimeout: Joi.number().default(30000),
       pingTimeout: Joi.number().default(30000),
       ssl: Joi.object({
-        verificationMode: Joi.string()
-          .valid('none', 'certificate', 'full')
-          .default('full'),
-        certificateAuthorities: Joi.array()
-          .single()
-          .items(Joi.string()),
+        verificationMode: Joi.string().valid('none', 'certificate', 'full').default('full'),
+        certificateAuthorities: Joi.array().single().items(Joi.string()),
         certificate: Joi.string(),
         key: Joi.string(),
         keyPassphrase: Joi.string(),

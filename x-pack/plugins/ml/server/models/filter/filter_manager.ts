@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
@@ -58,9 +58,9 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _client: IScopedClusterClient['callAsCurrentUser'];
+  private _client: ILegacyScopedClusterClient['callAsCurrentUser'];
 
-  constructor(client: IScopedClusterClient['callAsCurrentUser']) {
+  constructor(client: ILegacyScopedClusterClient['callAsCurrentUser']) {
     this._client = client;
   }
 
@@ -174,16 +174,16 @@ export class FilterManager {
   buildFiltersInUse(jobsList: PartialJob[]) {
     // Build a map of filter_ids against jobs and detectors using that filter.
     const filtersInUse: FiltersInUse = {};
-    jobsList.forEach(job => {
+    jobsList.forEach((job) => {
       const detectors = job.analysis_config.detectors;
-      detectors.forEach(detector => {
+      detectors.forEach((detector) => {
         if (detector.custom_rules) {
           const rules = detector.custom_rules;
-          rules.forEach(rule => {
+          rules.forEach((rule) => {
             if (rule.scope) {
               const ruleScope: DetectorRuleScope = rule.scope;
               const scopeFields = Object.keys(ruleScope);
-              scopeFields.forEach(scopeField => {
+              scopeFields.forEach((scopeField) => {
                 const filter = ruleScope[scopeField];
                 const filterId = filter.filter_id;
                 if (filtersInUse[filterId] === undefined) {

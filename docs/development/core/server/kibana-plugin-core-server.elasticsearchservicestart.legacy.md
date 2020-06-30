@@ -4,11 +4,16 @@
 
 ## ElasticsearchServiceStart.legacy property
 
+> Warning: This API is now obsolete.
+> 
+> Provided for the backward compatibility. Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
+> 
+
 <b>Signature:</b>
 
 ```typescript
 legacy: {
-        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-        readonly client: IClusterClient;
+        readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
+        readonly client: ILegacyClusterClient;
     };
 ```

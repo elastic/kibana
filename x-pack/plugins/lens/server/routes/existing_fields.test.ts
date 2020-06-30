@@ -143,7 +143,7 @@ describe('buildFieldList', () => {
 
   it('uses field descriptors to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.name === 'baz')).toMatchObject({
+    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
       isAlias: false,
       isScript: false,
       name: 'baz',
@@ -153,7 +153,7 @@ describe('buildFieldList', () => {
 
   it('uses aliases to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isAlias)).toMatchObject({
+    expect(fields.find((f) => f.isAlias)).toMatchObject({
       isAlias: true,
       isScript: false,
       name: '@bar',
@@ -163,13 +163,28 @@ describe('buildFieldList', () => {
 
   it('supports scripted fields', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isScript)).toMatchObject({
+    expect(fields.find((f) => f.isScript)).toMatchObject({
       isAlias: false,
       isScript: true,
       name: 'foo',
       path: ['foo'],
       lang: 'painless',
       script: '2+2',
+    });
+  });
+
+  it('handles missing mappings', () => {
+    const fields = buildFieldList(indexPattern, {}, fieldDescriptors);
+    expect(fields.every((f) => f.isAlias === false)).toEqual(true);
+  });
+
+  it('handles empty fieldDescriptors by skipping multi-mappings', () => {
+    const fields = buildFieldList(indexPattern, mappings, []);
+    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
+      isAlias: false,
+      isScript: false,
+      name: 'baz',
+      path: ['baz'],
     });
   });
 });

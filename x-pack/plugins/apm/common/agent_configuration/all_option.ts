@@ -13,7 +13,7 @@ export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 export function getOptionLabel(value: string | undefined) {
   if (value === undefined || value === ALL_OPTION_VALUE) {
     return i18n.translate('xpack.apm.agentConfig.allOptionLabel', {
-      defaultMessage: 'All'
+      defaultMessage: 'All',
     });
   }
 

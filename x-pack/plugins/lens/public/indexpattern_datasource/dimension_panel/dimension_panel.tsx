@@ -63,13 +63,13 @@ const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatr
 
   const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
     currentIndexPattern
-  ).filter(operation => props.filterOperations(operation.operationMetaData));
+  ).filter((operation) => props.filterOperations(operation.operationMetaData));
 
   const supportedOperationsByField: Partial<Record<string, OperationType[]>> = {};
   const supportedFieldsByOperation: Partial<Record<OperationType, string[]>> = {};
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
-    operations.forEach(operation => {
+    operations.forEach((operation) => {
       if (supportedOperationsByField[operation.field]) {
         supportedOperationsByField[operation.field]!.push(operation.operationType);
       } else {

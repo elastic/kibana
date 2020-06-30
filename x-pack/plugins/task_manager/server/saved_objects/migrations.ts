@@ -3,22 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObject } from '../../../../../src/core/server';
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
+import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
-export const migrations = {
-  task: {
-    '7.4.0': (doc: SavedObject<Record<string, unknown>>) => ({
-      ...doc,
-      updated_at: new Date().toISOString(),
-    }),
-    '7.6.0': moveIntervalIntoSchedule,
-  },
+export const migrations: SavedObjectMigrationMap = {
+  '7.4.0': (doc) => ({
+    ...doc,
+    updated_at: new Date().toISOString(),
+  }),
+  '7.6.0': moveIntervalIntoSchedule,
 };
 
 function moveIntervalIntoSchedule({
   attributes: { interval, ...attributes },
   ...doc
-}: SavedObject<Record<string, unknown>>) {
+}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<
+  TaskInstance
+> {
   return {
     ...doc,
     attributes: {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LegacyAPICaller } from 'kibana/server';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
@@ -15,13 +16,10 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _client: any;
-  constructor(client: any) {
-    this._client = client;
-  }
+  constructor(private _callAsCurrentUser: LegacyAPICaller) {}
 
   async getCalendarEvents(calendarId: string) {
-    const resp = await this._client('ml.events', { calendarId });
+    const resp = await this._callAsCurrentUser('ml.events', { calendarId });
 
     return resp.events;
   }
@@ -29,7 +27,7 @@ export class EventManager {
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    const resp = await this._client('ml.events', {
+    const resp = await this._callAsCurrentUser('ml.events', {
       calendarId,
       jobId,
     });
@@ -40,14 +38,14 @@ export class EventManager {
   async addEvents(calendarId: string, events: CalendarEvent[]) {
     const body = { events };
 
-    return await this._client('ml.addEvent', {
+    return await this._callAsCurrentUser('ml.addEvent', {
       calendarId,
       body,
     });
   }
 
   async deleteEvent(calendarId: string, eventId: string) {
-    return this._client('ml.deleteEvent', { calendarId, eventId });
+    return this._callAsCurrentUser('ml.deleteEvent', { calendarId, eventId });
   }
 
   isEqual(ev1: CalendarEvent, ev2: CalendarEvent) {

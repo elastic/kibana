@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -33,7 +33,7 @@ export default function({ getService }) {
         await supertest
           .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
               type: 'visualization',
@@ -65,7 +65,7 @@ export default function({ getService }) {
           await supertest
             .get(`/api/saved_objects/visualization/foobar`)
             .expect(404)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 error: 'Not Found',
                 message: 'Saved object [visualization/foobar] not found',
@@ -89,7 +89,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab')
           .expect(404)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               error: 'Not Found',
               message:

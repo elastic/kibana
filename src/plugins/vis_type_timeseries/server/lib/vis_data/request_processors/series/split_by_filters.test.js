@@ -63,7 +63,7 @@ describe('splitByFilters(req, panel, series)', () => {
   });
 
   test('returns a valid terms agg', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = splitByFilters(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {
@@ -107,7 +107,7 @@ describe('splitByFilters(req, panel, series)', () => {
 
   test('calls next and does not add a terms agg', () => {
     series.split_mode = 'everything';
-    const next = jest.fn(doc => doc);
+    const next = jest.fn((doc) => doc);
     const doc = splitByFilters(req, panel, series)(next)({});
     expect(next.mock.calls.length).toEqual(1);
     expect(doc).toEqual({});

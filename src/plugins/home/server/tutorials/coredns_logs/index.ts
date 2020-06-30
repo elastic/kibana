@@ -37,7 +37,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
       defaultMessage: 'CoreDNS logs',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Coredns.',
     }),

@@ -66,22 +66,25 @@ export function withBulkAlertOperations<T>(
       <WrappedComponent
         {...(props as T)}
         muteAlerts={async (items: Alert[]) =>
-          muteAlerts({ http, ids: items.filter(item => !isAlertMuted(item)).map(item => item.id) })
+          muteAlerts({
+            http,
+            ids: items.filter((item) => !isAlertMuted(item)).map((item) => item.id),
+          })
         }
         unmuteAlerts={async (items: Alert[]) =>
-          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map(item => item.id) })
+          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map((item) => item.id) })
         }
         enableAlerts={async (items: Alert[]) =>
-          enableAlerts({ http, ids: items.filter(isAlertDisabled).map(item => item.id) })
+          enableAlerts({ http, ids: items.filter(isAlertDisabled).map((item) => item.id) })
         }
         disableAlerts={async (items: Alert[]) =>
           disableAlerts({
             http,
-            ids: items.filter(item => !isAlertDisabled(item)).map(item => item.id),
+            ids: items.filter((item) => !isAlertDisabled(item)).map((item) => item.id),
           })
         }
         deleteAlerts={async (items: Alert[]) =>
-          deleteAlerts({ http, ids: items.map(item => item.id) })
+          deleteAlerts({ http, ids: items.map((item) => item.id) })
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
@@ -132,5 +135,5 @@ function isAlertMuted(alert: Alert) {
 }
 
 function isAlertInstanceMuted(alert: Alert, instanceId: string) {
-  return alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
+  return alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
 }

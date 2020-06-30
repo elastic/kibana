@@ -7,4 +7,5 @@
 export const DEFAULT_RESULTS_FIELD = 'ml';
 export const FEATURE_IMPORTANCE = 'feature_importance';
 export const FEATURE_INFLUENCE = 'feature_influence';
+export const TOP_CLASSES = 'top_classes';
 export const OUTLIER_SCORE = 'outlier_score';

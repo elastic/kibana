@@ -32,7 +32,6 @@ uiRoutes.when('/overview', {
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
-      const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
@@ -56,15 +55,9 @@ uiRoutes.when('/overview', {
         $injector,
       });
 
-      const changeUrl = target => {
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath(target);
-        });
-      };
-
       $scope.$watch(
         () => this.data,
-        async data => {
+        async (data) => {
           if (isEmpty(data)) {
             return;
           }
@@ -85,7 +78,6 @@ uiRoutes.when('/overview', {
                     cluster={data}
                     emailAddress={emailAddress}
                     setupMode={setupMode}
-                    changeUrl={changeUrl}
                     showLicenseExpiration={showLicenseExpiration}
                   />
                   {bottomBarComponent}

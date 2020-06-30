@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
 import { PipelinesCreate } from '../pipelines_create';
+import { attemptToURIDecode } from '../shared';
 
 export interface ParamProps {
   sourceName: string;
@@ -21,12 +22,13 @@ export interface ParamProps {
  * This section is a wrapper around the create section where we receive a pipeline name
  * to load and set as the source pipeline for the {@link PipelinesCreate} form.
  */
-export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = props => {
+export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = (props) => {
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 
+  const decodedSourceName = attemptToURIDecode(sourceName);
   const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
-    decodeURIComponent(sourceName)
+    decodedSourceName
   );
 
   useEffect(() => {

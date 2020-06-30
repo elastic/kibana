@@ -19,13 +19,13 @@
 import { take } from 'rxjs/operators';
 
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       hidden: false,
@@ -77,7 +77,7 @@ describe('KibanaMigrator', () => {
       // and should only be done once
       const callClusterCommands = clusterStub.mock.calls
         .map(([callClusterPath]) => callClusterPath)
-        .filter(callClusterPath => callClusterPath === 'cat.templates');
+        .filter((callClusterPath) => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
     });
 
@@ -87,10 +87,7 @@ describe('KibanaMigrator', () => {
 
       options.callCluster = clusterStub;
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator
-        .getStatus$()
-        .pipe(take(3))
-        .toPromise();
+      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
       await migrator.runMigrations();
       const { status, result } = await migratorStatus;
       expect(status).toEqual('completed');
@@ -113,7 +110,7 @@ describe('KibanaMigrator', () => {
 function mockOptions(): KibanaMigratorOptions {
   const callCluster = jest.fn();
   return {
-    logger: loggingServiceMock.create().get(),
+    logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     savedObjectValidations: {},
     typeRegistry: createRegistry([

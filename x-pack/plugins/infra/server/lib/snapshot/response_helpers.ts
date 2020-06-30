@@ -7,6 +7,7 @@
 import { isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
+import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './types';
 import { findInventoryModel } from '../../../common/inventory_models';
@@ -90,7 +91,7 @@ export const getNodePath = (
   options: InfraSnapshotRequestOptions
 ): SnapshotNodePath[] => {
   const node = groupBucket.key;
-  const path = options.groupBy.map(gb => {
+  const path = options.groupBy.map((gb) => {
     return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as SnapshotNodePath;
   });
   const ip = getIPFromBucket(options.nodeType, groupBucket);
@@ -127,12 +128,15 @@ export const getNodeMetrics = (
     };
   }
   const lastBucket = findLastFullBucket(nodeBuckets, options);
-  const result = {
+  const result: SnapshotNodeMetric = {
     name: options.metric.type,
     value: getMetricValueFromBucket(options.metric.type, lastBucket),
     max: calculateMax(nodeBuckets, options.metric.type),
     avg: calculateAvg(nodeBuckets, options.metric.type),
   };
+  if (options.includeTimeseries) {
+    result.timeseries = getTimeseriesData(nodeBuckets, options.metric.type);
+  }
   return result;
 };
 
@@ -158,9 +162,26 @@ const getMetricValueFromBucket = (type: SnapshotMetricType, bucket: InfraSnapsho
 };
 
 function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return max(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) || 0;
+  return max(buckets.map((bucket) => getMetricValueFromBucket(type, bucket))) || 0;
 }
 
 function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: SnapshotMetricType) {
-  return sum(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
+  return sum(buckets.map((bucket) => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
+}
+
+function getTimeseriesData(
+  buckets: InfraSnapshotMetricsBucket[],
+  type: SnapshotMetricType
+): MetricsExplorerSeries {
+  return {
+    id: type,
+    columns: [
+      { name: 'timestamp', type: 'date' },
+      { name: 'metric_0', type: 'number' },
+    ],
+    rows: buckets.map((bucket) => ({
+      timestamp: bucket.key as number,
+      metric_0: getMetricValueFromBucket(type, bucket),
+    })),
+  };
 }

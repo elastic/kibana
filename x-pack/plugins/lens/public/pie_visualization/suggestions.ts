@@ -15,7 +15,7 @@ function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizatio
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    table.columns.some(col => col.operation.dataType === 'date')
+    table.columns.some((col) => col.operation.dataType === 'date')
   );
 }
 
@@ -30,7 +30,7 @@ export function suggestions({
     return [];
   }
 
-  const [groups, metrics] = partition(table.columns, col => col.operation.isBucketed);
+  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
   if (
     groups.length === 0 ||
@@ -62,12 +62,12 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map(col => col.columnId),
+                groups: groups.map((col) => col.columnId),
                 metric: metrics[0].columnId,
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map(col => col.columnId),
+                groups: groups.map((col) => col.columnId),
                 metric: metrics[0].columnId,
                 numberDisplay: 'percent',
                 categoryDisplay: 'default',
@@ -113,7 +113,7 @@ export function suggestions({
             ? {
                 ...state.layers[0],
                 layerId: table.layerId,
-                groups: groups.map(col => col.columnId),
+                groups: groups.map((col) => col.columnId),
                 metric: metrics[0].columnId,
                 categoryDisplay:
                   state.layers[0].categoryDisplay === 'inside'
@@ -122,7 +122,7 @@ export function suggestions({
               }
             : {
                 layerId: table.layerId,
-                groups: groups.map(col => col.columnId),
+                groups: groups.map((col) => col.columnId),
                 metric: metrics[0].columnId,
                 numberDisplay: 'percent',
                 categoryDisplay: 'default',

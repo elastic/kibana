@@ -33,15 +33,15 @@ export async function getMtimes(paths: Iterable<string>) {
       // map paths to [path, mtimeMs] entries with concurrency of
       // 100 at a time, ignoring missing paths
       mergeMap(
-        path =>
+        (path) =>
           stat$(path).pipe(
-            map(stat => [path, stat.mtimeMs] as const),
+            map((stat) => [path, stat.mtimeMs] as const),
             catchError((error: any) => (error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)))
           ),
         100
       ),
       toArray(),
-      map(entries => new Map(entries))
+      map((entries) => new Map(entries))
     )
     .toPromise();
 }

@@ -17,4 +17,5 @@ export interface SavedObjectsClientProviderOptions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [excludedWrappers](./kibana-plugin-core-server.savedobjectsclientprovideroptions.excludedwrappers.md) | <code>string[]</code> |  |
+|  [includedHiddenTypes](./kibana-plugin-core-server.savedobjectsclientprovideroptions.includedhiddentypes.md) | <code>string[]</code> |  |
 

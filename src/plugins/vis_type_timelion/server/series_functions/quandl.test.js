@@ -32,7 +32,7 @@ function parseUrlParams(url) {
 jest.mock('node-fetch', () =>
   jest.fn(() =>
     Promise.resolve({
-      json: function() {
+      json: function () {
         return {
           name: '__beer__',
           data: [
@@ -49,45 +49,45 @@ jest.mock('node-fetch', () =>
 
 import invoke from './helpers/invoke_series_fn.js';
 
-describe('quandl', function() {
-  beforeEach(function() {
+describe('quandl', function () {
+  beforeEach(function () {
     jest.clearAllMocks();
   });
 
-  it('should wrap the quandl response up in a seriesList', function() {
-    return invoke(fn, []).then(function(result) {
+  it('should wrap the quandl response up in a seriesList', function () {
+    return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].data[0][1]).toEqual(3);
       expect(result.output.list[0].data[1][1]).toEqual(14);
     });
   });
 
-  it('should set the label to that of the quandl name', function() {
-    return invoke(fn, []).then(function(result) {
+  it('should set the label to that of the quandl name', function () {
+    return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].label).toEqual('__beer__');
     });
   });
 
-  it('should call the quandl API with the quandl code that has been passed', function() {
-    return invoke(fn, ['BEER/IS_GOOD']).then(function() {
+  it('should call the quandl API with the quandl code that has been passed', function () {
+    return invoke(fn, ['BEER/IS_GOOD']).then(function () {
       expect(fetchMock).toHaveBeenCalled();
       expect(fetchMock.mock.calls[0][0].match(/datasets\/(.*).json/)[1]).toEqual('BEER/IS_GOOD');
     });
   });
 
-  it('should limit the time span and interval to the stuff attached to tlConfig', function() {
-    return invoke(fn, []).then(function() {
+  it('should limit the time span and interval to the stuff attached to tlConfig', function () {
+    return invoke(fn, []).then(function () {
       const params = parseUrlParams(fetchMock.mock.calls[0][0]);
       expect(params.trim_start).toEqual(moment.utc(tlConfig.time.from).format('YYYY-MM-DD'));
       expect(params.trim_end).toEqual(moment.utc(tlConfig.time.to).format('YYYY-MM-DD'));
     });
   });
 
-  it('should throw an error is passed an unsupported interval', function() {
+  it('should throw an error is passed an unsupported interval', function () {
     return expect(invoke(fn, [], { time: { interval: '2d' } })).rejects.toThrowError();
   });
 
-  it('should use the configured API key when talking to quandl', function() {
-    return invoke(fn, [], { settings: { 'timelion:quandl.key': 'bEeR' } }).then(function() {
+  it('should use the configured API key when talking to quandl', function () {
+    return invoke(fn, [], { settings: { 'timelion:quandl.key': 'bEeR' } }).then(function () {
       const params = parseUrlParams(fetchMock.mock.calls[0][0]);
       expect(params.auth_token).toEqual('bEeR');
     });

@@ -41,7 +41,7 @@ import { last } from 'lodash';
 export function getLastSeriesTimestamp(seriesGroup = []) {
   let lastTimestamp = null;
 
-  seriesGroup.forEach(series => {
+  seriesGroup.forEach((series) => {
     series.forEach(({ data }) => {
       const [dataLastTimestamp] = last(data);
 

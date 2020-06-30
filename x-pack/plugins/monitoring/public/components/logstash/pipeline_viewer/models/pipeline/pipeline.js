@@ -11,7 +11,7 @@ import { isVertexPipelineStage } from './utils';
 function getInputStatements(pipelineGraph) {
   return pipelineGraph
     .getVertices()
-    .filter(v => v.pipelineStage === 'input')
+    .filter((v) => v.pipelineStage === 'input')
     .map(makeStatement);
 }
 
@@ -24,7 +24,7 @@ function isVertexOrphan(vertex) {
 }
 
 function isVertexChildOfQueue(vertex) {
-  return vertex.incomingVertices.every(p => p instanceof QueueVertex);
+  return vertex.incomingVertices.every((p) => p instanceof QueueVertex);
 }
 
 function getFilterStatements(pipelineGraph) {
@@ -32,10 +32,10 @@ function getFilterStatements(pipelineGraph) {
   // is where we want to start. If there is no Queue vertex then there are necessarily no input-stage vertices
   // either, so the first filter vertex that has no parents (orphan vertex) is where we want to start.
   const allVertices = pipelineGraph.getVertices();
-  const allFilterVertices = allVertices.filter(v => isFilterStageVertex(v));
+  const allFilterVertices = allVertices.filter((v) => isFilterStageVertex(v));
   const startFilterVertex = pipelineGraph.hasQueueVertex
-    ? allFilterVertices.find(v => isVertexChildOfQueue(v))
-    : allFilterVertices.find(v => isVertexOrphan(v));
+    ? allFilterVertices.find((v) => isVertexChildOfQueue(v))
+    : allFilterVertices.find((v) => isVertexOrphan(v));
 
   if (!startFilterVertex) {
     return [];
@@ -59,10 +59,11 @@ function getOutputStatements(pipelineGraph) {
   return pipelineGraph
     .getVertices()
     .filter(
-      v =>
-        v.pipelineStage === 'output' && !v.incomingVertices.some(p => p.pipelineStage === 'output')
+      (v) =>
+        v.pipelineStage === 'output' &&
+        !v.incomingVertices.some((p) => p.pipelineStage === 'output')
     )
-    .map(v => makeStatement(v, 'output'));
+    .map((v) => makeStatement(v, 'output'));
 }
 
 export class Pipeline {

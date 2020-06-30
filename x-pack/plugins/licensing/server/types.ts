@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { IClusterClient } from 'src/core/server';
+import { ILegacyClusterClient } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -40,16 +40,51 @@ export interface RawLicense {
   mode: LicenseType;
 }
 
+/**
+ * The APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing.
+ * @public
+ */
+export interface LicensingRequestHandlerContext {
+  featureUsage: FeatureUsageServiceStart;
+  license: ILicense;
+}
+
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    licensing: {
-      license: ILicense;
-    };
+    licensing: LicensingRequestHandlerContext;
   }
 }
 
 /** @public */
 export interface LicensingPluginSetup {
+  /**
+   * Steam of licensing information {@link ILicense}.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  license$: Observable<ILicense>;
+  /**
+   * Triggers licensing information re-fetch.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  refresh(): Promise<ILicense>;
+  /**
+   * Creates a license poller to retrieve a license data with.
+   * Allows a plugin to configure a cluster to retrieve data from at
+   * given polling frequency.
+   * @deprecated in favour of the counterpart provided from start contract
+   */
+  createLicensePoller: (
+    clusterClient: ILegacyClusterClient,
+    pollingFrequency: number
+  ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
+  /**
+   * APIs to register licensed feature usage.
+   */
+  featureUsage: FeatureUsageServiceSetup;
+}
+
+/** @public */
+export interface LicensingPluginStart {
   /**
    * Steam of licensing information {@link ILicense}.
    */
@@ -64,17 +99,9 @@ export interface LicensingPluginSetup {
    * given polling frequency.
    */
   createLicensePoller: (
-    clusterClient: IClusterClient,
+    clusterClient: ILegacyClusterClient,
     pollingFrequency: number
   ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
-  /**
-   * APIs to register licensed feature usage.
-   */
-  featureUsage: FeatureUsageServiceSetup;
-}
-
-/** @public */
-export interface LicensingPluginStart {
   /**
    * APIs to manage licensed feature usage.
    */

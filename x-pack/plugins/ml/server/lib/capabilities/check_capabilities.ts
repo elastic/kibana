@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   MlCapabilities,
   adminMlCapabilities,
@@ -14,7 +14,7 @@ import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
 
 export function capabilitiesProvider(
-  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser'],
+  callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'],
   capabilities: MlCapabilities,
   mlLicense: MlLicense,
   isMlEnabledInSpace: () => Promise<boolean>
@@ -41,7 +41,7 @@ export function capabilitiesProvider(
 }
 
 function disableAdminPrivileges(capabilities: MlCapabilities) {
-  Object.keys(adminMlCapabilities).forEach(k => {
+  Object.keys(adminMlCapabilities).forEach((k) => {
     capabilities[k as keyof MlCapabilities] = false;
   });
   capabilities.canCreateAnnotation = false;

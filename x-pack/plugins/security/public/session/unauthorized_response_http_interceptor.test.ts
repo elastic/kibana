@@ -12,7 +12,7 @@ import { UnauthorizedResponseHttpInterceptor } from './unauthorized_response_htt
 jest.mock('./session_expired');
 
 const drainPromiseQueue = () => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setImmediate(resolve);
   });
 };
@@ -20,7 +20,7 @@ const drainPromiseQueue = () => {
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 const setupHttp = (basePath: string) => {
-  const { http } = setup(injectedMetadata => {
+  const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
   return http;
@@ -34,7 +34,7 @@ afterEach(() => {
 it(`logs out 401 responses`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(`${http.basePath}/logout`, tenant);
-  const logoutPromise = new Promise(resolve => {
+  const logoutPromise = new Promise((resolve) => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);

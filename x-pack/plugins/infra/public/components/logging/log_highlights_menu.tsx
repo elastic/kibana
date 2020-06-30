@@ -51,8 +51,8 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
 
   const debouncedOnChange = useMemo(() => debounce(onChange, 275), [onChange]);
   const setHighlightTerm = useCallback<typeof _setHighlightTerm>(
-    valueOrUpdater =>
-      _setHighlightTerm(previousHighlightTerm => {
+    (valueOrUpdater) =>
+      _setHighlightTerm((previousHighlightTerm) => {
         const newHighlightTerm =
           typeof valueOrUpdater === 'function'
             ? valueOrUpdater(previousHighlightTerm)
@@ -67,7 +67,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
     [debouncedOnChange]
   );
   const changeHighlightTerm = useCallback(
-    e => {
+    (e) => {
       const value = e.target.value;
       setHighlightTerm(value);
     },
@@ -166,9 +166,9 @@ const goToNextHighlightLabel = i18n.translate(
 const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
   type: 'checkInCircleFilled',
   size: 'm',
-  color: theme.eui.euiColorAccent,
+  color: theme?.eui.euiColorAccent,
 }))`
-  padding-left: ${props => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
 `;
 
 const LogHighlightsMenuContent = euiStyled.div`

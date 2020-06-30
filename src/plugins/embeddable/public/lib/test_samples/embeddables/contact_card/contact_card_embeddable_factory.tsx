@@ -50,7 +50,7 @@ export class ContactCardEmbeddableFactory
   }
 
   public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const modalSession = this.overlays.openModal(
         toMountPoint(
           <ContactCardInitializer

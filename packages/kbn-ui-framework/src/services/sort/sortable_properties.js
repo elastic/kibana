@@ -73,7 +73,7 @@ export class SortableProperties {
    * @returns {SortableProperty|undefined}
    */
   getSortablePropertyByName(propertyName) {
-    return this.sortableProperties.find(property => property.name === propertyName);
+    return this.sortableProperties.find((property) => property.name === propertyName);
   }
 
   /**

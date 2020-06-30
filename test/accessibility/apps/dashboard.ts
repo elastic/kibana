@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'settings']);
   const a11y = getService('a11y');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -31,7 +31,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.home.addSampleDataSet('flights');
     });
 

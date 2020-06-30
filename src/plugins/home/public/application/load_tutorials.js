@@ -71,7 +71,7 @@ export async function getTutorial(id) {
     await loadTutorials();
   }
 
-  const tutorial = tutorials.find(tutorial => {
+  const tutorial = tutorials.find((tutorial) => {
     return tutorial.id === id;
   });
 

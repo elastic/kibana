@@ -35,7 +35,7 @@ export class License {
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
 

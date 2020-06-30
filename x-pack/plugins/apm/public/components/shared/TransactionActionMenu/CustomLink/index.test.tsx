@@ -11,7 +11,7 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
 import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 
@@ -28,7 +28,7 @@ describe('Custom links', () => {
     );
 
     expectTextsInDocument(component, [
-      'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.'
+      'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
     ]);
     expectTextsNotInDocument(component, ['Create']);
   });
@@ -51,7 +51,7 @@ describe('Custom links', () => {
       { id: '1', label: 'foo', url: 'foo' },
       { id: '2', label: 'bar', url: 'bar' },
       { id: '3', label: 'baz', url: 'baz' },
-      { id: '4', label: 'qux', url: 'qux' }
+      { id: '4', label: 'qux', url: 'qux' },
     ] as CustomLinkType[];
     const component = render(
       <CustomLink
@@ -71,7 +71,7 @@ describe('Custom links', () => {
       { id: '1', label: 'foo', url: 'foo' },
       { id: '2', label: 'bar', url: 'bar' },
       { id: '3', label: 'baz', url: 'baz' },
-      { id: '4', label: 'qux', url: 'qux' }
+      { id: '4', label: 'qux', url: 'qux' },
     ] as CustomLinkType[];
     const onSeeMoreClickMock = jest.fn();
     const component = render(
@@ -110,7 +110,7 @@ describe('Custom links', () => {
         { id: '1', label: 'foo', url: 'foo' },
         { id: '2', label: 'bar', url: 'bar' },
         { id: '3', label: 'baz', url: 'baz' },
-        { id: '4', label: 'qux', url: 'qux' }
+        { id: '4', label: 'qux', url: 'qux' },
       ] as CustomLinkType[];
       const component = render(
         <CustomLink

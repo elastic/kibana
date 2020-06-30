@@ -14,18 +14,18 @@
     "@storybook/addon-storyshots": "^5.2.8",
     "@storybook/react": "^5.2.8",
     "@storybook/theming": "^5.2.8",
-    "copy-webpack-plugin": "5.0.3",
+    "copy-webpack-plugin": "^6.0.2",
     "fast-glob": "2.2.7",
     "glob-watcher": "5.0.3",
     "jest-specific-snapshot": "2.0.0",
-    "jest-styled-components": "6.3.1",
+    "jest-styled-components": "^7.0.2",
     "mkdirp": "0.5.1",
     "mini-css-extract-plugin": "0.7.0",
     "normalize-path": "3.0.0",
     "react-docgen-typescript-loader": "3.1.0",
-    "rxjs": "6.5.2",
+    "rxjs": "6.5.5",
     "serve-static": "1.14.1",
-    "styled-components": "^3",
+    "styled-components": "^5.1.0",
     "webpack": "^4.41.5"
   }
 }

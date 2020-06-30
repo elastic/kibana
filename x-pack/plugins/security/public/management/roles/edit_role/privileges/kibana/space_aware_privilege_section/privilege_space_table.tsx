@@ -78,8 +78,8 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
-        spaceId =>
-          displaySpaces.find(space => space.id === spaceId) || {
+        (spaceId) =>
+          displaySpaces.find((space) => space.id === spaceId) || {
             id: spaceId,
             name: spaceId,
             disabledFeatures: [],
@@ -122,7 +122,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           if (record.isGlobal) {
             button = (
               <SpacesPopoverList
-                spaces={this.props.displaySpaces.filter(s => s.id !== '*')}
+                spaces={this.props.displaySpaces.filter((s) => s.id !== '*')}
                 buttonText={i18n.translate(
                   'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
                   {
@@ -238,7 +238,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                     'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                     {
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
-                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
+                      values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
                   color={'primary'}
@@ -256,7 +256,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                     'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                     {
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
-                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
+                      values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
                   color={'danger'}
@@ -296,7 +296,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   private toggleExpandSpacesGroup = (privilegeIndex: number) => {
     if (this.state.expandedSpacesGroups.includes(privilegeIndex)) {
       this.setState({
-        expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== privilegeIndex),
+        expandedSpacesGroups: this.state.expandedSpacesGroups.filter((i) => i !== privilegeIndex),
       });
     } else {
       this.setState({
@@ -312,7 +312,9 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     this.props.onChange(roleCopy);
 
     this.setState({
-      expandedSpacesGroups: this.state.expandedSpacesGroups.filter(i => i !== item.privilegeIndex),
+      expandedSpacesGroups: this.state.expandedSpacesGroups.filter(
+        (i) => i !== item.privilegeIndex
+      ),
     });
   };
 }

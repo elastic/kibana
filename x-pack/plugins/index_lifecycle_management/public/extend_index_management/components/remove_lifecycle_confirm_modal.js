@@ -100,7 +100,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
             </p>
 
             <ul>
-              {indexNames.map(indexName => (
+              {indexNames.map((indexName) => (
                 <li key={indexName}>{indexName}</li>
               ))}
             </ul>

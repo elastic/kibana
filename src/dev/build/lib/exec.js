@@ -34,5 +34,5 @@ export async function exec(log, cmd, args, options = {}) {
     preferLocal: true,
   });
 
-  await watchStdioForLine(proc, line => log[level](line), exitAfter);
+  await watchStdioForLine(proc, (line) => log[level](line), exitAfter);
 }

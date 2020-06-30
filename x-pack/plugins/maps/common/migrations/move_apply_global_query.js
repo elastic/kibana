@@ -22,7 +22,7 @@ export function moveApplyGlobalQueryToSources({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach(layerDescriptor => {
+  layerList.forEach((layerDescriptor) => {
     const applyGlobalQuery = _.get(layerDescriptor, 'applyGlobalQuery', true);
     delete layerDescriptor.applyGlobalQuery;
 
@@ -31,7 +31,7 @@ export function moveApplyGlobalQueryToSources({ attributes }) {
     }
 
     if (_.has(layerDescriptor, 'joins')) {
-      layerDescriptor.joins.forEach(joinDescriptor => {
+      layerDescriptor.joins.forEach((joinDescriptor) => {
         if (_.has(joinDescriptor, 'right')) {
           // joinDescriptor.right is ES_TERM_SOURCE source descriptor
           joinDescriptor.right.applyGlobalQuery = applyGlobalQuery;

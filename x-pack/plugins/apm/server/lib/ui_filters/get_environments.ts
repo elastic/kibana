@@ -7,9 +7,9 @@
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ESFilter } from '../../../typings/elasticsearch';
@@ -22,12 +22,12 @@ export async function getEnvironments(
 
   const filter: ESFilter[] = [
     { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
   ];
 
   if (serviceName) {
     filter.push({
-      term: { [SERVICE_NAME]: serviceName }
+      term: { [SERVICE_NAME]: serviceName },
     });
   }
 
@@ -35,24 +35,24 @@ export async function getEnvironments(
     index: [
       indices['apm_oss.metricsIndices'],
       indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
       query: {
         bool: {
-          filter
-        }
+          filter,
+        },
       },
       aggs: {
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED
-          }
-        }
-      }
-    }
+            missing: ENVIRONMENT_NOT_DEFINED,
+          },
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);
@@ -60,7 +60,7 @@ export async function getEnvironments(
   const environmentsBuckets = aggs?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
-    environmentBucket => environmentBucket.key as string
+    (environmentBucket) => environmentBucket.key as string
   );
 
   return environments;

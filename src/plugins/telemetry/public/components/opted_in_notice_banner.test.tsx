@@ -30,7 +30,7 @@ describe('OptInDetailsComponent', () => {
     const onLinkClick = jest.fn();
     const component = shallowWithIntl(<OptedInNoticeBanner onSeenBanner={onLinkClick} />);
 
-    const button = component.findWhere(n => n.type() === EuiButton);
+    const button = component.findWhere((n) => n.type() === EuiButton);
 
     if (!button) {
       throw new Error(`Couldn't find any buttons in opt-in notice`);

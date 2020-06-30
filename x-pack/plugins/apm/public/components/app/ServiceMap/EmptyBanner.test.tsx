@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { act, render, wait } from '@testing-library/react';
-import cytoscape from 'cytoscape';
 import React, { FunctionComponent } from 'react';
+import { act, wait } from '@testing-library/react';
+import cytoscape from 'cytoscape';
 import { CytoscapeContext } from './Cytoscape';
 import { EmptyBanner } from './EmptyBanner';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { renderWithTheme } from '../../../utils/testHelpers';
 
 const cy = cytoscape({});
 
@@ -29,8 +30,8 @@ describe('EmptyBanner', () => {
           </CytoscapeContext.Provider>
         </MockApmPluginContextWrapper>
       );
-      const component = render(<EmptyBanner />, {
-        wrapper: noCytoscapeWrapper
+      const component = renderWithTheme(<EmptyBanner />, {
+        wrapper: noCytoscapeWrapper,
       });
 
       expect(component.container.children).toHaveLength(0);
@@ -39,8 +40,8 @@ describe('EmptyBanner', () => {
 
   describe('with no nodes', () => {
     it('renders null', () => {
-      const component = render(<EmptyBanner />, {
-        wrapper
+      const component = renderWithTheme(<EmptyBanner />, {
+        wrapper,
       });
 
       expect(component.container.children).toHaveLength(0);
@@ -49,7 +50,7 @@ describe('EmptyBanner', () => {
 
   describe('with one node', () => {
     it('does not render null', async () => {
-      const component = render(<EmptyBanner />, { wrapper });
+      const component = renderWithTheme(<EmptyBanner />, { wrapper });
 
       await act(async () => {
         cy.add({ data: { id: 'test id' } });

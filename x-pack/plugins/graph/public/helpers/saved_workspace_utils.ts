@@ -74,10 +74,10 @@ export function findSavedWorkspace(
       perPage: size,
       searchFields: ['title^3', 'description'],
     })
-    .then(resp => {
+    .then((resp) => {
       return {
         total: resp.total,
-        hits: resp.savedObjects.map(hit => mapHits(hit, urlFor(basePath, hit.id))),
+        hits: resp.savedObjects.map((hit) => mapHits(hit, urlFor(basePath, hit.id))),
       };
     });
 }

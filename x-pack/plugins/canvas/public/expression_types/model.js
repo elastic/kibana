@@ -48,7 +48,7 @@ export class Model extends FunctionForm {
 
     // if argument is missing from modelArgs, mark it as skipped
     const argName = get(dataArg, 'arg.name');
-    const modelArg = modelArgs.find(modelArg => {
+    const modelArg = modelArgs.find((modelArg) => {
       if (Array.isArray(modelArg)) {
         return modelArg[0] === argName;
       }

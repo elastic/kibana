@@ -17,14 +17,12 @@
  * under the License.
  */
 
-export const VisualizeConstants = {
-  LANDING_PAGE_PATH: '/visualize',
-  WIZARD_STEP_1_PAGE_PATH: '/visualize/new',
-  WIZARD_STEP_2_PAGE_PATH: '/visualize/new/configure',
-  CREATE_PATH: '/visualize/create',
-  EDIT_PATH: '/visualize/edit',
-};
+export const APP_NAME = 'visualize';
 
-export function createVisualizeEditUrl(id: string) {
-  return `${VisualizeConstants.EDIT_PATH}/${id}`;
-}
+export const VisualizeConstants = {
+  LANDING_PAGE_PATH: '/',
+  WIZARD_STEP_1_PAGE_PATH: '/new',
+  WIZARD_STEP_2_PAGE_PATH: '/new/configure',
+  CREATE_PATH: '/create',
+  EDIT_PATH: '/edit',
+};

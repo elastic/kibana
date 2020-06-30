@@ -6,7 +6,11 @@
 
 import moment from 'moment';
 
-import { SavedObjectsFindResponse, SavedObjectsClientContract, APICaller } from 'src/core/server';
+import {
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+  LegacyAPICaller,
+} from 'src/core/server';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -112,7 +116,7 @@ export interface ReindexActions {
 
 export const reindexActionsFactory = (
   client: SavedObjectsClientContract,
-  callAsUser: APICaller
+  callAsUser: LegacyAPICaller
 ): ReindexActions => {
   // ----- Internal functions
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -280,7 +284,7 @@ export const reindexActionsFactory = (
             throw new Error(`Could not acquire lock for ML jobs`);
           }
 
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           return lockDoc(attempt + 1);
         }
       };
@@ -289,7 +293,7 @@ export const reindexActionsFactory = (
     },
 
     async incrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! + 1,
         })
@@ -297,7 +301,7 @@ export const reindexActionsFactory = (
     },
 
     async decrementIndexGroupReindexes(indexGroup) {
-      this.runWhileIndexGroupLocked(indexGroup, lockDoc =>
+      this.runWhileIndexGroupLocked(indexGroup, (lockDoc) =>
         this.updateReindexOp(lockDoc, {
           runningReindexCount: lockDoc.attributes.runningReindexCount! - 1,
         })

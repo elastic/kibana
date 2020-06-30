@@ -70,7 +70,7 @@ export class LineChart extends PointSeries {
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
     const circles = layer.selectAll('circle').data(function appendData() {
-      return data.values.filter(function(d) {
+      return data.values.filter(function (d) {
         return !_.isNull(d.y) && (d.y || !d.y0);
       });
     });
@@ -189,7 +189,7 @@ export class LineChart extends PointSeries {
       .attr('d', () => {
         const d3Line = d3.svg
           .line()
-          .defined(function(d) {
+          .defined(function (d) {
             return !_.isNull(d.y);
           })
           .interpolate(interpolate)
@@ -215,8 +215,8 @@ export class LineChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 

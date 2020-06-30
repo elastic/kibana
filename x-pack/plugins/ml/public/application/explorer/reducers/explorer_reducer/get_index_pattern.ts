@@ -13,7 +13,7 @@ import { getInfluencers, ExplorerJob } from '../../explorer_utils';
 export function getIndexPattern(selectedJobs: ExplorerJob[]) {
   return {
     title: ML_RESULTS_INDEX_PATTERN,
-    fields: getInfluencers(selectedJobs).map(influencer => ({
+    fields: getInfluencers(selectedJobs).map((influencer) => ({
       name: influencer,
       type: 'string',
       aggregatable: true,

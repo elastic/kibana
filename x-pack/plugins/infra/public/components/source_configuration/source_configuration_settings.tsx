@@ -46,7 +46,7 @@ export const SourceConfigurationSettings = ({
   } = useContext(Source.Context);
 
   const availableFields = useMemo(
-    () => (source && source.status ? source.status.indexFields.map(field => field.name) : []),
+    () => (source && source.status ? source.status.indexFields.map((field) => field.name) : []),
     [source]
   );
 

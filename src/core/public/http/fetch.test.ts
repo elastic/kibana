@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -28,7 +28,7 @@ import { BasePath } from './base_path';
 import { HttpResponse, HttpFetchOptionsWithPath } from './types';
 
 function delay<T>(duration: number) {
-  return new Promise<T>(r => setTimeout(r, duration));
+  return new Promise<T>((r) => setTimeout(r, duration));
 }
 
 const BASE_PATH = 'http://localhost/myBase';
@@ -44,11 +44,7 @@ describe('Fetch', () => {
   });
 
   describe('getRequestCount$', () => {
-    const getCurrentRequestCount = () =>
-      fetchInstance
-        .getRequestCount$()
-        .pipe(first())
-        .toPromise();
+    const getCurrentRequestCount = () => fetchInstance.getRequestCount$().pipe(first()).toPromise();
 
     it('should increase and decrease when request receives success response', async () => {
       fetchMock.get('*', 200);
@@ -88,7 +84,7 @@ describe('Fetch', () => {
       const requestCounts: number[] = [];
       const subscription = fetchInstance
         .getRequestCount$()
-        .subscribe(count => requestCounts.push(count));
+        .subscribe((count) => requestCounts.push(count));
 
       const success1 = fetchInstance.fetch('/success');
       const success2 = fetchInstance.fetch('/success');
@@ -121,7 +117,7 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch(
-          // @ts-ignore
+          // @ts-expect-error
           { path: '/', headers: { hello: 'world' } },
           { headers: { hello: 'mars' } }
         )
@@ -371,7 +367,7 @@ describe('Fetch', () => {
 
       fetchMock.get('*', Promise.reject(abortError));
 
-      await fetchInstance.fetch('/my/path').catch(e => {
+      await fetchInstance.fetch('/my/path').catch((e) => {
         expect(e.name).toEqual('AbortError');
       });
     });

@@ -22,7 +22,7 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
         '~logColumnHeader'
       );
-      return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
+      return await Promise.all(columnHeaderElements.map((element) => element.getVisibleText()));
     },
 
     async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {

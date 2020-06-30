@@ -60,7 +60,7 @@ export const fillWorkspaceSaga = ({
     }
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(fillWorkspace.match, fetchNodes);
   };
 };

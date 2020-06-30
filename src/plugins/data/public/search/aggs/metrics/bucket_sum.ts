@@ -45,14 +45,16 @@ const sumBucketTitle = i18n.translate('data.search.aggs.metrics.sumBucketTitle',
 export const getBucketSumMetricAgg = ({
   getInternalStartServices,
 }: BucketSumMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.SUM_BUCKET,
       title: sumBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
-      subtype: siblingPipelineAggHelper.subtype,
-      params: [...siblingPipelineAggHelper.params()],
-      getFormat: siblingPipelineAggHelper.getFormat,
+      makeLabel: (agg) => makeNestedLabel(agg, overallSumLabel),
+      subtype,
+      params: [...params()],
+      getSerializedFormat,
     },
     {
       getInternalStartServices,

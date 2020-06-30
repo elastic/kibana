@@ -73,9 +73,9 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
+      cases = cases.map((x) => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 204,
       request: createRequest(x),

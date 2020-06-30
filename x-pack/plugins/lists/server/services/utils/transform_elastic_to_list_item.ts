@@ -18,7 +18,7 @@ export const transformElasticToListItem = ({
   response,
   type,
 }: TransformElasticToListItemOptions): ListItemArraySchema => {
-  return response.hits.hits.map(hit => {
+  return response.hits.hits.map((hit) => {
     const {
       _id,
       _source: {

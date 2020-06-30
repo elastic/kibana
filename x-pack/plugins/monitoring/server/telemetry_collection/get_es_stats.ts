@@ -86,5 +86,5 @@ export interface ESClusterStats {
 export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map(cluster => cluster._source);
+  return clusters.map((cluster) => cluster._source);
 }

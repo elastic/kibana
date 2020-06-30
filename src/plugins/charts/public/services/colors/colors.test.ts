@@ -18,6 +18,7 @@
  */
 
 import { coreMock } from '../../../../../core/public/mocks';
+import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from './seed_colors';
 import { ColorsService } from './colors';
 
@@ -27,7 +28,7 @@ const config = new Map<string, any>();
 describe('Vislib Color Service', () => {
   const colors = new ColorsService();
   const mockUiSettings = coreMock.createSetup().uiSettings;
-  mockUiSettings.get.mockImplementation(a => config.get(a));
+  mockUiSettings.get.mockImplementation((a) => config.get(a));
   mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
   colors.init(mockUiSettings);
 
@@ -44,13 +45,13 @@ describe('Vislib Color Service', () => {
   const nullValue = null;
 
   beforeEach(() => {
-    previousConfig = config.get('visualization:colorMapping');
-    config.set('visualization:colorMapping', {});
+    previousConfig = config.get(COLOR_MAPPING_SETTING);
+    config.set(COLOR_MAPPING_SETTING, {});
     color = colors.createColorLookupFunction(arr, {});
   });
 
   afterEach(() => {
-    config.set('visualization:colorMapping', previousConfig);
+    config.set(COLOR_MAPPING_SETTING, previousConfig);
   });
 
   it('should throw error if not initialized', () => {

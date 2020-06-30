@@ -22,7 +22,7 @@ import moment from 'moment';
 
 export function createIndexPatternsStub() {
   return {
-    get: sinon.spy(indexPatternId =>
+    get: sinon.spy((indexPatternId) =>
       Promise.resolve({
         id: indexPatternId,
         isTimeNanosBased: () => false,
@@ -48,7 +48,7 @@ export function createSearchSourceStub(hits, timeField) {
   searchSourceStub.setParent = sinon.spy(() => searchSourceStub);
   searchSourceStub.setField = sinon.spy(() => searchSourceStub);
 
-  searchSourceStub.getField = sinon.spy(key => {
+  searchSourceStub.getField = sinon.spy((key) => {
     const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;
   });
@@ -83,7 +83,7 @@ export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
         : (first, second) => second[timeField] - first[timeField];
     const filteredHits = searchSourceStub._stubHits
       .filter(
-        hit =>
+        (hit) =>
           moment(hit[timeField]).isSameOrAfter(timeRange.gte) &&
           moment(hit[timeField]).isSameOrBefore(timeRange.lte)
       )

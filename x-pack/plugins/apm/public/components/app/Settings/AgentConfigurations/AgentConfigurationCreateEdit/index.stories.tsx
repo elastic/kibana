@@ -19,15 +19,15 @@ import { createCallApmApi } from '../../../../../services/rest/createCallApmApi'
 import { AgentConfigurationCreateEdit } from './index';
 import {
   ApmPluginContext,
-  ApmPluginContextValue
+  ApmPluginContextValue,
 } from '../../../../../context/ApmPluginContext';
+import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   module
-).add(
-  'with config',
-  () => {
+)
+  .addDecorator((storyFn) => {
     const httpMock = {};
 
     // mock
@@ -35,29 +35,41 @@ storiesOf(
 
     const contextMock = {
       core: {
-        notifications: { toasts: { addWarning: () => {}, addDanger: () => {} } }
-      }
+        notifications: {
+          toasts: { addWarning: () => {}, addDanger: () => {} },
+        },
+      },
     };
+
     return (
-      <ApmPluginContext.Provider
-        value={(contextMock as unknown) as ApmPluginContextValue}
-      >
+      <EuiThemeProvider>
+        <ApmPluginContext.Provider
+          value={(contextMock as unknown) as ApmPluginContextValue}
+        >
+          {storyFn()}
+        </ApmPluginContext.Provider>
+      </EuiThemeProvider>
+    );
+  })
+  .add(
+    'with config',
+    () => {
+      return (
         <AgentConfigurationCreateEdit
           pageStep="choose-settings-step"
           existingConfigResult={{
             status: FETCH_STATUS.SUCCESS,
             data: {
               service: { name: 'opbeans-node', environment: 'production' },
-              settings: {}
-            } as AgentConfiguration
+              settings: {},
+            } as AgentConfiguration,
           }}
         />
-      </ApmPluginContext.Provider>
-    );
-  },
-  {
-    info: {
-      source: false
+      );
+    },
+    {
+      info: {
+        source: false,
+      },
     }
-  }
-);
+  );

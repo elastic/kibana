@@ -9,7 +9,7 @@ import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elasti
 import { SourceTooltip } from './source_tooltip';
 import { i18n } from '@kbn/i18n';
 
-export const SourceDestination = props => {
+export const SourceDestination = (props) => {
   const { sourceName, targetName, targetTransportAddress } = props;
   const targetTransportAddressContent =
     targetTransportAddress ||

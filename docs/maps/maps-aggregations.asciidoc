@@ -2,6 +2,11 @@
 [[maps-aggregations]]
 == Plot big data without plotting too much data
 
+++++
+<titleabbrev>Plot big data</titleabbrev>
+++++
+
+
 Use {ref}/search-aggregations.html[aggregations] to plot large data sets without overwhelming your network or your browser.
 When using aggregations, the documents stay in Elasticsearch and only the calculated values for each group are returned to your computer.
 
@@ -37,7 +42,7 @@ image::maps/images/grid_to_docs.gif[]
 [[maps-grid-aggregation]]
 === Grid aggregation
 
-The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
+Grid aggregation layers use {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into grids. You can calculate metrics for each gridded cell.
 
 Symbolize grid aggregation metrics as:
 
@@ -48,13 +53,13 @@ The cluster location is the weighted centroid for all geo-points in the gridded 
 
 *Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
 
-To enable grid aggregation:
+To enable a grid aggregation layer:
 
-. Click *Add layer*, then select the *Grid aggregation* source.
+. Click *Add layer*, then select the *Clusters and grids* or *Heat map* layer.
 
 To enable a blended layer that dynamically shows clusters or documents:
 
-. Click *Add layer*, then select the *Documents* source.
+. Click *Add layer*, then select the *Documents* layer.
 . Configure *Index pattern* and the *Geospatial field*. To enable clustering, the *Geospatial field* must be set to a field mapped as {ref}/geo-point.html[geo_point].
 . In *Scaling*, select *Show clusters when results exceed 10000*.
 
@@ -69,7 +74,7 @@ then accumulates the most relevant documents based on sort order for each entry 
 
 To enable top hits:
 
-. Click *Add layer* button and select *Documents* source.
+. Click *Add layer*, then select the *Documents* layer.
 . Configure *Index pattern* and *Geospatial field*.
 . In *Scaling*, select *Show top hits per entity*.
 . Set *Entity* to the field that identifies entities in your documents.
@@ -99,7 +104,7 @@ image::maps/images/point_to_point.png[]
 
 Use term joins to augment vector features with properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
 
-Term joins are available for <<vector-layer, vector layers>> with the following sources:
+Term joins are available for the following <<vector-layer, vector layers>>:
 
 * Configured GeoJSON
 * Documents
@@ -213,7 +218,7 @@ The following shows an example terms aggregation response. Note the *key* proper
 }
 --------------------------------------------------
 
-==== Augmenting the left source with metrics from the right source
+==== Augment the left source with metrics from the right source
 
 The join adds metrics for each terms aggregation bucket to the world country feature with the corresponding ISO 3166-1 alpha-2 code. Features that do not have a corresponding terms aggregation bucket are not visible on the map.
 

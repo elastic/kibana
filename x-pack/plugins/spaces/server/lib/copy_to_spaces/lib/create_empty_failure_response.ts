@@ -7,7 +7,7 @@ import Boom, { Payload } from 'boom';
 import { SavedObjectsImportError } from 'src/core/server';
 
 export const createEmptyFailureResponse = (errors?: Array<SavedObjectsImportError | Boom>) => {
-  const errorMessages: Array<SavedObjectsImportError | Payload> = (errors || []).map(error => {
+  const errorMessages: Array<SavedObjectsImportError | Payload> = (errors || []).map((error) => {
     if (Boom.isBoom(error as any)) {
       return (error as Boom).output.payload as Payload;
     }

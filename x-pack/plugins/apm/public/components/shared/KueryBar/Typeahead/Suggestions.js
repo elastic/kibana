@@ -11,16 +11,15 @@ import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
 import { units, px, unit } from '../../../../style/variables';
 import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const List = styled.ul`
   width: 100%;
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${tint(0.1, theme.euiColorFullShade)};
+    ${({ theme }) => tint(0.1, theme.eui.euiColorFullShade)};
   position: absolute;
-  background: #fff;
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;
   left: 0;
   max-height: ${px(unit * 20)};
@@ -61,7 +60,7 @@ class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
@@ -72,7 +71,7 @@ class Suggestions extends Component {
     });
 
     return (
-      <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>
+      <List innerRef={(node) => (this.parentNode = node)}>{suggestions}</List>
     );
   }
 }
@@ -82,7 +81,7 @@ Suggestions.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
 };
 
 export default Suggestions;

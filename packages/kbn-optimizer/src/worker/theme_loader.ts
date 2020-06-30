@@ -21,7 +21,7 @@ import webpack from 'webpack';
 import { stringifyRequest } from 'loader-utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function(this: webpack.loader.LoaderContext) {
+export default function (this: webpack.loader.LoaderContext) {
   return `
 if (window.__kbnDarkMode__) {
   require(${stringifyRequest(this, `${this.resourcePath}?dark`)})

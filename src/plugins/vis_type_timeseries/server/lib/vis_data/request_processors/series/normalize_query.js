@@ -46,7 +46,7 @@ function removeEmptyTopLevelAggregation(doc, series) {
  * as the last place where you can modify the "doc" (request body) object before sending it to ES.
  */
 export function normalizeQuery(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     return next(removeEmptyTopLevelAggregation(doc, series));
   };
 }

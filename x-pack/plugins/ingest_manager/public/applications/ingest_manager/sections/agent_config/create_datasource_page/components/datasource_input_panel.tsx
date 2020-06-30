@@ -19,25 +19,32 @@ import {
   EuiSpacer,
   EuiIconTip,
 } from '@elastic/eui';
-import { DatasourceInput, DatasourceInputStream, RegistryInput } from '../../../../types';
+import {
+  DatasourceInput,
+  DatasourceInputStream,
+  RegistryInput,
+  RegistryStream,
+} from '../../../../types';
 import { DatasourceInputValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputConfig } from './datasource_input_config';
 import { DatasourceInputStreamConfig } from './datasource_input_stream_config';
 
 const FlushHorizontalRule = styled(EuiHorizontalRule)`
-  margin-left: -${props => props.theme.eui.paddingSizes.m};
-  margin-right: -${props => props.theme.eui.paddingSizes.m};
+  margin-left: -${(props) => props.theme.eui.paddingSizes.m};
+  margin-right: -${(props) => props.theme.eui.paddingSizes.m};
   width: auto;
 `;
 
 export const DatasourceInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
+  packageInputStreams: Array<RegistryStream & { dataset: { name: string } }>;
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
   inputValidationResults: DatasourceInputValidationResults;
   forceShowErrors?: boolean;
 }> = ({
   packageInput,
+  packageInputStreams,
   datasourceInput,
   updateDatasourceInput,
   inputValidationResults,
@@ -84,11 +91,11 @@ export const DatasourceInputPanel: React.FunctionComponent<{
               </EuiFlexGroup>
             }
             checked={datasourceInput.enabled}
-            onChange={e => {
+            onChange={(e) => {
               const enabled = e.target.checked;
               updateDatasourceInput({
                 enabled,
-                streams: datasourceInput.streams.map(stream => ({
+                streams: datasourceInput.streams.map((stream) => ({
                   ...stream,
                   enabled,
                 })),
@@ -107,11 +114,11 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                     count: (
                       <EuiTextColor color="default">
                         <strong>
-                          {datasourceInput.streams.filter(stream => stream.enabled).length}
+                          {datasourceInput.streams.filter((stream) => stream.enabled).length}
                         </strong>
                       </EuiTextColor>
                     ),
-                    total: packageInput.streams.length,
+                    total: packageInputStreams.length,
                   }}
                 />
               </EuiText>
@@ -168,18 +175,18 @@ export const DatasourceInputPanel: React.FunctionComponent<{
       {/* Per-stream configuration */}
       {isShowingStreams ? (
         <EuiFlexGroup direction="column">
-          {packageInput.streams.map(packageInputStream => {
+          {packageInputStreams.map((packageInputStream) => {
             const datasourceInputStream = datasourceInput.streams.find(
-              stream => stream.dataset === packageInputStream.dataset
+              (stream) => stream.dataset.name === packageInputStream.dataset.name
             );
             return datasourceInputStream ? (
-              <EuiFlexItem key={packageInputStream.dataset}>
+              <EuiFlexItem key={packageInputStream.dataset.name}>
                 <DatasourceInputStreamConfig
                   packageInputStream={packageInputStream}
                   datasourceInputStream={datasourceInputStream}
                   updateDatasourceInputStream={(updatedStream: Partial<DatasourceInputStream>) => {
                     const indexOfUpdatedStream = datasourceInput.streams.findIndex(
-                      stream => stream.dataset === packageInputStream.dataset
+                      (stream) => stream.dataset.name === packageInputStream.dataset.name
                     );
                     const newStreams = [...datasourceInput.streams];
                     newStreams[indexOfUpdatedStream] = {
@@ -196,7 +203,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
                       updatedInput.enabled = true;
                     } else if (
                       datasourceInput.enabled &&
-                      !newStreams.find(stream => stream.enabled)
+                      !newStreams.find((stream) => stream.enabled)
                     ) {
                       updatedInput.enabled = false;
                     }

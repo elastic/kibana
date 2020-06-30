@@ -78,7 +78,7 @@ describe('Top hit metric', () => {
         getByName: () => field,
         filter: () => [field],
       },
-      flattenHit: jest.fn(x => x!._source),
+      flattenHit: jest.fn((x) => x!._source),
     } as any;
 
     const aggConfigs = new AggConfigs(
@@ -91,7 +91,7 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry }
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -336,7 +336,7 @@ describe('Top hit metric', () => {
           data: [undefined, null],
           result: null,
         },
-      ].forEach(agg => {
+      ].forEach((agg) => {
         it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, () => {
           const bucket = {
             '1': {

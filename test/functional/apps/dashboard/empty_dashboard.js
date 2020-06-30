@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -49,10 +49,11 @@ export default function({ getService, getPageObjects }) {
       expect(emptyWidgetExists).to.be(true);
     });
 
-    it.skip('should open add panel when add button is clicked', async () => {
+    it('should open add panel when add button is clicked', async () => {
       await testSubjects.click('dashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
 
     it('should add new visualization from dashboard', async () => {

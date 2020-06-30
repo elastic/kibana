@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { ESLicense, LicenseGetter } from 'src/plugins/telemetry_collection_manager/server';
 
 let cachedLicense: ESLicense | undefined;
 
-function fetchLicense(callCluster: APICaller, local: boolean) {
+function fetchLicense(callCluster: LegacyAPICaller, local: boolean) {
   return callCluster<{ license: ESLicense }>('transport.request', {
     method: 'GET',
     path: '/_license',
@@ -41,9 +41,9 @@ function fetchLicense(callCluster: APICaller, local: boolean) {
  *
  * Like any X-Pack related API, X-Pack must installed for this to work.
  */
-async function getLicenseFromLocalOrMaster(callCluster: APICaller) {
+async function getLicenseFromLocalOrMaster(callCluster: LegacyAPICaller) {
   // Fetching the local license is cheaper than getting it from the master and good enough
-  const { license } = await fetchLicense(callCluster, true).catch(async err => {
+  const { license } = await fetchLicense(callCluster, true).catch(async (err) => {
     if (cachedLicense) {
       try {
         // Fallback to the master node's license info

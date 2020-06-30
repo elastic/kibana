@@ -66,7 +66,7 @@ describe('createBatchedFunction', () => {
     expect(onCall).toHaveBeenCalledWith(123);
     expect(onBatch).toHaveBeenCalledTimes(0);
 
-    await new Promise(r => setTimeout(r, 15));
+    await new Promise((r) => setTimeout(r, 15));
 
     expect(onCall).toHaveBeenCalledTimes(1);
     expect(onBatch).toHaveBeenCalledTimes(1);

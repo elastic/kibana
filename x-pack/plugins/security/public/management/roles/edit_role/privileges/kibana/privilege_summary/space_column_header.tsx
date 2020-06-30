@@ -20,9 +20,9 @@ const SPACES_DISPLAY_COUNT = 4;
 
 export const SpaceColumnHeader = (props: Props) => {
   const isGlobal = isGlobalPrivilegeDefinition(props.entry);
-  const entrySpaces = props.entry.spaces.map(spaceId => {
+  const entrySpaces = props.entry.spaces.map((spaceId) => {
     return (
-      props.spaces.find(s => s.id === spaceId) ?? {
+      props.spaces.find((s) => s.id === spaceId) ?? {
         id: spaceId,
         name: spaceId,
         disabledFeatures: [],
@@ -31,7 +31,7 @@ export const SpaceColumnHeader = (props: Props) => {
   });
   return (
     <div>
-      {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map(space => {
+      {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map((space) => {
         return (
           <span key={space.id}>
             <SpaceAvatar size="s" space={space} />{' '}
@@ -43,7 +43,7 @@ export const SpaceColumnHeader = (props: Props) => {
                 />
                 <br />
                 <SpacesPopoverList
-                  spaces={props.spaces.filter(s => s.id !== '*')}
+                  spaces={props.spaces.filter((s) => s.id !== '*')}
                   buttonText={i18n.translate(
                     'xpack.security.management.editRole.spacePrivilegeMatrix.showAllSpacesLink',
                     {

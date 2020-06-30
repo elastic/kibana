@@ -17,6 +17,7 @@
  * under the License.
  */
 import { createHashHistory } from 'history';
+import { ScopedHistory } from 'kibana/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { search } from '../../data/public';
@@ -52,16 +53,33 @@ export function setServices(newServices: any) {
 
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
+  restorePreviousUrl: () => void;
 }>('urlTracker');
 
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );
-
 /**
- * Makes sure discover and context are using one instance of history
+ * Makes sure discover and context are using one instance of history.
  */
 export const getHistory = _.once(() => createHashHistory());
+
+/**
+ * Discover currently uses two `history` instances: one from Kibana Platform and
+ * another from `history` package. Below function is used every time Discover
+ * app is loaded to synchronize both instances.
+ *
+ * This helper is temporary until https://github.com/elastic/kibana/issues/65161 is resolved.
+ */
+export const syncHistoryLocations = () => {
+  const h = getHistory();
+  Object.assign(h.location, createHashHistory().location);
+  return h;
+};
+
+export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
+  'scopedHistory'
+);
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';

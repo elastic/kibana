@@ -6,12 +6,12 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
+} from '../../../../../alerts/server/mocks';
 import { InfraSources } from '../../sources';
 
 interface AlertTestInstance {
@@ -19,6 +19,8 @@ interface AlertTestInstance {
   actionQueue: any[];
   state: any;
 }
+
+let persistAlertInstances = false; // eslint-disable-line
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -313,6 +315,50 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
   });
+
+  // describe('querying a metric that later recovers', () => {
+  //   const instanceID = 'test-*';
+  //   const execute = (threshold: number[]) =>
+  //     executor({
+  //       services,
+  //       params: {
+  //         criteria: [
+  //           {
+  //             ...baseCriterion,
+  //             comparator: Comparator.GT,
+  //             threshold,
+  //           },
+  //         ],
+  //       },
+  //     });
+  //   beforeAll(() => (persistAlertInstances = true));
+  //   afterAll(() => (persistAlertInstances = false));
+
+  //   test('sends a recovery alert as soon as the metric recovers', async () => {
+  //     await execute([0.5]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  //   test('does not continue to send a recovery alert if the metric is still OK', async () => {
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID)).toBe(undefined);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID)).toBe(undefined);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  //   test('sends a recovery alert again once the metric alerts and recovers again', async () => {
+  //     await execute([0.5]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  // });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
@@ -351,34 +397,6 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   }
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
-  }
-  return mocks.basicMetricResponse;
-});
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
-
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
-    }
-    if (metric === 'test.metric.2') {
-      return mocks.alternateCompositeResponse;
-    }
-    return mocks.basicCompositeResponse;
-  }
-  if (metric === 'test.metric.2') {
-    return mocks.alternateMetricResponse;
   } else if (metric === 'test.metric.3') {
     return mocks.emptyMetricResponse;
   }
@@ -397,12 +415,19 @@ services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId
 
 const alertInstances = new Map<string, AlertTestInstance>();
 services.alertInstanceFactory.mockImplementation((instanceID: string) => {
-  const alertInstance: AlertTestInstance = {
+  const newAlertInstance: AlertTestInstance = {
     instance: alertsMock.createAlertInstanceFactory(),
     actionQueue: [],
     state: {},
   };
+  const alertInstance: AlertTestInstance = persistAlertInstances
+    ? alertInstances.get(instanceID) || newAlertInstance
+    : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
+
+  alertInstance.instance.getState.mockImplementation(() => {
+    return alertInstance.state;
+  });
   alertInstance.instance.replaceState.mockImplementation((newState: any) => {
     alertInstance.state = newState;
     return alertInstance.instance;

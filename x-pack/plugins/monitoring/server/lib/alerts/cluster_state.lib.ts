@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { AlertInstance } from '../../../../alerting/server';
+import { AlertInstance } from '../../../../alerts/server';
 import {
   AlertCommonCluster,
   AlertCommonPerClusterMessage,

@@ -51,14 +51,17 @@ export class SavedObjectLoader {
   }
 
   /**
-   * Retrieve a saved object by id. Returns a promise that completes when the object finishes
+   * Retrieve a saved object by id or create new one.
+   * Returns a promise that completes when the object finishes
    * initializing.
-   * @param id
+   * @param opts
    * @returns {Promise<SavedObject>}
    */
-  async get(id?: string) {
+  async get(opts?: Record<string, unknown> | string) {
+    // can accept object as argument in accordance to SavedVis class
+    // see src/plugins/saved_objects/public/saved_object/saved_object_loader.ts
     // @ts-ignore
-    const obj = new this.Class(id);
+    const obj = new this.Class(opts);
     return obj.init();
   }
 
@@ -69,7 +72,7 @@ export class SavedObjectLoader {
   async delete(ids: string | string[]) {
     const idsUsed = !Array.isArray(ids) ? [ids] : ids;
 
-    const deletions = idsUsed.map(id => {
+    const deletions = idsUsed.map((id) => {
       // @ts-ignore
       const savedObject = new this.Class(id);
       return savedObject.delete();
@@ -83,11 +86,11 @@ export class SavedObjectLoader {
     coreNavLinks
       .getAll()
       .filter(
-        link =>
+        (link) =>
           link.linkToLastSubUrl &&
-          idsUsed.find(deletedId => link.url && link.url.includes(deletedId)) !== undefined
+          idsUsed.find((deletedId) => link.url && link.url.includes(deletedId)) !== undefined
       )
-      .forEach(link => coreNavLinks.update(link.id, { url: link.baseUrl }));
+      .forEach((link) => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**
@@ -133,19 +136,19 @@ export class SavedObjectLoader {
         defaultSearchOperator: 'AND',
         fields,
       } as SavedObjectsFindOptions)
-      .then(resp => {
+      .then((resp) => {
         return {
           total: resp.total,
-          hits: resp.savedObjects.map(savedObject => this.mapSavedObjectApiHits(savedObject)),
+          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject)),
         };
       });
   }
 
   find(search: string = '', size: number = 100) {
-    return this.findAll(search, size).then(resp => {
+    return this.findAll(search, size).then((resp) => {
       return {
         total: resp.total,
-        hits: resp.hits.filter(savedObject => !savedObject.error),
+        hits: resp.hits.filter((savedObject) => !savedObject.error),
       };
     });
   }

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { CONTEXT_STEP_SETTING, CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
@@ -35,9 +36,7 @@ import {
 } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
-const module = getAngularModule();
-
-module.directive('contextApp', function ContextApp() {
+getAngularModule().directive('contextApp', function ContextApp() {
   return {
     bindToController: true,
     controller: callAfterBindingsWorkaround(ContextAppController),
@@ -51,7 +50,6 @@ module.directive('contextApp', function ContextApp() {
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
-      discoverUrl: '=',
     },
     template: contextAppTemplate,
   };
@@ -62,9 +60,8 @@ function ContextAppController($scope, Private) {
   const queryParameterActions = getQueryParameterActions(filterManager, indexpatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
-    parseInt(uiSettings.get('context:step'), 10),
-    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields')),
-    this.discoverUrl
+    parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
+    getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING))
   );
 
   this.actions = _.mapValues(
@@ -72,7 +69,7 @@ function ContextAppController($scope, Private) {
       ...queryParameterActions,
       ...queryActions,
     },
-    action => (...args) => action(this.state)(...args)
+    (action) => (...args) => action(this.state)(...args)
   );
 
   this.constants = {
@@ -86,7 +83,7 @@ function ContextAppController($scope, Private) {
       () => this.state.rows.anchor,
       () => this.state.rows.successors,
     ],
-    newValues => this.actions.setAllRows(...newValues)
+    (newValues) => this.actions.setAllRows(...newValues)
   );
 
   /**
@@ -97,7 +94,7 @@ function ContextAppController($scope, Private) {
       ..._.pick(this, QUERY_PARAMETER_KEYS),
       indexPatternId: this.indexPattern.id,
     }),
-    newQueryParameters => {
+    (newQueryParameters) => {
       const { queryParameters } = this.state;
       if (
         newQueryParameters.indexPatternId !== queryParameters.indexPatternId ||
@@ -123,13 +120,13 @@ function ContextAppController($scope, Private) {
       predecessorCount: this.state.queryParameters.predecessorCount,
       successorCount: this.state.queryParameters.successorCount,
     }),
-    newParameters => {
+    (newParameters) => {
       _.assign(this, newParameters);
     }
   );
 }
 
-function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
+function createInitialState(defaultStepSize, tieBreakerField) {
   return {
     queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
@@ -139,10 +136,5 @@ function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
       successors: [],
     },
     loadingStatus: createInitialLoadingStatusState(),
-    navigation: {
-      discover: {
-        url: discoverUrl,
-      },
-    },
   };
 }

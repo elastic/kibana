@@ -197,137 +197,6 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 </EuiModal>
 `;
 
-exports[`SavedObjectsTable import should show the flyout 1`] = `
-<Flyout
-  allowedTypes={
-    Array [
-      "index-pattern",
-      "visualization",
-      "dashboard",
-      "search",
-    ]
-  }
-  close={[Function]}
-  done={[Function]}
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "anonymousPaths": Object {
-        "isAnonymous": [MockFunction],
-        "register": [MockFunction],
-      },
-      "basePath": BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "remove": [Function],
-        "serverBasePath": "",
-      },
-      "delete": [MockFunction],
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-    }
-  }
-  indexPatterns={
-    Object {
-      "clearCache": [MockFunction],
-      "createField": [MockFunction],
-      "createFieldList": [MockFunction],
-      "ensureDefaultIndexPattern": [MockFunction],
-      "get": [MockFunction],
-      "make": [Function],
-    }
-  }
-  overlays={
-    Object {
-      "banners": Object {
-        "add": [MockFunction],
-        "get$": [MockFunction],
-        "getComponent": [MockFunction],
-        "remove": [MockFunction],
-        "replace": [MockFunction],
-      },
-      "openConfirm": [MockFunction],
-      "openFlyout": [MockFunction],
-      "openModal": [MockFunction],
-    }
-  }
-  search={
-    Object {
-      "__LEGACY": Object {
-        "esClient": Object {
-          "msearch": [MockFunction],
-          "search": [MockFunction],
-        },
-      },
-      "aggs": Object {
-        "calculateAutoTimeExpression": [Function],
-        "createAggConfigs": [MockFunction],
-        "types": Object {
-          "get": [Function],
-          "getAll": [Function],
-          "getBuckets": [Function],
-          "getMetrics": [Function],
-        },
-      },
-      "search": [MockFunction],
-      "searchSource": Object {
-        "create": [MockFunction],
-        "fromJSON": [MockFunction],
-      },
-      "setInterceptor": [MockFunction],
-    }
-  }
-  serviceRegistry={
-    Object {
-      "all": [MockFunction],
-      "get": [MockFunction],
-      "register": [MockFunction],
-    }
-  }
-/>
-`;
-
-exports[`SavedObjectsTable relationships should show the flyout 1`] = `
-<Relationships
-  basePath={
-    BasePath {
-      "basePath": "",
-      "get": [Function],
-      "prepend": [Function],
-      "remove": [Function],
-      "serverBasePath": "",
-    }
-  }
-  canGoInApp={[Function]}
-  close={[Function]}
-  getRelationships={[Function]}
-  goInspectObject={[Function]}
-  savedObject={
-    Object {
-      "id": "2",
-      "meta": Object {
-        "editUrl": "#/management/kibana/objects/savedSearches/2",
-        "icon": "search",
-        "inAppUrl": Object {
-          "path": "/discover/2",
-          "uiCapabilitiesPath": "discover.show",
-        },
-        "title": "MySearch",
-      },
-      "type": "search",
-    }
-  }
-/>
-`;
-
 exports[`SavedObjectsTable should render normally 1`] = `
 <EuiPageContent
   horizontalPosition="center"
@@ -341,121 +210,162 @@ exports[`SavedObjectsTable should render normally 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <Table
-    actionRegistry={
+  <RedirectAppLinks
+    application={
       Object {
-        "getAll": [MockFunction],
-        "has": [MockFunction],
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "savedObjectsManagement": Object {
+            "delete": false,
+            "edit": false,
+            "read": true,
+          },
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+        "registerMountContext": [MockFunction],
       }
     }
-    basePath={
-      BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "remove": [Function],
-        "serverBasePath": "",
+  >
+    <Table
+      actionRegistry={
+        Object {
+          "getAll": [MockFunction],
+          "has": [MockFunction],
+        }
       }
-    }
-    canDelete={false}
-    canGoInApp={[Function]}
-    filterOptions={
-      Array [
-        Object {
-          "name": "index-pattern",
-          "value": "index-pattern",
-          "view": "index-pattern (0)",
-        },
-        Object {
-          "name": "visualization",
-          "value": "visualization",
-          "view": "visualization (0)",
-        },
-        Object {
-          "name": "dashboard",
-          "value": "dashboard",
-          "view": "dashboard (0)",
-        },
-        Object {
-          "name": "search",
-          "value": "search",
-          "view": "search (0)",
-        },
-      ]
-    }
-    goInspectObject={[Function]}
-    isSearching={false}
-    itemId="id"
-    items={
-      Array [
-        Object {
-          "id": "1",
-          "meta": Object {
-            "editUrl": "#/management/kibana/index_patterns/1",
-            "icon": "indexPatternApp",
-            "inAppUrl": Object {
-              "path": "/management/kibana/index_patterns/1",
-              "uiCapabilitiesPath": "management.kibana.index_patterns",
-            },
-            "title": "MyIndexPattern*",
-          },
-          "type": "index-pattern",
-        },
-        Object {
-          "id": "2",
-          "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedSearches/2",
-            "icon": "search",
-            "inAppUrl": Object {
-              "path": "/discover/2",
-              "uiCapabilitiesPath": "discover.show",
-            },
-            "title": "MySearch",
-          },
-          "type": "search",
-        },
-        Object {
-          "id": "3",
-          "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedDashboards/3",
-            "icon": "dashboardApp",
-            "inAppUrl": Object {
-              "path": "/dashboard/3",
-              "uiCapabilitiesPath": "dashboard.show",
-            },
-            "title": "MyDashboard",
-          },
-          "type": "dashboard",
-        },
-        Object {
-          "id": "4",
-          "meta": Object {
-            "editUrl": "#/management/kibana/objects/savedVisualizations/4",
-            "icon": "visualizeApp",
-            "inAppUrl": Object {
-              "path": "/visualize/edit/4",
-              "uiCapabilitiesPath": "visualize.show",
-            },
-            "title": "MyViz",
-          },
-          "type": "visualization",
-        },
-      ]
-    }
-    onDelete={[Function]}
-    onExport={[Function]}
-    onQueryChange={[Function]}
-    onShowRelationships={[Function]}
-    onTableChange={[Function]}
-    pageIndex={0}
-    pageSize={15}
-    selectedSavedObjects={Array []}
-    selectionConfig={
-      Object {
-        "onSelectionChange": [Function],
+      basePath={
+        BasePath {
+          "basePath": "",
+          "get": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        }
       }
-    }
-    totalItemCount={4}
-  />
+      canDelete={false}
+      canGoInApp={[Function]}
+      filterOptions={
+        Array [
+          Object {
+            "name": "index-pattern",
+            "value": "index-pattern",
+            "view": "index-pattern (0)",
+          },
+          Object {
+            "name": "visualization",
+            "value": "visualization",
+            "view": "visualization (0)",
+          },
+          Object {
+            "name": "dashboard",
+            "value": "dashboard",
+            "view": "dashboard (0)",
+          },
+          Object {
+            "name": "search",
+            "value": "search",
+            "view": "search (0)",
+          },
+        ]
+      }
+      goInspectObject={[Function]}
+      isSearching={false}
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "meta": Object {
+              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "icon": "indexPatternApp",
+              "inAppUrl": Object {
+                "path": "/management/kibana/indexPatterns/patterns/1",
+                "uiCapabilitiesPath": "management.kibana.indexPatterns",
+              },
+              "title": "MyIndexPattern*",
+            },
+            "type": "index-pattern",
+          },
+          Object {
+            "id": "2",
+            "meta": Object {
+              "editUrl": "/management/kibana/objects/savedSearches/2",
+              "icon": "search",
+              "inAppUrl": Object {
+                "path": "/discover/2",
+                "uiCapabilitiesPath": "discover.show",
+              },
+              "title": "MySearch",
+            },
+            "type": "search",
+          },
+          Object {
+            "id": "3",
+            "meta": Object {
+              "editUrl": "/management/kibana/objects/savedDashboards/3",
+              "icon": "dashboardApp",
+              "inAppUrl": Object {
+                "path": "/dashboard/3",
+                "uiCapabilitiesPath": "dashboard.show",
+              },
+              "title": "MyDashboard",
+            },
+            "type": "dashboard",
+          },
+          Object {
+            "id": "4",
+            "meta": Object {
+              "editUrl": "/management/kibana/objects/savedVisualizations/4",
+              "icon": "visualizeApp",
+              "inAppUrl": Object {
+                "path": "/edit/4",
+                "uiCapabilitiesPath": "visualize.show",
+              },
+              "title": "MyViz",
+            },
+            "type": "visualization",
+          },
+        ]
+      }
+      onDelete={[Function]}
+      onExport={[Function]}
+      onQueryChange={[Function]}
+      onShowRelationships={[Function]}
+      onTableChange={[Function]}
+      pageIndex={0}
+      pageSize={15}
+      selectedSavedObjects={Array []}
+      selectionConfig={
+        Object {
+          "onSelectionChange": [Function],
+        }
+      }
+      totalItemCount={4}
+    />
+  </RedirectAppLinks>
 </EuiPageContent>
 `;

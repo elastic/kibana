@@ -33,7 +33,7 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       if (dom) {
         await act(async () => {
           dom.update();
@@ -47,11 +47,13 @@ export const createAppMounter = ({
   appId,
   html = `<div>App ${appId}</div>`,
   appRoute = `/app/${appId}`,
+  exactRoute = false,
   extraMountHook,
 }: {
   appId: string;
   html?: string;
   appRoute?: string;
+  exactRoute?: boolean;
   extraMountHook?: (params: AppMountParameters) => void;
 }): MockedMounterTuple<App> => {
   const unmount = jest.fn();
@@ -61,6 +63,8 @@ export const createAppMounter = ({
       mounter: {
         appRoute,
         appBasePath: appRoute,
+        legacy: false,
+        exactRoute,
         mount: jest.fn(async (params: AppMountParameters) => {
           const { appBasePath: basename, element } = params;
           Object.assign(element, {
@@ -88,6 +92,8 @@ export const createLegacyAppMounter = (
       appRoute: `/app/${appId.split(':')[0]}`,
       appBasePath: `/app/${appId.split(':')[0]}`,
       unmountBeforeMounting: true,
+      legacy: true,
+      exactRoute: false,
       mount: legacyMount,
     },
     unmount: jest.fn(),

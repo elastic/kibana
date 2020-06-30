@@ -43,7 +43,7 @@ const tabToHumanizedMap = {
     <FormattedMessage id="xpack.idxMgmt.detailPanel.tabSettingsLabel" defaultMessage="Settings" />
   ),
   [TAB_MAPPING]: (
-    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabMappingLabel" defaultMessage="Mapping" />
+    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabMappingLabel" defaultMessage="Mappings" />
   ),
   [TAB_STATS]: (
     <FormattedMessage id="xpack.idxMgmt.detailPanel.tabStatsLabel" defaultMessage="Stats" />

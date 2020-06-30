@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const objectToArray = obj => Object.keys(obj).map(k => ({ ...obj[k], __id__: k }));
+export const objectToArray = (obj) => Object.keys(obj).map((k) => ({ ...obj[k], __id__: k }));
 
 export const arrayToObject = (array, keyProp = 'id') =>
   array.reduce((acc, item) => {

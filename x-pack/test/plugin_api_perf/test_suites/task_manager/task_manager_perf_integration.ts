@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }: { getService: (service: string) => any }) {
+export default function ({ getService }: { getService: (service: string) => any }) {
   const log = getService('log');
   const supertest = getService('supertest');
 
@@ -96,8 +96,9 @@ export default function({ getService }: { getService: (service: string) => any }
           }
           if (fillPoolBail - fillPoolBailNoTasks > 0) {
             log.info(
-              `     ⮑ Exhausted Available Workers due to on going Task runs ${fillPoolBail -
-                fillPoolBailNoTasks}`
+              `     ⮑ Exhausted Available Workers due to on going Task runs ${
+                fillPoolBail - fillPoolBailNoTasks
+              }`
             );
           }
         }

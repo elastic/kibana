@@ -7,7 +7,6 @@
 import { compose, withProps } from 'recompose';
 import moment from 'moment';
 import { DateFormatArgInput as Component, Props as ComponentProps } from './date_format';
-// @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
@@ -30,7 +29,7 @@ export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentPr
     LOCAL_TIME_WITH_SECONDS: 'LTS',
   };
 
-  const dateFormats = Object.values(formatMap).map(format => ({
+  const dateFormats = Object.values(formatMap).map((format) => ({
     value: format,
     text: moment.utc(moment()).format(format),
   }));

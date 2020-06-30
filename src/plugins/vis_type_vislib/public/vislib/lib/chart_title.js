@@ -27,30 +27,24 @@ export class ChartTitle extends ErrorHandler {
   constructor(visConfig) {
     super();
     this.el = visConfig.get('el');
-    this.tooltip = new Tooltip('chart-title', this.el, function(d) {
+    this.tooltip = new Tooltip('chart-title', this.el, function (d) {
       return '<p>' + _.escape(d.label) + '</p>';
     });
   }
 
   render() {
-    const el = d3
-      .select(this.el)
-      .select('.chart-title')
-      .node();
+    const el = d3.select(this.el).select('.chart-title').node();
     const width = el ? el.clientWidth : 0;
     const height = el ? el.clientHeight : 0;
 
-    return d3
-      .select(this.el)
-      .selectAll('.chart-title')
-      .call(this.draw(width, height));
+    return d3.select(this.el).selectAll('.chart-title').call(this.draw(width, height));
   }
 
   truncate(size) {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const text = d3.select(this);
         const n = text[0].length;
         const maxWidth = (size / n) * 0.9;
@@ -83,8 +77,8 @@ export class ChartTitle extends ErrorHandler {
   draw(width, height) {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const div = d3.select(this);
         const dataType = this.parentNode.__data__.rows ? 'rows' : 'columns';
         const size = dataType === 'rows' ? height : width;
@@ -98,14 +92,14 @@ export class ChartTitle extends ErrorHandler {
           .attr('width', width)
           .attr('height', height)
           .append('text')
-          .attr('transform', function() {
+          .attr('transform', function () {
             if (dataType === 'rows') {
               return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
             }
             return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
           })
           .attr('text-anchor', 'middle')
-          .text(function(d) {
+          .text(function (d) {
             return d.label;
           });
 

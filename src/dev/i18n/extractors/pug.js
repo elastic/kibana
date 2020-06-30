@@ -56,7 +56,9 @@ export function* extractPugMessages(buffer, reporter) {
   for (const expression of expressions) {
     try {
       const ast = parsePugExpression(expression);
-      const node = [...traverseNodes(ast.program.body)].find(node => isI18nTranslateFunction(node));
+      const node = [...traverseNodes(ast.program.body)].find((node) =>
+        isI18nTranslateFunction(node)
+      );
 
       if (node) {
         yield extractI18nCallMessages(node);

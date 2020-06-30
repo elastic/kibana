@@ -24,7 +24,7 @@ export class AnomalyDetectorService {
       .http$<{ count: number; jobs: Job[] }>({
         path: `${this.apiBasePath}/${jobId}`,
       })
-      .pipe(map(response => response.jobs[0]));
+      .pipe(map((response) => response.jobs[0]));
   }
 
   /**
@@ -36,7 +36,7 @@ export class AnomalyDetectorService {
       .http$<{ count: number; jobs: Job[] }>({
         path: `${this.apiBasePath}/${jobIds.join(',')}`,
       })
-      .pipe(map(response => response.jobs));
+      .pipe(map((response) => response.jobs));
   }
 
   /**

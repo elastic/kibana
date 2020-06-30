@@ -62,7 +62,7 @@ export async function run(fn: RunFn, options: Options = {}) {
     writeTo: process.stdout,
   });
 
-  process.on('unhandledRejection', error => {
+  process.on('unhandledRejection', (error) => {
     log.error('UNHANDLED PROMISE REJECTION');
     log.error(
       error instanceof Error
@@ -110,7 +110,7 @@ export async function run(fn: RunFn, options: Options = {}) {
     }
 
     try {
-      await withProcRunner(log, async procRunner => {
+      await withProcRunner(log, async (procRunner) => {
         await fn({
           log,
           flags,

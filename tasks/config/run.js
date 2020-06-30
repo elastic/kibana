@@ -25,7 +25,7 @@ const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
   `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   function createKbnServerTask({ runBuild, flags = [] }) {
     return {
       options: {
@@ -43,7 +43,7 @@ module.exports = function(grunt) {
         ...flags,
 
         // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function(flags, flag) {
+        ...grunt.option.flags().reduce(function (flags, flag) {
           if (flag.startsWith('--kbnServer.')) {
             flags.push(`--${flag.slice(12)}`);
           }
@@ -147,6 +147,12 @@ module.exports = function(grunt) {
       title: 'Internationalization check',
       cmd: NODE,
       args: ['scripts/i18n_check', '--ignore-missing'],
+    }),
+
+    telemetryCheck: scriptWithGithubChecks({
+      title: 'Telemetry Schema check',
+      cmd: NODE,
+      args: ['scripts/telemetry_check'],
     }),
 
     // used by the test:quick task

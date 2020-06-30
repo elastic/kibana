@@ -194,7 +194,7 @@ export async function migrationsUpToDate(
       throw e;
     }
 
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
 
     return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
   }
@@ -259,7 +259,7 @@ export async function claimAlias(
 ) {
   const result = await callCluster('indices.getAlias', { ignore: [404], name: alias });
   const aliasInfo = (result as NotFound).status === 404 ? {} : result;
-  const removeActions = Object.keys(aliasInfo).map(key => ({ remove: { index: key, alias } }));
+  const removeActions = Object.keys(aliasInfo).map((key) => ({ remove: { index: key, alias } }));
 
   await callCluster('indices.updateAliases', {
     body: {
@@ -347,11 +347,11 @@ async function reindex(
   let completed = false;
 
   while (!completed) {
-    await new Promise(r => setTimeout(r, pollInterval));
+    await new Promise((r) => setTimeout(r, pollInterval));
 
     completed = await callCluster('tasks.get', {
       taskId: task,
-    }).then(result => {
+    }).then((result) => {
       if (result.error) {
         const e = result.error;
         throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);

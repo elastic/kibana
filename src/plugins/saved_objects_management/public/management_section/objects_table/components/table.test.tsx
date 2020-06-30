@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-// @ts-ignore
+// @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
@@ -38,10 +38,10 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/index_patterns/1',
+        editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/management/kibana/index_patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          path: '/management/kibana/indexPatterns/patterns/1',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },
@@ -65,10 +65,10 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/index_patterns/1',
+        editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
-          path: '/management/kibana/index_patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          path: '/management/kibana/indexPatterns/patterns/1',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },

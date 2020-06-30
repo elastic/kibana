@@ -31,7 +31,7 @@ import {
 import { createFormatArchiveStreams } from '../format';
 
 const INPUTS = [1, 2, { foo: 'bar' }, [1, 2]];
-const INPUT_JSON = INPUTS.map(i => JSON.stringify(i, null, 2)).join('\n\n');
+const INPUT_JSON = INPUTS.map((i) => JSON.stringify(i, null, 2)).join('\n\n');
 
 describe('esArchiver createFormatArchiveStreams', () => {
   describe('{ gzip: false }', () => {
@@ -39,7 +39,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const streams = createFormatArchiveStreams({ gzip: false });
       expect(streams).to.be.an('array');
       expect(streams.length).to.be.greaterThan(0);
-      streams.forEach(s => expect(s).to.be.a(Stream));
+      streams.forEach((s) => expect(s).to.be.a(Stream));
     });
 
     it('streams consume js values and produces buffers', async () => {
@@ -50,7 +50,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       ] as [Readable, ...Writable[]]);
 
       expect(output.length).to.be.greaterThan(0);
-      output.forEach(b => expect(b).to.be.a(Buffer));
+      output.forEach((b) => expect(b).to.be.a(Buffer));
     });
 
     it('product is pretty-printed JSON separated by two newlines', async () => {
@@ -69,7 +69,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       const streams = createFormatArchiveStreams({ gzip: true });
       expect(streams).to.be.an('array');
       expect(streams.length).to.be.greaterThan(0);
-      streams.forEach(s => expect(s).to.be.a(Stream));
+      streams.forEach((s) => expect(s).to.be.a(Stream));
     });
 
     it('streams consume js values and produces buffers', async () => {
@@ -80,7 +80,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
       ] as [Readable, ...Writable[]]);
 
       expect(output.length).to.be.greaterThan(0);
-      output.forEach(b => expect(b).to.be.a(Buffer));
+      output.forEach((b) => expect(b).to.be.a(Buffer));
     });
 
     it('output can be gunzipped', async () => {

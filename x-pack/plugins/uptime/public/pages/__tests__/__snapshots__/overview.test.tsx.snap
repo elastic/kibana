@@ -51,113 +51,141 @@ exports[`MonitorPage shallow renders expected elements for valid props 1`] = `
     }
   }
 >
-  <OverviewPageComponent
-    autocomplete={
+  <ContextProvider
+    value={
       Object {
-        "addQuerySuggestionProvider": [MockFunction],
-        "getQuerySuggestions": [MockFunction],
-        "getValueSuggestions": [MockFunction],
-        "hasQuerySuggestions": [Function],
-      }
-    }
-    indexPattern={
-      Object {
-        "fields": Array [
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
           Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "date",
-            ],
-            "name": "@timestamp",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "date",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "monitor.check_group",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "long",
-            ],
-            "name": "monitor.duration.us",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "number",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "monitor.id",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "ip",
-            ],
-            "name": "monitor.ip",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "ip",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "monitor.name",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "monitor.status",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "string",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "date_range",
-            ],
-            "name": "monitor.timespan",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "unknown",
-          },
-          Object {
-            "aggregatable": true,
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "monitor.type",
-            "readFromDocValues": true,
-            "searchable": true,
-            "type": "string",
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
           },
         ],
-        "title": "heartbeat-8*",
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
-    setEsKueryFilters={[MockFunction]}
-  />
+  >
+    <Memo()
+      indexPattern={
+        Object {
+          "fields": Array [
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "date",
+              ],
+              "name": "@timestamp",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "date",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "name": "monitor.check_group",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "long",
+              ],
+              "name": "monitor.duration.us",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "number",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "name": "monitor.id",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "ip",
+              ],
+              "name": "monitor.ip",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "ip",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "name": "monitor.name",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "name": "monitor.status",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "date_range",
+              ],
+              "name": "monitor.timespan",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "unknown",
+            },
+            Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "keyword",
+              ],
+              "name": "monitor.type",
+              "readFromDocValues": true,
+              "searchable": true,
+              "type": "string",
+            },
+          ],
+          "title": "heartbeat-8*",
+        }
+      }
+      loading={false}
+      setEsKueryFilters={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

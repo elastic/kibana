@@ -8,7 +8,7 @@ import { PromiseReturnType } from '../../../../typings/common';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
@@ -24,7 +24,7 @@ export type ErrorDistributionAPIResponse = PromiseReturnType<
 export async function getErrorDistribution({
   serviceName,
   groupId,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId?: string;
@@ -35,12 +35,12 @@ export async function getErrorDistribution({
     serviceName,
     groupId,
     bucketSize,
-    setup
+    setup,
   });
 
   return {
     noHits,
     buckets,
-    bucketSize
+    bucketSize,
   };
 }

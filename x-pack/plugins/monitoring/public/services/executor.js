@@ -65,7 +65,7 @@ export function executorProvider($timeout, $q) {
     const noop = () => $q.resolve();
     return $q
       .all(
-        queue.map(service => {
+        queue.map((service) => {
           return service
             .execute()
             .then(service.handleResponse || noop)

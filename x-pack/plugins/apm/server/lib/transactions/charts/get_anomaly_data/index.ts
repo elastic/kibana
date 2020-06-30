@@ -4,29 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
-import { anomalySeriesFetcher } from './fetcher';
-import { getMlBucketSize } from './get_ml_bucket_size';
-import { anomalySeriesTransform } from './transform';
+import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
+
+interface AnomalyTimeseries {
+  anomalyBoundaries: Coordinate[];
+  anomalyScore: RectCoordinate[];
+}
 
 export async function getAnomalySeries({
   serviceName,
   transactionType,
   transactionName,
   timeSeriesDates,
-  setup
+  setup,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
   timeSeriesDates: number[];
   setup: Setup & SetupTimeRange & SetupUIFilters;
-}) {
+}): Promise<void | AnomalyTimeseries> {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
     return;
@@ -42,29 +44,17 @@ export async function getAnomalySeries({
     return;
   }
 
-  const mlBucketSize = await getMlBucketSize({
-    serviceName,
-    transactionType,
-    setup
-  });
+  // don't fetch anomalies if the ML plugin is not setup
+  if (!setup.ml) {
+    return;
+  }
 
-  const { start, end } = setup;
-  const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
+  // don't fetch anomalies if required license is not satisfied
+  const mlCapabilities = await setup.ml.mlSystem.mlCapabilities();
+  if (!mlCapabilities.isPlatinumOrTrialLicense) {
+    return;
+  }
 
-  const esResponse = await anomalySeriesFetcher({
-    serviceName,
-    transactionType,
-    intervalString,
-    mlBucketSize,
-    setup
-  });
-
-  return esResponse
-    ? anomalySeriesTransform(
-        esResponse,
-        mlBucketSize,
-        bucketSize,
-        timeSeriesDates
-      )
-    : undefined;
+  // TODO [APM ML] return a series of anomaly scores, upper & lower bounds for the given timeSeriesDates
+  return;
 }

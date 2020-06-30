@@ -41,7 +41,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = this.props.privileges.map(privilege => {
+    const items = this.props.privileges.map((privilege) => {
       return (
         <EuiContextMenuItem
           key={privilege.id}

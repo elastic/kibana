@@ -30,7 +30,7 @@ export class RelativeDateFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     if (val === null || val === undefined) {
       return '-';
     }

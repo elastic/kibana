@@ -25,10 +25,11 @@ import {
   OverlayStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
+  ApplicationStart,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
-import { KibanaLegacySetup } from '../../../kibana_legacy/public';
+import { KibanaLegacyStart } from '../../../kibana_legacy/public';
 import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
@@ -38,8 +39,9 @@ export interface HomeKibanaServices {
   indexPatternService: any;
   kibanaVersion: string;
   chrome: ChromeStart;
+  application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  config: KibanaLegacySetup['config'];
+  kibanaLegacy: KibanaLegacyStart;
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;

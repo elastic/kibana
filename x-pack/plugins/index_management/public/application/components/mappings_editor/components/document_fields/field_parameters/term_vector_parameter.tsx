@@ -39,7 +39,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
       defaultToggleValue={defaultToggleValue}
     >
       <FormDataProvider pathsToWatch="term_vector">
-        {formData => (
+        {(formData) => (
           <>
             <UseField
               path="term_vector"

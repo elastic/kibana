@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 export { DefaultEditorController } from './default_editor_controller';
 export { useValidation } from './components/controls/utils';
 export { RangesParamEditor, RangeValues } from './components/controls/ranges';

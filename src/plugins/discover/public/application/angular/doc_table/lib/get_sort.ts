@@ -57,7 +57,7 @@ export function getSort(sort: SortPair[], indexPattern: IndexPattern): SortPairO
   if (Array.isArray(sort)) {
     return sort
       .map((sortPair: SortPair) => createSortObject(sortPair, indexPattern))
-      .filter(sortPairObj => typeof sortPairObj === 'object') as SortPairObj[];
+      .filter((sortPairObj) => typeof sortPairObj === 'object') as SortPairObj[];
   }
   return [];
 }
@@ -67,5 +67,5 @@ export function getSort(sort: SortPair[], indexPattern: IndexPattern): SortPairO
  * [[fieldToSort: directionToSort]]
  */
 export function getSortArray(sort: SortPair[], indexPattern: IndexPattern) {
-  return getSort(sort, indexPattern).map(sortPair => Object.entries(sortPair).pop());
+  return getSort(sort, indexPattern).map((sortPair) => Object.entries(sortPair).pop());
 }

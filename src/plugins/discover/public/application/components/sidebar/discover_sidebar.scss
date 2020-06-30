@@ -107,6 +107,7 @@
  */
 .dscSidebarItem__action {
   opacity: 0; /* 1 */
+  transition: none;
 
   &:focus {
     opacity: 1; /* 2 */
@@ -119,14 +120,6 @@
     padding: 0 4px;
   }
 }
-
-/*
-  Fixes EUI known issue https://github.com/elastic/eui/issues/1749
-*/
-.dscProgressBarTooltip__anchor {
-  display: block;
-}
-
 
 .dscFieldSearch {
   padding: $euiSizeS;

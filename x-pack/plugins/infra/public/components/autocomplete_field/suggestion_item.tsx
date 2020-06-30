@@ -17,7 +17,7 @@ interface Props {
   suggestion: QuerySuggestion;
 }
 
-export const SuggestionItem: React.FC<Props> = props => {
+export const SuggestionItem: React.FC<Props> = (props) => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
   return (
@@ -40,10 +40,10 @@ const SuggestionItemContainer = euiStyled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.euiFontSizeS};
-  height: ${props => props.theme.eui.euiSizeXL};
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+  height: ${(props) => props.theme.eui.euiSizeXL};
   white-space: nowrap;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
@@ -52,24 +52,24 @@ const SuggestionItemField = euiStyled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.euiSizeXL};
-  padding: ${props => props.theme.eui.euiSizeXS};
+  height: ${(props) => props.theme.eui.euiSizeXL};
+  padding: ${(props) => props.theme.eui.euiSizeXS};
 `;
 
 const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
 }>`
-  background-color: ${props =>
+  background-color: ${(props) =>
     transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
-  color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
+  color: ${(props) => getEuiIconColor(props.theme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.euiSizeXL};
+  width: ${(props) => props.theme.eui.euiSizeXL};
 `;
 
 const SuggestionItemTextField = euiStyled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
 `;
 
 const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
@@ -79,7 +79,7 @@ const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
     display: inline;
 
     span {
-      font-family: ${props => props.theme.eui.euiCodeFontFamily};
+      font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
     }
   }
 `;
@@ -104,15 +104,15 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
 const getEuiIconColor = (theme: any, suggestionType: QuerySuggestionTypes): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme.eui.euiColorVis7;
+      return theme?.eui.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme.eui.euiColorVis0;
+      return theme?.eui.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme.eui.euiColorVis1;
+      return theme?.eui.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme.eui.euiColorVis2;
+      return theme?.eui.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme.eui.euiColorMediumShade;
+      return theme?.eui.euiColorMediumShade;
   }
 };

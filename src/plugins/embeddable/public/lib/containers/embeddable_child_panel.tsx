@@ -22,12 +22,7 @@ import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
-import { CoreStart } from 'src/core/public';
-import { UiActionsService } from 'src/plugins/ui_actions/public';
-
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
-import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
 
@@ -35,14 +30,7 @@ export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  application: CoreStart['application'];
-  inspector: InspectorStartContract;
-  SavedObjectFinder: React.ComponentType<any>;
+  PanelComponent: EmbeddableStart['EmbeddablePanel'];
 }
 
 interface State {
@@ -87,6 +75,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
+    const { PanelComponent } = this.props;
     const classes = classNames('embPanel', {
       'embPanel-isLoading': this.state.loading,
     });
@@ -96,17 +85,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
         {this.state.loading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <EmbeddablePanel
-            embeddable={this.embeddable}
-            getActions={this.props.getActions}
-            getEmbeddableFactory={this.props.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
-            overlays={this.props.overlays}
-            application={this.props.application}
-            notifications={this.props.notifications}
-            inspector={this.props.inspector}
-            SavedObjectFinder={this.props.SavedObjectFinder}
-          />
+          <PanelComponent embeddable={this.embeddable} />
         )}
       </div>
     );

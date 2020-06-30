@@ -132,7 +132,7 @@ export function deserializeCluster(
   }
 
   // It's unnecessary to send undefined values back to the client, so we can remove them.
-  Object.keys(deserializedClusterObject).forEach(key => {
+  Object.keys(deserializedClusterObject).forEach((key) => {
     if (deserializedClusterObject[key as keyof Cluster] === undefined) {
       delete deserializedClusterObject[key as keyof Cluster];
     }

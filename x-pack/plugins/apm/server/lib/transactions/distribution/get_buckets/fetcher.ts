@@ -13,13 +13,13 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../helpers/range_filter';
+import { rangeFilter } from '../../../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
 
 export async function bucketFetcher(
@@ -46,13 +46,13 @@ export async function bucketFetcher(
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES
+            ...uiFiltersES,
           ],
           should: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [TRANSACTION_ID]: transactionId } }
-          ]
-        }
+            { term: { [TRANSACTION_ID]: transactionId } },
+          ],
+        },
       },
       aggs: {
         distribution: {
@@ -62,27 +62,27 @@ export async function bucketFetcher(
             min_doc_count: 0,
             extended_bounds: {
               min: 0,
-              max: distributionMax
-            }
+              max: distributionMax,
+            },
           },
           aggs: {
             samples: {
               filter: {
-                term: { [TRANSACTION_SAMPLED]: true }
+                term: { [TRANSACTION_SAMPLED]: true },
               },
               aggs: {
                 items: {
                   top_hits: {
                     _source: [TRANSACTION_ID, TRACE_ID],
-                    size: 10
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                    size: 10,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   const response = await client.search<Transaction, typeof params>(params);

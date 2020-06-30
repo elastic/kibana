@@ -93,7 +93,7 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
       const movementDifference = destinationIndex - sourceIndex;
       await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
       for (let i = 0; i < Math.abs(movementDifference); i++) {
-        await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
+        await new Promise((res) => setTimeout(res, KEY_PRESS_DELAY_MS));
         if (movementDifference > 0) {
           await moveLogColumnHandle.pressKeys(browser.keys.ARROW_DOWN);
         } else {
@@ -101,7 +101,7 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
         }
       }
       await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
-      await new Promise(res => setTimeout(res, KEY_PRESS_DELAY_MS));
+      await new Promise((res) => setTimeout(res, KEY_PRESS_DELAY_MS));
     },
 
     /**

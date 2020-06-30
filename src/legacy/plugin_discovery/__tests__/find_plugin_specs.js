@@ -29,7 +29,7 @@ const PLUGIN_FIXTURES = resolve(__dirname, 'fixtures/plugins');
 const CONFLICT_FIXTURES = resolve(__dirname, 'fixtures/conflicts');
 
 describe('plugin discovery', () => {
-  describe('findPluginSpecs()', function() {
+  describe('findPluginSpecs()', function () {
     this.timeout(10000);
 
     describe('spec$', () => {
@@ -46,10 +46,10 @@ describe('plugin discovery', () => {
 
         const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
-        specs.forEach(spec => {
+        specs.forEach((spec) => {
           expect(spec).to.be.a(PluginSpec);
         });
-        expect(specs.map(s => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
+        expect(specs.map((s) => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
       });
 
       it('finds all specs in scanDirs', async () => {
@@ -64,10 +64,10 @@ describe('plugin discovery', () => {
 
         const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
-        specs.forEach(spec => {
+        specs.forEach((spec) => {
           expect(spec).to.be.a(PluginSpec);
         });
-        expect(specs.map(s => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
+        expect(specs.map((s) => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
       });
 
       it('does not find disabled plugins', async () => {
@@ -87,10 +87,10 @@ describe('plugin discovery', () => {
 
         const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(2);
-        specs.forEach(spec => {
+        specs.forEach((spec) => {
           expect(spec).to.be.a(PluginSpec);
         });
-        expect(specs.map(s => s.getId()).sort()).to.eql(['bar:two', 'foo']);
+        expect(specs.map((s) => s.getId()).sort()).to.eql(['bar:two', 'foo']);
       });
 
       it('dedupes duplicate packs', async () => {
@@ -110,10 +110,10 @@ describe('plugin discovery', () => {
 
         const specs = await spec$.pipe(toArray()).toPromise();
         expect(specs).to.have.length(3);
-        specs.forEach(spec => {
+        specs.forEach((spec) => {
           expect(spec).to.be.a(PluginSpec);
         });
-        expect(specs.map(s => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
+        expect(specs.map((s) => s.getId()).sort()).to.eql(['bar:one', 'bar:two', 'foo']);
       });
 
       describe('conflicting plugin spec ids', () => {
@@ -137,9 +137,9 @@ describe('plugin discovery', () => {
     });
 
     describe('packageJson$', () => {
-      const checkPackageJsons = packageJsons => {
+      const checkPackageJsons = (packageJsons) => {
         expect(packageJsons).to.have.length(2);
-        const package1 = packageJsons.find(packageJson =>
+        const package1 = packageJsons.find((packageJson) =>
           isEqual(
             {
               directoryPath: resolve(PLUGIN_FIXTURES, 'foo'),
@@ -152,7 +152,7 @@ describe('plugin discovery', () => {
           )
         );
         expect(package1).to.be.an(Object);
-        const package2 = packageJsons.find(packageJson =>
+        const package2 = packageJsons.find((packageJson) =>
           isEqual(
             {
               directoryPath: resolve(PLUGIN_FIXTURES, 'bar'),

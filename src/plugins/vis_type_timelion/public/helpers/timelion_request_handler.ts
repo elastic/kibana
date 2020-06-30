@@ -68,7 +68,7 @@ export function getTimelionRequestHandler({
 }: TimelionVisDependencies) {
   const timezone = getTimezone(uiSettings);
 
-  return async function({
+  return async function ({
     timeRange,
     filters,
     query,
@@ -96,7 +96,7 @@ export function getTimelionRequestHandler({
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
-      return await http.post('../api/timelion/run', {
+      return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
           extended: {

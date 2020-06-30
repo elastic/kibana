@@ -12,7 +12,7 @@ import { notificationService } from '../../services/notification';
 
 export const freezeIndicesStart = createAction('INDEX_MANAGEMENT_FREEZE_INDICES_START');
 
-export const freezeIndices = ({ indexNames }) => async dispatch => {
+export const freezeIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(freezeIndicesStart({ indexNames }));
   try {
     await request(indexNames);

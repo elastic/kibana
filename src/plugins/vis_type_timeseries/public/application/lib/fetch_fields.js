@@ -24,7 +24,7 @@ export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
     const indexFields = await Promise.all(
-      patterns.map(pattern => {
+      patterns.map((pattern) => {
         return getCoreStart().http.get('/api/metrics/fields', {
           query: {
             index: pattern,

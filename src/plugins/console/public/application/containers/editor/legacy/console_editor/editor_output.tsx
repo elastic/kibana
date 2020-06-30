@@ -72,8 +72,8 @@ function EditorOutputUI() {
       editor.session.setMode(mode);
       editor.update(
         data
-          .map(d => d.response.value as string)
-          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : a => a)
+          .map((d) => d.response.value as string)
+          .map(readOnlySettings.tripleQuotes ? expandLiteralStrings : (a) => a)
           .join('\n')
       );
     } else if (error) {

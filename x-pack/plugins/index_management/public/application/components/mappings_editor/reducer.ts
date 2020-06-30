@@ -11,7 +11,6 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
-  isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
@@ -93,9 +92,9 @@ export interface State {
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
-  | { type: 'configuration.save' }
+  | { type: 'configuration.save'; value: MappingsConfiguration }
   | { type: 'templates.update'; value: Partial<State['templates']> }
-  | { type: 'templates.save' }
+  | { type: 'templates.save'; value: MappingsTemplates }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -106,7 +105,8 @@ export type Action =
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string };
+  | { type: 'search:update'; value: string }
+  | { type: 'validity:update'; value: boolean };
 
 export type Dispatch = (action: Action) => void;
 
@@ -164,7 +164,7 @@ export const addFieldToState = (field: Field, state: State): State => {
 
   return {
     ...state,
-    isValid: isStateValid(state),
+    isValid: true,
     fields: updatedFields,
   };
 };
@@ -180,7 +180,7 @@ const updateAliasesReferences = (
    */
   if (previousTargetPath && updatedAliases[previousTargetPath]) {
     updatedAliases[previousTargetPath] = updatedAliases[previousTargetPath].filter(
-      id => id !== field.id
+      (id) => id !== field.id
     );
   }
 
@@ -217,7 +217,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
 
     if (parentField) {
       // If the parent exist, update its childFields Array
-      const childFields = parentField.childFields!.filter(childId => childId !== fieldId);
+      const childFields = parentField.childFields!.filter((childId) => childId !== fieldId);
 
       updatedById[parentId] = {
         ...parentField,
@@ -233,7 +233,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
   } else {
     // If there are no parentId it means that we have deleted a top level field
     // We need to update the root level fields Array
-    rootLevelFields = rootLevelFields.filter(childId => childId !== fieldId);
+    rootLevelFields = rootLevelFields.filter((childId) => childId !== fieldId);
   }
 
   let updatedFields = {
@@ -293,24 +293,18 @@ export const reducer = (state: State, action: Action): State => {
         configuration: { ...state.configuration, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
       return nextState;
     }
     case 'configuration.save': {
-      const {
-        data: { raw, format },
-      } = state.configuration;
-      const configurationData = format();
-
       return {
         ...state,
         configuration: {
           isValid: true,
-          defaultValue: configurationData,
+          defaultValue: action.value,
           data: {
-            raw,
-            format: () => configurationData,
+            raw: action.value,
+            format: () => action.value,
           },
           validate: async () => true,
         },
@@ -322,25 +316,19 @@ export const reducer = (state: State, action: Action): State => {
         templates: { ...state.templates, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
     case 'templates.save': {
-      const {
-        data: { raw, format },
-      } = state.templates;
-      const templatesData = format();
-
       return {
         ...state,
         templates: {
           isValid: true,
-          defaultValue: templatesData,
+          defaultValue: action.value,
           data: {
-            raw,
-            format: () => templatesData,
+            raw: action.value,
+            format: () => action.value,
           },
           validate: async () => true,
         },
@@ -352,8 +340,7 @@ export const reducer = (state: State, action: Action): State => {
         fieldForm: action.value,
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -420,7 +407,7 @@ export const reducer = (state: State, action: Action): State => {
         const allChildFields = getAllChildFields(field, state.fields.byId);
 
         // Remove all of its children
-        allChildFields!.forEach(childField => {
+        allChildFields!.forEach((childField) => {
           updatedFields = removeFieldFromMap(childField.id, updatedFields);
         });
       }
@@ -433,7 +420,7 @@ export const reducer = (state: State, action: Action): State => {
         const targetId = field.source.path as string;
         updatedFields.aliases = {
           ...updatedFields.aliases,
-          [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
+          [targetId]: updatedFields.aliases[targetId].filter((aliasId) => aliasId !== id),
         };
       }
 
@@ -501,7 +488,7 @@ export const reducer = (state: State, action: Action): State => {
             ...updatedFields.aliases,
             [previousField.source.path as string]: updatedFields.aliases[
               previousField.source.path as string
-            ].filter(aliasId => aliasId !== fieldToEdit),
+            ].filter((aliasId) => aliasId !== fieldToEdit),
           };
         } else {
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
@@ -509,7 +496,7 @@ export const reducer = (state: State, action: Action): State => {
           );
 
           if (!nextTypeCanHaveAlias && updatedFields.aliases[fieldToEdit]) {
-            updatedFields.aliases[fieldToEdit].forEach(aliasId => {
+            updatedFields.aliases[fieldToEdit].forEach((aliasId) => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
             delete updatedFields.aliases[fieldToEdit];
@@ -518,7 +505,7 @@ export const reducer = (state: State, action: Action): State => {
 
         if (shouldDeleteChildFields && previousField.childFields) {
           const allChildFields = getAllChildFields(previousField, updatedFields.byId);
-          allChildFields!.forEach(childField => {
+          allChildFields!.forEach((childField) => {
             updatedFields = removeFieldFromMap(childField.id, updatedFields);
           });
         }
@@ -539,7 +526,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: isStateValid(state),
+        isValid: true,
         fieldForm: undefined,
         fields: updatedFields,
         documentFields: {
@@ -587,7 +574,7 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
 
-      nextState.isValid = isStateValid(nextState);
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -598,6 +585,12 @@ export const reducer = (state: State, action: Action): State => {
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
         },
+      };
+    }
+    case 'validity:update': {
+      return {
+        ...state,
+        isValid: action.value,
       };
     }
     default:

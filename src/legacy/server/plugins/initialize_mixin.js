@@ -34,7 +34,7 @@ export async function initializeMixin(kbnServer, server, config) {
 
   async function callHookOnPlugins(hookName) {
     const { plugins } = kbnServer;
-    const ids = plugins.map(p => p.id);
+    const ids = plugins.map((p) => p.id);
 
     for (const id of ids) {
       await callPluginHook(hookName, plugins, id, []);

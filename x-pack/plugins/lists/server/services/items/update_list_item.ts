@@ -5,7 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Id,
@@ -20,7 +20,7 @@ import { getListItem } from './get_list_item';
 export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -48,7 +48,7 @@ export const updateListItem = async ({
       ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
-    const response: CreateDocumentResponse = await callCluster('update', {
+    const response = await callCluster<CreateDocumentResponse>('update', {
       body: {
         doc,
       },

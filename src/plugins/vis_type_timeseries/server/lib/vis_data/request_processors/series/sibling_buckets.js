@@ -30,12 +30,12 @@ export function siblingBuckets(
   indexPatternObject,
   capabilities
 ) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { bucketSize } = getBucketSize(req, interval, capabilities);
     series.metrics
-      .filter(row => /_bucket$/.test(row.type))
-      .forEach(metric => {
+      .filter((row) => /_bucket$/.test(row.type))
+      .forEach((metric) => {
         const fn = bucketTransform[metric.type];
         if (fn) {
           try {

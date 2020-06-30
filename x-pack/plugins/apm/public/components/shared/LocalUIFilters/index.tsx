@@ -9,7 +9,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -36,33 +36,33 @@ const LocalUIFilters = ({
   params,
   filterNames,
   children,
-  showCount = true
+  showCount = true,
 }: Props) => {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
-    params
+    params,
   });
 
-  const hasValues = filters.some(filter => filter.value.length > 0);
+  const hasValues = filters.some((filter) => filter.value.length > 0);
 
   return (
     <>
       <EuiTitle size="s">
         <h3>
           {i18n.translate('xpack.apm.localFiltersTitle', {
-            defaultMessage: 'Filters'
+            defaultMessage: 'Filters',
           })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {children}
-      {filters.map(filter => {
+      {filters.map((filter) => {
         return (
           <React.Fragment key={filter.name}>
             <Filter
               {...filter}
-              onChange={value => {
+              onChange={(value) => {
                 setFilterValue(filter.name, value);
               }}
               showCount={showCount}
@@ -80,9 +80,10 @@ const LocalUIFilters = ({
               iconType="cross"
               flush="left"
               onClick={clearValues}
+              data-cy="clearFilters"
             >
               {i18n.translate('xpack.apm.clearFilters', {
-                defaultMessage: 'Clear filters'
+                defaultMessage: 'Clear filters',
               })}
             </EuiButtonEmpty>
           </ButtonWrapper>

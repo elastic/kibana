@@ -7,11 +7,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { USER } from '../../../../functional/services/machine_learning/security_common';
-
-const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
+import { USER } from '../../../../functional/services/ml/security_common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -89,19 +86,19 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('bucket span estimator', function() {
+  describe('bucket span estimator', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
-    describe('with default settings', function() {
+    describe('with default settings', function () {
       for (const testData of testDataList) {
         it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
           const { body } = await supertest
             .post('/api/ml/validate/estimate_bucket_span')
             .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_HEADERS)
+            .set(COMMON_REQUEST_HEADERS)
             .send(testData.requestBody)
             .expect(testData.expected.responseCode);
 
@@ -110,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('with transient search.max_buckets setting', function() {
+    describe('with transient search.max_buckets setting', function () {
       before(async () => {
         await esSupertest
           .put('/_cluster/settings')
@@ -131,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
 
@@ -139,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with persistent search.max_buckets setting', function() {
+    describe('with persistent search.max_buckets setting', function () {
       before(async () => {
         await esSupertest
           .put('/_cluster/settings')
@@ -160,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post('/api/ml/validate/estimate_bucket_span')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-          .set(COMMON_HEADERS)
+          .set(COMMON_REQUEST_HEADERS)
           .send(testData.requestBody)
           .expect(testData.expected.responseCode);
 

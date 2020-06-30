@@ -27,10 +27,10 @@ import {
   FilterManager as QueryFilterManager,
 } from '../../../../data/public';
 
-describe('RangeFilterManager', function() {
+describe('RangeFilterManager', function () {
   const controlId = 'control1';
 
-  describe('createFilter', function() {
+  describe('createFilter', function () {
     const indexPatternId = '1';
     const fieldMock = {
       name: 'field1',
@@ -57,7 +57,7 @@ describe('RangeFilterManager', function() {
       );
     });
 
-    test('should create range filter from slider value', function() {
+    test('should create range filter from slider value', function () {
       const newFilter = filterManager.createFilter({ min: 1, max: 3 });
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -68,7 +68,7 @@ describe('RangeFilterManager', function() {
     });
   });
 
-  describe('getValueFromFilterBar', function() {
+  describe('getValueFromFilterBar', function () {
     class MockFindFiltersRangeFilterManager extends RangeFilterManager {
       mockFilters: RangeFilter[];
 
@@ -103,7 +103,7 @@ describe('RangeFilterManager', function() {
       );
     });
 
-    test('should extract value from range filter', function() {
+    test('should extract value from range filter', function () {
       filterManager.setMockFilters([
         {
           range: {
@@ -123,7 +123,7 @@ describe('RangeFilterManager', function() {
       expect(value?.max).to.be(3);
     });
 
-    test('should return undefined when filter value can not be extracted from Kibana filter', function() {
+    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
       filterManager.setMockFilters([
         {
           range: {

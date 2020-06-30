@@ -335,7 +335,7 @@ const wsState: any = {
   urlTemplates: [
     {
       url:
-        '/app/kibana#/discover?_a=(columns%3A!(_source)%2Cindex%3Aff959d40-b880-11e8-a6d9-e546fe2bba5f%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
+        '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3Aff959d40-b880-11e8-a6d9-e546fe2bba5f%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
       description: 'Raw documents',
       isDefault: true,
       encoderID: 'kql-loose',

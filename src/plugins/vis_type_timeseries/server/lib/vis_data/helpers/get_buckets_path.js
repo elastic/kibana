@@ -24,7 +24,7 @@ import { METRIC_TYPES } from '../../../../common/metric_types';
 const percentileTest = /\[[0-9\.]+\]$/;
 
 export const getBucketsPath = (id, metrics) => {
-  const metric = metrics.find(m => startsWith(id, m.id));
+  const metric = metrics.find((m) => startsWith(id, m.id));
   let bucketsPath = String(id);
 
   switch (metric.type) {

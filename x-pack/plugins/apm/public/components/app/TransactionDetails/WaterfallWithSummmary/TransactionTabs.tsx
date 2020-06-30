@@ -19,15 +19,15 @@ import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/wat
 const timelineTab = {
   key: 'timeline',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
-    defaultMessage: 'Timeline'
-  })
+    defaultMessage: 'Timeline',
+  }),
 };
 
 const metadataTab = {
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
-    defaultMessage: 'Metadata'
-  })
+    defaultMessage: 'Metadata',
+  }),
 };
 
 interface Props {
@@ -43,7 +43,7 @@ export function TransactionTabs({
   transaction,
   urlParams,
   waterfall,
-  exceedsMax
+  exceedsMax,
 }: Props) {
   const tabs = [timelineTab, metadataTab];
   const currentTab =
@@ -60,8 +60,8 @@ export function TransactionTabs({
                   ...location,
                   search: fromQuery({
                     ...toQuery(location.search),
-                    detailTab: key
-                  })
+                    detailTab: key,
+                  }),
                 });
               }}
               isSelected={currentTab.key === key}

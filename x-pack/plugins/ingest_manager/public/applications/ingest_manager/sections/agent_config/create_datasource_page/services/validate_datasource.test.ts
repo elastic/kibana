@@ -7,7 +7,7 @@ import {
   PackageInfo,
   InstallationStatus,
   NewDatasource,
-  RegistryDatasource,
+  RegistryConfigTemplate,
 } from '../../../../types';
 import { validateDatasource, validationHasErrors } from './validate_datasource';
 
@@ -32,7 +32,65 @@ describe('Ingest Manager - validateDatasource()', () => {
       },
     },
     status: InstallationStatus.notInstalled,
-    datasources: [
+    datasets: [
+      {
+        name: 'foo',
+        streams: [
+          {
+            input: 'foo',
+            title: 'Foo',
+            vars: [{ name: 'var-name', type: 'yaml' }],
+          },
+        ],
+      },
+      {
+        name: 'bar',
+        streams: [
+          {
+            input: 'bar',
+            title: 'Bar',
+            vars: [{ name: 'var-name', type: 'yaml', required: true }],
+          },
+          {
+            input: 'with-no-stream-vars',
+            title: 'Bar stream no vars',
+            enabled: true,
+          },
+        ],
+      },
+      {
+        name: 'bar2',
+        streams: [
+          {
+            input: 'bar',
+            title: 'Bar 2',
+            vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'text' }],
+          },
+        ],
+      },
+      {
+        name: 'disabled',
+        streams: [
+          {
+            input: 'with-disabled-streams',
+            title: 'Disabled',
+            enabled: false,
+            vars: [{ multi: true, required: true, name: 'var-name', type: 'text' }],
+          },
+        ],
+      },
+      {
+        name: 'disabled2',
+        streams: [
+          {
+            input: 'with-disabled-streams',
+            title: 'Disabled 2',
+            enabled: false,
+          },
+        ],
+      },
+    ],
+    config_templates: [
       {
         name: 'datasource1',
         title: 'Datasource 1',
@@ -51,14 +109,6 @@ describe('Ingest Manager - validateDatasource()', () => {
               },
               { name: 'foo-input3-var-name', type: 'text', required: true, multi: true },
             ],
-            streams: [
-              {
-                dataset: 'foo',
-                input: 'foo',
-                title: 'Foo',
-                vars: [{ name: 'var-name', type: 'yaml' }],
-              },
-            ],
           },
           {
             type: 'bar',
@@ -72,39 +122,19 @@ describe('Ingest Manager - validateDatasource()', () => {
               },
               { name: 'bar-input2-var-name', required: true, type: 'text' },
             ],
-            streams: [
-              {
-                dataset: 'bar',
-                input: 'bar',
-                title: 'Bar',
-                vars: [{ name: 'var-name', type: 'yaml', required: true }],
-              },
-              {
-                dataset: 'bar2',
-                input: 'bar2',
-                title: 'Bar 2',
-                vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'text' }],
-              },
-            ],
           },
           {
             type: 'with-no-config-or-streams',
             title: 'With no config or streams',
-            streams: [],
           },
           {
             type: 'with-disabled-streams',
             title: 'With disabled streams',
-            streams: [
-              {
-                dataset: 'disabled',
-                input: 'disabled',
-                title: 'Disabled',
-                enabled: false,
-                vars: [{ multi: true, required: true, name: 'var-name', type: 'text' }],
-              },
-              { dataset: 'disabled2', input: 'disabled2', title: 'Disabled 2', enabled: false },
-            ],
+          },
+          {
+            type: 'with-no-stream-vars',
+            enabled: true,
+            vars: [{ required: true, name: 'var-name', type: 'text' }],
           },
         ],
       },
@@ -128,7 +158,7 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'foo-foo',
-            dataset: 'foo',
+            dataset: { name: 'foo', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
           },
@@ -144,13 +174,13 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'bar-bar',
-            dataset: 'bar',
+            dataset: { name: 'bar', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
           },
           {
             id: 'bar-bar2',
-            dataset: 'bar2',
+            dataset: { name: 'bar2', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: undefined, type: 'text' } },
           },
@@ -167,14 +197,28 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'with-disabled-streams-disabled',
-            dataset: 'disabled',
+            dataset: { name: 'disabled', type: 'logs' },
             enabled: false,
             vars: { 'var-name': { value: undefined, type: 'text' } },
           },
           {
-            id: 'with-disabled-streams-disabled2',
-            dataset: 'disabled2',
+            id: 'with-disabled-streams-disabled-without-vars',
+            dataset: { name: 'disabled2', type: 'logs' },
             enabled: false,
+          },
+        ],
+      },
+      {
+        type: 'with-no-stream-vars',
+        enabled: true,
+        vars: {
+          'var-name': { value: 'test', type: 'text' },
+        },
+        streams: [
+          {
+            id: 'with-no-stream-vars-bar',
+            dataset: { name: 'bar', type: 'logs' },
+            enabled: true,
           },
         ],
       },
@@ -196,7 +240,7 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'foo-foo',
-            dataset: 'foo',
+            dataset: { name: 'foo', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'invalidyaml: test\n foo bar:', type: 'yaml' } },
           },
@@ -212,13 +256,13 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'bar-bar',
-            dataset: 'bar',
+            dataset: { name: 'bar', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: '    \n\n', type: 'yaml' } },
           },
           {
             id: 'bar-bar2',
-            dataset: 'bar2',
+            dataset: { name: 'bar2', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: undefined, type: 'text' } },
           },
@@ -235,7 +279,7 @@ describe('Ingest Manager - validateDatasource()', () => {
         streams: [
           {
             id: 'with-disabled-streams-disabled',
-            dataset: 'disabled',
+            dataset: { name: 'disabled', type: 'logs' },
             enabled: false,
             vars: {
               'var-name': {
@@ -245,9 +289,23 @@ describe('Ingest Manager - validateDatasource()', () => {
             },
           },
           {
-            id: 'with-disabled-streams-disabled2',
-            dataset: 'disabled2',
+            id: 'with-disabled-streams-disabled-without-vars',
+            dataset: { name: 'disabled2', type: 'logs' },
             enabled: false,
+          },
+        ],
+      },
+      {
+        type: 'with-no-stream-vars',
+        enabled: true,
+        vars: {
+          'var-name': { value: undefined, type: 'text' },
+        },
+        streams: [
+          {
+            id: 'with-no-stream-vars-bar',
+            dataset: { name: 'bar', type: 'logs' },
+            enabled: true,
           },
         ],
       },
@@ -274,7 +332,18 @@ describe('Ingest Manager - validateDatasource()', () => {
         },
       },
       'with-disabled-streams': {
-        streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
+        streams: {
+          'with-disabled-streams-disabled': {
+            vars: { 'var-name': null },
+          },
+          'with-disabled-streams-disabled-without-vars': {},
+        },
+      },
+      'with-no-stream-vars': {
+        streams: {
+          'with-no-stream-vars-bar': {},
+        },
+        vars: { 'var-name': null },
       },
     },
   };
@@ -307,25 +376,34 @@ describe('Ingest Manager - validateDatasource()', () => {
           },
         },
         'with-disabled-streams': {
-          streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
+          streams: {
+            'with-disabled-streams-disabled': { vars: { 'var-name': null } },
+            'with-disabled-streams-disabled-without-vars': {},
+          },
+        },
+        'with-no-stream-vars': {
+          vars: {
+            'var-name': ['var-name is required'],
+          },
+          streams: { 'with-no-stream-vars-bar': {} },
         },
       },
     });
   });
 
   it('returns no errors for disabled inputs', () => {
-    const disabledInputs = invalidDatasource.inputs.map(input => ({ ...input, enabled: false }));
+    const disabledInputs = invalidDatasource.inputs.map((input) => ({ ...input, enabled: false }));
     expect(validateDatasource({ ...validDatasource, inputs: disabledInputs }, mockPackage)).toEqual(
       noErrorsValidationResults
     );
   });
 
   it('returns only datasource and input-level errors for disabled streams', () => {
-    const inputsWithDisabledStreams = invalidDatasource.inputs.map(input =>
+    const inputsWithDisabledStreams = invalidDatasource.inputs.map((input) =>
       input.streams
         ? {
             ...input,
-            streams: input.streams.map(stream => ({ ...stream, enabled: false })),
+            streams: input.streams.map((stream) => ({ ...stream, enabled: false })),
           }
         : input
     );
@@ -354,7 +432,18 @@ describe('Ingest Manager - validateDatasource()', () => {
           },
         },
         'with-disabled-streams': {
-          streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
+          streams: {
+            'with-disabled-streams-disabled': {
+              vars: { 'var-name': null },
+            },
+            'with-disabled-streams-disabled-without-vars': {},
+          },
+        },
+        'with-no-stream-vars': {
+          vars: {
+            'var-name': ['var-name is required'],
+          },
+          streams: { 'with-no-stream-vars-bar': {} },
         },
       },
     });
@@ -364,7 +453,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     expect(
       validateDatasource(validDatasource, {
         ...mockPackage,
-        datasources: undefined,
+        config_templates: undefined,
       })
     ).toEqual({
       name: null,
@@ -374,7 +463,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     expect(
       validateDatasource(validDatasource, {
         ...mockPackage,
-        datasources: [],
+        config_templates: [],
       })
     ).toEqual({
       name: null,
@@ -387,7 +476,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     expect(
       validateDatasource(validDatasource, {
         ...mockPackage,
-        datasources: [{} as RegistryDatasource],
+        config_templates: [{} as RegistryConfigTemplate],
       })
     ).toEqual({
       name: null,
@@ -397,7 +486,7 @@ describe('Ingest Manager - validateDatasource()', () => {
     expect(
       validateDatasource(validDatasource, {
         ...mockPackage,
-        datasources: [({ inputs: [] } as unknown) as RegistryDatasource],
+        config_templates: [({ inputs: [] } as unknown) as RegistryConfigTemplate],
       })
     ).toEqual({
       name: null,

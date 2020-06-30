@@ -25,14 +25,16 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
   return (
     <EuiForm>
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDescriptionInput"
         errorMessages={formFields.description.errorMessages}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
           defaultMessage: 'Description',
         })}
-        onChange={value => dispatch({ field: 'description', value })}
+        onChange={(value) => dispatch({ field: 'description', value })}
         value={formFields.description.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutDocsPerSecondInput"
         errorMessages={formFields.docsPerSecond.errorMessages}
         helpText={i18n.translate(
           'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
@@ -44,10 +46,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormdocsPerSecondLabel', {
           defaultMessage: 'Documents per second',
         })}
-        onChange={value => dispatch({ field: 'docsPerSecond', value })}
+        onChange={(value) => dispatch({ field: 'docsPerSecond', value })}
         value={formFields.docsPerSecond.value}
       />
       <EditTransformFlyoutFormTextInput
+        dataTestSubj="transformEditFlyoutFrequencyInput"
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelptext', {
           defaultMessage:
@@ -56,7 +59,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',
         })}
-        onChange={value => dispatch({ field: 'frequency', value })}
+        onChange={(value) => dispatch({ field: 'frequency', value })}
         placeholder="1m"
         value={formFields.frequency.value}
       />

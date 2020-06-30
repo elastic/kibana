@@ -25,13 +25,13 @@ import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
   return plugins
-    .filter(p => p.isUiPlugin)
+    .filter((p) => p.isUiPlugin)
     .map(
-      p =>
+      (p) =>
         new Bundle({
           type: 'plugin',
           id: p.id,
-          entry: './public/index',
+          publicDirNames: ['public', ...p.extraPublicDirs],
           sourceRoot: repoRoot,
           contextDir: p.directory,
           outputDir: Path.resolve(p.directory, 'target/public'),

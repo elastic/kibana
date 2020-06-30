@@ -195,7 +195,7 @@ describe('Create Auto-follow pattern', () => {
       });
 
       test('should not allow invalid characters', () => {
-        const expectInvalidChar = char => {
+        const expectInvalidChar = (char) => {
           form.setComboBoxValue('indexPatternInput', `with${char}space`);
           expect(form.getErrorsMessages()).toContain(
             `Remove the character ${char} from the index pattern.`

@@ -22,7 +22,7 @@ export const DurationByCountryMap: React.FC = () => {
           {i18n.translate(
             'xpack.apm.metrics.durationByCountryMap.avgPageLoadByCountryLabel',
             {
-              defaultMessage: 'Avg. page load duration distribution by country'
+              defaultMessage: 'Avg. page load duration distribution by country',
             }
           )}
         </span>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,14 +17,27 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import {
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  isLensBrushEvent,
+  isLensFilterEvent,
+} from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -43,6 +56,8 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
+  plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
+  title?: string;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -58,7 +73,9 @@ export function InnerWorkspacePanel({
   framePublicAPI,
   dispatch,
   core,
+  plugins,
   ExpressionRenderer: ExpressionRendererComponent,
+  title,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
@@ -73,7 +90,7 @@ export function InnerWorkspacePanel({
     }
 
     const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-      datasource => datasource.getTableSpec().length > 0
+      (datasource) => datasource.getTableSpec().length > 0
     );
 
     const suggestions = getSuggestions({
@@ -88,7 +105,7 @@ export function InnerWorkspacePanel({
       field: dragDropContext.dragging,
     });
 
-    return suggestions.find(s => s.visualizationId === activeVisualizationId) || suggestions[0];
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }, [dragDropContext.dragging]);
 
   const [localState, setLocalState] = useState({
@@ -110,7 +127,7 @@ export function InnerWorkspacePanel({
       });
     } catch (e) {
       // Most likely an error in the expression provided by a datasource or visualization
-      setLocalState(s => ({ ...s, expressionBuildError: e.toString() }));
+      setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
     }
   }, [
     activeVisualization,
@@ -122,10 +139,35 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  const onEvent = useCallback(
+    (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return;
+      }
+      if (isLensBrushEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+      if (isLensFilterEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+    },
+    [plugins.uiActions]
+  );
+
+  const autoRefreshFetch$ = useMemo(
+    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
+    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+  );
+
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
-      setLocalState(s => ({
+      setLocalState((s) => ({
         ...s,
         expressionBuildError: undefined,
       }));
@@ -211,6 +253,8 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          reload$={autoRefreshFetch$}
+          onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">
@@ -227,7 +271,7 @@ export function InnerWorkspacePanel({
                   <EuiFlexItem className="eui-textBreakAll" grow={false}>
                     <EuiButtonEmpty
                       onClick={() => {
-                        setLocalState(prevState => ({
+                        setLocalState((prevState) => ({
                           ...prevState,
                           expandError: !prevState.expandError,
                         }));
@@ -250,13 +294,22 @@ export function InnerWorkspacePanel({
   }
 
   return (
-    <DragDrop
-      data-test-subj="lnsWorkspace"
-      draggable={false}
-      droppable={Boolean(suggestionForDraggedField)}
-      onDrop={onDrop}
+    <WorkspacePanelWrapper
+      title={title}
+      framePublicAPI={framePublicAPI}
+      dispatch={dispatch}
+      emptyExpression={expression === null}
+      visualizationState={visualizationState}
+      activeVisualization={activeVisualization}
     >
-      {renderVisualization()}
-    </DragDrop>
+      <DragDrop
+        data-test-subj="lnsWorkspace"
+        draggable={false}
+        droppable={Boolean(suggestionForDraggedField)}
+        onDrop={onDrop}
+      >
+        {renderVisualization()}
+      </DragDrop>
+    </WorkspacePanelWrapper>
   );
 }

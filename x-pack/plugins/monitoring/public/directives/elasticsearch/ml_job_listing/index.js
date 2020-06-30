@@ -15,8 +15,9 @@ import { EuiLink, EuiPage, EuiPageContent, EuiPageBody, EuiPanel, EuiSpacer } fr
 import { ClusterStatus } from '../../../components/elasticsearch/cluster_status';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
-const getColumns = (kbnUrl, scope) => [
+const getColumns = () => [
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.jobIdTitle', {
       defaultMessage: 'Job ID',
@@ -30,7 +31,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'state',
     sortable: true,
-    render: state => (
+    render: (state) => (
       <div>
         <MachineLearningJobStatusIcon status={state} />
         &nbsp;
@@ -44,7 +45,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'data_counts.processed_record_count',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.modelSizeTitle', {
@@ -52,7 +53,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'model_size_stats.model_bytes',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_BYTES)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_BYTES)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.forecastsTitle', {
@@ -60,7 +61,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'forecasts_stats.total',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.nodeTitle', {
@@ -71,11 +72,7 @@ const getColumns = (kbnUrl, scope) => [
     render: (name, node) => {
       if (node) {
         return (
-          <EuiLink
-            onClick={() => {
-              scope.$evalAsync(() => kbnUrl.changePath(`/elasticsearch/nodes/${node.id}`));
-            }}
-          >
+          <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${node.id}`)}>
             {name}
           </EuiLink>
         );
@@ -92,7 +89,7 @@ const getColumns = (kbnUrl, scope) => [
 ];
 
 //monitoringMlListing
-export function monitoringMlListingProvider(kbnUrl) {
+export function monitoringMlListingProvider() {
   return {
     restrict: 'E',
     scope: {
@@ -104,7 +101,7 @@ export function monitoringMlListingProvider(kbnUrl) {
     },
     link(scope, $el) {
       scope.$on('$destroy', () => $el && $el[0] && unmountComponentAtNode($el[0]));
-      const columns = getColumns(kbnUrl, scope);
+      const columns = getColumns();
 
       const filterJobsPlaceholder = i18n.translate(
         'xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder',

@@ -38,7 +38,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
   };
 
   dateAgg.time_buckets.aggs = {};
-  _.each(config.metric, function(metric) {
+  _.each(config.metric, function (metric) {
     metric = metric.split(':');
     if (metric[0] === 'count') {
       // This is pretty lame, but its how the "doc_count" metric has to be implemented at the moment
@@ -55,7 +55,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
       if (metric[0] === 'percentiles' && metric[2]) {
         let percentList = metric[2].split(',');
-        percentList = percentList.map(x => parseFloat(x));
+        percentList = percentList.map((x) => parseFloat(x));
         dateAgg.time_buckets.aggs[metricName][metric[0]].percents = percentList;
       }
     } else {

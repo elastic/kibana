@@ -28,6 +28,11 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../src/plugins/data/public/search/aggs';
 import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public/';
+import {
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../src/plugins/share/public';
 
 const mockObservable = () => {
   return {
@@ -49,18 +54,31 @@ let isTimeRangeSelectorEnabled = true;
 let isAutoRefreshSelectorEnabled = true;
 
 export const mockUiSettings = {
-  get: item => {
-    return mockUiSettings[item];
+  get: (item, defaultValue) => {
+    const defaultValues = {
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'UTC',
+      [UI_SETTINGS.SHORT_DOTS_ENABLE]: true,
+      [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
+      [UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+      [UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+      [UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN]: '($0,0.[00])',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN]: '0,0.[000]',
+      [UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
+      [UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE]: 'en',
+      [UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP]: {},
+      [CSV_SEPARATOR_SETTING]: ',',
+      [CSV_QUOTE_VALUES_SETTING]: true,
+      [UI_SETTINGS.SEARCH_QUERY_LANGUAGE]: 'kuery',
+      'state:storeInSessionStorage': false,
+    };
+
+    return defaultValues[item] || defaultValue;
   },
   getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
   isDefault: sinon.fake(),
-  'query:allowLeadingWildcards': true,
-  'query:queryString:options': {},
-  'courier:ignoreFilterIfFieldNotInIndex': true,
-  'dateFormat:tz': 'Browser',
-  'format:defaultTypeMap': {},
 };
 
 const mockCoreSetup = {
@@ -134,7 +152,7 @@ const querySetup = {
       getRefreshInterval: () => {
         return refreshInterval;
       },
-      setRefreshInterval: interval => {
+      setRefreshInterval: (interval) => {
         refreshInterval = interval;
       },
       enableTimeRangeSelector: () => {
@@ -173,8 +191,8 @@ const mockAggTypesRegistry = () => {
       notifications: mockCoreStart.notifications,
     }),
   });
-  aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
-  aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
+  aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
+  aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
 
   return registry;
 };
@@ -236,13 +254,15 @@ export const npSetup = {
     },
     share: {
       register: () => {},
+      urlGenerators: {
+        registerUrlGenerator: () => {},
+      },
     },
     devTools: {
       register: () => {},
     },
     kibanaLegacy: {
       registerLegacyApp: () => {},
-      registerLegacyAppAlias: () => {},
       forwardApp: () => {},
       config: {
         defaultAppId: 'home',
@@ -357,13 +377,9 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
-      getSortedDevTools: () => [],
-    },
     kibanaLegacy: {
-      getApps: () => [],
       getForwards: () => [],
-      getLegacyAppAliases: () => [],
+      loadFontAwesome: () => {},
       config: {
         defaultAppId: 'home',
       },
@@ -385,7 +401,7 @@ export const npStart = {
       },
       getSuggestions: sinon.fake(),
       indexPatterns: {
-        get: sinon.spy(indexPatternId =>
+        get: sinon.spy((indexPatternId) =>
           Promise.resolve({
             id: indexPatternId,
             isTimeNanosBased: () => false,
@@ -431,7 +447,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: interval => {
+            setRefreshInterval: (interval) => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {
@@ -515,6 +531,7 @@ export const npStart = {
       docViews: {
         DocViewer: () => null,
       },
+      savedSearchLoader: {},
     },
   },
 };
@@ -526,6 +543,8 @@ export function __setup__(coreSetup) {
   // bootstrap an LP plugin outside of tests)
   npSetup.core.application.register = () => {};
 
+  npSetup.core.uiSettings.get = mockUiSettings.get;
+
   // Services that need to be set in the legacy platform since the legacy data
   // & vis plugins which previously provided them have been removed.
   setSetupServices(npSetup);
@@ -533,6 +552,8 @@ export function __setup__(coreSetup) {
 
 export function __start__(coreStart) {
   npStart.core = coreStart;
+
+  npStart.core.uiSettings.get = mockUiSettings.get;
 
   // Services that need to be set in the legacy platform since the legacy data
   // & vis plugins which previously provided them have been removed.

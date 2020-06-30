@@ -7,7 +7,6 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { difference, zipObject } from 'lodash';
-import mean from 'lodash.mean';
 import { rgba } from 'polished';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
@@ -16,9 +15,9 @@ import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_
 import {
   Coordinate,
   RectCoordinate,
-  TimeSeries
+  TimeSeries,
 } from '../../typings/timeseries';
-import { asDecimal, tpmUnit, convertTo } from '../utils/formatters';
+import { asDecimal, asDuration, tpmUnit } from '../utils/formatters';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
@@ -41,12 +40,12 @@ const INITIAL_DATA = {
     responseTimes: {
       avg: [],
       p95: [],
-      p99: []
+      p99: [],
     },
     tpmBuckets: [],
-    overallAvgDuration: null
+    overallAvgDuration: null,
   },
-  anomalyTimeseries: undefined
+  anomalyTimeseries: undefined,
 };
 
 export function getTransactionCharts(
@@ -57,60 +56,56 @@ export function getTransactionCharts(
 
   const responseTimeSeries = getResponseTimeSeries({
     apmTimeseries,
-    anomalyTimeseries
+    anomalyTimeseries,
   });
 
   return {
     tpmSeries,
-    responseTimeSeries
+    responseTimeSeries,
   };
 }
 
 export function getResponseTimeSeries({
   apmTimeseries,
-  anomalyTimeseries
+  anomalyTimeseries,
 }: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
-  const formattedDuration = convertTo({
-    unit: 'milliseconds',
-    microseconds: overallAvgDuration
-  }).formatted;
 
   const series: TimeSeries[] = [
     {
       title: i18n.translate('xpack.apm.transactions.chart.averageLabel', {
-        defaultMessage: 'Avg.'
+        defaultMessage: 'Avg.',
       }),
       data: avg,
-      legendValue: formattedDuration,
+      legendValue: asDuration(overallAvgDuration),
       type: 'linemark',
-      color: theme.euiColorVis1
+      color: theme.euiColorVis1,
     },
     {
       title: i18n.translate(
         'xpack.apm.transactions.chart.95thPercentileLabel',
         {
-          defaultMessage: '95th percentile'
+          defaultMessage: '95th percentile',
         }
       ),
       titleShort: '95th',
       data: p95,
       type: 'linemark',
-      color: theme.euiColorVis5
+      color: theme.euiColorVis5,
     },
     {
       title: i18n.translate(
         'xpack.apm.transactions.chart.99thPercentileLabel',
         {
-          defaultMessage: '99th percentile'
+          defaultMessage: '99th percentile',
         }
       ),
       titleShort: '99th',
       data: p99,
       type: 'linemark',
-      color: theme.euiColorVis7
-    }
+      color: theme.euiColorVis7,
+    },
   ];
 
   if (anomalyTimeseries) {
@@ -129,14 +124,14 @@ export function getResponseTimeSeries({
 export function getAnomalyScoreSeries(data: RectCoordinate[]) {
   return {
     title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
-      defaultMessage: 'Anomaly score'
+      defaultMessage: 'Anomaly score',
     }),
     hideLegend: true,
     hideTooltipValue: true,
     data,
     type: 'areaMaxHeight',
     color: 'none',
-    areaColor: rgba(theme.euiColorVis9, 0.1)
+    areaColor: rgba(theme.euiColorVis9, 0.1),
   };
 }
 
@@ -145,7 +140,7 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
     title: i18n.translate(
       'xpack.apm.transactions.chart.anomalyBoundariesLabel',
       {
-        defaultMessage: 'Anomaly Boundaries'
+        defaultMessage: 'Anomaly Boundaries',
       }
     ),
     hideLegend: true,
@@ -153,7 +148,7 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
     data,
     type: 'area',
     color: 'none',
-    areaColor: rgba(theme.euiColorVis1, 0.1)
+    areaColor: rgba(theme.euiColorVis1, 0.1),
   };
 }
 
@@ -173,14 +168,13 @@ export function getTpmSeries(
     return getEmptySeries(start, end);
   }
 
-  return tpmBuckets.map(bucket => {
-    const average = mean(bucket.dataPoints.map(p => p.y));
+  return tpmBuckets.map((bucket) => {
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(average)} ${tpmUnit(transactionType || '')}`,
+      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
-      color: getColor(bucket.key)
+      color: getColor(bucket.key),
     };
   });
 }
@@ -203,7 +197,7 @@ function getColorByKey(keys: string[]) {
     theme.euiColorVis4,
     theme.euiColorVis6,
     theme.euiColorVis2,
-    theme.euiColorVis8
+    theme.euiColorVis8,
   ]);
 
   return (key: string) =>

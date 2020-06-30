@@ -28,7 +28,7 @@ export const VerifyExistingNodeBuildsTask = {
     const shasums = await getNodeShasums(config.getNodeVersion());
 
     await Promise.all(
-      config.getNodePlatforms().map(async platform => {
+      config.getNodePlatforms().map(async (platform) => {
         const { downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
 
         const sha256 = await getFileHash(downloadPath, 'sha256');

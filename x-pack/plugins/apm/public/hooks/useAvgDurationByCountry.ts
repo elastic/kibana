@@ -10,11 +10,11 @@ import { useUrlParams } from './useUrlParams';
 export function useAvgDurationByCountry() {
   const {
     urlParams: { serviceName, start, end, transactionName },
-    uiFilters
+    uiFilters,
   } = useUrlParams();
 
   const { data = [], error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname:
@@ -25,9 +25,9 @@ export function useAvgDurationByCountry() {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              transactionName
-            }
-          }
+              transactionName,
+            },
+          },
         });
       }
     },
@@ -37,6 +37,6 @@ export function useAvgDurationByCountry() {
   return {
     data,
     status,
-    error
+    error,
   };
 }

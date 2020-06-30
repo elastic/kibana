@@ -19,9 +19,9 @@
 
 import { BehaviorSubject, from } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { CoreSetup } from '../../../../core/public';
 import { IKibanaSearchRequest } from '../../common/search';
-import { ISearch, ISearchOptions } from './i_search';
-import { TSearchStrategyProvider, ISearchStrategy, ISearchContext } from './types';
+import { ISearch } from './i_search';
 
 export const SYNC_SEARCH_STRATEGY = 'SYNC_SEARCH_STRATEGY';
 
@@ -29,27 +29,22 @@ export interface ISyncSearchRequest extends IKibanaSearchRequest {
   serverStrategy: string;
 }
 
-export const syncSearchStrategyProvider: TSearchStrategyProvider<typeof SYNC_SEARCH_STRATEGY> = (
-  context: ISearchContext
-): ISearchStrategy<typeof SYNC_SEARCH_STRATEGY> => {
+export function syncSearchStrategyProvider(core: CoreSetup) {
   const loadingCount$ = new BehaviorSubject(0);
-  context.core.http.addLoadingCountSource(loadingCount$);
+  core.http.addLoadingCountSource(loadingCount$);
 
-  const search: ISearch<typeof SYNC_SEARCH_STRATEGY> = (
-    request: ISyncSearchRequest,
-    options: ISearchOptions = {}
-  ) => {
+  const search: ISearch<typeof SYNC_SEARCH_STRATEGY> = (request, options) => {
     loadingCount$.next(loadingCount$.getValue() + 1);
 
     return from(
-      context.core.http.fetch({
+      core.http.fetch({
         path: `/internal/search/${request.serverStrategy}`,
         method: 'POST',
         body: JSON.stringify(request),
-        signal: options.signal,
+        signal: options?.signal,
       })
     ).pipe(finalize(() => loadingCount$.next(loadingCount$.getValue() - 1)));
   };
 
   return { search };
-};
+}

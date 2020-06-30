@@ -3,6 +3,7 @@
 exports[`NewVisModal filter for visualization types should render as expected 1`] = `
 <NewVisModal
   addBasePath={[Function]}
+  application={Object {}}
   editorParams={Array []}
   intl={
     Object {
@@ -1263,6 +1264,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >
@@ -1545,6 +1547,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
 exports[`NewVisModal should render as expected 1`] = `
 <NewVisModal
   addBasePath={[Function]}
+  application={Object {}}
   editorParams={Array []}
   intl={
     Object {
@@ -2770,6 +2773,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >

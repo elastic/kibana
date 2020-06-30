@@ -12,7 +12,7 @@ export default ({ getService }: FtrProviderContext) => {
   const logsUi = getService('logsUi');
   const retry = getService('retry');
 
-  describe('Log Entry Categories Tab', function() {
+  describe('Log Entry Categories Tab', function () {
     this.tags('includeFirefox');
 
     describe('with a trial license', () => {

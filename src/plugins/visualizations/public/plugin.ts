@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -29,6 +31,7 @@ import {
   setUISettings,
   setTypes,
   setI18n,
+  setApplication,
   setCapabilities,
   setHttp,
   setIndexPatterns,
@@ -43,6 +46,8 @@ import {
   setAggs,
   setChrome,
   setOverlays,
+  setSavedSearchLoader,
+  setEmbeddable,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -50,7 +55,7 @@ import {
   createVisEmbeddableFromObject,
 } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import { EmbeddableSetup } from '../../embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
@@ -70,6 +75,7 @@ import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
+import { createSavedSearchesLoader } from '../../discover/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -81,7 +87,7 @@ export type VisualizationsSetup = TypesSetup;
 
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
-  createVis: (visType: string, visState?: SerializedVis) => Vis;
+  createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
@@ -99,6 +105,7 @@ export interface VisualizationsSetupDeps {
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
@@ -148,11 +155,13 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
+    setEmbeddable(embeddable);
+    setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
@@ -174,7 +183,14 @@ export class VisualizationsPlugin
       visualizationTypes: types,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
-
+    const savedSearchLoader = createSavedSearchesLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedSearchLoader(savedSearchLoader);
     return {
       ...types,
       showNewVisModal,
@@ -183,7 +199,11 @@ export class VisualizationsPlugin
        * @param {IIndexPattern} indexPattern - index pattern to use
        * @param {VisState} visState - visualization configuration
        */
-      createVis: (visType: string, visState?: SerializedVis) => new Vis(visType, visState),
+      createVis: async (visType: string, visState: SerializedVis) => {
+        const vis = new Vis(visType);
+        await vis.setState(visState);
+        return vis;
+      },
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,

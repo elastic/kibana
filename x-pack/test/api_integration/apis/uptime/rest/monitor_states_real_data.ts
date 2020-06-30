@@ -43,14 +43,14 @@ const checkMonitorStatesResponse = ({
   if (isRight(decoded)) {
     const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;
     expect(summaries).to.have.length(size);
-    expect(summaries?.map(s => s.monitor_id)).to.eql(statesIds);
+    expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
     expect(
-      summaries?.map(s => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
+      summaries?.map((s) => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
     ).to.eql(statuses);
-    (summaries ?? []).forEach(s => {
+    (summaries ?? []).forEach((s) => {
       expect(s.state.url.full).to.be.ok();
-      expect(s.histogram?.count).to.be(20);
-      (s.histogram?.points ?? []).forEach(point => {
+      expect(Array.isArray(s.histogram?.points)).to.be(true);
+      (s.histogram?.points ?? []).forEach((point) => {
         expect(point.timestamp).to.be.greaterThan(absFrom);
         expect(point.timestamp).to.be.lessThan(absTo);
       });
@@ -61,7 +61,7 @@ const checkMonitorStatesResponse = ({
   }
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('monitor states endpoint', () => {
     const from = '2019-09-11T03:30:04.380Z';

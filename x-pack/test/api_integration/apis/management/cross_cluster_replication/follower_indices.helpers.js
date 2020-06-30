@@ -8,7 +8,7 @@ import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 import { getFollowerIndexPayload } from './fixtures';
 
-export const registerHelpers = supertest => {
+export const registerHelpers = (supertest) => {
   let followerIndicesCreated = [];
 
   const loadFollowerIndices = () => supertest.get(`${API_BASE_PATH}/follower_indices`);
@@ -28,17 +28,17 @@ export const registerHelpers = supertest => {
           throw new Error('Error waiting for follower index to be active.');
         }
 
-        return new Promise(resolve => setTimeout(resolve, delayBetweenRetries)).then(proceed);
+        return new Promise((resolve) => setTimeout(resolve, delayBetweenRetries)).then(proceed);
       }
 
       return response;
     };
 
     return {
-      expect: status =>
+      expect: (status) =>
         new Promise((resolve, reject) =>
           proceed()
-            .then(response => {
+            .then((response) => {
               if (status !== response.status) {
                 reject(new Error(`Expected status ${status} but got ${response.status}`));
               }
@@ -46,10 +46,7 @@ export const registerHelpers = supertest => {
             })
             .catch(reject)
         ),
-      then: (resolve, reject) =>
-        proceed()
-          .then(resolve)
-          .catch(reject),
+      then: (resolve, reject) => proceed().then(resolve).catch(reject),
     };
   };
 
@@ -69,10 +66,10 @@ export const registerHelpers = supertest => {
       .send(payload);
   };
 
-  const unfollowLeaderIndex = followerIndex => {
+  const unfollowLeaderIndex = (followerIndex) => {
     const followerIndices = Array.isArray(followerIndex) ? followerIndex : [followerIndex];
     const followerIndicesToEncodedString = followerIndices
-      .map(index => encodeURIComponent(index))
+      .map((index) => encodeURIComponent(index))
       .join(',');
 
     return supertest
@@ -87,7 +84,7 @@ export const registerHelpers = supertest => {
         if (body.indices.length) {
           // There are still some index left to delete. Call recursively
           // until all follower indices are removed.
-          return unfollowAll(body.indices.map(i => i.name));
+          return unfollowAll(body.indices.map((i) => i.name));
         }
         followerIndicesCreated = [];
       });

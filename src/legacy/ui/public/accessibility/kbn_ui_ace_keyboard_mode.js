@@ -71,7 +71,7 @@ uiModules
         hint.removeClass('kbnUiAceKeyboardHint-isInactive');
       }
 
-      hint.keydown(ev => {
+      hint.keydown((ev) => {
         if (ev.keyCode === keyCodes.ENTER) {
           ev.preventDefault();
           startEditing();
@@ -102,7 +102,7 @@ uiModules
         { capture: true }
       );
 
-      uiAceTextbox.keydown(ev => {
+      uiAceTextbox.keydown((ev) => {
         if (ev.keyCode === keyCodes.ESCAPE) {
           // If the autocompletion context menu is open then we want to let ESC close it but
           // **not** exit out of editing mode.
@@ -121,7 +121,7 @@ uiModules
       element.prepend(hint);
     },
   }))
-  .directive('kbnUiAceKeyboardMode', kbnUiAceKeyboardModeService => ({
+  .directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
     restrict: 'A',
     link(scope, element) {
       kbnUiAceKeyboardModeService.initialize(scope, element);

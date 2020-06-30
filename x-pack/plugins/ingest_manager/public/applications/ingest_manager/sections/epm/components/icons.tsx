@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 export const StyledAlert = styled(EuiIcon)`
-  color: ${props => props.theme.eui.euiColorWarning};
+  color: ${(props) => props.theme.eui.euiColorWarning};
   padding: 0 5px;
 `;
 

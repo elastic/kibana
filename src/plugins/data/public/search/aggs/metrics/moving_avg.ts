@@ -48,15 +48,18 @@ const movingAvgLabel = i18n.translate('data.search.aggs.metrics.movingAvgLabel',
 export const getMovingAvgMetricAgg = ({
   getInternalStartServices,
 }: MovingAvgMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.MOVING_FN,
       dslName: 'moving_fn',
       title: movingAvgTitle,
-      subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, movingAvgLabel),
+      subtype,
+      getSerializedFormat,
       params: [
-        ...parentPipelineAggHelper.params(),
+        ...params(),
         {
           name: 'window',
           default: 5,
@@ -78,7 +81,6 @@ export const getMovingAvgMetricAgg = ({
          */
         return bucket[agg.id] ? bucket[agg.id].value : null;
       },
-      getFormat: parentPipelineAggHelper.getFormat,
     },
     {
       getInternalStartServices,

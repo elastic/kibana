@@ -58,7 +58,7 @@ describe('validateConfig()', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: url => {
+        ensureWhitelistedUri: (url) => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
       },
@@ -74,7 +74,7 @@ describe('validateConfig()', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: _ => {
+        ensureWhitelistedUri: (_) => {
           throw new Error(`target url is not whitelisted`);
         },
       },

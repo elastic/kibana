@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BASE_PATH } from '../../../common/constants';
-
-export const goToPolicyList = () => {
-  window.location.hash = `${BASE_PATH}policies`;
-};
-
 export const getPolicyPath = (policyName: string): string => {
-  return encodeURI(`#${BASE_PATH}policies/edit/${encodeURIComponent(policyName)}`);
+  return encodeURI(`/policies/edit/${encodeURIComponent(policyName)}`);
 };

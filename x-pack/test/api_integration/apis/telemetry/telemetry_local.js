@@ -34,17 +34,14 @@ const disableCollection = {
   },
 };
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
   describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
-      await esSupertest
-        .put('/_cluster/settings')
-        .send(disableCollection)
-        .expect(200);
-      await new Promise(r => setTimeout(r, 1000));
+      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -79,9 +76,10 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins['maps-telemetry'].attributes.timeCaptured).to.be.a(
-        'string'
-      );
+      expect(stats.stack_stats.kibana.plugins.maps.timeCaptured).to.be.a('string');
+      expect(stats.stack_stats.kibana.plugins.maps.attributes).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.id).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.type).to.be(undefined);
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
@@ -182,7 +180,7 @@ export default function({ getService }) {
         'version',
       ];
 
-      expect(expected.every(m => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
   });
 }

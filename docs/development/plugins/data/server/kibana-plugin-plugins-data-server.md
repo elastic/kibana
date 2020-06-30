@@ -23,6 +23,7 @@
 |  Function | Description |
 |  --- | --- |
 |  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
@@ -39,10 +40,12 @@
 |  [IIndexPattern](./kibana-plugin-plugins-data-server.iindexpattern.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Use data plugin interface instead |
 |  [IndexPatternFieldDescriptor](./kibana-plugin-plugins-data-server.indexpatternfielddescriptor.md) |  |
-|  [IRequestTypesMap](./kibana-plugin-plugins-data-server.irequesttypesmap.md) |  |
-|  [IResponseTypesMap](./kibana-plugin-plugins-data-server.iresponsetypesmap.md) |  |
-|  [ISearchContext](./kibana-plugin-plugins-data-server.isearchcontext.md) |  |
+|  [IRequestTypesMap](./kibana-plugin-plugins-data-server.irequesttypesmap.md) | The map of search strategy IDs to the corresponding request type definitions. |
+|  [IResponseTypesMap](./kibana-plugin-plugins-data-server.iresponsetypesmap.md) | The map of search strategy IDs to the corresponding response type definitions. |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
+|  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
+|  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
+|  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
 |  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
@@ -55,12 +58,14 @@
 |  Variable | Description |
 |  --- | --- |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
+|  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-server.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
+|  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 
 ## Type Aliases
 
@@ -71,5 +76,5 @@
 |  [ISearch](./kibana-plugin-plugins-data-server.isearch.md) |  |
 |  [ISearchCancel](./kibana-plugin-plugins-data-server.isearchcancel.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
-|  [TSearchStrategyProvider](./kibana-plugin-plugins-data-server.tsearchstrategyprovider.md) | Search strategy provider creates an instance of a search strategy with the request handler context bound to it. This way every search strategy can use whatever information they require from the request context. |
+|  [TStrategyTypes](./kibana-plugin-plugins-data-server.tstrategytypes.md) | Contains all known strategy type identifiers that will be used to map to request and response shapes. Plugins that wish to add their own custom search strategies should extend this type via:<!-- -->const MY\_STRATEGY = 'MY\_STRATEGY';<!-- -->declare module 'src/plugins/search/server' { export interface IRequestTypesMap { \[MY\_STRATEGY\]: IMySearchRequest; }<!-- -->export interface IResponseTypesMap { \[MY\_STRATEGY\]: IMySearchResponse } } |
 

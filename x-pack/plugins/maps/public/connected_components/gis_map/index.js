@@ -6,9 +6,8 @@
 
 import { connect } from 'react-redux';
 import { GisMap as UnconnectedGisMap } from './view';
-import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
-import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
+import { triggerRefreshTimer, cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   areLayersLoaded,
   getRefreshConfig,

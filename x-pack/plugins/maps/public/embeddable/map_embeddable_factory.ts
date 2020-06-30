@@ -6,67 +6,16 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AnyAction } from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  Embeddable,
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
-import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { MapStore, MapStoreState } from '../reducers/store';
-import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
-import { MapEmbeddableOutput } from './map_embeddable';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
-import { EventHandlers } from '../reducers/non_serializable_instances';
-
-let whenModulesLoadedPromise: Promise<boolean>;
-
-let getMapsSavedObjectLoader: any;
-let MapEmbeddable: new (
-  config: MapEmbeddableConfig,
-  initialInput: MapEmbeddableInput,
-  parent?: IContainer,
-  renderTooltipContent?: RenderToolTipContent,
-  eventHandlers?: EventHandlers
-) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
-
-let getIndexPatternService: () => {
-  get: (id: string) => IIndexPattern | undefined;
-};
-let getHttp: () => any;
-let getMapsCapabilities: () => any;
-let createMapStore: () => MapStore;
-let addLayerWithoutDataSync: (layerDescriptor: unknown) => AnyAction;
-let getQueryableUniqueIndexPatternIds: (state: MapStoreState) => string[];
-let getInitialLayers: (layerListJSON?: string, initialLayers?: unknown[]) => unknown[];
-let mergeInputWithSavedMap: any;
-
-async function waitForMapDependencies(): Promise<boolean> {
-  if (typeof whenModulesLoadedPromise !== 'undefined') {
-    return whenModulesLoadedPromise;
-  }
-
-  whenModulesLoadedPromise = new Promise(async resolve => {
-    ({
-      // @ts-ignore
-      getMapsSavedObjectLoader,
-      getQueryableUniqueIndexPatternIds,
-      MapEmbeddable,
-      getIndexPatternService,
-      getHttp,
-      getMapsCapabilities,
-      createMapStore,
-      addLayerWithoutDataSync,
-      getInitialLayers,
-      mergeInputWithSavedMap,
-    } = await import('./lazy'));
-
-    resolve(true);
-  });
-  return whenModulesLoadedPromise;
-}
+import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
+import { MapEmbeddableInput } from './types';
+import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -79,7 +28,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async isEditable() {
-    await waitForMapDependencies();
+    const { getMapsCapabilities } = await lazyLoadMapModules();
     return getMapsCapabilities().save as boolean;
   }
 
@@ -94,12 +43,18 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     });
   }
 
-  async _getIndexPatterns(layerList: unknown[]): Promise<IIndexPattern[]> {
+  async _getIndexPatterns(layerList: LayerDescriptor[]): Promise<IIndexPattern[]> {
     // Need to extract layerList from store to get queryable index pattern ids
+    const {
+      addLayerWithoutDataSync,
+      createMapStore,
+      getIndexPatternService,
+      getQueryableUniqueIndexPatternIds,
+    } = await lazyLoadMapModules();
     const store = createMapStore();
     let queryableIndexPatternIds: string[];
     try {
-      layerList.forEach((layerDescriptor: unknown) => {
+      layerList.forEach((layerDescriptor: LayerDescriptor) => {
         store.dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
       queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
@@ -111,7 +66,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async indexPatternId => {
+    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
       try {
         // @ts-ignore
         return await getIndexPatternService().get(indexPatternId);
@@ -126,6 +81,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   async _fetchSavedMap(savedObjectId: string) {
+    const { getMapsSavedObjectLoader } = await lazyLoadMapModules();
     const savedObjectLoader = getMapsSavedObjectLoader();
     return await savedObjectLoader.get(savedObjectId);
   }
@@ -135,7 +91,12 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     input: MapEmbeddableInput,
     parent?: IContainer
   ) => {
-    await waitForMapDependencies();
+    const {
+      getInitialLayers,
+      getHttp,
+      MapEmbeddable,
+      mergeInputWithSavedMap,
+    } = await lazyLoadMapModules();
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -152,7 +113,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         layerList,
         title: savedMap.title,
-        editUrl: getHttp().basePath.prepend(createMapPath(savedObjectId)),
+        editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
         indexPatterns,
         editable: await this.isEditable(),
         settings,
@@ -175,7 +136,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
-    await waitForMapDependencies();
+    const { getInitialLayers, MapEmbeddable } = await lazyLoadMapModules();
     const layerList = getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 

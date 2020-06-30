@@ -5,7 +5,7 @@
  */
 
 export function formatFields(fieldNames, type) {
-  return fieldNames.map(fieldName => ({
+  return fieldNames.map((fieldName) => ({
     name: fieldName,
     type,
   }));

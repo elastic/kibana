@@ -9,13 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
+import { pipelineSchema } from './pipeline_schema';
 
 const bodySchema = schema.object({
   name: schema.string(),
-  description: schema.maybe(schema.string()),
-  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  version: schema.maybe(schema.number()),
-  on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  ...pipelineSchema,
 });
 
 export const registerCreateRoute = ({
@@ -31,7 +29,7 @@ export const registerCreateRoute = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const pipeline = req.body as Pipeline;
 
       const { name, description, processors, version, on_failure } = pipeline;

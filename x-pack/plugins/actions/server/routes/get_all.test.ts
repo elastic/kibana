@@ -28,7 +28,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/_getAll"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -63,7 +63,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/_getAll"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
@@ -94,7 +94,7 @@ describe('getAllActionRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/action/_getAll"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [

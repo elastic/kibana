@@ -39,7 +39,7 @@ export function shareWeakReplay<T>(bufferSize?: number): Rx.MonoTypeOperatorFunc
     let subject: Rx.ReplaySubject<T> | undefined;
     const stop$ = new Rx.Subject();
 
-    return new Rx.Observable(observer => {
+    return new Rx.Observable((observer) => {
       if (!subject) {
         subject = new Rx.ReplaySubject<T>(bufferSize);
       }

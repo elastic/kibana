@@ -46,7 +46,7 @@ export const fileHandler = async ({
 
   // Set up feature tracking
   let featuresProcessed = 0;
-  const onFeatureRead = feature => {
+  const onFeatureRead = (feature) => {
     // TODO: Add handling and tracking for cleanAndValidate fails
     featuresProcessed++;
     return cleanAndValidate(feature);
@@ -58,7 +58,7 @@ export const fileHandler = async ({
   prevFileReader = fileReader;
 
   const filePromise = new Promise((resolve, reject) => {
-    const onStreamComplete = fileResults => {
+    const onStreamComplete = (fileResults) => {
       if (!featuresProcessed) {
         reject(
           new Error(

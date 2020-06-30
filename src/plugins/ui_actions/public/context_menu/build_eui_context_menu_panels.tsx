@@ -106,7 +106,7 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = event => {
+  menuPanelItem.onClick = (event) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
       if (

@@ -18,14 +18,15 @@
  */
 
 import expect from '@kbn/expect';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   describe('visualize lab mode', () => {
     it('disabling does not break loading saved searches', async () => {
-      await PageObjects.common.navigateToUrl('discover', '');
+      await PageObjects.common.navigateToUrl('discover', '', { useActualUrl: true });
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
       await PageObjects.discover.openLoadSavedSearchPanel();
       const hasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
@@ -37,7 +38,7 @@ export default function({ getService, getPageObjects }) {
       // Navigate to advanced setting and disable lab mode
       await PageObjects.header.clickStackManagement();
       await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
+      await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
 
       // Expect the discover still to list that saved visualization in the open list
       await PageObjects.header.clickDiscover();
@@ -51,7 +52,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.discover.closeLoadSaveSearchPanel();
       await PageObjects.header.clickStackManagement();
       await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
+      await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
     });
   });
 }

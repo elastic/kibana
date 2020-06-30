@@ -67,7 +67,7 @@ export default new Chainable('lines', {
     defaultMessage: 'Show the seriesList as lines',
   }),
   fn: function linesFn(args) {
-    return alter(args, function(eachSeries, width, fill, stack, show, steps) {
+    return alter(args, function (eachSeries, width, fill, stack, show, steps) {
       eachSeries.lines = eachSeries.lines || {};
 
       // Defaults

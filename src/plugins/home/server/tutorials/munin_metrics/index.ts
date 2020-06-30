@@ -55,7 +55,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
         label: i18n.translate('home.tutorials.muninMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

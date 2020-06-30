@@ -29,7 +29,7 @@ export function EuiMonitoringTable({
 
   if (search) {
     const oldOnChange = search.onChange;
-    search.onChange = arg => {
+    search.onChange = (arg) => {
       const filteredItems = EuiSearchBar.Query.execute(arg.query, items, props.executeQueryOptions);
       setHasItem(filteredItems.length > 0);
       oldOnChange && oldOnChange(arg);
@@ -37,7 +37,7 @@ export function EuiMonitoringTable({
     };
   }
 
-  const columns = _columns.map(column => {
+  const columns = _columns.map((column) => {
     if (!('sortable' in column)) {
       column.sortable = true;
     }

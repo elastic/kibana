@@ -44,7 +44,7 @@ const build = async ({ log, kibanaDir, styleSheetPaths, watch }) => {
       sourceMap: true,
     });
 
-    bundles.forEach(bundle => {
+    bundles.forEach((bundle) => {
       log.debug(`Compiled SCSS: ${bundle.sourcePath} (theme=${bundle.theme})`);
     });
 
@@ -63,9 +63,7 @@ export async function buildSass({ log, kibanaDir, watch }) {
   const scanDirs = [resolve(kibanaDir, 'src/legacy/core_plugins')];
   const paths = [resolve(kibanaDir, 'x-pack')];
   const { spec$, disabledSpec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
-  const allPlugins = await Rx.merge(spec$, disabledSpec$)
-    .pipe(toArray())
-    .toPromise();
+  const allPlugins = await Rx.merge(spec$, disabledSpec$).pipe(toArray()).toPromise();
   const uiExports = collectUiExports(allPlugins);
   const { styleSheetPaths } = uiExports;
 
@@ -73,17 +71,17 @@ export async function buildSass({ log, kibanaDir, watch }) {
   log.verbose(styleSheetPaths);
 
   if (watch) {
-    const debouncedBuild = debounce(async path => {
+    const debouncedBuild = debounce(async (path) => {
       let buildPaths = styleSheetPaths;
       if (path) {
-        buildPaths = styleSheetPaths.filter(styleSheetPath =>
+        buildPaths = styleSheetPaths.filter((styleSheetPath) =>
           path.includes(styleSheetPath.urlImports.publicDir)
         );
       }
       await build({ log, kibanaDir, styleSheetPaths: buildPaths, watch });
     });
 
-    const watchPaths = styleSheetPaths.map(styleSheetPath => styleSheetPath.urlImports.publicDir);
+    const watchPaths = styleSheetPaths.map((styleSheetPath) => styleSheetPath.urlImports.publicDir);
 
     await build({ log, kibanaDir, styleSheetPaths });
 

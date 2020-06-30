@@ -40,8 +40,8 @@ const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
-  new Promise(resolve => {
-    const onData = data => {
+  new Promise((resolve) => {
+    const onData = (data) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -180,7 +180,7 @@ exports.Cluster = class Cluster {
     await Promise.race([
       // wait for native realm to be setup and es to be started
       Promise.all([
-        first(this._process.stdout, data => {
+        first(this._process.stdout, (data) => {
           if (/started/.test(data)) {
             return true;
           }
@@ -207,7 +207,7 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch(error => {
+    this._nativeRealmSetup.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -287,7 +287,7 @@ exports.Cluster = class Cluster {
     });
 
     // parse log output to find http port
-    const httpPort = first(this._process.stdout, data => {
+    const httpPort = first(this._process.stdout, (data) => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -296,7 +296,7 @@ exports.Cluster = class Cluster {
     });
 
     // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async port => {
+    this._nativeRealmSetup = httpPort.then(async (port) => {
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,
@@ -309,19 +309,19 @@ exports.Cluster = class Cluster {
     });
 
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', data => {
+    this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => {
+      lines.forEach((line) => {
         this._log.info(line.formattedMessage);
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     // observe the exit code of the process and reflect in _outcome promies
-    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
-    this._outcome = exitCode.then(code => {
+    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
+    this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
         return;
       }

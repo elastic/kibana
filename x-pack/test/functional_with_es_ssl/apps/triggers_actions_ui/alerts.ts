@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alert`)
+      .post(`/api/alerts/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
@@ -39,7 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdAlert;
   }
 
-  describe('alerts', function() {
+  describe('alerts', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');

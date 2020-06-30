@@ -22,7 +22,6 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   ToastsStart,
-  IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
 // @ts-ignore
@@ -33,13 +32,14 @@ import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
-  addAppRedirectMessageToUrl,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
+  KibanaLegacyStart,
 } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -57,7 +57,6 @@ export interface GraphDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginSetup;
   chrome: ChromeStart;
-  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
   data: ReturnType<DataPlugin['start']>;
@@ -68,9 +67,12 @@ export interface GraphDependencies {
   canEditDrillDownUrls: boolean;
   graphSavePolicy: string;
   overlays: OverlayStart;
+  savedObjects: SavedObjectsStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
-export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
+export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
+  kibanaLegacy.loadFontAwesome();
   const graphAngularModule = createLocalAngularModule(deps.navigation);
   configureAppAngularModule(
     graphAngularModule,
@@ -78,13 +80,18 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     true
   );
 
-  const licenseSubscription = deps.licensing.license$.subscribe(license => {
+  const licenseSubscription = deps.licensing.license$.subscribe((license) => {
     const info = checkLicense(license);
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath('/app/kibana'), info.message);
-      window.location.href = newUrl;
+      deps.coreStart.notifications.toasts.addDanger(info.message);
+      // This has to happen in the next tick because otherwise the original navigation
+      // bringing us to the graph app in the first place
+      // never completes and the browser enters are redirect loop
+      setTimeout(() => {
+        deps.coreStart.application.navigateToApp('home');
+      }, 0);
     }
   });
 

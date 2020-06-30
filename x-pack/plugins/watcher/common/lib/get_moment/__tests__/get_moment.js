@@ -25,7 +25,7 @@ describe('get_moment', () => {
         getMoment(NaN),
       ];
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).to.be(null);
       });
     });

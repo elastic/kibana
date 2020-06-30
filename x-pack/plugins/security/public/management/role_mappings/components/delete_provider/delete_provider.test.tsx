@@ -41,7 +41,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -113,7 +113,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -189,7 +189,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>
@@ -253,7 +253,7 @@ describe('DeleteProvider', () => {
 
     const wrapper = mountWithIntl(
       <DeleteProvider {...props}>
-        {onDelete => (
+        {(onDelete) => (
           <button id="invoker" onClick={() => act(() => onDelete(roleMappingsToDelete, onSuccess))}>
             initiate delete
           </button>

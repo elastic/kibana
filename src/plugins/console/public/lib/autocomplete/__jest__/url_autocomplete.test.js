@@ -28,11 +28,11 @@ import { populateContext } from '../../autocomplete/engine';
 
 describe('Url autocomplete', () => {
   function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
-    test(name, function() {
+    test(name, function () {
       const patternMatcher = new UrlPatternMatcher(globalUrlComponentFactories);
-      _.each(endpoints, function(e, id) {
+      _.each(endpoints, function (e, id) {
         e.id = id;
-        _.each(e.patterns, function(p) {
+        _.each(e.patterns, function (p) {
           patternMatcher.addEndpoint(p, e);
         });
       });
@@ -40,7 +40,7 @@ describe('Url autocomplete', () => {
         if (tokenPath[tokenPath.length - 1] === '$') {
           tokenPath = tokenPath.substr(0, tokenPath.length - 1) + '/' + URL_PATH_END_MARKER;
         }
-        tokenPath = _.map(tokenPath.split('/'), function(p) {
+        tokenPath = _.map(tokenPath.split('/'), function (p) {
           p = p.split(',');
           if (p.length === 1) {
             return p[0];
@@ -50,7 +50,7 @@ describe('Url autocomplete', () => {
       }
 
       if (expectedContext.autoCompleteSet) {
-        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function(t) {
+        expectedContext.autoCompleteSet = _.map(expectedContext.autoCompleteSet, function (t) {
           if (_.isString(t)) {
             t = { name: t };
           }
@@ -91,7 +91,7 @@ describe('Url autocomplete', () => {
     return name;
   }
 
-  (function() {
+  (function () {
     const endpoints = {
       '1': {
         patterns: ['a/b'],
@@ -123,7 +123,7 @@ describe('Url autocomplete', () => {
     patternsTest('simple single path - different path', endpoints, 'a/c', {});
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1': {
         patterns: ['a/b', 'a/b/{p}'],
@@ -174,7 +174,7 @@ describe('Url autocomplete', () => {
     });
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1': {
         patterns: ['a/{p}'],
@@ -228,7 +228,7 @@ describe('Url autocomplete', () => {
     });
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1': {
         patterns: ['a/{p}'],
@@ -254,7 +254,7 @@ describe('Url autocomplete', () => {
       },
     };
     const globalFactories = {
-      p: function(name, parent) {
+      p: function (name, parent) {
         return new ListComponent(name, ['g1', 'g2'], parent);
       },
       getComponent(name) {
@@ -313,7 +313,7 @@ describe('Url autocomplete', () => {
     );
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1': {
         patterns: ['a/b/{p}/c/e'],
@@ -343,7 +343,7 @@ describe('Url autocomplete', () => {
     });
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1_param': {
         patterns: ['a/{p}'],
@@ -378,7 +378,7 @@ describe('Url autocomplete', () => {
     });
   })();
 
-  (function() {
+  (function () {
     const endpoints = {
       '1_GET': {
         patterns: ['a'],

@@ -22,11 +22,21 @@ import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n/react';
 import { NewVisModal } from './new_vis_modal';
-import { getHttp, getSavedObjects, getTypes, getUISettings, getUsageCollector } from '../services';
+import {
+  getHttp,
+  getSavedObjects,
+  getTypes,
+  getUISettings,
+  getUsageCollector,
+  getApplication,
+  getEmbeddable,
+} from '../services';
 
 export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
+  originatingApp?: string;
+  outsideVisualizeApp?: boolean;
 }
 
 /**
@@ -34,7 +44,12 @@ export interface ShowNewVisModalParams {
  * @param {string[]} editorParams
  * @param {function} onClose - function that will be called when dialog is closed
  */
-export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalParams = {}) {
+export function showNewVisModal({
+  editorParams = [],
+  onClose,
+  originatingApp,
+  outsideVisualizeApp,
+}: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;
   const handleClose = () => {
@@ -53,12 +68,16 @@ export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalP
       <NewVisModal
         isOpen={true}
         onClose={handleClose}
+        originatingApp={originatingApp}
+        stateTransfer={getEmbeddable().getStateTransfer()}
+        outsideVisualizeApp={outsideVisualizeApp}
         editorParams={editorParams}
         visTypesRegistry={getTypes()}
         addBasePath={getHttp().basePath.prepend}
         uiSettings={getUISettings()}
         savedObjects={getSavedObjects()}
         usageCollection={getUsageCollector()}
+        application={getApplication()}
       />
     </I18nProvider>
   );

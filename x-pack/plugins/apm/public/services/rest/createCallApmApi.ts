@@ -8,7 +8,7 @@ import { callApi, FetchOptions } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMAPI } from '../../../server/routes/create_apm_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Client } from '../../../server/routes/typings';
+import { Client, HttpMethod } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
 export type APMClientOptions = Omit<FetchOptions, 'query' | 'body'> & {
@@ -39,7 +39,15 @@ export function createCallApmApi(http: HttpSetup) {
       ...opts,
       pathname: formattedPathname,
       body: params.body,
-      query: params.query
+      query: params.query,
     });
   }) as APMClient;
 }
+
+// infer return type from API
+export type APIReturnType<
+  TPath extends keyof APMAPI['_S'],
+  TMethod extends HttpMethod = 'GET'
+> = APMAPI['_S'][TPath] extends { [key in TMethod]: { ret: any } }
+  ? APMAPI['_S'][TPath][TMethod]['ret']
+  : unknown;

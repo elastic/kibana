@@ -32,7 +32,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
           <EmptyButton>{text} </EmptyButton>
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
-          {copy => (
+          {(copy) => (
             <EuiButtonIcon
               aria-label={COPY_FINGERPRINT}
               onClick={copy}

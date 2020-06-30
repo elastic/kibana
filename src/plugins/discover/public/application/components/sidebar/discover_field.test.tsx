@@ -28,6 +28,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
+import { FieldSpecExportFmt } from '../../../../../data/common';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -74,6 +75,7 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
     format: null,
     routes: {},
     $$spec: {},
+    toSpec: () => (({} as unknown) as FieldSpecExportFmt),
   } as IndexPatternField;
 
   const props = {
@@ -92,18 +94,18 @@ function getComponent(selected = false, showDetails = false, useShortDots = fals
   return { comp, props };
 }
 
-describe('discover sidebar field', function() {
-  it('should allow selecting fields', function() {
+describe('discover sidebar field', function () {
+  it('should allow selecting fields', function () {
     const { comp, props } = getComponent();
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function() {
+  it('should allow deselecting fields', function () {
     const { comp, props } = getComponent(true);
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger onShowDetails', function() {
+  it('should trigger onShowDetails', function () {
     const { comp, props } = getComponent();
     findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
     expect(props.onShowDetails).toHaveBeenCalledWith(true, props.field);

@@ -35,7 +35,7 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 
-const calculateShards = shards => {
+const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';
@@ -144,9 +144,9 @@ export function ElasticsearchPanel(props) {
   const indices = clusterStats.indices;
   const setupMode = props.setupMode;
 
-  const goToElasticsearch = () => props.changeUrl('elasticsearch');
-  const goToNodes = () => props.changeUrl('elasticsearch/nodes');
-  const goToIndices = () => props.changeUrl('elasticsearch/indices');
+  const goToElasticsearch = () => getSafeForExternalLink('#/elasticsearch');
+  const goToNodes = () => getSafeForExternalLink('#/elasticsearch/nodes');
+  const goToIndices = () => getSafeForExternalLink('#/elasticsearch/indices');
 
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
 
@@ -162,7 +162,7 @@ export function ElasticsearchPanel(props) {
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={ELASTICSEARCH_SYSTEM_ID}
-        badgeClickAction={goToNodes}
+        badgeClickLink={goToNodes()}
       />
     ) : null;
 
@@ -215,7 +215,7 @@ export function ElasticsearchPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToElasticsearch}
+                  href={goToElasticsearch()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel',
                     {
@@ -268,7 +268,7 @@ export function ElasticsearchPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    <EuiLink data-test-subj="esNumberOfNodes" onClick={goToNodes}>
+                    <EuiLink data-test-subj="esNumberOfNodes" href={goToNodes()}>
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
                         defaultMessage="Nodes: {nodesTotal}"
@@ -320,7 +320,7 @@ export function ElasticsearchPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToIndices}
+                  href={goToIndices()}
                   data-test-subj="esNumberOfIndices"
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
@@ -390,7 +390,7 @@ export function ElasticsearchPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToElasticsearch}
+                  href={goToElasticsearch()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel',
                     {

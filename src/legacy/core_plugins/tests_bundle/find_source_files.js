@@ -27,7 +27,7 @@ import glob from 'glob-all';
 const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   patterns = [].concat(patterns || []);
 
-  const matches = await fromNode(cb => {
+  const matches = await fromNode((cb) => {
     glob(
       patterns,
       {
@@ -52,7 +52,7 @@ const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   return chain(matches)
     .flatten()
     .uniq()
-    .map(match => resolve(cwd, match))
+    .map((match) => resolve(cwd, match))
     .value();
 };
 

@@ -42,6 +42,7 @@ describe('loadAlertTypes', () => {
           context: [{ name: 'var1', description: 'val1' }],
           state: [{ name: 'var2', description: 'val2' }],
         },
+        producer: 'alerting',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
       },
@@ -52,7 +53,7 @@ describe('loadAlertTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/types",
+        "/api/alerts/list_alert_types",
       ]
     `);
   });
@@ -79,7 +80,7 @@ describe('loadAlert', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}`);
   });
 });
 
@@ -98,7 +99,7 @@ describe('loadAlertState', () => {
     http.get.mockResolvedValueOnce(resolvedValue);
 
     expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 
   test('should parse AlertInstances', async () => {
@@ -135,7 +136,7 @@ describe('loadAlertState', () => {
         },
       },
     });
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 
   test('should handle empty response from api', async () => {
@@ -143,7 +144,7 @@ describe('loadAlertState', () => {
     http.get.mockResolvedValueOnce('');
 
     expect(await loadAlertState({ http, alertId })).toEqual({});
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/api/alerts/alert/${alertId}/state`);
   });
 });
 
@@ -161,7 +162,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -191,7 +192,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -225,7 +226,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -259,7 +260,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -294,7 +295,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -329,7 +330,7 @@ describe('loadAlerts', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/_find",
+        "/api/alerts/_find",
         Object {
           "query": Object {
             "default_search_operator": "AND",
@@ -355,13 +356,13 @@ describe('deleteAlerts', () => {
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1",
+          "/api/alerts/alert/1",
         ],
         Array [
-          "/api/alert/2",
+          "/api/alerts/alert/2",
         ],
         Array [
-          "/api/alert/3",
+          "/api/alerts/alert/3",
         ],
       ]
     `);
@@ -372,7 +373,7 @@ describe('createAlert', () => {
   test('should call create alert API', async () => {
     const alertToCreate = {
       name: 'test',
-      consumer: 'alerting',
+      consumer: 'alerts',
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
@@ -401,9 +402,9 @@ describe('createAlert', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert",
+        "/api/alerts/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerts\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -414,7 +415,7 @@ describe('updateAlert', () => {
   test('should call alert update API', async () => {
     const alertToUpdate = {
       throttle: '1m',
-      consumer: 'alerting',
+      consumer: 'alerts',
       name: 'test',
       tags: ['foo'],
       schedule: {
@@ -443,7 +444,7 @@ describe('updateAlert', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/alert/123",
+        "/api/alerts/alert/123",
         Object {
           "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
@@ -459,7 +460,7 @@ describe('enableAlert', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_enable",
+          "/api/alerts/alert/1/_enable",
         ],
       ]
     `);
@@ -473,7 +474,7 @@ describe('disableAlert', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_disable",
+          "/api/alerts/alert/1/_disable",
         ],
       ]
     `);
@@ -487,7 +488,7 @@ describe('muteAlertInstance', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/alert_instance/123/_mute",
+          "/api/alerts/alert/1/alert_instance/123/_mute",
         ],
       ]
     `);
@@ -501,7 +502,7 @@ describe('unmuteAlertInstance', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/alert_instance/123/_unmute",
+          "/api/alerts/alert/1/alert_instance/123/_unmute",
         ],
       ]
     `);
@@ -515,7 +516,7 @@ describe('muteAlert', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_mute_all",
+          "/api/alerts/alert/1/_mute_all",
         ],
       ]
     `);
@@ -529,7 +530,7 @@ describe('unmuteAlert', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_unmute_all",
+          "/api/alerts/alert/1/_unmute_all",
         ],
       ]
     `);
@@ -544,13 +545,13 @@ describe('enableAlerts', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_enable",
+          "/api/alerts/alert/1/_enable",
         ],
         Array [
-          "/api/alert/2/_enable",
+          "/api/alerts/alert/2/_enable",
         ],
         Array [
-          "/api/alert/3/_enable",
+          "/api/alerts/alert/3/_enable",
         ],
       ]
     `);
@@ -565,13 +566,13 @@ describe('disableAlerts', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_disable",
+          "/api/alerts/alert/1/_disable",
         ],
         Array [
-          "/api/alert/2/_disable",
+          "/api/alerts/alert/2/_disable",
         ],
         Array [
-          "/api/alert/3/_disable",
+          "/api/alerts/alert/3/_disable",
         ],
       ]
     `);
@@ -586,13 +587,13 @@ describe('muteAlerts', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_mute_all",
+          "/api/alerts/alert/1/_mute_all",
         ],
         Array [
-          "/api/alert/2/_mute_all",
+          "/api/alerts/alert/2/_mute_all",
         ],
         Array [
-          "/api/alert/3/_mute_all",
+          "/api/alerts/alert/3/_mute_all",
         ],
       ]
     `);
@@ -607,13 +608,13 @@ describe('unmuteAlerts', () => {
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/1/_unmute_all",
+          "/api/alerts/alert/1/_unmute_all",
         ],
         Array [
-          "/api/alert/2/_unmute_all",
+          "/api/alerts/alert/2/_unmute_all",
         ],
         Array [
-          "/api/alert/3/_unmute_all",
+          "/api/alerts/alert/3/_unmute_all",
         ],
       ]
     `);
@@ -627,7 +628,7 @@ describe('health', () => {
     expect(http.get.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alert/_health",
+          "/api/alerts/_health",
         ],
       ]
     `);

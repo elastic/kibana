@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ConnectorAddFlyout } from './connector_add_flyout';
+import ConnectorAddFlyout from './connector_add_flyout';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
@@ -127,7 +127,7 @@ describe('connector_add_flyout', () => {
     const manageLink = callout.find('EuiButton');
     expect(manageLink).toHaveLength(1);
     expect(manageLink.getElements()[0].props.href).toMatchInlineSnapshot(
-      `"/app/kibana#/management/elasticsearch/license_management/"`
+      `"/app/management/stack/license_management"`
     );
 
     const subscriptionLink = callout.find('EuiButtonEmpty');

@@ -172,14 +172,14 @@ export function ChartSwitch(props: Props) {
     () =>
       flyoutOpen &&
       flatten(
-        Object.values(props.visualizationMap).map(v =>
-          v.visualizationTypes.map(t => ({
+        Object.values(props.visualizationMap).map((v) =>
+          v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
             icon: t.largeIcon || t.icon,
           }))
         )
-      ).map(visualizationType => ({
+      ).map((visualizationType) => ({
         ...visualizationType,
         selection: getSelection(visualizationType.visualizationId, visualizationType.id),
       })),
@@ -223,7 +223,7 @@ export function ChartSwitch(props: Props) {
         })}
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
-        {(visualizationTypes || []).map(v => (
+        {(visualizationTypes || []).map((v) => (
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
@@ -269,7 +269,7 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
-  }).filter(suggestion => {
+  }).filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (
@@ -282,8 +282,8 @@ function getTopSuggestion(
   // charts since that allows you to switch from A to B and back
   // to A with the greatest chance of preserving your original state.
   return (
-    suggestions.find(s => s.changeType === 'unchanged') ||
-    suggestions.find(s => s.changeType === 'reduced') ||
+    suggestions.find((s) => s.changeType === 'unchanged') ||
+    suggestions.find((s) => s.changeType === 'reduced') ||
     suggestions[0]
   );
 }

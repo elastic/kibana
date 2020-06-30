@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreSetup, APICaller } from 'kibana/server';
+import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
@@ -62,7 +62,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = (...args: Parameters<APICaller>) => {
+    const callCluster = (...args: Parameters<LegacyAPICaller>) => {
       return core.getStartServices().then(([{ elasticsearch: { legacy: { client } } }]) =>
         client.callAsInternalUser(...args)
       );
@@ -84,7 +84,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg => {
+          .catch((errMsg) => {
             logger.warn(`Error executing actions telemetry task: ${errMsg}`);
             return {
               state: {},
@@ -97,8 +97,5 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 }
 
 function getNextMidnight() {
-  return moment()
-    .add(1, 'd')
-    .startOf('d')
-    .toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }

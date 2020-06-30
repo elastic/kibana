@@ -103,7 +103,7 @@ export const AlertAdd = ({
     actionsErrors.find(
       (errorObj: { errors: IErrorObject }) =>
         errorObj &&
-        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
@@ -214,8 +214,11 @@ export const AlertAdd = ({
   );
 };
 
-const parseErrors: (errors: IErrorObject) => boolean = errors =>
-  !!Object.values(errors).find(errorList => {
+const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
+  !!Object.values(errors).find((errorList) => {
     if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
+
+// eslint-disable-next-line import/no-default-export
+export { AlertAdd as default };

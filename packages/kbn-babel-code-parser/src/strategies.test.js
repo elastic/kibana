@@ -84,7 +84,7 @@ describe('Code Parser Strategies', () => {
       cb(null, `require('./relative_dep')`);
     });
 
-    canRequire.mockImplementation(entry => {
+    canRequire.mockImplementation((entry) => {
       if (entry === `${mockCwd}dep1/relative_dep`) {
         return `${entry}/index.js`;
       }

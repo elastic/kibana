@@ -2,14 +2,37 @@
 
 exports[`PageHeader shallow renders extra links: page_header_with_extra_links 1`] = `
 Array [
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  .c0 {
+  white-space: nowrap;
+}
+
+@media only screen and (max-width:1024px) and (min-width:868px) {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+    width: 500px;
+  }
+}
+
+@media only screen and (max-width:880px) {
+  .c1.c1.c1 {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+  }
+
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+    width: calc(100% + 8px);
+  }
+}
+
+<div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>
@@ -18,56 +41,118 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              class="euiPopover__anchor"
+            >
+              <button
+                aria-label="Open alert context menu"
+                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+                data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content"
+                >
+                  <div
+                    aria-hidden="true"
+                    class="euiButtonEmpty__icon"
+                    data-euiicon-type="arrowDown"
+                  />
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Alerts
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            href="/settings"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary"
+              data-test-subj="settings-page-link"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content"
+              >
+                <div
+                  aria-hidden="true"
+                  class="euiButtonEmpty__icon"
+                  data-euiicon-type="gear"
+                />
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Settings
+                </span>
+              </span>
+            </button>
+          </a>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <div
+                aria-hidden="true"
+                class="euiButtonEmpty__icon"
+                data-euiicon-type="plusInCircle"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Add data
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero c1"
+      style="flex-basis:485px"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
       >
         <div
           class="euiFlexItem"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiPopover euiPopover--anchorDownLeft"
+              id="QuickSelectPopover"
             >
               <div
-                class="euiPopover euiPopover--anchorDownCenter"
-              >
-                <div
-                  class="euiPopover__anchor"
-                >
-                  <button
-                    aria-label="Open alert context menu"
-                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
-                    data-test-subj="xpack.uptime.alertsPopover.toggleButton"
-                    type="button"
-                  >
-                    <span
-                      class="euiButtonEmpty__content"
-                    >
-                      <div
-                        aria-hidden="true"
-                        class="euiButtonEmpty__icon"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        Alerts
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <a
-                href="/settings"
+                class="euiPopover__anchor euiQuickSelectPopover__anchor"
               >
                 <button
-                  class="euiButtonEmpty euiButtonEmpty--primary"
-                  data-test-subj="settings-page-link"
+                  aria-label="Date quick select"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
@@ -76,122 +161,80 @@ Array [
                     <div
                       aria-hidden="true"
                       class="euiButtonEmpty__icon"
-                      data-euiicon-type="gear"
+                      data-euiicon-type="arrowDown"
                     />
                     <span
-                      class="euiButtonEmpty__text"
+                      class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
-                      Settings
+                      <div
+                        data-euiicon-type="clock"
+                      />
                     </span>
                   </span>
                 </button>
-              </a>
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <div
+                class="euiDatePickerRange euiDatePickerRange--inGroup"
+              >
+                <button
+                  class="euiSuperDatePicker__prettyFormat"
+                  data-test-subj="superDatePickerShowDatesButton"
+                >
+                  Last 15 minutes
+                  <span
+                    class="euiSuperDatePicker__prettyFormatLink"
+                  >
+                    Show dates
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
         <div
-          class="euiFlexItem"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+          <span
+            class="euiToolTipAnchor"
           >
-            <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+            <button
+              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              data-test-subj="superDatePickerApplyTimeButton"
+              type="button"
             >
-              <div
-                class="euiFlexItem"
+              <span
+                class="euiButton__content"
               >
                 <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
-                >
-                  <div
-                    class="euiPopover euiPopover--anchorDownLeft"
-                    id="QuickSelectPopover"
-                  >
-                    <div
-                      class="euiPopover__anchor euiQuickSelectPopover__anchor"
-                    >
-                      <button
-                        aria-label="Date quick select"
-                        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
-                        data-test-subj="superDatePickerToggleQuickMenuButton"
-                        type="button"
-                      >
-                        <span
-                          class="euiButtonEmpty__content"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="euiButtonEmpty__icon"
-                            data-euiicon-type="arrowDown"
-                          />
-                          <span
-                            class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
-                          >
-                            <div
-                              data-euiicon-type="clock"
-                            />
-                          </span>
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    class="euiFormControlLayout__childrenWrapper"
-                  >
-                    <div
-                      class="euiDatePickerRange euiDatePickerRange--inGroup"
-                    >
-                      <button
-                        class="euiSuperDatePicker__prettyFormat"
-                        data-test-subj="superDatePickerShowDatesButton"
-                      >
-                        Last 15 minutes
-                        <span
-                          class="euiSuperDatePicker__prettyFormatLink"
-                        >
-                          Show dates
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
+                  aria-hidden="true"
+                  class="euiButton__icon"
+                  data-euiicon-type="refresh"
+                />
                 <span
-                  class="euiToolTipAnchor"
+                  class="euiButton__text euiSuperUpdateButton__text"
                 >
-                  <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
-                    data-test-subj="superDatePickerApplyTimeButton"
-                    type="button"
-                  >
-                    <span
-                      class="euiButton__content"
-                    >
-                      <div
-                        aria-hidden="true"
-                        class="euiButton__icon"
-                        data-euiicon-type="refresh"
-                      />
-                      <span
-                        class="euiButton__text euiSuperUpdateButton__text"
-                      >
-                        Refresh
-                      </span>
-                    </span>
-                  </button>
+                  Refresh
                 </span>
-              </div>
-            </div>
-          </div>
+              </span>
+            </button>
+          </span>
         </div>
       </div>
     </div>
   </div>,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiSpacer euiSpacer--s"
   />,
 ]
@@ -199,130 +242,150 @@ Array [
 
 exports[`PageHeader shallow renders with the date picker: page_header_with_date_picker 1`] = `
 Array [
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  .c0 {
+  white-space: nowrap;
+}
+
+@media only screen and (max-width:1024px) and (min-width:868px) {
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+    width: 500px;
+  }
+}
+
+@media only screen and (max-width:880px) {
+  .c1.c1.c1 {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+  }
+
+  .c1.c1.c1 .euiSuperDatePicker__flexWrapper {
+    width: calc(100% + 8px);
+  }
+}
+
+<div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
+    />
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero c1"
+      style="flex-basis:485px"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
       >
-        <div
-          class="euiFlexItem"
-        />
         <div
           class="euiFlexItem"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
+              class="euiPopover euiPopover--anchorDownLeft"
+              id="QuickSelectPopover"
             >
               <div
-                class="euiFlexItem"
+                class="euiPopover__anchor euiQuickSelectPopover__anchor"
               >
-                <div
-                  class="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
+                <button
+                  aria-label="Date quick select"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  data-test-subj="superDatePickerToggleQuickMenuButton"
+                  type="button"
                 >
-                  <div
-                    class="euiPopover euiPopover--anchorDownLeft"
-                    id="QuickSelectPopover"
+                  <span
+                    class="euiButtonEmpty__content"
                   >
                     <div
-                      class="euiPopover__anchor euiQuickSelectPopover__anchor"
-                    >
-                      <button
-                        aria-label="Date quick select"
-                        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
-                        data-test-subj="superDatePickerToggleQuickMenuButton"
-                        type="button"
-                      >
-                        <span
-                          class="euiButtonEmpty__content"
-                        >
-                          <div
-                            aria-hidden="true"
-                            class="euiButtonEmpty__icon"
-                            data-euiicon-type="arrowDown"
-                          />
-                          <span
-                            class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
-                          >
-                            <div
-                              data-euiicon-type="clock"
-                            />
-                          </span>
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    class="euiFormControlLayout__childrenWrapper"
-                  >
-                    <div
-                      class="euiDatePickerRange euiDatePickerRange--inGroup"
-                    >
-                      <button
-                        class="euiSuperDatePicker__prettyFormat"
-                        data-test-subj="superDatePickerShowDatesButton"
-                      >
-                        Last 15 minutes
-                        <span
-                          class="euiSuperDatePicker__prettyFormatLink"
-                        >
-                          Show dates
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
-              >
-                <span
-                  class="euiToolTipAnchor"
-                >
-                  <button
-                    class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
-                    data-test-subj="superDatePickerApplyTimeButton"
-                    type="button"
-                  >
+                      aria-hidden="true"
+                      class="euiButtonEmpty__icon"
+                      data-euiicon-type="arrowDown"
+                    />
                     <span
-                      class="euiButton__content"
+                      class="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                     >
                       <div
-                        aria-hidden="true"
-                        class="euiButton__icon"
-                        data-euiicon-type="refresh"
+                        data-euiicon-type="clock"
                       />
-                      <span
-                        class="euiButton__text euiSuperUpdateButton__text"
-                      >
-                        Refresh
-                      </span>
                     </span>
-                  </button>
-                </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <div
+                class="euiDatePickerRange euiDatePickerRange--inGroup"
+              >
+                <button
+                  class="euiSuperDatePicker__prettyFormat"
+                  data-test-subj="superDatePickerShowDatesButton"
+                >
+                  Last 15 minutes
+                  <span
+                    class="euiSuperDatePicker__prettyFormatLink"
+                  >
+                    Show dates
+                  </span>
+                </button>
               </div>
             </div>
           </div>
         </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <span
+            class="euiToolTipAnchor"
+          >
+            <button
+              class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+              data-test-subj="superDatePickerApplyTimeButton"
+              type="button"
+            >
+              <span
+                class="euiButton__content"
+              >
+                <div
+                  aria-hidden="true"
+                  class="euiButton__icon"
+                  data-euiicon-type="refresh"
+                />
+                <span
+                  class="euiButton__text euiSuperUpdateButton__text"
+                >
+                  Refresh
+                </span>
+              </span>
+            </button>
+          </span>
+        </div>
       </div>
     </div>
   </div>,
-  <div
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
     class="euiSpacer euiSpacer--s"
   />,
 ]
@@ -330,32 +393,25 @@ Array [
 
 exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  .c0 {
+  white-space: nowrap;
+}
+
+<div
+    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem"
     >
       <h1
-        class="euiTitle euiTitle--medium"
+        class="c0 euiTitle euiTitle--medium"
       >
         TestingHeading
       </h1>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <div
-          class="euiFlexItem"
-        />
-        <div
-          class="euiFlexItem"
-        />
-      </div>
-    </div>
+    />
   </div>,
   <div
     class="euiSpacer euiSpacer--s"

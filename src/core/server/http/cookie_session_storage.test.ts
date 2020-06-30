@@ -29,14 +29,14 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { httpServerMock } from './http_server.mocks';
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
@@ -62,11 +62,12 @@ configService.atPath.mockReturnValue(
       disableProtection: true,
       whitelist: [],
     },
+    customResponseHeaders: {},
   } as any)
 );
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
   env = Env.createDefault(getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
@@ -100,7 +101,7 @@ const userData = { id: '42' };
 const sessionDurationMs = 1000;
 const path = '/';
 const sessVal = () => ({ value: userData, expires: Date.now() + sessionDurationMs, path });
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
@@ -134,9 +135,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -173,9 +172,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       expect(cookies).toBeDefined();
@@ -206,9 +203,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200, { value: null });
+      const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
       const cookies = response.get('set-cookie');
       expect(cookies).not.toBeDefined();
@@ -329,7 +324,7 @@ describe('Cookie based SessionStorage', () => {
       expect(mockServer.auth.test).toBeCalledTimes(1);
       expect(mockServer.auth.test).toHaveBeenCalledWith('security-cookie', mockRequest);
 
-      expect(loggingServiceMock.collect(logger).warn).toEqual([
+      expect(loggingSystemMock.collect(logger).warn).toEqual([
         ['Found 2 auth sessions when we were only expecting 1.'],
       ]);
     });
@@ -386,7 +381,7 @@ describe('Cookie based SessionStorage', () => {
       const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
       expect(session).toBe(null);
 
-      expect(loggingServiceMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
+      expect(loggingSystemMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);
     });
   });
 
@@ -413,9 +408,7 @@ describe('Cookie based SessionStorage', () => {
       );
       await server.start();
 
-      const response = await supertest(innerServer.listener)
-        .get('/')
-        .expect(200);
+      const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const cookies = response.get('set-cookie');
       const sessionCookie = retrieveSessionCookie(cookies[0]);
@@ -429,6 +422,62 @@ describe('Cookie based SessionStorage', () => {
       expect(cookies2).toEqual([
         'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/',
       ]);
+    });
+  });
+
+  describe('#options', () => {
+    describe('#SameSite', () => {
+      it('throws an exception if "SameSite: None" set on not Secure connection', async () => {
+        const { server: innerServer } = await server.setup(setupDeps);
+
+        expect(
+          createCookieSessionStorageFactory(logger.get(), innerServer, {
+            ...cookieOptions,
+            sameSite: 'None',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"\\"SameSite: None\\" requires Secure connection"`
+        );
+      });
+
+      for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
+        it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
+          const { server: innerServer, createRouter } = await server.setup(setupDeps);
+          const router = createRouter('');
+
+          router.get({ path: '/', validate: false }, async (context, req, res) => {
+            const sessionStorage = factory.asScoped(req);
+            const sessionValue = await sessionStorage.get();
+            if (!sessionValue) {
+              sessionStorage.set(sessVal());
+              return res.ok();
+            }
+            return res.ok({ body: { value: sessionValue.value } });
+          });
+
+          const factory = await createCookieSessionStorageFactory(logger.get(), innerServer, {
+            ...cookieOptions,
+            isSecure: true,
+            name: `sid-${sameSite}`,
+            sameSite,
+          });
+          await server.start();
+
+          const response = await supertest(innerServer.listener).get('/').expect(200);
+
+          const cookies = response.get('set-cookie');
+          expect(cookies).toBeDefined();
+          expect(cookies).toHaveLength(1);
+
+          const sessionCookie = retrieveSessionCookie(cookies[0]);
+          expect(sessionCookie.extensions).toContain(`SameSite=${sameSite}`);
+
+          await supertest(innerServer.listener)
+            .get('/')
+            .set('Cookie', `${sessionCookie.key}=${sessionCookie.value}`)
+            .expect(200, { value: userData });
+        });
+      }
     });
   });
 });

@@ -17,14 +17,14 @@ import { AutoFollowPatternTable as AutoFollowPatternTableComponent } from './aut
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   apiStatusDelete: getApiStatus(`${scope}-delete`)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  selectAutoFollowPattern: name => dispatch(selectDetailAutoFollowPattern(name)),
-  pauseAutoFollowPattern: name => dispatch(pauseAutoFollowPattern(name)),
-  resumeAutoFollowPattern: name => dispatch(resumeAutoFollowPattern(name)),
+const mapDispatchToProps = (dispatch) => ({
+  selectAutoFollowPattern: (name) => dispatch(selectDetailAutoFollowPattern(name)),
+  pauseAutoFollowPattern: (name) => dispatch(pauseAutoFollowPattern(name)),
+  resumeAutoFollowPattern: (name) => dispatch(resumeAutoFollowPattern(name)),
 });
 
 export const AutoFollowPatternTable = connect(

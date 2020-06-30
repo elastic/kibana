@@ -34,14 +34,15 @@ import {
   HELLO_WORLD_EMBEDDABLE,
   TODO_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
-  SEARCHABLE_LIST_CONTAINER,
+  SearchableListContainerFactory,
 } from '../../embeddable_examples/public';
 
 interface Props {
   embeddableServices: EmbeddableStart;
+  searchListContainerFactory: SearchableListContainerFactory;
 }
 
-export function EmbeddablePanelExample({ embeddableServices }: Props) {
+export function EmbeddablePanelExample({ embeddableServices, searchListContainerFactory }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
@@ -81,10 +82,9 @@ export function EmbeddablePanelExample({ embeddableServices }: Props) {
   useEffect(() => {
     ref.current = true;
     if (!embeddable) {
-      const factory = embeddableServices.getEmbeddableFactory(SEARCHABLE_LIST_CONTAINER);
-      const promise = factory?.create(searchableInput);
+      const promise = searchListContainerFactory.create(searchableInput);
       if (promise) {
-        promise.then(e => {
+        promise.then((e) => {
           if (ref.current) {
             setEmbeddable(e);
           }

@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiEmptyPrompt,
-  // @ts-ignore (elastic/eui#1557) EuiFilePicker is not exported yet
   EuiFilePicker,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -27,7 +26,6 @@ import React, { FunctionComponent } from 'react';
 
 import { ComponentStrings } from '../../../i18n';
 
-// @ts-ignore
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
@@ -52,7 +50,7 @@ interface Props {
   onAssetDelete: (asset: AssetType) => void;
 }
 
-export const AssetModal: FunctionComponent<Props> = props => {
+export const AssetModal: FunctionComponent<Props> = (props) => {
   const {
     assetValues,
     isLoading,
@@ -114,7 +112,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
           <EuiSpacer />
           {assetValues.length ? (
             <EuiFlexGrid columns={4}>
-              {assetValues.map(asset => (
+              {assetValues.map((asset) => (
                 <Asset
                   asset={asset}
                   key={asset.id}

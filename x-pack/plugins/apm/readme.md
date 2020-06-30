@@ -39,18 +39,26 @@ _Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sa
 
 ### Unit testing
 
-Note: Run the following commands from `kibana/x-pack`.
+Note: Run the following commands from `kibana/x-pack/plugins/apm`.
 
 #### Run unit tests
 
 ```
-node scripts/jest.js plugins/apm --watch
+npx jest --watch
 ```
 
 #### Update snapshots
 
 ```
-node scripts/jest.js plugins/apm --updateSnapshot
+npx jest --updateSnapshot
+```
+
+#### Coverage
+
+HTML coverage report can be found in target/coverage/jest after tests have run.
+
+```
+open target/coverage/jest/index.html
 ```
 
 ### Functional tests
@@ -72,19 +80,38 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
+Our tests are separated in two suites: one suite runs with a basic license, and the other
+with a trial license (the equivalent of gold+). This requires separate test servers and test runs.
+
 **Start server**
 
+Basic:
+
 ```
-node scripts/functional_tests_server --config x-pack/test/api_integration/config.js
+node scripts/functional_tests_server --config x-pack/test/apm_api_integration/basic/config.ts
+```
+
+Trial:
+
+```
+node scripts/functional_tests_server --config x-pack/test/apm_api_integration/trial/config.ts
 ```
 
 **Run tests**
 
+Basic:
+
 ```
-node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts
 ```
 
-APM tests are located in `x-pack/test/api_integration/apis/apm`.
+Trial:
+
+```
+node scripts/functional_test_runner --config x-pack/test/apm_api_integration/trial/config.ts
+```
+
+APM tests are located in `x-pack/test/apm_api_integration`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### Linting

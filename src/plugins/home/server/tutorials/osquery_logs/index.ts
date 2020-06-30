@@ -37,7 +37,7 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
       defaultMessage: 'Osquery logs',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by osqueryd.',
     }),

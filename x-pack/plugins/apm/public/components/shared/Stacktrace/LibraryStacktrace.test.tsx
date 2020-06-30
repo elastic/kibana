@@ -22,7 +22,7 @@ describe('LibraryStacktrace', () => {
       it('renders an accordion', () => {
         const props = {
           id: 'testId',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }]
+          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
 
         expect(

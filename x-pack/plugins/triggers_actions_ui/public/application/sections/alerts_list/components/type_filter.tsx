@@ -57,7 +57,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
               onClick={() => {
                 const isPreviouslyChecked = selectedValues.includes(item.value);
                 if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter(val => val !== item.value));
+                  setSelectedValues(selectedValues.filter((val) => val !== item.value));
                 } else {
                   setSelectedValues(selectedValues.concat(item.value));
                 }

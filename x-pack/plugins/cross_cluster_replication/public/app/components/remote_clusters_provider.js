@@ -19,7 +19,7 @@ export class RemoteClustersProvider extends PureComponent {
   }
 
   loadRemoteClusters() {
-    const sortClusterByName = remoteClusters =>
+    const sortClusterByName = (remoteClusters) =>
       remoteClusters.sort((a, b) => {
         if (a.name < b.name) {
           return -1;
@@ -31,13 +31,13 @@ export class RemoteClustersProvider extends PureComponent {
       });
     loadRemoteClusters()
       .then(sortClusterByName)
-      .then(remoteClusters => {
+      .then((remoteClusters) => {
         this.setState({
           isLoading: false,
           remoteClusters,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         this.setState({
           isLoading: false,
           error,

@@ -45,7 +45,9 @@ export const CalendarsListTable = ({
       sortable: true,
       truncateText: true,
       scope: 'row',
-      render: id => <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>,
+      render: (id) => (
+        <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>
+      ),
     },
     {
       field: 'job_ids_string',
@@ -54,7 +56,7 @@ export const CalendarsListTable = ({
       }),
       sortable: true,
       truncateText: true,
-      render: jobList => {
+      render: (jobList) => {
         return jobList === GLOBAL_CALENDAR ? (
           <span style={{ fontStyle: 'italic' }}>
             <FormattedMessage
@@ -73,7 +75,7 @@ export const CalendarsListTable = ({
         defaultMessage: 'Events',
       }),
       sortable: true,
-      render: eventsLength =>
+      render: (eventsLength) =>
         i18n.translate('xpack.ml.calendarsList.table.eventsCountLabel', {
           defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
           values: { eventsLength },
@@ -82,7 +84,7 @@ export const CalendarsListTable = ({
   ];
 
   const tableSelection = {
-    onSelectionChange: selection => setSelectedCalendarList(selection),
+    onSelectionChange: (selection) => setSelectedCalendarList(selection),
   };
 
   const search = {

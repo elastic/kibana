@@ -3,10 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+export { deserializeDataStream, deserializeDataStreamList } from './data_stream_serialization';
+
 export {
+  deserializeLegacyTemplateList,
   deserializeTemplateList,
-  deserializeV1Template,
-  serializeV1Template,
+  deserializeLegacyTemplate,
+  serializeLegacyTemplate,
 } from './template_serialization';
 
 export { getTemplateParameter } from './utils';
+
+export {
+  deserializeComponentTemplate,
+  deserializeComponenTemplateList,
+} from './component_template_serialization';

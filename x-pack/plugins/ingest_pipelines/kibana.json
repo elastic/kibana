@@ -3,15 +3,7 @@
   "version": "8.0.0",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "licensing",
-    "management"
-  ],
-  "optionalPlugins": [
-    "usageCollection"
-  ],
-  "configPath": [
-    "xpack",
-    "ingest_pipelines"
-  ]
+  "requiredPlugins": ["licensing", "management"],
+  "optionalPlugins": ["security", "usageCollection"],
+  "configPath": ["xpack", "ingest_pipelines"]
 }

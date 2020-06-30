@@ -6,6 +6,9 @@
     "xpack",
     "observability"
   ],
+  "optionalPlugins": [
+    "licensing"
+  ],
   "ui": true,
   "server": true
 }

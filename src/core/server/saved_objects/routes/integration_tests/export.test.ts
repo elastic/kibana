@@ -27,7 +27,7 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '../test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
@@ -98,7 +98,7 @@ describe('POST /api/saved_objects/_export', () => {
       })
     );
 
-    const objects = (result.text as string).split('\n').map(row => JSON.parse(row));
+    const objects = (result.text as string).split('\n').map((row) => JSON.parse(row));
     expect(objects).toEqual(sortedObjects);
     expect(exportSavedObjectsToStream.mock.calls[0][0]).toEqual(
       expect.objectContaining({

@@ -22,7 +22,7 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 const initalData = {
   items: [],
   hasHistoricalData: true,
-  hasLegacyData: false
+  hasLegacyData: false,
 };
 
 let hasDisplayedToast = false;
@@ -31,16 +31,16 @@ export function ServiceOverview() {
   const { core } = useApmPluginContext();
   const {
     urlParams: { start, end },
-    uiFilters
+    uiFilters,
   } = useUrlParams();
   const { data = initalData, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (start && end) {
         return callApmApi({
           pathname: '/api/apm/services',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) }
-          }
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+          },
         });
       }
     },
@@ -54,30 +54,30 @@ export function ServiceOverview() {
       core.notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
           defaultMessage:
-            'Legacy data was detected within the selected time range'
+            'Legacy data was detected within the selected time range',
         }),
         text: toMountPoint(
           <p>
             {i18n.translate('xpack.apm.serviceOverview.toastText', {
               defaultMessage:
-                "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in "
+                "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in ",
             })}
 
             <EuiLink
               href={url.format({
                 pathname: core.http.basePath.prepend('/app/kibana'),
-                hash: '/management/elasticsearch/upgrade_assistant'
+                hash: '/management/stack/upgrade_assistant',
               })}
             >
               {i18n.translate(
                 'xpack.apm.serviceOverview.upgradeAssistantLink',
                 {
-                  defaultMessage: 'the upgrade assistant'
+                  defaultMessage: 'the upgrade assistant',
                 }
               )}
             </EuiLink>
           </p>
-        )
+        ),
       });
     }
   }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
@@ -88,7 +88,7 @@ export function ServiceOverview() {
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
-      projection: PROJECTION.SERVICES
+      projection: PROJECTION.SERVICES,
     }),
     []
   );

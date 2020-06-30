@@ -7,9 +7,14 @@
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ScopedHistory } from 'kibana/public';
 import { CreateRoleMappingButton } from '../create_role_mapping_button';
 
-export const EmptyPrompt: React.FunctionComponent<{}> = () => (
+interface EmptyPromptProps {
+  history: ScopedHistory;
+}
+
+export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({ history }) => (
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
@@ -30,7 +35,7 @@ export const EmptyPrompt: React.FunctionComponent<{}> = () => (
         </p>
       </Fragment>
     }
-    actions={<CreateRoleMappingButton />}
+    actions={<CreateRoleMappingButton history={history} />}
     data-test-subj="roleMappingsEmptyPrompt"
   />
 );

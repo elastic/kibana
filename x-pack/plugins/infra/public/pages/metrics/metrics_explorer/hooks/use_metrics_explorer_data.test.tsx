@@ -31,7 +31,7 @@ const renderUseMetricsExplorerDataHook = () => {
     return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
   };
   return renderHook(
-    props =>
+    (props) =>
       useMetricsExplorerData(
         props.options,
         props.source,
@@ -46,7 +46,7 @@ const renderUseMetricsExplorerDataHook = () => {
         source,
         derivedIndexPattern,
         timeRange,
-        afterKey: null as string | null,
+        afterKey: null as string | null | Record<string, string | null>,
         signal: 1,
       },
       wrapper,

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[security-settings-kb]]
-=== Security settings in Kibana
+=== Security settings in {kib}
 ++++
 <titleabbrev>Security settings</titleabbrev>
 ++++
@@ -31,6 +31,150 @@ You do not need to configure any additional settings to use the
 |===
 
 [float]
+[[authentication-security-settings]]
+==== Authentication security settings
+
+You configure authentication settings in the `xpack.security.authc` namespace in `kibana.yml`.
+
+For example:
+
+[source,yaml]
+----------------------------------------
+xpack.security.authc:
+    providers:
+      basic.basic1: <1>
+          order: 0 <2>
+          ...
+
+      saml.saml1: <3>
+          order: 1
+          ...
+  
+      saml.saml2: <4>
+          order: 2
+          ...
+  
+      pki.realm3:
+          order: 3
+          ...
+    ...
+----------------------------------------
+<1> Specifies the type of authentication provider (for example, `basic`, `token`, `saml`, `oidc`, `kerberos`, `pki`) and the provider name. This setting is mandatory.
+<2> Specifies the order of the provider in the authentication chain and on the Login Selector UI. This setting is mandatory.
+<3> Specifies the settings for the SAML authentication provider with a `saml1` name.
+<4> Specifies the settings for the SAML authentication provider with a `saml2` name.
+
+The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to <<kibana-authentication>>.
+
+[float]
+[[authentication-provider-settings]]
+===== Valid settings for all authentication providers
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.enabled`
+| Determines if the authentication provider should be enabled. By default, {kib} enables the provider as soon as you configure any of its properties.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.order`
+| Order of the provider in the authentication chain and on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.description`
+| Custom description of the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.hint`
+| Custom hint for the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.icon`
+| Custom icon for the provider entry displayed on the Login Selector UI.
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.showInSelector`
+| Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
+
+|===
+
+[NOTE]
+============
+You are unable to set this setting to `false` for `basic` and `token` authentication providers.
+============
+
+[cols="2*<"]
+|===
+
+| `xpack.security.authc.providers.`
+`<provider-type>.<provider-name>.accessAgreement.message`
+| Access agreement text in Markdown format. For more information, refer to <<xpack-security-access-agreement>>.
+
+|===
+
+[float]
+[[saml-authentication-provider-settings]]
+===== SAML authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`saml.<provider-name>.realm`
+| SAML realm in {es} that provider should use.
+
+| `xpack.security.authc.providers.`
+`saml.<provider-name>.maxRedirectURLSize`
+| The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
+
+|===
+
+[float]
+[[oidc-authentication-provider-settings]]
+===== OpenID Connect authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`oidc.<provider-name>.realm`
+| OpenID Connect realm in {es} that the provider should use.
+
+|===
+
+[float]
+[[http-authentication-settings]]
+===== HTTP authentication settings
+
+There is a very limited set of cases when you'd want to change these settings. For more information, refer to <<http-authentication>>.
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.http.enabled`
+| Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
+
+| `xpack.security.authc.http.autoSchemesEnabled`
+| Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
+
+| `xpack.security.authc.http.schemes`
+| List of HTTP authentication schemes that {kib} HTTP authentication should support. By default, this setting is set to `['apikey']` to support HTTP authentication with <<api-keys, `ApiKey`>> scheme.
+
+|===
+
+[float]
+[[login-selector-settings]]
+===== Login Selector UI settings
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.selector.enabled`
+| Determines if the Login Selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+
+|===
+
+[float]
 [[security-ui-settings]]
 ==== User interface security settings
 
@@ -54,6 +198,11 @@ You can configure the following settings in the `kibana.yml` file.
   is automatically set to `true` if `server.ssl.enabled` is set to `true`. Set
   this to `true` if SSL is configured outside of {kib} (for example, you are
   routing requests through a load balancer or proxy).
+
+| `xpack.security.sameSiteCookies`
+  | Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
+  Valid values are `Strict`, `Lax`, `None`.
+  This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting `xpack.security.secureCookies: true`.
 
 | `xpack.security.session.idleTimeout`
   | Sets the session duration. By default, sessions stay active until the
@@ -90,5 +239,8 @@ string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
 
 | `xpack.security.loginAssistanceMessage`
   | Adds a message to the login screen. Useful for displaying information about maintenance windows, links to corporate sign up pages etc.
+
+| `xpack.security.loginHelp`
+  | Adds a message accessible at the Login Selector UI with additional help information for the login process.
 
 |===

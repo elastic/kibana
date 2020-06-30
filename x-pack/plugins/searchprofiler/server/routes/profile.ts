@@ -46,7 +46,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         body: JSON.stringify(parsed, null, 2),
       };
       try {
-        const resp = await elasticsearch.dataClient.callAsCurrentUser('search', body);
+        const resp = await elasticsearch.legacy.client.callAsCurrentUser('search', body);
         return response.ok({
           body: {
             ok: true,

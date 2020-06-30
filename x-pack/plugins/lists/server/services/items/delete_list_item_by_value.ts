@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
@@ -15,7 +15,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
 }
 
@@ -33,7 +33,7 @@ export const deleteListItemByValue = async ({
     type,
     value: [value],
   });
-  const values = listItems.map(listItem => listItem.value);
+  const values = listItems.map((listItem) => listItem.value);
   const filter = getQueryFilterFromTypeValue({
     listId,
     type,

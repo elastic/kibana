@@ -19,7 +19,7 @@
 
 import { defaults, indexBy, sortBy } from 'lodash';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
 import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -39,7 +39,7 @@ export function concatIfUniq<T>(arr: T[], value: T) {
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   indices: string | string[] = [],
   metaFields: string[] = []
 ) {
@@ -47,10 +47,10 @@ export async function getFieldCapabilities(
   const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    .filter(name => !name.startsWith('_'))
+    .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
     .reduce(concatIfUniq, [] as string[])
-    .map<FieldDescriptor>(name =>
+    .map<FieldDescriptor>((name) =>
       defaults({}, fieldsFromFieldCapsByName[name], {
         name,
         type: 'string',

@@ -16,7 +16,7 @@ import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
 export interface OpenFlyoutAddDrilldownParams {
-  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
@@ -42,14 +42,6 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
 
-    /**
-     * Temporarily disable drilldowns for Lens as Lens embeddable does not have
-     * `.embeddable` field on VALUE_CLICK_TRIGGER context.
-     *
-     * @todo Remove this condition once Lens adds `.embeddable` to field to context.
-     */
-    if (context.embeddable.type === 'lens') return false;
-
     return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
   }
 
@@ -70,9 +62,8 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.drilldowns.FlyoutManageDrilldowns
+        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
           onClose={() => handle.close()}
-          placeContext={context}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
         />
