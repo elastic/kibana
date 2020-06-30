@@ -76,7 +76,7 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
   });
 
-  appMountParams.onAppLeave(actions => actions.default());
+  appMountParams.onAppLeave((actions) => actions.default());
 
   const mlLicense = setLicenseCache(deps.licensing, [
     () => ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element),
