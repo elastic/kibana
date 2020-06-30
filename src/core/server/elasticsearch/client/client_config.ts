@@ -24,9 +24,8 @@ import { ClientOptions, NodeOptions } from '@elastic/elasticsearch';
 import { ElasticsearchConfig } from '../elasticsearch_config';
 
 /**
- * @privateRemarks Config that consumers can pass to the Elasticsearch JS client is complex and includes
- * not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS
- * client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
+ * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
+ * {@link ElasticsearchServiceStart.createClient | createClient API}
  *
  * @public
  */
@@ -48,6 +47,13 @@ export type ElasticsearchClientConfig = Pick<
   keepAlive?: boolean;
 };
 
+/**
+ * Parse the client options from given client config and `scoped` flag.
+ *
+ * @param config The config to generate the client options from.
+ * @param scoped if true, will adapt the configuration to be used by a scoped client
+ *        (will remove basic auth and ssl certificates)
+ */
 export function parseClientOptions(
   config: ElasticsearchClientConfig,
   scoped: boolean

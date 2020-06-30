@@ -19,9 +19,24 @@
 
 import { ClientFacade } from './client_facade';
 
-/** @public **/
+/**
+ * Serves the same purpose as the normal {@link ClusterClient | cluster client} but exposes
+ * an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal
+ * user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers
+ * extracted from the current user request to the API instead.
+ *
+ * @public
+ **/
 export interface IScopedClusterClient {
+  /**
+   * Returns a {@link ClientFacade | client facade} to be used to query the elasticsearch cluster
+   * on behalf of the internal Kibana user.
+   */
   asInternalUser: () => ClientFacade;
+  /**
+   * Returns a {@link ClientFacade | client facade} to be used to query the elasticsearch cluster
+   * on behalf of the user that initiated the request to the Kibana server.
+   */
   asCurrentUser: () => ClientFacade;
 }
 

@@ -31,6 +31,8 @@ import { ClientFacade } from './client_facade';
  * @internal
  */
 export const getClientFacade = (client: Client, headers: Headers = {}): ClientFacade => {
+  // do not rename or change this method signature without adapting the API generation script
+  // at `src/dev/generate_es_client.ts`
   const addHeaders = (options?: TransportRequestOptions): TransportRequestOptions => {
     if (!options) {
       return {
