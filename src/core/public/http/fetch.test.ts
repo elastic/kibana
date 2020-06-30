@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -117,7 +117,7 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch(
-          // @ts-ignore
+          // @ts-expect-error
           { path: '/', headers: { hello: 'world' } },
           { headers: { hello: 'mars' } }
         )
