@@ -53,9 +53,6 @@ export const getTemplateStrings = (): TemplateStringDict => ({
       defaultMessage: 'Infographic-style report with live charts',
     }),
   },
-});
-
-export const getUnusedTemplateStrings = (): TemplateStringDict => ({
   Pitch: {
     name: i18n.translate('xpack.canvas.templates.pitchName', {
       defaultMessage: 'Pitch',
