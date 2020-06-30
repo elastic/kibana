@@ -90,7 +90,7 @@ export const LogEntryCategoriesSetupFlyout: React.FC<LogEntryCategoriesSetupFlyo
     return null;
   }
   return (
-    <EuiFlyout onClose={onClose} size="l">
+    <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3>
