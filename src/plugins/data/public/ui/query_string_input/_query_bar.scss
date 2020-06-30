@@ -53,7 +53,8 @@
     &.kbnQueryBar__datePickerWrapper-isHidden {
       width: 0;
       overflow: hidden;
-      visibility: hidden;
+      margin-right: 0;
+      margin-left: 0;
     }
   }
 }
