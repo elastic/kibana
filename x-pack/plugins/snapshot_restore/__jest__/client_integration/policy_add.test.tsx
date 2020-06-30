@@ -7,7 +7,6 @@
 // import helpers first, this also sets up the mocks
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../test/fixtures';

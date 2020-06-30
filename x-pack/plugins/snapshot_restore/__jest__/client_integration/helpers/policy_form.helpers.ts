@@ -55,4 +55,5 @@ export type PolicyFormTestSubjects =
   | 'selectIndicesLink'
   | 'showAdvancedCronLink'
   | 'snapshotNameInput'
+  | 'dataStreamBadge'
   | 'submitButton';
