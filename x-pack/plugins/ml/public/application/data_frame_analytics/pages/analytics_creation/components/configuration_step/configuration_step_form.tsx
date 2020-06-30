@@ -49,7 +49,8 @@ import { useSavedSearch } from './use_saved_search';
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
-    defaultMessage: 'At least one field must be included in the analysis.',
+    defaultMessage:
+      'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
 
@@ -426,6 +427,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         <Fragment />
       </EuiFormRow>
       <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
         includes={includes}
         tableItems={includesTableItems}
         loadingItems={loadingFieldOptions}

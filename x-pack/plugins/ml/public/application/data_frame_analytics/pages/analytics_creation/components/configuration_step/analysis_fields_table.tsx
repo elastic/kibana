@@ -14,7 +14,12 @@ import { FieldSelectionItem } from '../../../../common/analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
-const ITEMS_PER_PAGE = 5;
+const minimumFieldsMessage = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.analysisFieldsTable.minimumFieldsMessage',
+  {
+    defaultMessage: 'At least one field must be selected.',
+  }
+);
 
 const columns = [
   {
@@ -24,9 +29,12 @@ const columns = [
     width: '32px',
   },
   {
-    label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.fieldNameColumn', {
-      defaultMessage: 'Field name',
-    }),
+    label: i18n.translate(
+      'xpack.ml.dataframe.analytics.create.analysisFieldsTable.fieldNameColumn',
+      {
+        defaultMessage: 'Field name',
+      }
+    ),
     id: 'name',
     isSortable: true,
     alignment: LEFT_ALIGNMENT,
@@ -69,16 +77,24 @@ const columns = [
   },
 ];
 
-const checkboxDisabledCheck = (item: FieldSelectionItem) => item.is_required === true;
+const checkboxDisabledCheck = (item: FieldSelectionItem) =>
+  item.is_required === true || (item.reason && item.reason.includes('unsupported type'));
 
 export const AnalysisFieldsTable: FC<{
+  dependentVariable?: string;
   includes: string[];
   loadingItems: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
   tableItems: FieldSelectionItem[];
-}> = ({ includes, loadingItems, setFormState, tableItems }) => {
+}> = ({ dependentVariable, includes, loadingItems, setFormState, tableItems }) => {
   const [sortableProperties, setSortableProperties] = useState();
-  const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
+  const [currentPaginationData, setCurrentPaginationData] = useState<{
+    pageIndex: number;
+    itemsPerPage: number;
+  }>({ pageIndex: 0, itemsPerPage: 5 });
+  const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
+    undefined | string
+  >(undefined);
 
   useEffect(() => {
     if (includes.length === 0 && tableItems.length > 0) {
@@ -159,14 +175,17 @@ export const AnalysisFieldsTable: FC<{
         label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
           defaultMessage: 'Included fields',
         })}
+        isInvalid={minimumFieldsRequiredMessage !== undefined}
+        error={minimumFieldsRequiredMessage}
       >
         <Fragment />
       </EuiFormRow>
       {tableItems.length > 0 && (
         <EuiText size="xs">
-          {includes.length}
           {i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsCount', {
-            defaultMessage: ' fields included in the analysis',
+            defaultMessage:
+              '{numFields, plural, one {# field} other {# fields}} included in the analysis',
+            values: { numFields: includes.length },
           })}
         </EuiText>
       )}
@@ -185,18 +204,32 @@ export const AnalysisFieldsTable: FC<{
       {tableItems.length > 0 && (
         <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">
           <CustomSelectionTable
-            currentPage={currentPageIndex}
+            currentPage={currentPaginationData.pageIndex}
             data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
             checkboxDisabledCheck={checkboxDisabledCheck}
             columns={columns}
             filters={filters}
             items={tableItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            onTableChange={(selection: FieldSelectionItem[]) => {
-              setFormState({ includes: selection });
+            itemsPerPage={currentPaginationData.itemsPerPage}
+            onTableChange={(selection: string[]) => {
+              // dependent variable must always be in includes
+              if (
+                dependentVariable !== undefined &&
+                dependentVariable !== '' &&
+                selection.length === 0
+              ) {
+                selection = [dependentVariable];
+              }
+              // If nothing selected show minimum fields required message and don't update form yet
+              if (selection.length === 0) {
+                setMinimumFieldsRequiredMessage(minimumFieldsMessage);
+              } else {
+                setMinimumFieldsRequiredMessage(undefined);
+                setFormState({ includes: selection });
+              }
             }}
             selectedIds={includes}
-            setCurrentPage={setCurrentPageIndex}
+            setCurrentPaginationData={setCurrentPaginationData}
             singleSelection={false}
             sortableProperties={sortableProperties}
             tableItemId={'name'}

@@ -53,7 +53,7 @@ export function CustomSelectionTable({
   onTableChange,
   radioDisabledCheck,
   selectedIds,
-  setCurrentPage,
+  setCurrentPaginationData,
   singleSelection,
   sortableProperties,
   tableItemId = 'id',
@@ -126,8 +126,11 @@ export function CustomSelectionTable({
       }
     }
 
-    if (setCurrentPage) {
-      setCurrentPage(pager.getCurrentPageIndex());
+    if (setCurrentPaginationData) {
+      setCurrentPaginationData({
+        pageIndex: pager.getCurrentPageIndex(),
+        itemsPerPage: pagerSettings.itemsPerPage,
+      });
     }
 
     onTableChange(currentSelected);
@@ -403,7 +406,7 @@ CustomSelectionTable.propTypes = {
   onTableChange: PropTypes.func.isRequired,
   radioDisabledCheck: PropTypes.func,
   selectedId: PropTypes.array,
-  setCurrentPage: PropTypes.func,
+  setCurrentPaginationData: PropTypes.func,
   singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
   tableItemId: PropTypes.string,
