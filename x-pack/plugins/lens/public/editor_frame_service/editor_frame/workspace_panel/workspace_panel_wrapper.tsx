@@ -66,7 +66,7 @@ export function WorkspacePanelWrapper({
     [dispatch]
   );
   return (
-    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch">
+    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch" responsive={false}>
       <EuiFlexItem grow={false}>
         <ChartSwitch
           data-test-subj="lnsChartSwitcher"
