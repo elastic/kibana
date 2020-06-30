@@ -16,18 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
-import { VisualizeServerPlugin } from './plugin';
-
-import { ConfigSchema, configSchema } from '../config';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    showNewVisualizeFlow: true,
-  },
-  schema: configSchema,
-};
-
-export const plugin = (initContext: PluginInitializerContext) =>
-  new VisualizeServerPlugin(initContext);
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('New Visualize Flow', function () {
+    this.tags('ciGroup2');
+    loadTestFile(require.resolve('./dashboard_embedding'));
+  });
+}
