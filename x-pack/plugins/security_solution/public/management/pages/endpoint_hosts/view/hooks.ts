@@ -51,3 +51,20 @@ export const useHostIngestUrl = (): { url: string; appId: string; appPath: strin
     };
   }, [services.application]);
 };
+
+/**
+ * Returns an object that contains Ingest app and URL information
+ */
+export const useAgentDetailsIngestUrl = (
+  agentId: string
+): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `#/fleet/agents/${agentId}/activity`;
+    return {
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
+      appId: 'ingestManager',
+      appPath,
+    };
+  }, [services.application, agentId]);
+};
