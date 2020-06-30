@@ -238,7 +238,7 @@ transforming documents in that version's target index, but because migrations ar
   <summary>In the future, this algorithm could enable (2.6) "read-only functionality during the downtime window" but this is outside of the scope of this RFC.</summary>
 
   Although the migration algorithm guarantees there's no data loss while providing read-only access to outdated nodes, this could cause plugins to behave in unexpected ways. If we wish to persue it in the future, enabling read-only functionality during the downtime window will be it's own project and must include an audit of all plugins' behaviours.
-<details>
+</details>
 
 ### 4.2.1.3 Upgrade and rollback procedure
 When a newer Kibana starts an upgrade, it blocks all writes to the outdated index to prevent data loss. Since Kibana is not designed to gracefully handle a read-only index this could have unintended consequences such as a task executing multiple times but never being able to write that the task was completed successfully. To prevent unintended consequences, the following procedure should be followed when upgrading Kibana:
