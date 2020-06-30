@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Query as DataQuery } from 'src/plugins/data/public';
+import { Query as DataQuery } from '../../../../../src/plugins/data/common';
 import {
   Entry,
   EntryMatch,

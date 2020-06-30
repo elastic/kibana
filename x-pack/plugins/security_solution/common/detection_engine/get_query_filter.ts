@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, IIndexPattern, Query as DataQuery, esQuery } from 'src/plugins/data/public';
-import { isFilterDisabled } from 'src/plugins/data/common/es_query';
+import {
+  Filter,
+  IIndexPattern,
+  isFilterDisabled,
+  buildEsQuery,
+  Query as DataQuery,
+} from '../../../../../src/plugins/data/common';
 import { ExceptionListItemSchema } from '../../../lists/common/schemas';
 import { buildQueryExceptions } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
@@ -32,5 +37,5 @@ export const getQueryFilter = (
   };
 
   const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
-  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
+  return buildEsQuery(indexPattern, queries, enabledFilters, config);
 };
