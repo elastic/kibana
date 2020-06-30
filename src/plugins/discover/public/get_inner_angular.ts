@@ -63,6 +63,7 @@ import { createLoadingSpinnerDirective } from '././application/components/loadin
 import { createTimechartHeaderDirective } from './application/components/timechart_header';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
+import { createSkipBottomButtonDirective } from './application/components/skip_bottom_button';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -155,6 +156,7 @@ export function initializeInnerAngularModule(
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverSidebar', createDiscoverSidebarDirective)
+    .directive('skipBottomButton', createSkipBottomButtonDirective)
     .directive('hitsCounter', createHitsCounterDirective)
     .directive('loadingSpinner', createLoadingSpinnerDirective)
     .directive('timechartHeader', createTimechartHeaderDirective)
