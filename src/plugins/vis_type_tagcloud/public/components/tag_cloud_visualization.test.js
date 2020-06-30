@@ -19,7 +19,6 @@
 
 import 'jest-canvas-mock';
 
-import { ImageComparator } from 'test_utils/image_comparator';
 import { ExprVis } from '../../../visualizations/public/expressions/vis';
 
 // Replace with mock when converting to jest tests
@@ -31,12 +30,11 @@ import { setFormatService } from '../services';
 import { fieldFormatsServiceMock } from '../../../data/public/field_formats/mocks';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
 
-describe('TagCloudVisualizationTest', function () {
-  setSVGElementGetBBox(512, 512);
-
+describe('TagCloudVisualizationTest', () => {
   let domNode;
   let vis;
-  let imageComparator;
+  let SVGElementGetBBoxSpyInstance;
+  let HTMLElementOffsetMockInstance;
 
   const dummyTableGroup = {
     columns: [
@@ -67,11 +65,16 @@ describe('TagCloudVisualizationTest', function () {
     setFormatService(fieldFormatsServiceMock.createStartContract());
   });
 
-  describe('TagCloudVisualization - basics', function () {
-    beforeEach(async function () {
+  afterAll(() => {
+    SVGElementGetBBoxSpyInstance.mockRestore();
+    HTMLElementOffsetMockInstance.mockRestore();
+  });
+
+  describe('TagCloudVisualization - basics', () => {
+    beforeEach(async () => {
       const visType = new BaseVisType(createTagCloudVisTypeDefinition({ colors: seedColors }));
       setupDOM(512, 512);
-      imageComparator = new ImageComparator();
+
       vis = new ExprVis({
         type: visType,
         params: {
@@ -82,12 +85,7 @@ describe('TagCloudVisualizationTest', function () {
       });
     });
 
-    afterEach(function () {
-      teardownDOM();
-      imageComparator.destroy();
-    });
-
-    test('simple draw', async function () {
+    test('simple draw', async () => {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
 
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
@@ -102,7 +100,7 @@ describe('TagCloudVisualizationTest', function () {
       expect(svgNode.outerHTML).toMatchSnapshot();
     });
 
-    test('with resize', async function () {
+    test('with resize', async () => {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -136,7 +134,8 @@ describe('TagCloudVisualizationTest', function () {
         uiState: false,
       });
 
-      setSVGElementGetBBox(256, 368);
+      SVGElementGetBBoxSpyInstance.mockRestore();
+      SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(256, 368);
 
       Object.defineProperties(window.SVGElement.prototype, {
         transform: {
@@ -149,7 +148,8 @@ describe('TagCloudVisualizationTest', function () {
         },
       });
 
-      setHTMLElementOffset(256, 386);
+      HTMLElementOffsetMockInstance.mockRestore();
+      HTMLElementOffsetMockInstance = setHTMLElementOffset(256, 386);
 
       vis.params.orientation = 'right angled';
       vis.params.minFontSize = 70;
@@ -168,12 +168,10 @@ describe('TagCloudVisualizationTest', function () {
 
   function setupDOM(width, height) {
     domNode = document.createElement('div');
-    setHTMLElementOffset(width, height);
-    document.body.appendChild(domNode);
-  }
 
-  function teardownDOM() {
-    domNode.innerHTML = '';
-    document.body.removeChild(domNode);
+    HTMLElementOffsetMockInstance = setHTMLElementOffset(width, height);
+    SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(width, height);
+
+    document.body.appendChild(domNode);
   }
 });
