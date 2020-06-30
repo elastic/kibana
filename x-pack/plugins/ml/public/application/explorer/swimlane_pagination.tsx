@@ -18,16 +18,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 interface SwimLanePaginationProps {
-  fromPage?: number;
-  perPage?: number;
+  fromPage: number;
+  perPage: number;
   cardinality: number;
   onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
 }
 
 export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   cardinality,
-  fromPage = 1,
-  perPage = 10,
+  fromPage,
+  perPage,
   onPaginationChange,
 }) => {
   const componentFromPage = fromPage - 1;

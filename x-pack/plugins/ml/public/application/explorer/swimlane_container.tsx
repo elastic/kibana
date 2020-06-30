@@ -103,6 +103,7 @@ export const SwimlaneContainer: FC<
             ref={(el) => {
               resizeRef(el);
             }}
+            data-test-subj="mlSwimLaneContainer"
           >
             <EuiFlexItem style={{ width: '100%', overflowY: 'auto' }} grow={false}>
               <EuiText color="subdued" size="s">
@@ -119,7 +120,7 @@ export const SwimlaneContainer: FC<
                 )}
                 {isLoading && (
                   <EuiText textAlign={'center'}>
-                    <EuiLoadingChart size="xl" />
+                    <EuiLoadingChart size="xl" data-test-subj="mlSwimLaneLoadingIndicator" />
                   </EuiText>
                 )}
                 {!isLoading && !showSwimlane && noDataWarning}
@@ -129,8 +130,8 @@ export const SwimlaneContainer: FC<
               <EuiFlexItem grow={false}>
                 <SwimLanePagination
                   cardinality={swimlaneLimit!}
-                  fromPage={fromPage}
-                  perPage={perPage}
+                  fromPage={fromPage!}
+                  perPage={perPage!}
                   onPaginationChange={onPaginationChange!}
                 />
               </EuiFlexItem>
