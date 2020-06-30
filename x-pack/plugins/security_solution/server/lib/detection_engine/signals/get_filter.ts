@@ -4,57 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import {
   LanguageOrUndefined,
   QueryOrUndefined,
   Type,
   SavedIdOrUndefined,
   IndexOrUndefined,
-  ListAndOrUndefined,
   Language,
-  Index,
-  Query,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { AlertServices } from '../../../../../alerts/server';
 import { assertUnreachable } from '../../../utils/build_query';
-import {
-  Filter,
-  Query as DataQuery,
-  esQuery,
-  esFilters,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
-import { buildQueryExceptions } from './build_exceptions_query';
-
-export const getQueryFilter = (
-  query: Query,
-  language: Language,
-  filters: PartialFilter[],
-  index: Index,
-  lists: ListAndOrUndefined
-) => {
-  const indexPattern = {
-    fields: [],
-    title: index.join(),
-  } as IIndexPattern;
-
-  const queries: DataQuery[] = buildQueryExceptions({ query, language, lists });
-
-  const config = {
-    allowLeadingWildcards: true,
-    queryStringOptions: { analyze_wildcard: true },
-    ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: 'Zulu',
-  };
-
-  const enabledFilters = ((filters as unknown) as Filter[]).filter(
-    (f) => f && !esFilters.isFilterDisabled(f)
-  );
-
-  return esQuery.buildEsQuery(indexPattern, queries, enabledFilters, config);
-};
 
 interface GetFilterArgs {
   type: Type;
@@ -64,7 +27,7 @@ interface GetFilterArgs {
   savedId: SavedIdOrUndefined;
   services: AlertServices;
   index: IndexOrUndefined;
-  lists: ListAndOrUndefined;
+  lists: ExceptionListItemSchema[];
 }
 
 interface QueryAttributes {

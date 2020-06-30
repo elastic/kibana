@@ -30,7 +30,7 @@ export const EventCountsForProcess = memo(function EventCountsForProcess({
   relatedStats,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
+  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
   relatedStats: ResolverNodeStats;
 }) {
   interface EventCountsTableView {

@@ -22,7 +22,7 @@ let encryptedSavedObjectsServiceMockInstance: jest.Mocked<EncryptedSavedObjectsS
 beforeEach(() => {
   mockBaseClient = savedObjectsClientMock.create();
   mockBaseTypeRegistry = savedObjectsTypeRegistryMock.create();
-  encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.create([
+  encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.createWithTypes([
     {
       type: 'known-type',
       attributesToEncrypt: new Set([
