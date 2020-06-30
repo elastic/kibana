@@ -43,16 +43,16 @@ export class LayerPanel extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-    this.loadLeftJoinFields();
+    this._loadDisplayName();
+    this._loadImmutableSourceProperties();
+    this._loadLeftJoinFields();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  loadDisplayName = async () => {
+  _loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -63,7 +63,7 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  loadImmutableSourceProperties = async () => {
+  _loadImmutableSourceProperties = async () => {
     if (!this.props.selectedLayer) {
       return;
     }
@@ -74,7 +74,7 @@ export class LayerPanel extends React.Component {
     }
   };
 
-  async loadLeftJoinFields() {
+  async _loadLeftJoinFields() {
     if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
       return;
     }
