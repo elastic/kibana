@@ -89,7 +89,7 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
 `;
 
 const TimelineTemplateBadge = styled.div`
-  background: #a987d1;
+  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
   color: #fff;
   padding: 10px 15px;
   font-size: 0.8em;

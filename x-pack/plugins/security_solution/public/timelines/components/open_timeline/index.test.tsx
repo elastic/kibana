@@ -84,7 +84,7 @@ describe('StatefulOpenTimeline', () => {
   });
 
   describe('#onQueryChange', () => {
-    test.skip('it updates the query state with the expected trimmed value when the user enters a query', () => {
+    test('it updates the query state with the expected trimmed value when the user enters a query', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>

@@ -72,7 +72,7 @@ const ProviderFieldBadge = styled.div`
 `;
 
 const StyledTemplateFieldBadge = styled(ProviderFieldBadge)`
-  background: #a987d1;
+  background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
   text-transform: uppercase;
 `;
 
@@ -82,34 +82,22 @@ interface TemplateFieldBadgeProps {
 }
 
 const ConvertFieldBadge = styled(ProviderFieldBadge)`
-  background: grey;
+  background: ${({ theme }) => theme.eui.euiColorDarkShade};
   cursor: pointer;
 
   &:hover {
     text-decoration: underline;
-    background: #a987d1;
   }
 `;
 
 const TemplateFieldBadge: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
-  const [hoverRef, isHovered] = useHover();
-
-  const content = useMemo(() => {
-    const convertTo =
-      type === DataProviderType.template ? i18n.CONVERT_TO_FIELD : i18n.CONVERT_TO_TEMPLATE_FIELD;
-
-    if (type === DataProviderType.default || isHovered) {
-      return <ConvertFieldBadge onClick={toggleType}>{convertTo}</ConvertFieldBadge>;
-    }
-
+  if (type === DataProviderType.default) {
     return (
-      <StyledTemplateFieldBadge onClick={toggleType}>
-        {i18n.TEMPLATE_FIELD_LABEL}
-      </StyledTemplateFieldBadge>
+      <ConvertFieldBadge onClick={toggleType}>{i18n.CONVERT_TO_TEMPLATE_FIELD}</ConvertFieldBadge>
     );
-  }, [isHovered, toggleType, type]);
+  }
 
-  return <div ref={hoverRef}>{content}</div>;
+  return <StyledTemplateFieldBadge>{i18n.TEMPLATE_FIELD_LABEL}</StyledTemplateFieldBadge>;
 };
 
 interface ProviderBadgeProps {
