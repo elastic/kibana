@@ -59,7 +59,8 @@ it('prevents changing properties on nested children of argument', () => {
 it('prevents adding items to a frozen array', () => {
   const frozen = deepFreeze({ foo: [1] });
   expect(() => {
-    // ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo.push(2);
   }).toThrowError(`object is not extensible`);
 });
@@ -67,7 +68,8 @@ it('prevents adding items to a frozen array', () => {
 it('prevents reassigning items in a frozen array', () => {
   const frozen = deepFreeze({ foo: [1] });
   expect(() => {
-    // ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo[0] = 2;
   }).toThrowError(`read only property '0'`);
 });
