@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
@@ -12,15 +12,21 @@ import { ComponentStrings } from '../../../i18n';
 
 const { PagePreviewPageControls: strings } = ComponentStrings;
 
-export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
-  const handleDuplicate = (ev) => {
+interface Props {
+  pageId: string;
+  onRemove: (pageId: string) => void;
+  onDuplicate: (pageId: string) => void;
+}
+
+export const PageControls: FC<Props> = ({ pageId, onRemove, onDuplicate }) => {
+  const handleDuplicate: ReactEventHandler = (ev) => {
     ev.preventDefault();
     onDuplicate(pageId);
   };
 
-  const handleDelete = (ev) => {
+  const handleRemove: ReactEventHandler = (ev) => {
     ev.preventDefault();
-    onDelete(pageId);
+    onRemove(pageId);
   };
 
   return (
@@ -44,7 +50,7 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
             color="danger"
             iconType="trash"
             aria-label={strings.getDeletePageAriaLabel()}
-            onClick={handleDelete}
+            onClick={handleRemove}
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -54,7 +60,6 @@ export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
 
 PageControls.propTypes = {
   pageId: PropTypes.string.isRequired,
-  pageNumber: PropTypes.number.isRequired,
-  onDelete: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
   onDuplicate: PropTypes.func.isRequired,
 };
