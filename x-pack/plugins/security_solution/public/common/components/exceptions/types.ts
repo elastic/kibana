@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ReactNode } from 'react';
-
-import { Operator, OperatorType } from '../../../lists_plugin_deps';
-
-export interface OperatorOption {
-  message: string;
-  value: string;
-  operator: Operator;
-  type: OperatorType;
-}
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
+import { OperatorOption } from '../autocomplete/types';
+import {
+  EntriesArray,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../lists_plugin_deps';
 
 export interface FormattedEntry {
   fieldName: string;
-  operator: string | null;
-  value: string | string[] | null;
+  operator: string | undefined;
+  value: string | string[] | undefined;
   isNested: boolean;
 }
 
@@ -49,3 +47,26 @@ export interface ExceptionsPagination {
   totalItemCount: number;
   pageSizeOptions: number[];
 }
+
+export interface FormattedBuilderEntryBase {
+  field: IFieldType | undefined;
+  operator: OperatorOption;
+  value: string | string[] | undefined;
+}
+
+export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
+  parent?: string;
+  nested?: FormattedBuilderEntryBase[];
+}
+
+export type CreateExceptionListItemBuilderSchema = Omit<
+  CreateExceptionListItemSchema,
+  'meta' | 'entries'
+> & {
+  meta: { temporaryUuid: string };
+  entries: EntriesArray;
+};
+
+export type ExceptionsBuilderExceptionItem =
+  | ExceptionListItemSchema
+  | CreateExceptionListItemBuilderSchema;
