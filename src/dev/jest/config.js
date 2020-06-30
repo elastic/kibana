@@ -84,7 +84,7 @@ export default {
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testEnvironment: 'jest-environment-jsdom-thirteen',
-  testMatch: ['**/*.test.{js,ts,tsx}'],
+  testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
