@@ -82,12 +82,12 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  install = async id => {
-    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
+  install = async (id) => {
+    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
@@ -95,7 +95,7 @@ export class SampleDataSetCards extends React.Component {
       await installSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
           processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
@@ -110,9 +110,9 @@ export class SampleDataSetCards extends React.Component {
     }
 
     if (this._isMounted) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
-        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+        sampleDataSets: prevState.sampleDataSets.map((sampleDataSet) => {
           if (sampleDataSet.id === id) {
             sampleDataSet.status = INSTALLED_STATUS;
           }
@@ -130,12 +130,12 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  uninstall = async id => {
-    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
+  uninstall = async (id) => {
+    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
@@ -143,7 +143,7 @@ export class SampleDataSetCards extends React.Component {
       await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
           processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
@@ -158,9 +158,9 @@ export class SampleDataSetCards extends React.Component {
     }
 
     if (this._isMounted) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
-        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+        sampleDataSets: prevState.sampleDataSets.map((sampleDataSet) => {
           if (sampleDataSet.id === id) {
             sampleDataSet.status = UNINSTALLED_STATUS;
           }
@@ -178,7 +178,7 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  lightOrDarkImage = sampleDataSet => {
+  lightOrDarkImage = (sampleDataSet) => {
     return getServices().uiSettings.get('theme:darkMode') && sampleDataSet.darkPreviewImagePath
       ? sampleDataSet.darkPreviewImagePath
       : sampleDataSet.previewImagePath;
@@ -187,7 +187,7 @@ export class SampleDataSetCards extends React.Component {
   render() {
     return (
       <EuiFlexGrid columns={3} className="homSampleDataSetCards">
-        {this.state.sampleDataSets.map(sampleDataSet => {
+        {this.state.sampleDataSets.map((sampleDataSet) => {
           return (
             <EuiFlexItem key={sampleDataSet.id}>
               <SampleDataSetCard

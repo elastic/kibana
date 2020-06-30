@@ -16,13 +16,13 @@ import { documentationService } from '../../../../services/documentation';
 type MappingsTemplates = Types['MappingsTemplates'];
 
 interface Props {
-  defaultValue?: MappingsTemplates;
+  value?: MappingsTemplates;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const formSerializer: SerializerFunc<MappingsTemplates> = formData => {
+const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
   const { dynamicTemplates } = formData;
 
   let parsedTemplates;
@@ -50,14 +50,14 @@ const formDeserializer = (formData: { [key: string]: any }) => {
   };
 };
 
-export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
-  const didMountRef = useRef(false);
+export const TemplatesForm = React.memo(({ value }: Props) => {
+  const isMounted = useRef<boolean | undefined>(undefined);
 
   const { form } = useForm<MappingsTemplates>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
-    defaultValue,
+    defaultValue: value,
   });
   const dispatch = useDispatch();
 
@@ -69,25 +69,34 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
       });
     });
     return subscription.unsubscribe;
-  }, [form, dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (didMountRef.current) {
-      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
-      // we need to reset the form to update the fields values.
-      form.reset({ resetValues: true });
-    } else {
-      // Avoid reseting the form on component mount.
-      didMountRef.current = true;
+    if (isMounted.current === undefined) {
+      // On mount: don't reset the form
+      isMounted.current = true;
+      return;
+    } else if (isMounted.current === false) {
+      // When we save the snapshot on unMount we update the "defaultValue" in our state
+      // wich updates the "value" prop here on the component.
+      // To avoid resetting the form at this stage, we exit early.
+      return;
     }
-  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // If the value has changed (it probably means that we have loaded a new JSON)
+    // we need to reset the form to update the fields values.
+    form.reset({ resetValues: true });
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
+      isMounted.current = false;
+
       // On unmount => save in the state a snapshot of the current form data.
-      dispatch({ type: 'templates.save' });
+      const dynamicTemplatesData = form.getFormData();
+      dispatch({ type: 'templates.save', value: dynamicTemplatesData });
     };
-  }, [dispatch]);
+  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div data-test-subj="dynamicTemplates">

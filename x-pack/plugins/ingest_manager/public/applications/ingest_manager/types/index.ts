@@ -20,14 +20,19 @@ export {
   DatasourceConfigRecordEntry,
   Output,
   DataStream,
+  // API schema - misc setup, status
+  GetFleetStatusResponse,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
+  CopyAgentConfigRequest,
+  CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
   // API schemas - Datasource
@@ -60,6 +65,8 @@ export {
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,
+  // API schemas - app
+  CheckPermissionsResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -74,7 +81,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  RegistryDatasource,
+  RegistryConfigTemplate,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -90,4 +97,7 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';
+
+export * from './intra_app_route_state';

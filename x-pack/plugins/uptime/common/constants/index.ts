@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ACTION_GROUP_DEFINITIONS } from './alerts';
+export * from './alerts';
 export { CHART_FORMAT_LIMITS } from './chart_format_limits';
 export { CLIENT_DEFAULTS } from './client_defaults';
 export { CONTEXT_DEFAULTS } from './context_defaults';

@@ -5,20 +5,15 @@
  */
 
 import sinon from 'sinon';
-import { CustomElement } from '../../../../../legacy/plugins/canvas/types';
-import { CUSTOM_ELEMENT_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CustomElement } from '../../../types';
+import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { okResponse } from '../ok_response';
 
@@ -57,10 +52,10 @@ describe('PUT custom element', () => {
     clock = sinon.useFakeTimers(now);
 
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
     initializeUpdateCustomElementRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.put.mock.calls[0][1];

@@ -136,8 +136,8 @@ const CsvSchema = schema.object({
 const EncryptionKeySchema = schema.conditional(
   schema.contextRef('dist'),
   true,
-  schema.maybe(schema.string({ minLength: 32 })), // default value is dynamic in createConfig$
-  schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+  schema.maybe(schema.string()), // default value is dynamic in createConfig$
+  schema.string({ defaultValue: 'a'.repeat(32) })
 );
 
 const RolesSchema = schema.object({
@@ -162,6 +162,7 @@ const PollSchema = schema.object({
 });
 
 export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
   queue: QueueSchema,
   capture: CaptureSchema,
@@ -172,4 +173,4 @@ export const ConfigSchema = schema.object({
   poll: PollSchema,
 });
 
-export type ConfigType = TypeOf<typeof ConfigSchema>;
+export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

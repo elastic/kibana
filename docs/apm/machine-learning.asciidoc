@@ -1,18 +1,25 @@
 [role="xpack"]
 [[machine-learning-integration]]
-=== Machine Learning integration
+===  integration
 
 ++++
 <titleabbrev>Integrate with machine learning</titleabbrev>
 ++++
 
-The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times.
-The response time graph will show the expected bounds and add an annotation when the anomaly score is 75 or above.
-Jobs can be created per transaction type, and based on the average response time.
-Manage jobs in the *Machine Learning jobs management*.
+The Machine Learning integration initiates a new job predefined to calculate anomaly scores on APM transaction durations.
+Jobs can be created per transaction type, and are based on the service's average response time.
+
+After a machine learning job is created, results are shown in two places:
+
+The transaction duration graph will show the expected bounds and add an annotation when the anomaly score is 75 or above.
 
 [role="screenshot"]
-image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM app in Kibana]
+image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in the APM app]
+
+Service maps will display a color-coded anomaly indicator based on the detected anomaly score.
+
+[role="screenshot"]
+image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
 
 [float]
 [[create-ml-integration]]
@@ -20,8 +27,10 @@ image::apm/images/apm-ml-integration.png[Example view of anomaly scores on respo
 
 To enable machine learning anomaly detection, first choose a service to monitor.
 Then, select **Integrations** > **Enable ML anomaly detection** and click **Create job**.
+
 That's it! After a few minutes, the job will begin calculating results;
 it might take additional time for results to appear on your graph.
+Jobs can be managed in *Machine Learning jobs management*.
 
 APM specific anomaly detection wizards are also available for certain Agents.
 See the machine learning {ml-docs}/ootb-ml-jobs-apm.html[APM anomaly detection configurations] for more information.

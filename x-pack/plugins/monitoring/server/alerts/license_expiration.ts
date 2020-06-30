@@ -5,10 +5,10 @@
  */
 
 import moment from 'moment-timezone';
-import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
+import { Logger, ILegacyCustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { ALERT_TYPE_LICENSE_EXPIRATION } from '../../common/constants';
-import { AlertType } from '../../../../plugins/alerting/server';
+import { AlertType } from '../../../alerts/server';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import {
   AlertCommonState,
@@ -24,7 +24,7 @@ const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export const getLicenseExpiration = (
   getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-  monitoringCluster: ICustomClusterClient,
+  monitoringCluster: ILegacyCustomClusterClient,
   getLogger: (...scopes: string[]) => Logger,
   ccsEnabled: boolean
 ): AlertType => {
@@ -41,6 +41,7 @@ export const getLicenseExpiration = (
       },
     ],
     defaultActionGroupId: 'default',
+    producer: 'monitoring',
     async executor({ services, params, state }: AlertCommonExecutorOptions): Promise<any> {
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`

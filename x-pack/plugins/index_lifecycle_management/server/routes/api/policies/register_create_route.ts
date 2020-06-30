@@ -5,12 +5,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(callAsCurrentUser: APICaller, name: string, phases: any): Promise<any> {
+async function createPolicy(
+  callAsCurrentUser: LegacyAPICaller,
+  name: string,
+  phases: any
+): Promise<any> {
   const body = {
     policy: {
       phases,
@@ -30,7 +34,7 @@ const minAgeSchema = schema.maybe(schema.string());
 
 const setPrioritySchema = schema.maybe(
   schema.object({
-    priority: schema.number(),
+    priority: schema.nullable(schema.number()),
   })
 );
 
@@ -67,7 +71,7 @@ const warmPhaseSchema = schema.maybe(
     actions: schema.object({
       set_priority: setPrioritySchema,
       unfollow: unfollowSchema,
-      read_only: schema.maybe(schema.object({})), // Readonly has no options
+      readonly: schema.maybe(schema.object({})), // Readonly has no options
       allocate: allocateSchema,
       shrink: schema.maybe(
         schema.object({
@@ -91,6 +95,11 @@ const coldPhaseSchema = schema.maybe(
       unfollow: unfollowSchema,
       allocate: allocateSchema,
       freeze: schema.maybe(schema.object({})), // Freeze has no options
+      searchable_snapshot: schema.maybe(
+        schema.object({
+          snapshot_repository: schema.string(),
+        })
+      ),
     }),
   })
 );
@@ -104,7 +113,11 @@ const deletePhaseSchema = schema.maybe(
           policy: schema.string(),
         })
       ),
-      delete: schema.maybe(schema.object({})), // Delete has no options
+      delete: schema.maybe(
+        schema.object({
+          delete_searchable_snapshot: schema.maybe(schema.boolean()),
+        })
+      ),
     }),
   })
 );
@@ -128,7 +141,11 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
       const { name, phases } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.dataClient.callAsCurrentUser, name, phases);
+        await createPolicy(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          name,
+          phases
+        );
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

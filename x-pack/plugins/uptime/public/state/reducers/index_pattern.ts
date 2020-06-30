@@ -21,7 +21,7 @@ const initialState: IndexPatternState = {
 
 export const indexPatternReducer = handleActions<IndexPatternState>(
   {
-    [String(getIndexPattern)]: state => ({
+    [String(getIndexPattern)]: (state) => ({
       ...state,
       loading: true,
     }),

@@ -99,7 +99,7 @@ describe('response processing', () => {
 
   test('builds the metrics', async () => {
     const data = await loadStatus(mockFetch);
-    const names = data.metrics.map(m => m.name);
+    const names = data.metrics.map((m) => m.name);
     expect(names).toEqual([
       'Heap total',
       'Heap used',
@@ -109,7 +109,7 @@ describe('response processing', () => {
       'Requests per second',
     ]);
 
-    const values = data.metrics.map(m => m.value);
+    const values = data.metrics.map((m) => m.value);
     expect(values).toEqual([1000000, 100, [4.1, 2.1, 0.1], 4000, 8000, 400]);
   });
 });

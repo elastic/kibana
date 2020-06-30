@@ -12,5 +12,4 @@ export { XPackFeature } from './lib/xpack_info';
 export interface XPackMainPlugin {
   info: XPackInfo;
   getFeatures(): Feature[];
-  registerFeature(feature: FeatureConfig): void;
 }

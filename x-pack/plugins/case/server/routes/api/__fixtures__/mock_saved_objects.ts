@@ -18,6 +18,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
+      connector_id: 'none',
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
@@ -46,6 +47,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
+      connector_id: 'none',
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
         full_name: 'elastic',
@@ -74,6 +76,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
+      connector_id: '123',
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -106,6 +109,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
         email: 'testemail@elastic.co',
         username: 'elastic',
       },
+      connector_id: '123',
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
@@ -129,6 +133,35 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     version: 'WzUsMV0=',
   },
 ];
+
+export const mockCaseNoConnectorId: SavedObject<Partial<CaseAttributes>> = {
+  type: 'cases',
+  id: 'mock-no-connector_id',
+  attributes: {
+    closed_at: null,
+    closed_by: null,
+    created_at: '2019-11-25T21:54:48.952Z',
+    created_by: {
+      full_name: 'elastic',
+      email: 'testemail@elastic.co',
+      username: 'elastic',
+    },
+    description: 'This is a brand new case of a bad meanie defacing data',
+    external_service: null,
+    title: 'Super Bad Security Issue',
+    status: 'open',
+    tags: ['defacement'],
+    updated_at: '2019-11-25T21:54:48.952Z',
+    updated_by: {
+      full_name: 'elastic',
+      email: 'testemail@elastic.co',
+      username: 'elastic',
+    },
+  },
+  references: [],
+  updated_at: '2019-11-25T21:54:48.952Z',
+  version: 'WzAsMV0=',
+};
 
 export const mockCasesErrorTriggerData = [
   {

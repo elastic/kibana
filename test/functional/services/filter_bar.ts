@@ -187,10 +187,7 @@ export function FilterBarProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('addFilter');
       const indexPatterns = await comboBox.getOptionsList('filterIndexPatternsSelect');
       await this.ensureFieldEditorModalIsClosed();
-      return indexPatterns
-        .trim()
-        .split('\n')
-        .join(',');
+      return indexPatterns.trim().split('\n').join(',');
     }
 
     /**

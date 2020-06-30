@@ -7,18 +7,20 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('graph', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/53749
+  describe.skip('graph', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('graph/secrepo');
       await esArchiver.load('empty_kibana');
+      await PageObjects.common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');
@@ -75,50 +77,50 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(8000);
     }
 
-    it('should show correct node labels', async function() {
+    it('should show correct node labels', async function () {
       await PageObjects.graph.selectIndexPattern('secrepo');
       await buildGraph();
       const { nodes } = await PageObjects.graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
-      const unexpectedCircleTexts = circlesText.filter(t => !expectedNodes.includes(t));
+      const unexpectedCircleTexts = circlesText.filter((t) => !expectedNodes.includes(t));
 
       if (unexpectedCircleTexts.length) {
         throw new Error(`Find unexpected circle texts: ${unexpectedCircleTexts}`);
       }
     });
 
-    it('should show correct connections', async function() {
+    it('should show correct connections', async function () {
       const expectedConnectionCount = Object.values(expectedConnections)
-        .map(connections => Object.values(connections).length)
+        .map((connections) => Object.values(connections).length)
         .reduce((acc, n) => acc + n, 0);
       const { edges } = await PageObjects.graph.getGraphObjects();
       expect(edges.length).to.be(expectedConnectionCount);
-      edges.forEach(edge => {
+      edges.forEach((edge) => {
         const from = edge.sourceNode.label!;
         const to = edge.targetNode.label!;
         expect(expectedConnections[from][to]).to.be(true);
       });
     });
 
-    it('should save Graph workspace', async function() {
+    it('should save Graph workspace', async function () {
       const graphExists = await PageObjects.graph.saveGraph(graphName);
       expect(graphExists).to.eql(true);
     });
 
     // open the same graph workspace again and make sure the results are the same
-    it('should open Graph workspace', async function() {
+    it('should open Graph workspace', async function () {
       await PageObjects.graph.openGraph(graphName);
       const { nodes } = await PageObjects.graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
       expect(circlesText.length).to.equal(expectedNodes.length);
-      circlesText.forEach(circleText => {
+      circlesText.forEach((circleText) => {
         log.debug(`Looking for ${circleText}`);
         expect(expectedNodes.includes(circleText)).to.be(true);
       });
     });
 
-    it('should create new Graph workspace', async function() {
+    it('should create new Graph workspace', async function () {
       await PageObjects.graph.newGraph();
       await PageObjects.graph.selectIndexPattern('secrepo');
       const { nodes, edges } = await PageObjects.graph.getGraphObjects();
@@ -126,7 +128,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(edges).to.be.empty();
     });
 
-    it('should show venn when clicking a line', async function() {
+    it('should show venn when clicking a line', async function () {
       await buildGraph();
       const { edges } = await PageObjects.graph.getGraphObjects();
 
@@ -161,7 +163,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(smallVennTerm2).to.be('8');
     });
 
-    it('should delete graph', async function() {
+    it('should delete graph', async function () {
       await PageObjects.graph.goToListingPage();
       expect(await PageObjects.graph.getWorkspaceCount()).to.equal(1);
       await PageObjects.graph.deleteGraph(graphName);

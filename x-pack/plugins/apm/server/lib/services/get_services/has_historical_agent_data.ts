@@ -17,7 +17,7 @@ export async function hasHistoricalAgentData(setup: Setup) {
       indices['apm_oss.errorIndices'],
       indices['apm_oss.metricsIndices'],
       indices['apm_oss.sourcemapIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
@@ -30,14 +30,14 @@ export async function hasHistoricalAgentData(setup: Setup) {
                   'error',
                   'metric',
                   'sourcemap',
-                  'transaction'
-                ]
-              }
-            }
-          ]
-        }
-      }
-    }
+                  'transaction',
+                ],
+              },
+            },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);

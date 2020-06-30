@@ -84,13 +84,16 @@ export class CiStatsReporter {
     return !!this.config;
   }
 
-  async metric(name: string, subName: string, value: number) {
+  async metrics(metrics: Array<{ group: string; id: string; value: number }>) {
     if (!this.config) {
       return;
     }
 
     let attempt = 0;
     const maxAttempts = 5;
+    const bodySummary = metrics
+      .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
+      .join(' ');
 
     while (true) {
       attempt += 1;
@@ -98,18 +101,14 @@ export class CiStatsReporter {
       try {
         await Axios.request({
           method: 'POST',
-          url: '/metric',
+          url: '/v1/metrics',
           baseURL: this.config.apiUrl,
-          params: {
-            buildId: this.config.buildId,
-          },
           headers: {
             Authorization: `token ${this.config.apiToken}`,
           },
           data: {
-            name,
-            subName,
-            value,
+            buildId: this.config.buildId,
+            metrics,
           },
         });
 
@@ -125,14 +124,14 @@ export class CiStatsReporter {
           this.log.warning(
             `error recording metric [status=${error.response.status}] [resp=${inspect(
               error.response.data
-            )}] [${name}/${subName}=${value}]`
+            )}] ${bodySummary}`
           );
           return;
         }
 
         if (attempt === maxAttempts) {
           this.log.warning(
-            `failed to reach kibana-ci-stats service too many times, unable to record metric [${name}/${subName}=${value}]`
+            `failed to reach kibana-ci-stats service too many times, unable to record metric ${bodySummary}`
           );
           return;
         }
@@ -146,7 +145,7 @@ export class CiStatsReporter {
           `failed to reach kibana-ci-stats service [reason=${reason}], retrying in ${attempt} seconds`
         );
 
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
       }
     }
   }

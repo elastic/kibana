@@ -5,7 +5,8 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
+import { ILegacyScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
+import { xpackMocks } from '../../../../mocks';
 import { CURRENT_VERSION } from '../../common/version';
 import {
   esVersionCheck,
@@ -23,7 +24,7 @@ describe('getAllNodeVersions', () => {
           node3: { version: '6.0.0' },
         },
       }),
-    } as unknown) as IScopedClusterClient;
+    } as unknown) as ILegacyScopedClusterClient;
 
     await expect(getAllNodeVersions(adminClient)).resolves.toEqual([
       new SemVer('6.0.0'),
@@ -74,35 +75,27 @@ describe('EsVersionPrecheck', () => {
   it('returns a 403 when callCluster fails with a 403', async () => {
     const fakeCall = jest.fn().mockRejectedValue({ status: 403 });
 
-    const ctx = {
-      core: {
-        elasticsearch: {
-          adminClient: {
-            callAsInternalUser: fakeCall,
-          },
-        },
-      },
-    } as any;
+    const ctx = xpackMocks.createRequestHandlerContext();
+    ctx.core.elasticsearch.legacy.client = {
+      callAsCurrentUser: jest.fn(),
+      callAsInternalUser: fakeCall,
+    };
 
     const result = await esVersionCheck(ctx, kibanaResponseFactory);
     expect(result).toHaveProperty('status', 403);
   });
 
   it('returns a 426 message w/ allNodesUpgraded = false when nodes are not on same version', async () => {
-    const ctx = {
-      core: {
-        elasticsearch: {
-          adminClient: {
-            callAsInternalUser: jest.fn().mockResolvedValue({
-              nodes: {
-                node1: { version: CURRENT_VERSION.raw },
-                node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
-              },
-            }),
-          },
+    const ctx = xpackMocks.createRequestHandlerContext();
+    ctx.core.elasticsearch.legacy.client = {
+      callAsCurrentUser: jest.fn(),
+      callAsInternalUser: jest.fn().mockResolvedValue({
+        nodes: {
+          node1: { version: CURRENT_VERSION.raw },
+          node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
         },
-      },
-    } as any;
+      }),
+    };
 
     const result = await esVersionCheck(ctx, kibanaResponseFactory);
     expect(result).toHaveProperty('status', 426);
@@ -110,20 +103,16 @@ describe('EsVersionPrecheck', () => {
   });
 
   it('returns a 426 message w/ allNodesUpgraded = true when nodes are on next version', async () => {
-    const ctx = {
-      core: {
-        elasticsearch: {
-          adminClient: {
-            callAsInternalUser: jest.fn().mockResolvedValue({
-              nodes: {
-                node1: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
-                node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
-              },
-            }),
-          },
+    const ctx = xpackMocks.createRequestHandlerContext();
+    ctx.core.elasticsearch.legacy.client = {
+      callAsCurrentUser: jest.fn(),
+      callAsInternalUser: jest.fn().mockResolvedValue({
+        nodes: {
+          node1: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
+          node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
         },
-      },
-    } as any;
+      }),
+    };
 
     const result = await esVersionCheck(ctx, kibanaResponseFactory);
     expect(result).toHaveProperty('status', 426);
@@ -131,20 +120,16 @@ describe('EsVersionPrecheck', () => {
   });
 
   it('returns undefined when nodes are on same version', async () => {
-    const ctx = {
-      core: {
-        elasticsearch: {
-          adminClient: {
-            callAsInternalUser: jest.fn().mockResolvedValue({
-              nodes: {
-                node1: { version: CURRENT_VERSION.raw },
-                node2: { version: CURRENT_VERSION.raw },
-              },
-            }),
-          },
+    const ctx = xpackMocks.createRequestHandlerContext();
+    ctx.core.elasticsearch.legacy.client = {
+      callAsCurrentUser: jest.fn(),
+      callAsInternalUser: jest.fn().mockResolvedValue({
+        nodes: {
+          node1: { version: CURRENT_VERSION.raw },
+          node2: { version: CURRENT_VERSION.raw },
         },
-      },
-    } as any;
+      }),
+    };
 
     await expect(esVersionCheck(ctx, kibanaResponseFactory)).resolves.toBe(undefined);
   });

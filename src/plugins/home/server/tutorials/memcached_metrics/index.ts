@@ -55,7 +55,7 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
         label: i18n.translate('home.tutorials.memcachedMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

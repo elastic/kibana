@@ -18,6 +18,55 @@ User::      An optional username. If set, HTTP basic authentication is used. Cur
 Password::  An optional password. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
 
 [float]
+[[Preconfigured-webhook-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-webhook:
+   name: preconfigured-webhook-action-type
+   actionTypeId: .webhook
+   config:
+     url: https://test.host
+     method: POST
+     headers:
+       testheader: testvalue
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+|`url`
+| A URL string that corresponds to *URL*.
+
+|`method`
+| A string that corresponds to *Method*.
+
+|`headers`
+|A record<string, string> that corresponds to *Headers*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+|`user`
+|A string that corresponds to *User*.
+
+|`password`
+|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
+
+[float]
 [[webhook-action-configuration]]
 ==== Action configuration
 

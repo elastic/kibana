@@ -9,11 +9,10 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionType } from '../../../types';
-import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_modal', () => {
-  let deps: ActionsConnectorsContextValue;
+  let deps: any;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
@@ -27,13 +26,14 @@ describe('connector_add_modal', () => {
       http: mocks.http,
       capabilities: {
         ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
+        siem: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
         },
       },
       actionTypeRegistry: actionTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
@@ -63,19 +63,19 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
     };
 
-    const wrapper = deps
-      ? mountWithIntl(
-          <ConnectorAddModal
-            addModalVisible={true}
-            setAddModalVisibility={() => {}}
-            actionType={actionType}
-            http={deps.http}
-            actionTypeRegistry={deps.actionTypeRegistry}
-            toastNotifications={deps.toastNotifications}
-          />
-        )
-      : undefined;
-    expect(wrapper?.find('EuiModalHeader')).toHaveLength(1);
-    expect(wrapper?.find('[data-test-subj="saveActionButtonModal"]').exists()).toBeTruthy();
+    const wrapper = mountWithIntl(
+      <ConnectorAddModal
+        addModalVisible={true}
+        setAddModalVisibility={() => {}}
+        actionType={actionType}
+        http={deps!.http}
+        actionTypeRegistry={deps!.actionTypeRegistry}
+        toastNotifications={deps!.toastNotifications}
+        docLinks={deps!.docLinks}
+        capabilities={deps!.capabilities}
+      />
+    );
+    expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
+    expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
   });
 });

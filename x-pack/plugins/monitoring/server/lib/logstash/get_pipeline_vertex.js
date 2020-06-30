@@ -81,12 +81,12 @@ export function _enrichVertexStateWithStatsAggregation(
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
   // First, filter out the vertex we care about
-  const vertex = vertices.find(v => v.id === vertexId);
+  const vertex = vertices.find((v) => v.id === vertexId);
   vertex.stats = {};
 
   // Next, iterate over timeseries metrics and attach them to vertex
   const timeSeriesBuckets = vertexStatsAggregation.aggregations.timeseries.buckets;
-  timeSeriesBuckets.forEach(timeSeriesBucket => {
+  timeSeriesBuckets.forEach((timeSeriesBucket) => {
     // each bucket calculates stats for total pipeline CPU time for the associated timeseries
     const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
     const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
@@ -100,7 +100,7 @@ export function _enrichVertexStateWithStatsAggregation(
       totalProcessorsDurationInMillis,
       timeseriesIntervalInSeconds
     );
-    Object.keys(vertexStats).forEach(stat => {
+    Object.keys(vertexStats).forEach((stat) => {
       if (!vertex.stats.hasOwnProperty(stat)) {
         vertex.stats[stat] = { data: [] };
       }

@@ -32,7 +32,7 @@ export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMe
   };
 
   public toggleVisibility = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isShown: !state.isShown,
     }));
   };

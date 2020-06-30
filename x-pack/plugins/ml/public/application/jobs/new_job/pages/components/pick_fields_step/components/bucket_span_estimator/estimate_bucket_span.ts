@@ -29,12 +29,12 @@ export function useEstimateBucketSpan() {
   const [status, setStatus] = useState(ESTIMATE_STATUS.NOT_RUNNING);
 
   const data: BucketSpanEstimatorData = {
-    aggTypes: jobCreator.aggregations.map(a => a.dslName),
+    aggTypes: jobCreator.aggregations.map((a) => a.dslName),
     duration: {
       start: jobCreator.start,
       end: jobCreator.end,
     },
-    fields: jobCreator.fields.map(f => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
+    fields: jobCreator.fields.map((f) => (f.id === EVENT_RATE_FIELD_ID ? null : f.id)),
     index: mlContext.currentIndexPattern.title,
     query: mlContext.combinedQuery,
     splitField: undefined,
@@ -47,7 +47,7 @@ export function useEstimateBucketSpan() {
   ) {
     data.splitField = jobCreator.splitField.id;
   } else if (isAdvancedJobCreator(jobCreator)) {
-    jobCreator.richDetectors.some(d => {
+    jobCreator.richDetectors.some((d) => {
       if (d.partitionField !== null) {
         data.splitField = d.partitionField.id;
         return true;

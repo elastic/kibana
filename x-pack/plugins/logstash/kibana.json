@@ -9,6 +9,7 @@
   ],
   "optionalPlugins": [
     "home",
+    "monitoring",
     "security"
   ],
   "server": true,

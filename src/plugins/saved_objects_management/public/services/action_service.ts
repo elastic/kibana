@@ -42,7 +42,7 @@ export class SavedObjectsManagementActionService {
 
   setup(): SavedObjectsManagementActionServiceSetup {
     return {
-      register: action => {
+      register: (action) => {
         if (this.actions.has(action.id)) {
           throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
         }
@@ -53,7 +53,7 @@ export class SavedObjectsManagementActionService {
 
   start(): SavedObjectsManagementActionServiceStart {
     return {
-      has: actionId => this.actions.has(actionId),
+      has: (actionId) => this.actions.has(actionId),
       getAll: () => [...this.actions.values()],
     };
   }

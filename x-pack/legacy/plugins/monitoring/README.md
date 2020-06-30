@@ -74,7 +74,7 @@ cluster.
   % cat config/kibana.dev.yml
   monitoring.ui.elasticsearch:
     hosts: "http://localhost:9210"
-    username: "kibana"
+    username: "kibana_system"
     password: "changeme"
   ```
 

@@ -25,10 +25,11 @@ import { IUiSettingsClient } from 'src/core/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
+import { DateRangeKey } from './lib/date_range';
 
-import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -37,6 +38,12 @@ const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle',
 export interface DateRangeBucketAggDependencies {
   uiSettings: IUiSettingsClient;
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsDateRange extends BaseAggParams {
+  field?: string;
+  ranges?: DateRangeKey[];
+  time_zone?: string;
 }
 
 export const getDateRangeBucketAgg = ({
@@ -51,17 +58,11 @@ export const getDateRangeBucketAgg = ({
       getKey({ from, to }): DateRangeKey {
         return { from, to };
       },
-      getFormat(agg) {
-        const { fieldFormats } = getInternalStartServices();
-
-        const formatter = agg.fieldOwnFormatter(
-          TEXT_CONTEXT_TYPE,
-          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE)
-        );
-        const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
-          return convertDateRangeToString(range, formatter);
-        });
-        return new DateRangeFormat();
+      getSerializedFormat(agg) {
+        return {
+          id: 'date_range',
+          params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        };
       },
       makeLabel(aggConfig) {
         return aggConfig.getFieldDisplayName() + ' date ranges';

@@ -43,17 +43,17 @@ export const getHttpClient = () => {
 
 // ---
 
-const createIdString = ids => ids.map(id => encodeURIComponent(id)).join(',');
+const createIdString = (ids) => ids.map((id) => encodeURIComponent(id)).join(',');
 
 /* Auto Follow Pattern */
 export const loadAutoFollowPatterns = () => httpClient.get(`${API_BASE_PATH}/auto_follow_patterns`);
 
-export const getAutoFollowPattern = id =>
+export const getAutoFollowPattern = (id) =>
   httpClient.get(`${API_BASE_PATH}/auto_follow_patterns/${encodeURIComponent(id)}`);
 
 export const loadRemoteClusters = () => httpClient.get(API_REMOTE_CLUSTERS_BASE_PATH);
 
-export const createAutoFollowPattern = autoFollowPattern => {
+export const createAutoFollowPattern = (autoFollowPattern) => {
   const request = httpClient.post(`${API_BASE_PATH}/auto_follow_patterns`, {
     body: JSON.stringify(autoFollowPattern),
   });
@@ -68,16 +68,16 @@ export const updateAutoFollowPattern = (id, autoFollowPattern) => {
   return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_UPDATE);
 };
 
-export const deleteAutoFollowPattern = id => {
+export const deleteAutoFollowPattern = (id) => {
   const ids = arrify(id);
-  const idString = ids.map(_id => encodeURIComponent(_id)).join(',');
+  const idString = ids.map((_id) => encodeURIComponent(_id)).join(',');
   const request = httpClient.delete(`${API_BASE_PATH}/auto_follow_patterns/${idString}`);
   const uiMetric =
     ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
   return trackUserRequest(request, uiMetric);
 };
 
-export const pauseAutoFollowPattern = id => {
+export const pauseAutoFollowPattern = (id) => {
   const ids = arrify(id);
   const idString = ids.map(encodeURIComponent).join(',');
   const request = httpClient.post(`${API_BASE_PATH}/auto_follow_patterns/${idString}/pause`);
@@ -87,7 +87,7 @@ export const pauseAutoFollowPattern = id => {
   return trackUserRequest(request, uiMetric);
 };
 
-export const resumeAutoFollowPattern = id => {
+export const resumeAutoFollowPattern = (id) => {
   const ids = arrify(id);
   const idString = ids.map(encodeURIComponent).join(',');
   const request = httpClient.post(`${API_BASE_PATH}/auto_follow_patterns/${idString}/resume`);
@@ -100,10 +100,10 @@ export const resumeAutoFollowPattern = id => {
 /* Follower Index */
 export const loadFollowerIndices = () => httpClient.get(`${API_BASE_PATH}/follower_indices`);
 
-export const getFollowerIndex = id =>
+export const getFollowerIndex = (id) =>
   httpClient.get(`${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`);
 
-export const createFollowerIndex = followerIndex => {
+export const createFollowerIndex = (followerIndex) => {
   const uiMetrics = [UIM_FOLLOWER_INDEX_CREATE];
   const isUsingAdvancedSettings = !areAllSettingsDefault(followerIndex);
   if (isUsingAdvancedSettings) {
@@ -115,7 +115,7 @@ export const createFollowerIndex = followerIndex => {
   return trackUserRequest(request, uiMetrics);
 };
 
-export const pauseFollowerIndex = id => {
+export const pauseFollowerIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${API_BASE_PATH}/follower_indices/${idString}/pause`);
@@ -123,7 +123,7 @@ export const pauseFollowerIndex = id => {
   return trackUserRequest(request, uiMetric);
 };
 
-export const resumeFollowerIndex = id => {
+export const resumeFollowerIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${API_BASE_PATH}/follower_indices/${idString}/resume`);
@@ -131,7 +131,7 @@ export const resumeFollowerIndex = id => {
   return trackUserRequest(request, uiMetric);
 };
 
-export const unfollowLeaderIndex = id => {
+export const unfollowLeaderIndex = (id) => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${API_BASE_PATH}/follower_indices/${idString}/unfollow`);
@@ -189,10 +189,12 @@ export const loadIndices = () => {
   }
   abortController = new AbortController();
   const { signal } = abortController;
-  return httpClient.get(`${API_INDEX_MANAGEMENT_BASE_PATH}/indices`, { signal }).then(response => {
-    abortController = null;
-    return response;
-  });
+  return httpClient
+    .get(`${API_INDEX_MANAGEMENT_BASE_PATH}/indices`, { signal })
+    .then((response) => {
+      abortController = null;
+      return response;
+    });
 };
 
 export const loadPermissions = () => httpClient.get(`${API_BASE_PATH}/permissions`);

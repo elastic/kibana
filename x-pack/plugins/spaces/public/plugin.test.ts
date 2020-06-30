@@ -7,7 +7,7 @@
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
-import { ManagementSection } from '../../../../src/plugins/management/public';
+import { ManagementSection, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
 import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
 import { featuresPluginMock } from '../../features/public/mocks';
@@ -33,17 +33,11 @@ describe('Spaces plugin', () => {
     it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
       const coreSetup = coreMock.createSetup();
 
-      const kibanaSection = new ManagementSection(
-        {
-          id: 'kibana',
-          title: 'Mock Kibana Section',
-          order: 1,
-        },
-        jest.fn(),
-        jest.fn(),
-        jest.fn(),
-        coreSetup.getStartServices
-      );
+      const kibanaSection = new ManagementSection({
+        id: ManagementSectionId.Kibana,
+        title: 'Mock Kibana Section',
+        order: 1,
+      });
 
       const registerAppSpy = jest.spyOn(kibanaSection, 'registerApp');
 

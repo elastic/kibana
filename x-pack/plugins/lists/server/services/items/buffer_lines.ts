@@ -17,7 +17,7 @@ export class BufferLines extends Readable {
       input,
     });
 
-    readline.on('line', line => {
+    readline.on('line', (line) => {
       this.push(line);
     });
 

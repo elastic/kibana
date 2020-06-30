@@ -38,7 +38,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
-      const types = testCaseArray.map(x => x.type);
+      const types = testCaseArray.map((x) => x.type);
       await expectForbidden(types)(response);
     } else {
       // permitted
@@ -67,7 +67,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     if (!options?.singleRequest) {
       // if we are testing cases that should result in a forbidden response, we can do each case individually
       // this ensures that multiple test cases of a single type will each result in a forbidden error
-      return cases.map(x => ({
+      return cases.map((x) => ({
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
@@ -78,7 +78,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     return [
       {
         title: getTestTitle(cases, responseStatusCode),
-        request: cases.map(x => createRequest(x)),
+        request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
           options?.responseBodyOverride || expectResponseBody(cases, responseStatusCode),
@@ -100,7 +100,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          const requestBody = test.request.map(x => ({ ...x, ...attrs }));
+          const requestBody = test.request.map((x) => ({ ...x, ...attrs }));
           await supertest
             .put(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_update`)
             .auth(user?.username, user?.password)

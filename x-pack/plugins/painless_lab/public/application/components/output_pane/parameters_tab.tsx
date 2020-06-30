@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -61,7 +61,7 @@ export const ParametersTab: FunctionComponent = () => {
             languageId="json"
             height={600}
             value={payload.parameters}
-            onChange={nextParams => updatePayload({ parameters: nextParams })}
+            onChange={(nextParams) => updatePayload({ parameters: nextParams })}
             options={{
               fontSize: 12,
               minimap: {

@@ -9,7 +9,7 @@ export * from './snapshot';
 export * from './ui';
 export * from './monitor_list';
 export * from './monitor_status';
-export * from './index_patternts';
+export * from './index_pattern';
 export * from './ping';
 export * from './ml_anomaly';
 export * from './monitor_duration';

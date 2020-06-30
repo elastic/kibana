@@ -233,6 +233,6 @@ it('stops an infinite stream when unsubscribed', async () => {
 
   // ensure summarizer still only called 10 times after a timeout
   expect(summarize).toHaveBeenCalledTimes(10);
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   expect(summarize).toHaveBeenCalledTimes(10);
 });

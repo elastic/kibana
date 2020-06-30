@@ -71,7 +71,7 @@ export class ConfirmDelete extends Component<Props, State> {
                     />
                   </p>
                   <ul>
-                    {rolesToDelete.map(roleName => (
+                    {rolesToDelete.map((roleName) => (
                       <li key={roleName}>{roleName}</li>
                     ))}
                   </ul>
@@ -129,7 +129,7 @@ export class ConfirmDelete extends Component<Props, State> {
   private deleteRoles = async () => {
     const { rolesToDelete, callback, rolesAPIClient, notifications } = this.props;
     const errors: string[] = [];
-    const deleteOperations = rolesToDelete.map(roleName => {
+    const deleteOperations = rolesToDelete.map((roleName) => {
       const deleteRoleTask = async () => {
         try {
           await rolesAPIClient.deleteRole(roleName);

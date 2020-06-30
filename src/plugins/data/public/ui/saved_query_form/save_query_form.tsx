@@ -104,7 +104,7 @@ export function SaveQueryForm({
     const errors = [];
     if (
       !!savedQueries.find(
-        existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
+        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
       )
     ) {
       errors.push(titleConflictErrorText);
@@ -129,7 +129,7 @@ export function SaveQueryForm({
     }
   }, [validate, onSave, title, description, shouldIncludeFilters, shouldIncludeTimefilter]);
 
-  const onInputChange = useCallback(event => {
+  const onInputChange = useCallback((event) => {
     setEnabledSaveButton(Boolean(event.target.value));
     setFormErrors([]);
     setTitle(event.target.value);
@@ -178,7 +178,7 @@ export function SaveQueryForm({
         <EuiFieldText
           value={description}
           name="description"
-          onChange={event => {
+          onChange={(event) => {
             setDescription(event.target.value);
           }}
           data-test-subj="saveQueryFormDescription"

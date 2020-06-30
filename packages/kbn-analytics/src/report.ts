@@ -86,7 +86,7 @@ export class ReportManager {
     };
   }
   assignReports(newMetrics: Metric | Metric[]) {
-    wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
+    wrapArray(newMetrics).forEach((newMetric) => this.assignReport(this.report, newMetric));
     return { report: this.report };
   }
   static createMetricKey(metric: Metric): string {

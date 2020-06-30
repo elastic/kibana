@@ -1,5 +1,9 @@
 [[rpm]]
-=== Install Kibana with RPM
+=== Install {kib} with RPM
+++++
+<titleabbrev>Install with RPM</titleabbrev>
+++++
+
 
 The RPM for Kibana can be <<install-rpm,downloaded from our website>>
 or from our <<rpm-repo,RPM repository>>. It can be used to install
@@ -9,11 +13,11 @@ and Oracle Enterprise.
 NOTE: RPM install is not supported on distributions with old versions of RPM,
 such as SLES 11 and CentOS 5.  Please see <<targz>> instead.
 
-This package is free to use under the Elastic license. It contains open source 
-and free commercial features and access to paid commercial features. 
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+This package is free to use under the Elastic license. It contains open source
+and free commercial features and access to paid commercial features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 The latest stable version of Kibana can be found on the
@@ -21,7 +25,7 @@ link:/downloads/kibana[Download Kibana] page. Other versions can
 be found on the link:/downloads/past-releases[Past Releases page].
 
 [[rpm-key]]
-==== Import the Elastic PGP Key
+==== Import the Elastic PGP key
 
 include::key.asciidoc[]
 
@@ -143,9 +147,9 @@ sudo rpm --install kibana-{version}-x86_64.rpm
 <1> Compare the SHA produced by `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-x86_64.rpm.sha512[published SHA].
 
-Alternatively, you can download the following package, which contains only 
+Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm  
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm
 
 endif::[]
 
@@ -160,7 +164,7 @@ include::rpm-init.asciidoc[]
 include::systemd.asciidoc[]
 
 [[rpm-configuring]]
-==== Configuring Kibana via config file
+==== Configure {kib} via the config file
 
 Kibana loads its configuration from the `/etc/kibana/kibana.yml`
 file by default.  The format of this config file is explained in
@@ -196,7 +200,7 @@ locations for an RPM-based system:
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
   | path.data
-  
+
 | logs
     | Logs files location
     |  /var/log/kibana

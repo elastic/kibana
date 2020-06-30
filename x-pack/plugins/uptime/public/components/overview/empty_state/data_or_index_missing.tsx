@@ -60,7 +60,7 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
                   <EuiButton
                     fill
                     color="primary"
-                    href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
+                    href={`${basePath}/app/home#/tutorial/uptimeMonitors`}
                   >
                     <FormattedMessage
                       id="xpack.uptime.emptyState.viewSetupInstructions"

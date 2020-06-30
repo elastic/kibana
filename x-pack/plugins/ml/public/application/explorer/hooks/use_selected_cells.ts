@@ -33,12 +33,13 @@ export const useSelectedCells = (): [
 
   const setSelectedCells = (swimlaneSelectedCells: AppStateSelectedCells) => {
     const mlExplorerSwimlane = { ...appState.mlExplorerSwimlane };
+
     if (swimlaneSelectedCells !== undefined) {
       swimlaneSelectedCells.showTopFieldValues = false;
 
       const currentSwimlaneType = selectedCells?.type;
       const currentShowTopFieldValues = selectedCells?.showTopFieldValues;
-      const newSwimlaneType = selectedCells?.type;
+      const newSwimlaneType = swimlaneSelectedCells?.type;
 
       if (
         (currentSwimlaneType === SWIMLANE_TYPE.OVERALL &&

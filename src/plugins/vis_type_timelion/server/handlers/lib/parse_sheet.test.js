@@ -21,8 +21,8 @@ const parseSheet = require('./parse_sheet');
 
 const expect = require('chai').expect;
 
-describe('timelion parse_sheet function', function() {
-  it(`doesn't split expressions on whitespace`, async function() {
+describe('timelion parse_sheet function', function () {
+  it(`doesn't split expressions on whitespace`, async function () {
     const data = ['.es() .es(404)'];
     const ast = parseSheet(data);
 
@@ -31,7 +31,7 @@ describe('timelion parse_sheet function', function() {
     expect(expressions[0].type).to.equal('chain');
   });
 
-  it('splits expressions on commas', function() {
+  it('splits expressions on commas', function () {
     const data = ['.es(), .es(404)'];
     const ast = parseSheet(data);
 
@@ -41,7 +41,7 @@ describe('timelion parse_sheet function', function() {
     expect(expressions[1].type).to.equal('chain');
   });
 
-  it('splits expressions on newlines', function() {
+  it('splits expressions on newlines', function () {
     const data = [`.es()\n\r ,\n\r .es(404)`];
     const ast = parseSheet(data);
 

@@ -29,7 +29,7 @@ Kibana supports spaces in several ways.  You can:
 [[spaces-managing]]
 === View, create, and delete spaces
 
-Go to **Management > Spaces** for an overview of your spaces.  This view provides actions
+Open the menu, then go to *Stack Management > {kib} > Spaces* for an overview of your spaces.  This view provides actions
 for you to create, edit, and delete spaces.
 
 [role="screenshot"]
@@ -94,8 +94,8 @@ image::spaces/images/spaces-roles.png["Controlling features visiblity"]
 [[spaces-moving-objects]]
 === Move saved objects between spaces
 
-You can <<managing-saved-objects-copy-to-space, copy objects>> from one space to another
-in **Management > Saved objects**.
+To <<managing-saved-objects-copy-to-space, copy objects>> from one space to another, open the menu,
+then go to *Stack Management > {kib} > Saved objects*.
 
 Alternately, you can move objects using {kib}'s <<managing-saved-objects-export-objects, import and export>>
 interface.

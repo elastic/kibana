@@ -13,18 +13,24 @@ import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   options: MetricsExplorerOptions;
-  onChange: (groupBy: string | null) => void;
+  onChange: (groupBy: string | null | string[]) => void;
   fields: IFieldType[];
 }
 
 export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
   const handleChange = useCallback(
-    selectedOptions => {
-      const groupBy = (selectedOptions.length === 1 && selectedOptions[0].label) || null;
+    (selectedOptions: Array<{ label: string }>) => {
+      const groupBy = selectedOptions.map((option) => option.label);
       onChange(groupBy);
     },
     [onChange]
   );
+
+  const selectedOptions = Array.isArray(options.groupBy)
+    ? options.groupBy.map((field) => ({ label: field }))
+    : options.groupBy
+    ? [{ label: options.groupBy }]
+    : [];
 
   return (
     <EuiComboBox
@@ -35,11 +41,11 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
         defaultMessage: 'Graph per',
       })}
       fullWidth
-      singleSelection={true}
-      selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
+      singleSelection={false}
+      selectedOptions={selectedOptions}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
-        .map(f => ({ label: f.name }))}
+        .filter((f) => f.aggregatable && f.type === 'string')
+        .map((f) => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
     />

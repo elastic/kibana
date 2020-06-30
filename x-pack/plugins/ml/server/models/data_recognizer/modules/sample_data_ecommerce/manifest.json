@@ -1,13 +1,13 @@
 {
   "id": "sample_data_ecommerce",
   "title": "Kibana sample data eCommerce",
-  "description": "Find anomalies in eCommerce total sales data",
+  "description": "Find anomalies in eCommerce total sales data.",
   "type": "Sample Dataset",
   "logoFile": "logo.json",
   "defaultIndexPattern": "kibana_sample_data_ecommerce",
   "query": {
     "bool": {
-      "filter": [{ "term": { "_index": "kibana_sample_data_ecommerce" } }]
+      "filter": [{ "term": { "event.dataset": "sample_ecommerce" } }]
     }
   },
   "jobs": [

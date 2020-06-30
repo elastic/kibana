@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
+  EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -30,6 +31,7 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../../../../components/node_available_warning';
+import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';
@@ -94,7 +96,7 @@ export class JobsListView extends Component {
     }
   }
 
-  toggleRow = jobId => {
+  toggleRow = (jobId) => {
     if (this.state.itemIdToExpandedRowMap[jobId]) {
       const itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
       delete itemIdToExpandedRowMap[jobId];
@@ -110,6 +112,7 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       } else {
@@ -119,13 +122,14 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
         loadFullJob(jobId)
-          .then(job => {
+          .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             fullJobsList[jobId] = job;
             this.setState({ fullJobsList }, () => {
@@ -141,13 +145,16 @@ export class JobsListView extends Component {
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
+                    refreshJobList={this.onRefreshClick}
                   />
                 );
               }
-              this.setState({ itemIdToExpandedRowMap });
+              this.setState({ itemIdToExpandedRowMap }, () => {
+                this.updateFunctions[jobId](job);
+              });
             });
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error);
           });
       });
@@ -157,32 +164,32 @@ export class JobsListView extends Component {
   addUpdateFunction = (id, f) => {
     this.updateFunctions[id] = f;
   };
-  removeUpdateFunction = id => {
+  removeUpdateFunction = (id) => {
     delete this.updateFunctions[id];
   };
 
-  setShowEditJobFlyoutFunction = func => {
+  setShowEditJobFlyoutFunction = (func) => {
     this.showEditJobFlyout = func;
   };
   unsetShowEditJobFlyoutFunction = () => {
     this.showEditJobFlyout = () => {};
   };
 
-  setShowDeleteJobModalFunction = func => {
+  setShowDeleteJobModalFunction = (func) => {
     this.showDeleteJobModal = func;
   };
   unsetShowDeleteJobModalFunction = () => {
     this.showDeleteJobModal = () => {};
   };
 
-  setShowStartDatafeedModalFunction = func => {
+  setShowStartDatafeedModalFunction = (func) => {
     this.showStartDatafeedModal = func;
   };
   unsetShowStartDatafeedModalFunction = () => {
     this.showStartDatafeedModal = () => {};
   };
 
-  setShowCreateWatchFlyoutFunction = func => {
+  setShowCreateWatchFlyoutFunction = (func) => {
     this.showCreateWatchFlyout = func;
   };
   unsetShowCreateWatchFlyoutFunction = () => {
@@ -192,24 +199,24 @@ export class JobsListView extends Component {
     return this.showCreateWatchFlyout;
   };
 
-  selectJobChange = selectedJobs => {
+  selectJobChange = (selectedJobs) => {
     this.setState({ selectedJobs });
   };
 
   refreshSelectedJobs() {
-    const selectedJobsIds = this.state.selectedJobs.map(j => j.id);
-    const filteredJobIds = this.state.filteredJobsSummaryList.map(j => j.id);
+    const selectedJobsIds = this.state.selectedJobs.map((j) => j.id);
+    const filteredJobIds = this.state.filteredJobsSummaryList.map((j) => j.id);
 
     // refresh the jobs stored as selected
     // only select those which are also in the filtered list
     const selectedJobs = this.state.jobsSummaryList
-      .filter(j => selectedJobsIds.find(id => id === j.id))
-      .filter(j => filteredJobIds.find(id => id === j.id));
+      .filter((j) => selectedJobsIds.find((id) => id === j.id))
+      .filter((j) => filteredJobIds.find((id) => id === j.id));
 
     this.setState({ selectedJobs });
   }
 
-  setFilters = filterClauses => {
+  setFilters = (filterClauses) => {
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
@@ -235,7 +242,7 @@ export class JobsListView extends Component {
       try {
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
-        const jobsSummaryList = jobs.map(job => {
+        const jobsSummaryList = jobs.map((job) => {
           if (job.fullJob !== undefined) {
             fullJobsList[job.id] = job.fullJob;
             delete job.fullJob;
@@ -251,18 +258,18 @@ export class JobsListView extends Component {
           }
         );
 
-        Object.keys(this.updateFunctions).forEach(j => {
-          this.updateFunctions[j].setState({ job: fullJobsList[j] });
+        Object.keys(this.updateFunctions).forEach((j) => {
+          this.updateFunctions[j](fullJobsList[j]);
         });
 
-        jobs.forEach(job => {
+        jobs.forEach((job) => {
           if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
             this.toggleRow(job.id);
           }
         });
 
         this.isDoneRefreshing();
-        if (jobsSummaryList.some(j => j.deleting === true)) {
+        if (jobsSummaryList.some((j) => j.deleting === true)) {
           // if there are some jobs in a deleting state, start polling for
           // deleting jobs so we can update the jobs list once the
           // deleting tasks are over
@@ -351,7 +358,8 @@ export class JobsListView extends Component {
 
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList } = this.state;
-    const jobIds = jobsSummaryList.map(j => j.id);
+    const jobIds = jobsSummaryList.map((j) => j.id);
+
     return (
       <EuiPage data-test-subj="ml-jobs-list">
         <EuiPageBody>
@@ -366,17 +374,7 @@ export class JobsListView extends Component {
                 </h1>
               </EuiTitle>
             </EuiPageHeaderSection>
-          </EuiPageHeader>
-
-          <NodeAvailableWarning />
-
-          <UpgradeWarning />
-
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <JobStatsBar jobsSummaryList={jobsSummaryList} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiPageHeaderSection>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <RefreshJobsListButton
@@ -385,60 +383,75 @@ export class JobsListView extends Component {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <NewJobButton />
+                  <DatePickerWrapper />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
 
-          <EuiSpacer size="s" />
+          <NodeAvailableWarning />
 
-          <div>
-            <div className="actions-bar">
-              <MultiJobActions
-                selectedJobs={this.state.selectedJobs}
-                allJobIds={jobIds}
-                showStartDatafeedModal={this.showStartDatafeedModal}
+          <UpgradeWarning />
+
+          <EuiPageContent>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <JobStatsBar jobsSummaryList={jobsSummaryList} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <NewJobButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <div>
+              <div className="actions-bar">
+                <MultiJobActions
+                  selectedJobs={this.state.selectedJobs}
+                  allJobIds={jobIds}
+                  showStartDatafeedModal={this.showStartDatafeedModal}
+                  showDeleteJobModal={this.showDeleteJobModal}
+                  refreshJobs={() => this.refreshJobSummaryList(true)}
+                />
+                <JobFilterBar setFilters={this.setFilters} />
+              </div>
+              <JobsList
+                jobsSummaryList={this.state.filteredJobsSummaryList}
+                fullJobsList={this.state.fullJobsList}
+                itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+                toggleRow={this.toggleRow}
+                selectJobChange={this.selectJobChange}
+                showEditJobFlyout={this.showEditJobFlyout}
                 showDeleteJobModal={this.showDeleteJobModal}
+                showStartDatafeedModal={this.showStartDatafeedModal}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+                selectedJobsCount={this.state.selectedJobs.length}
+                loading={loading}
+              />
+              <EditJobFlyout
+                setShowFunction={this.setShowEditJobFlyoutFunction}
+                unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+                allJobIds={jobIds}
+              />
+              <DeleteJobModal
+                setShowFunction={this.setShowDeleteJobModalFunction}
+                unsetShowFunction={this.unsetShowDeleteJobModalFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
-              <JobFilterBar setFilters={this.setFilters} />
+              <StartDatafeedModal
+                setShowFunction={this.setShowStartDatafeedModalFunction}
+                unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+                getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+              />
+              <CreateWatchFlyout
+                setShowFunction={this.setShowCreateWatchFlyoutFunction}
+                unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+              />
             </div>
-            <JobsList
-              jobsSummaryList={this.state.filteredJobsSummaryList}
-              fullJobsList={this.state.fullJobsList}
-              itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-              toggleRow={this.toggleRow}
-              selectJobChange={this.selectJobChange}
-              showEditJobFlyout={this.showEditJobFlyout}
-              showDeleteJobModal={this.showDeleteJobModal}
-              showStartDatafeedModal={this.showStartDatafeedModal}
-              refreshJobs={() => this.refreshJobSummaryList(true)}
-              selectedJobsCount={this.state.selectedJobs.length}
-              loading={loading}
-            />
-            <EditJobFlyout
-              setShowFunction={this.setShowEditJobFlyoutFunction}
-              unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-              refreshJobs={() => this.refreshJobSummaryList(true)}
-              allJobIds={jobIds}
-            />
-            <DeleteJobModal
-              setShowFunction={this.setShowDeleteJobModalFunction}
-              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-              refreshJobs={() => this.refreshJobSummaryList(true)}
-            />
-            <StartDatafeedModal
-              setShowFunction={this.setShowStartDatafeedModalFunction}
-              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-              getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
-              refreshJobs={() => this.refreshJobSummaryList(true)}
-            />
-            <CreateWatchFlyout
-              setShowFunction={this.setShowCreateWatchFlyoutFunction}
-              unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
-            />
-          </div>
+          </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
     );

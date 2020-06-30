@@ -13,7 +13,7 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
 
   return {
     async navigateTo() {
-      pageObjects.infraLogs.navigateToTab('log-rate');
+      await pageObjects.infraLogs.navigateToTab('log-rate');
     },
 
     async getSetupScreen(): Promise<WebElementWrapper> {

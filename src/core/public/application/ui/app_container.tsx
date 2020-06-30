@@ -26,9 +26,11 @@ import React, {
   MutableRefObject,
 } from 'react';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
+import './app_container.scss';
 
 interface Props {
   /** Path application is mounted on without the global basePath */
@@ -38,6 +40,7 @@ interface Props {
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
 export const AppContainer: FunctionComponent<Props> = ({
@@ -47,7 +50,9 @@ export const AppContainer: FunctionComponent<Props> = ({
   setAppLeaveHandler,
   createScopedHistory,
   appStatus,
+  setIsMounting,
 }: Props) => {
+  const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
@@ -65,28 +70,44 @@ export const AppContainer: FunctionComponent<Props> = ({
     }
     setAppNotFound(false);
 
+    setIsMounting(true);
     if (mounter.unmountBeforeMounting) {
       unmount();
     }
 
     const mount = async () => {
-      unmountRef.current =
-        (await mounter.mount({
-          appBasePath: mounter.appBasePath,
-          history: createScopedHistory(appPath),
-          element: elementRef.current!,
-          onAppLeave: handler => setAppLeaveHandler(appId, handler),
-        })) || null;
+      setShowSpinner(true);
+      try {
+        unmountRef.current =
+          (await mounter.mount({
+            appBasePath: mounter.appBasePath,
+            history: createScopedHistory(appPath),
+            element: elementRef.current!,
+            onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
+          })) || null;
+      } catch (e) {
+        // TODO: add error UI
+        // eslint-disable-next-line no-console
+        console.error(e);
+      } finally {
+        setShowSpinner(false);
+        setIsMounting(false);
+      }
     };
 
     mount();
 
     return unmount;
-  }, [appId, appStatus, mounter, createScopedHistory, setAppLeaveHandler, appPath]);
+  }, [appId, appStatus, mounter, createScopedHistory, setAppLeaveHandler, appPath, setIsMounting]);
 
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
+      {showSpinner && (
+        <div className="appContainer__loading">
+          <EuiLoadingSpinner size="l" />
+        </div>
+      )}
       <div key={appId} ref={elementRef} />
     </Fragment>
   );

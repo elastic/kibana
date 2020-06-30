@@ -19,7 +19,7 @@
 
 var hook = require('require-in-the-middle');
 
-hook(['child_process'], function(exports, name) {
+hook(['child_process'], function (exports, name) {
   return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
 });
 

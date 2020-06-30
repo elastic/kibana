@@ -13,6 +13,7 @@ import {
   DatasourceConfigRecordEntry,
   PackageInfo,
   RegistryInput,
+  RegistryStream,
   RegistryVarsEntry,
 } from '../../../../types';
 
@@ -57,11 +58,11 @@ export const validateDatasource = (
   }
 
   if (
-    !packageInfo.datasources ||
-    packageInfo.datasources.length === 0 ||
-    !packageInfo.datasources[0] ||
-    !packageInfo.datasources[0].inputs ||
-    packageInfo.datasources[0].inputs.length === 0
+    !packageInfo.config_templates ||
+    packageInfo.config_templates.length === 0 ||
+    !packageInfo.config_templates[0] ||
+    !packageInfo.config_templates[0].inputs ||
+    packageInfo.config_templates[0].inputs.length === 0
   ) {
     validationResults.inputs = null;
     return validationResults;
@@ -70,13 +71,20 @@ export const validateDatasource = (
   const registryInputsByType: Record<
     string,
     RegistryInput
-  > = packageInfo.datasources[0].inputs.reduce((inputs, registryInput) => {
+  > = packageInfo.config_templates[0].inputs.reduce((inputs, registryInput) => {
     inputs[registryInput.type] = registryInput;
     return inputs;
   }, {} as Record<string, RegistryInput>);
 
+  const registryStreamsByDataset: Record<string, RegistryStream[]> = (
+    packageInfo.datasets || []
+  ).reduce((datasets, registryDataset) => {
+    datasets[registryDataset.name] = registryDataset.streams || [];
+    return datasets;
+  }, {} as Record<string, RegistryStream[]>);
+
   // Validate each datasource input with either its own config fields or streams
-  datasource.inputs.forEach(input => {
+  datasource.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
@@ -109,37 +117,32 @@ export const validateDatasource = (
 
     // Validate each input stream with config fields
     if (input.streams.length) {
-      input.streams.forEach(stream => {
-        if (!stream.vars) {
-          return;
-        }
-
-        const streamValidationResults: DatasourceConfigValidationResults = {
-          vars: undefined,
-        };
-
-        const streamVarsByName = (
-          (
-            registryInputsByType[input.type].streams.find(
-              registryStream => registryStream.dataset === stream.dataset
-            ) || {}
-          ).vars || []
-        ).reduce((vars, registryVar) => {
-          vars[registryVar.name] = registryVar;
-          return vars;
-        }, {} as Record<string, RegistryVarsEntry>);
+      input.streams.forEach((stream) => {
+        const streamValidationResults: DatasourceConfigValidationResults = {};
 
         // Validate stream-level config fields
-        streamValidationResults.vars = Object.entries(stream.vars).reduce(
-          (results, [name, configEntry]) => {
-            results[name] =
-              input.enabled && stream.enabled
-                ? validateDatasourceConfig(configEntry, streamVarsByName[name])
-                : null;
-            return results;
-          },
-          {} as ValidationEntry
-        );
+        if (stream.vars) {
+          const streamVarsByName = (
+            (
+              registryStreamsByDataset[stream.dataset.name].find(
+                (registryStream) => registryStream.input === input.type
+              ) || {}
+            ).vars || []
+          ).reduce((vars, registryVar) => {
+            vars[registryVar.name] = registryVar;
+            return vars;
+          }, {} as Record<string, RegistryVarsEntry>);
+          streamValidationResults.vars = Object.entries(stream.vars).reduce(
+            (results, [name, configEntry]) => {
+              results[name] =
+                input.enabled && stream.enabled
+                  ? validateDatasourceConfig(configEntry, streamVarsByName[name])
+                  : null;
+              return results;
+            },
+            {} as ValidationEntry
+          );
+        }
 
         inputValidationResults.streams![stream.id] = streamValidationResults;
       });
@@ -228,5 +231,6 @@ export const validationHasErrors = (
     | DatasourceConfigValidationResults
 ) => {
   const flattenedValidation = getFlattenedObject(validationResults);
+
   return !!Object.entries(flattenedValidation).find(([, value]) => !!value);
 };

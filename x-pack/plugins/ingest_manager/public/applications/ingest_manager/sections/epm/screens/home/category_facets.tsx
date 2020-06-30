@@ -24,7 +24,7 @@ export function CategoryFacets({
       {isLoading ? (
         <Loading />
       ) : (
-        categories.map(category => (
+        categories.map((category) => (
           <EuiFacetButton
             isSelected={category.id === selectedCategory}
             key={category.id}

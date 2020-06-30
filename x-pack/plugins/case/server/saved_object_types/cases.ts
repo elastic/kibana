@@ -49,6 +49,9 @@ export const caseSavedObjectType: SavedObjectsType = {
       description: {
         type: 'text',
       },
+      connector_id: {
+        type: 'keyword',
+      },
       external_service: {
         properties: {
           pushed_at: {

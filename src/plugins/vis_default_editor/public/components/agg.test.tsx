@@ -99,10 +99,7 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      comp
-        .find(DefaultEditorAggParams)
-        .props()
-        .setValidity(false);
+      comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
     comp.update();
     expect(setAggsState).toBeCalledWith({
@@ -124,10 +121,7 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      comp
-        .find(DefaultEditorAggParams)
-        .props()
-        .setValidity(true);
+      comp.find(DefaultEditorAggParams).props().setValidity(true);
     });
     comp.update();
     expect(setAggsState).toBeCalledWith({
@@ -160,10 +154,7 @@ describe('DefaultEditorAgg component', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
-      comp
-        .find(DefaultEditorAggParams)
-        .props()
-        .setValidity(false);
+      comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
 
     expect(setAggsState).toBeCalledWith({

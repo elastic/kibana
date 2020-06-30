@@ -55,7 +55,7 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
         label: i18n.translate('home.tutorials.haproxyMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

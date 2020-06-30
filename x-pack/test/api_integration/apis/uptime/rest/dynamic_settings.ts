@@ -7,9 +7,12 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { DynamicSettingsType } from '../../../../../plugins/uptime/common/runtime_types';
+import {
+  DynamicSettingsType,
+  DynamicSettings,
+} from '../../../../../plugins/uptime/common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../plugins/uptime/common/constants';
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('dynamic settings', () => {
@@ -20,12 +23,10 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('can change the settings', async () => {
-      const newSettings = {
+      const newSettings: DynamicSettings = {
         heartbeatIndices: 'myIndex1*',
-        certThresholds: {
-          expiration: 5,
-          age: 15,
-        },
+        certAgeThreshold: 15,
+        certExpirationThreshold: 5,
       };
       const postResponse = await supertest
         .post(`/api/uptime/dynamic_settings`)

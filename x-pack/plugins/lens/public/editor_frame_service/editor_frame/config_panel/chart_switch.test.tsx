@@ -22,17 +22,18 @@ describe('chart_switch', () => {
     return {
       ...createMockVisualization(),
       id,
+      getVisualizationTypeId: jest.fn((_state) => id),
       visualizationTypes: [
         {
           icon: 'empty',
-          id: `sub${id}`,
+          id,
           label: `Label ${id}`,
         },
       ],
       initialize: jest.fn((_frame, state?: unknown) => {
         return state || `${id} initial state`;
       }),
-      getSuggestions: jest.fn(options => {
+      getSuggestions: jest.fn((options) => {
         return [
           {
             score: 1,
@@ -51,6 +52,7 @@ describe('chart_switch', () => {
       visB: generateVisualization('visB'),
       visC: {
         ...generateVisualization('visC'),
+        initialize: jest.fn((_frame, state) => state ?? { type: 'subvisC1' }),
         visualizationTypes: [
           {
             icon: 'empty',
@@ -68,15 +70,23 @@ describe('chart_switch', () => {
             label: 'C3',
           },
         ],
-        getSuggestions: jest.fn(options => {
+        getVisualizationTypeId: jest.fn((state) => state.type),
+        getSuggestions: jest.fn((options) => {
           if (options.subVisualizationId === 'subvisC2') {
             return [];
           }
+          // Multiple suggestions need to be filtered
           return [
             {
               score: 1,
+              title: 'Primary suggestion',
+              state: { type: 'subvisC3' },
+              previewIcon: 'empty',
+            },
+            {
+              score: 1,
               title: '',
-              state: `suggestion`,
+              state: { type: 'subvisC1', notPrimary: true },
               previewIcon: 'empty',
             },
           ];
@@ -134,18 +144,12 @@ describe('chart_switch', () => {
   }
 
   function showFlyout(component: ReactWrapper) {
-    component
-      .find('[data-test-subj="lnsChartSwitchPopover"]')
-      .first()
-      .simulate('click');
+    component.find('[data-test-subj="lnsChartSwitchPopover"]').first().simulate('click');
   }
 
   function switchTo(subType: string, component: ReactWrapper) {
     showFlyout(component);
-    component
-      .find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`)
-      .first()
-      .simulate('click');
+    component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).first().simulate('click');
   }
 
   function getMenuItem(subType: string, component: ReactWrapper) {
@@ -162,7 +166,7 @@ describe('chart_switch', () => {
     const component = mount(
       <ChartSwitch
         visualizationId="visA"
-        visualizationState={{}}
+        visualizationState={'state from a'}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={mockFrame(['a'])}
@@ -171,7 +175,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
       initialState: 'suggestion visB',
@@ -201,7 +205,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(frame.removeLayers).toHaveBeenCalledWith(['a']);
 
@@ -265,7 +269,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if not all layers will be used', () => {
@@ -285,7 +289,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if no data will be used', () => {
@@ -306,7 +310,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should not indicate data loss if there is no data', () => {
@@ -328,7 +332,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
   it('should not show a warning when the subvisualization is the same', () => {
@@ -336,14 +340,14 @@ describe('chart_switch', () => {
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
     visualizations.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
-    const switchVisualizationType = jest.fn(() => 'therebedragons');
+    const switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
 
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
       <ChartSwitch
         visualizationId="visC"
-        visualizationState={'therebegriffins'}
+        visualizationState={{ type: 'subvisC2' }}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
@@ -373,7 +377,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(frame.removeLayers).toHaveBeenCalledTimes(1);
     expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
@@ -403,7 +407,7 @@ describe('chart_switch', () => {
     const component = mount(
       <ChartSwitch
         visualizationId="visC"
-        visualizationState={'therebegriffins'}
+        visualizationState={{ type: 'subvisC1' }}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
@@ -413,7 +417,7 @@ describe('chart_switch', () => {
     );
 
     switchTo('subvisC3', component);
-    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', 'suggestion');
+    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', { type: 'subvisC3' });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'SWITCH_VISUALIZATION',
@@ -471,7 +475,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'SWITCH_VISUALIZATION',
@@ -503,14 +507,40 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'suggestion visB subvisB',
+      initialState: 'suggestion visB visB',
       newVisualizationId: 'visB',
       type: 'SWITCH_VISUALIZATION',
       datasourceId: 'testDatasource',
       datasourceState: {},
+    });
+  });
+
+  it('should use the suggestion that matches the subtype', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const switchVisualizationType = jest.fn();
+
+    visualizations.visC.switchVisualizationType = switchVisualizationType;
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visC"
+        visualizationState={{ type: 'subvisC3' }}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={mockFrame(['a'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisC1', component);
+    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC1', {
+      type: 'subvisC1',
+      notPrimary: true,
     });
   });
 
@@ -529,8 +559,8 @@ describe('chart_switch', () => {
 
     showFlyout(component);
 
-    const allDisplayed = ['subvisA', 'subvisB', 'subvisC1', 'subvisC2'].every(
-      subType => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
+    const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2', 'subvisC3'].every(
+      (subType) => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 
     expect(allDisplayed).toBeTruthy();

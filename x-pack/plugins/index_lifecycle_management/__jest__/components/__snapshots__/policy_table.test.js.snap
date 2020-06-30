@@ -91,11 +91,10 @@ exports[`policy table should show empty state when there are not any policies 1`
         <div
           class="euiSpacer euiSpacer--s"
         />
-        <a
+        <button
           class="euiButton euiButton--primary euiButton--fill"
           data-test-subj="createPolicyButton"
-          href="#/management/elasticsearch/index_lifecycle_management/policies/edit"
-          rel="noreferrer"
+          type="button"
         >
           <span
             class="euiButton__content"
@@ -111,7 +110,7 @@ exports[`policy table should show empty state when there are not any policies 1`
               Create policy
             </span>
           </span>
-        </a>
+        </button>
       </div>
       <div
         class="euiSpacer euiSpacer--m"

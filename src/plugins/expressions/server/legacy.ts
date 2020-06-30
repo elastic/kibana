@@ -26,7 +26,7 @@ import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Logger, APICaller } from 'src/core/server';
+import { CoreSetup, Logger, LegacyAPICaller } from 'src/core/server';
 import { ExpressionsServerSetupDependencies } from './plugin';
 import { typeSpecs, ExpressionType } from '../common';
 import { serializeProvider } from '../common';
@@ -98,7 +98,7 @@ export const createLegacyServerEndpoints = (
    * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
    */
   async function runFunction(
-    handlers: { environment: string; elasticsearchClient: APICaller },
+    handlers: { environment: string; elasticsearchClient: LegacyAPICaller },
     fnCall: any
   ) {
     const { functionName, args, context } = fnCall;
@@ -114,7 +114,7 @@ export const createLegacyServerEndpoints = (
    * Register an endpoint that executes a batch of functions, and streams the
    * results back using ND-JSON.
    */
-  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, request => {
+  plugins.bfetch.addBatchProcessingRoute(`/api/interpreter/fns`, (request) => {
     return {
       onBatchItem: async (fnCall: any) => {
         const [coreStart] = await core.getStartServices();

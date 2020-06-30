@@ -44,7 +44,8 @@ import {
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setDataActions } from './services';
+import { setFormatService, setDataActions, setKibanaLegacy } from './services';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export interface VisTypeVislibDependencies {
   uiSettings: IUiSettingsClient;
@@ -62,6 +63,7 @@ export interface VisTypeVislibPluginSetupDependencies {
 /** @internal */
 export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
@@ -97,20 +99,21 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
 
       // Register legacy vislib types that have been converted
       convertedFns.forEach(expressions.registerFunction);
-      convertedTypes.forEach(vis =>
+      convertedTypes.forEach((vis) =>
         visualizations.createBaseVisualization(vis(visualizationDependencies))
       );
     }
 
     // Register non-converted types
     vislibFns.forEach(expressions.registerFunction);
-    vislibTypes.forEach(vis =>
+    vislibTypes.forEach((vis) =>
       visualizations.createBaseVisualization(vis(visualizationDependencies))
     );
   }
 
-  public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
+  public start(core: CoreStart, { data, kibanaLegacy }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
+    setKibanaLegacy(kibanaLegacy);
   }
 }

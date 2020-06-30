@@ -22,7 +22,16 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 import { GetInternalStartServicesFn } from '../../../types';
+
+export interface AggParamsMovingAvg extends BaseAggParams {
+  buckets_path: string;
+  window?: number;
+  script?: string;
+  customMetric?: AggConfigSerialized;
+  metricAgg?: string;
+}
 
 export interface MovingAvgMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
@@ -39,15 +48,18 @@ const movingAvgLabel = i18n.translate('data.search.aggs.metrics.movingAvgLabel',
 export const getMovingAvgMetricAgg = ({
   getInternalStartServices,
 }: MovingAvgMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.MOVING_FN,
       dslName: 'moving_fn',
       title: movingAvgTitle,
-      subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
+      makeLabel: (agg) => makeNestedLabel(agg, movingAvgLabel),
+      subtype,
+      getSerializedFormat,
       params: [
-        ...parentPipelineAggHelper.params(),
+        ...params(),
         {
           name: 'window',
           default: 5,
@@ -69,7 +81,6 @@ export const getMovingAvgMetricAgg = ({
          */
         return bucket[agg.id] ? bucket[agg.id].value : null;
       },
-      getFormat: parentPipelineAggHelper.getFormat,
     },
     {
       getInternalStartServices,

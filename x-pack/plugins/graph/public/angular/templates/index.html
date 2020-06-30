@@ -122,8 +122,8 @@
         </button>
 
         <button class="kuiButton kuiButton--basic kuiButton--small" ng-disabled="workspace === null ||workspace.selectedNodes.length === 0"
-          tooltip="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
-          aria-label="{{ ::'xpack.graph.sidebar.topMenu.blacklistButtonTooltip' | i18n: { defaultMessage: 'Blacklist selection from return to workspace' } }}"
+          tooltip="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
+          aria-label="{{ ::'xpack.graph.sidebar.topMenu.blocklistButtonTooltip' | i18n: { defaultMessage: 'Block selection from appearing in workspace' } }}"
           ng-click="workspace.blacklistSelection();">
           <span class="kuiIcon fa-ban"></span>
         </button>
@@ -208,7 +208,7 @@
             ng-click="selectSelected(n)">
             <svg width="24" height="24">
               <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{n.color}}"
-                ng-click="workspace.deselectNode(n)" />
+                ng-click="workspace.deselectNode(n)" ></circle>
 
               <text
                 ng-if="n.icon"

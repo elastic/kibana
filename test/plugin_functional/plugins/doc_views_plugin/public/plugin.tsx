@@ -48,7 +48,7 @@ export class DocViewsPlugin implements Plugin<void, void> {
     });
 
     discover.docViews.addDocView({
-      component: props => {
+      component: (props) => {
         return <MyHit index={props.hit._index as string} />;
       },
       order: 2,

@@ -8,15 +8,18 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {
     ...functionalConfig.getAll(),
+
     testFiles: [
       require.resolve('./apps/login_page'),
       require.resolve('./apps/home'),
       require.resolve('./apps/grok_debugger'),
+      require.resolve('./apps/search_profiler'),
+      require.resolve('./apps/uptime'),
     ],
     pageObjects,
     services,

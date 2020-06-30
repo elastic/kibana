@@ -19,7 +19,7 @@ import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export class MultiMetricJobCreator extends JobCreator {
-  // a multi metric job has one optional overall partition field
+  // a multi-metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
 
@@ -49,7 +49,7 @@ export class MultiMetricJobCreator extends JobCreator {
   }
 
   public removeSplitField() {
-    this._detectors.forEach(d => {
+    this._detectors.forEach((d) => {
       delete d.partition_field_name;
     });
   }

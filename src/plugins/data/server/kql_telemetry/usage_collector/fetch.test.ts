@@ -18,14 +18,17 @@
  */
 
 import { fetchProvider } from './fetch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
+  UI_SETTINGS: {
+    SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
+  },
 }));
 
 let fetch: ReturnType<typeof fetchProvider>;
-let callCluster: APICaller;
+let callCluster: LegacyAPICaller;
 
 function setupMockCallCluster(
   optCount: { optInCount?: number; optOutCount?: number } | null,
@@ -75,7 +78,7 @@ function setupMockCallCluster(
     }
 
     throw new Error('invalid call');
-  }) as unknown) as APICaller;
+  }) as unknown) as LegacyAPICaller;
 }
 
 describe('makeKQLUsageCollector', () => {

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('kibana status api', () => {
@@ -39,7 +39,7 @@ export default function({ getService }) {
           expect(body.status.overall.state).to.be('green');
 
           expect(body.status.statuses).to.be.an('array');
-          const kibanaPlugin = body.status.statuses.find(s => {
+          const kibanaPlugin = body.status.statuses.find((s) => {
             return s.id.indexOf('plugin:kibana') === 0;
           });
           expect(kibanaPlugin.state).to.be('green');

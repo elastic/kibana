@@ -25,20 +25,21 @@ import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { UptimePage, useUptimeTelemetry } from '../hooks';
 import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
+import {
+  VALUE_MUST_BE_GREATER_THAN_ZERO,
+  VALUE_MUST_BE_AN_INTEGER,
+} from '../../common/translations';
 
 interface SettingsPageFieldErrors {
-  heartbeatIndices: 'May not be blank' | '';
-  certificatesThresholds: {
-    expirationThresholdError: string | null;
-    ageThresholdError: string | null;
-  } | null;
+  heartbeatIndices: string | '';
+  expirationThresholdError?: string;
+  ageThresholdError?: string;
 }
 
 export interface SettingsFormProps {
@@ -49,33 +50,40 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
+export const isValidCertVal = (val?: number): string | undefined => {
+  if (val === undefined || isNaN(val)) {
+    return Translations.settings.mustBeNumber;
+  }
+  if (val <= 0) {
+    return VALUE_MUST_BE_GREATER_THAN_ZERO;
+  }
+  if (val % 1) {
+    return VALUE_MUST_BE_AN_INTEGER;
+  }
+};
+
 const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
   if (formFields) {
-    const blankStr = 'May not be blank';
-    const { certThresholds: certificatesThresholds, heartbeatIndices } = formFields;
-    const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
-    const expirationThresholdError = certificatesThresholds?.expiration ? null : blankStr;
-    const ageThresholdError = certificatesThresholds?.age ? null : blankStr;
+    const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
+
+    const indError = heartbeatIndices.match(/^\S+$/) ? '' : Translations.BLANK_STR;
+
+    const expError = isValidCertVal(certExpirationThreshold);
+    const ageError = isValidCertVal(certAgeThreshold);
+
     return {
-      heartbeatIndices: heartbeatIndErr,
-      certificatesThresholds:
-        expirationThresholdError || ageThresholdError
-          ? {
-              expirationThresholdError,
-              ageThresholdError,
-            }
-          : null,
+      heartbeatIndices: indError,
+      expirationThresholdError: expError,
+      ageThresholdError: ageError,
     };
   }
   return null;
 };
 
-export const SettingsPage = () => {
+export const SettingsPage: React.FC = () => {
   const dss = useSelector(selectDynamicSettings);
 
   useBreadcrumbs([{ text: Translations.settings.breadcrumbText }]);
-
-  useUptimeTelemetry(UptimePage.Settings);
 
   const dispatch = useDispatch();
 
@@ -93,17 +101,13 @@ export const SettingsPage = () => {
 
   const fieldErrors = getFieldErrors(formFields);
 
-  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
+  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find((v) => !!v));
 
-  const onChangeFormField: OnFieldChangeType = changedField => {
+  const onChangeFormField: OnFieldChangeType = (changedField) => {
     if (formFields) {
       setFormFields({
-        heartbeatIndices: changedField.heartbeatIndices ?? formFields.heartbeatIndices,
-        certThresholds: Object.assign(
-          {},
-          formFields.certThresholds,
-          changedField?.certThresholds ?? null
-        ),
+        ...formFields,
+        ...changedField,
       });
     }
   };

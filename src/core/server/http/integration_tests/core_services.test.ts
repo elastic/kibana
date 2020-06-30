@@ -43,7 +43,7 @@ describe('http service', () => {
   describe('auth', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({ migrations: { skip: true } });
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
@@ -192,7 +192,7 @@ describe('http service', () => {
 
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot({ migrations: { skip: true } });
+        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => {
@@ -326,7 +326,7 @@ describe('http service', () => {
     describe('#basePath()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot({ migrations: { skip: true } });
+        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => await root.shutdown());
@@ -355,7 +355,7 @@ describe('http service', () => {
   describe('elasticsearch', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({ migrations: { skip: true } });
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
@@ -373,8 +373,7 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
-        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
         return res.ok();
       });
 
@@ -382,12 +381,10 @@ describe('http service', () => {
 
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
 
-      // admin client contains authHeaders for BWC with legacy platform.
-      const [adminClient, dataClient] = clusterClientMock.mock.calls;
-      const [, , adminClientHeaders] = adminClient;
-      expect(adminClientHeaders).toEqual(authHeaders);
-      const [, , dataClientHeaders] = dataClient;
-      expect(dataClientHeaders).toEqual(authHeaders);
+      // client contains authHeaders for BWC with legacy platform.
+      const [client] = clusterClientMock.mock.calls;
+      const [, , clientHeaders] = client;
+      expect(clientHeaders).toEqual(authHeaders);
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
@@ -398,8 +395,7 @@ describe('http service', () => {
       const router = createRouter('/new-platform');
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         // it forces client initialization since the core creates them lazily.
-        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
-        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
         return res.ok();
       });
 
@@ -410,11 +406,9 @@ describe('http service', () => {
         .set('Authorization', authorizationHeader)
         .expect(200);
 
-      const [adminClient, dataClient] = clusterClientMock.mock.calls;
-      const [, , adminClientHeaders] = adminClient;
-      expect(adminClientHeaders).toEqual({ authorization: authorizationHeader });
-      const [, , dataClientHeaders] = dataClient;
-      expect(dataClientHeaders).toEqual({ authorization: authorizationHeader });
+      const [client] = clusterClientMock.mock.calls;
+      const [, , clientHeaders] = client;
+      expect(clientHeaders).toEqual({ authorization: authorizationHeader });
     });
   });
 });

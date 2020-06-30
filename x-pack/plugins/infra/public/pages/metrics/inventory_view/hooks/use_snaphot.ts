@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -14,6 +13,8 @@ import {
   SnapshotNodeResponseRT,
   SnapshotNodeResponse,
   SnapshotGroupBy,
+  SnapshotRequest,
+  InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
 import {
   InventoryItemType,
@@ -37,10 +38,11 @@ export function useSnapshot(
     );
   };
 
-  const timerange = {
+  const timerange: InfraTimerangeInput = {
     interval: '1m',
     to: currentTime,
     from: currentTime - 360 * 1000,
+    lookbackSize: 20,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
@@ -55,15 +57,10 @@ export function useSnapshot(
       sourceId,
       accountId,
       region,
-    }),
+      includeTimeseries: true,
+    } as SnapshotRequest),
     decodeResponse
   );
-
-  useEffect(() => {
-    (async () => {
-      await makeRequest();
-    })();
-  }, [makeRequest]);
 
   return {
     error: (error && error.message) || null,

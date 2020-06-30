@@ -20,7 +20,10 @@ export type DatasourceConfigRecord = Record<string, DatasourceConfigRecordEntry>
 export interface NewDatasourceInputStream {
   id: string;
   enabled: boolean;
-  dataset: string;
+  dataset: {
+    name: string;
+    type: string;
+  };
   processors?: string[];
   config?: DatasourceConfigRecord;
   vars?: DatasourceConfigRecord;
@@ -58,4 +61,10 @@ export interface Datasource extends Omit<NewDatasource, 'inputs'> {
   id: string;
   inputs: DatasourceInput[];
   revision: number;
+  updated_at: string;
+  updated_by: string;
+  created_at: string;
+  created_by: string;
 }
+
+export type DatasourceSOAttributes = Omit<Datasource, 'id'>;

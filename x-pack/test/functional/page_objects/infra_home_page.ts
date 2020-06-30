@@ -74,5 +74,9 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('configureSourceButton');
       await testSubjects.exists('sourceConfigurationFlyout');
     },
+
+    async waitForLoading() {
+      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
+    },
   };
 }

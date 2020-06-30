@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import mappings from '../../mappings/mappings';
+import { getTemplates } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 
 export class TemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, mappings.getTemplates, parent, true, true);
+    super(name, getTemplates, parent, true, true);
   }
   getContextKey() {
     return 'template';

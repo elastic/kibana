@@ -37,7 +37,7 @@ describe('deprecation logging API', () => {
 
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
     it('returns isEnabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.dataClient
+      (routeHandlerContextMock.core.elasticsearch.legacy.client
         .callAsCurrentUser as jest.Mock).mockResolvedValue({
         default: { logger: { deprecation: 'WARN' } },
       });
@@ -51,7 +51,7 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.dataClient
+      (routeHandlerContextMock.core.elasticsearch.legacy.client
         .callAsCurrentUser as jest.Mock).mockRejectedValue(new Error(`scary error!`));
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -64,7 +64,7 @@ describe('deprecation logging API', () => {
 
   describe('PUT /api/upgrade_assistant/deprecation_logging', () => {
     it('returns isEnabled', async () => {
-      (routeHandlerContextMock.core.elasticsearch.dataClient
+      (routeHandlerContextMock.core.elasticsearch.legacy.client
         .callAsCurrentUser as jest.Mock).mockResolvedValue({
         default: { logger: { deprecation: 'ERROR' } },
       });
@@ -77,7 +77,7 @@ describe('deprecation logging API', () => {
     });
 
     it('returns an error if it throws', async () => {
-      (routeHandlerContextMock.core.elasticsearch.dataClient
+      (routeHandlerContextMock.core.elasticsearch.legacy.client
         .callAsCurrentUser as jest.Mock).mockRejectedValue(new Error(`scary error!`));
       const resp = await routeDependencies.router.getHandler({
         method: 'put',

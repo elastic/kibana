@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 import _ from 'lodash';
-import override from './override';
+import { override } from './override';
 import createDefaultSchema from './schema';
 import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -47,7 +47,7 @@ export class Config {
     }
 
     if (!key) {
-      return _.each(extension._inner.children, child => {
+      return _.each(extension._inner.children, (child) => {
         this.extendSchema(child.schema, _.get(settings, child.key), child.key);
       });
     }
@@ -193,9 +193,7 @@ export class Config {
   getSchema() {
     if (!this[schema]) {
       this[schema] = (function convertToSchema(children) {
-        let schema = Joi.object()
-          .keys({})
-          .default();
+        let schema = Joi.object().keys({}).default();
 
         for (const key of Object.keys(children)) {
           const child = children[key];

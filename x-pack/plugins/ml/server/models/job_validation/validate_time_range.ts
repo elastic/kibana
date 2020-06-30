@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
@@ -27,7 +27,7 @@ const BUCKET_SPAN_COMPARE_FACTOR = 25;
 const MIN_TIME_SPAN_MS = 7200000;
 const MIN_TIME_SPAN_READABLE = '2 hours';
 
-export async function isValidTimeField(callAsCurrentUser: APICaller, job: CombinedJob) {
+export async function isValidTimeField(callAsCurrentUser: LegacyAPICaller, job: CombinedJob) {
   const index = job.datafeed_config.indices.join(',');
   const timeField = job.data_description.time_field;
 
@@ -37,17 +37,17 @@ export async function isValidTimeField(callAsCurrentUser: APICaller, job: Combin
     fields: [timeField],
   });
 
-  let fieldType = fieldCaps.fields[timeField]?.date?.type;
+  let fieldType = fieldCaps?.fields[timeField]?.date?.type;
   if (fieldType === undefined) {
-    fieldType = fieldCaps.fields[timeField]?.date_nanos?.type;
+    fieldType = fieldCaps?.fields[timeField]?.date_nanos?.type;
   }
   return fieldType === ES_FIELD_TYPES.DATE || fieldType === ES_FIELD_TYPES.DATE_NANOS;
 }
 
 export async function validateTimeRange(
-  callAsCurrentUser: APICaller,
+  callAsCurrentUser: LegacyAPICaller,
   job: CombinedJob,
-  timeRange: TimeRange | undefined
+  timeRange?: Partial<TimeRange>
 ) {
   const messages: ValidateTimeRangeMessage[] = [];
 
@@ -78,7 +78,7 @@ export async function validateTimeRange(
   }
 
   // check for minimum time range (25 buckets or 2 hours, whichever is longer)
-  const interval = parseInterval(job.analysis_config.bucket_span);
+  const interval = parseInterval(job.analysis_config.bucket_span, true);
   if (interval === null) {
     messages.push({ id: 'bucket_span_invalid' });
   } else {

@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -62,16 +62,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_index_patterns_all_role'),
           security.user.delete('global_index_patterns_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -124,8 +124,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing doesn't show create button`, async () => {
@@ -176,22 +176,27 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {
         await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('kibana');
-        await testSubjects.missingOrFail('index_patterns');
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.missingOrFail('indexPatterns');
       });
 
-      it(`does not allow navigation to Index Patterns; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+      it(`does not allow navigation to Index Patterns; redirects to management home`, async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });

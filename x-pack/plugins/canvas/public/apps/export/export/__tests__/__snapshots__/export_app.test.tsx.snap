@@ -1,0 +1,141 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ExportApp /> renders as expected 1`] = `
+<ExportApp
+  initializeWorkpad={[Function]}
+  selectedPageIndex={0}
+  workpad={
+    Object {
+      "css": "",
+      "id": "my-workpad-abcd",
+      "pages": Array [
+        Object {
+          "elements": Array [
+            0,
+            1,
+            2,
+          ],
+        },
+        Object {
+          "elements": Array [
+            3,
+            4,
+            5,
+            6,
+          ],
+        },
+      ],
+    }
+  }
+>
+  <div
+    className="canvasExport"
+    data-shared-page={1}
+  >
+    <div
+      className="canvasExport__stage"
+    >
+      <div
+        className="canvasLayout__stageHeader"
+      >
+        <Link
+          name="loadWorkpad"
+          params={
+            Object {
+              "id": "my-workpad-abcd",
+            }
+          }
+        >
+          <div>
+            Link
+          </div>
+        </Link>
+      </div>
+      <div
+        className="canvasExport__stageContent"
+        data-shared-items-count={3}
+      >
+        <WorkpadPage
+          isSelected={true}
+          registerLayout={[Function]}
+          unregisterLayout={[Function]}
+        >
+          <div>
+            Page
+          </div>
+        </WorkpadPage>
+      </div>
+    </div>
+  </div>
+</ExportApp>
+`;
+
+exports[`<ExportApp /> renders as expected 2`] = `
+<ExportApp
+  initializeWorkpad={[Function]}
+  selectedPageIndex={1}
+  workpad={
+    Object {
+      "css": "",
+      "id": "my-workpad-abcd",
+      "pages": Array [
+        Object {
+          "elements": Array [
+            0,
+            1,
+            2,
+          ],
+        },
+        Object {
+          "elements": Array [
+            3,
+            4,
+            5,
+            6,
+          ],
+        },
+      ],
+    }
+  }
+>
+  <div
+    className="canvasExport"
+    data-shared-page={2}
+  >
+    <div
+      className="canvasExport__stage"
+    >
+      <div
+        className="canvasLayout__stageHeader"
+      >
+        <Link
+          name="loadWorkpad"
+          params={
+            Object {
+              "id": "my-workpad-abcd",
+            }
+          }
+        >
+          <div>
+            Link
+          </div>
+        </Link>
+      </div>
+      <div
+        className="canvasExport__stageContent"
+        data-shared-items-count={4}
+      >
+        <WorkpadPage
+          isSelected={true}
+          registerLayout={[Function]}
+          unregisterLayout={[Function]}
+        >
+          <div>
+            Page
+          </div>
+        </WorkpadPage>
+      </div>
+    </div>
+  </div>
+</ExportApp>
+`;

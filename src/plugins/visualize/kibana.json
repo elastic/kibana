@@ -8,10 +8,8 @@
     "kibanaLegacy",
     "navigation",
     "savedObjects",
-    "visualizations"
+    "visualizations",
+    "embeddable"
   ],
-  "optionalPlugins": [
-    "home",
-    "share"
-  ]
+  "optionalPlugins": ["home", "share"]
 }

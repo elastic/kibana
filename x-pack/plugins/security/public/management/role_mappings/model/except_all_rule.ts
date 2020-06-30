@@ -50,13 +50,13 @@ export class ExceptAllRule extends RuleGroup {
 
   /** {@see RuleGroup.clone} */
   public clone() {
-    return new ExceptAllRule(this.rules.map(r => r.clone()));
+    return new ExceptAllRule(this.rules.map((r) => r.clone()));
   }
 
   /** {@see RuleGroup.toRaw} */
   public toRaw() {
     const rawRule = {
-      all: [...this.rules.map(rule => rule.toRaw())],
+      all: [...this.rules.map((rule) => rule.toRaw())],
     };
 
     return {

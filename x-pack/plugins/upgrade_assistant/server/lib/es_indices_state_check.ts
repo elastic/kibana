@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { getIndexStateFromClusterState } from '../../common/get_index_state_from_cluster_state';
 import { ClusterStateAPIResponse } from '../../common/types';
 
 type StatusCheckResult = Record<string, 'open' | 'close'>;
 
 export const esIndicesStateCheck = async (
-  callAsUser: APICaller,
+  callAsUser: LegacyAPICaller,
   indices: string[]
 ): Promise<StatusCheckResult> => {
   // According to https://www.elastic.co/guide/en/elasticsearch/reference/7.6/cluster-state.html
@@ -25,7 +25,7 @@ export const esIndicesStateCheck = async (
 
   const result: StatusCheckResult = {};
 
-  indices.forEach(index => {
+  indices.forEach((index) => {
     result[index] = getIndexStateFromClusterState(index, clusterState);
   });
 

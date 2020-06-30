@@ -5,12 +5,12 @@
  */
 
 import archiver from 'archiver';
-import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../legacy/plugins/canvas/common/lib';
+import { API_ROUTE_SHAREABLE_ZIP } from '../../../common/lib';
 import {
   SHAREABLE_RUNTIME_FILE,
   SHAREABLE_RUNTIME_NAME,
   SHAREABLE_RUNTIME_SRC,
-} from '../../../../../legacy/plugins/canvas/shareable_runtime/constants';
+} from '../../../shareable_runtime/constants';
 import { RenderedWorkpadSchema } from './rendered_workpad_schema';
 import { RouteInitializerDeps } from '..';
 

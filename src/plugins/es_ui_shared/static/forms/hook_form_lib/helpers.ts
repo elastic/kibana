@@ -20,7 +20,7 @@
 import { FieldHook } from './types';
 
 export const getFieldValidityAndErrorMessage = (
-  field: FieldHook
+  field: FieldHook<any>
 ): { isInvalid: boolean; errorMessage: string | null } => {
   const isInvalid = !field.isChangingValue && field.errors.length > 0;
   const errorMessage =

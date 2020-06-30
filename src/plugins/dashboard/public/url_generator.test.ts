@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { createDirectAccessDashboardLinkGenerator } from './url_generator';
+import { createDashboardUrlGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 // eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { esFilters, Filter } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 
-const APP_BASE_PATH: string = 'xyz/app/kibana';
+const APP_BASE_PATH: string = 'xyz/app/dashboards';
 
 const createMockDashboardLoader = (
   dashboardToFilters: {
@@ -55,7 +55,7 @@ describe('dashboard url generator', () => {
   });
 
   test('creates a link to a saved dashboard', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -63,11 +63,11 @@ describe('dashboard url generator', () => {
       })
     );
     const url = await generator.createUrl!({});
-    expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard?_a=()&_g=()"`);
+    expect(url).toMatchInlineSnapshot(`"xyz/app/dashboards#/create?_a=()&_g=()"`);
   });
 
   test('creates a link with global time range set up', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -78,12 +78,12 @@ describe('dashboard url generator', () => {
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/dashboards#/create?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
     );
   });
 
   test('creates a link with filters, time range, refresh interval and query to a saved object', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -118,12 +118,12 @@ describe('dashboard url generator', () => {
       query: { query: 'bye', language: 'kuery' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/dashboards#/view/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
     );
   });
 
   test('if no useHash setting is given, uses the one was start services', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: true,
@@ -137,7 +137,7 @@ describe('dashboard url generator', () => {
   });
 
   test('can override a false useHash ui setting', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -152,7 +152,7 @@ describe('dashboard url generator', () => {
   });
 
   test('can override a true useHash ui setting', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: true,
@@ -195,7 +195,7 @@ describe('dashboard url generator', () => {
     };
 
     test('attaches filters from destination dashboard', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -224,7 +224,7 @@ describe('dashboard url generator', () => {
     });
 
     test("doesn't fail if can't retrieve filters from destination dashboard", async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -246,7 +246,7 @@ describe('dashboard url generator', () => {
     });
 
     test('can enforce empty filters', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -265,12 +265,12 @@ describe('dashboard url generator', () => {
       expect(url).not.toEqual(expect.stringContaining('query:savedfilter1'));
       expect(url).not.toEqual(expect.stringContaining('query:appliedfilter'));
       expect(url).toMatchInlineSnapshot(
-        `"xyz/app/kibana#/dashboard/dashboard1?_a=(filters:!())&_g=(filters:!())"`
+        `"xyz/app/dashboards#/view/dashboard1?_a=(filters:!())&_g=(filters:!())"`
       );
     });
 
     test('no filters in result url if no filters applied', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -284,11 +284,11 @@ describe('dashboard url generator', () => {
         dashboardId: 'dashboard1',
       });
       expect(url).not.toEqual(expect.stringContaining('filters'));
-      expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard/dashboard1?_a=()&_g=()"`);
+      expect(url).toMatchInlineSnapshot(`"xyz/app/dashboards#/view/dashboard1?_a=()&_g=()"`);
     });
 
     test('can turn off preserving filters', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,

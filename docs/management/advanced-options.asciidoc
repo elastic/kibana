@@ -5,7 +5,7 @@ The *Advanced Settings* UI enables you to edit settings that control the behavio
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
 for displayed decimal values.
 
-. Go to *Management > {kib} > Advanced Settings*.
+. Open the menu, then go to *Stack Management > {kib} > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
 . Click *Save changes*.
@@ -68,6 +68,9 @@ into the document when displaying it.
 `metrics:max_buckets`:: The maximum numbers of buckets that a single
 data source can return. This might arise when the user selects a
 short interval (for example, 1s) for a long time period (1 year).
+`pageNavigation`:: The style of navigation menu for Kibana.
+Choices are Legacy, the legacy style where every plugin is represented in the nav,
+and Modern, a new format that bundles related plugins together in flyaway nested navigation.
 `query:allowLeadingWildcards`:: Allows a wildcard (*) as the first character
 in a query clause. Only applies when experimental query features are
 enabled in the query bar. To disallow leading wildcards in Lucene queries,

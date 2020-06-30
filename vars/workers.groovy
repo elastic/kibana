@@ -3,14 +3,18 @@
 
 def label(size) {
   switch(size) {
+    case 'flyweight':
+      return 'flyweight'
     case 's':
-      return 'linux && immutable'
+      return 'docker && linux && immutable'
+    case 's-highmem':
+      return 'docker && tests-s'
     case 'l':
-      return 'tests-l'
+      return 'docker && tests-l'
     case 'xl':
-      return 'tests-xl'
+      return 'docker && tests-xl'
     case 'xxl':
-      return 'tests-xxl'
+      return 'docker && tests-xxl'
   }
 
   error "unknown size '${size}'"
@@ -51,33 +55,30 @@ def base(Map params, Closure closure) {
       }
     }
 
-    def scmVars = [:]
+    def checkoutInfo = [:]
 
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        scmVars = checkout scm
-
-        def mergeBase
-        if (env.ghprbTargetBranch) {
-          sh(
-            script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}",
-            label: "update reference to target branch 'origin/${env.ghprbTargetBranch}'"
-          )
-          mergeBase = sh(
-            script: "cd kibana && git merge-base HEAD FETCH_HEAD",
-            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'",
-            returnStdout: true
-          ).trim()
-        }
-
-        ciStats.reportGitInfo(
-          env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
-          scmVars.GIT_COMMIT,
-          env.ghprbTargetBranch,
-          mergeBase
-        )
+        checkout scm
       }
+
+      dir("kibana") {
+        checkoutInfo = getCheckoutInfo()
+
+        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
+        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+          buildState.set('checkoutInfo', checkoutInfo)
+          githubCommitStatus.onStart()
+        }
+      }
+
+      ciStats.reportGitInfo(
+        checkoutInfo.branch,
+        checkoutInfo.commit,
+        checkoutInfo.targetBranch,
+        checkoutInfo.mergeBase
+      )
     }
 
     withEnv([
@@ -87,7 +88,7 @@ def base(Map params, Closure closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH ?: ''}",
+      "GIT_BRANCH=${checkoutInfo.branch}",
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
@@ -123,7 +124,7 @@ def ci(Map params, Closure closure) {
 // Worker for running the current intake jobs. Just runs a single script after bootstrap.
 def intake(jobName, String script) {
   return {
-    ci(name: jobName, size: 's', ramDisk: false) {
+    ci(name: jobName, size: 's-highmem', ramDisk: true) {
       withEnv(["JOB=${jobName}"]) {
         runbld(script, "Execute ${jobName}")
       }

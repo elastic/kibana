@@ -24,7 +24,7 @@ import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
 
 // @ts-ignore
-import mappings from '../../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
@@ -73,7 +73,7 @@ export const useSendCurrentRequestToES = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        mappings.retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
 
       dispatch({

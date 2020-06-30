@@ -14,6 +14,9 @@ Object {
           "p95": Object {
             "percentiles": Object {
               "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 2,
+              },
               "percents": Array [
                 95,
               ],
@@ -41,7 +44,7 @@ Object {
           },
         },
         "composite": Object {
-          "size": 10000,
+          "size": 101,
           "sources": Array [
             Object {
               "service": Object {
@@ -120,6 +123,9 @@ Object {
           "p95": Object {
             "percentiles": Object {
               "field": "transaction.duration.us",
+              "hdr": Object {
+                "number_of_significant_value_digits": 2,
+              },
               "percents": Array [
                 95,
               ],
@@ -147,7 +153,7 @@ Object {
           },
         },
         "composite": Object {
-          "size": 10000,
+          "size": 101,
           "sources": Array [
             Object {
               "transaction": Object {

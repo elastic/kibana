@@ -6,6 +6,7 @@
 
 import createContainer from 'constate';
 import { useState, useMemo, useCallback } from 'react';
+import { HttpSetup } from 'src/core/public';
 import {
   LogSourceConfiguration,
   LogSourceStatus,
@@ -24,7 +25,13 @@ export {
   LogSourceStatus,
 };
 
-export const useLogSource = ({ sourceId }: { sourceId: string }) => {
+export const useLogSource = ({
+  sourceId,
+  fetch,
+}: {
+  sourceId: string;
+  fetch: HttpSetup['fetch'];
+}) => {
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
   >(undefined);
@@ -35,42 +42,43 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callFetchLogSourceConfigurationAPI(sourceId);
+        return await callFetchLogSourceConfigurationAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
         setSourceConfiguration(data);
       },
     },
-    [sourceId]
+    [sourceId, fetch]
   );
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async (patchedProperties: LogSourceConfigurationPropertiesPatch) => {
-        return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties);
+        return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties, fetch);
       },
       onResolve: ({ data }) => {
         setSourceConfiguration(data);
         loadSourceStatus();
       },
     },
-    [sourceId]
+    [sourceId, fetch]
   );
 
   const [loadSourceStatusRequest, loadSourceStatus] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callFetchLogSourceStatusAPI(sourceId);
+        return await callFetchLogSourceStatusAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
         setSourceStatus(data);
       },
     },
-    [sourceId]
+    [sourceId, fetch]
   );
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const logIndicesExist = useMemo(() => (sourceStatus?.logIndexNames?.length ?? 0) > 0, [
     sourceStatus,
   ]);
@@ -80,6 +88,7 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
       fields: sourceStatus?.logIndexFields ?? [],
       title: sourceConfiguration?.configuration.name ?? 'unknown',
     }),
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
   );
 
@@ -114,6 +123,10 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
     [loadSourceConfigurationRequest.state]
   );
 
+  const hasFailedLoadingSourceStatus = useMemo(() => loadSourceStatusRequest.state === 'rejected', [
+    loadSourceStatusRequest.state,
+  ]);
+
   const loadSourceFailureMessage = useMemo(
     () =>
       loadSourceConfigurationRequest.state === 'rejected'
@@ -137,6 +150,7 @@ export const useLogSource = ({ sourceId }: { sourceId: string }) => {
   return {
     derivedIndexPattern,
     hasFailedLoadingSource,
+    hasFailedLoadingSourceStatus,
     initialize,
     isLoading,
     isLoadingSourceConfiguration,

@@ -4,38 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMlIndex, getMlJobId, getMlPrefix } from './ml_job_constants';
+import { getSeverity, severity } from './ml_job_constants';
 
 describe('ml_job_constants', () => {
-  it('getMlPrefix', () => {
-    expect(getMlPrefix('myServiceName')).toBe('myservicename-');
-    expect(getMlPrefix('myServiceName', 'myTransactionType')).toBe(
-      'myservicename-mytransactiontype-'
-    );
-  });
+  describe('getSeverity', () => {
+    describe('when score is undefined', () => {
+      it('returns undefined', () => {
+        expect(getSeverity(undefined)).toEqual(undefined);
+      });
+    });
 
-  it('getMlJobId', () => {
-    expect(getMlJobId('myServiceName')).toBe(
-      'myservicename-high_mean_response_time'
-    );
-    expect(getMlJobId('myServiceName', 'myTransactionType')).toBe(
-      'myservicename-mytransactiontype-high_mean_response_time'
-    );
-    expect(getMlJobId('my service name')).toBe(
-      'my_service_name-high_mean_response_time'
-    );
-    expect(getMlJobId('my service name', 'my transaction type')).toBe(
-      'my_service_name-my_transaction_type-high_mean_response_time'
-    );
-  });
+    describe('when score < 25', () => {
+      it('returns warning', () => {
+        expect(getSeverity(10)).toEqual(severity.warning);
+      });
+    });
 
-  it('getMlIndex', () => {
-    expect(getMlIndex('myServiceName')).toBe(
-      '.ml-anomalies-myservicename-high_mean_response_time'
-    );
+    describe('when score is between 25 and 50', () => {
+      it('returns minor', () => {
+        expect(getSeverity(40)).toEqual(severity.minor);
+      });
+    });
 
-    expect(getMlIndex('myServiceName', 'myTransactionType')).toBe(
-      '.ml-anomalies-myservicename-mytransactiontype-high_mean_response_time'
-    );
+    describe('when score is between 50 and 75', () => {
+      it('returns major', () => {
+        expect(getSeverity(60)).toEqual(severity.major);
+      });
+    });
+
+    describe('when score is 75 or more', () => {
+      it('returns critical', () => {
+        expect(getSeverity(100)).toEqual(severity.critical);
+      });
+    });
   });
 });

@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent, AgentAction, AgentEvent, AgentStatus, AgentType, NewAgentAction } from '../models';
+import {
+  Agent,
+  AgentAction,
+  NewAgentEvent,
+  AgentEvent,
+  AgentStatus,
+  AgentType,
+  NewAgentAction,
+} from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -40,7 +48,7 @@ export interface PostAgentCheckinRequest {
   };
   body: {
     local_metadata?: Record<string, any>;
-    events?: AgentEvent[];
+    events?: NewAgentEvent[];
   };
 }
 
@@ -152,7 +160,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId: string;
+    configId?: string;
   };
 }
 

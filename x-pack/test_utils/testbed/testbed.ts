@@ -5,6 +5,7 @@
  */
 
 import { ComponentType, ReactWrapper } from 'enzyme';
+
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import {
@@ -75,7 +76,7 @@ export const registerTestBed = <T extends string = string>(
    */
   onRouter(reactRouterMock);
 
-  const setup: SetupFunc<T> = props => {
+  const setup: SetupFunc<T> = (props) => {
     // If a function is provided we execute it
     const storeToMount = typeof store === 'function' ? store() : store!;
     const mountConfig = {
@@ -123,7 +124,7 @@ export const registerTestBed = <T extends string = string>(
       const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
         find(testSubject).length === count;
 
-      const setProps: TestBed<T>['setProps'] = updatedProps => {
+      const setProps: TestBed<T>['setProps'] = (updatedProps) => {
         if (memoryRouter.wrapComponent !== false) {
           throw new Error(
             'setProps() can only be called on a component **not** wrapped by a router route.'
@@ -138,42 +139,39 @@ export const registerTestBed = <T extends string = string>(
         });
       };
 
-      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T, count = 1) => {
+      const waitForFn: TestBed<T>['waitForFn'] = async (predicate, errMessage) => {
         const triggeredAt = Date.now();
 
-        /**
-         * The way jest run tests in parallel + the not deterministic DOM update from React "hooks"
-         * add flakiness to the tests. This is especially true for component integration tests that
-         * make many update to the DOM.
-         *
-         * For this reason, when we _know_ that an element should be there after we updated some state,
-         * we will give it 30 seconds to appear in the DOM, checking every 100 ms for its presence.
-         */
         const MAX_WAIT_TIME = 30000;
-        const WAIT_INTERVAL = 100;
+        const WAIT_INTERVAL = 50;
 
         const process = async (): Promise<void> => {
-          const elemFound = exists(testSubject, count);
+          const isOK = await predicate();
 
-          if (elemFound) {
+          if (isOK) {
             // Great! nothing else to do here.
             return;
           }
 
           const timeElapsed = Date.now() - triggeredAt;
           if (timeElapsed > MAX_WAIT_TIME) {
-            throw new Error(
-              `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
-            );
+            throw new Error(errMessage);
           }
 
-          return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+          return new Promise((resolve) => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
             component.update();
             return process();
           });
         };
 
         return process();
+      };
+
+      const waitFor: TestBed<T>['waitFor'] = (testSubject: T, count = 1) => {
+        return waitForFn(
+          () => Promise.resolve(exists(testSubject, count)),
+          `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+        );
       };
 
       /**
@@ -198,7 +196,25 @@ export const registerTestBed = <T extends string = string>(
         if (!isAsync) {
           return;
         }
-        return new Promise(resolve => setTimeout(resolve));
+        return new Promise((resolve) => setTimeout(resolve));
+      };
+
+      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
+        select,
+        value,
+        doUpdateComponent = true
+      ) => {
+        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+
+        if (!formSelect.length) {
+          throw new Error(`Select "${select}" was not found.`);
+        }
+
+        formSelect.simulate('change', { target: { value } });
+
+        if (doUpdateComponent) {
+          component.update();
+        }
       };
 
       const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
@@ -212,7 +228,7 @@ export const registerTestBed = <T extends string = string>(
         checkBox.simulate('change', { target: { checked: isChecked } });
       };
 
-      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = testSubject => {
+      const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = (testSubject) => {
         const checkBox = find(testSubject);
         if (!checkBox.length) {
           throw new Error(`"${testSubject}" was not found.`);
@@ -235,7 +251,7 @@ export const registerTestBed = <T extends string = string>(
 
       const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
         const errorMessagesWrappers = component.find('.euiFormErrorText');
-        return errorMessagesWrappers.map(err => err.text());
+        return errorMessagesWrappers.map((err) => err.text());
       };
 
       /**
@@ -249,7 +265,7 @@ export const registerTestBed = <T extends string = string>(
        *
        * @param tableTestSubject The data test subject of the EUI table
        */
-      const getMetaData: TestBed<T>['table']['getMetaData'] = tableTestSubject => {
+      const getMetaData: TestBed<T>['table']['getMetaData'] = (tableTestSubject) => {
         const table = find(tableTestSubject);
 
         if (!table.length) {
@@ -259,9 +275,9 @@ export const registerTestBed = <T extends string = string>(
         const rows = table
           .find('tr')
           .slice(1) // we remove the first row as it is the table header
-          .map(row => ({
+          .map((row) => ({
             reactWrapper: row,
-            columns: row.find('td').map(col => ({
+            columns: row.find('td').map((col) => ({
               reactWrapper: col,
               // We can't access the td value with col.text() because
               // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
@@ -270,7 +286,7 @@ export const registerTestBed = <T extends string = string>(
           }));
 
         // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
-        const tableCellsValues = rows.map(({ columns }) => columns.map(col => col.value));
+        const tableCellsValues = rows.map(({ columns }) => columns.map((col) => col.value));
         return { rows, tableCellsValues };
       };
 
@@ -293,11 +309,13 @@ export const registerTestBed = <T extends string = string>(
         find,
         setProps,
         waitFor,
+        waitForFn,
         table: {
           getMetaData,
         },
         form: {
           setInputValue,
+          setSelectValue,
           selectCheckBox,
           toggleEuiSwitch,
           setComboBoxValue,

@@ -63,7 +63,7 @@ export const useLogEntryRateModule = ({
   const hasStoppedJobs = useMemo(
     () =>
       Object.values(logAnalysisModule.jobStatus).some(
-        currentJobStatus => currentJobStatus === 'stopped'
+        (currentJobStatus) => currentJobStatus === 'stopped'
       ),
     [logAnalysisModule.jobStatus]
   );

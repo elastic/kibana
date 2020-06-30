@@ -22,6 +22,8 @@ import { Trigger } from '.';
 export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
 export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
   id: SELECT_RANGE_TRIGGER,
-  title: 'Select range',
+  // This is empty string to hide title of ui_actions context menu that appears
+  // when this trigger is executed.
+  title: '',
   description: 'Applies a range filter',
 };

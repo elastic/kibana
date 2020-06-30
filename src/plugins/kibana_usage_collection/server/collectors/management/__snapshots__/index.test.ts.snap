@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`telemetry_application_usage_collector fetch() 1`] = `
+Object {
+  "my-key": "my-value",
+}
+`;

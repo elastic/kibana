@@ -5,10 +5,11 @@
  */
 
 import numeral from '@elastic/numeral';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
 
 interface ModelMemoryEstimationResult {
   /**
@@ -35,7 +36,7 @@ export interface ModelMemoryEstimate {
 /**
  * Retrieves overall and max bucket cardinalities.
  */
-const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
+const cardinalityCheckProvider = (callAsCurrentUser: LegacyAPICaller) => {
   const fieldsService = fieldsServiceProvider(callAsCurrentUser);
 
   return async (
@@ -76,8 +77,8 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
         }
       ) => {
         [byFieldName, partitionFieldName, overFieldName]
-          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-          .forEach(key => {
+          .filter((field) => field !== undefined && field !== '' && !excludedKeywords.has(field))
+          .forEach((key) => {
             acc.add(key as string);
           });
         return acc;
@@ -86,7 +87,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
     );
 
     const maxBucketFieldCardinalities: string[] = influencers.filter(
-      influencerField =>
+      (influencerField) =>
         !!influencerField &&
         !excludedKeywords.has(influencerField) &&
         !overallCardinalityFields.has(influencerField)
@@ -122,7 +123,7 @@ const cardinalityCheckProvider = (callAsCurrentUser: APICaller) => {
   };
 };
 
-export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
+export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICaller) {
   const getCardinalities = cardinalityCheckProvider(callAsCurrentUser);
 
   /**
@@ -139,15 +140,9 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
     latestMs: number,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
-    let maxModelMemoryLimit;
-    try {
-      const resp = await callAsCurrentUser('ml.info');
-      if (resp?.limits?.max_model_memory_limit !== undefined) {
-        maxModelMemoryLimit = resp.limits.max_model_memory_limit.toUpperCase();
-      }
-    } catch (e) {
-      throw new Error('Unable to retrieve max model memory limit');
-    }
+    const info = await callAsCurrentUser<MlInfoResponse>('ml.info');
+    const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
+    const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       analysisConfig,
@@ -168,17 +163,32 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       })
     ).model_memory_estimate.toUpperCase();
 
-    let modelMemoryLimit: string = estimatedModelMemoryLimit;
+    let modelMemoryLimit = estimatedModelMemoryLimit;
+    let mmlCappedAtMax = false;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
-    if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
-      // @ts-ignore
-      const maxBytes = numeral(maxModelMemoryLimit).value();
+    if (allowMMLGreaterThanMax === false) {
       // @ts-ignore
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
-      if (mmlBytes > maxBytes) {
+      if (maxModelMemoryLimit !== undefined) {
         // @ts-ignore
-        modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
+        const maxBytes = numeral(maxModelMemoryLimit).value();
+        if (mmlBytes > maxBytes) {
+          // @ts-ignore
+          modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
+          mmlCappedAtMax = true;
+        }
+      }
+
+      // if we've not already capped the estimated mml at the hard max server setting
+      // ensure that the estimated mml isn't greater than the effective max mml
+      if (mmlCappedAtMax === false && effectiveMaxModelMemoryLimit !== undefined) {
+        // @ts-ignore
+        const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
+        if (mmlBytes > effectiveMaxMmlBytes) {
+          // @ts-ignore
+          modelMemoryLimit = `${Math.floor(effectiveMaxMmlBytes / numeral('1MB').value())}MB`;
+        }
       }
     }
 
@@ -186,6 +196,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       estimatedModelMemoryLimit,
       modelMemoryLimit,
       ...(maxModelMemoryLimit ? { maxModelMemoryLimit } : {}),
+      ...(effectiveMaxModelMemoryLimit ? { effectiveMaxModelMemoryLimit } : {}),
     };
   };
 }

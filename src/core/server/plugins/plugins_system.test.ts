@@ -28,14 +28,15 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
+import { Logger } from '../logging';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -342,7 +343,7 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
     ],
   ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
 
-  [...plugins.keys()].forEach(plugin => {
+  [...plugins.keys()].forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
@@ -371,7 +372,7 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
     createPlugin('opt-no-ui', { ui: false, server: true }),
   ];
 
-  plugins.forEach(plugin => {
+  plugins.forEach((plugin) => {
     pluginsSystem.addPlugin(plugin);
   });
 
@@ -424,7 +425,7 @@ describe('setup', () => {
   });
   it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
-    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise(i => i));
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
@@ -434,6 +435,21 @@ describe('setup', () => {
     await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
+  });
+
+  it('logs only server-side plugins', async () => {
+    [
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-1'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
   });
 });
 
@@ -447,7 +463,7 @@ describe('start', () => {
   it('throws timeout error if "start" was not completed in 30 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
-    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise(i => i));
+    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
     pluginsSystem.addPlugin(plugin);
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
@@ -460,5 +476,21 @@ describe('start', () => {
     await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
+  });
+
+  it('logs only server-side plugins', async () => {
+    [
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-1'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 });

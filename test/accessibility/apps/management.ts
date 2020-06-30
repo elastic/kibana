@@ -19,24 +19,13 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings']);
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'settings', 'header']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
-  // describe('Management', () => {
-  //   before(async () => {
-  //     await esArchiver.loadIfNeeded('logstash_functional');
-  //     await kibanaServer.uiSettings.update({
-  //       defaultIndex: 'logstash-*',
-  //     });
-  //     await PageObjects.common.navigateToApp('settings');
-  //   });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/60470
-  describe.skip('Management', () => {
+  describe('Management', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -57,23 +46,25 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Single indexpattern view', async () => {
       await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
     });
 
-    it('Create Index pattern wizard', async () => {
+    it('Open create index pattern wizard', async () => {
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await (await testSubjects.find('createIndexPatternButton')).click();
+      await PageObjects.settings.clickAddNewIndexPatternButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
     });
 
-    // index patterns page
+    // We are navigating back to index pattern page to test field formatters
     it('Navigate back to logstash index page', async () => {
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await a11y.testAppSnapshot();
     });
 
-    // Issue: https://github.com/elastic/kibana/issues/60030
+    // Will be enabling this and field formatters after this issue is addressed: https://github.com/elastic/kibana/issues/60030
     it.skip('Edit field type', async () => {
       await PageObjects.settings.clickEditFieldFormat();
       await a11y.testAppSnapshot();

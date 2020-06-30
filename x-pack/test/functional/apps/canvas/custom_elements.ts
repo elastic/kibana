@@ -19,7 +19,8 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  describe('custom elements', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/63339
+  describe.skip('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -40,8 +41,11 @@ export default function canvasCustomElementTest({
       // find the first workpad element (a markdown element) and click it to select it
       await testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent', 20000);
 
+      // click "Edit" menu
+      await testSubjects.click('canvasWorkpadEditMenuButton', 20000);
+
       // click the "Save as new element" button
-      await testSubjects.click('canvasSidebarHeader__saveElementButton', 20000);
+      await testSubjects.click('canvasWorkpadEditMenu__saveElementButton', 20000);
 
       // fill out the custom element form and submit it
       await PageObjects.canvas.fillOutCustomElementForm(

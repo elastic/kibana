@@ -52,12 +52,17 @@ export interface UsageCollectionSetup {
   };
 }
 
+export interface UsageCollectionStart {
+  reportUiStats: Reporter['reportUiStats'];
+  METRIC_TYPE: typeof METRIC_TYPE;
+}
+
 export function isUnauthenticated(http: HttpSetup) {
   const { anonymousPaths } = http;
   return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
   private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
@@ -83,14 +88,14 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       reportUiStats: this.reporter.reportUiStats,
       METRIC_TYPE,
       __LEGACY: {
-        appChanged: appId => this.legacyAppId$.next(appId),
+        appChanged: (appId) => this.legacyAppId$.next(appId),
       },
     };
   }
 
   public start({ http, application }: CoreStart) {
     if (!this.reporter) {
-      return;
+      throw new Error('Usage collection reporter not set up correctly');
     }
 
     if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
@@ -100,7 +105,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     if (this.trackUserAgent) {
       this.reporter.reportUserAgent('kibana');
     }
+
     reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
+
+    return {
+      reportUiStats: this.reporter.reportUiStats,
+      METRIC_TYPE,
+    };
   }
 
   public stop() {}

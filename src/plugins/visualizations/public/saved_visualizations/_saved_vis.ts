@@ -32,32 +32,25 @@ import {
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern, ISearchSource } from '../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
-import { createSavedSearchesLoader } from '../../../../plugins/discover/public';
-import { getChrome, getOverlays, getIndexPatterns, getSavedObjects, getSearch } from '../services';
+import { createSavedSearchesLoader } from '../../../discover/public';
 
-export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
-  const { visState } = savedVis;
-  const searchSource =
-    savedVis.searchSource && (await getSearchSource(savedVis.searchSource, savedVis.savedSearchId));
+export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
+  const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
 
-  const indexPattern =
-    searchSource && searchSource.getField('index') ? searchSource.getField('index')!.id : undefined;
-
-  const aggs = indexPattern ? visState.aggs || [] : visState.aggs;
+  const aggs = searchSourceFields && searchSourceFields.index ? visState.aggs || [] : visState.aggs;
 
   return {
-    id: savedVis.id,
-    title: savedVis.title,
+    id,
+    title,
     type: visState.type,
-    description: savedVis.description,
+    description,
     params: visState.params,
-    uiState: JSON.parse(savedVis.uiStateJSON || '{}'),
+    uiState: JSON.parse(uiStateJSON || '{}'),
     data: {
-      indexPattern,
       aggs,
-      searchSource,
+      searchSource: searchSourceFields!,
       savedSearchId: savedVis.savedSearchId,
     },
   };
@@ -69,41 +62,20 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
     title: vis.title,
     description: vis.description,
     visState: {
+      title: vis.title,
       type: vis.type,
       aggs: vis.data.aggs,
       params: vis.params,
     },
     uiStateJSON: JSON.stringify(vis.uiState),
-    searchSource: vis.data.searchSource!,
+    searchSourceFields: vis.data.searchSource,
     savedSearchId: vis.data.savedSearchId,
   };
 };
 
-const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const search = getSearch();
-
-  const searchSource = inputSearchSource.createCopy
-    ? inputSearchSource.createCopy()
-    : search.searchSource.create({ ...(inputSearchSource as any).fields });
-
-  if (savedSearchId) {
-    const savedSearch = await createSavedSearchesLoader({
-      search,
-      savedObjectsClient: getSavedObjects().client,
-      indexPatterns: getIndexPatterns(),
-      chrome: getChrome(),
-      overlays: getOverlays(),
-    }).get(savedSearchId);
-
-    searchSource.setParent(savedSearch.searchSource);
-  }
-
-  searchSource!.setField('size', 0);
-  return searchSource;
-};
-
 export function createSavedVisClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
+  const savedSearch = createSavedSearchesLoader(services);
 
   class SavedVis extends SavedObjectClass {
     public static type: string = 'visualization';
@@ -117,7 +89,6 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
     };
     // Order these fields to the top, the rest are alphabetical
     public static fieldOrder = ['title', 'description'];
-    public static searchSource = true;
 
     constructor(opts: Record<string, unknown> | string = {}) {
       if (typeof opts !== 'object') {
@@ -128,7 +99,6 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
       super({
         type: SavedVis.type,
         mapping: SavedVis.mapping,
-        searchSource: SavedVis.searchSource,
         extractReferences,
         injectReferences,
         id: (opts.id as string) || '',
@@ -144,18 +114,18 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
         afterESResp: async (savedObject: SavedObject) => {
           const savedVis = (savedObject as any) as ISavedVis;
           savedVis.visState = await updateOldState(savedVis.visState);
-          if (savedVis.savedSearchId && savedVis.searchSource) {
-            savedObject.searchSource = await getSearchSource(
-              savedVis.searchSource,
-              savedVis.savedSearchId
-            );
+          if (savedVis.searchSourceFields?.index) {
+            await services.indexPatterns.get(savedVis.searchSourceFields.index as any);
+          }
+          if (savedVis.savedSearchId) {
+            await savedSearch.get(savedVis.savedSearchId);
           }
           return (savedVis as any) as SavedObject;
         },
       });
       this.showInRecentlyAccessed = true;
       this.getFullPath = () => {
-        return `/app/kibana#/visualize/edit/${this.id}`;
+        return `/app/visualize#/edit/${this.id}`;
       };
     }
   }

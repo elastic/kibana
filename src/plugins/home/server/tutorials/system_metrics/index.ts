@@ -49,7 +49,7 @@ It collects system wide statistics and statistics per process and filesystem. \
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-system.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/system.svg',
+    euiIconType: '/plugins/home/assets/logos/system.svg',
     artifacts: {
       dashboards: [
         {
@@ -65,7 +65,7 @@ It collects system wide statistics and statistics per process and filesystem. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/system_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/system_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

@@ -62,6 +62,15 @@ export function sendGetAgentStatus(
   });
 }
 
+export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options?: RequestOptions) {
+  return useRequest<GetAgentStatusResponse>({
+    method: 'get',
+    path: agentRouteService.getStatusPath(),
+    query,
+    ...options,
+  });
+}
+
 export function sendPutAgentReassign(
   agentId: string,
   body: PutAgentReassignRequest['body'],

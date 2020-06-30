@@ -22,10 +22,15 @@ import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {
   defaultMessage: 'Unique Count',
 });
+
+export interface AggParamsCardinality extends BaseAggParams {
+  field: string;
+}
 
 export interface CardinalityMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
@@ -44,17 +49,17 @@ export const getCardinalityMetricAgg = ({
           values: { field: aggConfig.getFieldDisplayName() },
         });
       },
-      getFormat() {
-        const { fieldFormats } = getInternalStartServices();
-
-        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      getSerializedFormat(agg) {
+        return {
+          id: 'number',
+        };
       },
       params: [
         {
           name: 'field',
           type: 'field',
           filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-            type => type !== KBN_FIELD_TYPES.HISTOGRAM
+            (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
           ),
         },
       ],

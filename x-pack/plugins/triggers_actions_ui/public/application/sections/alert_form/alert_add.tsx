@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState, useEffect } from 'react';
 import { isObject } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -60,6 +60,9 @@ export const AlertAdd = ({
   const setAlert = (value: any) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
+  const setAlertProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  };
 
   const {
     reloadAlerts,
@@ -69,6 +72,10 @@ export const AlertAdd = ({
     actionTypeRegistry,
     docLinks,
   } = useAlertsContext();
+
+  useEffect(() => {
+    setAlertProperty('alertTypeId', alertTypeId);
+  }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
@@ -96,7 +103,7 @@ export const AlertAdd = ({
     actionsErrors.find(
       (errorObj: { errors: IErrorObject }) =>
         errorObj &&
-        !!Object.keys(errorObj.errors).find(errorKey => errorObj.errors[errorKey].length >= 1)
+        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
@@ -207,8 +214,11 @@ export const AlertAdd = ({
   );
 };
 
-const parseErrors: (errors: IErrorObject) => boolean = errors =>
-  !!Object.values(errors).find(errorList => {
+const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
+  !!Object.values(errors).find((errorList) => {
     if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
+
+// eslint-disable-next-line import/no-default-export
+export { AlertAdd as default };

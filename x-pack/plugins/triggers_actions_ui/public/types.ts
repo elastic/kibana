@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
-import { ActionGroup } from '../../alerting/common';
+import { HttpSetup, DocLinksStart } from 'kibana/public';
+import { ComponentType } from 'react';
+import { ActionGroup } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -13,20 +14,23 @@ import {
   AlertTaskState,
   RawAlertInstance,
   AlertingFrameworkHealth,
-} from '../../../plugins/alerting/common';
+} from '../../alerts/common';
 export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFrameworkHealth };
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
-export type ActionTypeRegistryContract = PublicMethodsOf<TypeRegistry<ActionTypeModel>>;
+export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
+  TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
+>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
+  docLinks: DocLinksStart;
   http?: HttpSetup;
 }
 
@@ -34,7 +38,7 @@ export interface ActionParamsProps<TParams> {
   actionParams: TParams;
   index: number;
   editAction: (property: string, value: any, index: number) => void;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   messageVariables?: string[];
   defaultMessage?: string;
 }
@@ -44,15 +48,19 @@ export interface Pagination {
   size: number;
 }
 
-export interface ActionTypeModel {
+export interface ActionTypeModel<ActionConnector = any, ActionParams = any> {
   id: string;
   iconClass: string;
   selectMessage: string;
   actionTypeTitle?: string;
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
-  actionConnectorFields: React.FunctionComponent<any> | null;
-  actionParamsFields: any;
+  actionConnectorFields: React.LazyExoticComponent<
+    ComponentType<ActionConnectorFieldsProps<ActionConnector>>
+  > | null;
+  actionParamsFields: React.LazyExoticComponent<
+    ComponentType<ActionParamsProps<ActionParams>>
+  > | null;
 }
 
 export interface ValidationResult {
@@ -91,6 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -102,12 +111,29 @@ export interface AlertTableItem extends Alert {
   tagsText: string;
 }
 
-export interface AlertTypeModel {
+export interface AlertTypeParamsExpressionProps<
+  AlertParamsType = unknown,
+  AlertsContextValue = unknown
+> {
+  alertParams: AlertParamsType;
+  alertInterval: string;
+  setAlertParams: (property: string, value: any) => void;
+  setAlertProperty: (key: string, value: any) => void;
+  errors: IErrorObject;
+  alertsContext: AlertsContextValue;
+}
+
+export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
-  name: string;
+  name: string | JSX.Element;
   iconClass: string;
-  validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  validate: (alertParams: AlertParamsType) => ValidationResult;
+  alertParamsExpression:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
+  requiresAppContext: boolean;
   defaultActionMessage?: string;
 }
 

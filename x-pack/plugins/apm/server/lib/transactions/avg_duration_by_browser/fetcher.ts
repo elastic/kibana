@@ -5,15 +5,15 @@
  */
 
 import { ESFilter } from '../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
-  TRANSACTION_DURATION
+  TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
@@ -31,7 +31,7 @@ export function fetcher(options: Options) {
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
-    ...uiFiltersES
+    ...uiFiltersES,
   ];
 
   const params = {
@@ -42,36 +42,36 @@ export function fetcher(options: Options) {
       aggs: {
         user_agent_keys: {
           terms: {
-            field: USER_AGENT_NAME
-          }
+            field: USER_AGENT_NAME,
+          },
         },
         browsers: {
           date_histogram: {
             extended_bounds: {
               max: end,
-              min: start
+              min: start,
             },
             field: '@timestamp',
             fixed_interval: intervalString,
-            min_doc_count: 0
+            min_doc_count: 0,
           },
           aggs: {
             user_agent: {
               terms: {
-                field: USER_AGENT_NAME
+                field: USER_AGENT_NAME,
               },
               aggs: {
                 avg_duration: {
                   avg: {
-                    field: TRANSACTION_DURATION
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                    field: TRANSACTION_DURATION,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   return client.search(params);

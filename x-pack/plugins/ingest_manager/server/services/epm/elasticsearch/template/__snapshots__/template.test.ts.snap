@@ -90,6 +90,9 @@ exports[`tests loading base.yml: base.yml 1`] = `
       }
     },
     "aliases": {}
+  },
+  "data_stream": {
+    "timestamp_field": "@timestamp"
   }
 }
 `;
@@ -184,6 +187,9 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
       }
     },
     "aliases": {}
+  },
+  "data_stream": {
+    "timestamp_field": "@timestamp"
   }
 }
 `;
@@ -1662,6 +1668,9 @@ exports[`tests loading system.yml: system.yml 1`] = `
       }
     },
     "aliases": {}
+  },
+  "data_stream": {
+    "timestamp_field": "@timestamp"
   }
 }
 `;

@@ -12,8 +12,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        transaction_sample_rate: '0.5'
-      }
+        transaction_sample_rate: '0.5',
+      },
     };
 
     expect(isConfigValid(config)).toBe(true);
@@ -23,8 +23,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: {},
       settings: {
-        transaction_sample_rate: 0.5
-      }
+        transaction_sample_rate: 0.5,
+      },
     };
 
     expect(isConfigValid(config)).toBe(false);
@@ -34,8 +34,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        my_unknown_setting: '0.5'
-      }
+        my_unknown_setting: '0.5',
+      },
     };
 
     expect(isConfigValid(config)).toBe(true);
@@ -45,8 +45,8 @@ describe('agentConfigurationIntakeRt', () => {
     const config = {
       service: { name: 'my-service', environment: 'my-environment' },
       settings: {
-        my_unknown_setting: false
-      }
+        my_unknown_setting: false,
+      },
     };
 
     expect(isConfigValid(config)).toBe(false);

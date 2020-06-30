@@ -8,7 +8,7 @@ import { services, pageObjects } from './services';
 
 const license = 'basic';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {

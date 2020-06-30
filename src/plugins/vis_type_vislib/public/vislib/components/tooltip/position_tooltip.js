@@ -90,11 +90,11 @@ function getOverflow(size, pos, containers) {
 
   containers
     .map(getBounds)
-    .sort(function(a, b) {
+    .sort(function (a, b) {
       // ensure smallest containers are merged first
       return a.area - b.area;
     })
-    .forEach(function(bounds) {
+    .forEach(function (bounds) {
       // number of pixels that the tooltip would overflow it's far
       // side, if we placed it that way. (negative === no overflow)
       mergeOverflows(overflow, {
@@ -110,7 +110,7 @@ function getOverflow(size, pos, containers) {
 }
 
 function mergeOverflows(dest, src) {
-  _.merge(dest, src, function(a, b) {
+  _.merge(dest, src, function (a, b) {
     if (a == null || b == null) return a || b;
     if (a < 0 && b < 0) return Math.min(a, b);
     return Math.max(a, b);
@@ -176,7 +176,7 @@ positionTooltip.getBasePosition = getBasePosition;
 positionTooltip.getOverflow = getOverflow;
 positionTooltip.getBounds = getBounds;
 positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
-positionTooltip.removeClone = function() {
+positionTooltip.removeClone = function () {
   $clone && $clone.remove();
   $clone = null;
 };

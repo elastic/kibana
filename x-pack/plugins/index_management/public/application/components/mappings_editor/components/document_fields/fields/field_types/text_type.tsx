@@ -182,7 +182,7 @@ export const TextType = React.memo(({ field }: Props) => {
           defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
         >
           <FormDataProvider pathsToWatch="index_options">
-            {formData => {
+            {(formData) => {
               return (
                 <>
                   <UseField

@@ -218,8 +218,8 @@ export function convertDate(value: number, from: Unit, to: Unit): number {
   }
 
   const ratioScale = getRatioScale(from, to);
-  const fromIdx = ratioScale.findIndex(ratio => ratio[0] === from);
-  const toIdx = ratioScale.findIndex(ratio => ratio[0] === to);
+  const fromIdx = ratioScale.findIndex((ratio) => ratio[0] === from);
+  const toIdx = ratioScale.findIndex((ratio) => ratio[0] === to);
 
   let convertedValue = value;
 
@@ -246,7 +246,7 @@ export function normalizeDate(amount: number, unit: Unit): { amount: number; uni
 
   const nextUnit = dateMath.unitsAsc[dateMath.unitsAsc.indexOf(unit) + 1];
   const ratioScale = getRatioScale(unit, nextUnit);
-  const ratio = ratioScale.find(r => r[0] === unit)![1];
+  const ratio = ratioScale.find((r) => r[0] === unit)![1];
 
   const newAmount = amount / ratio;
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   grunt.registerTask('jenkins:docs', ['docker:docs']);
 
   grunt.registerTask('jenkins:unit', [
@@ -27,6 +27,7 @@ module.exports = function(grunt) {
     'run:checkDocApiChanges',
     'run:typeCheck',
     'run:i18nCheck',
+    'run:telemetryCheck',
     'run:checkFileCasing',
     'run:checkLockfileSymlinks',
     'run:licenses',

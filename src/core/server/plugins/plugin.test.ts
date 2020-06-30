@@ -26,14 +26,14 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 jest.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),
@@ -260,7 +260,7 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
     setup: jest.fn(),
     start: async () => {
       // delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       expect(startDependenciesResolved).toBe(false);
       return pluginStartContract;
     },
@@ -269,7 +269,7 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
 
   await plugin.setup({} as any, {} as any);
 
-  const startDependenciesCheck = plugin.startDependencies.then(resolvedStartDeps => {
+  const startDependenciesCheck = plugin.startDependencies.then((resolvedStartDeps) => {
     startDependenciesResolved = true;
     expect(resolvedStartDeps).toEqual([startContext, pluginDeps, pluginStartContract]);
   });

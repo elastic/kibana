@@ -5,7 +5,7 @@
  */
 
 // the types have to match the names of the saved object mappings
-// in /x-pack/legacy/plugins/apm/mappings.json
+// in /x-pack/plugins/apm/mappings.json
 
 // APM indices
 export const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';

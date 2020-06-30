@@ -87,7 +87,7 @@ export const loadingSaga = ({
     getWorkspace()!.runLayout();
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(loadSavedWorkspace.match, deserializeWorkspace);
   };
 };
@@ -119,7 +119,7 @@ export const savingSaga = (deps: GraphStoreDependencies) => {
     }
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(saveWorkspace.match, persistWorkspace);
   };
 };

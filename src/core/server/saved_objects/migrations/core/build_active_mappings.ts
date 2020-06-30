@@ -76,10 +76,7 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
 
 // Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
 function md5Object(obj: any) {
-  return crypto
-    .createHash('md5')
-    .update(canonicalStringify(obj))
-    .digest('hex');
+  return crypto.createHash('md5').update(canonicalStringify(obj)).digest('hex');
 }
 
 // JSON.stringify is non-canonical, meaning the same object may produce slightly
@@ -106,7 +103,7 @@ function canonicalStringify(obj: any): string {
 
   const sortedObj = keys
     .sort((a, b) => a.localeCompare(b))
-    .map(k => `${k}: ${canonicalStringify(obj[k])}`);
+    .map((k) => `${k}: ${canonicalStringify(obj[k])}`);
 
   return `{${sortedObj}}`;
 }
@@ -120,7 +117,7 @@ function md5Values(obj: any) {
 // care, as it could be a disabled plugin, etc, and keeping stale stuff
 // around is better than migrating unecessesarily.
 function findChangedProp(actual: any, expected: any) {
-  return Object.keys(expected).find(k => actual[k] !== expected[k]);
+  return Object.keys(expected).find((k) => actual[k] !== expected[k]);
 }
 
 /**
@@ -133,6 +130,8 @@ function defaultMapping(): IndexMapping {
     dynamic: 'strict',
     properties: {
       migrationVersion: {
+        // Saved Objects can't redefine dynamic, but we cheat here to support migrations
+        // @ts-expect-error
         dynamic: 'true',
         type: 'object',
       },
@@ -170,7 +169,7 @@ function validateAndMerge(
   dest: SavedObjectsMappingProperties,
   source: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ) {
-  Object.keys(source).forEach(k => {
+  Object.keys(source).forEach((k) => {
     if (k.startsWith('_')) {
       throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
     }

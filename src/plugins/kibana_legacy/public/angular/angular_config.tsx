@@ -18,30 +18,22 @@
  */
 
 import {
-  auto,
   ICompileProvider,
   IHttpProvider,
   IHttpService,
   ILocationProvider,
-  ILocationService,
   IModule,
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
 import { cloneDeep, forOwn, get, set } from 'lodash';
-import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
+import { History } from 'history';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
-import { modifyUrl } from '../../../../core/utils';
-import { toMountPoint } from '../../../kibana_react/public';
-import { isSystemApiRequest, UrlOverflowService } from '../utils';
+import { isSystemApiRequest } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
-
-const URL_LIMIT_WARN_WITHIN = 1000;
 
 export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
@@ -88,7 +80,8 @@ export const configureAppAngularModule = (
           packageInfo: Readonly<PackageInfo>;
         };
       },
-  isLocalAngular: boolean
+  isLocalAngular: boolean,
+  getHistory?: () => History
 ) => {
   const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
   const packageInfo =
@@ -121,10 +114,10 @@ export const configureAppAngularModule = (
     .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(packageInfo.version))
     .run(capture$httpLoadingCount(core))
+    .run(digestOnHashChange(getHistory))
     .run($setupBreadcrumbsAutoClear(core, isLocalAngular))
     .run($setupBadgeAutoClear(core, isLocalAngular))
     .run($setupHelpExtensionAutoClear(core, isLocalAngular))
-    .run($setupUrlOverflowHandling(core, isLocalAngular))
     .run($setupUICapabilityRedirect(core));
 };
 
@@ -139,6 +132,19 @@ const getEsUrl = (newPlatform: CoreStart) => {
     protocol: a.protocol,
     pathname: a.pathname,
   };
+};
+
+const digestOnHashChange = (getHistory?: () => History) => ($rootScope: IRootScopeService) => {
+  if (!getHistory) return;
+  const unlisten = getHistory().listen(() => {
+    // dispatch synthetic hash change event to update hash history objects and angular routing
+    // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+    // this has to happen in the next tick to not change the existing timing of angular digest cycles.
+    setTimeout(() => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }, 0);
+  });
+  $rootScope.$on('$destroy', unlisten);
 };
 
 const setupCompileProvider = (devMode: boolean) => ($compileProvider: ICompileProvider) => {
@@ -192,10 +198,10 @@ const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   $http: IHttpService
 ) => {
   newPlatform.http.addLoadingCountSource(
-    new Rx.Observable(observer => {
+    new Rx.Observable((observer) => {
       const unwatch = $rootScope.$watch(() => {
         const reqs = $http.pendingRequests || [];
-        observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
+        observer.next(reqs.filter((req) => !isSystemApiRequest(req)).length);
       });
 
       return unwatch;
@@ -373,65 +379,4 @@ const $setupHelpExtensionAutoClear = (newPlatform: CoreStart, isLocalAngular: bo
 
     newPlatform.chrome.setHelpExtension(current.helpExtension);
   });
-};
-
-const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boolean) => (
-  $location: ILocationService,
-  $rootScope: IRootScopeService,
-  $injector: auto.IInjectorService
-) => {
-  const $route = $injector.has('$route') ? $injector.get('$route') : {};
-  const urlOverflow = new UrlOverflowService();
-  const check = () => {
-    if (isDummyRoute($route, isLocalAngular)) {
-      return;
-    }
-    // disable long url checks when storing state in session storage
-    if (newPlatform.uiSettings.get('state:storeInSessionStorage')) {
-      return;
-    }
-
-    if ($location.path() === '/error/url-overflow') {
-      return;
-    }
-
-    try {
-      if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
-        newPlatform.notifications.toasts.addWarning({
-          title: i18n.translate('kibana_legacy.bigUrlWarningNotificationTitle', {
-            defaultMessage: 'The URL is big and Kibana might stop working',
-          }),
-          text: toMountPoint(
-            <Fragment>
-              <FormattedMessage
-                id="kibana_legacy.bigUrlWarningNotificationMessage"
-                defaultMessage="Either enable the {storeInSessionStorageParam} option
-                  in {advancedSettingsLink} or simplify the onscreen visuals."
-                values={{
-                  storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
-                  advancedSettingsLink: (
-                    <a href="#/management/kibana/settings">
-                      <FormattedMessage
-                        id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
-                        defaultMessage="advanced settings"
-                      />
-                    </a>
-                  ),
-                }}
-              />
-            </Fragment>
-          ),
-        });
-      }
-    } catch (e) {
-      window.location.href = modifyUrl(window.location.href, (parts: any) => {
-        parts.hash = '#/error/url-overflow';
-      });
-      // force the browser to reload to that Kibana's potentially unstable state is unloaded
-      window.location.reload();
-    }
-  };
-
-  $rootScope.$on('$routeUpdate', check);
-  $rootScope.$on('$routeChangeStart', check);
 };

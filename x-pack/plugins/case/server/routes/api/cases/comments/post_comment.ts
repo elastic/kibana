@@ -16,8 +16,14 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
 import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { getConnectorId } from '../helpers';
 
-export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPostCommentApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_COMMENTS_URL,
@@ -45,7 +51,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
-        const [newComment, updatedCase] = await Promise.all([
+        const [newComment, updatedCase, myCaseConfigure] = await Promise.all([
           caseService.postNewComment({
             client,
             attributes: transformNewComment({
@@ -72,8 +78,10 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
             },
             version: myCase.version,
           }),
+          caseConfigureService.find({ client }),
         ]);
 
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
           client,
           caseId,
@@ -112,16 +120,17 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
 
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase.attributes },
                 version: updatedCase.version ?? myCase.version,
                 references: myCase.references,
               },
-              comments.saved_objects
-            )
+              comments: comments.saved_objects,
+              caseConfigureConnectorId,
+            })
           ),
         });
       } catch (error) {

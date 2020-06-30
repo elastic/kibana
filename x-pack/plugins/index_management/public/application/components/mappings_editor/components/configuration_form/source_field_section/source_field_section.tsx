@@ -65,7 +65,7 @@ export const SourceFieldSection = () => {
   );
 
   const renderFormFields = () => (
-    <>
+    <div data-test-subj="sourceField">
       <UseField path="sourceField.includes">
         {({ label, helpText, value, setValue }) => (
           <EuiFormRow label={label} helpText={helpText} fullWidth>
@@ -78,7 +78,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -89,6 +89,7 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="includesField"
             />
           </EuiFormRow>
         )}
@@ -108,7 +109,7 @@ export const SourceFieldSection = () => {
                 }
               )}
               selectedOptions={value as ComboBoxOption[]}
-              onChange={newValue => {
+              onChange={(newValue) => {
                 setValue(newValue);
               }}
               onCreateOption={(searchValue: string) => {
@@ -119,11 +120,12 @@ export const SourceFieldSection = () => {
                 setValue([...(value as ComboBoxOption[]), newOption]);
               }}
               fullWidth
+              data-test-subj="excludesField"
             />
           </EuiFormRow>
         )}
       </UseField>
-    </>
+    </div>
   );
 
   return (
@@ -152,7 +154,7 @@ export const SourceFieldSection = () => {
       }
     >
       <FormDataProvider pathsToWatch={['sourceField.enabled']}>
-        {formData => {
+        {(formData) => {
           const { 'sourceField.enabled': enabled } = formData;
 
           if (enabled === undefined) {

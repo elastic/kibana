@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import createContainer from 'constate';
-import { HttpHandler } from 'target/types/core/public/http';
-import { ToastInput } from 'target/types/core/public/notifications/toasts/toasts_api';
+import { HttpHandler } from 'src/core/public';
+import { ToastInput } from 'src/core/public';
 import {
   SourceResponseRuntimeType,
   SourceResponse,
@@ -69,12 +69,16 @@ export const useSourceViaHttp = ({
     })();
   }, [makeRequest]);
 
-  const createDerivedIndexPattern = (indexType: 'logs' | 'metrics' | 'both' = type) => {
-    return {
-      fields: response?.source ? response.status.indexFields : [],
-      title: pickIndexPattern(response?.source, indexType),
-    };
-  };
+  const createDerivedIndexPattern = useCallback(
+    (indexType: 'logs' | 'metrics' | 'both' = type) => {
+      return {
+        fields: response?.source ? response.status.indexFields : [],
+        title: pickIndexPattern(response?.source, indexType),
+      };
+    },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    [response, type]
+  );
 
   const source = useMemo(() => {
     return response ? { ...response.source, status: response.status } : null;

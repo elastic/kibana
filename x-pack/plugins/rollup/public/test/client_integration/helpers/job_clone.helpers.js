@@ -12,7 +12,7 @@ import { deserializeJob } from '../../../crud_app/services';
 
 import { wrapComponent } from './setup_context';
 
-export const setup = props => {
+export const setup = (props) => {
   const initTestBed = registerTestBed(wrapComponent(JobCreate), {
     store: createRollupJobsStore({
       cloneJob: { job: deserializeJob(JOB_TO_CLONE.jobs[0]) },

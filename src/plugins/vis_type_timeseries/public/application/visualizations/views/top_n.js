@@ -102,7 +102,7 @@ export class TopN extends Component {
   };
 
   renderRow({ min, max }) {
-    return item => {
+    return (item) => {
       const renderMode = TopN.getRenderMode(min, max);
       const key = `${item.id || item.label}`;
       const lastValue = getLastValue(item.data);
@@ -183,8 +183,8 @@ export class TopN extends Component {
 }
 
 TopN.defaultProps = {
-  tickFormatter: n => n,
-  onClick: i => i,
+  tickFormatter: (n) => n,
+  onClick: (i) => i,
   direction: 'desc',
 };
 

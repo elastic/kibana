@@ -26,13 +26,13 @@ export function PaginateDirectiveProvider($parse, $compile) {
     restrict: 'E',
     scope: true,
     link: {
-      pre: function($scope, $el, attrs) {
+      pre: function ($scope, $el, attrs) {
         if (_.isUndefined(attrs.bottomControls)) attrs.bottomControls = true;
         if ($el.find('paginate-controls.paginate-bottom').length === 0 && attrs.bottomControls) {
           $el.append($compile('<paginate-controls class="paginate-bottom">')($scope));
         }
       },
-      post: function($scope, $el, attrs) {
+      post: function ($scope, $el, attrs) {
         if (_.isUndefined(attrs.topControls)) attrs.topControls = false;
         if ($el.find('paginate-controls.paginate-top').length === 0 && attrs.topControls) {
           $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
@@ -57,7 +57,7 @@ export function PaginateDirectiveProvider($parse, $compile) {
       },
     },
     controllerAs: 'paginate',
-    controller: function($scope, $document) {
+    controller: function ($scope, $document) {
       const self = this;
       const ALL = 0;
       const allSizeTitle = i18n.translate('kibana_legacy.paginate.size.allDropDownOptionLabel', {
@@ -72,10 +72,10 @@ export function PaginateDirectiveProvider($parse, $compile) {
       ];
 
       // setup the watchers, called in the post-link function
-      self.init = function() {
+      self.init = function () {
         self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
-        $scope.$watchMulti(['paginate.perPage', self.perPageProp, self.otherWidthGetter], function(
+        $scope.$watchMulti(['paginate.perPage', self.perPageProp, self.otherWidthGetter], function (
           vals,
           oldVals
         ) {
@@ -101,13 +101,13 @@ export function PaginateDirectiveProvider($parse, $compile) {
         });
 
         $scope.$watch('page', self.changePage);
-        $scope.$watchCollection(self.getList, function(list) {
+        $scope.$watchCollection(self.getList, function (list) {
           $scope.list = list;
           self.renderList();
         });
       };
 
-      self.goToPage = function(number) {
+      self.goToPage = function (number) {
         if (number) {
           if (number.hasOwnProperty('number')) number = number.number;
           $scope.page = $scope.pages[number - 1] || $scope.pages[0];
@@ -118,14 +118,14 @@ export function PaginateDirectiveProvider($parse, $compile) {
         $document.scrollTop(0);
       };
 
-      self.renderList = function() {
+      self.renderList = function () {
         $scope.pages = [];
         if (!$scope.list) return;
 
         const perPage = _.parseInt(self.perPage);
         const count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
-        _.times(count, function(i) {
+        _.times(count, function (i) {
           let page;
 
           if (perPage) {
@@ -162,7 +162,7 @@ export function PaginateDirectiveProvider($parse, $compile) {
         }
       };
 
-      self.changePage = function(page) {
+      self.changePage = function (page) {
         if (!page) {
           $scope.otherPages = null;
           return;

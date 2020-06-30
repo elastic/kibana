@@ -9,12 +9,15 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const { alerts, common: commonService, monitor, navigation } = getService('uptime');
+  const { common: commonService, monitor, navigation } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public async goToRoot() {
+    public async goToRoot(refresh?: boolean) {
       await navigation.goToUptime();
+      if (refresh) {
+        await navigation.refreshApp();
+      }
     }
 
     public async setDateRange(start: string, end: string) {
@@ -53,7 +56,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async pageHasExpectedIds(monitorIdsToCheck: string[]): Promise<void> {
       return retry.tryForTime(15000, async () => {
-        await Promise.all(monitorIdsToCheck.map(id => commonService.monitorPageLinkExists(id)));
+        await Promise.all(monitorIdsToCheck.map((id) => commonService.monitorPageLinkExists(id)));
       });
     }
 
@@ -94,42 +97,9 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       return await commonService.getSnapshotCount();
     }
 
-    public async openAlertFlyoutAndCreateMonitorStatusAlert({
-      alertInterval,
-      alertName,
-      alertNumTimes,
-      alertTags,
-      alertThrottleInterval,
-      alertTimerangeSelection,
-      alertType,
-      filters,
-    }: {
-      alertName: string;
-      alertTags: string[];
-      alertInterval: string;
-      alertThrottleInterval: string;
-      alertNumTimes: string;
-      alertTimerangeSelection: string;
-      alertType?: string;
-      filters?: string;
-    }) {
+    public async setAlertKueryBarText(filters: string) {
       const { setKueryBarText } = commonService;
-      await alerts.openFlyout();
-      if (alertType) {
-        await alerts.openMonitorStatusAlertType(alertType);
-      }
-      await alerts.setAlertName(alertName);
-      await alerts.setAlertTags(alertTags);
-      await alerts.setAlertInterval(alertInterval);
-      await alerts.setAlertThrottleInterval(alertThrottleInterval);
-      if (filters) {
-        await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
-      }
-      await alerts.setAlertStatusNumTimes(alertNumTimes);
-      await alerts.setAlertTimerangeSelection(alertTimerangeSelection);
-      await alerts.setMonitorStatusSelectableToHours();
-      await alerts.setLocationsSelectable();
-      await alerts.clickSaveAlertButtion();
+      await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
     }
 
     public async setMonitorListPageSize(size: number): Promise<void> {

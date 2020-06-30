@@ -18,8 +18,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 function loadGroups() {
   return ml.jobs
     .groups()
-    .then(groups => {
-      return groups.map(g => ({
+    .then((groups) => {
+      return groups.map((g) => ({
         value: g.id,
         view: (
           <div className="group-item">
@@ -36,7 +36,7 @@ function loadGroups() {
         ),
       }));
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
       return [];
     });

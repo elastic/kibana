@@ -6,7 +6,7 @@
 
 import { sortBy } from 'lodash';
 
-const stringSort = fieldName => item => item[fieldName];
+const stringSort = (fieldName) => (item) => item[fieldName];
 
 const sorters = {};
 

@@ -6,11 +6,13 @@
 
 import request from 'request';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find((header) =>
+      header.startsWith('sid=')
+    );
     return cookie ? request.cookie(cookie) : undefined;
   }
 

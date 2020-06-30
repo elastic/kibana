@@ -20,31 +20,38 @@
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-
+import { createHashHistory } from 'history';
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from 'kibana/public';
 
-import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
+import { Storage, createKbnUrlTracker, createKbnUrlStateStorage } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart } from '../../share/public';
-import { KibanaLegacySetup, AngularRenderedAppUpdater } from '../../kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
-import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { DefaultEditorController } from '../../vis_default_editor/public';
+import { VisualizeServices } from './application/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
+  embeddable: EmbeddableStart;
+  kibanaLegacy: KibanaLegacyStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -53,11 +60,16 @@ export interface VisualizePluginSetupDependencies {
   data: DataPublicPluginSetup;
 }
 
+export interface FeatureFlagConfig {
+  showNewVisualizeFlow: boolean;
+}
+
 export class VisualizePlugin
   implements
     Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
-  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -65,9 +77,15 @@ export class VisualizePlugin
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
   ) {
-    const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
-      baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/visualize',
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl,
+      restorePreviousUrl,
+    } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/visualize'),
+      defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -85,54 +103,87 @@ export class VisualizePlugin
           ),
         },
       ],
+      getHistory: () => this.currentHistory!,
     });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
 
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'visualize',
       title: 'Visualize',
+      order: 8000,
+      euiIconType: 'visualizeApp',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
-      navLinkId: 'kibana:visualize',
+      // remove all references to visualize
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        this.currentHistory = params.history;
+
+        // make sure the index pattern list is up to date
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure a default index pattern exists
+        // if not, the page will be redirected to management and visualize won't be rendered
+        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
         appMounted();
 
-        const deps: VisualizeKibanaServices = {
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = params.history.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
+
+        /**
+         * current implementation uses 2 history objects:
+         * 1. the hash history (used for the react hash router)
+         * 2. and the scoped history (used for url tracking)
+         * this should be replaced to use only scoped history after moving legacy apps to browser routing
+         */
+        const history = createHashHistory();
+
+        const services: VisualizeServices = {
+          ...coreStart,
+          history,
+          kbnUrlStateStorage: createKbnUrlStateStorage({
+            history,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          }),
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           pluginInitializerContext: this.initializerContext,
-          addBasePath: coreStart.http.basePath.prepend,
-          core: coreStart,
-          config: kibanaLegacy.config,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
           localStorage: new Storage(localStorage),
           navigation: pluginsStart.navigation,
-          savedObjectsClient: coreStart.savedObjects.client,
           savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
-          I18nContext: coreStart.i18n.Context,
+          embeddable: pluginsStart.embeddable,
           setActiveUrl,
-          DefaultVisualizationEditor: DefaultEditorController,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
+          savedObjectsPublic: pluginsStart.savedObjects,
+          scopedHistory: params.history,
+          restorePreviousUrl,
+          featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
         };
-        setServices(deps);
 
-        // make sure the index pattern list is up to date
-        await pluginsStart.data.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
+        params.element.classList.add('visAppWrapper');
+        const { renderApp } = await import('./application');
+        const unmount = renderApp(params, services);
         return () => {
+          unlistenParentHistory();
           unmount();
           appUnMounted();
         };
       },
     });
+
+    kibanaLegacy.forwardApp('visualize', 'visualize');
 
     if (home) {
       home.featureCatalogue.register({
@@ -143,7 +194,7 @@ export class VisualizePlugin
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
         }),
         icon: 'visualizeApp',
-        path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+        path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: true,
         category: FeatureCatalogueCategory.DATA,
       });

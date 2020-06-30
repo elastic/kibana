@@ -37,7 +37,7 @@ export function createTimeSeriesQueryRoute(service: Service, router: IRouter, ba
 
     const result = await service.indexThreshold.timeSeriesQuery({
       logger: service.logger,
-      callCluster: ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+      callCluster: ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
       query: req.body,
     });
 

@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import {
+  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
@@ -60,7 +61,7 @@ export type IconStop = {
 
 export type ColorDynamicOptions = {
   // ordinal color properties
-  color: string; // TODO move color category ramps to constants and make ENUM type
+  color?: string; // TODO move color category ramps to constants and make ENUM type
   customColorRamp?: OrdinalColorStop[];
   useCustomColorRamp?: boolean;
 
@@ -71,21 +72,27 @@ export type ColorDynamicOptions = {
 
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
+
+  type?: COLOR_MAP_TYPE;
 };
 
 export type ColorStaticOptions = {
   color: string;
 };
 
+export type ColorStaticStylePropertyDescriptor = {
+  type: STYLE_TYPE.STATIC;
+  options: ColorStaticOptions;
+};
+
+export type ColorDynamicStylePropertyDescriptor = {
+  type: STYLE_TYPE.DYNAMIC;
+  options: ColorDynamicOptions;
+};
+
 export type ColorStylePropertyDescriptor =
-  | {
-      type: STYLE_TYPE.STATIC;
-      options: ColorStaticOptions;
-    }
-  | {
-      type: STYLE_TYPE.DYNAMIC;
-      options: ColorDynamicOptions;
-    };
+  | ColorStaticStylePropertyDescriptor
+  | ColorDynamicStylePropertyDescriptor;
 
 export type IconDynamicOptions = {
   iconPaletteId?: string;

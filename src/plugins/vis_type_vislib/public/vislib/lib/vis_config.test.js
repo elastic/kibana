@@ -22,7 +22,7 @@ import d3 from 'd3';
 import { VisConfig } from './vis_config';
 import { getMockUiState } from '../../fixtures/mocks';
 
-describe('Vislib VisConfig Class Test Suite', function() {
+describe('Vislib VisConfig Class Test Suite', function () {
   let el;
   let visConfig;
   const data = {
@@ -85,11 +85,7 @@ describe('Vislib VisConfig Class Test Suite', function() {
   };
 
   beforeEach(() => {
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visWrapper')
-      .node();
+    el = d3.select('body').append('div').attr('class', 'visWrapper').node();
 
     visConfig = new VisConfig(
       {
@@ -106,33 +102,33 @@ describe('Vislib VisConfig Class Test Suite', function() {
     el.remove();
   });
 
-  describe('get Method', function() {
-    it('should be a function', function() {
+  describe('get Method', function () {
+    it('should be a function', function () {
       expect(typeof visConfig.get).toBe('function');
     });
 
-    it('should get the property', function() {
+    it('should get the property', function () {
       expect(visConfig.get('el')).toBe(el);
       expect(visConfig.get('type')).toBe('point_series');
     });
 
-    it('should return defaults if property does not exist', function() {
+    it('should return defaults if property does not exist', function () {
       expect(visConfig.get('this.does.not.exist', 'defaults')).toBe('defaults');
     });
 
-    it('should throw an error if property does not exist and defaults were not provided', function() {
-      expect(function() {
+    it('should throw an error if property does not exist and defaults were not provided', function () {
+      expect(function () {
         visConfig.get('this.does.not.exist');
       }).toThrow();
     });
   });
 
-  describe('set Method', function() {
-    it('should be a function', function() {
+  describe('set Method', function () {
+    it('should be a function', function () {
       expect(typeof visConfig.set).toBe('function');
     });
 
-    it('should set a property', function() {
+    it('should set a property', function () {
       visConfig.set('this.does.not.exist', 'it.does.now');
       expect(visConfig.get('this.does.not.exist')).toBe('it.does.now');
     });

@@ -6,13 +6,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
-  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'discover',
     'timePicker',
     'security',
@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Management']);
+        expect(navLinks.map((link) => link.text)).to.contain('Discover');
       });
 
       it('shows save button', async () => {
@@ -168,12 +168,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Discover');
       });
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -184,6 +185,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
@@ -257,12 +259,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Discover');
       });
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');
       });
@@ -273,6 +276,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
@@ -350,6 +354,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`shows the visualize button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectFieldListItemVisualize('bytes');
@@ -392,11 +397,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_discover_privileges_user');
       });
 
-      it(`redirects to the home page`, async () => {
+      it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

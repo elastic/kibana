@@ -34,7 +34,7 @@ function AutoPrecisionParamEditor({ value = false, setValue }: AggParamEditorPro
         compressed={true}
         label={label}
         checked={value}
-        onChange={ev => setValue(ev.target.checked)}
+        onChange={(ev) => setValue(ev.target.checked)}
       />
     </EuiFormRow>
   );

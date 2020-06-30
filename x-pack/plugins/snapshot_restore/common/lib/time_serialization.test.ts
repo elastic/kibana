@@ -9,7 +9,7 @@ import { TIME_UNITS } from '../constants';
 describe('time_serialization', () => {
   describe('deserializeTime()', () => {
     it('should deserialize valid ES time', () => {
-      Object.values(TIME_UNITS).forEach(unit => {
+      Object.values(TIME_UNITS).forEach((unit) => {
         expect(deserializeTime(`15${unit}`)).toEqual({
           timeValue: 15,
           timeUnit: unit,

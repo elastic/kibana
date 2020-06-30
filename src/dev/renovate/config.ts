@@ -21,7 +21,7 @@ import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
 import { PACKAGE_GLOBS } from './package_globs';
 import { wordRegExp, maybeFlatMap, maybeMap, getTypePackageName } from './utils';
 
-const DEFAULT_LABELS = ['release_note:skip', 'Team:Operations', 'renovate', 'v8.0.0', 'v7.7.0'];
+const DEFAULT_LABELS = ['release_note:skip', 'Team:Operations', 'renovate', 'v8.0.0', 'v7.9.0'];
 
 export const RENOVATE_CONFIG = {
   extends: ['config:base'],
@@ -85,11 +85,11 @@ export const RENOVATE_CONFIG = {
      * Define groups of packages that should be updated/configured together
      */
     packageRules: [
-      ...RENOVATE_PACKAGE_GROUPS.map(group => ({
+      ...RENOVATE_PACKAGE_GROUPS.map((group) => ({
         groupSlug: group.name,
         groupName: `${group.name} related packages`,
-        packagePatterns: maybeMap(group.packageWords, word => wordRegExp(word).source),
-        packageNames: maybeFlatMap(group.packageNames, name => [name, getTypePackageName(name)]),
+        packagePatterns: maybeMap(group.packageWords, (word) => wordRegExp(word).source),
+        packageNames: maybeFlatMap(group.packageNames, (name) => [name, getTypePackageName(name)]),
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
         allowedVersions: group.allowedVersions || undefined,

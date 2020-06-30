@@ -17,7 +17,6 @@ describe('snapshot reducer', () => {
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'foo: bar',
-      statusFilter: 'up',
     });
     expect(
       snapshotReducer(

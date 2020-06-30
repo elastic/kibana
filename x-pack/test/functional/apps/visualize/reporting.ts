@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Print PDF button', () => {
       it('is not available if new', async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
         await PageObjects.reporting.openPdfReportingPanel();
@@ -50,7 +50,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
-      it('downloaded PDF has OK status', async function() {
+      it('downloaded PDF has OK status', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);
 

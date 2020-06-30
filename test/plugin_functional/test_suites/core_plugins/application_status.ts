@@ -37,27 +37,28 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   });
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
-    return browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
+    return browser.executeAsync(async (status, cb) => {
       window.__coreAppStatus.setAppStatus(status);
       cb();
     }, s);
   };
 
   const navigateToApp = async (i: string) => {
-    return (await browser.executeAsync(async (appId, cb: Function) => {
+    return await browser.executeAsync(async (appId, cb) => {
       await window.__coreAppStatus.navigateToApp(appId);
       cb();
-    }, i)) as any;
+    }, i);
   };
 
-  describe('application status management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/65423
+  describe.skip('application status management', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('app_status_start');
     });
@@ -75,14 +76,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       });
       link = await appsMenu.getLink('App Status');
       expect(link).to.eql(undefined);
-
-      await setAppStatus({
-        navLinkStatus: AppNavLinkStatus.visible,
-        tooltip: 'Some tooltip',
-      });
-      link = await appsMenu.getLink('Some tooltip'); // the tooltip replaces the name in the selector we use.
-      expect(link).not.to.eql(undefined);
-      expect(link!.disabled).to.eql(false);
     });
 
     it('shows an error when navigating to an inaccessible app', async () => {

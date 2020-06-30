@@ -14,7 +14,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setMapInitError,
-} from '../../../actions/map_actions';
+} from '../../../actions';
 import {
   getLayerList,
   getMapReady,
@@ -40,17 +40,16 @@ function mapStateToProps(state = {}) {
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
     hideViewControl: isViewControlHidden(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    extentChanged: e => {
+    extentChanged: (e) => {
       dispatch(mapExtentChanged(e));
     },
-    onMapReady: e => {
+    onMapReady: (e) => {
       dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());

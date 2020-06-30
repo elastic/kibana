@@ -19,13 +19,13 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
   describe('scripted fields preview', () => {
-    before(async function() {
+    before(async function () {
       await browser.setWindowSize(1200, 800);
       await PageObjects.settings.createIndexPattern();
 
@@ -43,21 +43,21 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
-    it('should display script error when script is invalid', async function() {
+    it('should display script error when script is invalid', async function () {
       const scriptResults = await PageObjects.settings.executeScriptedField(
         `i n v a l i d  s c r i p t`
       );
       expect(scriptResults).to.contain('search_phase_execution_exception');
     });
 
-    it('should display script results when script is valid', async function() {
+    it('should display script results when script is valid', async function () {
       const scriptResults = await PageObjects.settings.executeScriptedField(
         `doc['bytes'].value * 2`
       );
       expect(scriptResults.replace(/\s/g, '')).to.contain('"myScriptedField":[6196');
     });
 
-    it('should display additional fields', async function() {
+    it('should display additional fields', async function () {
       const scriptResults = await PageObjects.settings.executeScriptedField(
         `doc['bytes'].value * 2`,
         ['bytes']

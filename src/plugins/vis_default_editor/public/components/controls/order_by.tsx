@@ -81,7 +81,7 @@ function OrderByParamEditor({
       <EuiSelect
         options={options}
         value={value}
-        onChange={ev => setValue(ev.target.value)}
+        onChange={(ev) => setValue(ev.target.value)}
         fullWidth={true}
         compressed
         isInvalid={showValidation && !isValid}

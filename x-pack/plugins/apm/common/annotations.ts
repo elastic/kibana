@@ -5,12 +5,12 @@
  */
 
 export enum AnnotationType {
-  VERSION = 'version'
+  VERSION = 'version',
 }
 
 export interface Annotation {
   type: AnnotationType;
   id: string;
-  time: number;
+  '@timestamp': number;
   text: string;
 }

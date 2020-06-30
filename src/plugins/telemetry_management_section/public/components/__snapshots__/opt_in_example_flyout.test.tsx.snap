@@ -3,12 +3,9 @@
 exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiPortal>
   <EuiFlyout
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
     maxWidth={true}
     onClose={[MockFunction]}
     ownFocus={true}
-    size="m"
   >
     <EuiFlyoutHeader>
       <EuiTitle>

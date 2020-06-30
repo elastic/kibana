@@ -45,7 +45,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.name),
         name: 'name',
-        onChange: name => setFormStateChanges(changes => ({ ...changes, name })),
+        onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
       }),
     [formState.name]
@@ -55,7 +55,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.logAlias),
         name: 'logAlias',
-        onChange: logAlias => setFormStateChanges(changes => ({ ...changes, logAlias })),
+        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
         value: formState.logAlias,
       }),
     [formState.logAlias]
@@ -65,7 +65,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.metricAlias),
         name: 'metricAlias',
-        onChange: metricAlias => setFormStateChanges(changes => ({ ...changes, metricAlias })),
+        onChange: (metricAlias) => setFormStateChanges((changes) => ({ ...changes, metricAlias })),
         value: formState.metricAlias,
       }),
     [formState.metricAlias]
@@ -75,8 +75,8 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.containerField),
         name: `containerField`,
-        onChange: containerField =>
-          setFormStateChanges(changes => ({ ...changes, containerField })),
+        onChange: (containerField) =>
+          setFormStateChanges((changes) => ({ ...changes, containerField })),
         value: formState.containerField,
       }),
     [formState.containerField]
@@ -86,7 +86,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.hostField),
         name: `hostField`,
-        onChange: hostField => setFormStateChanges(changes => ({ ...changes, hostField })),
+        onChange: (hostField) => setFormStateChanges((changes) => ({ ...changes, hostField })),
         value: formState.hostField,
       }),
     [formState.hostField]
@@ -96,7 +96,7 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.podField),
         name: `podField`,
-        onChange: podField => setFormStateChanges(changes => ({ ...changes, podField })),
+        onChange: (podField) => setFormStateChanges((changes) => ({ ...changes, podField })),
         value: formState.podField,
       }),
     [formState.podField]
@@ -106,8 +106,8 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.tiebreakerField),
         name: `tiebreakerField`,
-        onChange: tiebreakerField =>
-          setFormStateChanges(changes => ({ ...changes, tiebreakerField })),
+        onChange: (tiebreakerField) =>
+          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
         value: formState.tiebreakerField,
       }),
     [formState.tiebreakerField]
@@ -117,8 +117,8 @@ export const useIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.timestampField),
         name: `timestampField`,
-        onChange: timestampField =>
-          setFormStateChanges(changes => ({ ...changes, timestampField })),
+        onChange: (timestampField) =>
+          setFormStateChanges((changes) => ({ ...changes, timestampField })),
         value: formState.timestampField,
       }),
     [formState.timestampField]

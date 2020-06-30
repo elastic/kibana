@@ -5,15 +5,64 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
+import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
-const { setup } = componentHelpers.mappingsEditor;
-const mockOnUpdate = () => undefined;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+const onChangeHandler = jest.fn();
+const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
-describe('<MappingsEditor />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66457
+describe.skip('Mappings editor: core', () => {
+  /**
+   * Variable to store the mappings data forwarded to the consumer component
+   */
+  let data: any;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  afterEach(() => {
+    onChangeHandler.mockReset();
+  });
+
+  test('default behaviour', async () => {
+    const defaultMappings = {
+      properties: {
+        user: {
+          // No type defined for user
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+      },
+    };
+
+    const { component } = setup({ value: defaultMappings, onChange: onChangeHandler });
+
+    const expectedMappings = {
+      _meta: {}, // Was not defined so an empty object is returned
+      _source: {}, // Was not defined so an empty object is returned
+      ...defaultMappings,
+      properties: {
+        user: {
+          type: 'object', // Was not defined so it defaults to "object" type
+          ...defaultMappings.properties.user,
+        },
+      },
+    };
+
+    ({ data } = await getMappingsEditorData(component));
+    expect(data).toEqual(expectedMappings);
+  });
+
   describe('multiple mappings detection', () => {
     test('should show a warning when multiple mappings are detected', async () => {
-      const defaultValue = {
+      const value = {
         type1: {
           properties: {
             name1: {
@@ -29,7 +78,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
+      const testBed = setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -38,14 +87,14 @@ describe('<MappingsEditor />', () => {
     });
 
     test('should not show a warning when mappings a single-type', async () => {
-      const defaultValue = {
+      const value = {
         properties: {
           name1: {
             type: 'keyword',
           },
         },
       };
-      const testBed = await setup({ onUpdate: mockOnUpdate, defaultValue });
+      const testBed = setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -62,12 +111,12 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate() {} });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     test('should keep the changes when switching tabs', async () => {
       const {
-        actions: { addField, selectTab, updateJsonEditor, getJsonEditorValue },
+        actions: { addField, selectTab, updateJsonEditor, getJsonEditorValue, getToggleValue },
         component,
         find,
         exists,
@@ -79,10 +128,11 @@ describe('<MappingsEditor />', () => {
       // -------------------------------------
       expect(find('fieldsListItem').length).toEqual(0); // Check that we start with an empty  list
 
-      const newField = { name: getRandomString(), type: 'text' };
+      const newField = { name: 'John', type: 'text' };
       await act(async () => {
-        await addField(newField.name, newField.type);
+        addField(newField.name, newField.type);
       });
+      component.update();
 
       expect(find('fieldsListItem').length).toEqual(1);
 
@@ -93,20 +143,19 @@ describe('<MappingsEditor />', () => {
       // Navigate to dynamic templates tab
       // -------------------------------------
       await act(async () => {
-        await selectTab('templates');
+        selectTab('templates');
       });
+      component.update();
 
       let templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
 
       // Update the dynamic templates editor value
       const updatedValueTemplates = [{ after: 'bar' }];
-
       await act(async () => {
-        await updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
-        await nextTick();
-        component.update();
+        updateJsonEditor('dynamicTemplatesEditor', updatedValueTemplates);
       });
+      component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -115,12 +164,13 @@ describe('<MappingsEditor />', () => {
       // Switch to advanced settings tab and make some changes
       // ------------------------------------------------------
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
-      let isDynamicMappingsEnabled = find(
+      let isDynamicMappingsEnabled = getToggleValue(
         'advancedConfiguration.dynamicMappingsToggle.input'
-      ).props()['aria-checked'];
+      );
       expect(isDynamicMappingsEnabled).toBe(true);
 
       let isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
@@ -129,25 +179,25 @@ describe('<MappingsEditor />', () => {
       // Turn off dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
-        await nextTick();
-        component.update();
-        await nextTick();
       });
+      component.update();
 
-      isDynamicMappingsEnabled = find('advancedConfiguration.dynamicMappingsToggle.input').props()[
-        'aria-checked'
-      ];
+      isDynamicMappingsEnabled = getToggleValue(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      );
       expect(isDynamicMappingsEnabled).toBe(false);
 
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
 
+      // await act(() => promise);
       // ----------------------------------------------------------------------------
       // Go back to dynamic templates tab and make sure our changes are still there
       // ----------------------------------------------------------------------------
       await act(async () => {
-        await selectTab('templates');
+        selectTab('templates');
       });
+      component.update();
 
       templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(updatedValueTemplates);
@@ -156,22 +206,207 @@ describe('<MappingsEditor />', () => {
       // Go back to fields and make sure our created field is there
       // -----------------------------------------------------------
       await act(async () => {
-        await selectTab('fields');
+        selectTab('fields');
       });
+      component.update();
       field = find('fieldsListItem').at(0);
       expect(find('fieldName', field).text()).toEqual(newField.name);
 
       // Go back to advanced settings tab make sure dynamic mappings is disabled
       await act(async () => {
-        await selectTab('advanced');
+        selectTab('advanced');
       });
+      component.update();
 
-      isDynamicMappingsEnabled = find('advancedConfiguration.dynamicMappingsToggle.input').props()[
-        'aria-checked'
-      ];
+      isDynamicMappingsEnabled = getToggleValue(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      );
       expect(isDynamicMappingsEnabled).toBe(false);
       isNumericDetectionVisible = exists('advancedConfiguration.numericDetection');
       expect(isNumericDetectionVisible).toBe(false);
+    });
+  });
+
+  describe('component props', () => {
+    /**
+     * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a text datatype field,
+     * as it is the only place where it is consumed by the mappings editor.
+     *
+     * The test that covers it is text_datatype.test.tsx: "analyzer parameter: custom analyzer (from index settings)"
+     */
+    const defaultMappings: any = {
+      dynamic: true,
+      numeric_detection: false,
+      date_detection: true,
+      properties: {
+        title: { type: 'text' },
+        address: {
+          type: 'object',
+          properties: {
+            street: { type: 'text' },
+            city: { type: 'text' },
+          },
+        },
+      },
+      dynamic_templates: [{ initial: 'value' }],
+      _source: {
+        enabled: true,
+        includes: ['field1', 'field2'],
+        excludes: ['field3'],
+      },
+      _meta: {
+        some: 'metaData',
+      },
+      _routing: {
+        required: false,
+      },
+    };
+
+    let testBed: MappingsEditorTestBed;
+
+    beforeEach(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+
+    test('props.value => should prepopulate the editor data', async () => {
+      const {
+        component,
+        actions: { selectTab, getJsonEditorValue, getComboBoxValue, getToggleValue },
+        find,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      // Test that root-level mappings "properties" are rendered as root-level "DOM tree items"
+      const fields = find('fieldsListItem.fieldName').map((item) => item.text());
+      expect(fields).toEqual(Object.keys(defaultMappings.properties).sort());
+
+      /**
+       * Dynamic templates
+       */
+      await act(async () => {
+        selectTab('templates');
+      });
+      component.update();
+
+      // Test that dynamic templates JSON is rendered in the templates editor
+      const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
+      expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
+
+      /**
+       * Advanced settings
+       */
+      await act(async () => {
+        selectTab('advanced');
+      });
+      component.update();
+
+      const isDynamicMappingsEnabled = getToggleValue(
+        'advancedConfiguration.dynamicMappingsToggle.input'
+      );
+      expect(isDynamicMappingsEnabled).toBe(defaultMappings.dynamic);
+
+      const isNumericDetectionEnabled = getToggleValue(
+        'advancedConfiguration.numericDetection.input'
+      );
+      expect(isNumericDetectionEnabled).toBe(defaultMappings.numeric_detection);
+
+      expect(getComboBoxValue('sourceField.includesField')).toEqual(
+        defaultMappings._source.includes
+      );
+      expect(getComboBoxValue('sourceField.excludesField')).toEqual(
+        defaultMappings._source.excludes
+      );
+
+      const metaFieldValue = getJsonEditorValue('advancedConfiguration.metaField');
+      expect(metaFieldValue).toEqual(defaultMappings._meta);
+
+      const isRoutingRequired = getToggleValue('advancedConfiguration.routingRequiredToggle.input');
+      expect(isRoutingRequired).toBe(defaultMappings._routing.required);
+    });
+
+    test('props.onChange() => should forward the changes to the consumer component', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        find,
+        actions: { addField, selectTab, updateJsonEditor },
+        component,
+        form,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      const newField = { name: 'someNewField', type: 'text' };
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          ...updatedMappings.properties,
+          [newField.name]: { type: 'text' },
+        },
+      };
+
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+      });
+      component.update();
+
+      await act(async () => {
+        addField(newField.name, newField.type);
+      });
+      component.update();
+
+      ({ data } = await getMappingsEditorData(component));
+      expect(data).toEqual(updatedMappings);
+
+      /**
+       * Dynamic templates
+       */
+      await act(async () => {
+        await selectTab('templates');
+      });
+      component.update();
+
+      const updatedTemplatesValue = [{ someTemplateProp: 'updated' }];
+      updatedMappings = {
+        ...updatedMappings,
+        dynamic_templates: updatedTemplatesValue,
+      };
+
+      await act(async () => {
+        updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
+      });
+
+      ({ data } = await getMappingsEditorData(component));
+      expect(data).toEqual(updatedMappings);
+
+      /**
+       * Advanced settings
+       */
+      await act(async () => {
+        selectTab('advanced');
+      });
+      component.update();
+
+      // Disbable dynamic mappings
+      await act(async () => {
+        form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
+      });
+
+      ({ data } = await getMappingsEditorData(component));
+
+      // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
+      updatedMappings = {
+        ...updatedMappings,
+        dynamic: false,
+      };
+      delete updatedMappings.date_detection;
+      delete updatedMappings.dynamic_date_formats;
+      delete updatedMappings.numeric_detection;
+
+      expect(data).toEqual(updatedMappings);
     });
   });
 });

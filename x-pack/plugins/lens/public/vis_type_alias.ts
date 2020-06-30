@@ -9,7 +9,8 @@ import { VisTypeAlias } from 'src/plugins/visualizations/public';
 import { getBasePath, getEditPath } from '../common';
 
 export const getLensAliasConfig = (): VisTypeAlias => ({
-  aliasUrl: getBasePath(),
+  aliasPath: getBasePath(),
+  aliasApp: 'lens',
   name: 'lens',
   promotion: {
     description: i18n.translate('xpack.lens.visTypeAlias.promotion.description', {
@@ -33,11 +34,13 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       searchFields: ['title^3'],
       toListItem(savedObject) {
         const { id, type, attributes } = savedObject;
-        const { title } = attributes as { title: string };
+        const { title, description } = attributes as { title: string; description?: string };
         return {
           id,
           title,
+          description,
           editUrl: getEditPath(id),
+          editApp: 'lens',
           icon: 'lensApp',
           stage: 'beta',
           savedObjectType: type,

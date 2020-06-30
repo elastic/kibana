@@ -23,7 +23,7 @@ export const useLogSummary = (
   const bucketSize = useBucketSize(startTimestamp, endTimestamp);
 
   useCancellableEffect(
-    getIsCancelled => {
+    (getIsCancelled) => {
       if (startTimestamp === null || endTimestamp === null || bucketSize === null) {
         return;
       }
@@ -34,7 +34,7 @@ export const useLogSummary = (
         endTimestamp,
         bucketSize,
         query: filterQuery,
-      }).then(response => {
+      }).then((response) => {
         if (!getIsCancelled()) {
           setLogSummaryBuckets(response.data.buckets);
         }

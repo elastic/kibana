@@ -9,7 +9,7 @@ import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/s
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = ({
     get: jest.fn((type, id) => {
-      const result = spaces.filter(s => s.id === id);
+      const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
@@ -22,13 +22,13 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       };
     }),
     create: jest.fn((type, attributes, { id }) => {
-      if (spaces.find(s => s.id === id)) {
+      if (spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
       }
       return {};
     }),
     update: jest.fn((type, id) => {
-      if (!spaces.find(s => s.id === id)) {
+      if (!spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       return {};

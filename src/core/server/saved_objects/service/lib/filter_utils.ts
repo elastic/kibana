@@ -48,22 +48,22 @@ export const validateConvertFilterToKueryNode = (
       );
     }
 
-    if (validationFilterKuery.some(obj => obj.error != null)) {
+    if (validationFilterKuery.some((obj) => obj.error != null)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         validationFilterKuery
-          .filter(obj => obj.error != null)
-          .map(obj => obj.error)
+          .filter((obj) => obj.error != null)
+          .map((obj) => obj.error)
           .join('\n')
       );
     }
 
-    validationFilterKuery.forEach(item => {
+    validationFilterKuery.forEach((item) => {
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
       const existingKueryNode: KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
-        const itemType = allowedTypes.filter(t => t === item.type);
+        const itemType = allowedTypes.filter((t) => t === item.type);
         if (itemType.length === 1) {
           set(
             filterKueryNode,

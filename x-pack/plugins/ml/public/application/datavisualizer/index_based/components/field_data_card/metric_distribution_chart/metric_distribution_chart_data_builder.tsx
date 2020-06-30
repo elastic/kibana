@@ -114,7 +114,7 @@ export function buildChartDataFromStats(
   }
 
   // Adjust the maximum bar height to be (METRIC_DISTRIBUTION_CHART_MAX_BAR_HEIGHT_FACTOR * median bar height).
-  let barHeights = processedData.map(data => data.y);
+  let barHeights = processedData.map((data) => data.y);
   barHeights = barHeights.sort((a, b) => a - b);
 
   let maxBarHeight = 0;
@@ -131,12 +131,12 @@ export function buildChartDataFromStats(
       2;
   }
 
-  processedData.forEach(data => {
+  processedData.forEach((data) => {
     data.y = Math.min(data.y, maxBarHeight);
   });
 
   // Convert the data to the format used by the chart.
-  chartData = processedData.map(data => {
+  chartData = processedData.map((data) => {
     const { x0, y, dataMin, dataMax, percent } = data;
     return { x: x0, y, dataMin, dataMax, percent };
   });

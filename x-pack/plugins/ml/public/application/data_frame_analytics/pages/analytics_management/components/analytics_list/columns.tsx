@@ -16,13 +16,16 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { getJobIdUrl } from '../../../../../util/get_job_id_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
+  getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
@@ -30,7 +33,7 @@ import {
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
 } from './common';
-import { getActions, AnalyticsViewAction } from './actions';
+import { getActions } from './actions';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -64,6 +67,12 @@ export const getTaskStateBadge = (
   );
 };
 
+export const getJobTypeBadge = (jobType: string) => (
+  <EuiBadge className="mlTaskStateBadge" color="hollow">
+    {jobType}
+  </EuiBadge>
+);
+
 export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
@@ -71,11 +80,7 @@ export const progressColumn = {
   sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
-    const progress = getDataFrameAnalyticsProgress(item.stats);
-
-    if (progress === undefined) {
-      return null;
-    }
+    const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
     // For now all analytics jobs are batch jobs.
     const isBatchTransform = true;
@@ -84,19 +89,29 @@ export const progressColumn = {
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         {isBatchTransform && (
           <Fragment>
-            <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              <EuiProgress
-                value={progress}
-                max={100}
-                color="primary"
-                size="m"
-                data-test-subj="mlAnalyticsTableProgress"
-              >
-                {progress}%
-              </EuiProgress>
+            <EuiFlexItem style={{ width: '60px' }} grow={false}>
+              <EuiText size="xs">
+                Phase {currentPhase}/{totalPhases}
+              </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '35px' }} grow={false}>
-              <EuiText size="xs">{`${progress}%`}</EuiText>
+            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.dataframe.analyticsList.progressOfPhase', {
+                  defaultMessage: 'Progress of phase {currentPhase}: {progress}%',
+                  values: {
+                    currentPhase,
+                    progress,
+                  },
+                })}
+              >
+                <EuiProgress
+                  value={progress}
+                  max={100}
+                  color="primary"
+                  size="m"
+                  data-test-subj="mlAnalyticsTableProgress"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </Fragment>
         )}
@@ -118,9 +133,13 @@ export const progressColumn = {
       </EuiFlexGroup>
     );
   },
-  width: '100px',
+  width: '130px',
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
+
+export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
+  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+);
 
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
@@ -129,8 +148,7 @@ export const getColumns = (
   isMlEnabledInSpace: boolean = true,
   createAnalyticsForm?: CreateAnalyticsFormProps
 ) => {
-  const actions =
-    isManagementTable === true ? [AnalyticsViewAction] : getActions(createAnalyticsForm!);
+  const actions = getActions(createAnalyticsForm!, isManagementTable);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -180,12 +198,13 @@ export const getColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      field: DataFrameAnalyticsListColumn.id,
       name: 'ID',
-      sortable: true,
+      sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
+      render: (item: DataFrameAnalyticsListRow) =>
+        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -219,7 +238,7 @@ export const getColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+        return getJobTypeBadge(getAnalysisType(item.config.analysis));
       },
       width: '150px',
       'data-test-subj': 'mlAnalyticsTableColumnType',

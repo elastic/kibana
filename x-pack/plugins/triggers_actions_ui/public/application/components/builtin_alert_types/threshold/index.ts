@@ -3,16 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AlertTypeModel } from '../../../../types';
-import { IndexThresholdAlertTypeExpression } from './expression';
-import { validateExpression } from './validation';
+import { lazy } from 'react';
 
-export function getAlertType(): AlertTypeModel {
+import { AlertTypeModel } from '../../../../types';
+import { validateExpression } from './validation';
+import { IndexThresholdAlertParams } from './types';
+import { AlertsContextValue } from '../../../context/alerts_context';
+
+export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, AlertsContextValue> {
   return {
     id: '.index-threshold',
     name: 'Index threshold',
     iconClass: 'alert',
-    alertParamsExpression: IndexThresholdAlertTypeExpression,
+    alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
+    requiresAppContext: false,
   };
 }

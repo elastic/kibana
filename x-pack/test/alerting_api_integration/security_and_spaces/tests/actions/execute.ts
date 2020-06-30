@@ -15,7 +15,7 @@ import {
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
@@ -43,7 +43,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle execute request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -56,11 +56,11 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const reference = `actions-execute-1:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -115,7 +115,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it(`shouldn't execute an action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -128,11 +128,11 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const reference = `actions-execute-4:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix('other')}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -169,7 +169,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after action is updated', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -182,10 +182,10 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action updated',
@@ -200,7 +200,7 @@ export default function({ getService }: FtrProviderContext) {
 
           const reference = `actions-execute-2:${user.username}`;
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -255,7 +255,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it(`should handle execute request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -289,7 +289,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/1/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/1/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({});
@@ -322,7 +322,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after changing config properties', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'test email action',
@@ -340,10 +340,10 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           await supertest
-            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'a test email action 2',
@@ -359,7 +359,7 @@ export default function({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -395,17 +395,17 @@ export default function({ getService }: FtrProviderContext) {
           let searchResult: any;
           const reference = `actions-execute-3:${user.username}`;
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}/_execute`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}/_execute`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({

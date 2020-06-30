@@ -18,7 +18,7 @@ export { metrics } from './metrics';
 export const inventoryModels = [host, pod, container, awsEC2, awsS3, awsRDS, awsSQS];
 
 export const findInventoryModel = (type: InventoryItemType) => {
-  const model = inventoryModels.find(m => m.id === type);
+  const model = inventoryModels.find((m) => m.id === type);
   if (!model) {
     throw new Error(
       i18n.translate('xpack.infra.inventoryModels.findInventoryModel.error', {

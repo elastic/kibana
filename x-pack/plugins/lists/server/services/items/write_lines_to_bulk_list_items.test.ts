@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getImportListItemsToStreamOptionsMock,
-  getListItemResponseMock,
-  getWriteBufferToItemsOptionsMock,
-} from '../mocks';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
 import {
   LinesResult,
   importListItemsToStream,
   writeBufferToItems,
 } from './write_lines_to_bulk_list_items';
+import {
+  getImportListItemsToStreamOptionsMock,
+  getWriteBufferToItemsOptionsMock,
+} from './write_lines_to_bulk_list_items.mock';
 
 import { getListItemByValues } from '.';
 

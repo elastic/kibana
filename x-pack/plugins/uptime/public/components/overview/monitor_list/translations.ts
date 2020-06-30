@@ -21,6 +21,10 @@ export const HISTORY_COLUMN_LABEL = i18n.translate(
   }
 );
 
+export const TLS_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.tlsColumnLabel', {
+  defaultMessage: 'TLS Certificate',
+});
+
 export const getExpandDrawerLabel = (id: string) => {
   return i18n.translate('xpack.uptime.monitorList.expandDrawerButton.ariaLabel', {
     defaultMessage: 'Expand row for monitor with ID {id}',
@@ -48,13 +52,14 @@ export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
   }
 );
 
+export const LOADING = i18n.translate('xpack.uptime.monitorList.loading', {
+  defaultMessage: 'Loading...',
+  description: 'Shown when the monitor list is waiting for a server response',
+});
+
 export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMessage', {
   defaultMessage: 'No uptime monitors found',
   description: 'This message is shown if the monitors table is rendered but has no items.',
-});
-
-export const URL = i18n.translate('xpack.uptime.monitorList.table.url.name', {
-  defaultMessage: 'Url',
 });
 
 export const UP = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {

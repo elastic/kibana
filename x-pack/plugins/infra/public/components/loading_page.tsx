@@ -27,7 +27,7 @@ export const LoadingPage = ({ message }: LoadingPageProps) => (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
-          <EuiFlexItem>{message}</EuiFlexItem>
+          <EuiFlexItem data-test-subj="loadingMessage">{message}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageContent>
     </EuiPageBody>

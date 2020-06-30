@@ -17,7 +17,6 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
         class="euiTextColor euiTextColor--subdued"
       >
         <div
-          aria-hidden="true"
           color="subdued"
           data-euiicon-type="visualizeApp"
         />

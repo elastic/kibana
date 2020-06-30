@@ -64,166 +64,164 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
   return (
     <UpdateFieldProvider>
-      {updateField => (
+      {(updateField) => (
         <Form form={form} onSubmit={getSubmitForm(updateField)}>
-          <FormDataProvider pathsToWatch={['type', 'subType']}>
-            {({ type, subType }) => {
-              const typeDefinition = TYPE_DEFINITION[type as MainType];
-              const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
-              const ParametersForm = getParametersFormForType(type, subType);
+          <EuiFlyout
+            data-test-subj="mappingsEditorFieldEdit"
+            onClose={exitEdit}
+            aria-labelledby="mappingsEditorFieldEditTitle"
+            size="m"
+            className="mappingsEditor__editField"
+            maxWidth={720}
+          >
+            <EuiFlyoutHeader>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  {/* We need an extra div to get out of flex grow */}
+                  <div>
+                    {/* Title */}
+                    <EuiTitle size="m">
+                      <h2 data-test-subj="flyoutTitle">
+                        {isMultiField
+                          ? i18n.translate('xpack.idxMgmt.mappingsEditor.editMultiFieldTitle', {
+                              defaultMessage: "Edit multi-field '{fieldName}'",
+                              values: {
+                                fieldName: limitStringLength(field.source.name),
+                              },
+                            })
+                          : i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
+                              defaultMessage: "Edit field '{fieldName}'",
+                              values: {
+                                fieldName: limitStringLength(field.source.name),
+                              },
+                            })}
+                      </h2>
+                    </EuiTitle>
+                  </div>
+                </EuiFlexItem>
 
-              if (typeDefinition === undefined) {
-                return null;
-              }
+                {/* Documentation link */}
+                <FormDataProvider pathsToWatch={['type', 'subType']}>
+                  {({ type, subType }) => {
+                    const linkDocumentation =
+                      documentationService.getTypeDocLink(subType) ||
+                      documentationService.getTypeDocLink(type);
 
-              const linkDocumentation =
-                documentationService.getTypeDocLink(subType) ||
-                documentationService.getTypeDocLink(type);
+                    if (!linkDocumentation) {
+                      return null;
+                    }
 
-              return (
-                <EuiFlyout
-                  data-test-subj="mappingsEditorFieldEdit"
-                  onClose={exitEdit}
-                  aria-labelledby="mappingsEditorFieldEditTitle"
-                  size="m"
-                  className="mappingsEditor__editField"
-                  maxWidth={720}
-                >
-                  <EuiFlyoutHeader>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
-                        {/* We need an extra div to get out of flex grow */}
-                        <div>
-                          {/* Title */}
-                          <EuiTitle size="m">
-                            <h2>
-                              {isMultiField
-                                ? i18n.translate(
-                                    'xpack.idxMgmt.mappingsEditor.editMultiFieldTitle',
-                                    {
-                                      defaultMessage: "Edit multi-field '{fieldName}'",
-                                      values: {
-                                        fieldName: limitStringLength(field.source.name),
-                                      },
-                                    }
-                                  )
-                                : i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
-                                    defaultMessage: "Edit field '{fieldName}'",
-                                    values: {
-                                      fieldName: limitStringLength(field.source.name),
-                                    },
-                                  })}
-                            </h2>
-                          </EuiTitle>
-                        </div>
-                      </EuiFlexItem>
+                    const typeDefinition = TYPE_DEFINITION[type as MainType];
+                    const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
 
-                      {/* Documentation link */}
-                      {linkDocumentation && (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
-                            size="s"
-                            flush="right"
-                            href={linkDocumentation}
-                            target="_blank"
-                            iconType="help"
-                          >
-                            {i18n.translate(
-                              'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
-                              {
-                                defaultMessage: '{type} documentation',
-                                values: {
-                                  type: subTypeDefinition
-                                    ? subTypeDefinition.label
-                                    : typeDefinition.label,
-                                },
-                              }
-                            )}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-
-                    {/* Field path */}
-                    <EuiFlexGroup>
+                    return (
                       <EuiFlexItem grow={false}>
-                        <CodeBlock padding="small">{field.path.join(' > ')}</CodeBlock>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlyoutHeader>
-
-                  <EuiFlyoutBody>
-                    <EditFieldHeaderForm
-                      type={type}
-                      defaultValue={field.source}
-                      isRootLevelField={field.parentId === undefined}
-                      isMultiField={isMultiField}
-                    />
-
-                    {ParametersForm && (
-                      <ParametersForm
-                        // As the component "ParametersForm" does not change when switching type, and all the props
-                        // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
-                        // This will trigger an unmount of all the previous form fields and then mount the new ones.
-                        key={subType ?? type}
-                        field={field}
-                        allFields={allFields}
-                        isMultiField={isMultiField}
-                      />
-                    )}
-                  </EuiFlyoutBody>
-
-                  <EuiFlyoutFooter>
-                    {form.isSubmitted && !form.isValid && (
-                      <>
-                        <EuiCallOut
-                          title={i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
-                            {
-                              defaultMessage: 'Fix errors in form before continuing.',
-                            }
-                          )}
-                          color="danger"
-                          iconType="cross"
-                          data-test-subj="formError"
-                        />
-                        <EuiSpacer size="m" />
-                      </>
-                    )}
-
-                    <EuiFlexGroup justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty onClick={cancel}>
+                        <EuiButtonEmpty
+                          size="s"
+                          flush="right"
+                          href={linkDocumentation}
+                          target="_blank"
+                          iconType="help"
+                          data-test-subj="documentationLink"
+                        >
                           {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel',
+                            'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
                             {
-                              defaultMessage: 'Cancel',
+                              defaultMessage: '{type} documentation',
+                              values: {
+                                type: subTypeDefinition
+                                  ? subTypeDefinition.label
+                                  : typeDefinition.label,
+                              },
                             }
                           )}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          fill
-                          onClick={getSubmitForm(updateField)}
-                          type="submit"
-                          disabled={form.isSubmitted && !form.isValid}
-                          data-test-subj="editFieldUpdateButton"
-                        >
-                          {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel',
-                            {
-                              defaultMessage: 'Update',
-                            }
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlyoutFooter>
-                </EuiFlyout>
-              );
-            }}
-          </FormDataProvider>
+                    );
+                  }}
+                </FormDataProvider>
+              </EuiFlexGroup>
+
+              {/* Field path */}
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false} data-test-subj="fieldPath">
+                  <CodeBlock padding="small">{field.path.join(' > ')}</CodeBlock>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutHeader>
+
+            <EuiFlyoutBody>
+              <EditFieldHeaderForm
+                defaultValue={field.source}
+                isRootLevelField={field.parentId === undefined}
+                isMultiField={isMultiField}
+              />
+
+              <FormDataProvider pathsToWatch={['type', 'subType']}>
+                {({ type, subType }) => {
+                  const ParametersForm = getParametersFormForType(type, subType);
+
+                  if (!ParametersForm) {
+                    return null;
+                  }
+
+                  return (
+                    <ParametersForm
+                      // As the component "ParametersForm" does not change when switching type, and all the props
+                      // also remain the same (===), adding a key give us *a new instance* each time we change the type or subType.
+                      // This will trigger an unmount of all the previous form fields and then mount the new ones.
+                      key={subType ?? type}
+                      field={field}
+                      allFields={allFields}
+                      isMultiField={isMultiField}
+                    />
+                  );
+                }}
+              </FormDataProvider>
+            </EuiFlyoutBody>
+
+            <EuiFlyoutFooter>
+              {form.isSubmitted && !form.isValid && (
+                <>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.editFieldFlyout.validationErrorTitle',
+                      {
+                        defaultMessage: 'Fix errors in form before continuing.',
+                      }
+                    )}
+                    color="danger"
+                    iconType="cross"
+                    data-test-subj="formError"
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={cancel}>
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    onClick={getSubmitForm(updateField)}
+                    type="submit"
+                    disabled={form.isSubmitted && !form.isValid}
+                    data-test-subj="editFieldUpdateButton"
+                  >
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {
+                      defaultMessage: 'Update',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          </EuiFlyout>
         </Form>
       )}
     </UpdateFieldProvider>

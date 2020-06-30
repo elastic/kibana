@@ -3,91 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerting/server/mocks';
-
-const executor = createMetricThresholdExecutor('test') as (opts: {
-  params: AlertExecutorOptions['params'];
-  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-}) => Promise<void>;
-
-const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
-    }
-    if (metric === 'test.metric.2') {
-      return mocks.alternateCompositeResponse;
-    }
-    return mocks.basicCompositeResponse;
-  }
-  if (metric === 'test.metric.2') {
-    return mocks.alternateMetricResponse;
-  } else if (metric === 'test.metric.3') {
-    return mocks.emptyMetricResponse;
-  }
-  return mocks.basicMetricResponse;
-});
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
+} from '../../../../../alerts/server/mocks';
+import { InfraSources } from '../../sources';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
   actionQueue: any[];
   state: any;
 }
-const alertInstances = new Map<string, AlertTestInstance>();
-services.alertInstanceFactory.mockImplementation((instanceID: string) => {
-  const alertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
-    actionQueue: [],
-    state: {},
-  };
-  alertInstances.set(instanceID, alertInstance);
-  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-    alertInstance.state = newState;
-    return alertInstance.instance;
-  });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
-  return alertInstance.instance;
-});
 
-function mostRecentAction(id: string) {
-  return alertInstances.get(id)!.actionQueue.pop();
-}
+let persistAlertInstances = false; // eslint-disable-line
 
-function getState(id: string) {
-  return alertInstances.get(id)!.state;
-}
-
-const baseCriterion = {
-  aggType: 'avg',
-  metric: 'test.metric.1',
-  timeSize: 1,
-  timeUnit: 'm',
-};
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = 'test-*';
@@ -166,14 +100,6 @@ describe('The metric threshold alert type', () => {
       expect(action.reason).toContain('current value is 1');
       expect(action.reason).toContain('threshold of 0.75');
       expect(action.reason).toContain('test.metric.1');
-    });
-    test('fetches the index pattern dynamically', async () => {
-      await execute(Comparator.LT, [17], 'alternate');
-      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-      await execute(Comparator.LT, [1.5], 'alternate');
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
 
@@ -309,6 +235,58 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
+  describe('querying with the p99 aggregator', () => {
+    const instanceID = 'test-*';
+    const execute = (comparator: Comparator, threshold: number[]) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator,
+              threshold,
+              aggType: 'p99',
+              metric: 'test.metric.2',
+            },
+          ],
+        },
+      });
+    test('alerts based on the p99 values', async () => {
+      await execute(Comparator.GT, [1]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [1]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
+  describe('querying with the p95 aggregator', () => {
+    const instanceID = 'test-*';
+    const execute = (comparator: Comparator, threshold: number[]) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator,
+              threshold,
+              aggType: 'p95',
+              metric: 'test.metric.1',
+            },
+          ],
+        },
+      });
+    test('alerts based on the p95 values', async () => {
+      await execute(Comparator.GT, [0.25]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [0.95]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
   describe("querying a metric that hasn't reported data", () => {
     const instanceID = 'test-*';
     const execute = (alertOnNoData: boolean) =>
@@ -337,4 +315,141 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
   });
+
+  // describe('querying a metric that later recovers', () => {
+  //   const instanceID = 'test-*';
+  //   const execute = (threshold: number[]) =>
+  //     executor({
+  //       services,
+  //       params: {
+  //         criteria: [
+  //           {
+  //             ...baseCriterion,
+  //             comparator: Comparator.GT,
+  //             threshold,
+  //           },
+  //         ],
+  //       },
+  //     });
+  //   beforeAll(() => (persistAlertInstances = true));
+  //   afterAll(() => (persistAlertInstances = false));
+
+  //   test('sends a recovery alert as soon as the metric recovers', async () => {
+  //     await execute([0.5]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  //   test('does not continue to send a recovery alert if the metric is still OK', async () => {
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID)).toBe(undefined);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID)).toBe(undefined);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  //   test('sends a recovery alert again once the metric alerts and recovers again', async () => {
+  //     await execute([0.5]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+  //     await execute([2]);
+  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+  //   });
+  // });
 });
+
+const createMockStaticConfiguration = (sources: any) => ({
+  enabled: true,
+  query: {
+    partitionSize: 1,
+    partitionFactor: 1,
+  },
+  sources,
+});
+
+const mockLibs: any = {
+  sources: new InfraSources({
+    config: createMockStaticConfiguration({}),
+  }),
+  configuration: createMockStaticConfiguration({}),
+};
+
+const executor = createMetricThresholdExecutor(mockLibs, 'test') as (opts: {
+  params: AlertExecutorOptions['params'];
+  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
+}) => Promise<void>;
+
+const services: AlertServicesMock = alertsMock.createAlertServices();
+services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
+  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const metric = body.query.bool.filter[1]?.exists.field;
+  if (body.aggs.groupings) {
+    if (body.aggs.groupings.composite.after) {
+      return mocks.compositeEndResponse;
+    }
+    if (metric === 'test.metric.2') {
+      return mocks.alternateCompositeResponse;
+    }
+    return mocks.basicCompositeResponse;
+  }
+  if (metric === 'test.metric.2') {
+    return mocks.alternateMetricResponse;
+  } else if (metric === 'test.metric.3') {
+    return mocks.emptyMetricResponse;
+  }
+  return mocks.basicMetricResponse;
+});
+services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
+  if (sourceId === 'alternate')
+    return {
+      id: 'alternate',
+      attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
+});
+
+const alertInstances = new Map<string, AlertTestInstance>();
+services.alertInstanceFactory.mockImplementation((instanceID: string) => {
+  const newAlertInstance: AlertTestInstance = {
+    instance: alertsMock.createAlertInstanceFactory(),
+    actionQueue: [],
+    state: {},
+  };
+  const alertInstance: AlertTestInstance = persistAlertInstances
+    ? alertInstances.get(instanceID) || newAlertInstance
+    : newAlertInstance;
+  alertInstances.set(instanceID, alertInstance);
+
+  alertInstance.instance.getState.mockImplementation(() => {
+    return alertInstance.state;
+  });
+  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
+    alertInstance.state = newState;
+    return alertInstance.instance;
+  });
+  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
+    alertInstance.actionQueue.push({ id, action });
+    return alertInstance.instance;
+  });
+  return alertInstance.instance;
+});
+
+function mostRecentAction(id: string) {
+  return alertInstances.get(id)!.actionQueue.pop();
+}
+
+function getState(id: string) {
+  return alertInstances.get(id)!.state;
+}
+
+const baseCriterion = {
+  aggType: 'avg',
+  metric: 'test.metric.1',
+  timeSize: 1,
+  timeUnit: 'm',
+};

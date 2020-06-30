@@ -19,7 +19,7 @@ import { FollowerIndicesList as FollowerIndicesListView } from './follower_indic
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   followerIndices: getListFollowerIndices(state),
   followerIndexId: getSelectedFollowerIndexId('detail')(state),
   apiStatus: getApiStatus(scope)(state),
@@ -27,9 +27,9 @@ const mapStateToProps = state => ({
   isAuthorized: isApiAuthorized(scope)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  loadFollowerIndices: inBackground => dispatch(loadFollowerIndices(inBackground)),
-  selectFollowerIndex: id => dispatch(selectDetailFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  loadFollowerIndices: (inBackground) => dispatch(loadFollowerIndices(inBackground)),
+  selectFollowerIndex: (id) => dispatch(selectDetailFollowerIndex(id)),
 });
 
 export const FollowerIndicesList = connect(

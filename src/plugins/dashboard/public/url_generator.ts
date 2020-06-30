@@ -28,6 +28,7 @@ import {
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
+import { ViewMode } from '../../embeddable/public';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -73,9 +74,14 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * true is default
    */
   preserveSavedFilters?: boolean;
+
+  /**
+   * View mode of the dashboard.
+   */
+  viewMode?: ViewMode;
 }>;
 
-export const createDirectAccessDashboardLinkGenerator = (
+export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
     appBasePath: string;
     useHashedUrl: boolean;
@@ -83,11 +89,11 @@ export const createDirectAccessDashboardLinkGenerator = (
   }>
 ): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
   id: DASHBOARD_APP_URL_GENERATOR,
-  createUrl: async state => {
+  createUrl: async (state) => {
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
+    const hash = state.dashboardId ? `view/${state.dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (state.preserveSavedFilters === false) return [];
@@ -103,7 +109,7 @@ export const createDirectAccessDashboardLinkGenerator = (
     };
 
     const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
-      Object.keys(stateObj).forEach(key => {
+      Object.keys(stateObj).forEach((key) => {
         if (stateObj[key] === undefined) {
           delete stateObj[key];
         }
@@ -122,7 +128,8 @@ export const createDirectAccessDashboardLinkGenerator = (
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
-        filters: filters?.filter(f => !esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
+        viewMode: state.viewMode,
       }),
       { useHash },
       `${appBasePath}#/${hash}`
@@ -132,7 +139,7 @@ export const createDirectAccessDashboardLinkGenerator = (
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
-        filters: filters?.filter(f => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
         refreshInterval: state.refreshInterval,
       }),
       { useHash },

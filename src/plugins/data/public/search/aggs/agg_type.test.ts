@@ -159,17 +159,17 @@ describe('AggType Class', () => {
       });
     });
 
-    describe('getFormat', function() {
-      let aggConfig: IAggConfig;
-      let field: any;
-
-      beforeEach(() => {
-        aggConfig = ({
-          getField: jest.fn(() => field),
+    describe('getSerializedFormat', () => {
+      test('returns the default serialized field format if it exists', () => {
+        const aggConfig = ({
+          params: {
+            field: {
+              format: {
+                toJSON: () => ({ id: 'format' }),
+              },
+            },
+          },
         } as unknown) as IAggConfig;
-      });
-
-      test('returns the formatter for the aggConfig', () => {
         const aggType = new AggType(
           {
             name: 'name',
@@ -177,15 +177,17 @@ describe('AggType Class', () => {
           },
           dependencies
         );
-
-        field = {
-          format: 'format',
-        };
-
-        expect(aggType.getFormat(aggConfig)).toBe('format');
+        expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`
+          Object {
+            "id": "format",
+          }
+        `);
       });
 
-      test('returns default formatter', () => {
+      test('returns an empty object if a field param does not exist', () => {
+        const aggConfig = ({
+          params: {},
+        } as unknown) as IAggConfig;
         const aggType = new AggType(
           {
             name: 'name',
@@ -193,10 +195,35 @@ describe('AggType Class', () => {
           },
           dependencies
         );
+        expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`Object {}`);
+      });
 
-        field = undefined;
-
-        expect(aggType.getFormat(aggConfig)).toBe('default');
+      test('uses a custom getSerializedFormat function if defined', () => {
+        const aggConfig = ({
+          params: {
+            field: {
+              format: {
+                toJSON: () => ({ id: 'format' }),
+              },
+            },
+          },
+        } as unknown) as IAggConfig;
+        const getSerializedFormat = jest.fn().mockReturnValue({ id: 'hello' });
+        const aggType = new AggType(
+          {
+            name: 'name',
+            title: 'title',
+            getSerializedFormat,
+          },
+          dependencies
+        );
+        const serialized = aggType.getSerializedFormat(aggConfig);
+        expect(getSerializedFormat).toHaveBeenCalledWith(aggConfig);
+        expect(serialized).toMatchInlineSnapshot(`
+          Object {
+            "id": "hello",
+          }
+        `);
       });
     });
   });

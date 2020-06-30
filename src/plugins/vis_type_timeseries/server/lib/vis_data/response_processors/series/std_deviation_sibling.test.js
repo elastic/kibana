@@ -84,31 +84,20 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdDeviationSibling(resp, panel, series)(next)([]);
-    expect(results).toHaveLength(2);
+    expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({
-      id: 'test:lower',
+      id: 'test',
       color: 'rgb(255, 0, 0)',
-      lines: { show: true, fill: false, lineWidth: 0 },
-      points: { show: false },
-      data: [
-        [1, 0.01],
-        [2, 0.01],
-      ],
-    });
-
-    expect(results[1]).toEqual({
-      id: 'test:upper',
       label: 'Overall Std. Deviation of Average of cpu',
-      color: 'rgb(255, 0, 0)',
-      fillBetween: 'test:lower',
-      lines: { show: true, fill: 0.5, lineWidth: 0 },
+      lines: { show: true, fill: 0.5, lineWidth: 0, mode: 'band' },
+      bars: { show: false, fill: 0.5, mode: 'band' },
       points: { show: false },
       data: [
-        [1, 0.7],
-        [2, 0.7],
+        [1, 0.7, 0.01],
+        [2, 0.7, 0.01],
       ],
     });
   });

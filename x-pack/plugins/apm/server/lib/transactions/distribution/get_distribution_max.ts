@@ -9,12 +9,12 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 
 export async function getDistributionMax(
@@ -41,22 +41,22 @@ export async function getDistributionMax(
                 '@timestamp': {
                   gte: start,
                   lte: end,
-                  format: 'epoch_millis'
-                }
-              }
+                  format: 'epoch_millis',
+                },
+              },
             },
-            ...uiFiltersES
-          ]
-        }
+            ...uiFiltersES,
+          ],
+        },
       },
       aggs: {
         stats: {
           extended_stats: {
-            field: TRANSACTION_DURATION
-          }
-        }
-      }
-    }
+            field: TRANSACTION_DURATION,
+          },
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);

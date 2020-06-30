@@ -16,7 +16,7 @@ export class FeaturePrivilegeManagementBuilder extends BaseFeaturePrivilegeBuild
     }
 
     return Object.entries(managementSections).reduce((acc, [sectionId, items]) => {
-      return [...acc, ...items.map(item => this.actions.ui.get('management', sectionId, item))];
+      return [...acc, ...items.map((item) => this.actions.ui.get('management', sectionId, item))];
     }, [] as string[]);
   }
 }

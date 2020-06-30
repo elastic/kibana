@@ -15,11 +15,12 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
-  APICaller,
-  IScopedClusterClient,
+  LegacyAPICaller,
+  ILegacyScopedClusterClient,
 } from 'src/core/server';
 
 import { Index } from '../../index_management/server';
@@ -29,14 +30,21 @@ import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 interface CrossClusterReplicationContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
-const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  // Extend the elasticsearchJs client with additional endpoints.
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('crossClusterReplication', esClientConfig);
+}
+
+const ccrDataEnricher = async (indicesList: Index[], callWithRequest: LegacyAPICaller) => {
   if (!indicesList?.length) {
     return indicesList;
   }
@@ -49,7 +57,7 @@ const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller)
       'transport.request',
       params
     );
-    return indicesList.map(index => {
+    return indicesList.map((index) => {
       const isFollowerIndex = !!followerIndices.find(
         (followerIndex: { follower_index: string }) => {
           return followerIndex.follower_index === index.name;
@@ -69,6 +77,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
+  private ccrEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -77,13 +86,13 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   }
 
   setup(
-    { http, elasticsearch }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { licensing, indexManagement, remoteClusters }: Dependencies
   ) {
     this.config$
       .pipe(first())
       .toPromise()
-      .then(config => {
+      .then((config) => {
         // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
         // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
         // the Remote Clusters UI is disabled we can't show the CCR UI.
@@ -115,12 +124,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       }
     );
 
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const ccrEsClient = elasticsearch.createClient('crossClusterReplication', esClientConfig);
-    http.registerRouteHandlerContext('crossClusterReplication', (ctx, request) => {
+    http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
+      this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: ccrEsClient.asScoped(request),
+        client: this.ccrEsClient.asScoped(request),
       };
     });
 
@@ -135,5 +142,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   }
 
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.ccrEsClient) {
+      this.ccrEsClient.close();
+    }
+  }
 }

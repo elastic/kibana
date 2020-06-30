@@ -62,7 +62,7 @@ function getDetailsItems(anomaly, examples, filter) {
       singleCauseByFieldValue = sourceCauses[0].by_field_value;
     }
   } else {
-    causes = sourceCauses.map(cause => {
+    causes = sourceCauses.map((cause) => {
       const simplified = _.pick(cause, 'typical', 'actual', 'probability');
       // Get the 'entity field name/value' to display in the cause -
       // For by and over, use by_field_name/value (over_field_name/value are in the top level fields)
@@ -229,7 +229,7 @@ function getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay)
   const items = [];
 
   for (let i = 0; i < numToDisplay; i++) {
-    Object.keys(anomalyInfluencers[i]).forEach(influencerFieldName => {
+    Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
       const value = anomalyInfluencers[i][influencerFieldName];
 
       items.push({
@@ -279,7 +279,7 @@ export class AnomalyDetails extends Component {
           ),
         },
         {
-          id: 'Category examples',
+          id: 'category-examples',
           name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
             defaultMessage: 'Category examples',
           }),

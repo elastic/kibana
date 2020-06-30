@@ -39,7 +39,7 @@ export interface ClonePanelActionContext {
 export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
-  public order = 11;
+  public order = 45;
 
   constructor(private core: CoreStart) {}
 
@@ -97,10 +97,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     });
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
-    const baseTitle = rawTitle
-      .replace(cloneNumberRegex, '')
-      .replace(cloneRegex, '')
-      .trim();
+    const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
 
     const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
       type: embeddableType,

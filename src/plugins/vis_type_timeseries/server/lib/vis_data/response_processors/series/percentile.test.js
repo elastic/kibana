@@ -87,7 +87,7 @@ describe('percentile(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = percentile(resp, panel, series)(next)([]);
     expect(results).toHaveLength(2);
 

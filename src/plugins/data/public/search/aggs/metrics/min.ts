@@ -22,10 +22,15 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const minTitle = i18n.translate('data.search.aggs.metrics.minTitle', {
   defaultMessage: 'Min',
 });
+
+export interface AggParamsMin extends BaseAggParams {
+  field: string;
+}
 
 export interface MinMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;

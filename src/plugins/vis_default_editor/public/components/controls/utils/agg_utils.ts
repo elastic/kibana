@@ -33,6 +33,7 @@ const CUSTOM_METRIC = {
 };
 
 function useCompatibleAggCallback(aggFilter: AggFilter) {
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   return useCallback(isCompatibleAggregation(aggFilter), [aggFilter]);
 }
 
@@ -54,7 +55,7 @@ function useFallbackMetric(
       // ensure that metric is set to a valid agg
       const respAgg = metricAggs
         .filter(isCompatibleAgg)
-        .find(aggregation => aggregation.id === value);
+        .find((aggregation) => aggregation.id === value);
 
       if (!respAgg && value !== fallbackValue) {
         setValue(fallbackValue);
@@ -76,7 +77,7 @@ function useAvailableOptions(
 
   const options = useMemo(
     () => [
-      ...metricAggs.map(respAgg => ({
+      ...metricAggs.map((respAgg) => ({
         text: i18n.translate('visDefaultEditor.controls.definiteMetricLabel', {
           defaultMessage: 'Metric: {metric}',
           values: {

@@ -50,7 +50,7 @@ export const FLAGS = {
   plugins: opts.plugins
     ? String(opts.plugins)
         .split(',')
-        .map(id => id.trim())
+        .map((id) => id.trim())
     : undefined,
 };
 
@@ -66,5 +66,5 @@ export async function getEnabledPlugins() {
   });
 
   const enabledPlugins: Array<{ getId: () => string }> = await spec$.pipe(toArray()).toPromise();
-  return enabledPlugins.map(spec => spec.getId());
+  return enabledPlugins.map((spec) => spec.getId());
 }

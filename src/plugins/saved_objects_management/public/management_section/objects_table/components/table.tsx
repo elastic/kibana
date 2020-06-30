@@ -20,7 +20,6 @@
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
-  // @ts-ignore
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
@@ -111,13 +110,13 @@ export class Table extends PureComponent<TableProps, TableState> {
   };
 
   toggleExportPopoverVisibility = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isExportPopoverOpen: !state.isExportPopoverOpen,
     }));
   };
 
   toggleIsIncludeReferencesDeepChecked = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
     }));
   };
@@ -241,8 +240,8 @@ export class Table extends PureComponent<TableProps, TableState> {
             ),
             type: 'icon',
             icon: 'inspect',
-            onClick: object => goInspectObject(object),
-            available: object => !!object.meta.editUrl,
+            onClick: (object) => goInspectObject(object),
+            available: (object) => !!object.meta.editUrl,
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -259,10 +258,10 @@ export class Table extends PureComponent<TableProps, TableState> {
             ),
             type: 'icon',
             icon: 'kqlSelector',
-            onClick: object => onShowRelationships(object),
+            onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
-          ...actionRegistry.getAll().map(action => {
+          ...actionRegistry.getAll().map((action) => {
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
@@ -390,7 +389,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             pagination={pagination}
             selection={selection}
             onChange={onTableChange}
-            rowProps={item => ({
+            rowProps={(item) => ({
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
             })}
           />

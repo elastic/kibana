@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../legacy/plugins/canvas/types';
+export * from '../../../../src/plugins/expressions/common';
+export * from './assets';
+export * from './canvas';
+export * from './elements';
+export * from './functions';
+export * from './renderers';
+export * from './shortcuts';
+export * from './state';
+export * from './style';
+export * from './telemetry';

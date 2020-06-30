@@ -28,7 +28,7 @@ export function createZeroFilledArray(arr, label) {
 
   const zeroFilledArray = [];
 
-  arr.forEach(function(val) {
+  arr.forEach(function (val) {
     zeroFilledArray.push({
       x: val,
       xi: Infinity,

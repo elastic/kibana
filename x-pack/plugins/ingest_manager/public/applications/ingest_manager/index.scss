@@ -5,7 +5,7 @@
  * 1. Hack EUI so the bottom bar doesn't obscure the nav drawer flyout.
  */
 .ingestManager__bottomBar {
-  z-index: 0; /* 1 */
+  z-index: 5; /* 1 */
   left: $euiNavDrawerWidthCollapsed;
 }
 

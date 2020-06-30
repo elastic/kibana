@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const ace = require('brace');
+import ace from 'brace';
 import 'brace/mode/json';
 import { addXJsonToRules } from '../../../../../../es_ui_shared/public';
 

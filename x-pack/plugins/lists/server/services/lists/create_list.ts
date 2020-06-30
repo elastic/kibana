@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Description,
@@ -23,7 +23,7 @@ export interface CreateListOptions {
   type: Type;
   name: Name;
   description: Description;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -55,7 +55,7 @@ export const createList = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const response: CreateDocumentResponse = await callCluster('index', {
+  const response = await callCluster<CreateDocumentResponse>('index', {
     body,
     id,
     index: listIndex,

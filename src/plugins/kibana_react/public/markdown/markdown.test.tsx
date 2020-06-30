@@ -38,12 +38,9 @@ test('should render links with parentheses correctly', () => {
   const component = shallow(
     <Markdown markdown="[link](https://example.com/foo/bar?group=(()filters:!t))" />
   );
-  expect(
-    component
-      .render()
-      .find('a')
-      .prop('href')
-  ).toBe('https://example.com/foo/bar?group=(()filters:!t)');
+  expect(component.render().find('a').prop('href')).toBe(
+    'https://example.com/foo/bar?group=(()filters:!t)'
+  );
 });
 
 test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () => {
@@ -53,24 +50,14 @@ test('should add `noreferrer` and `nooopener` to unknown links in new tabs', () 
       markdown="[link](https://example.com/foo/bar?group=(()filters:!t))"
     />
   );
-  expect(
-    component
-      .render()
-      .find('a')
-      .prop('rel')
-  ).toBe('noopener noreferrer');
+  expect(component.render().find('a').prop('rel')).toBe('noopener noreferrer');
 });
 
 test('should only add `nooopener` to known links in new tabs', () => {
   const component = shallow(
     <Markdown openLinksInNewTab={true} markdown="[link](https://www.elastic.co/cool/path" />
   );
-  expect(
-    component
-      .render()
-      .find('a')
-      .prop('rel')
-  ).toBe('noopener');
+  expect(component.render().find('a').prop('rel')).toBe('noopener');
 });
 
 describe('props', () => {
@@ -95,19 +82,9 @@ describe('props', () => {
 
   test('should update markdown when openLinksInNewTab prop change', () => {
     const component = shallow(<Markdown markdown={markdown} openLinksInNewTab={false} />);
-    expect(
-      component
-        .render()
-        .find('a')
-        .prop('target')
-    ).not.toBe('_blank');
+    expect(component.render().find('a').prop('target')).not.toBe('_blank');
     component.setProps({ openLinksInNewTab: true });
-    expect(
-      component
-        .render()
-        .find('a')
-        .prop('target')
-    ).toBe('_blank');
+    expect(component.render().find('a').prop('target')).toBe('_blank');
   });
 
   test('should update markdown when whiteListedRules prop change', () => {

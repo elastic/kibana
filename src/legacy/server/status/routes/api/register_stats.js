@@ -40,12 +40,12 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
 export function registerStatsApi(usageCollection, server, config, kbnServer) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
-  const getClusterUuid = async callCluster => {
+  const getClusterUuid = async (callCluster) => {
     const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
-  const getUsage = async callCluster => {
+  const getUsage = async (callCluster) => {
     const usage = await usageCollection.bulkFetchUsage(callCluster);
     return usageCollection.toObject(usage);
   };
@@ -54,7 +54,7 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
   /* kibana_stats gets singled out from the collector set as it is used
    * for health-checking Kibana and fetch does not rely on fetching data
    * from ES */
-  server.newPlatform.setup.core.metrics.getOpsMetrics$().subscribe(metrics => {
+  server.newPlatform.start.core.metrics.getOpsMetrics$().subscribe((metrics) => {
     lastMetrics = {
       ...metrics,
       timestamp: new Date().toISOString(),

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
 
-  describe('management', function() {
+  describe('management', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
@@ -32,7 +32,7 @@ export default function({ getService, loadTestFile }) {
       await esArchiver.unload('empty_kibana');
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
@@ -45,7 +45,7 @@ export default function({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup8');
 
       loadTestFile(require.resolve('./_index_pattern_filter'));

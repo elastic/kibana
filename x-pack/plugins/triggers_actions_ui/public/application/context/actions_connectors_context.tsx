@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, ToastsApi, ApplicationStart } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ActionTypeModel } from '../../types';
 import { TypeRegistry } from '../type_registry';
 
@@ -18,6 +18,7 @@ export interface ActionsConnectorsContextValue {
   >;
   capabilities: ApplicationStart['capabilities'];
   reloadConnectors?: () => Promise<void>;
+  docLinks: DocLinksStart;
 }
 
 const ActionsConnectorsContext = createContext<ActionsConnectorsContextValue>(null as any);

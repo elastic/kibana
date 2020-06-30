@@ -18,29 +18,16 @@
  */
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('core', () => {
-    describe('request context', () => {
-      it('provides access to elasticsearch', async () =>
-        await supertest.get('/requestcontext/elasticsearch').expect(200, 'Elasticsearch: true'));
-
-      it('provides access to SavedObjects client', async () =>
-        await supertest
-          .get('/requestcontext/savedobjectsclient')
-          .expect(
-            200,
-            'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}'
-          ));
-    });
-
     describe('compression', () => {
       it(`uses compression when there isn't a referer`, async () => {
         await supertest
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).to.have.property('content-encoding', 'gzip');
           });
       });
@@ -50,7 +37,7 @@ export default function({ getService }) {
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://some-host.com')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).to.have.property('content-encoding', 'gzip');
           });
       });
@@ -60,7 +47,7 @@ export default function({ getService }) {
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://other.some-host.com')
-          .then(response => {
+          .then((response) => {
             expect(response.headers).not.to.have.property('content-encoding');
           });
       });

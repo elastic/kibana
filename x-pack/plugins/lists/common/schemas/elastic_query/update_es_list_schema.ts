@@ -16,6 +16,7 @@ import {
   updated_by,
 } from '../common/schemas';
 
+// TODO: Should we use partial here and everywhere these are instead of this OrUndefined?
 export const updateEsListSchema = t.exact(
   t.type({
     description: descriptionOrUndefined,

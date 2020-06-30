@@ -24,7 +24,7 @@ import { Chart } from '../../../../../../../plugins/vis_type_vislib/public/visli
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
-describe('Vislib _chart Test Suite', function() {
+describe('Vislib _chart Test Suite', function () {
   let vis;
   let el;
   let myChart;
@@ -96,10 +96,10 @@ describe('Vislib _chart Test Suite', function() {
         ],
       },
     ],
-    tooltipFormatter: function(datapoint) {
+    tooltipFormatter: function (datapoint) {
       return datapoint;
     },
-    xAxisFormatter: function(thing) {
+    xAxisFormatter: function (thing) {
       return thing;
     },
     xAxisLabel: 'Date Histogram',
@@ -107,10 +107,7 @@ describe('Vislib _chart Test Suite', function() {
   };
 
   beforeEach(() => {
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'column-chart');
+    el = d3.select('body').append('div').attr('class', 'column-chart');
 
     config = {
       type: 'histogram',
@@ -125,16 +122,16 @@ describe('Vislib _chart Test Suite', function() {
     myChart = vis.handler.charts[0];
   });
 
-  afterEach(function() {
+  afterEach(function () {
     el.remove();
     vis.destroy();
   });
 
-  it('should be a constructor for visualization modules', function() {
+  it('should be a constructor for visualization modules', function () {
     expect(myChart instanceof Chart).to.be(true);
   });
 
-  it('should have a render method', function() {
+  it('should have a render method', function () {
     expect(typeof myChart.render === 'function').to.be(true);
   });
 });

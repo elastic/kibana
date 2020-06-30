@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
@@ -26,7 +26,7 @@ import { setup as httpSetup } from '../../../test_utils/public/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const { http } = httpSetup(injectedMetadata => {
+  const { http } = httpSetup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
   });
 
@@ -181,10 +181,7 @@ describe('#getLoadingCount$()', () => {
 
     const { uiSettingsApi } = setup();
     const done$ = new Rx.Subject();
-    const promise = uiSettingsApi
-      .getLoadingCount$()
-      .pipe(takeUntil(done$), toArray())
-      .toPromise();
+    const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
     done$.next();
@@ -209,10 +206,7 @@ describe('#getLoadingCount$()', () => {
 
     const { uiSettingsApi } = setup();
     const done$ = new Rx.Subject();
-    const promise = uiSettingsApi
-      .getLoadingCount$()
-      .pipe(takeUntil(done$), toArray())
-      .toPromise();
+    const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
     await expect(uiSettingsApi.batchSet('foo', 'bar')).rejects.toThrowError();
@@ -230,14 +224,8 @@ describe('#stop', () => {
 
     const { uiSettingsApi } = setup();
     const promise = Promise.all([
-      uiSettingsApi
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise(),
-      uiSettingsApi
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise(),
+      uiSettingsApi.getLoadingCount$().pipe(toArray()).toPromise(),
+      uiSettingsApi.getLoadingCount$().pipe(toArray()).toPromise(),
     ]);
 
     const batchSetPromise = uiSettingsApi.batchSet('foo', 'bar');

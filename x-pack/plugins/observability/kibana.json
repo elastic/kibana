@@ -2,6 +2,13 @@
   "id": "observability",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "observability"],
-  "ui": true
+  "configPath": [
+    "xpack",
+    "observability"
+  ],
+  "optionalPlugins": [
+    "licensing"
+  ],
+  "ui": true,
+  "server": true
 }

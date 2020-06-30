@@ -9,12 +9,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -100,7 +95,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
-                "learnMoreLink": <ForwardRef
+                "learnMoreLink": <EuiLink
                   href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
                   target="_blank"
                 >
@@ -109,7 +104,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -259,12 +254,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -364,7 +354,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
-                "learnMoreLink": <ForwardRef
+                "learnMoreLink": <EuiLink
                   href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
                   target="_blank"
                 >
@@ -373,7 +363,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -523,12 +513,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}
@@ -614,7 +599,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
-                "learnMoreLink": <ForwardRef
+                "learnMoreLink": <EuiLink
                   href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/ml-rules.html"
                   target="_blank"
                 >
@@ -623,7 +608,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -765,12 +750,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
     onClose={[Function]}
-    ownFocus={false}
-    size="m"
   >
     <EuiFlyoutHeader
       hasBorder={true}

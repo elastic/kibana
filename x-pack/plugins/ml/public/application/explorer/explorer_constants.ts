@@ -14,7 +14,7 @@ export const DRAG_SELECT_ACTION = {
   NEW_SELECTION: 'newSelection',
   ELEMENT_SELECT: 'elementSelect',
   DRAG_START: 'dragStart',
-};
+} as const;
 
 export const EXPLORER_ACTION = {
   CLEAR_INFLUENCER_FILTER_SETTINGS: 'clearInfluencerFilterSettings',
@@ -40,7 +40,9 @@ export const FILTER_ACTION = {
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
   VIEW_BY: 'viewBy',
-};
+} as const;
+
+export type SwimlaneType = typeof SWIMLANE_TYPE[keyof typeof SWIMLANE_TYPE];
 
 export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',

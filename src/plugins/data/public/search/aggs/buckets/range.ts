@@ -19,14 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
-
-const keyCaches = new WeakMap();
-const formats = new WeakMap();
+import { BaseAggParams } from '../types';
 
 const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {
   defaultMessage: 'Range',
@@ -36,12 +34,22 @@ export interface RangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) =>
-  new BucketAggType(
+export interface AggParamsRange extends BaseAggParams {
+  field: string;
+  ranges?: Array<{
+    from: number;
+    to: number;
+  }>;
+}
+
+export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) => {
+  const keyCaches = new WeakMap();
+
+  return new BucketAggType(
     {
       name: BUCKET_TYPES.RANGE,
       title: rangeTitle,
-      createFilter: createFilterRange,
+      createFilter: createFilterRange(getInternalStartServices),
       makeLabel(aggConfig) {
         return i18n.translate('data.search.aggs.aggTypesLabel', {
           defaultMessage: '{fieldName} ranges',
@@ -68,29 +76,15 @@ export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDe
 
         return key;
       },
-      getFormat(agg) {
-        let aggFormat = formats.get(agg);
-        if (aggFormat) return aggFormat;
-
-        const RangeFormat = FieldFormat.from((range: any) => {
-          const format = agg.fieldOwnFormatter();
-          const gte = '\u2265';
-          const lt = '\u003c';
-          return i18n.translate('data.search.aggs.aggTypes.rangesFormatMessage', {
-            defaultMessage: '{gte} {from} and {lt} {to}',
-            values: {
-              gte,
-              from: format(range.gte),
-              lt,
-              to: format(range.lt),
-            },
-          });
-        });
-
-        aggFormat = new RangeFormat();
-
-        formats.set(agg, aggFormat);
-        return aggFormat;
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+        return {
+          id: 'range',
+          params: {
+            id: format.id,
+            params: format.params,
+          },
+        };
       },
       params: [
         {
@@ -113,3 +107,4 @@ export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDe
     },
     { getInternalStartServices }
   );
+};

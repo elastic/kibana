@@ -15,8 +15,9 @@ import {
 } from '../__fixtures__';
 import { initFindCasesApi } from './find_cases';
 import { CASES_URL } from '../../../../common/constants';
+import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
 
-describe('GET all cases', () => {
+describe('FIND all cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
     routeHandler = await createRoute(initFindCasesApi, 'get');
@@ -36,5 +37,54 @@ describe('GET all cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
+  });
+  it(`has proper connector id on cases with configured id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: `${CASES_URL}/_find`,
+      method: 'get',
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.cases[2].connector_id).toEqual('123');
+  });
+  it(`adds 'none' connector id to cases without when 3rd party unconfigured`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: `${CASES_URL}/_find`,
+      method: 'get',
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.cases[0].connector_id).toEqual('none');
+  });
+  it(`adds default connector id to cases without when 3rd party configured`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: `${CASES_URL}/_find`,
+      method: 'get',
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.cases[0].connector_id).toEqual('123');
   });
 });

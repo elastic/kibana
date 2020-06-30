@@ -5,10 +5,10 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 
@@ -22,32 +22,34 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
     index: [
       indices['apm_oss.metricsIndices'],
       indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } }
-          ]
-        }
+            {
+              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
+            },
+          ],
+        },
       },
       aggs: {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 50
-          }
-        }
-      }
-    }
+            size: 50,
+          },
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);
   const serviceNames =
     resp.aggregations?.services.buckets
-      .map(bucket => bucket.key as string)
+      .map((bucket) => bucket.key as string)
       .sort() || [];
   return [ALL_OPTION_VALUE, ...serviceNames];
 }

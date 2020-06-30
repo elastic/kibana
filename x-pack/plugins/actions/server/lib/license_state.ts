@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
-import { assertNever } from '../../../../../src/core/utils';
+import { assertNever } from '../../../../../src/core/server';
 import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';

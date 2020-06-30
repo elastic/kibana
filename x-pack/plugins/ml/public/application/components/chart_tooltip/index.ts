@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { mlChartTooltipService } from './chart_tooltip_service';
-export { ChartTooltip } from './chart_tooltip';
+export { ChartTooltipService } from './chart_tooltip_service';
+export { MlTooltipComponent } from './chart_tooltip';

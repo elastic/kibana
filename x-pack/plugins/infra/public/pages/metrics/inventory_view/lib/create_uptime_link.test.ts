@@ -21,6 +21,7 @@ const options: InfraWaffleMapOptions = {
   formatTemplate: '{{value}}',
   metric: { type: 'cpu' },
   groupBy: [],
+  sort: { by: 'name', direction: 'asc' },
   legend: {
     type: 'gradient',
     rules: [],

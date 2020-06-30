@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-const oboe = require('oboe');
+import oboe from 'oboe';
 
 export class PatternReader {
   constructor({ onFeatureDetect, onStreamComplete }) {
@@ -21,7 +21,7 @@ export class PatternReader {
 
   _registerFeaturePatternHandler(featurePatternCallback) {
     this._oboeStream.node({
-      'features.*': feature => {
+      'features.*': (feature) => {
         if (!feature.geometry || !feature.geometry.type) {
           // Only add this error once
           // TODO: Give feedback on which features failed
@@ -48,7 +48,7 @@ export class PatternReader {
   }
 
   _registerStreamCompleteHandler(streamCompleteCallback) {
-    this._oboeStream.done(parsedGeojson => {
+    this._oboeStream.done((parsedGeojson) => {
       streamCompleteCallback({ parsedGeojson, errors: this.getErrors() });
     });
   }

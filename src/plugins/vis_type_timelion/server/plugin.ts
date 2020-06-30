@@ -20,12 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { RecursiveReadonly } from '@kbn/utility-types';
+
+import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
+import { deepFreeze } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';

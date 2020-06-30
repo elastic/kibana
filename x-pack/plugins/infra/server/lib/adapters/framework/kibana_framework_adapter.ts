@@ -28,11 +28,11 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-  APICaller,
+  LegacyAPICaller,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
-import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 
 export class KibanaFramework {
   public router: IRouter;
@@ -197,10 +197,10 @@ export class KibanaFramework {
   ) {
     const { elasticsearch, uiSettings } = requestContext.core;
 
-    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
+    const includeFrozen = await uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
       const maxConcurrentShardRequests = await uiSettings.client.get(
-        'courier:maxConcurrentShardRequests'
+        UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
       );
       if (maxConcurrentShardRequests > 0) {
         params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
@@ -213,17 +213,17 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
       ...params,
       ...frozenIndicesParams,
     });
   }
 
   public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
-    return new IndexPatternsFetcher((...rest: Parameters<APICaller>) => {
+    return new IndexPatternsFetcher((...rest: Parameters<LegacyAPICaller>) => {
       rest[1] = rest[1] || {};
       rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.adminClient.callAsCurrentUser(...rest);
+      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
     });
   }
 

@@ -8,7 +8,7 @@ import { FtrProviderContext } from './services';
 import { PublicLicenseJSON } from '../../plugins/licensing/server';
 import '../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export function createScenario({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');

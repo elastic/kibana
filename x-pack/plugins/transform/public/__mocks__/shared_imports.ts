@@ -14,8 +14,8 @@ export const useRequest = jest.fn(() => ({
 }));
 
 // just passing through the reimports
-export { getErrorMessage } from '../../../ml/common/util/errors';
 export {
+  getErrorMessage,
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   multiColumnSortFactory,
@@ -27,5 +27,5 @@ export {
   SearchResponse7,
   UseDataGridReturnType,
   UseIndexDataReturnType,
-} from '../../../ml/public/application/components/data_grid';
-export { INDEX_STATUS } from '../../../ml/public/application/data_frame_analytics/common';
+  INDEX_STATUS,
+} from '../../../ml/public';

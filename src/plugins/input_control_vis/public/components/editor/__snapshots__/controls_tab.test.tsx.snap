@@ -24,9 +24,6 @@ exports[`renders ControlsTab 1`] = `
       Object {
         "core": Object {
           "getStartServices": [MockFunction],
-          "injectedMetadata": Object {
-            "getInjectedVar": [MockFunction],
-          },
         },
         "data": Object {
           "query": Object {
@@ -46,6 +43,7 @@ exports[`renders ControlsTab 1`] = `
             },
           },
         },
+        "getSettings": [MockFunction],
       }
     }
     getIndexPattern={[Function]}
@@ -85,9 +83,6 @@ exports[`renders ControlsTab 1`] = `
       Object {
         "core": Object {
           "getStartServices": [MockFunction],
-          "injectedMetadata": Object {
-            "getInjectedVar": [MockFunction],
-          },
         },
         "data": Object {
           "query": Object {
@@ -107,6 +102,7 @@ exports[`renders ControlsTab 1`] = `
             },
           },
         },
+        "getSettings": [MockFunction],
       }
     }
     getIndexPattern={[Function]}

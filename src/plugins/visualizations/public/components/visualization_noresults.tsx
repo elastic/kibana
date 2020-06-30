@@ -33,7 +33,7 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
         <div className="item top" />
         <div className="item">
           <EuiText size="xs" color="subdued">
-            <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden="true" />
+            <EuiIcon type="visualizeApp" size="m" color="subdued" />
 
             <EuiSpacer size="s" />
 

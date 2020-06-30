@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
@@ -23,7 +23,7 @@ interface Results {
   };
 }
 
-export function groupsProvider(callAsCurrentUser: APICaller) {
+export function groupsProvider(callAsCurrentUser: LegacyAPICaller) {
   const calMngr = new CalendarManager(callAsCurrentUser);
 
   async function getAllGroups() {
@@ -35,10 +35,10 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
     ]);
 
     if (jobs) {
-      jobs.forEach(job => {
+      jobs.forEach((job) => {
         jobIds[job.job_id] = null;
         if (job.groups !== undefined) {
-          job.groups.forEach(g => {
+          job.groups.forEach((g) => {
             if (groups[g] === undefined) {
               groups[g] = {
                 id: g,
@@ -53,8 +53,8 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
       });
     }
     if (calendars) {
-      calendars.forEach(cal => {
-        cal.job_ids.forEach(jId => {
+      calendars.forEach((cal) => {
+        cal.job_ids.forEach((jId) => {
           // don't include _all in the calendar groups list
           if (jId !== GLOBAL_CALENDAR && jobIds[jId] === undefined) {
             if (groups[jId] === undefined) {
@@ -71,7 +71,7 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
       });
     }
 
-    return Object.keys(groups).map(g => groups[g]);
+    return Object.keys(groups).map((g) => groups[g]);
   }
 
   async function updateGroups(jobs: Job[]) {

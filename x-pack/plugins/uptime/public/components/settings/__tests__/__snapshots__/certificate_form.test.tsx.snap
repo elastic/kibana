@@ -51,20 +51,53 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
     }
   }
 >
-  <CertificateExpirationForm
-    fieldErrors={null}
-    formFields={
+  <ContextProvider
+    value={
       Object {
-        "certThresholds": Object {
-          "age": 36,
-          "expiration": 7,
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-        "heartbeatIndices": "heartbeat-8*",
+        "push": [Function],
+        "replace": [Function],
       }
     }
-    isDisabled={false}
-    loading={false}
-    onChange={[MockFunction]}
-  />
+  >
+    <CertificateExpirationForm
+      fieldErrors={null}
+      formFields={
+        Object {
+          "certAgeThreshold": 36,
+          "certExpirationThreshold": 7,
+          "heartbeatIndices": "heartbeat-8*",
+        }
+      }
+      isDisabled={false}
+      loading={false}
+      onChange={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

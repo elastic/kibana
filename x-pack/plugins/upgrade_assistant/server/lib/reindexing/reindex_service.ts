@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { APICaller, Logger } from 'src/core/server';
+import { LegacyAPICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
@@ -127,7 +127,7 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callAsUser: APICaller,
+  callAsUser: LegacyAPICaller,
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginSetup
@@ -141,7 +141,7 @@ export const reindexServiceFactory = (
    */
   const stopMlJobs = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       await validateNodesMinimumVersion(6, 7);
 
       const res = await callAsUser('transport.request', {
@@ -162,7 +162,7 @@ export const reindexServiceFactory = (
    */
   const resumeMlJobs = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       if (mlDoc.attributes.runningReindexCount === 0) {
         const res = await callAsUser('transport.request', {
           path: '/_ml/set_upgrade_mode?enabled=false',
@@ -183,7 +183,7 @@ export const reindexServiceFactory = (
    */
   const stopWatcher = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
       const { acknowledged } = await callAsUser('transport.request', {
         path: '/_watcher/_stop',
         method: 'POST',
@@ -202,7 +202,7 @@ export const reindexServiceFactory = (
    */
   const startWatcher = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
       if (watcherDoc.attributes.runningReindexCount === 0) {
         const { acknowledged } = await callAsUser('transport.request', {
           path: '/_watcher/_start',
@@ -223,7 +223,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
       await callAsUser('tasks.cancel', {
         taskId: reindexOp.attributes.reindexTaskId,
-      }).catch(e => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+      }).catch((e) => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
@@ -444,7 +444,7 @@ export const reindexServiceFactory = (
       })
     )[indexName].aliases;
 
-    const extraAlises = Object.keys(existingAliases).map(aliasName => ({
+    const extraAlises = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
@@ -629,7 +629,7 @@ export const reindexServiceFactory = (
     findAllByStatus: actions.findAllByStatus,
 
     async processNextStep(reindexOp: ReindexSavedObject) {
-      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
@@ -670,7 +670,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(err => lockedReindexOp);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch((err) => lockedReindexOp);
         }
 
         return lockedReindexOp;
@@ -684,7 +684,7 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.paused) {
           // Another node already paused the operation, don't do anything
           return reindexOp;
@@ -703,7 +703,7 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.inProgress) {
           // Another node already resumed the operation, don't do anything
           return reindexOp;
@@ -730,7 +730,7 @@ export const reindexServiceFactory = (
         throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
       }
 
-      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         const { reindexOptions } = lockedReindexOp.attributes;
         reindexOptions!.queueSettings!.startedAt = Date.now();
         return actions.updateReindexOp(lockedReindexOp, {

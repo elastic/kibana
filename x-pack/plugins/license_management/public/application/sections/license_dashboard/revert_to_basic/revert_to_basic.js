@@ -62,7 +62,7 @@ export class RevertToBasic extends React.PureComponent {
             <EuiText>{firstLine}</EuiText>
             <EuiText>
               <ul>
-                {messages.map(message => (
+                {messages.map((message) => (
                   <li key={message}>{message}</li>
                 ))}
               </ul>

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_register_git_hook');
+require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('@kbn/dev-utils/target/precommit_hook/cli');

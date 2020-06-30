@@ -91,6 +91,7 @@ export interface OverlayFlyoutStart {
 export interface OverlayFlyoutOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
+  ownFocus?: boolean;
   'data-test-subj'?: string;
 }
 

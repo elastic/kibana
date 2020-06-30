@@ -1,38 +1,53 @@
 [role="xpack"]
 [[spans]]
-=== Span timeline
+=== Trace sample timeline
 
-TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is the duration of a single event.
-Spans are automatically captured by APM agents, and you can also define custom spans.
-Each span has a type and is defined by a different color in the timeline/waterfall visualization.
-
-The span timeline visualization is a bird's-eye view of what your application was doing while it was trying to respond to the request that came in.
+The trace sample timeline visualization is a bird's-eye view of what your application was doing while it was trying to respond to a request.
 This makes it useful for visualizing where the selected transaction spent most of its time.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in Kibana]
 
 View a span in detail by clicking on it in the timeline waterfall.
-When you click on an SQL Select database query,
+For example, when you click on an SQL Select database query,
 the information displayed includes the actual SQL that was executed, how long it took,
 and the percentage of the trace's total time.
 You also get a stack trace, which shows the SQL query in your code.
 Finally, APM knows which files are your code and which are just modules or libraries that you've installed.
 These library frames will be minimized by default in order to show you the most relevant stack trace.
 
+TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is the duration of a single event.
+Spans are automatically captured by APM agents, and you can also define custom spans.
+Each span has a type and is defined by a different color in the timeline/waterfall visualization.
+
 [role="screenshot"]
 image::apm/images/apm-span-detail.png[Example view of a span detail in the APM app in Kibana]
 
-If your span timeline is colorful, it's indicative of a <<distributed-tracing,distributed trace>>.
+[float]
+[[distributed-tracing]]
+==== Distributed tracing
+
+If your trace sample timeline is colorful, it's indicative of a distributed trace.
 Services in a distributed trace are separated by color and listed in the order they occur.
 
 [role="screenshot"]
 image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM app in Kibana]
 
-Don't forget; a distributed trace includes more than one transaction.
+As application architectures are shifting from monolithic to more distributed, service-based architectures,
+distributed tracing has become a crucial feature of modern application performance monitoring.
+It allows you to trace requests through your service architecture automatically, and visualize those traces in one single view in the APM app.
+From initial web requests to your front-end service, to queries made to your back-end services,
+this makes finding possible bottlenecks throughout your application much easier and faster.
+
+[role="screenshot"]
+image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
+
+Don't forget; by definition, a distributed trace includes more than one transaction.
 When viewing these distributed traces in the timeline waterfall, you'll see this image:apm/images/transaction-icon.png[APM icon] icon,
 which indicates the next transaction in the trace.
 These transactions can be expanded and viewed in detail by clicking on them.
 
 After exploring these traces,
 you can return to the full trace by clicking *View full trace*.
+
+TIP: Distributed tracing is supported by all APM agents, and there's no additional configuration needed.

@@ -54,9 +54,7 @@ describe('plugin discovery/schema', () => {
     it('uses default schema when no config provider', async () => {
       const schema = await getSchema(createPluginSpec());
       expect(schema).to.be.an('object');
-      expect(schema)
-        .to.have.property('validate')
-        .a('function');
+      expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
         enabled: true,
       });
@@ -65,9 +63,7 @@ describe('plugin discovery/schema', () => {
     it('uses default schema when config returns falsy value', async () => {
       const schema = await getSchema(createPluginSpec(() => null));
       expect(schema).to.be.an('object');
-      expect(schema)
-        .to.have.property('validate')
-        .a('function');
+      expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
         enabled: true,
       });
@@ -76,9 +72,7 @@ describe('plugin discovery/schema', () => {
     it('uses default schema when config promise resolves to falsy value', async () => {
       const schema = await getSchema(createPluginSpec(() => Promise.resolve(null)));
       expect(schema).to.be.an('object');
-      expect(schema)
-        .to.have.property('validate')
-        .a('function');
+      expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
         enabled: true,
       });
@@ -89,9 +83,7 @@ describe('plugin discovery/schema', () => {
     it('returns schema with enabled: false', async () => {
       const schema = await getStubSchema();
       expect(schema).to.be.an('object');
-      expect(schema)
-        .to.have.property('validate')
-        .a('function');
+      expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
         enabled: false,
       });

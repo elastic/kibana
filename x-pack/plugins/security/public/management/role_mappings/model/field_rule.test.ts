@@ -7,7 +7,7 @@
 import { FieldRule } from '.';
 
 describe('FieldRule', () => {
-  ['*', 1, null, true, false].forEach(value => {
+  ['*', 1, null, true, false].forEach((value) => {
     it(`can convert itself to raw form with a single value of ${value}`, () => {
       const rule = new FieldRule('username', value);
       expect(rule.toRaw()).toEqual({

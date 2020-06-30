@@ -19,8 +19,8 @@ import { getTimeRangeFromSelection } from './job_select_service_utils';
 // check that the ids read from the url exist by comparing them to the
 // jobs loaded via mlJobsService.
 function getInvalidJobIds(jobs: MlJobWithTimeRange[], ids: string[]) {
-  return ids.filter(id => {
-    const jobExists = jobs.some(job => job.job_id === id);
+  return ids.filter((id) => {
+    const jobExists = jobs.some((job) => job.job_id === id);
     return jobExists === false && id !== '*';
   });
 }

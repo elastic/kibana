@@ -68,7 +68,7 @@ export function formatMsg(err: Record<string, any> | string, source: string = ''
   return message;
 }
 
-formatMsg.describeError = function(err: Record<string, any>) {
+formatMsg.describeError = function (err: Record<string, any>) {
   if (!err) return undefined;
   if (err.shortMessage) return err.shortMessage;
   if (err.body && err.body.message) return err.body.message;

@@ -20,7 +20,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig } from '../common';
+import { Bundle, WorkerConfig, CacheableWorkerConfig } from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
@@ -32,6 +32,16 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
+}
+
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj) as any) {
+    if (!keys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -106,7 +116,7 @@ export class OptimizerConfig {
       ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
-    if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
+    if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }
 
@@ -118,7 +128,7 @@ export class OptimizerConfig {
     }
 
     const pluginPaths = options.pluginPaths || [];
-    if (!pluginPaths.every(s => Path.isAbsolute(s))) {
+    if (!pluginPaths.every((s) => Path.isAbsolute(s))) {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
@@ -152,7 +162,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/entry_point',
+              publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
@@ -197,5 +207,15 @@ export class OptimizerConfig {
       optimizerCacheKey,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
+  }
+
+  getCacheableWorkerConfig(): CacheableWorkerConfig {
+    return omit(this.getWorkerConfig('♻'), [
+      // these config options don't change the output of the bundles, so
+      // should not invalidate caches when they change
+      'watch',
+      'profileWebpack',
+      'cache',
+    ]);
   }
 }

@@ -13,14 +13,19 @@ import {
   EuiButton,
   EuiSpacer,
   EuiFlexItem,
-  EuiTitle,
+  EuiBadge,
+  EuiText,
+  EuiButtonIcon,
+  EuiCodeBlock,
 } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { Agent, AgentEvent } from '../../../../types';
 import { usePagination, useGetOneAgentEvents } from '../../../../hooks';
 import { SearchBar } from '../../../../components/search_bar';
+import { TYPE_LABEL, SUBTYPE_LABEL } from './type_labels';
 
 function useSearch() {
   const [state, setState] = useState<{ search: string }>({
@@ -41,6 +46,9 @@ function useSearch() {
 export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { pageSizeOptions, pagination, setPagination } = usePagination();
   const { search, setSearch } = useSearch();
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
+    [key: string]: JSX.Element;
+  }>({});
 
   const { isLoading, data, sendRequest } = useGetOneAgentEvents(agent.id, {
     page: pagination.currentPage,
@@ -59,6 +67,49 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     pageSizeOptions,
   };
 
+  const toggleDetails = (agentEvent: AgentEvent) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[agentEvent.id]) {
+      delete itemIdToExpandedRowMapValues[agentEvent.id];
+    } else {
+      const details = (
+        <div style={{ width: '100%' }}>
+          <div>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentEventsList.messageDetailsTitle"
+                  defaultMessage="Message"
+                />
+              </strong>
+              <EuiSpacer size="xs" />
+              <p>{agentEvent.message}</p>
+            </EuiText>
+          </div>
+          {agentEvent.payload ? (
+            <div>
+              <EuiSpacer size="s" />
+              <EuiText size="s">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentEventsList.payloadDetailsTitle"
+                    defaultMessage="Payload"
+                  />
+                </strong>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiCodeBlock language="json" paddingSize="s" overflowHeight={200}>
+                {JSON.stringify(agentEvent.payload, null, 2)}
+              </EuiCodeBlock>
+            </div>
+          ) : null}
+        </div>
+      );
+      itemIdToExpandedRowMapValues[agentEvent.id] = details;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
   const columns = [
     {
       field: 'timestamp',
@@ -66,40 +117,63 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
         defaultMessage: 'Timestamp',
       }),
       render: (timestamp: string) => (
-        <FormattedTime value={new Date(timestamp)} month="numeric" day="numeric" year="numeric" />
+        <FormattedTime
+          value={new Date(timestamp)}
+          month="short"
+          day="numeric"
+          year="numeric"
+          hour="numeric"
+          minute="numeric"
+          second="numeric"
+        />
       ),
       sortable: true,
+      width: '18%',
     },
     {
       field: 'type',
       name: i18n.translate('xpack.ingestManager.agentEventsList.typeColumnTitle', {
         defaultMessage: 'Type',
       }),
-      width: '90px',
+      width: '10%',
+      render: (type: AgentEvent['type']) =>
+        TYPE_LABEL[type] || <EuiBadge color="hollow">{type}</EuiBadge>,
     },
     {
       field: 'subtype',
       name: i18n.translate('xpack.ingestManager.agentEventsList.subtypeColumnTitle', {
         defaultMessage: 'Subtype',
       }),
-      width: '90px',
+      width: '13%',
+      render: (subtype: AgentEvent['subtype']) =>
+        SUBTYPE_LABEL[subtype] || <EuiBadge color="hollow">{subtype}</EuiBadge>,
     },
     {
       field: 'message',
       name: i18n.translate('xpack.ingestManager.agentEventsList.messageColumnTitle', {
         defaultMessage: 'Message',
       }),
+      render: (message: string) => <EuiText size="xs">{message}</EuiText>,
+      truncateText: true,
     },
     {
-      field: 'payload',
-      name: i18n.translate('xpack.ingestManager.agentEventsList.paylodColumnTitle', {
-        defaultMessage: 'Payload',
-      }),
-      truncateText: true,
-      render: (payload: any) => (
-        <span>
-          <code>{payload && JSON.stringify(payload, null, 2)}</code>
-        </span>
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render: (agentEvent: AgentEvent) => (
+        <EuiButtonIcon
+          onClick={() => toggleDetails(agentEvent)}
+          aria-label={
+            itemIdToExpandedRowMap[agentEvent.id]
+              ? i18n.translate('xpack.ingestManager.agentEventsList.collapseDetailsAriaLabel', {
+                  defaultMessage: 'Hide details',
+                })
+              : i18n.translate('xpack.ingestManager.agentEventsList.expandDetailsAriaLabel', {
+                  defaultMessage: 'Show details',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[agentEvent.id] ? 'arrowUp' : 'arrowDown'}
+        />
       ),
     },
   ];
@@ -120,25 +194,20 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.ingestManager.agentEventsList.title"
-            defaultMessage="Activity Log"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <SearchBar
             value={search}
             onChange={setSearch}
             fieldPrefix={AGENT_EVENT_SAVED_OBJECT_TYPE}
+            placeholder={i18n.translate(
+              'xpack.ingestManager.agentEventsList.searchPlaceholderText',
+              { defaultMessage: 'Search for activity logs' }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={null}>
-          <EuiButton color="secondary" iconType="refresh" onClick={onClickRefresh}>
+          <EuiButton iconType="refresh" onClick={onClickRefresh}>
             <FormattedMessage
               id="xpack.ingestManager.agentEventsList.refreshButton"
               defaultMessage="Refresh"
@@ -150,9 +219,11 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
       <EuiBasicTable<AgentEvent>
         onChange={onChange}
         items={list}
+        itemId="id"
         columns={columns}
         pagination={paginationOptions}
         loading={isLoading}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       />
     </>
   );

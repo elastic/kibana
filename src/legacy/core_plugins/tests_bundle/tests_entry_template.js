@@ -19,7 +19,7 @@
 import { Type } from '@kbn/config-schema';
 import pkg from '../../../../package.json';
 
-export const createTestEntryTemplate = defaultUiSettings => bundle => `
+export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
 /**
  * Test entry file
  *

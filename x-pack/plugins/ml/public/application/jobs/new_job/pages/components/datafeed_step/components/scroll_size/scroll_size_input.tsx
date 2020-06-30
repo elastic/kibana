@@ -41,7 +41,7 @@ export const ScrollSizeInput: FC = () => {
         min={0}
         placeholder={scrollSizeDefault}
         value={scrollSizeString === '' ? scrollSizeString : +scrollSizeString}
-        onChange={e => setScrollSize(e.target.value)}
+        onChange={(e) => setScrollSize(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputScrollSize"
       />

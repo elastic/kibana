@@ -28,7 +28,7 @@ export function Chart(timelionPanels) {
       interval: '=', // Required for formatting x-axis ticks
       rerenderTrigger: '=',
     },
-    link: function($scope, $elem) {
+    link: function ($scope, $elem) {
       let panelScope = $scope.$new(true);
 
       function render() {

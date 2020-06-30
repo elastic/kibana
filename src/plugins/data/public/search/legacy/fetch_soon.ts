@@ -20,6 +20,7 @@
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../index';
+import { UI_SETTINGS } from '../../../common';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
@@ -30,7 +31,7 @@ export async function fetchSoon(
   options: FetchOptions,
   fetchHandlers: FetchHandlers
 ) {
-  const msToDelay = fetchHandlers.config.get('courier:batchSearches') ? 50 : 0;
+  const msToDelay = fetchHandlers.config.get(UI_SETTINGS.COURIER_BATCH_SEARCHES) ? 50 : 0;
   return delayedFetch(request, options, fetchHandlers, msToDelay);
 }
 
@@ -41,8 +42,8 @@ export async function fetchSoon(
  * @param ms The number of milliseconds to wait
  * @return Promise<any> A promise that resolves with the result of executing the function
  */
-function delay(fn: Function, ms: number) {
-  return new Promise(resolve => {
+function delay<T>(fn: (...args: any) => T, ms: number): Promise<T> {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(fn()), ms);
   });
 }
@@ -67,10 +68,14 @@ async function delayedFetch(
   fetchHandlers: FetchHandlers,
   ms: number
 ) {
+  if (ms === 0) {
+    return callClient([request], [options], fetchHandlers)[0];
+  }
+
   const i = requestsToFetch.length;
   requestsToFetch = [...requestsToFetch, request];
   requestOptions = [...requestOptions, options];
-  const responses = await (fetchInProgress =
+  const responses: SearchResponse[] = await (fetchInProgress =
     fetchInProgress ||
     delay(() => {
       const response = callClient(requestsToFetch, requestOptions, fetchHandlers);

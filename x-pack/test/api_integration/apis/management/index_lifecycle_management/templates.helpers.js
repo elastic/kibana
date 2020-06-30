@@ -10,14 +10,11 @@ export const registerHelpers = ({ supertest }) => {
   const loadTemplates = () => supertest.get(`${API_BASE_PATH}/templates`);
 
   const addPolicyToTemplate = (templateName, policyName, aliasName) =>
-    supertest
-      .post(`${API_BASE_PATH}/template`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        templateName,
-        policyName,
-        aliasName,
-      });
+    supertest.post(`${API_BASE_PATH}/template`).set('kbn-xsrf', 'xxx').send({
+      templateName,
+      policyName,
+      aliasName,
+    });
 
   return {
     loadTemplates,

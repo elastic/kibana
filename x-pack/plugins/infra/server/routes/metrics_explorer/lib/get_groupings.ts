@@ -5,10 +5,12 @@
  */
 
 import { isObject, set } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 import {
   MetricsExplorerRequestBody,
   MetricsExplorerResponse,
+  afterKeyObjectRT,
 } from '../../../../common/http_api/metrics_explorer';
 
 interface GroupingAggregation {
@@ -24,7 +26,13 @@ interface GroupingAggregation {
 }
 
 const EMPTY_RESPONSE = {
-  series: [{ id: 'ALL', columns: [], rows: [] }],
+  series: [
+    {
+      id: i18n.translate('xpack.infra.metricsExploer.everything', { defaultMessage: 'Everything' }),
+      columns: [],
+      rows: [],
+    },
+  ],
   pageInfo: { total: 0, afterKey: null },
 };
 
@@ -35,7 +43,25 @@ export const getGroupings = async (
   if (!options.groupBy) {
     return EMPTY_RESPONSE;
   }
+
+  if (Array.isArray(options.groupBy) && options.groupBy.length === 0) {
+    return EMPTY_RESPONSE;
+  }
+
   const limit = options.limit || 9;
+  const groupBy = Array.isArray(options.groupBy) ? options.groupBy : [options.groupBy];
+  const filter: Array<Record<string, any>> = [
+    {
+      range: {
+        [options.timerange.field]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+    ...groupBy.map((field) => ({ exists: { field } })),
+  ];
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -46,32 +72,26 @@ export const getGroupings = async (
         bool: {
           should: [
             ...options.metrics
-              .filter(m => m.field)
-              .map(m => ({
+              .filter((m) => m.field)
+              .map((m) => ({
                 exists: { field: m.field },
               })),
           ],
-          filter: [
-            {
-              range: {
-                [options.timerange.field]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-          ] as object[],
+          filter,
         },
       },
       aggs: {
         groupingsCount: {
-          cardinality: { field: options.groupBy },
+          cardinality: {
+            script: { source: groupBy.map((field) => `doc['${field}'].value`).join('+') },
+          },
         },
         groupings: {
           composite: {
             size: limit,
-            sources: [{ groupBy: { terms: { field: options.groupBy, order: 'asc' } } }],
+            sources: groupBy.map((field, index) => ({
+              [`groupBy${index}`]: { terms: { field, order: 'asc' } },
+            })),
           },
         },
       },
@@ -83,7 +103,11 @@ export const getGroupings = async (
   }
 
   if (options.afterKey) {
-    set(params, 'body.aggs.groupings.composite.after', { groupBy: options.afterKey });
+    if (afterKeyObjectRT.is(options.afterKey)) {
+      set(params, 'body.aggs.groupings.composite.after', options.afterKey);
+    } else {
+      set(params, 'body.aggs.groupings.composite.after', { groupBy0: options.afterKey });
+    }
   }
 
   if (options.filterQuery) {
@@ -112,12 +136,14 @@ export const getGroupings = async (
   const { groupings, groupingsCount } = response.aggregations;
   const { after_key: afterKey } = groupings;
   return {
-    series: groupings.buckets.map(bucket => {
-      return { id: bucket.key.groupBy, rows: [], columns: [] };
+    series: groupings.buckets.map((bucket) => {
+      const keys = Object.values(bucket.key);
+      const id = keys.join(' / ');
+      return { id, keys, rows: [], columns: [] };
     }),
     pageInfo: {
       total: groupingsCount.value,
-      afterKey: afterKey && groupings.buckets.length === limit ? afterKey.groupBy : null,
+      afterKey: afterKey && groupings.buckets.length === limit ? afterKey : null,
     },
   };
 };

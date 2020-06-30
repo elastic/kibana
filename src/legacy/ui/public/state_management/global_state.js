@@ -37,6 +37,6 @@ export function GlobalStateProvider(Private) {
   return new GlobalState();
 }
 
-module.service('globalState', function(Private) {
+module.service('globalState', function (Private) {
   return Private(GlobalStateProvider);
 });

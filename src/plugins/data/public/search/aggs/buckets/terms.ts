@@ -26,11 +26,11 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
-import { AggConfigSerialized, IAggConfigs } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
-import { IFieldFormat, FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
@@ -63,11 +63,11 @@ export interface TermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsTerms {
+export interface AggParamsTerms extends BaseAggParams {
   field: string;
-  order: 'asc' | 'desc';
   orderBy: string;
   orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
   size?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
@@ -76,7 +76,6 @@ export interface AggParamsTerms {
   // advanced
   exclude?: string;
   include?: string;
-  json?: string;
 }
 
 export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDependencies) =>
@@ -89,21 +88,17 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
         const params = agg.params;
         return agg.getFieldDisplayName() + ': ' + params.order.text;
       },
-      getFormat(bucket): IFieldFormat {
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
         return {
-          getConverterFor: (type: FieldFormatsContentType) => {
-            return (val: any) => {
-              if (val === '__other__') {
-                return bucket.params.otherBucketLabel;
-              }
-              if (val === '__missing__') {
-                return bucket.params.missingBucketLabel;
-              }
-
-              return bucket.params.field.format.convert(val, type);
-            };
+          id: 'terms',
+          params: {
+            id: format.id,
+            otherBucketLabel: agg.params.otherBucketLabel,
+            missingBucketLabel: agg.params.missingBucketLabel,
+            ...format.params,
           },
-        } as IFieldFormat;
+        };
       },
       createFilter: createFilterTerms,
       postFlightRequest: async (
@@ -256,7 +251,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
             defaultMessage: 'Label for other bucket',
           }),
-          shouldShow: agg => agg.getParam('otherBucket'),
+          shouldShow: (agg) => agg.getParam('otherBucket'),
           write: noop,
         },
         {
@@ -275,7 +270,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
             defaultMessage: 'Label for missing values',
           }),
-          shouldShow: agg => agg.getParam('missingBucket'),
+          shouldShow: (agg) => agg.getParam('missingBucket'),
           write: noop,
         },
         {

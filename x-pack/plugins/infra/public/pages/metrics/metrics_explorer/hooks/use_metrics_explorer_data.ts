@@ -6,8 +6,8 @@
 
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
-import { useEffect, useState } from 'react';
-import { HttpHandler } from 'target/types/core/public/http';
+import { useEffect, useState, useCallback } from 'react';
+import { HttpHandler } from 'src/core/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../../../common/graphql/types';
 import {
@@ -28,9 +28,10 @@ export function useMetricsExplorerData(
   source: SourceQuery.Query['source']['configuration'] | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
-  afterKey: string | null,
+  afterKey: string | null | Record<string, string | null>,
   signal: any,
-  fetch?: HttpHandler
+  fetch?: HttpHandler,
+  shouldLoadImmediately = true
 ) {
   const kibana = useKibana();
   const fetchFn = fetch ? fetch : kibana.services.http?.fetch;
@@ -40,7 +41,7 @@ export function useMetricsExplorerData(
   const [lastOptions, setLastOptions] = useState<MetricsExplorerOptions | null>(null);
   const [lastTimerange, setLastTimerange] = useState<MetricsExplorerTimeOptions | null>(null);
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     (async () => {
       setLoading(true);
       try {
@@ -60,10 +61,11 @@ export function useMetricsExplorerData(
             method: 'POST',
             body: JSON.stringify({
               forceInterval: options.forceInterval,
+              dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]
-                  : options.metrics.map(metric => ({
+                  : options.metrics.map((metric) => ({
                       aggregation: metric.aggregation,
                       field: metric.field,
                     })),
@@ -111,9 +113,15 @@ export function useMetricsExplorerData(
       }
       setLoading(false);
     })();
-
-    // TODO: fix this dependency list while preserving the semantics
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, source, timerange, signal, afterKey]);
-  return { error, loading, data };
+
+  useEffect(() => {
+    if (!shouldLoadImmediately) {
+      return;
+    }
+
+    loadData();
+  }, [loadData, shouldLoadImmediately]);
+  return { error, loading, data, loadData };
 }

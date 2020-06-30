@@ -64,7 +64,7 @@ class MarkdownPanelConfigUi extends Component {
     const lessSrc = `#markdown-${model.id} {
   ${value}
 }`;
-    lessC.render(lessSrc, { compress: true }, (e, output) => {
+    lessC.render(lessSrc, { compress: true, javascriptEnabled: false }, (e, output) => {
       const parts = { markdown_less: value };
       if (output) {
         parts.markdown_css = output.css;
@@ -105,14 +105,14 @@ class MarkdownPanelConfigUi extends Component {
         value: 'bottom',
       },
     ];
-    const selectedAlignOption = alignOptions.find(option => {
+    const selectedAlignOption = alignOptions.find((option) => {
       return model.markdown_vertical_align === option.value;
     });
     let view;
     if (selectedTab === 'markdown') {
       view = (
         <VisDataContext.Consumer>
-          {visData => <MarkdownEditor visData={visData} {...this.props} />}
+          {(visData) => <MarkdownEditor visData={visData} {...this.props} />}
         </VisDataContext.Consumer>
       );
     } else if (selectedTab === 'data') {
@@ -166,7 +166,7 @@ class MarkdownPanelConfigUi extends Component {
                         : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>

@@ -7,8 +7,6 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { InventoryItemType } from '../../common/inventory_models/types';
 
-const KIBANA_REPORTING_TYPE = 'infraops';
-
 interface InfraopsSum {
   infraopsHosts: number;
   infraopsDocker: number;
@@ -24,7 +22,7 @@ export class UsageCollector {
 
   public static getUsageCollector(usageCollection: UsageCollectionSetup) {
     return usageCollection.makeUsageCollector({
-      type: KIBANA_REPORTING_TYPE,
+      type: 'infraops',
       isReady: () => true,
       fetch: async () => {
         return this.getReport();
@@ -79,7 +77,7 @@ export class UsageCollector {
 
     // only keep the newest BUCKET_NUMBER buckets
     const cutoff = this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (parseInt(key, 10) < cutoff) {
         delete this.counters[key];
       }

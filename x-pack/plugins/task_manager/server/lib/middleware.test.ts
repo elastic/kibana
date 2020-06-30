@@ -151,7 +151,7 @@ describe('addMiddlewareToChain', () => {
 
     await middlewareChain
       .beforeRun(getMockRunContext(getMockConcreteTaskInstance()))
-      .then(contextOpts => {
+      .then((contextOpts) => {
         expect(contextOpts).toMatchInlineSnapshot(`
           Object {
             "kbnServer": Object {},

@@ -16,4 +16,13 @@ export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
     id: 'xpack.uptime.alerts.actionGroups.monitorStatus',
     name: 'Uptime Down Monitor',
   },
+  TLS: {
+    id: 'xpack.uptime.alerts.actionGroups.tls',
+    name: 'Uptime TLS Alert',
+  },
+};
+
+export const CLIENT_ALERT_TYPES = {
+  MONITOR_STATUS: 'xpack.uptime.alerts.monitorStatus',
+  TLS: 'xpack.uptime.alerts.tls',
 };

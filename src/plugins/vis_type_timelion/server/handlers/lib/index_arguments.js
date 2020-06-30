@@ -41,7 +41,7 @@ export default function indexArguments(functionDef, orderedArgs) {
 
   const indexedArgs = {};
   // Check and index each known argument
-  _.each(functionDef.args, function(argDef, i) {
+  _.each(functionDef.args, function (argDef, i) {
     const value = orderedArgs[i];
     validateArg(value, argDef.name, argDef);
     indexedArgs[argDef.name] = value;
@@ -51,7 +51,7 @@ export default function indexArguments(functionDef, orderedArgs) {
   if (functionDef.extended) {
     const values = orderedArgs[orderedArgs.length - 1];
     const names = orderedArgs[orderedArgs.length - 2];
-    _.each(values, function(value, i) {
+    _.each(values, function (value, i) {
       validateArg(value, names[i], functionDef.extended);
       indexedArgs[names[i]] = value;
     });

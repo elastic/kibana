@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -28,12 +28,6 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
-
-interface Driver {
-  driver: WebDriver;
-  By: typeof By;
-  until: typeof until;
-}
 
 interface TypeOptions {
   charByChar: boolean;
@@ -51,16 +45,15 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By = this.webDriver.By;
-  private driver: WebDriver = this.webDriver.driver;
+  private By = By;
   private Keys = Key;
-  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
+  public isW3CEnabled: boolean = (this.driver as any).executor_.w3c === true;
   public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
     locator: By | null,
-    webDriver: Driver,
+    driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
@@ -73,7 +66,7 @@ export class WebElementWrapper {
     return new WebElementWrapper(
       webElement,
       locator,
-      webDriver,
+      driver,
       timeout,
       fixedHeaderHeight,
       logger,
@@ -84,7 +77,7 @@ export class WebElementWrapper {
   constructor(
     public _webElement: WebElement,
     private locator: By | null,
-    private webDriver: Driver,
+    private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
@@ -109,7 +102,7 @@ export class WebElementWrapper {
     return WebElementWrapper.create(
       otherWebElement,
       locator,
-      this.webDriver,
+      this.driver,
       this.timeout,
       this.fixedHeaderHeight,
       this.logger,
@@ -118,7 +111,7 @@ export class WebElementWrapper {
   }
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
-    return otherWebElements.map(e => this._wrap(e));
+    return otherWebElements.map((e) => this._wrap(e));
   }
 
   private async retryCall<T>(
@@ -437,10 +430,7 @@ export class WebElementWrapper {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
         await wrapper
           .getActions()
           .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
@@ -467,10 +457,7 @@ export class WebElementWrapper {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
       if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
+        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
         await wrapper
           .getActions()
           .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
@@ -496,10 +483,7 @@ export class WebElementWrapper {
   public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper
-        .getActions()
-        .doubleClick(wrapper._webElement)
-        .perform();
+      await wrapper.getActions().doubleClick(wrapper._webElement).perform();
     });
   }
 

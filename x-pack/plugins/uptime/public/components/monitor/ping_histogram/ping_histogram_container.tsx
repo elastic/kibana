@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
-import { selectPingHistogram } from '../../../state/selectors';
+import { esKuerySelector, selectPingHistogram } from '../../../state/selectors';
 import { useGetUrlParams } from '../../../hooks';
 import { useMonitorId } from '../../../hooks';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../common/higher_order';
+import { UptimeRefreshContext } from '../../../contexts';
 
 interface Props {
   height: string;
@@ -19,7 +20,6 @@ interface Props {
 
 const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const {
-    statusFilter,
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
     dateRangeStart: dateStart,
@@ -29,11 +29,15 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const dispatch = useDispatch();
   const monitorId = useMonitorId();
 
-  const { loading, data, esKuery, lastRefresh } = useSelector(selectPingHistogram);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const esKuery = useSelector(esKuerySelector);
+
+  const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
   useEffect(() => {
-    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery }));
-  }, [dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery, dispatch]);
+    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, filters: esKuery }));
+  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch]);
   return (
     <PingHistogramComponent
       data={data}

@@ -82,7 +82,7 @@ export class MeterGauge {
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];
-    colorsRange.forEach(range => {
+    colorsRange.forEach((range) => {
       const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
       const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
       labels.push(`${from} - ${to}`);
@@ -106,7 +106,7 @@ export class MeterGauge {
   }
 
   getBucket(val) {
-    let bucket = _.findIndex(this.gaugeConfig.colorsRange, range => {
+    let bucket = _.findIndex(this.gaugeConfig.colorsRange, (range) => {
       return range.from <= val && range.to > val;
     });
 
@@ -137,7 +137,7 @@ export class MeterGauge {
 
     const scale = svg.append('g');
 
-    this.gaugeConfig.colorsRange.forEach(range => {
+    this.gaugeConfig.colorsRange.forEach((range) => {
       const color = this.getColorBucket(range.from);
 
       const scaleArc = d3.svg
@@ -147,11 +147,7 @@ export class MeterGauge {
         .innerRadius(radius)
         .outerRadius(radius + scaleWidth);
 
-      scale
-        .append('path')
-        .attr('d', scaleArc)
-        .style('stroke', color)
-        .style('fill', color);
+      scale.append('path').attr('d', scaleArc).style('stroke', color).style('fill', color);
     });
 
     const extents = angle.domain();
@@ -220,13 +216,13 @@ export class MeterGauge {
     const arc = d3.svg
       .arc()
       .startAngle(minAngle)
-      .endAngle(function(d) {
+      .endAngle(function (d) {
         return Math.max(0, Math.min(maxAngle, angle(Math.max(min, d.y))));
       })
-      .innerRadius(function(d, i, j) {
+      .innerRadius(function (d, i, j) {
         return Math.max(0, radius(j + 1) + gaugePadding);
       })
-      .outerRadius(function(d, i, j) {
+      .outerRadius(function (d, i, j) {
         return Math.max(0, radius(j) - gaugePadding);
       });
 
@@ -234,10 +230,10 @@ export class MeterGauge {
       .arc()
       .startAngle(minAngle)
       .endAngle(maxAngle)
-      .innerRadius(function(d, i, j) {
+      .innerRadius(function (d, i, j) {
         return Math.max(0, radius(j + 1) + bgPadding);
       })
-      .outerRadius(function(d, i, j) {
+      .outerRadius(function (d, i, j) {
         return Math.max(0, radius(j) - bgPadding);
       });
 
@@ -246,11 +242,11 @@ export class MeterGauge {
       .data([data])
       .enter()
       .append('g')
-      .attr('data-label', d => this.getLabel(d.values[0].y));
+      .attr('data-label', (d) => this.getLabel(d.values[0].y));
 
     const gauges = gaugeHolders
       .selectAll('g')
-      .data(d => d.values)
+      .data((d) => d.values)
       .enter();
 
     gauges
@@ -263,7 +259,7 @@ export class MeterGauge {
       .append('path')
       .attr('d', arc)
       .attr('class', this.gaugeConfig.outline ? 'visGauge__meter--outline' : undefined)
-      .style('fill', d => this.getColorBucket(Math.max(min, d.y)));
+      .style('fill', (d) => this.getColorBucket(Math.max(min, d.y)));
 
     const smallContainer = svg.node().getBBox().height < 70;
     let hiddenLabels = smallContainer;
@@ -276,7 +272,7 @@ export class MeterGauge {
       .append('text')
       .attr('class', 'chart-label')
       .attr('y', -5)
-      .text(d => {
+      .text((d) => {
         if (this.gaugeConfig.percentageMode) {
           const percentage = (d.y - min) / (max - min);
           return data.yAxisFormatter(percentage);
@@ -286,7 +282,7 @@ export class MeterGauge {
       .attr('style', 'dominant-baseline: central;')
       .style('text-anchor', 'middle')
       .style('font-size', '2em')
-      .style('display', function() {
+      .style('display', function () {
         const textLength = this.getBBox().width;
         // The text is too long if it's larger than the inner free space minus a couple of random pixels for padding.
         const textTooLong = textLength >= getInnerFreeSpace() - 6;
@@ -304,7 +300,7 @@ export class MeterGauge {
         .text(data.label)
         .attr('y', -30)
         .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-        .style('display', function() {
+        .style('display', function () {
           const textLength = this.getBBox().width;
           const textTooLong = textLength > maxRadius;
           if (textTooLong) {
@@ -319,7 +315,7 @@ export class MeterGauge {
         .text(this.gaugeConfig.style.subText)
         .attr('y', 20)
         .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-        .style('display', function() {
+        .style('display', function () {
           const textLength = this.getBBox().width;
           const textTooLong = textLength > maxRadius;
           if (textTooLong) {
@@ -334,7 +330,7 @@ export class MeterGauge {
     }
 
     if (isTooltip) {
-      series.each(function() {
+      series.each(function () {
         const gauge = d3.select(this);
         gauge.call(tooltip.render());
       });

@@ -9,7 +9,9 @@ Please use Chrome or Firefox if available.
 
 A service map is a real-time visual representation of the instrumented services in your application's architecture.
 It shows you how these services are connected, along with high-level metrics like average transaction duration,
-requests per minute, and errors per minute, that allow you to quickly assess the status of your services.
+requests per minute, and errors per minute.
+If enabled, service maps also integrate with machine learning--for real time health indicators based on anomaly detection scores.
+All of these features can help you to quickly and visually assess the status and health of your services.
 
 We currently surface two types of service maps:
 
@@ -53,6 +55,26 @@ Additional filters are not currently available for service maps.
 image::apm/images/service-maps-java.png[Example view of service maps with Java highlighted in the APM app in Kibana]
 
 [float]
+[[service-map-anomaly-detection]]
+=== Anomaly detection with machine learning
+
+Machine learning jobs can be created to calculate anomaly scores on APM transaction durations within the selected service.
+When these jobs are active, service maps will display a color-coded anomaly indicator based on the detected anomaly score:
+
+[horizontal]
+image:apm/images/green-service.png[APM green service]:: Max anomaly score **≤25**. Service is healthy.
+image:apm/images/yellow-service.png[APM yellow service]:: Max anomaly score **26-74**. Anomalous activity detected. Service may be degraded.
+image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**. Anomalous activity detected. Service is unhealthy.
+
+[role="screenshot"]
+image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
+
+If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewier in the Machine learning app.
+This time series analysis will display additional details on the severity and time of the detected anomalies.
+
+To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.
+
+[float]
 [[service-maps-legend]]
 === Legend
 
@@ -70,10 +92,10 @@ Type and subtype are based on `span.type`, and `span.subtype`.
 Service maps are supported for the following Agent versions:
 
 [horizontal]
-Go Agent:: >= v1.7.0
-Java Agent:: >= v1.13.0
-.NET Agent:: >= v1.3.0
-Node.js Agent:: >= v3.6.0
-Python Agent:: >= v5.5.0
-Ruby Agent:: >= v3.6.0
-Real User Monitoring (RUM) Agent:: >= v4.7.0
+Go Agent:: ≥ v1.7.0
+Java Agent:: ≥ v1.13.0
+.NET Agent:: ≥ v1.3.0
+Node.js Agent:: ≥ v3.6.0
+Python Agent:: ≥ v5.5.0
+Ruby Agent:: ≥ v3.6.0
+Real User Monitoring (RUM) Agent:: ≥ v4.7.0

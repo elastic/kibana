@@ -57,11 +57,6 @@ export type Action =
     }
   | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }
   | { type: ACTION.SET_IS_JOB_STARTED; isJobStarted: State['isJobStarted'] }
-  | {
-      type: ACTION.SET_IS_MODAL_BUTTON_DISABLED;
-      isModalButtonDisabled: State['isModalButtonDisabled'];
-    }
-  | { type: ACTION.SET_IS_MODAL_VISIBLE; isModalVisible: State['isModalVisible'] }
   | { type: ACTION.SET_JOB_CONFIG; payload: State['jobConfig'] }
   | { type: ACTION.SET_JOB_IDS; jobIds: State['jobIds'] }
   | { type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT; value: State['estimatedModelMemoryLimit'] }
@@ -71,11 +66,10 @@ export type Action =
 export interface ActionDispatchers {
   closeModal: () => void;
   createAnalyticsJob: () => void;
-  openModal: () => Promise<void>;
+  initiateWizard: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;
   setFormState: (payload: Partial<State['form']>) => void;
-  setIsModalVisible: (payload: State['isModalVisible']) => void;
   setJobConfig: (payload: State['jobConfig']) => void;
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;

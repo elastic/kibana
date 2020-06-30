@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './space_result_details.scss';
 import React from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,10 +25,10 @@ interface Props {
 
 export const SpaceCopyResultDetails = (props: Props) => {
   const onOverwriteClick = (object: { type: string; id: string }) => {
-    const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
+    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
 
     props.onRetriesChange([
-      ...props.retries.filter(r => r !== retry),
+      ...props.retries.filter((r) => r !== retry),
       {
         type: object.type,
         id: object.id,
@@ -37,7 +38,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
   };
 
   const hasPendingOverwrite = (object: { type: string; id: string }) => {
-    const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
+    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
 
     return Boolean(retry && retry.overwrite);
   };

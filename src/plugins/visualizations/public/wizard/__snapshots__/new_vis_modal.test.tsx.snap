@@ -3,6 +3,7 @@
 exports[`NewVisModal filter for visualization types should render as expected 1`] = `
 <NewVisModal
   addBasePath={[Function]}
+  application={Object {}}
   editorParams={Array []}
   intl={
     Object {
@@ -288,7 +289,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -319,7 +319,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -351,7 +350,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -602,7 +600,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -633,7 +630,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -665,7 +661,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -856,7 +851,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -887,7 +881,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -919,7 +912,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -1272,6 +1264,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >
@@ -1304,13 +1297,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1373,13 +1364,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1442,13 +1431,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -1560,6 +1547,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
 exports[`NewVisModal should render as expected 1`] = `
 <NewVisModal
   addBasePath={[Function]}
+  application={Object {}}
   editorParams={Array []}
   intl={
     Object {
@@ -1811,7 +1799,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -1860,7 +1847,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -1891,7 +1877,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                   class="euiKeyPadMenuItem__icon"
                                 >
                                   <div
-                                    aria-hidden="true"
                                     color="secondary"
                                     data-euiicon-type="empty"
                                   />
@@ -2108,7 +2093,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -2157,7 +2141,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -2188,7 +2171,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                           class="euiKeyPadMenuItem__icon"
                                         >
                                           <div
-                                            aria-hidden="true"
                                             color="secondary"
                                             data-euiicon-type="empty"
                                           />
@@ -2345,7 +2327,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -2394,7 +2375,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -2425,7 +2405,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiKeyPadMenuItem__icon"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               color="secondary"
                                               data-euiicon-type="empty"
                                             />
@@ -2712,13 +2691,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -2796,6 +2773,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                     >
                                                       <span
                                                         className="euiToolTipAnchor"
+                                                        onKeyUp={[Function]}
                                                         onMouseOut={[Function]}
                                                         onMouseOver={[Function]}
                                                       >
@@ -2828,13 +2806,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"
@@ -2897,13 +2873,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 >
                                                   <VisTypeIcon>
                                                     <EuiIcon
-                                                      aria-hidden="true"
                                                       color="secondary"
                                                       size="l"
                                                       type="empty"
                                                     >
                                                       <div
-                                                        aria-hidden="true"
                                                         color="secondary"
                                                         data-euiicon-type="empty"
                                                         size="l"

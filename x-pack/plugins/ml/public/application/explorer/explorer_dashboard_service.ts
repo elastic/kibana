@@ -18,13 +18,16 @@ import { DeepPartial } from '../../../common/types/common';
 
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
-import { EXPLORER_ACTION } from './explorer_constants';
+import { DRAG_SELECT_ACTION, EXPLORER_ACTION } from './explorer_constants';
 import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
-export const dragSelect$ = new Subject();
+export const dragSelect$ = new Subject<{
+  action: typeof DRAG_SELECT_ACTION[keyof typeof DRAG_SELECT_ACTION];
+  elements?: any[];
+}>();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();

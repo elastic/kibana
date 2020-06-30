@@ -18,21 +18,12 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { IndexPatternMissingIndices } from '../lib';
+import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
+import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
-export interface GetFieldsOptions {
-  pattern?: string;
-  type?: string;
-  params?: any;
-  lookBack?: boolean;
-  metaFields?: string;
-}
-
-export type IIndexPatternsApiClient = PublicMethodsOf<IndexPatternsApiClient>;
-
-export class IndexPatternsApiClient {
+export class IndexPatternsApiClient implements IIndexPatternsApiClient {
   private http: HttpSetup;
 
   constructor(http: HttpSetup) {
@@ -53,14 +44,8 @@ export class IndexPatternsApiClient {
       });
   }
 
-  _getUrl(path: string[]) {
-    return (
-      API_BASE_URL +
-      path
-        .filter(Boolean)
-        .map(encodeURIComponent)
-        .join('/')
-    );
+  private _getUrl(path: string[]) {
+    return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
   getFieldsForTimePattern(options: GetFieldsOptions = {}) {

@@ -13,7 +13,10 @@
     "home",
     "licensing",
     "usageCollection",
-    "share"
+    "share",
+    "embeddable",
+    "uiActions",
+    "kibanaLegacy"
   ],
   "optionalPlugins": [
     "security",

@@ -80,7 +80,7 @@ describe('metric_suggestions', () => {
           layerId: 'l1',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table =>
+      ] as TableSuggestion[]).map((table) =>
         expect(getSuggestions({ table, keptLayerIds: ['l1'] })).toEqual([])
       )
     );
@@ -101,7 +101,7 @@ describe('metric_suggestions', () => {
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
         "previewIcon": "test-file-stub",
-        "score": 0.5,
+        "score": 0.1,
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",

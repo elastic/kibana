@@ -64,6 +64,6 @@ test(`#has when empty returns false`, () => {
 test(`#has returns result of predicate`, () => {
   const priorityCollection = new PriorityCollection();
   priorityCollection.add(1, 'foo');
-  expect(priorityCollection.has(val => val === 'foo')).toEqual(true);
-  expect(priorityCollection.has(val => val === 'bar')).toEqual(false);
+  expect(priorityCollection.has((val) => val === 'foo')).toEqual(true);
+  expect(priorityCollection.has((val) => val === 'bar')).toEqual(false);
 });

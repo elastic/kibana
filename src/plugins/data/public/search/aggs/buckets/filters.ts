@@ -26,9 +26,10 @@ import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
-import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
+import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
 import { getQueryLog } from '../../../query';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -47,6 +48,13 @@ export interface FiltersBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
+export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
+  filters?: Array<{
+    input: Query;
+    label: string;
+  }>;
+}
+
 export const getFiltersBucketAgg = ({
   uiSettings,
   getInternalStartServices,
@@ -61,13 +69,16 @@ export const getFiltersBucketAgg = ({
         {
           name: 'filters',
           default: [
-            { input: { query: '', language: uiSettings.get('search:queryLanguage') }, label: '' },
+            {
+              input: { query: '', language: uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
+              label: '',
+            },
           ],
           write(aggConfig, output) {
             const inFilters: FilterValue[] = aggConfig.params.filters;
             if (!size(inFilters)) return;
 
-            inFilters.forEach(filter => {
+            inFilters.forEach((filter) => {
               const persistedLog = getQueryLog(
                 uiSettings,
                 new Storage(window.localStorage),
@@ -79,7 +90,7 @@ export const getFiltersBucketAgg = ({
 
             const outFilters = transform(
               inFilters,
-              function(filters, filter) {
+              function (filters, filter) {
                 const input = cloneDeep(filter.input);
 
                 if (!input) {

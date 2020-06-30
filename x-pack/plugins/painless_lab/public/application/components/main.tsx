@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NavType } from 'src/core/public';
 import { formatRequestPayload, formatJson } from '../lib/format';
 import { exampleScript } from '../constants';
 import { PayloadFormat } from '../types';
@@ -23,7 +24,7 @@ export const Main: React.FunctionComponent = () => {
     updatePayload,
     services: {
       http,
-      chrome: { getIsNavDrawerLocked$ },
+      chrome: { getIsNavDrawerLocked$, getNavType$ },
     },
     links,
   } = useAppContext();
@@ -43,10 +44,19 @@ export const Main: React.FunctionComponent = () => {
   };
 
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+  const [isNavLegacy, setIsNavLegacy] = useState(false);
 
   useEffect(() => {
     const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
       setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
+
+  useEffect(() => {
+    const subscription = getNavType$().subscribe((navType: NavType) => {
+      setIsNavLegacy(navType === 'legacy');
     });
 
     return () => subscription.unsubscribe();
@@ -64,7 +74,7 @@ export const Main: React.FunctionComponent = () => {
             </h1>
           </EuiTitle>
 
-          <Editor code={payload.code} onChange={nextCode => updatePayload({ code: nextCode })} />
+          <Editor code={payload.code} onChange={(nextCode) => updatePayload({ code: nextCode })} />
         </EuiFlexItem>
 
         <EuiFlexItem>
@@ -78,6 +88,7 @@ export const Main: React.FunctionComponent = () => {
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
         isNavDrawerLocked={isNavDrawerLocked}
+        isNavLegacy={isNavLegacy}
         reset={() => updatePayload({ code: exampleScript })}
       />
 

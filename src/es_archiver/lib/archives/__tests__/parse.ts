@@ -36,7 +36,7 @@ describe('esArchiver createParseArchiveStreams', () => {
       const streams = createParseArchiveStreams({ gzip: false });
       expect(streams).to.be.an('array');
       expect(streams.length).to.be.greaterThan(0);
-      streams.forEach(s => expect(s).to.be.a(Stream));
+      streams.forEach((s) => expect(s).to.be.a(Stream));
     });
 
     describe('streams', () => {
@@ -73,7 +73,7 @@ describe('esArchiver createParseArchiveStreams', () => {
 
       it('provides each JSON object as soon as it is parsed', async () => {
         let onReceived: (resolved: any) => void;
-        const receivedPromise = new Promise(resolve => (onReceived = resolve));
+        const receivedPromise = new Promise((resolve) => (onReceived = resolve));
         const input = new PassThrough();
         const check = new Transform({
           writableObjectMode: true,
@@ -124,7 +124,7 @@ describe('esArchiver createParseArchiveStreams', () => {
       const streams = createParseArchiveStreams({ gzip: true });
       expect(streams).to.be.an('array');
       expect(streams.length).to.be.greaterThan(0);
-      streams.forEach(s => expect(s).to.be.a(Stream));
+      streams.forEach((s) => expect(s).to.be.a(Stream));
     });
 
     describe('streams', () => {

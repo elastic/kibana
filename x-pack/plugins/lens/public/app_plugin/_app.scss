@@ -1,3 +1,9 @@
+.lnsAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
 .lnsApp {
   position: absolute;
   top: 0;

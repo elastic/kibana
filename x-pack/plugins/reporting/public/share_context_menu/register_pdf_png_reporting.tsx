@@ -31,7 +31,7 @@ export const reportingPDFPNGProvider = ({
   let disabled = true;
   let hasPDFPNGReporting = false;
 
-  license$.subscribe(license => {
+  license$.subscribe((license) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
 
     toolTipContent = message;

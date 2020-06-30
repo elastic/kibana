@@ -26,10 +26,9 @@ import {
   IAggConfig,
   AggParam,
   OptionedValueProp,
-  OptionedParamEditorProps,
   OptionedParamType,
 } from 'src/plugins/data/public';
-import { AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: IAggConfig): boolean;
@@ -92,7 +91,7 @@ export function TopAggregateParamEditor({
     }
 
     if (value) {
-      if (aggParam.options.find(opt => opt.value === value.value)) {
+      if (aggParam.options.find((opt) => opt.value === value.value)) {
         return;
       }
 
@@ -100,7 +99,7 @@ export function TopAggregateParamEditor({
     }
 
     if (filteredOptions.length === 1) {
-      setValue(aggParam.options.find(opt => opt.value === filteredOptions[0].value));
+      setValue(aggParam.options.find((opt) => opt.value === filteredOptions[0].value));
     }
   }, [aggParam.options, fieldType, filteredOptions, setValue, value]);
 
@@ -108,7 +107,7 @@ export function TopAggregateParamEditor({
     if (event.target.value === emptyValue.value) {
       setValue();
     } else {
-      setValue(aggParam.options.find(opt => opt.value === event.target.value));
+      setValue(aggParam.options.find((opt) => opt.value === event.target.value));
     }
   };
 

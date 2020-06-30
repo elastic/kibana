@@ -26,7 +26,7 @@ export const container: InventoryModel = {
   fields: {
     id: 'container.id',
     name: 'container.name',
-    ip: 'continaer.ip_address',
+    ip: 'container.ip_address',
   },
   metrics,
   requiredMetrics: [

@@ -6,24 +6,26 @@
 
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
-import { useConfig } from '../../hooks';
+import { PAGE_ROUTING_PATHS } from '../../constants';
+import { useConfig, useBreadcrumbs } from '../../hooks';
 import { CreateDatasourcePage } from '../agent_config/create_datasource_page';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 
 export const EPMApp: React.FunctionComponent = () => {
+  useBreadcrumbs('integrations');
   const { epm } = useConfig();
 
   return epm.enabled ? (
     <Router>
       <Switch>
-        <Route path="/epm/:pkgkey/add-datasource">
+        <Route path={PAGE_ROUTING_PATHS.add_datasource_from_integration}>
           <CreateDatasourcePage />
         </Route>
-        <Route path="/epm/detail/:pkgkey/:panel?">
+        <Route path={PAGE_ROUTING_PATHS.integration_details}>
           <Detail />
         </Route>
-        <Route path="/epm/:tabId?" exact={true}>
+        <Route path={PAGE_ROUTING_PATHS.integrations}>
           <EPMHomePage />
         </Route>
       </Switch>

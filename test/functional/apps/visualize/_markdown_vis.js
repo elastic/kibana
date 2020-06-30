@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'header']);
   const find = getService('find');
   const inspector = getService('inspector');
@@ -30,7 +30,7 @@ export default function({ getPageObjects, getService }) {
   `;
 
   describe('markdown app in visualize app', () => {
-    before(async function() {
+    before(async function () {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
@@ -38,22 +38,22 @@ export default function({ getPageObjects, getService }) {
     });
 
     describe('markdown vis', () => {
-      it('should not have inspector enabled', async function() {
+      it('should not have inspector enabled', async function () {
         await inspector.expectIsNotEnabled();
       });
 
-      it('should render markdown as html', async function() {
+      it('should render markdown as html', async function () {
         const h1Txt = await PageObjects.visChart.getMarkdownBodyDescendentText('h1');
         expect(h1Txt).to.equal('Heading 1');
       });
 
-      it('should not render html in markdown as html', async function() {
+      it('should not render html in markdown as html', async function () {
         const expected = 'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>';
         const actual = await PageObjects.visChart.getMarkdownText();
         expect(actual).to.equal(expected);
       });
 
-      it('should auto apply changes if auto mode is turned on', async function() {
+      it('should auto apply changes if auto mode is turned on', async function () {
         const markdown2 = '## Heading 2';
         await PageObjects.visEditor.toggleAutoMode();
         await PageObjects.visEditor.setMarkdownTxt(markdown2);
@@ -62,7 +62,7 @@ export default function({ getPageObjects, getService }) {
         expect(h1Txt).to.equal('Heading 2');
       });
 
-      it('should resize the editor', async function() {
+      it('should resize the editor', async function () {
         const editorSidebar = await find.byCssSelector('.visEditor__collapsibleSidebar');
         const initialSize = await editorSidebar.getSize();
         await PageObjects.visEditor.sizeUpEditor();

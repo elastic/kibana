@@ -17,6 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import aggTableTemplate from './agg_table.html';
 import { getFormatService } from '../services';
 import { i18n } from '@kbn/i18n';
@@ -37,28 +38,33 @@ export function KbnAggTable(config, RecursionHelper) {
       filter: '=',
     },
     controllerAs: 'aggTable',
-    compile: function($el) {
+    compile: function ($el) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
       return RecursionHelper.compile($el);
     },
-    controller: function($scope) {
+    controller: function ($scope) {
       const self = this;
 
       self._saveAs = require('@elastic/filesaver').saveAs;
       self.csv = {
-        separator: config.get('csv:separator'),
-        quoteValues: config.get('csv:quoteValues'),
+        separator: config.get(CSV_SEPARATOR_SETTING),
+        quoteValues: config.get(CSV_QUOTE_VALUES_SETTING),
       };
 
-      self.exportAsCsv = function(formatted) {
+      self.exportAsCsv = function (formatted) {
         const csv = new Blob([self.toCsv(formatted)], { type: 'text/plain;charset=utf-8' });
         self._saveAs(csv, self.csv.filename);
       };
 
-      self.toCsv = function(formatted) {
-        const rows = $scope.table.rows;
-        const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
+      self.toCsv = function (formatted) {
+        const rows = formatted ? $scope.rows : $scope.table.rows;
+        const columns = formatted ? [...$scope.formattedColumns] : [...$scope.table.columns];
+
+        if ($scope.splitRow && formatted) {
+          columns.unshift($scope.splitRow);
+        }
+
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
 
@@ -71,26 +77,27 @@ export function KbnAggTable(config, RecursionHelper) {
           return val;
         }
 
-        // escape each cell in each row
-        const csvRows = rows.map(function(row) {
-          return Object.entries(row).map(([k, v]) => {
-            const column = columns.find(c => c.id === k);
-            if (formatted && column) {
-              return escape(column.formatter.convert(v));
-            }
-            return escape(v);
-          });
-        });
+        let csvRows = [];
+        for (const row of rows) {
+          const rowArray = [];
+          for (const col of columns) {
+            const value = row[col.id];
+            const formattedValue =
+              formatted && col.formatter ? escape(col.formatter.convert(value)) : escape(value);
+            rowArray.push(formattedValue);
+          }
+          csvRows = [...csvRows, rowArray];
+        }
 
         // add the columns to the rows
         csvRows.unshift(
-          columns.map(function(col) {
+          columns.map(function (col) {
             return escape(formatted ? col.title : col.name);
           })
         );
 
         return csvRows
-          .map(function(row) {
+          .map(function (row) {
             return row.join(self.csv.separator) + '\r\n';
           })
           .join('');
@@ -98,13 +105,14 @@ export function KbnAggTable(config, RecursionHelper) {
 
       $scope.$watchMulti(
         ['table', 'exportTitle', 'percentageCol', 'totalFunc', '=scope.dimensions'],
-        function() {
+        function () {
           const { table, exportTitle, percentageCol } = $scope;
           const showPercentage = percentageCol !== '';
 
           if (!table) {
             $scope.rows = null;
             $scope.formattedColumns = null;
+            $scope.splitRow = null;
             return;
           }
 
@@ -114,20 +122,23 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics, splitColumn } = $scope.dimensions;
+          const { buckets, metrics, splitColumn, splitRow } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
-            .map(function(col, i) {
-              const isBucket = buckets.find(bucket => bucket.accessor === i);
+            .map(function (col, i) {
+              const isBucket = buckets.find((bucket) => bucket.accessor === i);
               const isSplitColumn = splitColumn
-                ? splitColumn.find(splitColumn => splitColumn.accessor === i)
+                ? splitColumn.find((splitColumn) => splitColumn.accessor === i)
+                : undefined;
+              const isSplitRow = splitRow
+                ? splitRow.find((splitRow) => splitRow.accessor === i)
                 : undefined;
               const dimension =
-                isBucket || isSplitColumn || metrics.find(metric => metric.accessor === i);
+                isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
 
-              if (!dimension) return;
-
-              const formatter = getFormatService().deserialize(dimension.format);
+              const formatter = dimension
+                ? getFormatService().deserialize(dimension.format)
+                : undefined;
 
               const formattedColumn = {
                 id: col.id,
@@ -135,6 +146,12 @@ export function KbnAggTable(config, RecursionHelper) {
                 formatter: formatter,
                 filterable: !!isBucket,
               };
+
+              if (isSplitRow) {
+                $scope.splitRow = formattedColumn;
+              }
+
+              if (!dimension) return;
 
               const last = i === table.columns.length - 1;
 
@@ -152,10 +169,10 @@ export function KbnAggTable(config, RecursionHelper) {
               }
 
               if (allowsNumericalAggregations || isDate || totalFunc === 'count') {
-                const sum = tableRows => {
+                const sum = (tableRows) => {
                   return _.reduce(
                     tableRows,
-                    function(prev, curr) {
+                    function (prev, curr) {
                       // some metrics return undefined for some of the values
                       // derivative is an example of this as it returns undefined in the first row
                       if (curr[col.id] === undefined) return prev;
@@ -184,19 +201,13 @@ export function KbnAggTable(config, RecursionHelper) {
                     break;
                   }
                   case 'min': {
-                    const total = _.chain(table.rows)
-                      .map(col.id)
-                      .min()
-                      .value();
+                    const total = _.chain(table.rows).map(col.id).min().value();
                     formattedColumn.formattedTotal = formatter.convert(total);
                     formattedColumn.total = total;
                     break;
                   }
                   case 'max': {
-                    const total = _.chain(table.rows)
-                      .map(col.id)
-                      .max()
-                      .value();
+                    const total = _.chain(table.rows).map(col.id).max().value();
                     formattedColumn.formattedTotal = formatter.convert(total);
                     formattedColumn.total = total;
                     break;
@@ -214,7 +225,7 @@ export function KbnAggTable(config, RecursionHelper) {
 
               return formattedColumn;
             })
-            .filter(column => column);
+            .filter((column) => column);
 
           if (showPercentage) {
             const insertAtIndex = _.findIndex($scope.formattedColumns, { title: percentageCol });
@@ -257,8 +268,8 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     id: newId,
     formatter,
   });
-  const newRows = rows.map(row => ({
-    [newId]: formatter.convert(row[id] / sumTotal / 100),
+  const newRows = rows.map((row) => ({
+    [newId]: row[id] / sumTotal,
     ...row,
   }));
 

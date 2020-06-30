@@ -13,14 +13,14 @@ import { LoadingState } from './types';
 import { OverviewTab } from './tabs/overview';
 
 // Used to wait for promises to resolve and renders to finish before reading updates
-const promisesToResolve = () => new Promise(resolve => setTimeout(resolve, 0));
+const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 const mockHttp = httpServiceMock.createSetupContract();
 
 describe('UpgradeAssistantTabs', () => {
   test('renders loading state', async () => {
     mockHttp.get.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         /* never resolve */
       })
     );

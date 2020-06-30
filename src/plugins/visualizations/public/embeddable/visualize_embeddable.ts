@@ -36,7 +36,11 @@ import {
   IContainer,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
-import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/expressions/public';
+import {
+  IExpressionLoaderParams,
+  ExpressionsStart,
+  ExpressionRenderError,
+} from '../../../../plugins/expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
@@ -48,6 +52,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: IIndexPattern[];
+  editPath: string;
   editUrl: string;
   editable: boolean;
   deps: VisualizeEmbeddableFactoryDeps;
@@ -60,15 +65,20 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
+  table?: unknown;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
+  editPath: string;
+  editApp: string;
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
+
+const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -77,7 +87,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private title?: string;
   private filters?: Filter[];
-  private visCustomizations: VisualizeInput['vis'];
+  private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
   private vis: Vis;
@@ -89,7 +99,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: IContainer
   ) {
@@ -97,6 +107,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       initialInput,
       {
         defaultTitle: vis.title,
+        editPath,
+        editApp: 'visualize',
         editUrl,
         indexPatterns,
         editable,
@@ -108,6 +120,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.timefilter = timefilter;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
+    this.vis.uiState.on('reload', this.reload);
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -124,7 +137,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler) {
+    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
       return undefined;
     }
     return this.handler.inspect();
@@ -136,7 +149,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const adapters = this.handler.inspect();
     if (!adapters) return;
 
-    this.deps.start().plugins.inspector.open(adapters, {
+    return this.deps.start().plugins.inspector.open(adapters, {
       title: this.getTitle() || '',
     });
   };
@@ -149,17 +162,22 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     // Check for changes that need to be forwarded to the uiState
     // Since the vis has an own listener on the uiState we don't need to
     // pass anything from here to the handler.update method
-    const visCustomizations = this.input.vis;
-    if (visCustomizations) {
+    const visCustomizations = { vis: this.input.vis, table: this.input.table };
+    if (visCustomizations.vis || visCustomizations.table) {
       if (!_.isEqual(visCustomizations, this.visCustomizations)) {
         this.visCustomizations = visCustomizations;
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
-        this.vis.uiState.set('vis', visCustomizations);
-        getKeys(visCustomizations).forEach(key => {
-          this.vis.uiState.set(key, visCustomizations[key]);
-        });
+        if (visCustomizations.vis) {
+          this.vis.uiState.set('vis', visCustomizations.vis);
+          getKeys(visCustomizations).forEach((key) => {
+            this.vis.uiState.set(key, visCustomizations[key]);
+          });
+        }
+        if (visCustomizations.table) {
+          this.vis.uiState.set('table', visCustomizations.table);
+        }
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
@@ -208,18 +226,30 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
-  hasInspector = () => {
-    const visTypesWithoutInspector = [
-      'markdown',
-      'input_control_vis',
-      'metrics',
-      'vega',
-      'timelion',
-    ];
-    if (visTypesWithoutInspector.includes(this.vis.type.name)) {
-      return false;
+  hasInspector = () => Boolean(this.getInspectorAdapters());
+
+  onContainerLoading = () => {
+    this.domNode.setAttribute('data-render-complete', 'false');
+    this.updateOutput({ loading: true, error: undefined });
+  };
+
+  onContainerRender = (count: number) => {
+    this.domNode.setAttribute('data-render-complete', 'true');
+    this.domNode.setAttribute('data-rendering-count', count.toString());
+    this.updateOutput({ loading: false, error: undefined });
+    dispatchRenderComplete(this.domNode);
+  };
+
+  onContainerError = (error: ExpressionRenderError) => {
+    if (this.abortController) {
+      this.abortController.abort();
     }
-    return this.getInspectorAdapters();
+    this.domNode.setAttribute(
+      'data-rendering-count',
+      this.domNode.getAttribute('data-rendering-count') + 1
+    );
+    this.domNode.setAttribute('data-render-complete', 'false');
+    this.updateOutput({ loading: false, error });
   };
 
   /**
@@ -227,6 +257,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
+    super.render(domNode);
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
@@ -234,13 +265,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const div = document.createElement('div');
     div.className = `visualize panel-content panel-content--fullWidth`;
     domNode.appendChild(div);
+
     this.domNode = div;
 
     const expressions = getExpressions();
-    this.handler = new expressions.ExpressionLoader(this.domNode);
+    this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
+      onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
+        this.onContainerError(error);
+      },
+    });
 
     this.subscriptions.push(
-      this.handler.events$.subscribe(async event => {
+      this.handler.events$.subscribe(async (event) => {
         // maps hack, remove once esaggs function is cleaned up and ready to accept variables
         if (event.name === 'bounds') {
           const agg = this.vis.data.aggs!.aggs.find((a: any) => {
@@ -262,12 +298,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context = {
             embeddable: this,
-            timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
-            data: event.data,
+            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
           };
-          getUiActions()
-            .getTrigger(triggerId)
-            .exec(context);
+
+          getUiActions().getTrigger(triggerId).exec(context);
         }
       })
     );
@@ -283,29 +317,18 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     div.setAttribute('data-rendering-count', '0');
     div.setAttribute('data-render-complete', 'false');
 
-    this.subscriptions.push(
-      this.handler.loading$.subscribe(() => {
-        div.setAttribute('data-render-complete', 'false');
-        div.setAttribute('data-loading', '');
-      })
-    );
+    this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
 
-    this.subscriptions.push(
-      this.handler.render$.subscribe(count => {
-        div.removeAttribute('data-loading');
-        div.setAttribute('data-render-complete', 'true');
-        div.setAttribute('data-rendering-count', count.toString());
-        dispatchRenderComplete(div);
-      })
-    );
+    this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.updateHandler();
   }
 
   public destroy() {
     super.destroy();
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
+    this.vis.uiState.off('reload', this.reload);
 
     if (this.handler) {
       this.handler.destroy();
@@ -331,13 +354,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.abortController.abort();
     }
     this.abortController = new AbortController();
+    const abortController = this.abortController;
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
     });
 
-    if (this.handler) {
+    if (this.handler && !abortController.signal.aborted) {
       this.handler.update(this.expression, expressionParams);
     }
   }

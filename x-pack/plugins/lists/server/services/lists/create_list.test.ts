@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LIST_ID,
-  LIST_INDEX,
-  getCreateListOptionsMock,
-  getIndexESListMock,
-  getListResponseMock,
-} from '../mocks';
+import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
+import { getIndexESListMock } from '../../../common/schemas/elastic_query/index_es_list_schema.mock';
+import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
 
 import { createList } from './create_list';
+import { getCreateListOptionsMock } from './create_list.mock';
 
 describe('crete_list', () => {
   beforeEach(() => {

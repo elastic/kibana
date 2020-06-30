@@ -8,7 +8,7 @@ import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot count', () => {
@@ -79,23 +79,6 @@ export default function({ getService }: FtrProviderContext) {
               );
 
               expectFixtureEql(apiResponse.body, 'snapshot');
-            });
-
-            it('will fetch a monitor snapshot filtered by down status', async () => {
-              const statusFilter = 'down';
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
-              );
-
-              expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_down');
-            });
-
-            it('will fetch a monitor snapshot filtered by up status', async () => {
-              const statusFilter = 'up';
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
-              );
-              expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_up');
             });
           });
         });

@@ -41,7 +41,7 @@ export default function preProcessChainFn(tlConfig) {
 
     if (!Array.isArray(chain)) return;
 
-    _.each(chain, function(operator) {
+    _.each(chain, function (operator) {
       if (!_.isObject(operator)) {
         return;
       }

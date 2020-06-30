@@ -1,44 +1,111 @@
 [[connect-to-elasticsearch]]
-== Connect Kibana with Elasticsearch
+== Add data to {kib}
 
-Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore.
-The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of
-one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can
-add index patterns at any time from the <<settings-create-pattern,Management tab>>.
+To start working with your data in {kib}, you can:
 
-TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a
-different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and
-restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
+* Upload a CSV, JSON, or log file with the File Data Visualizer.
 
-To configure the Elasticsearch indices you want to access with Kibana:
+* Upload geospatial data with the GeoJSON Upload feature.
 
-. Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or
-`http://YOURDOMAIN.com:5601`.
-+
-image:images/Start-Page.png[Kibana start page]
-+
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. The pattern
-can include an asterisk (*) to matches zero or more characters in an index's name. When filling out your
-index pattern, any matched indices will be displayed.
-. Click *Next Step* to select the index field that contains the timestamp you want to use to perform time-based
-comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the Time Filter* option.
-+
-. Click *Create index pattern* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default by clicking
-on the star icon above the index pattern title from *Management > Index Patterns*.
+* Index logs, metrics, events, or application data by setting up a Beats module.
 
-All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
-configured for the matching index.
+* Connect {kib} with existing {es} indices.
+
+If you're not ready to use your own data, you can add a <<get-data-in, sample data set>>
+to see all that you can do in {kib}.
 
 [float]
-[[explore]]
-=== Start Exploring your Data!
-You're ready to dive in to your data:
+[[upload-data-kibana]]
+=== Upload a CSV, JSON, or log file
 
-* Search and browse your data interactively from the <<discover, Discover>> page.
-* Chart and map your data from the <<visualize, Visualize>> page.
-* Create and view custom dashboards from the <<dashboard, Dashboard>> page.
+experimental[]
 
-For a step-by-step introduction to these core Kibana concepts, see the <<getting-started,
-Getting Started>> tutorial.
+To visualize data in a CSV, JSON, or log file, you can upload it using the File 
+Data Visualizer. On the home page, click *Import a CSV, NDSON, or log file*, and 
+then drag your file into the File Data Visualizer. Alternatively, you can open 
+it by navigating to *Machine Learning* from the side navigation and selecting 
+*Data Visualizer*.
+
+[role="screenshot"]
+image::images/data-viz-homepage.jpg[File Data Visualizer on the home page]
+
+You can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<kibana-ml-settings, Advanced Settings>>.
+
+[role="screenshot"]
+image::images/add-data-fv.png[File Data Visualizer]
+
+The File Data Visualizer uses the {ref}/ml-find-file-structure.html[find_file_structure API] to analyze
+the uploaded file and to suggest ingest pipelines and mappings for your data.
+
+NOTE: This feature is not intended for use as part of a
+repeated production process, but rather for the initial exploration of your data.
+
+[float]
+[[upload-geoipdata-kibana]]
+=== Upload geospatial data
+
+To visualize geospatial data in a point or shape file, you can upload it using the <<geojson-upload, GeoJSON Upload>>
+feature in Maps, and then use that data as a layer in a map.
+The data is also available for use in the broader Kibana ecosystem, for example,
+in visualizations and Canvas workpads.
+With GeoJSON Upload, you can upload a file up to 50 MB.
+
+[role="screenshot"]
+image::images/fu_gs_select_source_file_upload.png[]
+
+
+[float]
+[[add-data-tutorial-kibana]]
+===  Index metrics, log, security, and application data
+
+The built-in data tutorials can help you quickly get up and running with
+metrics data, log analytics, security events, and application data.
+These tutorials walk you through installing and configuring a
+Beats data shipper to periodically collect and send data to {es}.
+You can then use the pre-built dashboards to explore and analyze the data.
+
+You access the tutorials from the home page.
+If a tutorial doesn’t exist for your data, go to the {beats-ref}/beats-reference.html[Beats overview]
+to learn about other data shippers in the Beats family.
+
+[role="screenshot"]
+image::images/add-data-tutorials.png[Add Data tutorials]
+
+
+[float]
+[[connect-to-es]]
+=== Connect with {es} indices
+
+To visualize data in existing {es} indices, you must
+create an index pattern that matches the names of the indices that you want to explore.
+When you add data with the File Data Visualizer, GeoJSON Upload feature,
+or built-in tutorial, an index pattern is created for you.
+
+. Go to *Stack Management*, and then click *Index Patterns*.
+
+. Click *Create index pattern*.
+
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices.
++
+For example, an index pattern can point to your Apache data from yesterday,
+`filebeat-apache-4-3-2022`, or any index that matches the pattern, `filebeat-*`.
+Using a wildcard is the more popular approach.
+
+
+. Click *Next Step*, and then select the index field that contains the timestamp you want to use to perform time-based
+comparisons.
++
+Kibana reads the index mapping and lists all fields that contain a timestamp. If your
+index doesn't have time-based data, choose *I don't want to use the Time Filter*.
++
+You must select a time field to use global time filters on your dashboards.
+
+. Click *Create index pattern*.
++
+{kib} is now configured to access your {es} indices.
+You’ll see a list of fields configured for the matching index.
+You can designate your index pattern as the default by clicking the star icon on this page.
++
+When searching in *Discover* and creating visualizations, you choose a pattern
+from the index pattern menu to specify the {es} indices that contain the data you want to explore.

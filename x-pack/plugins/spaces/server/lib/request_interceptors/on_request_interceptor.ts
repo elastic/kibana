@@ -37,7 +37,7 @@ export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDep
 
       const newLocation = (path && path.substr(reqBasePath.length)) || '/';
 
-      const newUrl = modifyUrl(format(request.url), parts => {
+      const newUrl = modifyUrl(format(request.url), (parts) => {
         return {
           ...parts,
           pathname: newLocation,

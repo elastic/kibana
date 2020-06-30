@@ -35,7 +35,7 @@ import { tabifiedData } from './tabified_data';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { configureAppAngularModule } from '../../../../../../plugins/kibana_legacy/public/angular';
 
-describe('Table Vis - AggTable Directive', function() {
+describe('Table Vis - AggTable Directive', function () {
   let $rootScope;
   let $compile;
   let settings;
@@ -50,7 +50,7 @@ describe('Table Vis - AggTable Directive', function() {
 
   beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function($injector, config) {
+    ngMock.inject(function ($injector, config) {
       settings = config;
 
       $rootScope = $injector.get('$rootScope');
@@ -59,14 +59,14 @@ describe('Table Vis - AggTable Directive', function() {
   );
 
   let $scope;
-  beforeEach(function() {
+  beforeEach(function () {
     $scope = $rootScope.$new();
   });
-  afterEach(function() {
+  afterEach(function () {
     $scope.$destroy();
   });
 
-  it('renders a simple response properly', function() {
+  it('renders a simple response properly', function () {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
@@ -83,7 +83,7 @@ describe('Table Vis - AggTable Directive', function() {
     expect($el.find('td').text()).to.eql('1,000');
   });
 
-  it('renders nothing if the table is empty', function() {
+  it('renders nothing if the table is empty', function () {
     $scope.dimensions = {};
     $scope.table = null;
     const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
@@ -94,7 +94,7 @@ describe('Table Vis - AggTable Directive', function() {
     expect($el.find('tbody').length).to.be(0);
   });
 
-  it('renders a complex response properly', async function() {
+  it('renders a complex response properly', async function () {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -124,15 +124,13 @@ describe('Table Vis - AggTable Directive', function() {
       }
     }
 
-    $rows.each(function() {
+    $rows.each(function () {
       // 6 cells in every row
       const $cells = $(this).find('td');
       expect($cells.length).to.be(6);
 
-      const txts = $cells.map(function() {
-        return $(this)
-          .text()
-          .trim();
+      const txts = $cells.map(function () {
+        return $(this).text().trim();
       });
 
       // two character country code
@@ -149,7 +147,7 @@ describe('Table Vis - AggTable Directive', function() {
     });
   });
 
-  describe('renders totals row', function() {
+  describe('renders totals row', function () {
     async function totalsRowTest(totalFunc, expected) {
       function setDefaultTimezone() {
         moment.tz.setDefault(settings.get('dateFormat:tz'));
@@ -192,19 +190,15 @@ describe('Table Vis - AggTable Directive', function() {
       expect($cells.length).to.be(6);
 
       for (let i = 0; i < 6; i++) {
-        expect(
-          $($cells[i])
-            .text()
-            .trim()
-        ).to.be(expected[i]);
+        expect($($cells[i]).text().trim()).to.be(expected[i]);
       }
       settings.set('dateFormat:tz', oldTimezoneSetting);
       off();
     }
-    it('as count', async function() {
+    it('as count', async function () {
       await totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
     });
-    it('as min', async function() {
+    it('as min', async function () {
       await totalsRowTest('min', [
         '',
         '2014-09-28',
@@ -214,7 +208,7 @@ describe('Table Vis - AggTable Directive', function() {
         '11',
       ]);
     });
-    it('as max', async function() {
+    it('as max', async function () {
       await totalsRowTest('max', [
         '',
         '2014-10-03',
@@ -224,16 +218,16 @@ describe('Table Vis - AggTable Directive', function() {
         '837',
       ]);
     });
-    it('as avg', async function() {
+    it('as avg', async function () {
       await totalsRowTest('avg', ['', '', '87,221.5', '', '64.667', '206.833']);
     });
-    it('as sum', async function() {
+    it('as sum', async function () {
       await totalsRowTest('sum', ['', '', '1,569,987', '', '1,164', '3,723']);
     });
   });
 
-  describe('aggTable.toCsv()', function() {
-    it('escapes rows and columns properly', function() {
+  describe('aggTable.toCsv()', function () {
+    it('escapes rows and columns properly', function () {
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
         $scope
       );
@@ -255,7 +249,7 @@ describe('Table Vis - AggTable Directive', function() {
       );
     });
 
-    it('exports rows and columns properly', async function() {
+    it('exports rows and columns properly', async function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -283,34 +277,34 @@ describe('Table Vis - AggTable Directive', function() {
       expect(raw).to.be(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
-          'png,IT,win,412032,9299,0' +
+          'png,412032,IT,9299,win,0' +
           '\r\n' +
-          'png,IT,mac,412032,9299,9299' +
+          'png,412032,IT,9299,mac,9299' +
           '\r\n' +
-          'png,US,linux,412032,8293,3992' +
+          'png,412032,US,8293,linux,3992' +
           '\r\n' +
-          'png,US,mac,412032,8293,3029' +
+          'png,412032,US,8293,mac,3029' +
           '\r\n' +
-          'css,MX,win,412032,9299,4992' +
+          'css,412032,MX,9299,win,4992' +
           '\r\n' +
-          'css,MX,mac,412032,9299,5892' +
+          'css,412032,MX,9299,mac,5892' +
           '\r\n' +
-          'css,US,linux,412032,8293,3992' +
+          'css,412032,US,8293,linux,3992' +
           '\r\n' +
-          'css,US,mac,412032,8293,3029' +
+          'css,412032,US,8293,mac,3029' +
           '\r\n' +
-          'html,CN,win,412032,9299,4992' +
+          'html,412032,CN,9299,win,4992' +
           '\r\n' +
-          'html,CN,mac,412032,9299,5892' +
+          'html,412032,CN,9299,mac,5892' +
           '\r\n' +
-          'html,FR,win,412032,8293,3992' +
+          'html,412032,FR,8293,win,3992' +
           '\r\n' +
-          'html,FR,mac,412032,8293,3029' +
+          'html,412032,FR,8293,mac,3029' +
           '\r\n'
       );
     });
 
-    it('exports formatted rows and columns properly', async function() {
+    it('exports formatted rows and columns properly', async function () {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -335,41 +329,41 @@ describe('Table Vis - AggTable Directive', function() {
       $tableScope.table = $scope.table;
 
       // Create our own converter since the ones we use for tests don't actually transform the provided value
-      $tableScope.formattedColumns[0].formatter.convert = v => `${v}_formatted`;
+      $tableScope.formattedColumns[0].formatter.convert = (v) => `${v}_formatted`;
 
       const formatted = aggTable.toCsv(true);
       expect(formatted).to.be(
         '"extension: Descending","Average bytes","geo.src: Descending","Average bytes","machine.os: Descending","Average bytes"' +
           '\r\n' +
-          '"png_formatted",IT,win,412032,9299,0' +
+          '"png_formatted",412032,IT,9299,win,0' +
           '\r\n' +
-          '"png_formatted",IT,mac,412032,9299,9299' +
+          '"png_formatted",412032,IT,9299,mac,9299' +
           '\r\n' +
-          '"png_formatted",US,linux,412032,8293,3992' +
+          '"png_formatted",412032,US,8293,linux,3992' +
           '\r\n' +
-          '"png_formatted",US,mac,412032,8293,3029' +
+          '"png_formatted",412032,US,8293,mac,3029' +
           '\r\n' +
-          '"css_formatted",MX,win,412032,9299,4992' +
+          '"css_formatted",412032,MX,9299,win,4992' +
           '\r\n' +
-          '"css_formatted",MX,mac,412032,9299,5892' +
+          '"css_formatted",412032,MX,9299,mac,5892' +
           '\r\n' +
-          '"css_formatted",US,linux,412032,8293,3992' +
+          '"css_formatted",412032,US,8293,linux,3992' +
           '\r\n' +
-          '"css_formatted",US,mac,412032,8293,3029' +
+          '"css_formatted",412032,US,8293,mac,3029' +
           '\r\n' +
-          '"html_formatted",CN,win,412032,9299,4992' +
+          '"html_formatted",412032,CN,9299,win,4992' +
           '\r\n' +
-          '"html_formatted",CN,mac,412032,9299,5892' +
+          '"html_formatted",412032,CN,9299,mac,5892' +
           '\r\n' +
-          '"html_formatted",FR,win,412032,8293,3992' +
+          '"html_formatted",412032,FR,8293,win,3992' +
           '\r\n' +
-          '"html_formatted",FR,mac,412032,8293,3029' +
+          '"html_formatted",412032,FR,8293,mac,3029' +
           '\r\n'
       );
     });
   });
 
-  it('renders percentage columns', async function() {
+  it('renders percentage columns', async function () {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -397,46 +391,36 @@ describe('Table Vis - AggTable Directive', function() {
 
     const $headings = $el.find('th');
     expect($headings.length).to.be(7);
-    expect(
-      $headings
-        .eq(3)
-        .text()
-        .trim()
-    ).to.be('Average bytes percentages');
+    expect($headings.eq(3).text().trim()).to.be('Average bytes percentages');
 
-    const countColId = $scope.table.columns.find(col => col.name === $scope.percentageCol).id;
-    const counts = $scope.table.rows.map(row => row[countColId]);
+    const countColId = $scope.table.columns.find((col) => col.name === $scope.percentageCol).id;
+    const counts = $scope.table.rows.map((row) => row[countColId]);
     const total = counts.reduce((sum, curr) => sum + curr, 0);
-    const $percentageColValues = $el.find('tbody tr').map((i, el) =>
-      $(el)
-        .find('td')
-        .eq(3)
-        .text()
-    );
+    const $percentageColValues = $el.find('tbody tr').map((i, el) => $(el).find('td').eq(3).text());
 
     $percentageColValues.each((i, value) => {
-      const percentage = `${round((counts[i] / total) * 100, 1)}%`;
+      const percentage = `${round((counts[i] / total) * 100, 3)}%`;
       expect(value).to.be(percentage);
     });
   });
 
-  describe('aggTable.exportAsCsv()', function() {
+  describe('aggTable.exportAsCsv()', function () {
     let origBlob;
     function FakeBlob(slices, opts) {
       this.slices = slices;
       this.opts = opts;
     }
 
-    beforeEach(function() {
+    beforeEach(function () {
       origBlob = window.Blob;
       window.Blob = FakeBlob;
     });
 
-    afterEach(function() {
+    afterEach(function () {
       window.Blob = origBlob;
     });
 
-    it('calls _saveAs properly', function() {
+    it('calls _saveAs properly', function () {
       const $el = $compile('<kbn-agg-table table="table"  dimensions="dimensions">')($scope);
       $scope.$digest();
 
@@ -468,7 +452,7 @@ describe('Table Vis - AggTable Directive', function() {
       expect(call.args[1]).to.be('somefilename.csv');
     });
 
-    it('should use the export-title attribute', function() {
+    it('should use the export-title attribute', function () {
       const expected = 'export file name';
       const $el = $compile(
         `<kbn-agg-table table="table"  dimensions="dimensions" export-title="exportTitle">`

@@ -42,7 +42,7 @@ export default new Chainable('max', {
       'Maximum values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),
   fn: function maxFn(args) {
-    return reduce(args, function(a, b) {
+    return reduce(args, function (a, b) {
       return Math.max(a, b);
     });
   },

@@ -24,8 +24,8 @@ import glob from 'glob';
 import fs from 'fs';
 import { analyzeArchive, extractArchive, _isDirectory } from './zip';
 
-describe('kibana cli', function() {
-  describe('zip', function() {
+describe('kibana cli', function () {
+  describe('zip', function () {
     const repliesPath = path.resolve(__dirname, '__fixtures__', 'replies');
     const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
 
@@ -40,7 +40,7 @@ describe('kibana cli', function() {
       del.sync(tempPath, { force: true });
     });
 
-    describe('analyzeArchive', function() {
+    describe('analyzeArchive', function () {
       it('returns array of plugins', async () => {
         const packages = await analyzeArchive(archivePath);
         const plugin = packages[0];

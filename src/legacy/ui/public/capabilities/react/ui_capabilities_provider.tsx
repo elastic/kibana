@@ -21,7 +21,7 @@ import React from 'react';
 import { UICapabilitiesContext } from './ui_capabilities_context';
 import { capabilities } from '..';
 
-export const UICapabilitiesProvider: React.FC = props => (
+export const UICapabilitiesProvider: React.FC = (props) => (
   <UICapabilitiesContext.Provider value={capabilities.get()}>
     {props.children}
   </UICapabilitiesContext.Provider>

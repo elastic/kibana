@@ -1,5 +1,5 @@
 [[index-patterns]]
-== Creating an index pattern
+== Create an index pattern
 
 To explore and visualize data in {kib}, you must create an index pattern.
 An index pattern tells {kib} which {es} indices contain the data that
@@ -25,9 +25,8 @@ image::images/management-index-read-only-badge.png[Example of Index Pattern Mana
 [[settings-create-pattern]]
 === Create an index pattern
 
-If you are in an app that requires an index pattern, and you don't have one yet,
-{kib} prompts you to create one.  Or, you can go directly to
-*Management > Kibana > Index Patterns*.
+When you don't have an index pattern, {kib} prompts you to create one. Or, you can open the menu, 
+then go to *Stack Management > {kib} > Index Patterns* to go directly to the *Index Patterns* UI.
 
 [role="screenshot"]
 image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollup index pattern"]

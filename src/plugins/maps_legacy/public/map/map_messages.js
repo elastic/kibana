@@ -22,9 +22,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { toMountPoint } from '../../../kibana_react/public';
 
-export const createZoomWarningMsg = (function() {
+export const createZoomWarningMsg = (function () {
   let disableZoomMsg = false;
-  const setZoomMsg = boolDisableMsg => (disableZoomMsg = boolDisableMsg);
+  const setZoomMsg = (boolDisableMsg) => (disableZoomMsg = boolDisableMsg);
 
   class ZoomWarning extends React.Component {
     constructor(props) {

@@ -8,7 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
-  hasMLFeatureAvailable,
+  hasMLFeatureSelector,
   hasMLJobSelector,
   isMLJobDeletedSelector,
   isMLJobDeletingSelector,
@@ -20,7 +20,7 @@ import { getMLJobId } from '../../../state/api/ml_anomaly';
 import * as labels from './translations';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ManageMLJobComponent } from './manage_ml_job';
-import { JobStat } from '../../../../../../plugins/ml/common/types/data_recognizer';
+import { JobStat } from '../../../../../../plugins/ml/public';
 import { useMonitorId } from '../../../hooks';
 
 export const MLIntegrationComponent = () => {
@@ -35,7 +35,7 @@ export const MLIntegrationComponent = () => {
 
   const dispatch = useDispatch();
 
-  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+  const isMLAvailable = useSelector(hasMLFeatureSelector);
 
   const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId: monitorId as string }));
   const isMLJobDeleting = useSelector(isMLJobDeletingSelector);
@@ -65,6 +65,9 @@ export const MLIntegrationComponent = () => {
 
       refreshApp();
     }
+    return () => {
+      dispatch(resetMLState());
+    };
   }, [
     isMLJobDeleting,
     isConfirmDeleteJobOpen,

@@ -24,6 +24,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import { first } from 'rxjs/operators';
 
 import {
   EnvironmentService,
@@ -38,11 +40,13 @@ import { setServices } from './application/kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { AppNavLinkStatus } from '../../../core/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -63,14 +67,18 @@ export class HomePublicPlugin
     core: CoreSetup<HomePluginStartDependencies>,
     { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'home',
       title: 'Home',
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { telemetry, data }] = await core.getStartServices();
+        const [
+          coreStart,
+          { telemetry, data, kibanaLegacy: kibanaLegacyStart },
+        ] = await core.getStartServices();
         setServices({
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
@@ -80,21 +88,27 @@ export class HomePublicPlugin
           docLinks: coreStart.docLinks,
           savedObjectsClient: coreStart.savedObjects.client,
           chrome: coreStart.chrome,
+          application: coreStart.application,
           telemetry,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           indexPatternService: data.indexPatterns,
           environmentService: this.environmentService,
-          config: kibanaLegacy.config,
+          kibanaLegacy: kibanaLegacyStart,
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
         });
+        coreStart.chrome.docTitle.change(
+          i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
+        );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element);
+        return await renderApp(params.element, params.history);
       },
     });
+    kibanaLegacy.forwardApp('home', 'home');
+
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
       environment: { ...this.environmentService.setup() },
@@ -102,8 +116,26 @@ export class HomePublicPlugin
     };
   }
 
-  public start({ application: { capabilities } }: CoreStart) {
+  public start(
+    { application: { capabilities, currentAppId$ }, http }: CoreStart,
+    { kibanaLegacy }: HomePluginStartDependencies
+  ) {
     this.featuresCatalogueRegistry.start({ capabilities });
+
+    // If the home app is the initial location when loading Kibana...
+    if (
+      window.location.pathname === http.basePath.prepend(`/app/home`) &&
+      window.location.hash === ''
+    ) {
+      // ...wait for the app to mount initially and then...
+      currentAppId$.pipe(first()).subscribe((appId) => {
+        if (appId === 'home') {
+          // ...navigate to default app set by `kibana.defaultAppId`.
+          // This doesn't do anything as along as the default settings are kept.
+          kibanaLegacy.navigateToDefaultApp({ overwriteHash: false });
+        }
+      });
+    }
   }
 }
 

@@ -6,7 +6,7 @@
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '../../../../../alerts/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
@@ -25,6 +25,13 @@ const conditionsActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.conditionsActionVariableDescription',
   {
     defaultMessage: 'The conditions that log entries needed to fulfill',
+  }
+);
+
+const groupByActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.groupByActionVariableDescription',
+  {
+    defaultMessage: 'The name of the group responsible for triggering the alert',
   }
 );
 
@@ -75,6 +82,7 @@ export async function registerLogThresholdAlertType(
         criteria: schema.arrayOf(criteriaSchema),
         timeUnit: schema.string(),
         timeSize: schema.number(),
+        groupBy: schema.maybe(schema.arrayOf(schema.string())),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
@@ -84,7 +92,9 @@ export async function registerLogThresholdAlertType(
       context: [
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
+        { name: 'group', description: groupByActionVariableDescription },
       ],
     },
+    producer: 'logs',
   });
 }

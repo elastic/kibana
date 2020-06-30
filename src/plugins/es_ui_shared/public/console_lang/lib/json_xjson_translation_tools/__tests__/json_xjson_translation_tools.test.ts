@@ -36,7 +36,7 @@ describe('JSON to XJSON conversion tools', () => {
   });
 });
 
-_.each(collapsingTests.split(/^=+$/m), function(fixture) {
+_.each(collapsingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }
@@ -45,12 +45,12 @@ _.each(collapsingTests.split(/^=+$/m), function(fixture) {
   const expanded = fixture[1].trim();
   const collapsed = fixture[2].trim();
 
-  test('Literal collapse - ' + name, function() {
+  test('Literal collapse - ' + name, function () {
     expect(utils.collapseLiteralStrings(expanded)).toEqual(collapsed);
   });
 });
 
-_.each(expandingTests.split(/^=+$/m), function(fixture) {
+_.each(expandingTests.split(/^=+$/m), function (fixture) {
   if (fixture.trim() === '') {
     return;
   }
@@ -59,7 +59,7 @@ _.each(expandingTests.split(/^=+$/m), function(fixture) {
   const collapsed = fixture[1].trim();
   const expanded = fixture[2].trim();
 
-  test('Literal expand - ' + name, function() {
+  test('Literal expand - ' + name, function () {
     expect(utils.expandLiteralStrings(collapsed)).toEqual(expanded);
   });
 });

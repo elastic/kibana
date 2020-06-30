@@ -29,11 +29,13 @@ export enum AGGREGATION_TYPES {
   MAX = 'max',
   RATE = 'rate',
   CARDINALITY = 'cardinality',
+  P95 = 'p95',
+  P99 = 'p99',
 }
 
 export interface MetricThresholdAlertParams {
   criteria?: MetricExpression[];
-  groupBy?: string;
+  groupBy?: string | string[];
   filterQuery?: string;
   sourceId?: string;
 }
@@ -48,4 +50,13 @@ export type ExpressionChartSeries = ExpressionChartRow[][];
 export interface ExpressionChartData {
   id: string;
   series: ExpressionChartSeries;
+}
+
+export interface AlertParams {
+  criteria: MetricExpression[];
+  groupBy?: string;
+  filterQuery?: string;
+  sourceId?: string;
+  filterQueryText?: string;
+  alertOnNoData?: boolean;
 }

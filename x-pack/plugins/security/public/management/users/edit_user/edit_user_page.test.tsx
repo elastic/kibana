@@ -5,12 +5,13 @@
  */
 
 import { act } from '@testing-library/react';
+import { ScopedHistory } from 'kibana/public';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { EditUserPage } from './edit_user_page';
 import React from 'react';
 import { User, Role } from '../../../../common/model';
 import { ReactWrapper } from 'enzyme';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
@@ -29,6 +30,14 @@ const createUser = (username: string, roles = ['idk', 'something']) => {
   if (username === 'reserved_user') {
     user.metadata = {
       _reserved: true,
+    };
+  }
+
+  if (username === 'deprecated_user') {
+    user.metadata = {
+      _reserved: true,
+      _deprecated: true,
+      _deprecated_reason: 'beacuse I said so.',
     };
   }
 
@@ -95,6 +104,8 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 }
 
 describe('EditUserPage', () => {
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+
   it('allows reserved users to be viewed', async () => {
     const user = createUser('reserved_user');
     const { apiClient, rolesAPIClient } = buildClients(user);
@@ -106,6 +117,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -128,6 +140,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -150,6 +163,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -160,6 +174,29 @@ describe('EditUserPage', () => {
 
     expect(findTestSubject(wrapper, 'hasDeprecatedRolesAssignedHelpText')).toHaveLength(0);
     expectSaveButton(wrapper);
+  });
+
+  it('warns when viewing a depreciated user', async () => {
+    const user = createUser('deprecated_user');
+    const { apiClient, rolesAPIClient } = buildClients(user);
+    const securitySetup = buildSecuritySetup();
+
+    const wrapper = mountWithIntl(
+      <EditUserPage
+        username={user.username}
+        userAPIClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
+        history={history}
+      />
+    );
+
+    await waitForRender(wrapper);
+    expect(apiClient.getUser).toBeCalledTimes(1);
+    expect(securitySetup.authc.getCurrentUser).toBeCalledTimes(1);
+
+    expect(findTestSubject(wrapper, 'deprecatedUserWarning')).toHaveLength(1);
   });
 
   it('warns when user is assigned a deprecated role', async () => {
@@ -174,6 +211,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 

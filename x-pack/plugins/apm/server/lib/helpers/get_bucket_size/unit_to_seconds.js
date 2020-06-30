@@ -12,7 +12,7 @@ const units = {
   d: 86400,
   w: 86400 * 7, // Hum... might be wrong
   M: 86400 * 30, // this too... 29,30,31?
-  y: 86400 * 356 // Leap year?
+  y: 86400 * 356, // Leap year?
 };
 
 export function unitToSeconds(unit) {

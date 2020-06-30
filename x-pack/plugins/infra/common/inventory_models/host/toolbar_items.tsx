@@ -10,20 +10,27 @@ import { ToolbarProps } from '../../../public/pages/metrics/inventory_view/compo
 import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const hostMetricTypes: SnapshotMetricType[] = [
+  'cpu',
+  'memory',
+  'load',
+  'rx',
+  'tx',
+  'logRate',
+];
+export const hostGroupByFields = [
+  'cloud.availability_zone',
+  'cloud.machine.type',
+  'cloud.project.id',
+  'cloud.provider',
+  'service.type',
+];
 export const HostToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'load', 'rx', 'tx', 'logRate'];
-  const groupByFields = [
-    'cloud.availability_zone',
-    'cloud.machine.type',
-    'cloud.project.id',
-    'cloud.provider',
-    'service.type',
-  ];
   return (
     <MetricsAndGroupByToolbarItems
       {...props}
-      metricTypes={metricTypes}
-      groupByFields={groupByFields}
+      metricTypes={hostMetricTypes}
+      groupByFields={hostGroupByFields}
     />
   );
 };

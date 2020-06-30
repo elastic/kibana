@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './settings.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -83,7 +83,7 @@ export default function({ getService }) {
       ];
 
       // Make sure none of the settings have been removed from ES API
-      expectedSettings.forEach(setting => {
+      expectedSettings.forEach((setting) => {
         try {
           expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
         } catch {

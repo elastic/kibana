@@ -22,7 +22,7 @@ const { resolve } = require('path');
 const { debug } = require('./debug');
 const { getPlugins } = require('./get_plugins');
 
-exports.getWebpackConfig = function(kibanaPath, projectRoot, config) {
+exports.getWebpackConfig = function (kibanaPath, projectRoot, config) {
   const fromKibana = (...path) => resolve(kibanaPath, ...path);
 
   const alias = {
@@ -39,7 +39,7 @@ exports.getWebpackConfig = function(kibanaPath, projectRoot, config) {
     test_utils: fromKibana('src/test_utils/public'),
   };
 
-  getPlugins(config, kibanaPath, projectRoot).forEach(plugin => {
+  getPlugins(config, kibanaPath, projectRoot).forEach((plugin) => {
     alias[`plugins/${plugin.name}`] = plugin.publicDirectory;
   });
 

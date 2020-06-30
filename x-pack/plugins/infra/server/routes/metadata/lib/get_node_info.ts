@@ -61,11 +61,11 @@ export const getNodeInfo = async (
       },
     },
   };
-  if (!CLOUD_METRICS_MODULES.some(m => startsWith(nodeType, m))) {
+  if (!CLOUD_METRICS_MODULES.some((m) => startsWith(nodeType, m))) {
     set(
       params,
       'body.query.bool.must_not',
-      CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } }))
+      CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } }))
     );
   }
   const response = await framework.callWithRequest<{ _source: InfraMetadataInfo }, {}>(

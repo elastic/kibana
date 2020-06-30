@@ -12,7 +12,7 @@ import { notificationService } from '../../services/notification';
 
 export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');
 
-export const openIndices = ({ indexNames }) => async dispatch => {
+export const openIndices = ({ indexNames }) => async (dispatch) => {
   dispatch(openIndicesStart({ indexNames }));
   try {
     await request(indexNames);

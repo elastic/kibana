@@ -56,12 +56,12 @@ export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisu
       source.icon = source.type.icon;
       source.image = source.type.image;
       source.typeTitle = source.type.title;
-      source.editUrl = `#/visualize/edit/${id}`;
+      source.editUrl = `/edit/${id}`;
 
       return source;
     };
     urlFor(id: string) {
-      return `#/visualize/edit/${encodeURIComponent(id)}`;
+      return `#/edit/${encodeURIComponent(id)}`;
     }
     // This behaves similarly to find, except it returns visualizations that are
     // defined as appExtensions and which may not conform to type: visualization

@@ -6,7 +6,7 @@
 import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
-  APM_INDICES_SAVED_OBJECT_ID
+  APM_INDICES_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
 import { ApmIndicesConfig } from './get_apm_indices';
 
@@ -19,7 +19,7 @@ export async function saveApmIndices(
     removeEmpty(apmIndices),
     {
       id: APM_INDICES_SAVED_OBJECT_ID,
-      overwrite: true
+      overwrite: true,
     }
   );
 }
@@ -28,6 +28,6 @@ export async function saveApmIndices(
 function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
   return Object.entries(apmIndices)
     .map(([key, value]) => [key, value?.trim()])
-    .filter(([key, value]) => !!value)
+    .filter(([_, value]) => !!value)
     .reduce((obj, [key, value]) => ({ ...obj, [key as string]: value }), {});
 }

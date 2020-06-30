@@ -2,12 +2,8 @@
 
 exports[`ML Flyout component renders without errors 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
   data-test-subj="uptimeMLFlyout"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>
@@ -21,7 +17,6 @@ exports[`ML Flyout component renders without errors 1`] = `
     />
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <ShowLicenseInfo />
     <EuiText>
       <p>
         Here you can create a machine learning job to calculate anomaly scores on
@@ -35,11 +30,11 @@ exports[`ML Flyout component renders without errors 1`] = `
           id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
           values={
             Object {
-              "mlJobsPageLink": <ForwardRef
+              "mlJobsPageLink": <EuiLink
                 href="/app/ml"
               >
                 Machine Learning jobs management page
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />
@@ -71,7 +66,7 @@ exports[`ML Flyout component renders without errors 1`] = `
       >
         <EuiButton
           data-test-subj="uptimeMLCreateJobBtn"
-          disabled={true}
+          disabled={false}
           fill={true}
           isLoading={false}
           onClick={[Function]}
@@ -106,7 +101,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
       tabindex="0"
     >
       <button
-        aria-label="Closes this dialog"
+        aria-label="Close this dialog"
         class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
         data-test-subj="euiFlyoutCloseButton"
         type="button"
@@ -162,22 +157,24 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
                 <p>
                   In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.
                 </p>
-                <a
-                  class="euiButton euiButton--primary"
-                  href="/app/kibana#/management/elasticsearch/license_management/home"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <span
-                    class="euiButton__content"
+                <span>
+                  <a
+                    class="euiButton euiButton--primary"
+                    href="/app/management/stack/license_management/home"
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <span
-                      class="euiButton__text"
+                      class="euiButton__content"
                     >
-                      Start free 14-day trial
+                      <span
+                        class="euiButton__text"
+                      >
+                        Start free 14-day trial
+                      </span>
                     </span>
-                  </span>
-                </a>
+                  </a>
+                </span>
               </div>
             </div>
             <div

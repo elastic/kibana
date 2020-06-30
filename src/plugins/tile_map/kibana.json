@@ -1,0 +1,15 @@
+{
+  "id": "tileMap",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["map", "tilemap"],
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [
+    "visualizations",
+    "expressions",
+    "mapsLegacy",
+    "kibanaLegacy",
+    "data"
+  ]
+}

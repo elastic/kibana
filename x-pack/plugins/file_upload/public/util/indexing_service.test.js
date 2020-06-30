@@ -20,7 +20,7 @@ describe('indexing_service', () => {
     'is.not.just.one.period', // name can't be .
     'x'.repeat(255), // Cannot be longer than 255 bytes
   ];
-  validNames.forEach(validName => {
+  validNames.forEach((validName) => {
     it(`Should validate index pattern: "${validName}"`, () => {
       const isValid = checkIndexPatternValid(validName);
       expect(isValid).toEqual(true);
@@ -48,7 +48,7 @@ describe('indexing_service', () => {
     'x'.repeat(256), // Cannot be longer than 255 bytes
     'ü'.repeat(128), // Cannot be longer than 255 bytes (using 2 byte char)
   ];
-  inValidNames.forEach(inValidName => {
+  inValidNames.forEach((inValidName) => {
     it(`Should invalidate index pattern: "${inValidName}"`, () => {
       const isValid = checkIndexPatternValid(inValidName);
       expect(isValid).toEqual(false);

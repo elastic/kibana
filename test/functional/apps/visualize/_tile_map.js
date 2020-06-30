@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -35,9 +35,9 @@ export default function({ getService, getPageObjects }) {
     'tileMap',
   ]);
 
-  describe('tile map visualize app', function() {
+  describe('tile map visualize app', function () {
     describe('incomplete config', function describeIndexTests() {
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -57,7 +57,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('complete config', function describeIndexTests() {
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -84,7 +84,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('comparing expected: ', expected);
         log.debug('with actual: ', actual);
 
-        const roundedValues = actual.map(row => {
+        const roundedValues = actual.map((row) => {
           // Parse last element in each row as JSON and floor the lat/long value
           const coords = JSON.parse(row[row.length - 1]);
           row[row.length - 1] = {
@@ -98,11 +98,11 @@ export default function({ getService, getPageObjects }) {
       }
 
       describe('tile map chart', function indexPatternCreation() {
-        it('should have inspector enabled', async function() {
+        it('should have inspector enabled', async function () {
           await inspector.expectIsEnabled();
         });
 
-        it('should show correct tile map data on default zoom level', async function() {
+        it('should show correct tile map data on default zoom level', async function () {
           const expectedTableData = [
             ['-', '9', '5,787', { lat: 37, lon: -104 }],
             ['-', 'd', '5,600', { lat: 37, lon: -82 }],
@@ -123,35 +123,34 @@ export default function({ getService, getPageObjects }) {
           compareTableData(actualTableData, expectedTableData);
         });
 
-        it('should not be able to zoom out beyond 0', async function() {
+        it('should not be able to zoom out beyond 0', async function () {
           await PageObjects.tileMap.zoomAllTheWayOut();
           const enabled = await PageObjects.tileMap.getMapZoomOutEnabled();
           expect(enabled).to.be(false);
         });
 
-        // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
-        it('Fit data bounds should zoom to level 3', async function() {
+        it('Fit data bounds should zoom to level 3', async function () {
           const expectedPrecision2DataTable = [
-            ['-', 'dn', '1,429', { lat: 36, lon: -85 }],
-            ['-', 'dp', '1,418', { lat: 41, lon: -85 }],
-            ['-', '9y', '1,215', { lat: 36, lon: -96 }],
-            ['-', '9z', '1,099', { lat: 42, lon: -96 }],
-            ['-', 'dr', '1,076', { lat: 42, lon: -74 }],
-            ['-', 'dj', '982', { lat: 31, lon: -85 }],
-            ['-', '9v', '938', { lat: 31, lon: -96 }],
-            ['-', '9q', '722', { lat: 36, lon: -120 }],
-            ['-', '9w', '475', { lat: 36, lon: -107 }],
-            ['-', 'cb', '457', { lat: 46, lon: -96 }],
-            ['-', 'c2', '453', { lat: 47, lon: -120 }],
-            ['-', '9x', '420', { lat: 41, lon: -107 }],
-            ['-', 'dq', '399', { lat: 37, lon: -78 }],
-            ['-', '9r', '396', { lat: 41, lon: -120 }],
-            ['-', '9t', '274', { lat: 32, lon: -107 }],
-            ['-', 'c8', '271', { lat: 47, lon: -107 }],
-            ['-', 'dh', '214', { lat: 26, lon: -82 }],
-            ['-', 'b6', '207', { lat: 60, lon: -162 }],
-            ['-', 'bd', '206', { lat: 59, lon: -153 }],
-            ['-', 'b7', '167', { lat: 64, lon: -163 }],
+            ['-', 'dr4', '127', { lat: 40, lon: -76 }],
+            ['-', 'dr7', '92', { lat: 41, lon: -74 }],
+            ['-', '9q5', '91', { lat: 34, lon: -119 }],
+            ['-', '9qc', '89', { lat: 38, lon: -122 }],
+            ['-', 'drk', '87', { lat: 41, lon: -73 }],
+            ['-', 'dps', '82', { lat: 42, lon: -84 }],
+            ['-', 'dph', '82', { lat: 40, lon: -84 }],
+            ['-', 'dp3', '79', { lat: 41, lon: -88 }],
+            ['-', 'dpe', '78', { lat: 42, lon: -86 }],
+            ['-', 'dp8', '77', { lat: 43, lon: -90 }],
+            ['-', 'dp6', '74', { lat: 41, lon: -87 }],
+            ['-', 'djv', '74', { lat: 33, lon: -83 }],
+            ['-', '9qh', '74', { lat: 34, lon: -118 }],
+            ['-', 'dpq', '73', { lat: 41, lon: -81 }],
+            ['-', 'dpp', '73', { lat: 40, lon: -80 }],
+            ['-', '9y7', '73', { lat: 35, lon: -97 }],
+            ['-', '9vg', '73', { lat: 32, lon: -97 }],
+            ['-', 'drs', '71', { lat: 42, lon: -73 }],
+            ['-', '9ys', '71', { lat: 37, lon: -95 }],
+            ['-', '9yn', '71', { lat: 34, lon: -93 }],
           ];
 
           await PageObjects.tileMap.clickMapFitDataBounds();
@@ -208,7 +207,7 @@ export default function({ getService, getPageObjects }) {
           const vizName1 = 'Visualization TileMap';
           await PageObjects.visualize.loadSavedVisualization(vizName1);
           await inspector.open();
-          await inspector.expectTableHeaders(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Filter', 'Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
@@ -217,7 +216,7 @@ export default function({ getService, getPageObjects }) {
           await PageObjects.visEditor.setIsFilteredByCollarCheckbox(false);
           await PageObjects.visEditor.clickGo();
           await inspector.open();
-          await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
@@ -237,7 +236,7 @@ export default function({ getService, getPageObjects }) {
       let last = false;
       const toastDefaultLife = 6000;
 
-      before(async function() {
+      before(async function () {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
@@ -255,11 +254,11 @@ export default function({ getService, getPageObjects }) {
         }
       });
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
       });
 
-      afterEach(async function() {
+      afterEach(async function () {
         if (!last) {
           await PageObjects.common.sleep(toastDefaultLife);
           await PageObjects.tileMap.clickMapZoomOut(waitForLoading);

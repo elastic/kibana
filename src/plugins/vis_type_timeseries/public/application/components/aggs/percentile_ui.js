@@ -33,13 +33,13 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const newPercentile = opts => {
+export const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
 class PercentilesUi extends Component {
   handleTextChange(item, name) {
-    return e => {
+    return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -97,7 +97,7 @@ class PercentilesUi extends Component {
     }
     const labelStyle = { marginBottom: 0 };
     const htmlId = htmlIdGenerator(model.id);
-    const selectedModeOption = modeOptions.find(option => {
+    const selectedModeOption = modeOptions.find((option) => {
       return model.mode === option.value;
     });
     return (

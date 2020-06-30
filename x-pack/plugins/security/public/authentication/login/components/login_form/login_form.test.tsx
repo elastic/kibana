@@ -47,10 +47,6 @@ describe('LoginForm', () => {
     });
   });
 
-  afterAll(() => {
-    delete (window as any).location;
-  });
-
   it('renders as expected', () => {
     const coreStartMock = coreMock.createStart();
     expect(
@@ -172,7 +168,7 @@ describe('LoginForm', () => {
 
   it('properly redirects after successful login', async () => {
     window.location.href = `https://some-host/login?next=${encodeURIComponent(
-      '/some-base-path/app/kibana#/home?_g=()'
+      '/some-base-path/app/home#/?_g=()'
     )}`;
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
     coreStartMock.http.post.mockResolvedValue({});
@@ -205,7 +201,7 @@ describe('LoginForm', () => {
       body: JSON.stringify({ username: 'username1', password: 'password1' }),
     });
 
-    expect(window.location.href).toBe('/some-base-path/app/kibana#/home?_g=()');
+    expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
     expect(wrapper.find(EuiCallOut).exists()).toBe(false);
   });
 
@@ -275,7 +271,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.secLoginCard').map(card => {
+        wrapper.find('.secLoginCard').map((card) => {
           const hint = card.find('.secLoginCard__hint');
           return {
             title: card.find('p.secLoginCard__title').text(),
@@ -316,7 +312,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.secLoginCard').map(card => {
+        wrapper.find('.secLoginCard').map((card) => {
           const hint = card.find('.secLoginCard__hint');
           return {
             title: card.find('p.secLoginCard__title').text(),
@@ -359,7 +355,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -403,7 +399,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -445,7 +441,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'basic').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
       wrapper.update();
       expectPageMode(wrapper, PageMode.Form);
 
@@ -512,7 +508,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       // Going to login form.
-      wrapper.findWhere(node => node.key() === 'basic').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
       wrapper.update();
       expectPageMode(wrapper, PageMode.Form);
 

@@ -28,7 +28,7 @@ import {
 
 import html from './view_sandbox.html';
 
-export default props => (
+export default (props) => (
   <GuideSandbox>
     <GuideDemo isFullScreen={true} html={html} />
 

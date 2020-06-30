@@ -18,13 +18,19 @@
  */
 
 import { get } from 'lodash';
-import { APICaller } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
+import { LegacyAPICaller } from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
+export interface Usage {
+  optInCount: number;
+  optOutCount: number;
+  defaultQueryLanguage: string;
+}
+
 export function fetchProvider(index: string) {
-  return async (callCluster: APICaller) => {
+  return async (callCluster: LegacyAPICaller): Promise<Usage> => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
@@ -38,9 +44,9 @@ export function fetchProvider(index: string) {
       }),
     ]);
 
-    const queryLanguageConfigValue = get(
+    const queryLanguageConfigValue: string | null | undefined = get(
       config,
-      'hits.hits[0]._source.config.search:queryLanguage'
+      `hits.hits[0]._source.config.${UI_SETTINGS.SEARCH_QUERY_LANGUAGE}`
     );
 
     // search:queryLanguage can potentially be in four states in the .kibana index:

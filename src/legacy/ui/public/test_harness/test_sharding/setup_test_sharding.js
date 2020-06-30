@@ -58,7 +58,7 @@ export function setupTestSharding() {
   });
 
   // Filter top-level describe statements as they come
-  setupTopLevelDescribeFilter(describeName => {
+  setupTopLevelDescribeFilter((describeName) => {
     const describeShardNum = getShardNum(shardTotal, describeName);
     if (describeShardNum === shardNum) return true;
     // track shard numbers that we ignore

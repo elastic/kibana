@@ -4,15 +4,17 @@ files:
     - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_vislib/**/*.s+(a|c)ss'
     - 'src/plugins/vis_type_xy/**/*.s+(a|c)ss'
-    - 'x-pack/legacy/plugins/security/**/*.s+(a|c)ss'
-    - 'x-pack/legacy/plugins/canvas/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/canvas/**/*.s+(a|c)ss'
     - 'x-pack/plugins/triggers_actions_ui/**/*.s+(a|c)ss'
     - 'x-pack/plugins/lens/**/*.s+(a|c)ss'
     - 'x-pack/plugins/cross_cluster_replication/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/maps/**/*.s+(a|c)ss'
     - 'x-pack/plugins/maps/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/spaces/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/security/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/monitoring/**/*.s+(a|c)ss'
   ignore:
-    - 'x-pack/legacy/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/canvas/shareable_runtime/**/*.s+(a|c)ss'
 rules:
   quotes:
     - 2

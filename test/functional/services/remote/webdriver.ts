@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { delimiter } from 'path';
+import { delimiter, resolve } from 'path';
+import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
@@ -27,7 +28,7 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
+import { Builder, Capabilities, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -37,6 +38,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -50,6 +52,13 @@ const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as strin
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
+const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
+const chromiumDownloadPrefs = {
+  prefs: {
+    'download.default_directory': downloadDir,
+    'download.prompt_for_download': false,
+  },
+};
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -64,13 +73,18 @@ Executor.prototype.execute = preventParallelCalls(
   (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
 );
 
+export interface BrowserConfig {
+  logPollingMs: number;
+  acceptInsecureCerts: boolean;
+}
+
 let attemptCounter = 0;
 let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
@@ -105,6 +119,7 @@ async function attemptToCreateCommand(
         if (certValidation === '0') {
           chromeOptions.push('ignore-certificate-errors');
         }
+
         if (remoteDebug === '1') {
           // Visit chrome://inspect in chrome to remotely view/debug
           chromeOptions.push('headless', 'disable-gpu', 'remote-debugging-port=9222');
@@ -112,9 +127,11 @@ async function attemptToCreateCommand(
         chromeCapabilities.set('goog:chromeOptions', {
           w3c: true,
           args: chromeOptions,
+          ...chromiumDownloadPrefs,
         });
         chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
+        chromeCapabilities.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         const session = await new Builder()
           .forBrowser(browserType)
@@ -127,7 +144,7 @@ async function attemptToCreateCommand(
           consoleLog$: pollForLogEntry$(
             session,
             logging.Type.BROWSER,
-            logPollingMs,
+            config.logPollingMs,
             lifecycle.cleanup.after$
           ).pipe(
             takeUntil(lifecycle.cleanup.after$),
@@ -150,6 +167,10 @@ async function attemptToCreateCommand(
           edgeOptions.setEdgeChromium(true);
           // @ts-ignore internal modules are not typed
           edgeOptions.setBinaryPath(edgePaths.browserPath);
+          const options = edgeOptions.get('ms:edgeOptions');
+          // overriding options to include preferences
+          Object.assign(options, chromiumDownloadPrefs);
+          edgeOptions.set('ms:edgeOptions', options);
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
             .setEdgeOptions(edgeOptions)
@@ -160,7 +181,7 @@ async function attemptToCreateCommand(
             consoleLog$: pollForLogEntry$(
               session,
               logging.Type.BROWSER,
-              logPollingMs,
+              config.logPollingMs,
               lifecycle.cleanup.after$
             ).pipe(
               takeUntil(lifecycle.cleanup.after$),
@@ -185,6 +206,15 @@ async function attemptToCreateCommand(
         firefoxOptions.set('moz:firefoxOptions', {
           prefs: { 'devtools.console.stdout.content': true },
         });
+        firefoxOptions.setPreference('browser.download.folderList', 2);
+        firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
+        firefoxOptions.setPreference('browser.download.dir', downloadDir);
+        firefoxOptions.setPreference(
+          'browser.helperApps.neverAsk.saveToDisk',
+          'application/comma-separated-values, text/csv, text/plain'
+        );
+        firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
+
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
@@ -219,8 +249,8 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: chunk$.pipe(
-            map(chunk => chunk.toString('utf8')),
-            mergeMap(msg => {
+            map((chunk) => chunk.toString('utf8')),
+            mergeMap((msg) => {
               const match = msg.match(CONSOLE_LINE_RE);
               if (!match) {
                 log.debug('Firefox stdout: ' + msg);
@@ -288,14 +318,14 @@ async function attemptToCreateCommand(
     return;
   } // abort
 
-  return { driver: session, By, until, consoleLog$ };
+  return { driver: session, consoleLog$ };
 }
 
 export async function initWebDriver(
   log: ToolingLog,
   browserType: Browsers,
   lifecycle: Lifecycle,
-  logPollingMs: number
+  config: BrowserConfig
 ) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
@@ -307,6 +337,9 @@ export async function initWebDriver(
 
     log.verbose(entry.message);
   });
+
+  // create browser download folder
+  Fs.mkdirSync(downloadDir, { recursive: true });
 
   // download Edge driver only in case of usage
   if (browserType === Browsers.ChromiumEdge) {
@@ -323,7 +356,7 @@ export async function initWebDriver(
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
+          attemptToCreateCommand(log, browserType, lifecycle, config),
         ]);
 
         if (!command) {

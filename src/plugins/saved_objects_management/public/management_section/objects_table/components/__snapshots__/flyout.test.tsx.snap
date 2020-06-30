@@ -2,11 +2,7 @@
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader
@@ -47,7 +43,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <ForwardRef
+                "indexPatternLink": <EuiLink
                   href=""
                 >
                   <FormattedMessage
@@ -55,7 +51,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                     id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -321,11 +317,7 @@ exports[`Flyout errors should display unsupported type errors properly 1`] = `
 
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader
@@ -391,7 +383,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <ForwardRef
+                "indexPatternLink": <EuiLink
                   href=""
                 >
                   <FormattedMessage
@@ -399,7 +391,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
                     id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </ForwardRef>,
+                </EuiLink>,
               }
             }
           />
@@ -553,7 +545,7 @@ Array [
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <ForwardRef
+            "indexPatternLink": <EuiLink
               href=""
             >
               <FormattedMessage
@@ -561,7 +553,7 @@ Array [
                 id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </ForwardRef>,
+            </EuiLink>,
           }
         }
       />
@@ -586,11 +578,7 @@ Array [
 
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader

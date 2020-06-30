@@ -43,7 +43,7 @@ function getSuggestion(table: TableSuggestion): VisualizationSuggestion<State> {
 
   return {
     title,
-    score: 0.5,
+    score: 0.1,
     previewIcon: chartMetricSVG,
     state: {
       layerId: table.layerId,

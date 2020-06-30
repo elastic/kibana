@@ -27,37 +27,71 @@ import { EuiText } from '@elastic/eui';
 import { useInput, useComboInput, useCore, useGetSettings, sendPutSettings } from '../hooks';
 import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
 
+const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+
 interface Props {
   onClose: () => void;
 }
 
-function useSettingsForm(outputId: string | undefined) {
+function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
+  const [isLoading, setIsloading] = React.useState(false);
   const { notifications } = useCore();
-  const kibanaUrlInput = useInput();
-  const elasticsearchUrlInput = useComboInput([]);
+  const kibanaUrlInput = useInput('', (value) => {
+    if (!value.match(URL_REGEX)) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.kibanaUrlError', {
+          defaultMessage: 'Invalid URL',
+        }),
+      ];
+    }
+  });
+  const elasticsearchUrlInput = useComboInput([], (value) => {
+    if (value.some((v) => !v.match(URL_REGEX))) {
+      return [
+        i18n.translate('xpack.ingestManager.settings.elasticHostError', {
+          defaultMessage: 'Invalid URL',
+        }),
+      ];
+    }
+  });
 
   return {
+    isLoading,
     onSubmit: async () => {
+      if (!kibanaUrlInput.validate() || !elasticsearchUrlInput.validate()) {
+        return;
+      }
+
       try {
+        setIsloading(true);
         if (!outputId) {
           throw new Error('Unable to load outputs');
         }
-        await sendPutOutput(outputId, {
+        const outputResponse = await sendPutOutput(outputId, {
           hosts: elasticsearchUrlInput.value,
         });
-        await sendPutSettings({
+        if (outputResponse.error) {
+          throw outputResponse.error;
+        }
+        const settingsResponse = await sendPutSettings({
           kibana_url: kibanaUrlInput.value,
         });
+        if (settingsResponse.error) {
+          throw settingsResponse.error;
+        }
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.ingestManager.settings.success.message', {
+            defaultMessage: 'Settings saved',
+          })
+        );
+        setIsloading(false);
+        onSuccess();
       } catch (error) {
+        setIsloading(false);
         notifications.toasts.addError(error, {
           title: 'Error',
         });
       }
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.ingestManager.settings.success.message', {
-          defaultMessage: 'Settings saved',
-        })
-      );
     },
     inputs: {
       kibanaUrl: kibanaUrlInput,
@@ -72,7 +106,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const settings = settingsRequest?.data?.item;
   const outputsRequest = useGetOutputs();
   const output = outputsRequest.data?.items?.[0];
-  const { inputs, onSubmit } = useSettingsForm(output?.id);
+  const { inputs, onSubmit, isLoading } = useSettingsForm(output?.id, onClose);
 
   useEffect(() => {
     if (output) {
@@ -110,7 +144,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           },
         ]}
         idSelected={'enabled'}
-        onChange={id => {}}
+        onChange={(id) => {}}
         legend={{
           children: (
             <EuiTitle size="xs">
@@ -133,7 +167,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
               'xpack.ingestManager.settings.integrationUpgradeEnabledFieldLabel',
               {
                 defaultMessage:
-                  'Automatically update Integrations to the latest version to receive the latest assets. Agent configurations may need to be updated in order to use new features.',
+                  'Automatically update integrations to the latest version to receive the latest assets. Agent configurations may need to be updated in order to use new features.',
               }
             ),
           },
@@ -149,14 +183,14 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           },
         ]}
         idSelected={'enabled'}
-        onChange={id => {}}
+        onChange={(id) => {}}
         legend={{
           children: (
             <EuiTitle size="xs">
               <h3>
                 <FormattedMessage
                   id="xpack.ingestManager.settings.integrationUpgradeFieldLabel"
-                  defaultMessage="Elastic integration version"
+                  defaultMessage="Integration version"
                 />
               </h3>
             </EuiTitle>
@@ -185,6 +219,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           label={i18n.translate('xpack.ingestManager.settings.kibanaUrlLabel', {
             defaultMessage: 'Kibana URL',
           })}
+          {...inputs.kibanaUrl.formRowProps}
         >
           <EuiFieldText required={true} {...inputs.kibanaUrl.props} name="kibanaUrl" />
         </EuiFormRow>
@@ -195,6 +230,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           label={i18n.translate('xpack.ingestManager.settings.elasticsearchUrlLabel', {
             defaultMessage: 'Elasticsearch URL',
           })}
+          {...inputs.elasticsearchUrl.formRowProps}
         >
           <EuiComboBox noSuggestions {...inputs.elasticsearchUrl.props} />
         </EuiFormRow>
@@ -226,7 +262,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} iconType="save">
+            <EuiButton onClick={onSubmit} iconType="save" isLoading={isLoading}>
               <FormattedMessage
                 id="xpack.ingestManager.settings.saveButtonLabel"
                 defaultMessage="Save settings"

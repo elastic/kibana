@@ -24,14 +24,12 @@ import { getSerialDiffMetricAgg } from './serial_diff';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
-describe('parent pipeline aggs', function() {
+describe('parent pipeline aggs', function () {
   const getInternalStartServices: GetInternalStartServicesFn = () =>
     (({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       notifications: notificationServiceMock.createStartContract(),
     } as unknown) as InternalStartServices);
 
@@ -61,7 +59,7 @@ describe('parent pipeline aggs', function() {
     },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -76,9 +74,7 @@ describe('parent pipeline aggs', function() {
         const field = {
           name: 'field',
           format: {
-            type: {
-              id: 'bytes',
-            },
+            toJSON: () => ({ id: 'bytes' }),
           },
         };
         const indexPattern = {
@@ -111,7 +107,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry, fieldFormats: getInternalStartServices().fieldFormats }
+          { typesRegistry }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -197,14 +193,14 @@ describe('parent pipeline aggs', function() {
         );
       });
 
-      it('should have correct formatter', () => {
+      it('should have correct serialized format', () => {
         init({
           metricAgg: '3',
         });
-        expect(metricAgg.getFormat(aggConfig).type.id).toBe('bytes');
+        expect(metricAgg.getSerializedFormat(aggConfig).id).toBe('bytes');
       });
 
-      it('should have correct customMetric nested formatter', () => {
+      it('should have correct customMetric nested serialized format', () => {
         init({
           metricAgg: 'custom',
           customMetric: {
@@ -222,7 +218,7 @@ describe('parent pipeline aggs', function() {
             schema: 'orderAgg',
           },
         });
-        expect(metricAgg.getFormat(aggConfig).type.id).toBe('bytes');
+        expect(metricAgg.getSerializedFormat(aggConfig).id).toBe('bytes');
       });
 
       it("should call modifyAggConfigOnSearchRequestStart for its customMetric's parameters", () => {
@@ -243,7 +239,7 @@ describe('parent pipeline aggs', function() {
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
         expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);

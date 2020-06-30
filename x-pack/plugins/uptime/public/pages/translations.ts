@@ -6,6 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SETTINGS_ON_CERT = i18n.translate('xpack.uptime.certificates.settingsLinkLabel', {
+  defaultMessage: 'Settings',
+});
+
+export const RETURN_TO_OVERVIEW = i18n.translate(
+  'xpack.uptime.certificates.returnToOverviewLinkLabel',
+  {
+    defaultMessage: 'Return to overview',
+  }
+);
+
+export const REFRESH_CERT = i18n.translate('xpack.uptime.certificates.refresh', {
+  defaultMessage: 'Refresh',
+});
+
 export const settings = {
   breadcrumbText: i18n.translate('xpack.uptime.settingsBreadcrumbText', {
     defaultMessage: 'Settings',
@@ -20,4 +35,11 @@ export const settings = {
   returnToOverviewLinkLabel: i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
     defaultMessage: 'Return to overview',
   }),
+  mustBeNumber: i18n.translate('xpack.uptime.settings.blankNumberField.error', {
+    defaultMessage: 'Must be a number.',
+  }),
 };
+
+export const BLANK_STR = i18n.translate('xpack.uptime.settings.blank.error', {
+  defaultMessage: 'May not be blank.',
+});

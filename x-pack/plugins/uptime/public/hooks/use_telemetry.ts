@@ -13,6 +13,7 @@ export enum UptimePage {
   Overview = 'Overview',
   Monitor = 'Monitor',
   Settings = 'Settings',
+  Certificates = 'Certificates',
   NotFound = '__not-found__',
 }
 

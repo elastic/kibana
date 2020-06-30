@@ -55,6 +55,13 @@ function getTabs(disableLinks: boolean): Tab[] {
       }),
       disabled: false,
     },
+    {
+      id: 'settings',
+      name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
+        defaultMessage: 'Settings',
+      }),
+      disabled: false,
+    },
   ];
 }
 interface TabData {
@@ -63,16 +70,19 @@ interface TabData {
 }
 
 const TAB_DATA: Record<TabId, TabData> = {
-  overview: { testSubject: 'mlMainTab overview', pathId: 'overview' },
+  overview: { testSubject: 'mlMainTab overview' },
+  // Note that anomaly detection jobs list is mapped to ml#/jobs.
   anomaly_detection: { testSubject: 'mlMainTab anomalyDetection', pathId: 'jobs' },
   data_frame_analytics: { testSubject: 'mlMainTab dataFrameAnalytics' },
   datavisualizer: { testSubject: 'mlMainTab dataVisualizer' },
+  settings: { testSubject: 'mlMainTab settings' },
+  'access-denied': { testSubject: 'mlMainTab overview' },
 };
 
 export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   const [globalState] = useUrlState('_g');
   const [selectedTabId, setSelectedTabId] = useState(tabId);
-  function onSelectedTabChanged(id: string) {
+  function onSelectedTabChanged(id: TabId) {
     setSelectedTabId(id);
   }
 
@@ -93,20 +103,23 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
             {tab.name}
           </EuiTab>
         ) : (
-          <EuiLink
-            data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
-            href={`#/${defaultPathId}${fullGlobalStateString}`}
-            key={`${id}-key`}
-            color="text"
-          >
-            <EuiTab
-              className={'mlNavigationMenu__mainTab'}
-              onClick={() => onSelectedTabChanged(id)}
-              isSelected={id === selectedTabId}
+          <div className="euiTab" key={`div-${id}-key`}>
+            <EuiLink
+              data-test-subj={testSubject + (id === selectedTabId ? ' selected' : '')}
+              href={`#/${defaultPathId}${fullGlobalStateString}`}
+              key={`${id}-key`}
+              color="text"
             >
-              {tab.name}
-            </EuiTab>
-          </EuiLink>
+              <EuiTab
+                className={'mlNavigationMenu__mainTab'}
+                onClick={() => onSelectedTabChanged(id)}
+                isSelected={id === selectedTabId}
+                key={`tab-${id}-key`}
+              >
+                {tab.name}
+              </EuiTab>
+            </EuiLink>
+          </div>
         );
       })}
     </EuiTabs>

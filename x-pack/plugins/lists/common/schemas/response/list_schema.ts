@@ -37,3 +37,6 @@ export const listSchema = t.exact(
 );
 
 export type ListSchema = t.TypeOf<typeof listSchema>;
+
+export const listArraySchema = t.array(listSchema);
+export type ListArraySchema = t.TypeOf<typeof listArraySchema>;

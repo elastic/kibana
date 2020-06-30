@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+} from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -18,12 +21,13 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-} from './utils';
+  waitFor,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('create_rules_bulk', () => {
     describe('validation errors', () => {
@@ -66,6 +70,53 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+      });
+
+      /*
+       This test is to ensure no future regressions introduced by the following scenario
+       a call to updateApiKey was invalidating the api key used by the
+       rule while the rule was executing, or even before it executed,
+       on the first rule run.
+       this pr https://github.com/elastic/kibana/pull/68184
+       fixed this by finding the true source of a bug that required the manual
+       api key update, and removed the call to that function.
+
+       When the api key is updated before / while the rule is executing, the alert
+       executor no longer has access to a service to update the rule status
+       saved object in Elasticsearch. Because of this, we cannot set the rule into
+       a 'failure' state, so the user ends up seeing 'going to run' as that is the
+       last status set for the rule before it erupts in an error that cannot be
+       recorded inside of the executor.
+
+       This adds an e2e test for the backend to catch that in case
+       this pops up again elsewhere.
+      */
+      it('should create a single rule with a rule_id and validate it ran successfully', async () => {
+        const simpleRule = getSimpleRule();
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .set('kbn-xsrf', 'true')
+          .send([simpleRule])
+          .expect(200);
+
+        // wait for Task Manager to execute the rule and update status
+        await waitFor(async () => {
+          const { body: statusBody } = await supertest
+            .post(DETECTION_ENGINE_RULES_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ids: [body[0].id] })
+            .expect(200);
+          return statusBody[body[0].id].current_status?.status === 'succeeded';
+        });
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body[0].id] })
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body[0]);
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
       });
 
       it('should create a single rule without a rule_id', async () => {

@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './toggle_all_features.scss';
+
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -51,7 +54,7 @@ export class ToggleAllFeatures extends Component<Props, State> {
       </EuiLink>
     );
 
-    const items = options.map(item => {
+    const items = options.map((item) => {
       return (
         <EuiContextMenuItem
           data-test-subj={`spc-toggle-all-features-${item.id}`}

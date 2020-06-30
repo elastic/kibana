@@ -3,112 +3,54 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isNumber } from 'lodash';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { ESFilter } from '../../../../typings/elasticsearch';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  PROCESSOR_EVENT
-} from '../../../../common/elasticsearch_fieldnames';
+import { LegacyAPICaller, Logger } from 'kibana/server';
+import { ScopedAnnotationsClient } from '../../../../../observability/server';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { rangeFilter } from '../../helpers/range_filter';
-import { SERVICE_VERSION } from '../../../../common/elasticsearch_fieldnames';
+import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
   setup,
   serviceName,
-  environment
+  environment,
+  annotationsClient,
+  apiCaller,
+  logger,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
+  annotationsClient?: ScopedAnnotationsClient;
+  apiCaller: LegacyAPICaller;
+  logger: Logger;
 }) {
-  const { start, end, client, indices } = setup;
+  // start fetching derived annotations (based on transactions), but don't wait on it
+  // it will likely be significantly slower than the stored annotations
+  const derivedAnnotationsPromise = getDerivedServiceAnnotations({
+    setup,
+    serviceName,
+    environment,
+  });
 
-  const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { range: rangeFilter(start, end) },
-    { term: { [SERVICE_NAME]: serviceName } }
-  ];
+  const storedAnnotations = annotationsClient
+    ? await getStoredAnnotations({
+        setup,
+        serviceName,
+        environment,
+        annotationsClient,
+        apiCaller,
+        logger,
+      })
+    : [];
 
-  if (environment) {
-    filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
+  if (storedAnnotations.length) {
+    derivedAnnotationsPromise.catch(() => {
+      // handle error silently to prevent Kibana from crashing
+    });
+    return { annotations: storedAnnotations };
   }
 
-  const versions =
-    (
-      await client.search({
-        index: indices['apm_oss.transactionIndices'],
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: {
-            bool: {
-              filter
-            }
-          },
-          aggs: {
-            versions: {
-              terms: {
-                field: SERVICE_VERSION
-              }
-            }
-          }
-        }
-      })
-    ).aggregations?.versions.buckets.map(bucket => bucket.key) ?? [];
-
-  if (versions.length > 1) {
-    const annotations = await Promise.all(
-      versions.map(async version => {
-        const response = await client.search({
-          index: indices['apm_oss.transactionIndices'],
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: filter
-                  .filter(esFilter => !Object.keys(esFilter).includes('range'))
-                  .concat({
-                    term: {
-                      [SERVICE_VERSION]: version
-                    }
-                  })
-              }
-            },
-            aggs: {
-              first_seen: {
-                min: {
-                  field: '@timestamp'
-                }
-              }
-            },
-            track_total_hits: false
-          }
-        });
-
-        const firstSeen = response.aggregations?.first_seen.value;
-
-        if (!isNumber(firstSeen)) {
-          throw new Error(
-            'First seen for version was unexpectedly undefined or null.'
-          );
-        }
-
-        if (firstSeen < start || firstSeen > end) {
-          return null;
-        }
-
-        return {
-          type: AnnotationType.VERSION,
-          id: version,
-          time: firstSeen,
-          text: version
-        };
-      })
-    );
-    return { annotations: annotations.filter(Boolean) as Annotation[] };
-  }
-  return { annotations: [] };
+  return {
+    annotations: await derivedAnnotationsPromise,
+  };
 }

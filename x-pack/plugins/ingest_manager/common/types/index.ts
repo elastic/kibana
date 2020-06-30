@@ -14,7 +14,8 @@ export interface IngestManagerConfigType {
   };
   fleet: {
     enabled: boolean;
-    defaultOutputHost: string;
+    tlsCheckDisabled: boolean;
+    pollingRequestTimeout: number;
     kibana: {
       host?: string;
       ca_sha256?: string;
