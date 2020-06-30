@@ -19,7 +19,7 @@ import { useServices } from '../../../../../app_context';
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
-  editTemplate: (name: string, isLegacy: boolean) => void;
+  editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
   history: ScopedHistory;
 }
@@ -167,8 +167,8 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             }
           ),
           icon: 'copy',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            cloneTemplate(name, isLegacy);
+          onClick: ({ name }: TemplateListItem) => {
+            cloneTemplate(name, true);
           },
         },
         {

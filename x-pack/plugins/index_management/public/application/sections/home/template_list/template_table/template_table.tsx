@@ -7,27 +7,34 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
-import { TemplateDeleteModal } from '../../../../components';
+import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { SendRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { encodePathForReactRouter } from '../../../../services/routing';
+import { useServices } from '../../../../app_context';
+import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: string) => void;
+  cloneTemplate: (name: string) => void;
   history: ScopedHistory;
 }
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
   templates,
   reload,
-  history,
   editTemplate,
+  cloneTemplate,
+  history,
 }) => {
+  const { uiMetricService } = useServices();
+  const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -40,6 +47,23 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+      render: (name: TemplateListItem['name'], item: TemplateListItem) => {
+        return (
+          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+          <EuiLink
+            {...reactRouterNavigate(
+              history,
+              {
+                pathname: `/templates/${encodePathForReactRouter(name)}`,
+              },
+              () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+            )}
+            data-test-subj="templateDetailsLink"
+          >
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'indexPatterns',
@@ -121,6 +145,35 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           },
           enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
         },
+        {
+          type: 'icon',
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
+            defaultMessage: 'Clone',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
+            defaultMessage: 'Clone this template',
+          }),
+          icon: 'copy',
+          onClick: ({ name }: TemplateListItem) => {
+            cloneTemplate(name);
+          },
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
+            defaultMessage: 'Delete',
+          }),
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
+            defaultMessage: 'Delete this template',
+          }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
+            setTemplatesToDelete([{ name, isLegacy }]);
+          },
+          isPrimary: true,
+          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+        },
       ],
     },
   ];
@@ -137,10 +190,47 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   } as const;
 
+  const selectionConfig = {
+    onSelectionChange: setSelection,
+    selectable: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+    selectableMessage: (selectable: boolean) => {
+      if (!selectable) {
+        return i18n.translate(
+          'xpack.idxMgmt.templateList.legacyTable.deleteManagedTemplateTooltip',
+          {
+            defaultMessage: 'You cannot delete a managed template.',
+          }
+        );
+      }
+      return '';
+    },
+  };
+
   const searchConfig = {
     box: {
       incremental: true,
     },
+    toolsLeft:
+      selection.length > 0 ? (
+        <EuiButton
+          data-test-subj="deleteTemplatesButton"
+          onClick={() =>
+            setTemplatesToDelete(
+              selection.map(({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => ({
+                name,
+                isLegacy,
+              }))
+            )
+          }
+          color="danger"
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.templateList.table.deleteTemplatesButtonLabel"
+            defaultMessage="Delete {count, plural, one {template} other {templates} }"
+            values={{ count: selection.length }}
+          />
+        </EuiButton>
+      ) : undefined,
     toolsRight: [
       <EuiButton
         iconType="plusInCircle"
@@ -177,7 +267,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         columns={columns}
         search={searchConfig}
         sorting={sorting}
-        isSelectable={false}
+        isSelectable={true}
+        selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({
           'data-test-subj': 'row',
