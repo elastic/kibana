@@ -16,7 +16,7 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
@@ -105,7 +105,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <ExplorerSwimlaneContainer
+        <EmbeddableSwimLaneContainer
           id={this.input.id}
           embeddableInput={this.getInput$()}
           services={this.services}

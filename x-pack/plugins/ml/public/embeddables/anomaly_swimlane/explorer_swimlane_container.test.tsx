@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -38,6 +38,7 @@ describe('ExplorerSwimlaneContainer', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: BehaviorSubject<any>;
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  const onInputChange = jest.fn();
 
   beforeEach(() => {
     embeddableInput = new BehaviorSubject({
@@ -67,13 +68,14 @@ describe('ExplorerSwimlaneContainer', () => {
     ]);
 
     const { findByTestId } = render(
-      <ExplorerSwimlaneContainer
+      <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
+        onInputChange={onInputChange}
       />,
       defaultOptions
     );
@@ -91,13 +93,14 @@ describe('ExplorerSwimlaneContainer', () => {
     ]);
 
     const { findByText } = render(
-      <ExplorerSwimlaneContainer
+      <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
+        onInputChange={onInputChange}
       />,
       defaultOptions
     );
@@ -107,13 +110,14 @@ describe('ExplorerSwimlaneContainer', () => {
 
   test('should render a loading indicator during the data fetching', async () => {
     const { findByTestId } = render(
-      <ExplorerSwimlaneContainer
+      <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
+        onInputChange={onInputChange}
       />,
       defaultOptions
     );

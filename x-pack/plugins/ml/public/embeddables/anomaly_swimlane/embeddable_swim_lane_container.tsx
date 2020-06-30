@@ -31,7 +31,7 @@ export interface ExplorerSwimlaneContainerProps {
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
-export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
+export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   id,
   embeddableInput,
   services,
