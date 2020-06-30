@@ -8,7 +8,7 @@ import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
-  unenrolledHostIds?: string[];
+  unenrolledAgentIds?: string[];
 }
 
 export async function kibanaRequestToMetadataListESQuery(
@@ -22,7 +22,7 @@ export async function kibanaRequestToMetadataListESQuery(
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
-      query: buildQueryBody(request, queryBuilderOptions?.unenrolledHostIds!),
+      query: buildQueryBody(request, queryBuilderOptions?.unenrolledAgentIds!),
       collapse: {
         field: 'host.id',
         inner_hits: {
@@ -76,21 +76,21 @@ async function getPagingProperties(
 function buildQueryBody(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
-  unerolledHostIds: string[] | undefined
+  unerolledAgentIds: string[] | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> {
-  const filterUnenrolledHosts = unerolledHostIds && unerolledHostIds.length > 0;
+  const filterUnenrolledAgents = unerolledAgentIds && unerolledAgentIds.length > 0;
   if (typeof request?.body?.filter === 'string') {
     const kqlQuery = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
     return {
       bool: {
-        must: filterUnenrolledHosts
+        must: filterUnenrolledAgents
           ? [
               {
                 bool: {
                   must_not: {
                     terms: {
-                      'host.id': unerolledHostIds,
+                      'elastic.agent.id': unerolledAgentIds,
                     },
                   },
                 },
@@ -107,12 +107,12 @@ function buildQueryBody(
       },
     };
   }
-  return filterUnenrolledHosts
+  return filterUnenrolledAgents
     ? {
         bool: {
           must_not: {
             terms: {
-              'host.id': unerolledHostIds,
+              'elastic.agent.id': unerolledAgentIds,
             },
           },
         },

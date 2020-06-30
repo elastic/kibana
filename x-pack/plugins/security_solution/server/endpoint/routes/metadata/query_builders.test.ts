@@ -63,7 +63,7 @@ describe('query builder', () => {
       'test default query params for all endpoints metadata when no params or body is provided ' +
         'with unenrolled host ids excluded',
       async () => {
-        const unenrolledHostId = '1fdca33f-799f-49f4-939c-ea4383c77672';
+        const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
         const mockRequest = httpServerMock.createKibanaRequest({
           body: {},
         });
@@ -76,7 +76,7 @@ describe('query builder', () => {
           },
           metadataIndexPattern,
           {
-            unenrolledHostIds: [unenrolledHostId],
+            unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
 
@@ -86,7 +86,7 @@ describe('query builder', () => {
               bool: {
                 must_not: {
                   terms: {
-                    'host.id': ['1fdca33f-799f-49f4-939c-ea4383c77672'],
+                    'elastic.agent.id': [unenrolledElasticAgentId],
                   },
                 },
               },
@@ -198,7 +198,7 @@ describe('query builder', () => {
       'test default query params for all endpoints endpoint metadata excluding unerolled endpoint ' +
         'and when body filter is provided',
       async () => {
-        const unenrolledHostId = '1fdca33f-799f-49f4-939c-ea4383c77672';
+        const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
         const mockRequest = httpServerMock.createKibanaRequest({
           body: {
             filter: 'not host.ip:10.140.73.246',
@@ -213,7 +213,7 @@ describe('query builder', () => {
           },
           metadataIndexPattern,
           {
-            unenrolledHostIds: [unenrolledHostId],
+            unenrolledAgentIds: [unenrolledElasticAgentId],
           }
         );
 
@@ -226,7 +226,7 @@ describe('query builder', () => {
                     bool: {
                       must_not: {
                         terms: {
-                          'host.id': [unenrolledHostId],
+                          'elastic.agent.id': [unenrolledElasticAgentId],
                         },
                       },
                     },
