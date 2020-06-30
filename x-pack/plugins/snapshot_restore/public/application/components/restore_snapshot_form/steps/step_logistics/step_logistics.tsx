@@ -33,6 +33,8 @@ import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../shared';
 
 import { StepProps } from '../index';
 
+import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
+
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
   restoreSettings,
@@ -42,7 +44,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   const { i18n } = useServices();
   const {
     indices: unfilteredSnapshotIndices,
-    dataStreams: snapshotDataStreams,
+    dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
   } = snapshotDetails;
 
@@ -167,6 +169,11 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {snapshotDataStreams.length ? (
+        <DataStreamsGlobalStateCallOut dataStreamsCount={snapshotDataStreams.length} />
+      ) : undefined}
+
       <EuiSpacer size="l" />
 
       {/* Indices */}
