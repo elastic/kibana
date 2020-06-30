@@ -1042,7 +1042,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`includes namespaces property for multi-namespace documents`, async () => {
+      it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
         const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
         const result = await bulkGetSuccess([obj1, obj]);
         expect(result).toEqual({
@@ -1365,12 +1365,13 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id, attributes, references }) => ({
+      const expectSuccessResult = ({ type, id, attributes, references, namespaces }) => ({
         type,
         id,
         attributes,
         references,
         version: mockVersion,
+        namespaces: namespaces ?? ['default'],
         ...mockTimestampFields,
       });
 
@@ -1404,12 +1405,12 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`includes namespaces property for multi-namespace documents`, async () => {
+      it(`includes namespaces property for single-namespace and multi-namespace documents`, async () => {
         const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
         const result = await bulkUpdateSuccess([obj1, obj]);
         expect(result).toEqual({
           saved_objects: [
-            expect.not.objectContaining({ namespaces: expect.anything() }),
+            expect.objectContaining({ namespaces: expect.any(Array) }),
             expect.objectContaining({ namespaces: expect.any(Array) }),
           ],
         });
