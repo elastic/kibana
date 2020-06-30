@@ -42,6 +42,25 @@ export class UpdateSourceEditor extends Component<Props, State> {
     }
     if (!_.isEqual(settings.fields, this._getFieldDescriptors())) {
       changes.push({ propName: 'fields', value: settings.fields });
+
+      // Remove dangling tooltips.
+      // This behaves similar to how stale styling properties are removed (e.g. on metric-change in agg sources)
+      const sanitizedTooltips = [];
+      for (let i = 0; i < this.props.tooltipFields.length; i++) {
+        const tooltipName = this.props.tooltipFields[i].getName();
+        let hasMatch = false;
+        for (let j = 0; j < settings.fields.length; j++) {
+          if (settings.fields[j].name === tooltipName) {
+            hasMatch = true;
+            sanitizedTooltips.push(tooltipName);
+            break;
+          }
+        }
+      }
+
+      if (!_.isEqual(sanitizedTooltips, this.props.tooltipFields)) {
+        changes.push({ propName: 'tooltipProperties', value: sanitizedTooltips });
+      }
     }
     this.props.onChange(...changes);
   };

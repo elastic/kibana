@@ -34,23 +34,14 @@ describe('canFormatFeatureProperties', () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
     expect(source.canFormatFeatureProperties()).toEqual(false);
   });
-  it('true if at least one matching tooltip', async () => {
+  it('true if tooltip', async () => {
     const descriptorWithTooltips = {
       ...descriptor,
       fields: [{ name: 'foobar', type: MVT_FIELD_TYPE.STRING }],
-      tooltipProperties: ['foo', 'foobar', 'bar'],
+      tooltipProperties: ['foobar'],
     };
     const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
     expect(source.canFormatFeatureProperties()).toEqual(true);
-  });
-  it('false if no matching tooltip', async () => {
-    const descriptorWithTooltips = {
-      ...descriptor,
-      fields: [{ name: 'foobar', type: MVT_FIELD_TYPE.STRING }],
-      tooltipProperties: ['foo', 'bar'],
-    };
-    const source = new MVTSingleLayerVectorSource(descriptorWithTooltips);
-    expect(source.canFormatFeatureProperties()).toEqual(false);
   });
 });
 
