@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiBetaBadge, EuiEmptyPrompt, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiEmptyPrompt, EuiLink, EuiPanel, EuiTitle, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getEndpointListPath } from '../../../management/common/routing';
@@ -15,7 +15,7 @@ import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
 
 const EMPTY_PROMPT_STYLE = Object.freeze({ maxWidth: '100%' });
 
-export const EndpointNotice = memo(() => {
+export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
   const endpointsPath = getEndpointListPath({ name: 'endpointList' });
   const endpointsLink = useManagementFormatUrl(endpointsPath);
   const handleGetStartedClick = useNavigateToAppEventHandler(MANAGEMENT_APP_ID, {
@@ -64,6 +64,12 @@ export const EndpointNotice = memo(() => {
                 }}
               />
             </p>
+            <EuiButton onClick={onDismiss}>
+              <FormattedMessage
+                id="xpack.securitySolution.overview.endpointNotice.dismiss"
+                defaultMessage="Dismiss"
+              />
+            </EuiButton>
           </>
         }
       />

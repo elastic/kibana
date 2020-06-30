@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
@@ -41,6 +41,13 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   setAbsoluteRangeDatePicker,
 }) => {
   const { indicesExist, indexPattern } = useWithSource();
+  const [showEndpointNotice, setShowEndpointNotice] = useState(
+    localStorage.getItem('dismissEndpointNotice') === null
+  );
+  const dismissEndpointNotice = () => {
+    setShowEndpointNotice(false);
+    localStorage.setItem('dismissEndpointNotice', 'true');
+  };
 
   return (
     <>
@@ -50,7 +57,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <EndpointNotice />
+          {showEndpointNotice && <EndpointNotice onDismiss={dismissEndpointNotice} />}
 
           <WrapperPage>
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
