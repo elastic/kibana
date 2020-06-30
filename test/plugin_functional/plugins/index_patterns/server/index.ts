@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export * from '../../../common/index_patterns/index_patterns';
-export * from './redirect_no_index_pattern';
-export * from './on_unsupported_time_pattern';
-export * from './index_patterns_api_client';
+import { PluginInitializer } from 'kibana/server';
+import {
+  IndexPatternsTestPlugin,
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart,
+} from './plugin';
+
+export const plugin: PluginInitializer<
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart
+> = () => new IndexPatternsTestPlugin();
