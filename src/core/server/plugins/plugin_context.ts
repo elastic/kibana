@@ -169,9 +169,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
     },
-    metrics: {
-      getOpsMetrics$: deps.metrics.getOpsMetrics$,
-    },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
@@ -224,6 +221,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
+    },
+    metrics: {
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

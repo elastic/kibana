@@ -5,11 +5,13 @@
  */
 
 import Boom from 'boom';
+import semver from 'semver';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import * as APIKeyService from '../api_keys';
+import { appContextService } from '../app_context';
 
 export async function enroll(
   soClient: SavedObjectsClientContract,
@@ -18,6 +20,12 @@ export async function enroll(
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
+  const kibanaVersion = appContextService.getKibanaVersion();
+  const version: string | undefined = metadata?.local?.elastic?.agent?.version;
+  if (!version || semver.compare(version, kibanaVersion) === 1) {
+    throw Boom.badRequest('Agent version is not compatible with kibana version');
+  }
+
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
   if (existingAgent && existingAgent.active === true) {

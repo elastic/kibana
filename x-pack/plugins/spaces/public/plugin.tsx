@@ -87,10 +87,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart, plugins: PluginsStart) {
     initSpacesNavControl(this.spacesManager, core);
 
-    if (this.managementService) {
-      this.managementService.start({ capabilities: core.application.capabilities });
-    }
-
     return {
       activeSpace$: this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),

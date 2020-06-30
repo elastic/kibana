@@ -21,8 +21,9 @@ import { Url } from 'url';
 import { Request, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
@@ -156,7 +157,7 @@ export class KibanaRequest<
     public readonly params: Params,
     public readonly query: Query,
     public readonly body: Body,
-    // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
+    // @ts-expect-error we will use this flag as soon as http request proxy is supported in the core
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {

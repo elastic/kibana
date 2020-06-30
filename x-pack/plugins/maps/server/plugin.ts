@@ -14,7 +14,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 // @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, createMapPath } from '../common/constants';
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getExistingMapPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
 // @ts-ignore
@@ -58,7 +58,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('ecommerce', [
         {
-          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -80,7 +80,7 @@ export class MapsPlugin implements Plugin {
 
       home.sampleData.addAppLinksToSampleDataset('flights', [
         {
-          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },
@@ -101,7 +101,7 @@ export class MapsPlugin implements Plugin {
       home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
       home.sampleData.addAppLinksToSampleDataset('logs', [
         {
-          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          path: getExistingMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON,
         },

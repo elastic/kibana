@@ -57,7 +57,7 @@ interface State {
   showDeleteConfirmation: boolean;
   user: EditUser;
   roles: Role[];
-  selectedRoles: string[];
+  selectedRoles: readonly string[];
   formError: UserValidationResult | null;
 }
 
