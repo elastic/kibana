@@ -39,7 +39,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*wp*', patternName: 'wordpress' }, // TODO: Too vague?
   { pattern: '*drupal*', patternName: 'drupal' },
   { pattern: '*joomla*', patternName: 'joomla' },
-  { pattern: '*search*', patternName: 'search' },
+  { pattern: '*search*', patternName: 'search' }, // TODO: Too vague?
   { pattern: '*wix*', patternName: 'wix' }, // TODO: Too vague?
   { pattern: '*sharepoint*', patternName: 'sharepoint' },
   { pattern: '*squarespace*', patternName: 'squarespace' },
@@ -67,6 +67,9 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   // Security - Elastic
   { pattern: 'logstash-*', patternName: 'logstash', shipper: 'logstash' },
   { pattern: 'endgame-*', patternName: 'endgame', shipper: 'endgame' },
+  { pattern: 'logs-endpoint.*', patternName: 'logs-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
+  { pattern: 'metrics-endpoint.*', patternName: 'metrics-endpoint', shipper: 'endpoint' }, // It should be caught by the `mappings` logic, but just in case
+  { pattern: '.siem-signals-*', patternName: 'siem-signals' },
   { pattern: 'auditbeat-*', patternName: 'auditbeat', shipper: 'auditbeat' },
   { pattern: 'winlogbeat-*', patternName: 'winlogbeat', shipper: 'winlogbeat' },
   { pattern: 'packetbeat-*', patternName: 'packetbeat', shipper: 'packetbeat' },
@@ -78,7 +81,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*aruba*', patternName: 'aruba' },
   { pattern: '*barracuda*', patternName: 'barracuda' },
   { pattern: '*bluecoat*', patternName: 'bluecoat' },
-  { pattern: '*cef*', patternName: 'cef' }, // TODO: Too vague?
+  // { pattern: '*cef*', patternName: 'cef' }, // Disabled because it's too vague
   { pattern: '*checkpoint*', patternName: 'checkpoint' },
   { pattern: '*cisco*', patternName: 'cisco' },
   { pattern: '*citrix*', patternName: 'citrix' },
@@ -90,12 +93,19 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*kaspersky*', patternName: 'kaspersky' },
   { pattern: '*mcafee*', patternName: 'mcafee' },
   { pattern: '*paloaltonetworks*', patternName: 'paloaltonetworks' },
-  { pattern: '*pan*', patternName: 'paloaltonetworks' }, // TODO: Too vague?
-  { pattern: '*rsa*', patternName: 'rsa' }, // TODO: Too vague?
-  { pattern: '*snort*', patternName: 'snort' }, // TODO: Too vague?
+  { pattern: 'pan-*', patternName: 'paloaltonetworks' },
+  { pattern: 'pan_*', patternName: 'paloaltonetworks' },
+  { pattern: 'pan.*', patternName: 'paloaltonetworks' },
+  { pattern: 'rsa.*', patternName: 'rsa' },
+  { pattern: 'rsa-*', patternName: 'rsa' },
+  { pattern: 'rsa_*', patternName: 'rsa' },
+  { pattern: 'snort-*', patternName: 'snort' },
+  { pattern: 'logstash-snort*', patternName: 'snort' },
   { pattern: '*sonicwall*', patternName: 'sonicwall' },
   { pattern: '*sophos*', patternName: 'sophos' },
-  { pattern: '*squid*', patternName: 'squid' }, // TODO: Too vague?
+  { pattern: 'squid-*', patternName: 'squid' },
+  { pattern: 'squid_*', patternName: 'squid' },
+  { pattern: 'squid.*', patternName: 'squid' },
   { pattern: '*symantec*', patternName: 'symantec' },
   { pattern: '*tippingpoint*', patternName: 'tippingpoint' },
   { pattern: '*trendmicro*', patternName: 'trendmicro' },
@@ -103,9 +113,9 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*zscaler*', patternName: 'zscaler' },
   { pattern: '*zeek*', patternName: 'zeek' },
   { pattern: '*sigma_doc*', patternName: 'sigma_doc' },
-  { pattern: '*bro*', patternName: 'bro' }, // TODO: Too vague?
+  // { pattern: '*bro*', patternName: 'bro' }, // Disabled because it's too vague
   { pattern: '*suricata*', patternName: 'suricata' },
-  { pattern: '*fsf*', patternName: 'fsf' }, // TODO: Too vague?
+  // { pattern: '*fsf*', patternName: 'fsf' }, // Disabled because it's too vague
   { pattern: '*wazuh*', patternName: 'wazuh' },
 ] as const;
 

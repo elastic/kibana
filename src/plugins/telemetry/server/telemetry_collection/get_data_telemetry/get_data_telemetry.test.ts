@@ -72,6 +72,7 @@ describe('get_data_telemetry', () => {
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
+          { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
             name: 'logs-nginx.access-default-000001',
@@ -120,6 +121,12 @@ describe('get_data_telemetry', () => {
         },
         {
           pattern_name: 'app-search',
+          index_count: 1,
+          doc_count: 0,
+        },
+        {
+          pattern_name: 'logs-endpoint',
+          shipper: 'endpoint',
           index_count: 1,
           doc_count: 0,
         },
