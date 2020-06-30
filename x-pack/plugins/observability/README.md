@@ -4,7 +4,7 @@ This plugin provides shared components and services for use across observability
 
 ## Unit testing
 
-Note: Run the following commands from `kibana/x-pack/plugins/apm`.
+Note: Run the following commands from `kibana/x-pack/plugins/observability`.
 
 ### Run unit tests
 
