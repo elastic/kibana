@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { APICaller, Logger } from 'src/core/server';
+import { LegacyAPICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
@@ -130,7 +130,7 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callAsUser: APICaller,
+  callAsUser: LegacyAPICaller,
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginSetup,

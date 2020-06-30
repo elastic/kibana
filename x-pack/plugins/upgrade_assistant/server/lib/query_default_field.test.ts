@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { MappingProperties } from './reindexing/types';
 
@@ -42,7 +42,7 @@ describe('getDefaultFieldList', () => {
 });
 
 describe('fixMetricbeatIndex', () => {
-  let dataClient: IScopedClusterClient;
+  let dataClient: ILegacyScopedClusterClient;
   const mockMappings = {
     'metricbeat-1': {
       mappings: { properties: { field1: { type: 'text' }, field2: { type: 'float' } } },

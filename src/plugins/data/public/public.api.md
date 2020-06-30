@@ -142,6 +142,7 @@ import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
 import * as React_2 from 'react';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -1301,6 +1302,26 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
     search: ISearch<T>;
 }
 
+// Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isFilter: (x: unknown) => x is Filter;
+
+// Warning: (ae-missing-release-tag) "isFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isFilters: (x: unknown) => x is Filter[];
+
+// Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isQuery: (x: unknown) => x is Query;
+
+// Warning: (ae-missing-release-tag) "isTimeRange" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const isTimeRange: (x: unknown) => x is TimeRange;
+
 // Warning: (ae-missing-release-tag) "ISyncSearchRequest" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1521,7 +1542,7 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "query" | "placeholder" | "onChange" | "onSubmit" | "prepend" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "query" | "prepend" | "placeholder" | "onChange" | "onSubmit" | "indexPatterns" | "dataTestSubj" | "screenTitle" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;

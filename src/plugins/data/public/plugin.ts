@@ -150,7 +150,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
-        query: queryService,
       }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -192,10 +191,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, {
-      indexPatterns,
-      fieldFormats,
-    });
+    const search = this.searchService.start(core, { indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(

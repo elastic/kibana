@@ -12,8 +12,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import {
-  ElasticsearchErrorHelpers,
-  IClusterClient,
+  LegacyElasticsearchErrorHelpers,
+  ILegacyClusterClient,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -21,7 +21,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -615,7 +615,7 @@ describe('SAMLAuthenticationProvider', () => {
         ],
         [
           'session is is expired',
-          Promise.reject(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())),
+          Promise.reject(LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())),
         ],
       ] as Array<[string, Promise<any>]>) {
         it(`redirects to the home page if new SAML Response is for the same user if ${description}.`, async () => {
@@ -1342,7 +1342,7 @@ describe('SAMLAuthenticationProvider', () => {
         if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-            ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
           );
           return mockScopedClusterClient;
         }
@@ -1394,7 +1394,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1428,7 +1428,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1460,7 +1460,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1492,7 +1492,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1534,7 +1534,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 

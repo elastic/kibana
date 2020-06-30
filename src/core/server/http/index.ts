@@ -25,6 +25,7 @@ export {
   CustomHttpResponseOptions,
   IKibanaSocket,
   isRealRequest,
+  Headers,
   HttpResponseOptions,
   HttpResponsePayload,
   ErrorHttpResponseOptions,

@@ -82,7 +82,6 @@ import {
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
 export {
-  RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
