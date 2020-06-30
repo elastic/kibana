@@ -27,10 +27,11 @@ interface Options {
 }
 
 interface TaskParameters {
+  environment?: string;
+  filter: ESFilter[];
+  minutes: number;
   serviceName?: string;
   setup: Setup;
-  minutes: number;
-  filter: ESFilter[];
 }
 
 export async function getServiceMapServiceNodeInfo({
@@ -45,6 +46,10 @@ export async function getServiceMapServiceNodeInfo({
     { term: { [SERVICE_NAME]: serviceName } },
   ];
 
+  // The environment parameter given to this endpoint is not the same as the
+  // environment in the uiFilters (this endpoint doesn't take uiFilters as a
+  // parameter) but the evnironment of the selected node. We use the same function
+  // used by `getUiFiltersES` to create the filter used for environment.
   const environmentFilter = getEnvironmentUiFilterES(environment);
 
   if (environmentFilter) {
@@ -54,10 +59,11 @@ export async function getServiceMapServiceNodeInfo({
   const minutes = Math.abs((end - start) / (1000 * 60));
 
   const taskParams = {
+    environment,
+    filter,
+    minutes,
     serviceName,
     setup,
-    minutes,
-    filter,
   };
 
   const [
@@ -81,20 +87,26 @@ export async function getServiceMapServiceNodeInfo({
 }
 
 async function getErrorStats({
+  environment,
   filter,
   serviceName,
   setup,
 }: {
+  environment?: string;
   filter: ESFilter[];
   serviceName: string;
   setup: Options['setup'];
 }) {
+  // The endpoint that calls `getServiceMapServiceNodeInfo` does not take
+  // `uiFilters` but other endpoints that call getErrorRate do, so we pass in an
+  // a setup object with an empty list of uiFilters added to satisfy the type
+  // definition of `getErrorRate`
+  const setupWithBlankUiFilters = { ...setup, uiFiltersES: [] };
+
   const { average, noHits } = await getErrorRate({
+    environment,
     serviceName,
-    setup: {
-      ...setup,
-      uiFiltersES: filter,
-    },
+    setup: setupWithBlankUiFilters,
   });
 
   return { avgErrorRate: noHits ? null : average };

@@ -18,12 +18,15 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { rangeFilter } from '../../../common/utils/range_filter';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export async function getErrorRate({
+  environment,
   serviceName,
   groupId,
   setup,
 }: {
+  environment?: string;
   serviceName: string;
   groupId?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
@@ -35,6 +38,14 @@ export async function getErrorRate({
     { range: rangeFilter(start, end) },
     ...uiFiltersES,
   ];
+
+  // If environment is provided explicitly as an argument we want to filter by
+  // the provided environment, not the environment from the uiFilters.
+  const environmentFilter = getEnvironmentUiFilterES(environment);
+
+  if (environmentFilter) {
+    filter.push(environmentFilter);
+  }
 
   const aggs = {
     response_times: {
