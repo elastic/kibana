@@ -199,6 +199,7 @@ module.exports = async ({ config }) => {
   config.resolve.alias['ui/url/absolute_to_parsed_url'] = path.resolve(__dirname, '../tasks/mocks/uiAbsoluteToParsedUrl');
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
+  config.resolve.alias['src/legacy/ui/public/styles/styling_constants'] = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
 
   return config;

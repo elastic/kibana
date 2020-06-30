@@ -5,7 +5,7 @@
  */
 import { UnwrapPromise } from '@kbn/utility-types';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   CoreSetup,
   KibanaRequest,
   LoggerFactory,
@@ -40,7 +40,7 @@ interface SetupAuthenticationParams {
   auditLogger: SecurityAuditLogger;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: CoreSetup['http'];
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;

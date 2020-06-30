@@ -18,8 +18,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreStart,
+  IRouter,
+  ILegacyClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
@@ -70,7 +72,7 @@ export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -278,7 +280,7 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ICustomClusterClient
+    cluster: ILegacyCustomClusterClient
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({

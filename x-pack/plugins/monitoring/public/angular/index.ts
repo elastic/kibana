@@ -26,6 +26,7 @@ export class AngularApp {
       pluginInitializerContext,
       externalConfig,
       triggersActionsUi,
+      kibanaLegacy,
     } = deps;
     const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {

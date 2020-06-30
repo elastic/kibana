@@ -10,21 +10,6 @@ import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLJobLink } from './MLJobLink';
 
 describe('MLJobLink', () => {
-  it('should produce the correct URL with serviceName', async () => {
-    const href = await getRenderedHref(
-      () => (
-        <MLJobLink
-          serviceName="myServiceName"
-          transactionType="myTransactionType"
-        />
-      ),
-      { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location
-    );
-
-    expect(href).toEqual(
-      `/basepath/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now-4h))`
-    );
-  });
   it('should produce the correct URL with jobId', async () => {
     const href = await getRenderedHref(
       () => (

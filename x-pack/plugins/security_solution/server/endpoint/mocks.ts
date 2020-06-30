@@ -4,9 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { xpackMocks } from '../../../../mocks';
-import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import {
+  AgentService,
+  IngestManagerStartContract,
+  ExternalCallback,
+} from '../../../ingest_manager/server';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+
+/**
+ * Crates a mocked input contract for the `EndpointAppContextService#start()` method
+ */
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
+  EndpointAppContextServiceStartContract
+> => {
+  return {
+    agentService: createMockAgentService(),
+    registerIngestCallback: jest.fn<
+      ReturnType<IngestManagerStartContract['registerExternalCallback']>,
+      Parameters<IngestManagerStartContract['registerExternalCallback']>
+    >(),
+  };
+};
 
 /**
  * Creates a mock AgentService
@@ -14,6 +35,9 @@ import { AgentService, IngestManagerStartContract } from '../../../ingest_manage
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+    authenticateAgentWithAccessToken: jest.fn(),
+    getAgent: jest.fn(),
+    listAgents: jest.fn(),
   };
 };
 
@@ -32,11 +56,13 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
+    datasourceService: createDatasourceServiceMock(),
   };
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
   const context = xpackMocks.createRequestHandlerContext();

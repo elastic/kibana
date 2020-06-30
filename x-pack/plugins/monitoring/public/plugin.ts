@@ -83,6 +83,7 @@ export class MonitoringPlugin
         const { AngularApp } = await import('./angular');
         const deps: MonitoringPluginDependencies = {
           navigation: pluginsStart.navigation,
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
@@ -92,6 +93,7 @@ export class MonitoringPlugin
           triggersActionsUi: plugins.triggers_actions_ui,
         };
 
+        pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
         this.overrideAlertingEmailDefaults(deps);
 

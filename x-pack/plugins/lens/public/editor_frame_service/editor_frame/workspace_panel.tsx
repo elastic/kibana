@@ -37,6 +37,7 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -56,6 +57,7 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
+  title?: string;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -73,6 +75,7 @@ export function InnerWorkspacePanel({
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
+  title,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
@@ -291,13 +294,22 @@ export function InnerWorkspacePanel({
   }
 
   return (
-    <DragDrop
-      data-test-subj="lnsWorkspace"
-      draggable={false}
-      droppable={Boolean(suggestionForDraggedField)}
-      onDrop={onDrop}
+    <WorkspacePanelWrapper
+      title={title}
+      framePublicAPI={framePublicAPI}
+      dispatch={dispatch}
+      emptyExpression={expression === null}
+      visualizationState={visualizationState}
+      activeVisualization={activeVisualization}
     >
-      {renderVisualization()}
-    </DragDrop>
+      <DragDrop
+        data-test-subj="lnsWorkspace"
+        draggable={false}
+        droppable={Boolean(suggestionForDraggedField)}
+        onDrop={onDrop}
+      >
+        {renderVisualization()}
+      </DragDrop>
+    </WorkspacePanelWrapper>
   );
 }

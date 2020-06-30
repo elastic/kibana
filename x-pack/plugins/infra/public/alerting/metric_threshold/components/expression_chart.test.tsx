@@ -27,6 +27,7 @@ describe('ExpressionChart', () => {
     groupBy?: string
   ) {
     const mocks = coreMock.createSetup();
+    const startMocks = coreMock.createStart();
     const [
       {
         application: { capabilities },
@@ -38,7 +39,7 @@ describe('ExpressionChart', () => {
       toastNotifications: mocks.notifications.toasts,
       actionTypeRegistry: actionTypeRegistryMock.create() as any,
       alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: mocks.docLinks,
+      docLinks: startMocks.docLinks,
       capabilities: {
         ...capabilities,
         actions: {
@@ -62,6 +63,8 @@ describe('ExpressionChart', () => {
         logColumns: [],
         metricAlias: 'metricbeat-*',
         logAlias: 'filebeat-*',
+        inventoryDefaultView: 'host',
+        metricsExplorerDefaultView: 'host',
         fields: {
           timestamp: '@timestamp',
           message: ['message'],
