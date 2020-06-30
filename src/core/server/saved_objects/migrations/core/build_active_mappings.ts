@@ -131,7 +131,7 @@ function defaultMapping(): IndexMapping {
     properties: {
       migrationVersion: {
         // Saved Objects can't redefine dynamic, but we cheat here to support migrations
-        // @ts-expect-error
+        // @ts-ignore
         dynamic: 'true',
         type: 'object',
       },
