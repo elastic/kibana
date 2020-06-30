@@ -142,7 +142,7 @@ const convertHost = (
 ): NodeOptions => {
   const url = new URL(host);
   const isHTTPS = url.protocol === 'https:';
-  url.port = url.port ?? isHTTPS ? '443' : '80';
+  url.port = url.port ?? (isHTTPS ? '443' : '80');
   if (needAuth && username && password) {
     url.username = username;
     url.password = password;
