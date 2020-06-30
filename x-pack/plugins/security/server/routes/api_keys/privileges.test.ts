@@ -48,7 +48,7 @@ describe('Check API keys privileges', () => {
         apiKeys.areAPIKeysEnabled()
       );
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       for (const apiResponse of callAsCurrentUserResponses) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);

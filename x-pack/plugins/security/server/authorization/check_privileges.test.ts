@@ -21,10 +21,10 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
   mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
 
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };

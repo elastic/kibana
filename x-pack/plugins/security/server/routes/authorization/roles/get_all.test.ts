@@ -33,7 +33,7 @@ describe('GET all roles', () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       mockRouteDefinitionParams.authz.applicationName = application;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
         mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);

@@ -43,7 +43,7 @@ describe('Security Plugin', () => {
       protocol: 'https',
     });
 
-    mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
     mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
     mockDependencies = ({

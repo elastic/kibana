@@ -22,8 +22,8 @@ describe('test alerts route', () => {
   let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
 

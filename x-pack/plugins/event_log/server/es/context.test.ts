@@ -17,7 +17,7 @@ let clusterClient: EsClusterClient;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createClusterClient();
+  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 });
 
 describe('createEsContext', () => {

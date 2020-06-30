@@ -51,7 +51,7 @@ type MockCallES = (method: any, params: any) => Promise<any>;
 const setupMock = (
   criteria: MultiPageCriteria[]
 ): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
   criteria.forEach(({ after_key, bucketCriteria }) => {
     const mockResponse = {

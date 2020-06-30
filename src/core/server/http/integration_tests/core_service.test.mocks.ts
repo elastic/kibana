@@ -21,7 +21,7 @@ import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_serv
 export const clusterClientMock = jest.fn();
 jest.doMock('../../elasticsearch/legacy/scoped_cluster_client', () => ({
   LegacyScopedClusterClient: clusterClientMock.mockImplementation(function () {
-    return elasticsearchServiceMock.createScopedClusterClient();
+    return elasticsearchServiceMock.createLegacyScopedClusterClient();
   }),
 }));
 
@@ -31,7 +31,7 @@ jest.doMock('elasticsearch', () => {
     ...realES,
     // eslint-disable-next-line object-shorthand
     Client: function () {
-      return elasticsearchServiceMock.createElasticsearchClient();
+      return elasticsearchServiceMock.createLegacyElasticsearchClient();
     },
   };
 });
