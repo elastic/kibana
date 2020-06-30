@@ -1,3 +1,10 @@
+/*
+ * This file is forked from the lodash project (https://lodash.com/),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See `packages/elastic-safer-lodash-set/LICENSE` more information.
+ */
+
 var assocIndexOf = require('./_assocIndexOf');
 
 /** Used for built-in method references. */

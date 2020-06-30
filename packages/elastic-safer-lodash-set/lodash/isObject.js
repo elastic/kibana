@@ -1,3 +1,10 @@
+/*
+ * This file is forked from the lodash project (https://lodash.com/),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See `packages/elastic-safer-lodash-set/LICENSE` more information.
+ */
+
 /**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)

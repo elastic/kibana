@@ -49,6 +49,31 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const SAFER_LODASH_SET_HEADER = `
+/*
+ * Elasticsearch B.V licenses this file to you under the MIT License.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ */
+`;
+
+const SAFER_LODASH_SET_LODASH_HEADER = `
+/*
+ * This file is forked from the lodash project (https://lodash.com/),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ */
+`;
+
+const SAFER_LODASH_SET_DEFINITLYTYPED_HEADER = `
+/*
+ * This file is forked from the DefinitlyTyped project (https://github.com/DefinitelyTyped/DefinitelyTyped),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See \`packages/elastic-safer-lodash-set/LICENSE\` more information.
+ */
+`;
+
 const allMochaRulesOff = {};
 Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
   allMochaRulesOff['mocha/' + k] = 'off';
@@ -143,7 +168,12 @@ module.exports = {
         '@kbn/eslint/disallow-license-headers': [
           'error',
           {
-            licenses: [ELASTIC_LICENSE_HEADER],
+            licenses: [
+              ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+            ],
           },
         ],
       },
@@ -174,7 +204,82 @@ module.exports = {
         '@kbn/eslint/disallow-license-headers': [
           'error',
           {
-            licenses: [APACHE_2_0_LICENSE_HEADER],
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * safer-lodash-set package requires special license headers
+     */
+    {
+      files: ['packages/elastic-safer-lodash-set/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: SAFER_LODASH_SET_LODASH_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              ELASTIC_LICENSE_HEADER,
+              APACHE_2_0_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: SAFER_LODASH_SET_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              ELASTIC_LICENSE_HEADER,
+              APACHE_2_0_LICENSE_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['packages/elastic-safer-lodash-set/*.d.ts'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: SAFER_LODASH_SET_DEFINITLYTYPED_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              ELASTIC_LICENSE_HEADER,
+              APACHE_2_0_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+            ],
           },
         ],
       },

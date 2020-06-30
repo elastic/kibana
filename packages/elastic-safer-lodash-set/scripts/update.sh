@@ -13,7 +13,8 @@ for file in $all_files
 do
   if [[ ! "${modified_lodash_files[@]}" =~ "${file}" ]]
   then
-    cp ".tmp/node_modules/lodash/$file" lodash
+    cat scripts/license-header.txt > "lodash/$file"
+    cat ".tmp/node_modules/lodash/$file" >> "lodash/$file"
   fi
 done
 
