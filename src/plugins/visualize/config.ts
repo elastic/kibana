@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
-import { VisualizeServerPlugin } from './plugin';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import { ConfigSchema, configSchema } from '../config';
+export const configSchema = schema.object({
+  showNewVisualizeFlow: schema.boolean({ defaultValue: false }),
+});
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    showNewVisualizeFlow: true,
-  },
-  schema: configSchema,
-};
-
-export const plugin = (initContext: PluginInitializerContext) =>
-  new VisualizeServerPlugin(initContext);
+export type ConfigSchema = TypeOf<typeof configSchema>;
