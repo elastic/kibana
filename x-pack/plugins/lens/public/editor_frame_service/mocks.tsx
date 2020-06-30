@@ -12,9 +12,16 @@ import {
 } from '../../../../../src/plugins/expressions/public';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../../src/plugins/expressions/public/mocks';
-import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
+import {
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  Datasource,
+  Visualization,
+  ColorFunctionDefinition,
+} from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -96,7 +103,28 @@ export function createMockDatasource(id: string): DatasourceMock {
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
+export function createMockColorFunction(): jest.Mocked<ColorFunctionDefinition> {
+  return {
+    getPreviewPalette: jest.fn(() => ['#ff0000', '#00ff00']),
+    title: 'Mock Palette',
+    id: 'default',
+    renderEditor: jest.fn(),
+    toExpression: jest.fn(() => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'mock_palette',
+          arguments: {},
+        },
+      ],
+    })),
+    getColor: jest.fn().mockReturnValue('#ff0000'),
+  };
+}
+
 export function createMockFramePublicAPI(): FrameMock {
+  const palette = createMockColorFunction();
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
@@ -104,6 +132,15 @@ export function createMockFramePublicAPI(): FrameMock {
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
+    globalPalette: {
+      state: {},
+      setState: jest.fn(),
+      availableColorFunctions: {
+        default: palette,
+      },
+      colorFunction: palette,
+      setColorFunction: jest.fn(),
+    },
   };
 }
 
@@ -129,6 +166,7 @@ export function createMockSetupDependencies() {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
+    charts: chartPluginMock.createSetupContract(),
   } as unknown) as MockedSetupDependencies;
 }
 
@@ -137,5 +175,6 @@ export function createMockStartDependencies() {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
 }

@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/common';
-import color from 'color';
 import {
   euiPaletteColorBlind,
   euiPaletteComplimentary,
@@ -23,8 +20,7 @@ import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
 import { ColorFunctionDefinition, SeriesLayer } from '../../types';
 import { PaletteSetupPlugins } from './service';
 import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions';
-
-const MAX_LIGHTNESS = 93;
+import { lightenColor } from './lighten_color';
 
 function buildRoundRobinCategoricalWithMappedColors(
   colorService: ChartsPluginSetup['colors'],
@@ -37,19 +33,17 @@ function buildRoundRobinCategoricalWithMappedColors(
     const outputColor =
       colorFromSettings || actualColors[series[0].rankAtDepth % actualColors.length];
 
-    const hslColor = color(outputColor, 'hsl');
-    const outputColorLightness = hslColor.lightness();
-    const luminositySpace = Math.min(MAX_LIGHTNESS - outputColorLightness, 30);
-    const currentLevelTargetLightness =
-      outputColorLightness + luminositySpace * (series.length / series[0].maxDepth);
-    const leveledColor = hslColor.lightness(currentLevelTargetLightness);
-    return leveledColor.hex();
+    if (series[0].maxDepth === 1) {
+      return outputColor;
+    }
+
+    return lightenColor(outputColor, series.length, series[0].maxDepth);
   }
   return {
     id,
     getColor,
     ...buildStatelessExpressionIntegration(id, getColor),
-    getPreviewPalette: colors,
+    getPreviewPalette: () => colors(10),
   };
 }
 
@@ -58,8 +52,7 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
     colors.mappedColors.mapKeys([series[0].name]);
     const outputColor = colors.mappedColors.get(series[0].name);
 
-    const lighten = (series.length - 1) / (series[0].maxDepth * 2);
-    return color(outputColor, 'hsl').lighten(lighten).hex();
+    return lightenColor(outputColor, series.length, series[0].maxDepth);
   }
   return {
     id: 'kibana_palette',

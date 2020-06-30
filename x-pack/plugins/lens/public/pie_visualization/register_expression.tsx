@@ -80,6 +80,7 @@ export const pie: ExpressionFunctionDefinition<
     palette: {
       types: ['lens_palette'],
       help: '',
+      default: `{lens_palette_default}`,
     },
   },
   inputTypes: ['lens_multitable'],

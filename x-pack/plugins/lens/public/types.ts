@@ -7,7 +7,6 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { EuiColorPalettePicker } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -408,7 +407,7 @@ export interface ColorFunctionDefinition<T = unknown> {
     domElement: Element,
     props: { state?: T; setState: (updater: (oldState: T) => T) => void }
   ) => void;
-  getPreviewPalette: () => EuiColorPalettePicker['palettes'];
+  getPreviewPalette: () => string[];
 }
 
 export interface FramePublicAPI {

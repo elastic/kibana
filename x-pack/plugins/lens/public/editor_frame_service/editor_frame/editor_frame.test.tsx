@@ -17,6 +17,7 @@ import {
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
+  createMockColorFunction,
 } from '../mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
@@ -55,6 +56,9 @@ function getDefaultProps() {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+    },
+    palettes: {
+      default: createMockColorFunction(),
     },
   };
 }
@@ -261,6 +265,15 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        globalPalette: {
+          availableColorFunctions: {
+            default: expect.anything(),
+          },
+          state: undefined,
+          setState: expect.any(Function),
+          colorFunction: expect.objectContaining({ id: 'default' }),
+          setColorFunction: expect.any(Function),
+        },
       });
     });
 
@@ -1495,6 +1508,10 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
+            globalPalette: {
+              activePaletteId: 'default',
+              state: undefined,
+            },
           },
           title: '',
           type: 'lens',
@@ -1514,6 +1531,10 @@ describe('editor_frame', () => {
             datasourceStates: { testDatasource: undefined },
             query: { query: '', language: 'lucene' },
             filters: [],
+            globalPalette: {
+              activePaletteId: 'default',
+              state: undefined,
+            },
           },
           title: '',
           type: 'lens',
@@ -1568,6 +1589,10 @@ describe('editor_frame', () => {
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
             filters: [],
+            globalPalette: {
+              activePaletteId: 'default',
+              state: undefined,
+            },
           },
           title: '',
           type: 'lens',

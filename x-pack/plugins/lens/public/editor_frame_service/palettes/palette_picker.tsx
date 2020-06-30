@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiColorPalettePicker, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import { EuiColorPalettePicker } from '@elastic/eui';
 import { FramePublicAPI } from '../../types';
 import { NativeRenderer } from '../../native_renderer';
 

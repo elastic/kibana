@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockDatasource } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
 
 function mockFrame(): FramePublicAPI {
   return {
+    ...createMockFramePublicAPI(),
     addNewLayer: () => 'aaa',
     removeLayers: () => {},
     datasourceLayers: {},

@@ -11,6 +11,7 @@ import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
+import { createMockColorFunction } from '../editor_frame_service/mocks';
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -51,6 +52,7 @@ describe('PieVisualization component', () => {
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
+      palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
     };
 
     function getDefaultArgs() {

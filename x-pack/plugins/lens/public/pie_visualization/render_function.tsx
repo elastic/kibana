@@ -136,12 +136,16 @@ export function PieComponent(
             tempParent = tempParent.parent;
           }
 
-          const outputColor = palette.getColor(seriesLayers);
-
-          if (outputColor && shape === 'treemap') {
+          if (shape === 'treemap') {
             // Only highlight the innermost color of the treemap, as it accurately represents area
-            return layerIndex < columnGroups.length - 1 ? 'rgba(0,0,0,0)' : outputColor;
+            if (layerIndex < columnGroups.length - 1) {
+              return 'rgba(0,0,0,0)';
+            }
+            // only use the top level series layer for coloring
+            seriesLayers.pop();
           }
+
+          const outputColor = palette.getColor(seriesLayers);
 
           return outputColor || 'rgba(0,0,0,0)';
         },

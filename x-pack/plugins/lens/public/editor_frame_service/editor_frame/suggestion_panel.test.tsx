@@ -125,6 +125,10 @@ describe('suggestion_panel', () => {
           state: defaultProps.visualizationState,
           activeId: defaultProps.activeVisualizationId,
         },
+        globalPalette: {
+          activePaletteId: 'default',
+          state: undefined,
+        },
       };
     });
 

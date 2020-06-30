@@ -104,6 +104,7 @@ export const xyChart: ExpressionFunctionDefinition<
     palette: {
       types: ['lens_palette'],
       help: '',
+      default: `{lens_palette_default}`,
     },
   },
   fn(data: LensMultiTable, args: XYArgs) {

@@ -24,6 +24,7 @@ import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { createMockColorFunction } from '../editor_frame_service/mocks';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -207,6 +208,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
   layers,
 });
 
@@ -1230,6 +1232,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1299,6 +1302,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1355,6 +1359,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
