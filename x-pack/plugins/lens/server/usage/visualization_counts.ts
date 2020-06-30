@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { LensVisualizationUsage } from './types';
 
 export async function getVisualizationCounts(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   kibanaIndex: string
 ): Promise<LensVisualizationUsage> {
   const scriptedMetric = {

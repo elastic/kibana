@@ -56,6 +56,19 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+/**
+ * If we need to fetch, this is the entity ID to fetch.
+ */
+export const databaseDocumentIDToFetch = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToFetch
+);
+
+export const databaseDocumentIDToAbort = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToAbort
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
@@ -159,15 +172,6 @@ export const graphableProcesses = composeSelectors(
 );
 
 /**
- * Select the `ancestors` and `children` limits that were reached or exceeded
- * during the request for the current tree.
- */
-export const lineageLimitsReached = composeSelectors(
-  dataStateSelector,
-  dataSelectors.limitsReached
-);
-
-/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
@@ -182,6 +186,14 @@ const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewab
 const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
   dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
+);
+
+/**
+ * Total count of related events for a process.
+ */
+export const relatedEventTotalForProcess = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalForProcess
 );
 
 /**

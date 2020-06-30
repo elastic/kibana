@@ -64,6 +64,12 @@ export function create(workpad) {
   });
 }
 
+export async function createFromTemplate(templateId) {
+  return fetch.post(getApiPath(), {
+    templateId,
+  });
+}
+
 export function get(workpadId) {
   return fetch.get(`${getApiPath()}/${workpadId}`).then(({ data: workpad }) => {
     // shim old workpads with new properties
