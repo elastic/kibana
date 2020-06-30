@@ -67,7 +67,7 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.RequestTimeout ||
                     error instanceof esErrors.AuthenticationException ||
                     error instanceof esErrors.AuthorizationException ||
-                    // @ts-ignore
+                    // @ts-expect-error
                     error instanceof esErrors.Gone ||
                     error?.body?.error?.type === 'snapshot_in_progress_exception'
                   );
