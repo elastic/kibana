@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 /*
  * Accepts an array of data objects and a formatter function.
@@ -28,5 +28,5 @@ export function uniqLabels(arr) {
     throw new TypeError('UniqLabelUtil expects an array of objects');
   }
 
-  return _(arr).pluck('label').unique().value();
+  return _(arr).map('label').uniq().value();
 }

@@ -18,7 +18,7 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniq, map, every, isUndefined } from 'lodash3';
+import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
@@ -119,7 +119,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   getSeriesLabels = (data: any[]) => {
     const values = data.map((chart) => chart.series).reduce((a, b) => a.concat(b), []);
 
-    return compact(uniq(values, 'label')).map((label: any) => ({
+    return compact(uniqBy(values, 'label')).map((label: any) => ({
       ...label,
       values: [label.values[0].seriesRaw],
     }));

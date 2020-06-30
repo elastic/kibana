@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 import { labels } from './labels';
 import { dataArray } from './data_array';
@@ -166,9 +166,9 @@ describe('Vislib Labels Module Test Suite', function () {
       seriesArr = Array.isArray(seriesLabels);
       rowsArr = Array.isArray(rowsLabels);
       uniqSeriesLabels = _.chain(rowsData.rows)
-        .pluck('series')
+        .map('series')
         .flattenDeep()
-        .pluck('label')
+        .map('label')
         .uniq()
         .value();
     });
