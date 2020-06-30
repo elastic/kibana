@@ -10,8 +10,8 @@ import { LogsFetchDataResponse } from '../../../observability/public';
 export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
   return async () => {
     // if you need the data plugin, this is how you get it
-    const [, startPlugins] = await getStartServices();
-    const { data } = startPlugins;
+    // const [, startPlugins] = await getStartServices();
+    // const { data } = startPlugins;
 
     // if you need a core dep, we need to pass in more than just getStartServices
 
@@ -25,8 +25,8 @@ export function getLogsOverviewDataFetcher(
 ) {
   return async (): Promise<LogsFetchDataResponse> => {
     // if you need the data plugin, this is how you get it
-    const [, startPlugins] = await getStartServices();
-    const { data } = startPlugins;
+    // const [, startPlugins] = await getStartServices();
+    // const { data } = startPlugins;
 
     // if you need a core dep, we need to pass in more than just getStartServices
 
