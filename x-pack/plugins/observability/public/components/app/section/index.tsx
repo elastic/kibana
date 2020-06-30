@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
 
 interface Props {
   title: string;
@@ -16,10 +17,22 @@ interface Props {
   appLink?: string;
   children: React.ReactNode;
 }
+const StyledEuiAccordion = styled(EuiAccordion)`
+  .euiAccordion__triggerWrapper {
+    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  }
+  .euiAccordion__button,
+  .euiAccordion__optionalAction {
+    margin-bottom: 16px;
+  }
+  .euiAccordion__childWrapper {
+    margin-top: 16px;
+  }
+`;
 
 export const SectionContainer = ({ title, appLink, children, subtitle, minHeight }: Props) => {
   return (
-    <EuiAccordion
+    <StyledEuiAccordion
       initialIsOpen
       id={title}
       buttonContentClassName="accordion-button"
@@ -47,6 +60,6 @@ export const SectionContainer = ({ title, appLink, children, subtitle, minHeight
         <EuiSpacer size="s" />
         {children}
       </EuiPanel>
-    </EuiAccordion>
+    </StyledEuiAccordion>
   );
 };

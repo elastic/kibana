@@ -7,6 +7,7 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui'
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { APMSection } from '../../components/app/section/apm';
@@ -74,7 +75,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
+      <EuiHorizontalRule />
 
       <EuiFlexGroup direction="column">
         {hasData?.infra_logs && (
