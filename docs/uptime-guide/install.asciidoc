@@ -51,7 +51,7 @@ Uptime requires the setup of monitors in Heartbeat.
 These monitors provide the data you'll be visualizing in the {kibana-ref}/xpack-uptime.html[Uptime app].
 
 For instructions on installing and configuring Heartbeat, see the *Setup Instructions* in {kib}.
-Additional information is available in {heartbeat-ref}/heartbeat-configuration.html[Configure Heartbeat].
+Additional information is available in {heartbeat-ref}/configuring-howto-heartbeat.html[Configure Heartbeat].
 
 [role="screenshot"]
 image::images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]

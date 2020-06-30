@@ -45,7 +45,7 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
         an AWS Lambda function. \
         [Learn more]({learnMoreLink}).',
       values: {
-        learnMoreLink: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html',
+        learnMoreLink: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
       },
     }),
     euiIconType: 'logoAWS',
