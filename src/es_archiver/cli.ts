@@ -67,9 +67,10 @@ cmd
   .action((name, indices) => execute((archiver, { raw }) => archiver.save(name, indices, { raw })));
 
 cmd
+  .option('--use-create', 'use create instead of index for loading documents')
   .command('load <name>')
   .description('load the archive in --dir with <name>')
-  .action((name) => execute((archiver) => archiver.load(name)));
+  .action((name) => execute((archiver, { useCreate }) => archiver.load(name, { useCreate })));
 
 cmd
   .command('unload <name>')

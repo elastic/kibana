@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-import { FieldFormat } from '../../../../../common';
 
 const metricAggFilter: string[] = [
   '!top_hits',
@@ -87,10 +85,8 @@ export const siblingPipelineAggHelper = {
     ] as Array<MetricAggParam<IMetricAggConfig>>;
   },
 
-  getFormat(agg: IMetricAggConfig) {
+  getSerializedFormat(agg: IMetricAggConfig) {
     const customMetric = agg.getParam('customMetric');
-    return customMetric
-      ? customMetric.type.getFormat(customMetric)
-      : new (FieldFormat.from(identity))();
+    return customMetric ? customMetric.type.getSerializedFormat(customMetric) : {};
   },
 };

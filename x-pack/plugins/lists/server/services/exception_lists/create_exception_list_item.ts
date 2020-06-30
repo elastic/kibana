@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
 import {
-  CommentOrUndefined,
+  CreateCommentsArray,
   Description,
   EntriesArray,
   ExceptionListItemSchema,
@@ -23,11 +23,15 @@ import {
   _Tags,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
+import {
+  getSavedObjectType,
+  transformCreateCommentsToComments,
+  transformSavedObjectToExceptionListItem,
+} from './utils';
 
 interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comment: CommentOrUndefined;
+  comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
   savedObjectsClient: SavedObjectsClientContract;
@@ -44,7 +48,7 @@ interface CreateExceptionListItemOptions {
 
 export const createExceptionListItem = async ({
   _tags,
-  comment,
+  comments,
   entries,
   itemId,
   listId,
@@ -60,9 +64,10 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
+  const transformedComments = transformCreateCommentsToComments({ comments, user });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
-    comment,
+    comments: transformedComments,
     created_at: dateNow,
     created_by: user,
     description,

@@ -5,8 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../lib/is_es_error';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -20,7 +20,7 @@ const bodySchema = schema.object({
   options: schema.object({}, { unknowns: 'allow' }),
 });
 
-function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
+function fetchVisualizeData(dataClient: ILegacyScopedClusterClient, index: any, body: any) {
   const params = {
     index,
     body,

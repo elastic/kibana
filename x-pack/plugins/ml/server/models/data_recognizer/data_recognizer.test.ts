@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
-    jest.fn() as APICaller,
+    jest.fn() as LegacyAPICaller,
     ({
       find: jest.fn(),
       bulkCreate: jest.fn(),

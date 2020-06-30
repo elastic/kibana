@@ -8,7 +8,10 @@ import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
   GetDatasourcesRequest,
   GetAgentStatusResponse,
+  DeleteDatasourcesResponse,
+  DeleteDatasourcesRequest,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  GetPackagesResponse,
 } from '../../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
@@ -17,6 +20,8 @@ const INGEST_API_ROOT = `/api/ingest_manager`;
 export const INGEST_API_DATASOURCES = `${INGEST_API_ROOT}/datasources`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
+export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
+const INGEST_API_DELETE_DATASOURCE = `${INGEST_API_DATASOURCES}/delete`;
 
 /**
  * Retrieves a list of endpoint specific datasources (those created with a `package.name` of
@@ -51,6 +56,23 @@ export const sendGetDatasource = (
   options?: HttpFetchOptions
 ) => {
   return http.get<GetPolicyResponse>(`${INGEST_API_DATASOURCES}/${datasourceId}`, options);
+};
+
+/**
+ * Retrieves a single datasource based on ID from ingest
+ * @param http
+ * @param datasourceId
+ * @param options
+ */
+export const sendDeleteDatasource = (
+  http: HttpStart,
+  body: DeleteDatasourcesRequest,
+  options?: HttpFetchOptions
+) => {
+  return http.post<DeleteDatasourcesResponse>(INGEST_API_DELETE_DATASOURCE, {
+    ...options,
+    body: JSON.stringify(body.body),
+  });
 };
 
 /**
@@ -92,4 +114,21 @@ export const sendGetFleetAgentStatusForConfig = (
       configId,
     },
   });
+};
+
+/**
+ * Get Endpoint Security Package information
+ */
+export const sendGetEndpointSecurityPackage = async (
+  http: HttpStart
+): Promise<GetPackagesResponse['response'][0]> => {
+  const options = { query: { category: 'security' } };
+  const securityPackages = await http.get<GetPackagesResponse>(INGEST_API_EPM_PACKAGES, options);
+  const endpointPackageInfo = securityPackages.response.find(
+    (epmPackage) => epmPackage.name === 'endpoint'
+  );
+  if (!endpointPackageInfo) {
+    throw new Error('Endpoint package was not found.');
+  }
+  return endpointPackageInfo;
 };

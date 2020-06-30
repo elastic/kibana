@@ -25,6 +25,8 @@ import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from '../sources/wms_source';
 import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
+import { SecurityLayerWizardConfig } from './solution_layers/security';
+import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { getEnableVectorTiles } from '../../kibana_services';
 
 let registered = false;
@@ -36,9 +38,11 @@ export function registerLayerWizards() {
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
   registerLayerWizard(ObservabilityLayerWizardConfig);
+  registerLayerWizard(SecurityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
+  registerLayerWizard(choroplethLayerWizardConfig);
   registerLayerWizard(clustersLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(heatmapLayerWizardConfig);

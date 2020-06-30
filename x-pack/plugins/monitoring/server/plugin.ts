@@ -5,9 +5,10 @@
  */
 import Boom from 'boom';
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
+import { TypeOf } from '@kbn/config-schema';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
@@ -17,10 +18,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreStart,
   IRouter,
-  IClusterClient,
+  ILegacyClusterClient,
   CustomHttpResponseOptions,
   ResponseError,
 } from 'kibana/server';
@@ -30,7 +31,7 @@ import {
   KIBANA_ALERTING_ENABLED,
   KIBANA_STATS_TYPE_MONITORING,
 } from '../common/constants';
-import { MonitoringConfig } from './config';
+import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
 import { requireUIRoutes } from './routes';
 // @ts-ignore
@@ -82,7 +83,7 @@ interface MonitoringCore {
 interface LegacyShimDependencies {
   router: IRouter;
   instanceUuid: string;
-  esDataClient: IClusterClient;
+  esDataClient: ILegacyClusterClient;
   kibanaStatsCollector: any;
 }
 
@@ -108,7 +109,7 @@ export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  private cluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -122,7 +123,9 @@ export class Plugin {
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
     const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config
+        .create<TypeOf<typeof configSchema>>()
+        .pipe(map((rawConfig) => createConfig(rawConfig))),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
@@ -319,7 +322,7 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ICustomClusterClient
+    cluster: ILegacyCustomClusterClient
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({

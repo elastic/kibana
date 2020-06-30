@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
+import React, { useMemo, useState, useCallback } from 'react';
+import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -21,14 +21,15 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { AgentConfig } from '../../../types';
+import { AgentConfig, AgentConfigDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
+import { useGetOneAgentConfig, useLink, useBreadcrumbs, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
 import { ConfigDatasourcesView, ConfigSettingsView } from './components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const Divider = styled.div`
   width: 0;
@@ -40,14 +41,21 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const { getHref } = useLink();
+  const history = useHistory();
+  const { getHref, getPath } = useLink();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
   const [redirectToAgentConfigList] = useState<boolean>(false);
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
+  const {
+    application: { navigateToApp },
+  } = useCore();
+  const routeState = useIntraAppState<AgentConfigDetailsDeployAgentAction>();
   const agentStatus = agentStatusRequest.data?.results;
+  const queryParams = new URLSearchParams(useLocation().search);
+  const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
 
   const headerLeftContent = useMemo(
     () => (
@@ -93,6 +101,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     ),
     [getHref, agentConfig, configId]
   );
+
+  const enrollmentCancelClickHandler = useCallback(() => {
+    if (routeState && routeState.onDoneNavigateTo) {
+      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
+    }
+  }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
     () => (
@@ -147,7 +161,21 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
           { isDivider: true },
           {
-            content: agentConfig && <AgentConfigActionMenu configId={configId} fullButton={true} />,
+            content: agentConfig && (
+              <AgentConfigActionMenu
+                config={agentConfig}
+                fullButton={true}
+                onCopySuccess={(newAgentConfig: AgentConfig) => {
+                  history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
+                }}
+                enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
+                onCancelEnrollment={
+                  routeState && routeState.onDoneNavigateTo
+                    ? enrollmentCancelClickHandler
+                    : undefined
+                }
+              />
+            ),
           },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>

@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { APICaller } from 'kibana/server';
+import Boom from 'boom';
+import { LegacyAPICaller } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -45,7 +46,7 @@ interface Results {
   };
 }
 
-export function jobsProvider(callAsCurrentUser: APICaller) {
+export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callAsCurrentUser);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(callAsCurrentUser);
@@ -126,6 +127,23 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
       }
     }
     return results;
+  }
+
+  async function forceStopAndCloseJob(jobId: string) {
+    const datafeedIds = await getDatafeedIdsByJobId();
+    const datafeedId = datafeedIds[jobId];
+    if (datafeedId === undefined) {
+      throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
+    }
+
+    const dfResult = await callAsCurrentUser('ml.stopDatafeed', { datafeedId, force: true });
+    if (!dfResult || dfResult.stopped !== true) {
+      return { success: false };
+    }
+
+    await callAsCurrentUser('ml.closeJob', { jobId, force: true });
+
+    return { success: true };
   }
 
   async function jobsSummary(jobIds: string[] = []) {
@@ -472,6 +490,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
+    forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
     createFullJobsList,

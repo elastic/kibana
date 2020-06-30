@@ -7,7 +7,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
-  CommentOrUndefined,
   DescriptionOrUndefined,
   EntriesArrayOrUndefined,
   ExceptionListItemSchema,
@@ -19,15 +18,20 @@ import {
   NameOrUndefined,
   NamespaceType,
   TagsOrUndefined,
+  UpdateCommentsArrayOrUndefined,
   _TagsOrUndefined,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionListItem } from './utils';
+import {
+  getSavedObjectType,
+  transformSavedObjectUpdateToExceptionListItem,
+  transformUpdateCommentsToComments,
+} from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
 
 interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
-  comment: CommentOrUndefined;
+  comments: UpdateCommentsArrayOrUndefined;
   _tags: _TagsOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
@@ -44,7 +48,7 @@ interface UpdateExceptionListItemOptions {
 
 export const updateExceptionListItem = async ({
   _tags,
-  comment,
+  comments,
   entries,
   id,
   savedObjectsClient,
@@ -67,12 +71,17 @@ export const updateExceptionListItem = async ({
   if (exceptionListItem == null) {
     return null;
   } else {
+    const transformedComments = transformUpdateCommentsToComments({
+      comments,
+      existingComments: exceptionListItem.comments,
+      user,
+    });
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
       exceptionListItem.id,
       {
         _tags,
-        comment,
+        comments: transformedComments,
         description,
         entries,
         meta,

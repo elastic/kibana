@@ -21,7 +21,7 @@ import {
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
-import { extractErrorMessage } from '../../../../../util/error_utils';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
   /**
@@ -344,7 +344,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
 }
 
 interface CloneActionProps {
-  item: DeepReadonly<DataFrameAnalyticsListRow>;
+  item: DataFrameAnalyticsListRow;
   createAnalyticsForm: CreateAnalyticsFormProps;
 }
 
@@ -360,7 +360,14 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
     defaultMessage: 'Clone job',
   });
 
-  const { notifications, savedObjects } = useMlKibana().services;
+  const {
+    services: {
+      application: { navigateToUrl },
+      notifications: { toasts },
+      savedObjects,
+    },
+  } = useMlKibana();
+
   const savedObjectsClient = savedObjects.client;
 
   const onClick = async () => {
@@ -385,7 +392,6 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
         sourceIndexId = ip.id;
       }
     } catch (e) {
-      const { toasts } = notifications;
       const error = extractErrorMessage(e);
 
       toasts.addDanger(
@@ -401,9 +407,11 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
     }
 
     if (sourceIndexId) {
-      window.location.href = `ml#/data_frame_analytics/new_job?index=${encodeURIComponent(
-        sourceIndexId
-      )}&jobId=${item.config.id}`;
+      await navigateToUrl(
+        `ml#/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
+          item.config.id
+        }`
+      );
     }
   };
 

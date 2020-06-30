@@ -11,7 +11,7 @@ import { CameraState, AABB } from '../../types';
 import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
 import { expectVectorsToBeClose } from './test_helpers';
 import { scaleToZoom } from './scale_to_zoom';
-import { applyMatrix3 } from '../../lib/vector2';
+import { applyMatrix3 } from '../../models/vector2';
 
 describe('zooming', () => {
   let store: Store<CameraState, CameraAction>;
@@ -70,12 +70,12 @@ describe('zooming', () => {
         expect(actual).toMatchInlineSnapshot(`
           Object {
             "maximum": Array [
-              25.000000000000007,
-              16.666666666666668,
+              75,
+              50,
             ],
             "minimum": Array [
-              -25,
-              -16.666666666666668,
+              -75,
+              -50,
             ],
           }
         `);

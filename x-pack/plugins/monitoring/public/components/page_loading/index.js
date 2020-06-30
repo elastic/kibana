@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './page_loading.scss';
 
 export function PageLoading() {
   return (
@@ -22,7 +23,7 @@ export function PageLoading() {
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
-          className="noData__content"
+          className="monNoData__content"
         >
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>

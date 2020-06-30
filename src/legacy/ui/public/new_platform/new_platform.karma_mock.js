@@ -263,7 +263,6 @@ export const npSetup = {
     },
     kibanaLegacy: {
       registerLegacyApp: () => {},
-      registerLegacyAppAlias: () => {},
       forwardApp: () => {},
       config: {
         defaultAppId: 'home',
@@ -379,9 +378,8 @@ export const npStart = {
       registerType: sinon.fake(),
     },
     kibanaLegacy: {
-      getApps: () => [],
       getForwards: () => [],
-      getLegacyAppAliases: () => [],
+      loadFontAwesome: () => {},
       config: {
         defaultAppId: 'home',
       },

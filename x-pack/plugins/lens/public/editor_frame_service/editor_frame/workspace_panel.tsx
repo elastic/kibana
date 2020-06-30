@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -37,6 +37,7 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -56,6 +57,7 @@ export interface WorkspacePanelProps {
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
+  title?: string;
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -73,6 +75,7 @@ export function InnerWorkspacePanel({
   core,
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
+  title,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
   const emptyStateGraphicURL = IS_DARK_THEME
@@ -135,6 +138,26 @@ export function InnerWorkspacePanel({
     framePublicAPI.query,
     framePublicAPI.filters,
   ]);
+
+  const onEvent = useCallback(
+    (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return;
+      }
+      if (isLensBrushEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+      if (isLensFilterEvent(event)) {
+        plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: event.data,
+        });
+      }
+    },
+    [plugins.uiActions]
+  );
 
   const autoRefreshFetch$ = useMemo(
     () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
@@ -231,22 +254,7 @@ export function InnerWorkspacePanel({
           padding="m"
           expression={expression!}
           reload$={autoRefreshFetch$}
-          onEvent={(event: ExpressionRendererEvent) => {
-            if (!plugins.uiActions) {
-              // ui actions not available, not handling event...
-              return;
-            }
-            if (isLensBrushEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-            if (isLensFilterEvent(event)) {
-              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-                data: event.data,
-              });
-            }
-          }}
+          onEvent={onEvent}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">
@@ -286,13 +294,22 @@ export function InnerWorkspacePanel({
   }
 
   return (
-    <DragDrop
-      data-test-subj="lnsWorkspace"
-      draggable={false}
-      droppable={Boolean(suggestionForDraggedField)}
-      onDrop={onDrop}
+    <WorkspacePanelWrapper
+      title={title}
+      framePublicAPI={framePublicAPI}
+      dispatch={dispatch}
+      emptyExpression={expression === null}
+      visualizationState={visualizationState}
+      activeVisualization={activeVisualization}
     >
-      {renderVisualization()}
-    </DragDrop>
+      <DragDrop
+        data-test-subj="lnsWorkspace"
+        draggable={false}
+        droppable={Boolean(suggestionForDraggedField)}
+        onDrop={onDrop}
+      >
+        {renderVisualization()}
+      </DragDrop>
+    </WorkspacePanelWrapper>
   );
 }

@@ -28,7 +28,11 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
 
-import { FieldFormatsStartCommon } from '../../field_formats';
+import { fieldFormatsMock } from '../../field_formats/mocks';
+
+class MockFieldFormatter {}
+
+fieldFormatsMock.getType = jest.fn().mockImplementation(() => MockFieldFormatter);
 
 jest.mock('../../field_mapping', () => {
   const originalModule = jest.requireActual('../../field_mapping');
@@ -62,7 +66,7 @@ const savedObjectsClient = {
   create: jest.fn(),
   get: jest.fn().mockImplementation(() => object),
   update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
-    if (object._version !== version) {
+    if (object.version !== version) {
       throw new Object({
         res: {
           status: 409,
@@ -70,10 +74,10 @@ const savedObjectsClient = {
       });
     }
     object.attributes.title = body.title;
-    object._version += 'a';
+    object.version += 'a';
     return {
-      id: object._id,
-      _version: object._version,
+      id: object.id,
+      version: object.version,
     };
   }),
 };
@@ -97,16 +101,16 @@ const apiClient = {
 
 // helper function to create index patterns
 function create(id: string, payload?: any): Promise<IndexPattern> {
-  const indexPattern = new IndexPattern(
-    id,
-    (cfg: any) => config.get(cfg),
-    savedObjectsClient as any,
+  const indexPattern = new IndexPattern(id, {
+    getConfig: (cfg: any) => config.get(cfg),
+    savedObjectsClient: savedObjectsClient as any,
     apiClient,
     patternCache,
-    ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-    () => {},
-    () => {}
-  );
+    fieldFormats: fieldFormatsMock,
+    onNotification: () => {},
+    onError: () => {},
+    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+  });
 
   setDocsourcePayload(id, payload);
 
@@ -304,6 +308,29 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('toSpec', () => {
+    test('should match snapshot', () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
+      expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can restore from spec', async () => {
+      indexPattern.fieldFormatMap.bytes = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      };
+      const spec = indexPattern.toSpec();
+      const restoredPattern = await create(spec.id as string);
+      restoredPattern.initFromSpec(spec);
+      expect(restoredPattern.id).toEqual(indexPattern.id);
+      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
+    });
+  });
+
   describe('popularizeField', () => {
     test('should increment the popularity count by default', () => {
       // const saveSpy = sinon.stub(indexPattern, 'save');
@@ -356,38 +383,38 @@ describe('IndexPattern', () => {
 
   test('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
-      _id: 'foo',
-      _version: 'foo',
+      id: 'foo',
+      version: 'foo',
       attributes: {
         title: 'something',
       },
     });
     // Create a normal index pattern
-    const pattern = new IndexPattern(
-      'foo',
-      (cfg: any) => config.get(cfg),
-      savedObjectsClient as any,
+    const pattern = new IndexPattern('foo', {
+      getConfig: (cfg: any) => config.get(cfg),
+      savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-      () => {},
-      () => {}
-    );
+      fieldFormats: fieldFormatsMock,
+      onNotification: () => {},
+      onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+    });
     await pattern.init();
 
     expect(get(pattern, 'version')).toBe('fooa');
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = new IndexPattern(
-      'foo',
-      (cfg: any) => config.get(cfg),
-      savedObjectsClient as any,
+    const samePattern = new IndexPattern('foo', {
+      getConfig: (cfg: any) => config.get(cfg),
+      savedObjectsClient: savedObjectsClient as any,
       apiClient,
       patternCache,
-      ({ getDefaultInstance: () => {}, getType: () => {} } as unknown) as FieldFormatsStartCommon,
-      () => {},
-      () => {}
-    );
+      fieldFormats: fieldFormatsMock,
+      onNotification: () => {},
+      onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
+    });
     await samePattern.init();
 
     expect(get(samePattern, 'version')).toBe('fooaa');

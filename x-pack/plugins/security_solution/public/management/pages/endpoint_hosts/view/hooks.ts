@@ -6,14 +6,13 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { HostState } from '../types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
 import { State } from '../../../../common/store';
-
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
@@ -23,17 +22,33 @@ export function useHostSelector<TSelected>(selector: (state: HostState) => TSele
 }
 
 /**
- * Returns an object that contains Kibana Logs app and URL information for a given host id
- * @param hostId
+ * Returns an object that contains Ingest app and URL information
  */
-export const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
+export const useHostIngestUrl = (): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
-    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
+    const appPath = `#/fleet`;
     return {
-      url: `${services.application.getUrlForApp('logs')}${appPath}`,
-      appId: 'logs',
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
+      appId: 'ingestManager',
       appPath,
     };
-  }, [hostId, services.application]);
+  }, [services.application]);
+};
+
+/**
+ * Returns an object that contains Ingest app and URL information
+ */
+export const useAgentDetailsIngestUrl = (
+  agentId: string
+): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `#/fleet/agents/${agentId}/activity`;
+    return {
+      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
+      appId: 'ingestManager',
+      appPath,
+    };
+  }, [services.application, agentId]);
 };

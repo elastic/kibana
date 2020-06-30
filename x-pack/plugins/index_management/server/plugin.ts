@@ -16,19 +16,19 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  IScopedClusterClient,
-  ICustomClusterClient,
+  ILegacyScopedClusterClient,
+  ILegacyCustomClusterClient,
 } from 'src/core/server';
 
 import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
-import { isEsError } from './lib/is_es_error';
+import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 export interface IndexManagementPluginSetup {
@@ -48,7 +48,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   private readonly license: License;
   private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
-  private dataManagementESClient?: ICustomClusterClient;
+  private dataManagementESClient?: ILegacyCustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -59,7 +59,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing }: Dependencies
+    { licensing, security }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter();
 
@@ -89,6 +89,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.apiRoutes.setup({
       router,
       license: this.license,
+      config: {
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+      },
       indexDataEnricher: this.indexDataEnricher,
       lib: {
         isEsError,

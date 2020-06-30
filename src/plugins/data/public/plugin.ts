@@ -40,7 +40,12 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatternsService, onRedirectNoIndexPattern } from './index_patterns';
+import {
+  IndexPatternsService,
+  onRedirectNoIndexPattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
+} from './index_patterns';
 import {
   setFieldFormats,
   setHttp,
@@ -76,6 +81,7 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -146,7 +152,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
-        query: queryService,
       }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -164,26 +169,27 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(
-      uiSettings,
-      savedObjects.client,
-      http,
+    const indexPatterns = new IndexPatternsService({
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
-      (toastInputFields) => {
+      onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
-      notifications.toasts.addError,
-      onRedirectNoIndexPattern(application.capabilities, application.navigateToApp, overlays)
-    );
+      onError: notifications.toasts.addError,
+      onRedirectNoIndexPattern: onRedirectNoIndexPattern(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+    });
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, {
-      indexPatterns,
-      fieldFormats,
-    });
+    const search = this.searchService.start(core, { indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(

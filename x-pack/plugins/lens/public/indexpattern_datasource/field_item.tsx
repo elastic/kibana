@@ -49,6 +49,8 @@ import { IndexPattern, IndexPatternField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
+import { debouncedComponent } from '../debounced_component';
+
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
   data: DataPublicPluginStart;
@@ -78,7 +80,7 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
-export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
+export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const {
     core,
     field,
@@ -239,7 +241,9 @@ export const FieldItem = React.memo(function FieldItem(props: FieldItemProps) {
       <FieldItemPopoverContents {...state} {...props} />
     </EuiPopover>
   );
-});
+};
+
+export const FieldItem = debouncedComponent(InnerFieldItem);
 
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const {

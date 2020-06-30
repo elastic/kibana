@@ -66,22 +66,73 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
 
 export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
   properties: {
-    comment: {
-      // TODO: investigate what the deep mapping structure of this really is
-      type: 'keyword',
+    comments: {
+      properties: {
+        comment: {
+          type: 'keyword',
+        },
+        created_at: {
+          type: 'keyword',
+        },
+        created_by: {
+          type: 'keyword',
+        },
+        updated_at: {
+          type: 'keyword',
+        },
+        updated_by: {
+          type: 'keyword',
+        },
+      },
     },
     entries: {
       properties: {
+        entries: {
+          properties: {
+            field: {
+              type: 'keyword',
+            },
+            operator: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+            value: {
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
+              type: 'keyword',
+            },
+          },
+        },
         field: {
           type: 'keyword',
         },
-        match: {
-          type: 'keyword',
-        },
-        match_any: {
-          type: 'keyword',
+        list: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
         },
         operator: {
+          type: 'keyword',
+        },
+        type: {
+          type: 'keyword',
+        },
+        value: {
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
           type: 'keyword',
         },
       },
