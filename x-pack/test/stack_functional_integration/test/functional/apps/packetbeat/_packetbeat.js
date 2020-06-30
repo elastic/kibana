@@ -6,19 +6,19 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const appsMenu = getService('appsMenu');
 
-  describe('check packetbeat', function() {
-    before(function() {
+  describe('check packetbeat', function () {
+    before(function () {
       log.debug('navigateToApp Discover');
     });
 
-    it('packetbeat- should have hit count GT 0', async function() {
+    it('packetbeat- should have hit count GT 0', async function () {
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
@@ -29,7 +29,7 @@ export default function({ getService, getPageObjects }) {
       }
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('Today');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);
       });

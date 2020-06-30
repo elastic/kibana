@@ -152,7 +152,7 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('data:makelogs(star) should discover data from remote', async function() {
+    it('data:makelogs(star) should discover data from remote', async function () {
       await PageObjects.discover.selectIndexPattern('data:makelogs工程*');
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
@@ -161,7 +161,7 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('star:makelogs-star should discover data from both clusters', async function() {
+    it('star:makelogs-star should discover data from both clusters', async function () {
       await PageObjects.discover.selectIndexPattern('*:makelogs工程-*');
       await PageObjects.timePicker.setCommonlyUsedTime('makelogs');
       await retry.tryForTime(40000, async () => {
@@ -171,7 +171,7 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('data:makelogs-star,local:makelogs-star should discover data from both clusters', async function() {
+    it('data:makelogs-star,local:makelogs-star should discover data from both clusters', async function () {
       await PageObjects.discover.selectIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();

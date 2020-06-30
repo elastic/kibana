@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common', 'visualize']);
   const log = getService('log');
   const visName1 = 'Connections over time';
@@ -45,7 +45,7 @@ export default function({ getService, getPageObjects }) {
       .then(() => {
         return this.remote.getAllWindowHandles();
       })
-      .then(handles => {
+      .then((handles) => {
         windowHandles = handles;
         this.remote.switchToWindow(windowHandles[1]);
       })
@@ -58,7 +58,7 @@ export default function({ getService, getPageObjects }) {
       .then(() => {
         return this.remote.getCurrentUrl();
       })
-      .then(url => {
+      .then((url) => {
         PageObjects.common.debug('URL = ' + url);
         expect(url).to.contain('/jobs/download/');
       });

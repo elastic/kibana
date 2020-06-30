@@ -5,7 +5,7 @@
  */
 
 // testsList :: {} -> list
-export default envObj => {
+export default (envObj) => {
   const xs = [];
   // one of these 2 needs to create the default index pattern
   if (envObj.PRODUCTS.includes('logstash')) {
