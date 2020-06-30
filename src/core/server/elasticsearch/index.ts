@@ -29,3 +29,10 @@ export {
   ScopeableRequest,
 } from './types';
 export * from './legacy';
+export {
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  ClientFacade,
+  IScopedClusterClient,
+} from './client';

@@ -26,6 +26,11 @@ import {
 } from '@elastic/elasticsearch/lib/Transport';
 import * as RequestParams from '@elastic/elasticsearch/api/requestParams';
 
+/**
+ * Facade used to query the elasticsearch cluster.
+ *
+ * @public
+ */
 export interface ClientFacade {
   /* GENERATED */
   asyncSearch: {

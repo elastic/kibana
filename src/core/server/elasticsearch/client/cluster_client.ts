@@ -48,6 +48,11 @@ export interface IClusterClient {
   asScoped: (request: ScopeableRequest) => IScopedClusterClient;
 }
 
+/**
+ * See {@link IClusterClient}
+ *
+ * @public
+ */
 export interface ICustomClusterClient extends IClusterClient {
   /**
    * Closes the cluster client. After that client cannot be used and one should
@@ -57,7 +62,7 @@ export interface ICustomClusterClient extends IClusterClient {
 }
 
 /** @internal **/
-export class ClusterClient implements IClusterClient {
+export class ClusterClient implements IClusterClient, ICustomClusterClient {
   private readonly internalClient: Client;
   private readonly scopedClient: Client;
 
