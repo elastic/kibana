@@ -19,8 +19,8 @@
 
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
-import { RecursiveReadonly } from 'kibana/public';
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';

@@ -7,11 +7,33 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
+import { PackageInfo, RegistryStream, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
 import { DatasourceInputPanel, CustomConfigureDatasource } from './components';
 import { CreateDatasourceFrom } from './types';
+
+const findStreamsForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo
+): Array<RegistryStream & { dataset: { name: string } }> => {
+  const streams: Array<RegistryStream & { dataset: { name: string } }> = [];
+
+  (packageInfo.datasets || []).forEach((dataset) => {
+    (dataset.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          dataset: {
+            name: dataset.name,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
 
 export const StepConfigureDatasource: React.FunctionComponent<{
   from?: CreateDatasourceFrom;
@@ -35,19 +57,21 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   // Configure inputs (and their streams)
   // Assume packages only export one datasource for now
   const renderConfigureInputs = () =>
-    packageInfo.datasources &&
-    packageInfo.datasources[0] &&
-    packageInfo.datasources[0].inputs &&
-    packageInfo.datasources[0].inputs.length ? (
+    packageInfo.config_templates &&
+    packageInfo.config_templates[0] &&
+    packageInfo.config_templates[0].inputs &&
+    packageInfo.config_templates[0].inputs.length ? (
       <EuiFlexGroup direction="column">
-        {packageInfo.datasources[0].inputs.map((packageInput) => {
+        {packageInfo.config_templates[0].inputs.map((packageInput) => {
           const datasourceInput = datasource.inputs.find(
             (input) => input.type === packageInput.type
           );
+          const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
           return datasourceInput ? (
             <EuiFlexItem key={packageInput.type}>
               <DatasourceInputPanel
                 packageInput={packageInput}
+                packageInputStreams={packageInputStreams}
                 datasourceInput={datasourceInput}
                 updateDatasourceInput={(updatedInput: Partial<DatasourceInput>) => {
                   const indexOfUpdatedInput = datasource.inputs.findIndex(

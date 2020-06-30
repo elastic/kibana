@@ -18,9 +18,14 @@
  */
 
 import { Observable } from 'rxjs';
+import { Headers } from '../http/router';
+import { LegacyRequest, KibanaRequest } from '../http';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchClientConfig } from './elasticsearch_client_config';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
+import {
+  LegacyElasticsearchClientConfig,
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+} from './legacy';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
 
@@ -38,7 +43,7 @@ export interface ElasticsearchServiceSetup {
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
      *
-     * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+     * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
      * @param type Unique identifier of the client
      * @param clientConfig A config consists of Elasticsearch JS client options and
@@ -56,22 +61,22 @@ export interface ElasticsearchServiceSetup {
      */
     readonly createClient: (
       type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ICustomClusterClient;
+      clientConfig?: Partial<LegacyElasticsearchClientConfig>
+    ) => ILegacyCustomClusterClient;
 
     /**
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.client} instead.
      *
      * All Elasticsearch config value changes are processed under the hood.
-     * See {@link IClusterClient}.
+     * See {@link ILegacyClusterClient}.
      *
      * @example
      * ```js
      * const client = core.elasticsearch.legacy.client;
      * ```
      */
-    readonly client: IClusterClient;
+    readonly client: ILegacyClusterClient;
   };
 }
 
@@ -86,7 +91,7 @@ export interface ElasticsearchServiceStart {
    * */
   legacy: {
     /**
-     * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+     * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
      * @param type Unique identifier of the client
      * @param clientConfig A config consists of Elasticsearch JS client options and
@@ -104,19 +109,19 @@ export interface ElasticsearchServiceStart {
      */
     readonly createClient: (
       type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ICustomClusterClient;
+      clientConfig?: Partial<LegacyElasticsearchClientConfig>
+    ) => ILegacyCustomClusterClient;
 
     /**
      * A pre-configured Elasticsearch client. All Elasticsearch config value changes are processed under the hood.
-     * See {@link IClusterClient}.
+     * See {@link ILegacyClusterClient}.
      *
      * @example
      * ```js
      * const client = core.elasticsearch.client;
      * ```
      */
-    readonly client: IClusterClient;
+    readonly client: ILegacyClusterClient;
   };
 }
 
@@ -135,3 +140,21 @@ export interface ElasticsearchStatusMeta {
   warningNodes: NodesVersionCompatibility['warningNodes'];
   incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
 }
+
+/**
+ * Fake request object created manually by Kibana plugins.
+ * @public
+ */
+export interface FakeRequest {
+  /** Headers used for authentication against Elasticsearch */
+  headers: Headers;
+}
+
+/**
+ A user credentials container.
+ * It accommodates the necessary auth credentials to impersonate the current user.
+ *
+ * @public
+ * See {@link KibanaRequest}.
+ */
+export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;

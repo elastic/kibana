@@ -5,7 +5,7 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
+import { ILegacyClusterClient, KibanaRequest } from '../../../../../src/core/server';
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import { HasPrivilegesResponse, HasPrivilegesResponseApplication } from './types';
@@ -45,7 +45,7 @@ export interface CheckPrivileges {
 
 export function checkPrivilegesWithRequestFactory(
   actions: CheckPrivilegesActions,
-  clusterClient: IClusterClient,
+  clusterClient: ILegacyClusterClient,
   applicationName: string
 ) {
   const hasIncompatibleVersion = (

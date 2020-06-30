@@ -74,7 +74,6 @@ describe('Histogram Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry([getHistogramBucketAgg(aggTypesDependencies)]),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };
