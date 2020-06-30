@@ -31,13 +31,9 @@ export interface ContextErrorMessageProps {
    * the reason of the error
    */
   reason?: string;
-  /**
-   * parameters used for invalid tieBreakerFields realted errors
-   */
-  queryParameters: { indexPatternId: string };
 }
 
-export function ContextErrorMessage({ status, reason, queryParameters }: ContextErrorMessageProps) {
+export function ContextErrorMessage({ status, reason }: ContextErrorMessageProps) {
   if (status !== LOADING_STATUS.FAILED) {
     return null;
   }
@@ -55,16 +51,6 @@ export function ContextErrorMessage({ status, reason, queryParameters }: Context
         data-test-subj="contextErrorMessageTitle"
       >
         <EuiText data-test-subj="contextErrorMessageBody">
-          {reason === FAILURE_REASONS.INVALID_TIEBREAKER && (
-            <FormattedMessage
-              id="discover.context.noSearchableTiebreakerFieldDescription"
-              defaultMessage="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
-              values={{
-                indexPatternId: queryParameters.indexPatternId,
-                tieBreakerFields: <code>context:tieBreakerFields</code>,
-              }}
-            />
-          )}
           {reason === FAILURE_REASONS.UNKNOWN && (
             <FormattedMessage
               id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"

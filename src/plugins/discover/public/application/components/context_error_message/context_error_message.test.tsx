@@ -29,62 +29,26 @@ describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('ContextErrorMessage does not render on loading', () => {
-    component = mountWithIntl(
-      <ContextErrorMessage
-        status={LOADING_STATUS.LOADING}
-        queryParameters={{ indexPatternId: 'index-pattern-id' }}
-      />
-    );
+    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADING} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage does not render on success loading', () => {
-    component = mountWithIntl(
-      <ContextErrorMessage
-        status={LOADING_STATUS.LOADED}
-        queryParameters={{ indexPatternId: 'index-pattern-id' }}
-      />
-    );
+    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.LOADED} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(0);
   });
 
   it('ContextErrorMessage renders just the title if the reason is not specifically handled', () => {
-    component = mountWithIntl(
-      <ContextErrorMessage
-        status={LOADING_STATUS.FAILED}
-        queryParameters={{ indexPatternId: 'index-pattern-id' }}
-      />
-    );
+    component = mountWithIntl(<ContextErrorMessage status={LOADING_STATUS.FAILED} />);
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').text()).toBe('');
   });
 
-  it('ContextErrorMessage renders the reason for tiebreaker errors', () => {
-    component = mountWithIntl(
-      <ContextErrorMessage
-        status={LOADING_STATUS.FAILED}
-        reason={FAILURE_REASONS.INVALID_TIEBREAKER}
-        queryParameters={{ indexPatternId: 'index-pattern-id' }}
-      />
-    );
-    expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
-    expect(findTestSubject(component, 'contextErrorMessageBody').text()).toMatch(
-      'index-pattern-id'
-    );
-  });
-
   it('ContextErrorMessage renders the reason for unknown errors', () => {
     component = mountWithIntl(
-      <ContextErrorMessage
-        status={LOADING_STATUS.FAILED}
-        reason={FAILURE_REASONS.UNKNOWN}
-        queryParameters={{ indexPatternId: 'index-pattern-id' }}
-      />
+      <ContextErrorMessage status={LOADING_STATUS.FAILED} reason={FAILURE_REASONS.UNKNOWN} />
     );
     expect(findTestSubject(component, 'contextErrorMessageTitle').length).toBe(1);
     expect(findTestSubject(component, 'contextErrorMessageBody').length).toBe(1);
-    expect(findTestSubject(component, 'contextErrorMessageBody').text()).not.toMatch(
-      'index-pattern-id'
-    );
   });
 });
