@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import uuid from 'uuid';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -33,7 +34,6 @@ import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -66,6 +66,7 @@ export const getTopNavConfig = (
     toastNotifications,
     visualizeCapabilities,
     i18n: { Context: I18nContext },
+    featureFlagConfig,
   }: VisualizeServices
 ) => {
   /**
@@ -234,6 +235,19 @@ export const getTopNavConfig = (
                 return response;
               };
 
+              const createVisReference = () => {
+                if (!originatingApp) {
+                  return;
+                }
+                const input = {
+                  ...vis.serialize(),
+                  id: uuid.v4(),
+                };
+                embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
+                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
+                });
+              };
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis}
@@ -243,7 +257,11 @@ export const getTopNavConfig = (
                   originatingApp={originatingApp}
                 />
               );
-              showSaveModal(saveModal, I18nContext);
+              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+                createVisReference();
+              } else {
+                showSaveModal(saveModal, I18nContext);
+              }
             },
           },
         ]

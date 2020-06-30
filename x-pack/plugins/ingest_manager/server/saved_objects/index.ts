@@ -65,9 +65,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         config_revision: { type: 'integer' },
         config_newest_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'keyword' },
+        default_api_key: { type: 'binary', index: false },
         updated_at: { type: 'date' },
-        current_error_events: { type: 'text' },
+        current_error_events: { type: 'text', index: false },
         packages: { type: 'keyword' },
       },
     },
@@ -83,7 +83,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_id: { type: 'keyword' },
         type: { type: 'keyword' },
-        data: { type: 'binary' },
+        data: { type: 'binary', index: false },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
@@ -130,7 +130,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
-        monitoring_enabled: { type: 'keyword' },
+        monitoring_enabled: { type: 'keyword', index: false },
       },
     },
     migrations: {
@@ -148,7 +148,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         name: { type: 'keyword' },
         type: { type: 'keyword' },
-        api_key: { type: 'binary' },
+        api_key: { type: 'binary', index: false },
         api_key_id: { type: 'keyword' },
         config_id: { type: 'keyword' },
         created_at: { type: 'date' },
@@ -171,9 +171,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
-        ca_sha256: { type: 'keyword' },
-        fleet_enroll_username: { type: 'binary' },
-        fleet_enroll_password: { type: 'binary' },
+        ca_sha256: { type: 'keyword', index: false },
+        fleet_enroll_username: { type: 'binary', index: false },
+        fleet_enroll_password: { type: 'binary', index: false },
         config: { type: 'flattened' },
       },
     },
@@ -202,6 +202,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         output_id: { type: 'keyword' },
         inputs: {
           type: 'nested',
+          enabled: false,
           properties: {
             type: { type: 'keyword' },
             enabled: { type: 'boolean' },
@@ -252,7 +253,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         internal: { type: 'boolean' },
         removable: { type: 'boolean' },
         es_index_patterns: {
-          dynamic: 'false',
+          enabled: false,
           type: 'object',
         },
         installed: {

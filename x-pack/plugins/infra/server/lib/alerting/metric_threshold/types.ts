@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Unit } from '@elastic/datemath';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 
 export enum Comparator {
@@ -34,11 +35,9 @@ export enum AlertStates {
   ERROR,
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
-
 interface BaseMetricExpressionParams {
   timeSize: number;
-  timeUnit: TimeUnit;
+  timeUnit: Unit;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
