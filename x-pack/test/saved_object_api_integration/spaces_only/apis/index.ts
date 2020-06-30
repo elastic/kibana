@@ -19,6 +19,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./max_size'));
     loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./update'));
   });
