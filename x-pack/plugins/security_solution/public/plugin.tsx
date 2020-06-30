@@ -346,7 +346,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await import('./sub_plugins');
 
@@ -357,7 +356,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     };
   }
@@ -370,7 +368,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await this.downloadSubPlugins();
     const { apolloClient } = composeLibs(coreStart);
@@ -381,7 +378,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const hostsStart = hostsSubPlugin.start(storage);
     const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
-    const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
     const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
     const timelineInitialState = {
@@ -401,23 +397,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...hostsStart.store.initialState,
         ...networkStart.store.initialState,
         ...timelineInitialState,
-        ...endpointAlertsStart.store.initialState,
         ...managementSubPluginStart.store.initialState,
       }),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,
         ...timelinesStart.store.reducer,
-        ...endpointAlertsStart.store.reducer,
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
       libs$.pipe(pluck('kibana')),
       storage,
-      [
-        ...(endpointAlertsStart.store.middleware ?? []),
-        ...(managementSubPluginStart.store.middleware ?? []),
-      ]
+      [...(managementSubPluginStart.store.middleware ?? [])]
     );
   }
 }
