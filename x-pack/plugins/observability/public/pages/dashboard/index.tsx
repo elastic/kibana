@@ -60,6 +60,8 @@ export const DashboardPage = ({ routeParams }: Props) => {
         })
       : undefined;
 
+  const appEmptySections = emptySections.filter(({ id }) => hasData && !hasData[id]);
+
   return (
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
@@ -119,25 +121,28 @@ export const DashboardPage = ({ routeParams }: Props) => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          {appEmptySections.length && (
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiFlexGrid columns={2} gutterSize="s">
+                {appEmptySections
+                  .filter(({ id }) => hasData && !hasData[id])
+                  .map((app) => {
+                    return (
+                      <EuiFlexItem key={app.id}>
+                        <EmptySection section={app} />
+                      </EuiFlexItem>
+                    );
+                  })}
+              </EuiFlexGrid>
+            </EuiFlexItem>
+          )}
         </EuiFlexItem>
+
         <EuiFlexItem grow={2}>
           <Resources />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
-      <EuiFlexGrid columns={1} gutterSize="s">
-        {emptySections
-          .filter(({ id }) => hasData && !hasData[id])
-          .map((app) => {
-            return (
-              <EuiFlexItem key={app.id}>
-                <EmptySection section={app} />
-              </EuiFlexItem>
-            );
-          })}
-      </EuiFlexGrid>
     </WithHeaderLayout>
   );
 };
