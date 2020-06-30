@@ -244,7 +244,21 @@ export default async function ({ readConfigFile }) {
 
         global_upgrade_assistant_role: {
           elasticsearch: {
-            cluster: ['manage'],
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
           },
           kibana: [
             {

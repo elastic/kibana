@@ -6,8 +6,8 @@
 
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { EuiCallOut, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigureDatasourceContent,
@@ -21,43 +21,65 @@ import { getPolicyDetailPath } from '../../../../common/routing';
  */
 export const ConfigureEndpointDatasource = memo<CustomConfigureDatasourceContent>(
   ({ from, datasourceId }: CustomConfigureDatasourceProps) => {
-    const { services } = useKibana();
     let policyUrl = '';
     if (from === 'edit' && datasourceId) {
       policyUrl = getPolicyDetailPath(datasourceId);
     }
 
     return (
-      <EuiEmptyPrompt
-        data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
-        body={
-          <EuiText>
+      <>
+        <EuiTitle size="xs">
+          <h4>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.ingestManager.policyConfiguration"
+              defaultMessage="Policy Configuration"
+            />
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          data-test-subj={`endpointDatasourceConfig_${from === 'edit' ? 'edit' : 'create'}`}
+          iconType="iInCircle"
+          title={i18n.translate(
+            'xpack.securitySolution.endpoint.ingestManager.policyConfiguration.calloutTitle',
+            {
+              defaultMessage: 'Manage Policy configuration in the Security app',
+            }
+          )}
+        >
+          <EuiText size="s">
             <p>
               {from === 'edit' ? (
-                <LinkToApp
-                  data-test-subj="editLinkToPolicyDetails"
-                  appId="securitySolution:management"
-                  appPath={policyUrl}
-                  // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
-                  href={`${services.application.getUrlForApp(
-                    'securitySolution:management'
-                  )}${policyUrl}`}
-                >
+                <>
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.ingestManager.editDatasource.stepConfigure"
-                    defaultMessage="View and configure Security Policy"
+                    id="xpack.securitySolution.endpoint.ingestManager.editDatasource.endpointConfiguration"
+                    defaultMessage="You can make changes to the Policy Configuration in the Security app. Fleet will deploy changes to your agents whenever your Policy changes."
                   />
-                </LinkToApp>
+                  <EuiSpacer />
+                  <LinkToApp
+                    data-test-subj="editLinkToPolicyDetails"
+                    asButton={true}
+                    appId="securitySolution:management"
+                    className="editLinkToPolicyDetails"
+                    appPath={policyUrl}
+                    // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.ingestManager.editDatasource.configurePolicyLink"
+                      defaultMessage="Configure Policy"
+                    />
+                  </LinkToApp>
+                </>
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.createDatasource.stepConfigure"
-                  defaultMessage="The recommended Security Policy has been associated with this data source. The Security Policy can be edited in the Security application once your data source has been saved."
+                  id="xpack.securitySolution.endpoint.ingestManager.createDatasource.endpointConfiguration"
+                  defaultMessage="Any agents that use this agent configuration will use a basic policy. You can make changes to this policy in the Security app, and Fleet will deploy those changes to your agents."
                 />
               )}
             </p>
           </EuiText>
-        }
-      />
+        </EuiCallOut>
+      </>
     );
   }
 );

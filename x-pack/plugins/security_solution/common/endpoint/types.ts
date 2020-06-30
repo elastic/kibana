@@ -179,6 +179,8 @@ export interface OSFields {
   full: string;
   name: string;
   version: string;
+  platform: string;
+  family: string;
   Ext: OSFieldsExt;
 }
 
@@ -195,8 +197,10 @@ export interface OSFieldsExt {
 export interface Host {
   id: string;
   hostname: string;
+  name: string;
   ip: string[];
   mac: string[];
+  architecture: string;
   os: OSFields;
 }
 
@@ -510,6 +514,11 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * The response body for the resolver '/entity' index API
+ */
+export type ResolverEntityIndex = Array<{ entity_id: string }>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.

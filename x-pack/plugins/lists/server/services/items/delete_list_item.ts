@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Id, ListItemSchema } from '../../../common/schemas';
 
@@ -12,7 +12,7 @@ import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
 }
 
