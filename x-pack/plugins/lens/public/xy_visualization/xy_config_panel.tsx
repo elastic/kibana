@@ -6,11 +6,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFormRow,
+  htmlIdGenerator,
+  EuiForm,
+  EuiColorPicker,
+  EuiCallOut,
+} from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { getColorForPanel } from './metric_color_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -82,58 +90,98 @@ export function DimensionEditor({
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
+
+  const color = getColorForPanel(layer, accessor, state.layers);
   return (
-    <EuiFormRow
-      display="columnCompressed"
-      label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-        defaultMessage: 'Axis side',
-      })}
-    >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+    <EuiForm>
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
           defaultMessage: 'Axis side',
         })}
-        name="axisSide"
-        buttonSize="compressed"
-        className="eui-displayInlineBlock"
-        options={[
-          {
-            id: `${idPrefix}auto`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
-              defaultMessage: 'Auto',
-            }),
-          },
-          {
-            id: `${idPrefix}left`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-              defaultMessage: 'Left',
-            }),
-          },
-          {
-            id: `${idPrefix}right`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
-              defaultMessage: 'Right',
-            }),
-          },
-        ]}
-        idSelected={`${idPrefix}${axisMode}`}
-        onChange={(id) => {
-          const newMode = id.replace(idPrefix, '') as YAxisMode;
-          const newYAxisConfigs = [...(layer.yConfig || [])];
-          const existingIndex = newYAxisConfigs.findIndex(
-            (yAxisConfig) => yAxisConfig.forAccessor === accessor
-          );
-          if (existingIndex !== -1) {
-            newYAxisConfigs[existingIndex].axisMode = newMode;
-          } else {
-            newYAxisConfigs.push({
-              forAccessor: accessor,
-              axisMode: newMode,
-            });
-          }
-          setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-        }}
-      />
-    </EuiFormRow>
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Axis side',
+          })}
+          name="axisSide"
+          buttonSize="compressed"
+          className="eui-displayInlineBlock"
+          options={[
+            {
+              id: `${idPrefix}auto`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
+                defaultMessage: 'Auto',
+              }),
+            },
+            {
+              id: `${idPrefix}left`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                defaultMessage: 'Left',
+              }),
+            },
+            {
+              id: `${idPrefix}right`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
+                defaultMessage: 'Right',
+              }),
+            },
+          ]}
+          idSelected={`${idPrefix}${axisMode}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as YAxisMode;
+            const newYAxisConfigs = [...(layer.yConfig || [])];
+            const existingIndex = newYAxisConfigs.findIndex(
+              (yAxisConfig) => yAxisConfig.forAccessor === accessor
+            );
+            if (existingIndex !== -1) {
+              newYAxisConfigs[existingIndex].axisMode = newMode;
+            } else {
+              newYAxisConfigs.push({
+                forAccessor: accessor,
+                axisMode: newMode,
+              });
+            }
+            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+          defaultMessage: 'Series Color',
+        })}
+      >
+        <>
+          <EuiColorPicker
+            color={color}
+            disabled={!!layer.splitAccessor}
+            onChange={(newColor) => {
+              const newYConfigs = [...(layer.yConfig || [])];
+              const existingIndex = newYConfigs.findIndex(
+                (yConfig) => yConfig.forAccessor === accessor
+              );
+              if (existingIndex !== -1) {
+                newYConfigs[existingIndex].color = newColor;
+              } else {
+                newYConfigs.push({
+                  forAccessor: accessor,
+                  color: newColor,
+                  axisMode: 'auto',
+                });
+              }
+              setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+            }}
+          />
+        </>
+      </EuiFormRow>
+      {!!layer.splitAccessor && (
+        <EuiFormRow>
+          <EuiCallOut size="s" color="danger">
+            You cannot apply color on layer with break down by.
+          </EuiCallOut>
+        </EuiFormRow>
+      )}
+    </EuiForm>
   );
 }

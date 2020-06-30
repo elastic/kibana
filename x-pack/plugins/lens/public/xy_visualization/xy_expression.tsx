@@ -41,6 +41,7 @@ import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { getAxesConfiguration } from './axes_configuration';
+import { getColorConfig } from './metric_color_configuration';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -269,6 +270,8 @@ export function XYChart({
       }
     : undefined;
 
+  const colorConfig = getColorConfig(filteredLayers);
+
   return (
     <Chart>
       <Settings
@@ -430,6 +433,12 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
+            color: () => {
+              if (layer.splitAccessor) {
+                return null;
+              }
+              return colorConfig[accessor];
+            },
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,

@@ -189,6 +189,7 @@ export const buildExpression = (
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: [yConfig.axisMode],
+                                color: [yConfig.color],
                               },
                             },
                           ],
