@@ -78,7 +78,7 @@ export const createInventoryMetricThresholdExecutor = (
           if (!result[item]) return '';
           const resultWithVerboseMetricName = {
             ...result[item],
-            metric: toMetricOpt(result[item].metric)?.text as string,
+            metric: toMetricOpt(result[item].metric)?.text || result[item].metric,
           };
           return buildFiredAlertReason(resultWithVerboseMetricName);
         })
