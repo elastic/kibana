@@ -63,3 +63,20 @@ export const tagMappings = {
     },
   },
 };
+
+export const tagAttachmentMappings = {
+  properties: {
+    tagId: {
+      type: 'keyword',
+    },
+    kri: {
+      type: 'keyword',
+    },
+    createdBy: {
+      type: 'keyword',
+    },
+    createdAt: {
+      type: 'date',
+    },
+  },
+};
