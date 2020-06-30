@@ -12,9 +12,9 @@ export type AgentType =
   | typeof AGENT_TYPE_TEMPORARY;
 
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
-
+export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
 export interface NewAgentAction {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
+  type: AgentActionType;
   data?: any;
   sent_at?: string;
 }
@@ -26,7 +26,7 @@ export interface AgentAction extends NewAgentAction {
 }
 
 export interface AgentActionSOAttributes {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: AgentActionType;
   sent_at?: string;
   timestamp?: string;
   created_at: string;

@@ -13,7 +13,6 @@ import {
   GetOneAgentEventsResponse,
   PostAgentCheckinResponse,
   PostAgentEnrollResponse,
-  PostAgentUnenrollResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
 } from '../../../common/types';
@@ -25,7 +24,6 @@ import {
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
   PostAgentEnrollRequestSchema,
-  PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
 } from '../../types';
@@ -292,25 +290,6 @@ export const getAgentsHandler: RequestHandler<
       total,
       page,
       perPage,
-    };
-    return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
-  }
-};
-
-export const postAgentsUnenrollHandler: RequestHandler<TypeOf<
-  typeof PostAgentUnenrollRequestSchema.params
->> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    await AgentService.unenrollAgent(soClient, request.params.agentId);
-
-    const body: PostAgentUnenrollResponse = {
-      success: true,
     };
     return response.ok({ body });
   } catch (e) {

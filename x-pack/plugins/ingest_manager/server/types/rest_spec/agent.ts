@@ -70,6 +70,11 @@ export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.maybe(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };
 
 export const PutAgentReassignRequestSchema = {
