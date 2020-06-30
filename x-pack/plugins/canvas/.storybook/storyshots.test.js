@@ -63,6 +63,13 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   };
 });
 
+// Temporary workaround. To be resolved by EUI team.
+jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
+  return {
+    EuiOverlayMask: ({children}) => children,
+  };
+});
+
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
   '../public/components/workpad_header/share_menu/flyout/__examples__/share_website_flyout.stories',
