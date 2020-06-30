@@ -32,7 +32,7 @@ interface MyStateV77 extends PersistableState {
   val: number,
 }
 
-interface MyState extends PersistableState {
+export interface MyState extends PersistableState {
   objectId: string,
   value: number,
 }
@@ -63,7 +63,9 @@ const extract = (state: MyState) => {
   return [{ ...state, objectId: 'objectId' }, references];
 }
 
-persistableStateService.register(MY_STATE_ID, { migrate, inject, extract });
+export const persistableStateDefinition = { migrate, inject, extract };
+
+persistableStateService.register(MY_STATE_ID, persistableStateDefinition);
 ```
 
 Persister plugin can then use the service to prepare state for saving or get it ready after loading.
@@ -84,9 +86,9 @@ We also need to make sure that all the persited state containing references to s
 We plan to implement `PersistableStateRegistry ` which will be exposed under `share` plugin
 
 ```ts
-interface PersistableState extends Serializable {}
+export interface PersistableState extends Serializable {}
 
-interface PersistableStateDefinition<P extends PersistableState = PersistableState> {
+export interface PersistableStateDefinition<P extends PersistableState = PersistableState> {
   id: string,
   // migrate function receives state and version string and should return latest state version
   // default is identity function
@@ -119,6 +121,20 @@ class PersistableStateRegistry {
   }
 }
 ```
+
+Every plugin that exposes its state should register its `PersistableStateDefinition`. In this definition he needs to expose `migrate` function which can take in any state version and migrate it to the latest state as well as `inject` and `extract` functions, which should be able to inject and extract saved object references from the latest state version.
+
+This same persitableStateDefinition should also be exposed on the plugin contract. On top of that plugin also needs to export type definition for the latest state version. Name of type definition should not include a version number but always be the same. (see the basic example)
+
+Plugins consuming state not owned by them should always use persistableStateDefinion of the registrator plugin. When loading state they need to:
+
+`const state = persistabelStateDefinition.inject(persistableStateDefinition.migrate(loadedState, version), references)`
+
+and when saving state they always need to:
+
+`const { state, references } = persistableStateDefinition.extract(runtimeState)` and store references separatly.
+
+This way consuming plugin can always be sure that its working with the latest state version.
 
 # Server or Client ?
 
