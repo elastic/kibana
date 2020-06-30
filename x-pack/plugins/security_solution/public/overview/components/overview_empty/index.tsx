@@ -17,7 +17,7 @@ const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
   const basePath = http.basePath.get();
   const { appId: ingestAppId, appPath: ingestPath, url: ingestUrl } = useHostIngestUrl(
-    'integrations'
+    'integrations?category=security'
   );
   const handleOnClick = useNavigateToAppEventHandler(ingestAppId, { path: ingestPath });
 
