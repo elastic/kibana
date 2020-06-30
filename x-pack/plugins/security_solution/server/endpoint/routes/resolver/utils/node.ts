@@ -7,10 +7,10 @@
 import {
   ResolverEvent,
   ResolverAncestry,
-  LifecycleNode,
+  ResolverLifecycleNode,
   ResolverRelatedEvents,
   ResolverTree,
-  ChildNode,
+  ResolverChildNode,
   ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 
@@ -49,7 +49,7 @@ export function createRelatedAlerts(
  *
  * @param entityID the entity_id of the child
  */
-export function createChild(entityID: string): ChildNode {
+export function createChild(entityID: string): ResolverChildNode {
   const lifecycle = createLifecycle(entityID, []);
   return {
     ...lifecycle,
@@ -70,7 +70,10 @@ export function createAncestry(): ResolverAncestry {
  * @param id the entity_id that these lifecycle nodes should have
  * @param lifecycle an array of lifecycle events
  */
-export function createLifecycle(entityID: string, lifecycle: ResolverEvent[]): LifecycleNode {
+export function createLifecycle(
+  entityID: string,
+  lifecycle: ResolverEvent[]
+): ResolverLifecycleNode {
   return { entityID, lifecycle };
 }
 

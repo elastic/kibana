@@ -9,7 +9,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
-import { WithSource } from '../../../common/containers/source';
+import { useWithSource } from '../../../common/containers/source';
 import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
@@ -41,6 +41,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
+    graphEventId,
     id,
     isLive,
     isTimelineExists,
@@ -56,6 +57,8 @@ const StatefulTimelineComponent = React.memo<Props>(
     showCallOutUnauthorizedMsg,
     sort,
     start,
+    status,
+    timelineType,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
     updateItemsPerPage,
@@ -158,46 +161,47 @@ const StatefulTimelineComponent = React.memo<Props>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const { indexPattern, browserFields } = useWithSource('default', indexToAdd);
+
     return (
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indexPattern, browserFields }) => (
-          <Timeline
-            browserFields={browserFields}
-            columns={columns}
-            dataProviders={dataProviders!}
-            end={end}
-            eventType={eventType}
-            filters={filters}
-            id={id}
-            indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            kqlQueryExpression={kqlQueryExpression}
-            loadingIndexName={loading}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onClose={onClose}
-            onDataProviderEdited={onDataProviderEditedLocal}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
-            usersViewing={usersViewing}
-          />
-        )}
-      </WithSource>
+      <Timeline
+        browserFields={browserFields}
+        columns={columns}
+        dataProviders={dataProviders!}
+        end={end}
+        eventType={eventType}
+        filters={filters}
+        graphEventId={graphEventId}
+        id={id}
+        indexPattern={indexPattern}
+        indexToAdd={indexToAdd}
+        isLive={isLive}
+        itemsPerPage={itemsPerPage!}
+        itemsPerPageOptions={itemsPerPageOptions!}
+        kqlMode={kqlMode}
+        kqlQueryExpression={kqlQueryExpression}
+        loadingIndexName={loading}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onClose={onClose}
+        onDataProviderEdited={onDataProviderEditedLocal}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        show={show!}
+        showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+        sort={sort!}
+        start={start}
+        status={status}
+        toggleColumn={toggleColumn}
+        usersViewing={usersViewing}
+      />
     );
   },
   (prevProps, nextProps) => {
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
+      prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
@@ -206,6 +210,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
+      prevProps.timelineType === nextProps.timelineType &&
+      prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
@@ -231,22 +237,25 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType,
       filters,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       show,
       sort,
+      status,
+      timelineType,
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
 
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
-
     return {
       columns,
       dataProviders,
       eventType,
       end: input.timerange.to,
       filters: timelineFilter,
+      graphEventId,
       id,
       isLive: input.policy.kind === 'interval',
       isTimelineExists: getTimeline(state, id) != null,
@@ -258,6 +267,8 @@ const makeMapStateToProps = () => {
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
       start: input.timerange.from,
+      status,
+      timelineType,
     };
   };
   return mapStateToProps;

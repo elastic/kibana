@@ -10,21 +10,17 @@ function extractCountFromSummary(str: string) {
   return parseInt(str.split('\n')[1], 10);
 }
 
-export function CopySavedObjectsToSpacePageProvider({ getService }: FtrProviderContext) {
+export function CopySavedObjectsToSpacePageProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
   const find = getService('find');
+  const { savedObjects } = getPageObjects(['savedObjects']);
 
   return {
-    async searchForObject(objectName: string) {
-      const searchBox = await testSubjects.find('savedObjectSearchBar');
-      await searchBox.clearValue();
-      await searchBox.type(objectName);
-      await searchBox.pressKeys(browser.keys.ENTER);
-    },
-
     async openCopyToSpaceFlyoutForObject(objectName: string) {
-      await this.searchForObject(objectName);
+      await savedObjects.searchForObject(objectName);
 
       // Click action button to show context menu
       await find.clickByCssSelector(
