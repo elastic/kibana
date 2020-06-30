@@ -16,14 +16,19 @@ import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/resp
 const mockStart = jest.fn();
 const mockResult = getFoundListSchemaMock();
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../lists_plugin_deps', () => ({
-  useFindLists: () => ({
-    loading: false,
-    start: mockStart.mockReturnValue(mockResult),
-    result: mockResult,
-    error: undefined,
-  }),
-}));
+jest.mock('../../../lists_plugin_deps', () => {
+  const originalModule = jest.requireActual('../../../lists_plugin_deps');
+
+  return {
+    ...originalModule,
+    useFindLists: () => ({
+      loading: false,
+      start: mockStart.mockReturnValue(mockResult),
+      result: mockResult,
+      error: undefined,
+    }),
+  };
+});
 
 describe('AutocompleteFieldListsComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {

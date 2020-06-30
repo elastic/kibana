@@ -89,8 +89,11 @@ export const ExceptionBuilder = ({
     item: ExceptionsBuilderExceptionItem,
     itemIndex: number
   ): void => {
-    if (item.entries.length === 0 && exceptionListItemSchema.is(item)) {
-      setExceptionsToDelete((items) => [...items, item]);
+    if (item.entries.length === 0) {
+      if (exceptionListItemSchema.is(item)) {
+        setExceptionsToDelete((items) => [...items, item]);
+      }
+
       setExceptions((existingExceptions) => {
         const updatedExceptions = [
           ...existingExceptions.slice(0, itemIndex),
@@ -175,11 +178,6 @@ export const ExceptionBuilder = ({
       return `${index}`;
     }
   };
-
-  // useEffect(() => {
-  //   setExceptions(exceptionListItems);
-  //   setAndLogicIncluded(exceptionListItems.length > 1);
-  // }, [exceptionListItems]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
