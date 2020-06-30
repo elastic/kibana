@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Boundaries source"
+          id="xpack.maps.choropleth.boundariesLabel"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="EMS"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "EMS",
+              "label": "Administrative boundaries from Elastic Maps Service",
+            },
+            Object {
+              "id": "ELASTICSEARCH",
+              "label": "Points, lines, and polygons from Elasticsearch",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EMSFileSelect
+      onChange={[Function]}
+      value={null}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.ELASTICSEARCH 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Boundaries source"
+          id="xpack.maps.choropleth.boundariesLabel"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      labelType="label"
+    >
+      <EuiRadioGroup
+        idSelected="ELASTICSEARCH"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "EMS",
+              "label": "Administrative boundaries from Elastic Maps Service",
+            },
+            Object {
+              "id": "ELASTICSEARCH",
+              "label": "Points, lines, and polygons from Elasticsearch",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <GeoIndexPatternSelect
+      onChange={[Function]}
+      value=""
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

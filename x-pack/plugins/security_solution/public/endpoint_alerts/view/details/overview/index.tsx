@@ -20,8 +20,6 @@ import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../store/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
-import { AlertDetailResolver } from '../../resolver';
-import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { TakeActionDropdown } from './take_action_dropdown';
 import { urlFromQueryParams } from '../../url_from_query_params';
 
@@ -65,12 +63,11 @@ const AlertDetailsOverviewComponent = memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <AlertDetailResolver selectedEvent={(alertDetailsData as unknown) as ResolverEvent} />
           </>
         ),
       },
     ];
-  }, [alertDetailsData]);
+  }, []);
 
   /* eslint-disable-next-line react-hooks/rules-of-hooks */
   const activeTab = useMemo(

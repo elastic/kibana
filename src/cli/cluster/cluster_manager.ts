@@ -269,8 +269,8 @@ export class ClusterManager {
       fromRoot('x-pack/plugins/case/server/scripts'),
       fromRoot('x-pack/plugins/lists/scripts'),
       fromRoot('x-pack/plugins/lists/server/scripts'),
-      fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
       fromRoot('x-pack/plugins/security_solution/scripts'),
+      fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
       'plugins/java_languageserver',
     ];
 

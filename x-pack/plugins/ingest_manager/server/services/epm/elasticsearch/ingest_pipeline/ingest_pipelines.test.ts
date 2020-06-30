@@ -107,7 +107,7 @@ test('a yml-format pipeline with no pipeline references stays unchanged', () => 
 
 test('getPipelineNameForInstallation gets correct name', () => {
   const dataset: Dataset = {
-    id: 'coredns.log',
+    name: 'coredns.log',
     title: 'CoreDNS logs',
     release: 'ga',
     type: 'logs',
@@ -127,8 +127,10 @@ test('getPipelineNameForInstallation gets correct name', () => {
     dataset,
     packageVersion,
   });
-  expect(pipelineEntryNameForInstallation).toBe(`${dataset.type}-${dataset.id}-${packageVersion}`);
+  expect(pipelineEntryNameForInstallation).toBe(
+    `${dataset.type}-${dataset.name}-${packageVersion}`
+  );
   expect(pipelineRefNameForInstallation).toBe(
-    `${dataset.type}-${dataset.id}-${packageVersion}-${pipelineRefName}`
+    `${dataset.type}-${dataset.name}-${packageVersion}-${pipelineRefName}`
   );
 });
