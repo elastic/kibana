@@ -46,7 +46,7 @@ const derivativeTitle = i18n.translate('data.search.aggs.metrics.derivativeTitle
 export const getDerivativeMetricAgg = ({
   getInternalStartServices,
 }: DerivativeMetricAggDependencies) => {
-  const { subtype, params, getFormat, getSerializedFormat } = parentPipelineAggHelper;
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
 
   return new MetricAggType(
     {
@@ -57,7 +57,6 @@ export const getDerivativeMetricAgg = ({
       },
       subtype,
       params: [...params()],
-      getFormat,
       getSerializedFormat,
     },
     {

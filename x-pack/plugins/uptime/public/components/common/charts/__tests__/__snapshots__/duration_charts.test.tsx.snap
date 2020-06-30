@@ -51,62 +51,97 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     }
   }
 >
-  <DurationChartComponent
-    anomalies={null}
-    loading={false}
-    locationDurationLines={
-      Array [
-        Object {
-          "line": Array [
-            Object {
-              "x": 1548697620000,
-              "y": 743928.2027027027,
-            },
-            Object {
-              "x": 1548697920000,
-              "y": 766840.0133333333,
-            },
-            Object {
-              "x": 1548698220000,
-              "y": 786970.8266666667,
-            },
-            Object {
-              "x": 1548698520000,
-              "y": 781064.7808219178,
-            },
-            Object {
-              "x": 1548698820000,
-              "y": 741563.04,
-            },
-            Object {
-              "x": 1548699120000,
-              "y": 759354.6756756756,
-            },
-            Object {
-              "x": 1548699420000,
-              "y": 737533.3866666667,
-            },
-            Object {
-              "x": 1548699720000,
-              "y": 728669.0266666666,
-            },
-            Object {
-              "x": 1548700020000,
-              "y": 719951.64,
-            },
-            Object {
-              "x": 1548700320000,
-              "y": 769181.7866666666,
-            },
-            Object {
-              "x": 1548700620000,
-              "y": 740805.2666666667,
-            },
-          ],
-          "name": "somewhere",
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
         },
-      ]
+        "push": [Function],
+        "replace": [Function],
+      }
     }
-  />
+  >
+    <DurationChartComponent
+      anomalies={null}
+      loading={false}
+      locationDurationLines={
+        Array [
+          Object {
+            "line": Array [
+              Object {
+                "x": 1548697620000,
+                "y": 743928.2027027027,
+              },
+              Object {
+                "x": 1548697920000,
+                "y": 766840.0133333333,
+              },
+              Object {
+                "x": 1548698220000,
+                "y": 786970.8266666667,
+              },
+              Object {
+                "x": 1548698520000,
+                "y": 781064.7808219178,
+              },
+              Object {
+                "x": 1548698820000,
+                "y": 741563.04,
+              },
+              Object {
+                "x": 1548699120000,
+                "y": 759354.6756756756,
+              },
+              Object {
+                "x": 1548699420000,
+                "y": 737533.3866666667,
+              },
+              Object {
+                "x": 1548699720000,
+                "y": 728669.0266666666,
+              },
+              Object {
+                "x": 1548700020000,
+                "y": 719951.64,
+              },
+              Object {
+                "x": 1548700320000,
+                "y": 769181.7866666666,
+              },
+              Object {
+                "x": 1548700620000,
+                "y": 740805.2666666667,
+              },
+            ],
+            "name": "somewhere",
+          },
+        ]
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

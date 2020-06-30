@@ -5,9 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AttributionDescriptor } from '../../../../common/descriptor_types';
 
@@ -77,7 +77,7 @@ export class XYZTMSEditor extends Component<Props, State> {
   render() {
     const { attributionText, attributionUrl } = this.state;
     return (
-      <Fragment>
+      <EuiPanel>
         <EuiFormRow label="Url">
           <EuiFieldText
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
@@ -116,7 +116,7 @@ export class XYZTMSEditor extends Component<Props, State> {
             }
           />
         </EuiFormRow>
-      </Fragment>
+      </EuiPanel>
     );
   }
 }
