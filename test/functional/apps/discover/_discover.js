@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -266,6 +267,20 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitKibanaChrome();
         const toastMessage = await PageObjects.common.closeToast();
         expect(toastMessage).to.be('Invalid time range');
+      });
+    });
+
+    describe('managing fields', function () {
+      it('should add a field, sort by it, remove it and also sorting by it', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldSort('_score');
+        const currentUrlWithScore = await browser.getCurrentUrl();
+        expect(currentUrlWithScore).to.contain('_score');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        const currentUrlWithoutScore = await browser.getCurrentUrl();
+        expect(currentUrlWithoutScore).not.to.contain('_score');
       });
     });
   });

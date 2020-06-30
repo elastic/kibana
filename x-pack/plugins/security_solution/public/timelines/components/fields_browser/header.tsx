@@ -12,14 +12,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { alertsHeaders } from '../../../alerts/components/alerts_table/default_config';
-import { alertsHeaders as externalAlertsHeaders } from '../../../common/components/alerts_viewer/default_headers';
-import { defaultHeaders as eventsDefaultHeaders } from '../../../common/components/events_viewer/default_headers';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
@@ -100,26 +96,13 @@ const TitleRow = React.memo<{
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ id, isEventViewer, onOutsideClick, onUpdateColumns }) => {
+}>(({ id, onOutsideClick, onUpdateColumns }) => {
   const { getManageTimelineById } = useManageTimeline();
-  const documentType = useMemo(() => getManageTimelineById(id).documentType, [
-    getManageTimelineById,
-    id,
-  ]);
   const handleResetColumns = useCallback(() => {
-    let resetDefaultHeaders = defaultHeaders;
-    if (isEventViewer) {
-      if (documentType.toLocaleLowerCase() === 'externalAlerts') {
-        resetDefaultHeaders = externalAlertsHeaders;
-      } else if (documentType.toLocaleLowerCase() === 'alerts') {
-        resetDefaultHeaders = alertsHeaders;
-      } else {
-        resetDefaultHeaders = eventsDefaultHeaders;
-      }
-    }
-    onUpdateColumns(resetDefaultHeaders);
+    const timeline = getManageTimelineById(id);
+    onUpdateColumns(timeline.defaultModel.columns);
     onOutsideClick();
-  }, [isEventViewer, onOutsideClick, onUpdateColumns, documentType]);
+  }, [id, onUpdateColumns, onOutsideClick, getManageTimelineById]);
 
   return (
     <EuiFlexGroup
