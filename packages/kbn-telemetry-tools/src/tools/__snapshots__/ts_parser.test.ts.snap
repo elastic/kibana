@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parseUsageCollection throws when mapping fields is not defined 1`] = `
+"Error extracting collector in src/fixtures/telemetry_collectors/unmapped_collector.ts
+Error: usageCollector.schema must be defined."
+`;

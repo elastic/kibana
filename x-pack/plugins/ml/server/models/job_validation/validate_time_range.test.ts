@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -21,7 +21,7 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const callWithRequestFactory = (resp: any): APICaller => {
+const callWithRequestFactory = (resp: any): LegacyAPICaller => {
   return (path: string) => {
     return new Promise((resolve) => {
       resolve(resp[path]);

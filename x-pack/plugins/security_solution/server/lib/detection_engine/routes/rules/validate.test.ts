@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
-
 import {
-  validate,
   transformValidate,
   transformValidateFindAlerts,
   transformValidateBulkError,
@@ -17,6 +14,7 @@ import { FindResult } from '../../../../../../alerts/server';
 import { BulkError } from '../utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const ruleOutput: RulesSchema = {
   actions: [],
@@ -71,38 +69,7 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   meta: {
     someMeta: 'someField',
@@ -119,26 +86,6 @@ describe('validate', () => {
 
   afterAll(() => {
     unSetFeatureFlagsForTestsOnly();
-  });
-
-  describe('validate', () => {
-    test('it should do a validation correctly', () => {
-      const schema = t.exact(t.type({ a: t.number }));
-      const payload = { a: 1 };
-      const [validated, errors] = validate(payload, schema);
-
-      expect(validated).toEqual(payload);
-      expect(errors).toEqual(null);
-    });
-
-    test('it should do an in-validation correctly', () => {
-      const schema = t.exact(t.type({ a: t.number }));
-      const payload = { a: 'some other value' };
-      const [validated, errors] = validate(payload, schema);
-
-      expect(validated).toEqual(null);
-      expect(errors).toEqual('Invalid value "some other value" supplied to "a"');
-    });
   });
 
   describe('transformValidate', () => {

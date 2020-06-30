@@ -15,6 +15,10 @@ Array [
       class="echChart"
     >
       <div
+        class="echChartBackground"
+        style="background-color:transparent"
+      />
+      <div
         class="echChartStatus"
         data-ech-render-complete="false"
         data-ech-render-count="0"
@@ -24,15 +28,7 @@ Array [
       />
       <div
         class="echContainer"
-      >
-        <div
-          class="echReactiveChart_unavailable"
-        >
-          <p>
-            No data to display
-          </p>
-        </div>
-      </div>
+      />
     </div>
   </div>,
 ]
@@ -89,160 +85,195 @@ exports[`PingHistogram component shallow renders the component without errors 1`
     }
   }
 >
-  <PingHistogramComponent
-    absoluteEndDate={1548700920000}
-    absoluteStartDate={1548697920000}
-    data={
+  <ContextProvider
+    value={
       Object {
-        "histogram": Array [
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
           Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068329000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068359000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068389000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068419000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068449000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068479000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068509000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068539000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068569000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068599000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068629000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068659000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 33,
-            "x": 1581068689000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 6,
-            "upCount": 30,
-            "x": 1581068719000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 5,
-            "upCount": 34,
-            "x": 1581068749000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 33,
-            "x": 1581068779000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 36,
-            "x": 1581068809000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 33,
-            "x": 1581068839000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 36,
-            "x": 1581068869000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 33,
-            "x": 1581068899000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 36,
-            "x": 1581068929000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 33,
-            "x": 1581068959000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 3,
-            "upCount": 36,
-            "x": 1581068989000,
-            "y": 1,
-          },
-          Object {
-            "downCount": 1,
-            "upCount": 11,
-            "x": 1581069019000,
-            "y": 1,
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
           },
         ],
-        "interval": "1s",
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
-  />
+  >
+    <PingHistogramComponent
+      absoluteEndDate={1548700920000}
+      absoluteStartDate={1548697920000}
+      data={
+        Object {
+          "histogram": Array [
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068329000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068359000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068389000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068419000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068449000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068479000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068509000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068539000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068569000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068599000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068629000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068659000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 33,
+              "x": 1581068689000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 6,
+              "upCount": 30,
+              "x": 1581068719000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 5,
+              "upCount": 34,
+              "x": 1581068749000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 33,
+              "x": 1581068779000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 36,
+              "x": 1581068809000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 33,
+              "x": 1581068839000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 36,
+              "x": 1581068869000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 33,
+              "x": 1581068899000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 36,
+              "x": 1581068929000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 33,
+              "x": 1581068959000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 3,
+              "upCount": 36,
+              "x": 1581068989000,
+              "y": 1,
+            },
+            Object {
+              "downCount": 1,
+              "upCount": 11,
+              "x": 1581069019000,
+              "y": 1,
+            },
+          ],
+          "interval": "1s",
+        }
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

@@ -67,7 +67,7 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksSetup, DocLinksStart } from './doc_links';
+import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
@@ -81,7 +81,6 @@ import {
 
 export { CoreContext, CoreSystem } from './core_system';
 export {
-  RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
@@ -216,8 +215,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
-  /** {@link DocLinksSetup} */
-  docLinks: DocLinksSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -348,7 +345,6 @@ export {
   HandlerParameters,
   IContextProvider,
   ContextSetup,
-  DocLinksSetup,
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,

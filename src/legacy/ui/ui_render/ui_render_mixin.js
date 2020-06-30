@@ -26,8 +26,6 @@ import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
-const uniq = (...items) => Array.from(new Set(items));
-
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
  * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
@@ -132,7 +130,6 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
-          `${regularBundlePath}/commons.style.css`,
           ...(isCore
             ? []
             : [
@@ -150,28 +147,14 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = uniq(
-          // load these plugins first, they are "shared" and other bundles access their
-          // public/index exports without considering topographic sorting by plugin deps (for now)
-          'kibanaUtils',
-          'kibanaReact',
-          'data',
-          'esUiShared',
-          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
-        );
+        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
             (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore
-            ? []
-            : [
-                `${dllBundlePath}/vendors_runtime.bundle.dll.js`,
-                ...dllJsChunks,
-                `${regularBundlePath}/commons.bundle.js`,
-              ]),
+          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
           ...kpPluginIds.map(
@@ -251,7 +234,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       savedObjects.getClient(h.request)
     );
     const vars = await legacy.getVars(app.getId(), h.request, {
-      apmConfig: getApmConfig(app),
+      apmConfig: getApmConfig(h.request.path),
       ...overrides,
     });
     const content = await rendering.render(h.request, uiSettings, {

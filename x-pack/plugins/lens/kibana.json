@@ -13,5 +13,6 @@
     "dashboard"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
-  "configPath": ["xpack", "lens"]
+  "configPath": ["xpack", "lens"],
+  "extraPublicDirs": ["common/constants"]
 }

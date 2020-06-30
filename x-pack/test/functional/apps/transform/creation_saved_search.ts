@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
+          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -235,12 +235,10 @@ export default function ({ getService }: FtrProviderContext) {
           expect(rows.filter((row) => row.id === testData.transformId)).to.have.length(1);
         });
 
-        it('job creation displays details for the created job in the job list', async () => {
+        it('transform creation displays details for the created transform in the transform list', async () => {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
-            sourceIndex: testData.expected.sourceIndex,
-            destinationIndex: testData.destinationIndex,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

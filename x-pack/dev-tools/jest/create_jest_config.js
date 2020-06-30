@@ -44,6 +44,7 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       '!**/mocks/**',
       '!**/plugins/apm/e2e/**',
       '!**/plugins/siem/cypress/**',
+      '!**/plugins/**/test_helpers/**',
     ],
     coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: `${kibanaDirectory}/target/kibana-coverage/jest`,
@@ -58,7 +59,9 @@ export function createJestConfig({ kibanaDirectory, rootDir, xPackKibanaDirector
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
+    testEnvironment: 'jest-environment-jsdom-thirteen',
     testMatch: ['**/*.test.{js,ts,tsx}'],
+    testRunner: 'jest-circus/runner',
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

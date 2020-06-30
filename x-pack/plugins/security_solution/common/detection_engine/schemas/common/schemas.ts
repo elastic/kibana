@@ -191,7 +191,7 @@ export type Severity = t.TypeOf<typeof severity>;
 export const severityOrUndefined = t.union([severity, t.undefined]);
 export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
 
-export const status = t.keyof({ open: null, closed: null });
+export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
 export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
@@ -235,6 +235,7 @@ export const pageOrUndefined = t.union([page, t.undefined]);
 export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
 
 export const signal_ids = t.array(t.string);
+export type SignalIds = t.TypeOf<typeof signal_ids>;
 
 // TODO: Can this be more strict or is this is the set of all Elastic Queries?
 export const signal_status_query = t.object;
@@ -340,40 +341,3 @@ export type Note = t.TypeOf<typeof note>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
-
-// NOTE: Experimental list support not being shipped currently and behind a feature flag
-// TODO: Remove this comment once we lists have passed testing and is ready for the release
-export const list_field = t.string;
-export const list_values_operator = t.keyof({ included: null, excluded: null });
-export const list_values_type = t.keyof({ match: null, match_all: null, list: null, exists: null });
-export const list_values = t.exact(
-  t.intersection([
-    t.type({
-      name: t.string,
-    }),
-    t.partial({
-      id: t.string,
-      description: t.string,
-      created_at,
-    }),
-  ])
-);
-export const list = t.exact(
-  t.intersection([
-    t.type({
-      field: t.string,
-      values_operator: list_values_operator,
-      values_type: list_values_type,
-    }),
-    t.partial({ values: t.array(list_values) }),
-  ])
-);
-export const list_and = t.intersection([
-  list,
-  t.partial({
-    and: t.array(list),
-  }),
-]);
-
-export const listAndOrUndefined = t.union([t.array(list_and), t.undefined]);
-export type ListAndOrUndefined = t.TypeOf<typeof listAndOrUndefined>;

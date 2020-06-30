@@ -47,7 +47,7 @@ export const exportListItemRoute = (router: IRouter): void => {
             body: stream,
             headers: {
               'Content-Disposition': `attachment; filename="${fileName}"`,
-              'Content-Type': 'text/plain',
+              'Content-Type': 'application/ndjson',
             },
           });
         }
