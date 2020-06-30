@@ -7,6 +7,7 @@
 import React, { useContext, useState, useEffect, FunctionComponent } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { RouterContext } from '../router';
+import { ComponentStrings } from '../../../i18n/components';
 // @ts-expect-error
 import * as workpadService from '../../lib/workpad_service';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -22,7 +23,8 @@ interface WorkpadTemplatesProps {
 
 const Creating: FunctionComponent<{ name: string }> = ({ name }) => (
   <div>
-    <EuiLoadingSpinner size="l" /> Creating from template {name}
+    <EuiLoadingSpinner size="l" />{' '}
+    {ComponentStrings.WorkpadTemplates.getCreatingTemplateLabel(name)}
   </div>
 );
 export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onClose }) => {
