@@ -5,3 +5,4 @@
  */
 
 export { LoadFromJsonButton } from './button';
+export { OnDoneLoadJsonHandler } from './modal_provider';

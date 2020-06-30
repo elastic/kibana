@@ -52,7 +52,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     renderOnFailureHandlers,
   }) => {
     const {
-      state: { editor, processorsDispatch },
+      state: { editor, processors },
     } = usePipelineProcessorsContext();
 
     const isDisabled = editor.mode.id !== 'idle';
@@ -115,7 +115,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                         description: nextDescription,
                       };
                     }
-                    processorsDispatch({
+                    processors.dispatch({
                       type: 'updateProcessor',
                       payload: {
                         processor: {
@@ -183,7 +183,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 editor.setMode({ id: 'removingProcessor', arg: { selector } });
               }}
               onDuplicate={() => {
-                processorsDispatch({
+                processors.dispatch({
                   type: 'duplicateProcessor',
                   payload: {
                     source: selector,

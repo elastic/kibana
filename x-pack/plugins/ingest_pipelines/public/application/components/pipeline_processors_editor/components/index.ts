@@ -12,10 +12,10 @@ export {
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
-export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item/pipeline_processors_editor_item';
+export { PipelineProcessorsEditor } from './pipeline_processors_editor';
+
+export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item';
 
 export { ProcessorRemoveModal } from './processor_remove_modal';
 
-export { ProcessorsTitleAndTestButton } from './processors_title_and_test_button';
-
-export { OnFailureProcessorsTitle } from './on_failure_processors_title';
+export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';

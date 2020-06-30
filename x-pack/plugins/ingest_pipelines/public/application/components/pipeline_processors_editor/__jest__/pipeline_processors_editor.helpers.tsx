@@ -6,7 +6,12 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor.container';
+import {
+  PipelineProcessorsContextProvider,
+  Props,
+  ProcessorsEditor,
+  GlobalOnFailureProcessorsEditor,
+} from '../';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -55,9 +60,16 @@ jest.mock('react-virtualized', () => {
   };
 });
 
-const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
-  doMountAsync: false,
-});
+const testBedSetup = registerTestBed<TestSubject>(
+  (props: Props) => (
+    <PipelineProcessorsContextProvider {...props}>
+      <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
+    </PipelineProcessorsContextProvider>
+  ),
+  {
+    doMountAsync: false,
+  }
+);
 
 export interface SetupResult extends TestBed<TestSubject> {
   actions: ReturnType<typeof createActions>;
@@ -145,10 +157,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       act(() => {
         find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
       });
-    },
-
-    toggleOnFailure() {
-      find('pipelineEditorOnFailureToggle').simulate('click');
     },
   };
 };

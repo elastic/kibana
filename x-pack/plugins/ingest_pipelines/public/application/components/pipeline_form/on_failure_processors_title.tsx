@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../context';
+import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
 
 export const OnFailureProcessorsTitle: FunctionComponent = () => {
   const { links } = usePipelineProcessorsContext();

@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineProcessorsEditor, OnUpdateHandler } from './pipeline_processors_editor.container';
+export { PipelineProcessorsContextProvider, Props } from './context';
 
-export { OnUpdateHandlerArg } from './types';
+export { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
+
+export { OnUpdateHandlerArg, OnUpdateHandler } from './types';
 
 export { SerializeResult } from './serialize';
+
+export { LoadFromJsonButton, OnDoneLoadJsonHandler } from './components';

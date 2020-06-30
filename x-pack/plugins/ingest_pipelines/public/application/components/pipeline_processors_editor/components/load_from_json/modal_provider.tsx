@@ -4,16 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useRef, useState } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { FunctionComponent, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiOverlayMask, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+
 import {
   JsonEditor,
   OnJsonEditorUpdateHandler,
 } from '../../../../../../../../../src/plugins/es_ui_shared/public';
 
-interface Props {
-  onDone: (json: Record<string, any>) => void;
+import { Processor } from '../../../../../../common/types';
+
+import { deserialize } from '../../deserialize';
+
+export type OnDoneLoadJsonHandler = (json: {
+  processors: Processor[];
+  on_failure?: Processor[];
+}) => void;
+
+export interface Props {
+  onDone: OnDoneLoadJsonHandler;
   children: (openModal: () => void) => React.ReactNode;
 }
 
@@ -34,12 +44,33 @@ const i18nTexts = {
       defaultMessage: 'Pipeline object',
     }),
   },
+  error: {
+    title: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.error.title', {
+      defaultMessage: 'Invalid pipeline',
+    }),
+    body: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.error.body', {
+      defaultMessage: 'Please ensure the JSON is a valid pipeline object.',
+    }),
+  },
 };
+
+const defaultValue = {};
+const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
 
 export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0'] | undefined>();
+  const [isValidJson, setIsValidJson] = useState(true);
+  const [error, setError] = useState<Error | undefined>();
+  const jsonContent = useRef<Parameters<OnJsonEditorUpdateHandler>['0']>({
+    isValid: true,
+    validate: () => true,
+    data: {
+      format: () => defaultValue,
+      raw: defaultValueRaw,
+    },
+  });
   const onJsonUpdate: OnJsonEditorUpdateHandler = (jsonUpdateData) => {
+    setIsValidJson(jsonUpdateData.validate());
     jsonContent.current = jsonUpdateData;
   };
   return (
@@ -48,12 +79,26 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
       {isModalVisible ? (
         <EuiOverlayMask>
           <EuiConfirmModal
+            data-test-subj="loadJsonConfirmationModal"
             title={i18nTexts.modalTitle}
             onCancel={() => {
               setIsModalVisible(false);
             }}
-            onConfirm={() => {}}
+            onConfirm={async () => {
+              try {
+                const json = jsonContent.current.data.format();
+                const { processors, on_failure: onFailure } = json;
+                deserialize({ processors, onFailure });
+                onDone(json as any);
+                setIsModalVisible(false);
+              } catch (e) {
+                setError(e);
+                // eslint-disable-next-line no-console
+                console.error(e);
+              }
+            }}
             cancelButtonText={i18nTexts.buttons.cancel}
+            confirmButtonDisabled={!isValidJson}
             confirmButtonText={i18nTexts.buttons.confirm}
             maxWidth={600}
           >
@@ -66,6 +111,20 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
               </EuiText>
 
               <EuiSpacer size="m" />
+
+              {error && (
+                <>
+                  <EuiCallOut
+                    data-test-subj="errorCallOut"
+                    title={i18nTexts.error.title}
+                    color="danger"
+                    iconType="alert"
+                  >
+                    {i18nTexts.error.body}
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               <JsonEditor
                 label={i18nTexts.editor.label}

@@ -9,7 +9,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
-import { Pipeline } from '../../../../common/types';
+import { Pipeline, Processor } from '../../../../common/types';
+
+import './pipeline_form.scss';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
@@ -51,6 +53,20 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
+  const {
+    processors: initialProcessors,
+    on_failure: initialOnFailureProcessors,
+    ...defaultFormValues
+  } = defaultValue;
+
+  const [processorsState, setProcessorsState] = useState<{
+    processors: Processor[];
+    onFailure?: Processor[];
+  }>({
+    processors: initialProcessors,
+    onFailure: initialOnFailureProcessors,
+  });
+
   const processorStateRef = useRef<OnUpdateHandlerArg>();
 
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
@@ -61,9 +77,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     }
 
     if (processorStateRef.current) {
-      const processorsState = processorStateRef.current;
-      if (await processorsState.validate()) {
-        override = processorsState.getData();
+      const state = processorStateRef.current;
+      if (await state.validate()) {
+        override = state.getData();
       } else {
         return;
       }
@@ -78,7 +94,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const { form } = useForm({
     schema: pipelineFormSchema,
-    defaultValue,
+    defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
 
@@ -122,9 +138,12 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
         {/* All form fields */}
         <PipelineFormFields
+          onLoadJson={({ processors, on_failure: onFailure }) => {
+            setProcessorsState({ processors, onFailure });
+          }}
           onEditorFlyoutOpen={onEditorFlyoutOpen}
-          initialProcessors={defaultValue.processors}
-          initialOnFailureProcessors={defaultValue.on_failure}
+          processors={processorsState.processors}
+          onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}

@@ -9,18 +9,20 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../context';
+import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
 
-import { LoadFromJsonButton } from './load_from_json';
+import { LoadFromJsonButton, OnDoneLoadJsonHandler } from '../pipeline_processors_editor';
 
 export interface Props {
   onTestPipelineClick: () => void;
   isTestButtonDisabled: boolean;
+  onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
+export const ProcessorsTitle: FunctionComponent<Props> = ({
   onTestPipelineClick,
   isTestButtonDisabled,
+  onLoadJson,
 }) => {
   const { links } = usePipelineProcessorsContext();
   return (
@@ -58,7 +60,7 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <LoadFromJsonButton onDone={() => {}} />
+        <LoadFromJsonButton onDone={onLoadJson} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
