@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
 import { ModelMemoryEstimate } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
@@ -97,7 +97,7 @@ describe('ML - validateModelMemoryLimit', () => {
         response = estimateModelMemory || modelMemoryEstimateResponse;
       }
       return Promise.resolve(response);
-    }) as APICaller;
+    }) as LegacyAPICaller;
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
     return ({
