@@ -117,13 +117,14 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
           <EuiFlexGroup
             direction="column"
             responsive={false}
-            gutterSize="s"
+            gutterSize="xs"
             justifyContent="center"
             alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
               {isShowingAllErrors ? (
                 <EuiButtonEmpty
+                  size="s"
                   onClick={() => setIsShowingAllErrors(false)}
                   color="danger"
                   iconSide="right"
@@ -141,6 +142,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                 </EuiButtonEmpty>
               ) : (
                 <EuiButtonEmpty
+                  size="s"
                   onClick={() => setIsShowingAllErrors(true)}
                   color="danger"
                   iconSide="right"
