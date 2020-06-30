@@ -60,6 +60,7 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
+  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -436,10 +437,15 @@ export class DashboardAppController {
                   id: incomingState.embeddableIdToReplace,
                 });
               } else if ('input' in incomingState) {
-                container.addOrUpdateEmbeddable<EmbeddableInput>(
-                  incomingState.type,
-                  incomingState.input
-                );
+                // TODO: Get rid of this, maybe by making the visualize embeddable also use the attributeService
+                const explicitInput =
+                  incomingState.type === 'lens'
+                    ? incomingState.input
+                    : {
+                        savedVis: incomingState.input,
+                      };
+
+                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
               }
             }
           }
