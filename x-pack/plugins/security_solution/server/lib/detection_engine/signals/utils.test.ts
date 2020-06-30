@@ -698,6 +698,24 @@ describe('utils', () => {
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(10);
       });
     });
+
+    // this tests if calculatedFrom in utils.ts:320 parses an int and not a float
+    // if we don't parse as an int, then dateMath.parse will fail
+    // as it doesn't support parsing `now-67.549`, it only supports ints like `now-67`.
+    test('should return five tuples when given a gap with a decimal to ensure no parsing errors', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(67549, 'ms'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(67549, 'ms').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      expect(someTuples.length).toEqual(5);
+    });
+
     test('should return single tuples when give a negative gap (rule ran sooner than expected)', () => {
       const someTuples = getSignalTimeTuples({
         logger: mockLogger,
