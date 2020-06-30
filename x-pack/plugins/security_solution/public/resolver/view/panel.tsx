@@ -22,7 +22,7 @@ import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
@@ -141,15 +141,10 @@ const PanelContent = memo(function PanelContent() {
     [history, urlSearch]
   );
 
-  // GO JONNY GO
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForIdFromParams = useMemo(() => {
-    if (idFromParams) {
-      return relatedEventStats.get(idFromParams);
-    }
-    return undefined;
-  }, [relatedEventStats, idFromParams]);
+  const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
+    idFromParams && relatedEventStats ? relatedEventStats.get(idFromParams) : undefined;
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   FoundListItemSchema,
@@ -75,7 +75,7 @@ export class ListClient {
   private readonly spaceId: string;
   private readonly user: string;
   private readonly config: ConfigType;
-  private readonly callCluster: APICaller;
+  private readonly callCluster: LegacyAPICaller;
 
   constructor({ spaceId, user, config, callCluster }: ConstructorOptions) {
     this.spaceId = spaceId;

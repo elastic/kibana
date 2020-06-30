@@ -150,7 +150,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
-        query: queryService,
       }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
