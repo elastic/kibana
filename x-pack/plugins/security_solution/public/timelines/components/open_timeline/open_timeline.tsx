@@ -140,31 +140,14 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const timelineResultsType = searchResults[0]?.timelineType;
-      const timelineActions = ['export', 'selectable'];
-
-      if (timelineResultsType === TimelineType.template) {
-        timelineActions.unshift('duplicateTemplate');
-      }
-
-      if (timelineResultsType !== TimelineType.template) {
-        timelineActions.unshift('duplicate');
-      }
+      const timelineActions = ['createFrom', 'duplicate', 'export', 'selectable'];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
-        timelineActions.unshift('delete');
-      }
-
-      if (timelineResultsType === TimelineType.template) {
-        timelineActions.unshift('createTimelineFromTemplate');
-      }
-
-      if (timelineResultsType !== TimelineType.template) {
-        timelineActions.unshift('createTemplateFromTimeline');
+        timelineActions.push('delete');
       }
 
       return timelineActions as ActionTimelineToShow[];
-    }, [onDeleteSelected, deleteTimelines, searchResults]);
+    }, [onDeleteSelected, deleteTimelines]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 
@@ -204,6 +187,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             onlyFavorites={onlyFavorites}
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
+            query={query}
             timelineType={timelineType}
           >
             {SearchRowContent}

@@ -10,7 +10,6 @@ import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useHover } from '../../../../common/hooks/use_hover';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';

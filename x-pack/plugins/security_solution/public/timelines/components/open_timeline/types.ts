@@ -119,14 +119,7 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow =
-  | 'createTimelineFromTemplate'
-  | 'createTemplateFromTimeline'
-  | 'duplicate'
-  | 'duplicateTemplate'
-  | 'delete'
-  | 'export'
-  | 'selectable';
+export type ActionTimelineToShow = 'createFrom' | 'duplicate' | 'delete' | 'export' | 'selectable';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */

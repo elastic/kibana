@@ -48,6 +48,8 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
     'data-test-subj': 'create-from-template',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('createFrom'),
   };
 
   const createTemplateFromTimeline = {
@@ -64,6 +66,8 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
     'data-test-subj': 'create-template-from-timeline',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('createFrom'),
   };
 
   const openAsDuplicateColumn = {
@@ -79,6 +83,8 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE,
     'data-test-subj': 'open-duplicate',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType !== TimelineType.template && actionTimelineToShow.includes('duplicate'),
   };
 
   const openAsDuplicateTemplateColumn = {
@@ -94,6 +100,8 @@ export const getActionsColumns = ({
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
     'data-test-subj': 'open-duplicate-template',
+    available: (item: OpenTimelineResult) =>
+      item.timelineType === TimelineType.template && actionTimelineToShow.includes('duplicate'),
   };
 
   const exportTimelineAction = {
@@ -107,6 +115,7 @@ export const getActionsColumns = ({
     },
     description: i18n.EXPORT_SELECTED,
     'data-test-subj': 'export-timeline',
+    available: () => actionTimelineToShow.includes('export'),
   };
 
   const deleteTimelineColumn = {
@@ -119,25 +128,20 @@ export const getActionsColumns = ({
       savedObjectId != null && status !== TimelineStatus.immutable,
     description: i18n.DELETE_SELECTED,
     'data-test-subj': 'delete-timeline',
+    available: () => actionTimelineToShow.includes('delete') && deleteTimelines != null,
   };
 
   return [
     {
       width: '80px',
       actions: [
-        actionTimelineToShow.includes('createTimelineFromTemplate')
-          ? createTimelineFromTemplate
-          : null,
-        actionTimelineToShow.includes('createTemplateFromTimeline')
-          ? createTemplateFromTimeline
-          : null,
-        actionTimelineToShow.includes('duplicate') ? openAsDuplicateColumn : null,
-        actionTimelineToShow.includes('duplicateTemplate') ? openAsDuplicateTemplateColumn : null,
-        actionTimelineToShow.includes('export') ? exportTimelineAction : null,
-        actionTimelineToShow.includes('delete') && deleteTimelines != null
-          ? deleteTimelineColumn
-          : null,
-      ].filter((action) => action != null),
+        createTimelineFromTemplate,
+        createTemplateFromTimeline,
+        openAsDuplicateColumn,
+        openAsDuplicateTemplateColumn,
+        exportTimelineAction,
+        deleteTimelineColumn,
+      ],
     },
   ];
 };

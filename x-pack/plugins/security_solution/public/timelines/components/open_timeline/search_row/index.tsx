@@ -35,7 +35,12 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 
 type Props = Pick<
   OpenTimelineProps,
-  'favoriteCount' | 'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'timelineType'
+  | 'favoriteCount'
+  | 'onlyFavorites'
+  | 'onQueryChange'
+  | 'onToggleOnlyFavorites'
+  | 'query'
+  | 'timelineType'
 > & { children?: JSX.Element | null };
 
 /**

@@ -8,8 +8,6 @@ import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
-
 import { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
@@ -52,25 +50,14 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const actionsToShow = useMemo(() => {
-      const timelineResultsType = searchResults[0]?.timelineType;
-      const actions: ActionTimelineToShow[] = [];
+      const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
 
       if (onDeleteSelected != null && deleteTimelines != null) {
-        actions.unshift('delete');
-      }
-
-      if (timelineResultsType === TimelineType.template) {
-        actions.push('duplicateTemplate');
-        actions.unshift('createTimelineFromTemplate');
-      }
-
-      if (timelineResultsType !== TimelineType.template) {
-        actions.push('duplicate');
-        actions.unshift('createTemplateFromTimeline');
+        actions.push('delete');
       }
 
       return actions.filter((action) => !hideActions.includes(action));
-    }, [onDeleteSelected, deleteTimelines, hideActions, searchResults]);
+    }, [onDeleteSelected, deleteTimelines, hideActions]);
 
     const SearchRowContent = useMemo(
       () => (
@@ -99,6 +86,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
+                query=""
                 timelineType={timelineType}
               >
                 {SearchRowContent}
