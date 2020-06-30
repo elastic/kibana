@@ -5,7 +5,7 @@
  */
 
 import LRU from 'lru-cache';
-import { APICaller } from '../../../../../../src/core/server';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
   IIndexPattern,
@@ -37,7 +37,7 @@ export const getDynamicIndexPattern = async ({
   }
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
-    (...rest: Parameters<APICaller>) =>
+    (...rest: Parameters<LegacyAPICaller>) =>
       context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
   );
 

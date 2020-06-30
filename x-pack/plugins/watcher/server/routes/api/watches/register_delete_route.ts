@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
@@ -13,7 +13,7 @@ const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
 });
 
-function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
+function deleteWatches(dataClient: ILegacyScopedClusterClient, watchIds: string[]) {
   const deletePromises = watchIds.map((watchId) => {
     return dataClient
       .callAsCurrentUser('watcher.deleteWatch', {
