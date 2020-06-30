@@ -19,7 +19,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useHostLogsUrl, useAgentDetailsIngestUrl } from '../hooks';
+import { useHostSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -51,7 +51,6 @@ const LinkToExternalApp = styled.div`
 const openReassignFlyoutSearch = '?openReassignFlyout=true';
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { url: logsUrl, appId: logsAppId, appPath: logsAppPath } = useHostLogsUrl(details.host.id);
   const agentId = details.elastic.agent.id;
   const {
     url: agentDetailsUrl,
@@ -77,12 +76,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           defaultMessage: 'Last Seen',
         }),
         description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.alerts', {
-          defaultMessage: 'Alerts',
-        }),
-        description: '0',
       },
     ];
   }, [details]);
@@ -251,22 +244,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         listItems={detailsResultsLower}
         data-test-subj="hostDetailsLowerList"
       />
-      <EuiHorizontalRule margin="m" />
-      <LinkToExternalApp>
-        <LinkToApp
-          appId={logsAppId}
-          appPath={logsAppPath}
-          href={logsUrl}
-          data-test-subj="hostDetailsLinkToLogs"
-        >
-          <EuiIcon type="logsApp" className="linkToAppIcon" />
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToLogsTitle"
-            defaultMessage="Endpoint Logs"
-          />
-          <EuiIcon type="popout" className="linkToAppPopoutIcon" />
-        </LinkToApp>
-      </LinkToExternalApp>
     </>
   );
 });

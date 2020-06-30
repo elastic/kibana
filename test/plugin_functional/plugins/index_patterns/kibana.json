@@ -1,0 +1,9 @@
+{
+  "id": "index_patterns_test_plugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["index_patterns_test_plugin"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["data"]
+}
