@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Language, Query } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Query as DataQuery } from '../../../../../../../src/plugins/data/server';
+import { Query as DataQuery } from '../../../../../src/plugins/data/common';
 import {
   Entry,
-  ExceptionListItemSchema,
   EntryMatch,
   EntryMatchAny,
   EntryNested,
@@ -19,7 +17,9 @@ import {
   entriesMatch,
   entriesNested,
   entriesList,
-} from '../../../../../lists/common/schemas';
+  ExceptionListItemSchema,
+} from '../../../lists/common/schemas';
+import { Language, Query } from './schemas/common/schemas';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
