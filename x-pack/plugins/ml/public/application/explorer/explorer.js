@@ -224,7 +224,7 @@ export class Explorer extends React.Component {
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
 
-    if (noJobsFound) {
+    if (noJobsFound && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoJobsFound />
@@ -232,7 +232,7 @@ export class Explorer extends React.Component {
       );
     }
 
-    if (noJobsFound && hasResults === false) {
+    if (noJobsFound && hasResults === false && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
           <ExplorerNoResultsFound />
