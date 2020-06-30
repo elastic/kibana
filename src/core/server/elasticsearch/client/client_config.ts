@@ -70,8 +70,11 @@ export function parseClientOptions(
   if (config.requestTimeout != null) {
     clientOptions.requestTimeout = getDurationAsMs(config.requestTimeout);
   }
-  if (config.sniffInterval) {
-    clientOptions.sniffInterval = getDurationAsMs(config.sniffInterval);
+  if (config.sniffInterval != null) {
+    clientOptions.sniffInterval =
+      typeof config.sniffInterval === 'boolean'
+        ? config.sniffInterval
+        : getDurationAsMs(config.sniffInterval);
   }
   if (config.keepAlive) {
     clientOptions.agent = {
@@ -79,9 +82,7 @@ export function parseClientOptions(
     };
   }
 
-  // TODO: this can either be done globally here or by host in convertHost.
-  //       Not sure which option is the best.
-  if (config.username && config.password) {
+  if (config.username && config.password && !scoped) {
     clientOptions.auth = {
       username: config.username,
       password: config.password,
@@ -142,7 +143,7 @@ const convertHost = (
 ): NodeOptions => {
   const url = new URL(host);
   const isHTTPS = url.protocol === 'https:';
-  url.port = url.port ?? (isHTTPS ? '443' : '80');
+  url.port = url.port || (isHTTPS ? '443' : '80');
   if (needAuth && username && password) {
     url.username = username;
     url.password = password;
