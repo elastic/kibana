@@ -14,7 +14,7 @@ import { StartPlugins } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { apolloClientObservable, kibanaObservable } from '../test_providers';
-import { createStore, State, substateMiddlewareFactory } from '../../store';
+import { createStore, State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createKibanaContextProviderMock } from '../kibana_react';
