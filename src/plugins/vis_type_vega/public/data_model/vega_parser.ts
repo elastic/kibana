@@ -581,7 +581,7 @@ export class VegaParser {
    * @private
    */
 
-  _findObjectDataUrls(obj: VegaSpec | Data, onFind: (data: Data) => void, key?: any) {
+  _findObjectDataUrls(obj: VegaSpec | Data, onFind: (data: Data) => void, key?: unknown) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
         this._findObjectDataUrls(elem, onFind, key);
