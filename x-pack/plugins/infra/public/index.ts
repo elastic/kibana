@@ -5,14 +5,19 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
-import { ClientSetup, ClientStart, Plugin } from './plugin';
-import { ClientPluginsSetup, ClientPluginsStart } from './types';
+import { Plugin } from './plugin';
+import {
+  InfraClientSetupExports,
+  InfraClientStartExports,
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
+} from './types';
 
 export const plugin: PluginInitializer<
-  ClientSetup,
-  ClientStart,
-  ClientPluginsSetup,
-  ClientPluginsStart
+  InfraClientSetupExports,
+  InfraClientStartExports,
+  InfraClientSetupDeps,
+  InfraClientStartDeps
 > = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };

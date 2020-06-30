@@ -42,16 +42,16 @@ it('parses kibana.json files of plugins found in pluginDirs', () => {
         "isUiPlugin": true,
       },
       Object {
-        "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/baz,
-        "extraPublicDirs": Array [],
-        "id": "baz",
-        "isUiPlugin": false,
-      },
-      Object {
         "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/foo,
         "extraPublicDirs": Array [],
         "id": "foo",
         "isUiPlugin": true,
+      },
+      Object {
+        "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/nested/baz,
+        "extraPublicDirs": Array [],
+        "id": "baz",
+        "isUiPlugin": false,
       },
       Object {
         "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/test_plugins/test_baz,

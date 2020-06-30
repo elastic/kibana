@@ -71,7 +71,6 @@ describe('Filters Agg', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getFiltersBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
     };
