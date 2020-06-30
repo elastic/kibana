@@ -30,6 +30,7 @@ interface CheckOriginConflictsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
+  ignoreRegularConflicts?: boolean;
   importIds: Set<string>;
 }
 
@@ -169,8 +170,20 @@ export async function checkOriginConflicts(
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
-      importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
-      filteredObjects.push(object);
+      if (options.ignoreRegularConflicts) {
+        importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
+        filteredObjects.push(object);
+      } else {
+        errors.push({
+          type,
+          id,
+          title: attributes?.title,
+          error: {
+            type: 'conflict',
+            destinationId: destinations[0].id,
+          },
+        });
+      }
       return;
     }
     // This is an ambiguous conflict error, which is one of the following cases:

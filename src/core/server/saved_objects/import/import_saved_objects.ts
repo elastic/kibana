@@ -86,6 +86,7 @@ export async function importSavedObjectsFromStream({
       savedObjectsClient,
       typeRegistry,
       namespace,
+      ignoreRegularConflicts: overwrite,
       importIds: checkConflictsResult.importIds,
     };
     const checkOriginConflictsResult = await checkOriginConflicts(

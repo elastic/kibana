@@ -75,6 +75,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   const expectResponseBody = (
     testCases: ImportTestCase | ImportTestCase[],
     statusCode: 200 | 403,
+    singleRequest: boolean,
+    overwrite: boolean,
+    trueCopy: boolean,
     spaceId = SPACES.DEFAULT.spaceId
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
@@ -117,13 +120,16 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         } else {
           expect(destinationId).to.be(undefined);
         }
-        const { _source } = await expectResponses.successCreated(
-          es,
-          spaceId,
-          type,
-          destinationId ?? id
-        );
-        expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        if (!singleRequest || overwrite || trueCopy) {
+          // even if the object result was a "success" result, it may not have been created if other resolvable errors were returned
+          const { _source } = await expectResponses.successCreated(
+            es,
+            spaceId,
+            type,
+            destinationId ?? id
+          );
+          expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        }
       }
       for (let i = 0; i < expectedFailures.length; i++) {
         const { type, id, failure, fail409Param, expectedNewId } = expectedFailures[i];
@@ -191,7 +197,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         title: getTestTitle(x, responseStatusCode),
         request: [createRequest(x)],
         responseStatusCode,
-        responseBody: responseBodyOverride || expectResponseBody(x, responseStatusCode, spaceId),
+        responseBody:
+          responseBodyOverride ||
+          expectResponseBody(x, responseStatusCode, false, overwrite, trueCopy, spaceId),
         overwrite,
         trueCopy,
       }));
@@ -203,7 +211,8 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         request: cases.map((x) => createRequest(x)),
         responseStatusCode,
         responseBody:
-          responseBodyOverride || expectResponseBody(cases, responseStatusCode, spaceId),
+          responseBodyOverride ||
+          expectResponseBody(cases, responseStatusCode, true, overwrite, trueCopy, spaceId),
         overwrite,
         trueCopy,
       },

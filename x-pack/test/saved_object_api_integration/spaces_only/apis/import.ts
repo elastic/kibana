@@ -36,6 +36,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   // for each outcome, if failure !== undefined then we expect to receive
   // an error; otherwise, we expect to receive a success result
   const group1 = [
+    // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     {
       ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
       ...fail409(!overwrite && spaceId === DEFAULT_SPACE_ID),
@@ -61,7 +62,6 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.CONFLICT_1A_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
     { ...CASES.CONFLICT_1B_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
-    { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     CASES.NEW_SINGLE_NAMESPACE_OBJ,
@@ -69,13 +69,19 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
   ];
   const group2 = [
+    // when overwrite=true, all of the objects in this group are errors, so we cannot check the created object attributes
+    // grouping errors together simplifies the test suite code
+    { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
+  ];
+  const group3 = [
+    // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     { ...CASES.CONFLICT_1_OBJ, ...fail409(!overwrite) }, // "exact match" conflict
     CASES.CONFLICT_1A_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     CASES.CONFLICT_1B_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     { ...CASES.CONFLICT_2C_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
     { ...CASES.CONFLICT_2D_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
   ];
-  return { group1, group2 };
+  return { group1, group2, group3 };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -91,10 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
       return createTestDefinitions(cases, false, { trueCopy, spaceId, singleRequest });
     }
 
-    const { group1, group2 } = createTestCases(overwrite, spaceId);
+    const { group1, group2, group3 } = createTestCases(overwrite, spaceId);
     return [
       createTestDefinitions(group1, false, { overwrite, spaceId, singleRequest }),
       createTestDefinitions(group2, false, { overwrite, spaceId, singleRequest }),
+      createTestDefinitions(group3, false, { overwrite, spaceId, singleRequest }),
     ].flat();
   };
 

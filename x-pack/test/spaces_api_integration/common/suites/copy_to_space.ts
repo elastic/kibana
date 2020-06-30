@@ -323,12 +323,8 @@ export function copyToSpaceTestSuiteFactory(
       },
     } as CopyResponse);
 
-    // Query ES to ensure that we copied everything we expected
-    await assertSpaceCounts(destination, {
-      dashboard: 2,
-      visualization: 5,
-      'index-pattern': 1,
-    });
+    // Query ES to ensure that no objects were created
+    await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
   };
 
   /**

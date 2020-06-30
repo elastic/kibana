@@ -35,6 +35,7 @@ const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
   const group1Importable = [
+    // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(!overwrite) },
     CASES.SINGLE_NAMESPACE_SPACE_1,
     CASES.SINGLE_NAMESPACE_SPACE_2,
@@ -45,24 +46,30 @@ const createTestCases = (overwrite: boolean) => {
   const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
   const group1All = group1Importable.concat(group1NonImportable);
   const group2 = [
+    // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     CASES.NEW_MULTI_NAMESPACE_OBJ,
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...destinationId() },
     { ...CASES.CONFLICT_1A_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
     { ...CASES.CONFLICT_1B_OBJ, ...destinationId() }, // "ambiguous source" conflict which results in a new destination ID
-    { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
     { ...CASES.CONFLICT_4_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
   ];
   const group3 = [
+    // when overwrite=true, all of the objects in this group are errors, so we cannot check the created object attributes
+    // grouping errors together simplifies the test suite code
+    { ...CASES.CONFLICT_2C_OBJ, ...ambiguousConflict('2c') }, // "ambiguous destination" conflict
+  ];
+  const group4 = [
+    // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     { ...CASES.CONFLICT_1_OBJ, ...fail409(!overwrite) }, // "exact match" conflict
     CASES.CONFLICT_1A_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     CASES.CONFLICT_1B_OBJ, // no conflict because CONFLICT_1_OBJ is an exact match
     { ...CASES.CONFLICT_2C_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
     { ...CASES.CONFLICT_2D_OBJ, ...destinationId() }, // "ambiguous source and destination" conflict which results in a new destination ID
   ];
-  return { group1Importable, group1NonImportable, group1All, group2, group3 };
+  return { group1Importable, group1NonImportable, group1All, group2, group3, group4 };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -100,9 +107,14 @@ export default function ({ getService }: FtrProviderContext) {
       };
     }
 
-    const { group1Importable, group1NonImportable, group1All, group2, group3 } = createTestCases(
-      overwrite
-    );
+    const {
+      group1Importable,
+      group1NonImportable,
+      group1All,
+      group2,
+      group3,
+      group4,
+    } = createTestCases(overwrite);
     return {
       unauthorized: [
         createTestDefinitions(group1Importable, true, { overwrite }),
@@ -118,11 +130,13 @@ export default function ({ getService }: FtrProviderContext) {
         }),
         createTestDefinitions(group2, true, { overwrite, singleRequest }),
         createTestDefinitions(group3, true, { overwrite, singleRequest }),
+        createTestDefinitions(group4, true, { overwrite, singleRequest }),
       ].flat(),
       authorized: [
         createTestDefinitions(group1All, false, { overwrite, singleRequest }),
         createTestDefinitions(group2, false, { overwrite, singleRequest }),
         createTestDefinitions(group3, false, { overwrite, singleRequest }),
+        createTestDefinitions(group4, false, { overwrite, singleRequest }),
       ].flat(),
     };
   };

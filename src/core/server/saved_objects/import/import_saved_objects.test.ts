@@ -169,6 +169,7 @@ describe('#importSavedObjectsFromStream', () => {
           savedObjectsClient,
           typeRegistry,
           namespace,
+          ignoreRegularConflicts: overwrite,
           importIds,
         };
         expect(checkOriginConflicts).toHaveBeenCalledWith(
