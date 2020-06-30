@@ -45,6 +45,7 @@ export type ElasticsearchClientConfig = Pick<
   pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
   requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
   ssl?: Partial<ElasticsearchConfig['ssl']>;
+  keepAlive?: boolean;
 };
 
 export function parseClientOptions(
@@ -65,6 +66,11 @@ export function parseClientOptions(
   }
   if (config.sniffInterval) {
     clientOptions.sniffInterval = getDurationAsMs(config.sniffInterval);
+  }
+  if (config.keepAlive) {
+    clientOptions.agent = {
+      keepAlive: config.keepAlive,
+    };
   }
 
   // TODO: this can either be done globally here or by host in convertHost.
