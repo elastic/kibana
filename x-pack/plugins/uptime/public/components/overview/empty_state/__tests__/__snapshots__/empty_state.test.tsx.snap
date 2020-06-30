@@ -1372,25 +1372,60 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
     }
   }
 >
-  <EmptyStateComponent
-    loading={false}
-    statesIndexStatus={
+  <ContextProvider
+    value={
       Object {
-        "docCount": 1,
-        "indexExists": true,
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
   >
-    <div>
-      Foo
-    </div>
-    <div>
-      Bar
-    </div>
-    <div>
-      Baz
-    </div>
-  </EmptyStateComponent>
+    <EmptyStateComponent
+      loading={false}
+      statesIndexStatus={
+        Object {
+          "docCount": 1,
+          "indexExists": true,
+        }
+      }
+    >
+      <div>
+        Foo
+      </div>
+      <div>
+        Bar
+      </div>
+      <div>
+        Baz
+      </div>
+    </EmptyStateComponent>
+  </ContextProvider>
 </ContextProvider>
 `;
 

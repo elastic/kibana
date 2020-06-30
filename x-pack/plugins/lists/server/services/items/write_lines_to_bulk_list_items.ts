@@ -6,7 +6,7 @@
 
 import { Readable } from 'stream';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { MetaOrUndefined, Type } from '../../../common/schemas';
 
@@ -17,7 +17,7 @@ import { createListItemsBulk } from './create_list_items_bulk';
 export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -55,7 +55,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   buffer: string[];
   type: Type;

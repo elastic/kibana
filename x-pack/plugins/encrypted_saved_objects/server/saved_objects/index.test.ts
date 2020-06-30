@@ -42,7 +42,7 @@ describe('#setupSavedObjects', () => {
     coreSetupMock = coreMock.createSetup();
     coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
 
-    mockEncryptedSavedObjectsService = encryptedSavedObjectsServiceMock.create([
+    mockEncryptedSavedObjectsService = encryptedSavedObjectsServiceMock.createWithTypes([
       { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
     ]);
     setupContract = setupSavedObjects({
