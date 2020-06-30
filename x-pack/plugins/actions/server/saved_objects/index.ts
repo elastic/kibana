@@ -9,6 +9,7 @@ import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 export const ACTION_SAVED_OBJECT_TYPE = 'action';
+export const ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE = 'action_task_params';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -32,13 +33,13 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: 'action_task_params',
+    name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
     namespaceType: 'single',
     mappings: mappings.action_task_params,
   });
   encryptedSavedObjects.registerType({
-    type: 'action_task_params',
+    type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
   });
 }

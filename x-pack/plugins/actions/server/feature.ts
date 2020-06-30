@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export const ACTIONS_FEATURE = {
   id: 'actions',
@@ -19,7 +20,7 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       savedObject: {
-        all: ['action'],
+        all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
         read: [],
       },
       ui: [],
@@ -29,8 +30,9 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       savedObject: {
-        all: [],
-        read: ['action'],
+        // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
+        all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
+        read: [ACTION_SAVED_OBJECT_TYPE],
       },
       ui: [],
     },

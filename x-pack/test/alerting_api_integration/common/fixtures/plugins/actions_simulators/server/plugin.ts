@@ -65,7 +65,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         all: {
           app: ['actions', 'kibana'],
           savedObject: {
-            all: ['action', 'action_task_params'],
+            all: [],
             read: [],
           },
           ui: [],
@@ -74,8 +74,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         read: {
           app: ['actions', 'kibana'],
           savedObject: {
-            all: ['action_task_params'],
-            read: ['action'],
+            all: [],
+            read: [],
           },
           ui: [],
           api: [],

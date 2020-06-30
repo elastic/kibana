@@ -54,7 +54,11 @@ import {
 } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
-import { setupSavedObjects } from './saved_objects';
+import {
+  setupSavedObjects,
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
@@ -91,7 +95,7 @@ export interface ActionsPluginsStart {
   taskManager: TaskManagerStartContract;
 }
 
-const includedHiddenTypes = ['action', 'action_task_params'];
+const includedHiddenTypes = [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE];
 
 export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
   private readonly kibanaIndex: Promise<string>;

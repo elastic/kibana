@@ -22,7 +22,7 @@ export const METRICS_FEATURE = {
       catalogue: ['infraops'],
       api: ['infra', 'alerting-read', 'alerting-all'],
       savedObject: {
-        all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
+        all: ['infrastructure-ui-source', 'alert'],
         read: ['index-pattern'],
       },
       ui: [
@@ -42,7 +42,7 @@ export const METRICS_FEATURE = {
       catalogue: ['infraops'],
       api: ['infra', 'alerting-read', 'alerting-all'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: ['alert'],
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       ui: [

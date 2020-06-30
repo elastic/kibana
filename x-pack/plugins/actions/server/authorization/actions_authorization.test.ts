@@ -8,6 +8,7 @@ import { securityMock } from '../../../../plugins/security/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
+import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 const request = {} as KibanaRequest;
 
@@ -44,7 +45,7 @@ describe('ensureAuthorized', () => {
     await actionsAuthorization.ensureAuthorized('create', 'myType');
   });
 
-  test('ensures the user has privileges to execute the operation on the Actions Saved Object type', async () => {
+  test('ensures the user has privileges to use the operation on the Actions Saved Object type', async () => {
     const authorization = mockAuthorization();
     const checkPrivileges: jest.MockedFunction<ReturnType<
       typeof authorization.checkPrivilegesDynamicallyWithRequest
@@ -78,6 +79,55 @@ describe('ensureAuthorized', () => {
       Array [
         "some-user",
         "create",
+        "myType",
+      ]
+    `);
+  });
+
+  test('ensures the user has privileges to execute an Actions Saved Object type', async () => {
+    const authorization = mockAuthorization();
+    const checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >> = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+      auditLogger,
+    });
+
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('myType', 'execute'),
+          authorized: true,
+        },
+      ],
+    });
+
+    await actionsAuthorization.ensureAuthorized('execute', 'myType');
+
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_SAVED_OBJECT_TYPE,
+      'get'
+    );
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      'create'
+    );
+    expect(checkPrivileges).toHaveBeenCalledWith([
+      mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+      mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+    ]);
+
+    expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(auditLogger.actionsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "some-user",
+        "execute",
         "myType",
       ]
     `);

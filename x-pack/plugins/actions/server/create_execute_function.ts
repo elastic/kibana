@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -49,11 +50,14 @@ export function createExecutionEnqueuerFunction({
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 
-    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
-      actionId: id,
-      params,
-      apiKey,
-    });
+    const actionTaskParamsRecord = await savedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: id,
+        params,
+        apiKey,
+      }
+    );
 
     await taskManager.schedule({
       taskType: `actions:${actionTypeId}`,
