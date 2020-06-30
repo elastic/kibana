@@ -20,6 +20,9 @@ export ES_HOST
 STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
 
+DELAY=100
+export DELAY
+
 for x in jest functional; do
   echo "### Ingesting coverage for ${x}"
 
