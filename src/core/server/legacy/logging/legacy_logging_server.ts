@@ -19,9 +19,9 @@
 
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
-// @ts-ignore: implicit any for JS file
+// @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
-// @ts-ignore: implicit any for JS file
+// @ts-expect-error: implicit any for JS file
 import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
 import { LogRecord } from '../../logging/log_record';
