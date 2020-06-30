@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
+import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
@@ -23,7 +25,7 @@ import * as selectors from '../store/selectors';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
 /**
- * A map of all known event types (in ugly schema format) to beautifully i18n'd display names
+ * A record of all known event types (in schema format) to translations
  */
 export const displayNameRecord = {
   application: i18n.translate(
@@ -177,11 +179,11 @@ type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord]
   typeof unknownEventTypeMessage;
 
 /**
- * Take a gross `schemaName` and return a beautiful translated one.
+ * Take a `schemaName` and return a translation.
  */
-const getDisplayName: (schemaName: string) => EventDisplayName = function nameInSchemaToDisplayName(
-  schemaName
-) {
+const schemaNameTranslation: (
+  schemaName: string
+) => EventDisplayName = function nameInSchemaToDisplayName(schemaName) {
   if (schemaName in displayNameRecord) {
     return displayNameRecord[schemaName as keyof typeof displayNameRecord];
   }
@@ -232,7 +234,7 @@ const StyledDescriptionText = styled.div<StyledDescriptionText>`
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
  */
-const ProcessEventDotComponents = React.memo(
+const UnstyledProcessEventDot = React.memo(
   ({
     className,
     position,
@@ -241,7 +243,7 @@ const ProcessEventDotComponents = React.memo(
     adjacentNodeMap,
     isProcessTerminated,
     isProcessOrigin,
-    relatedEventsStats,
+    relatedEventsStatsForProcess,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -276,7 +278,7 @@ const ProcessEventDotComponents = React.memo(
      * to provide the user some visibility regarding the contents thereof.
      * Statistics for the number of related events and alerts for this process node
      */
-    relatedEventsStats?: ResolverNodeStats;
+    relatedEventsStatsForProcess?: ResolverNodeStats;
   }) => {
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -465,47 +467,42 @@ const ProcessEventDotComponents = React.memo(
      * e.g. "10 DNS", "230 File"
      */
 
-    const [relatedEventOptions, grandTotal] = useMemo(() => {
+    const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
-      if (!relatedEventsStats) {
+      if (!relatedEventsStatsForProcess) {
         // Return an empty set of options if there are no stats to report
-        return [[], 0];
+        return [];
       }
-      let runningTotal = 0;
       // If we have entries to show, map them into options to display in the selectable list
-      for (const category in relatedEventsStats.events.byCategory) {
-        if (Object.hasOwnProperty.call(relatedEventsStats.events.byCategory, category)) {
-          const total = relatedEventsStats.events.byCategory[category];
-          runningTotal += total;
-          const displayName = getDisplayName(category);
-          relatedStatsList.push({
-            prefix: <EuiI18nNumber value={total || 0} />,
-            optionTitle: `${displayName}`,
-            action: () => {
-              dispatch({
-                type: 'userSelectedRelatedEventCategory',
-                payload: {
-                  subject: event,
-                  category,
-                },
-              });
 
-              pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
-            },
-          });
-        }
+      for (const [category, total] of Object.entries(
+        relatedEventsStatsForProcess.events.byCategory
+      )) {
+        relatedStatsList.push({
+          prefix: <EuiI18nNumber value={total || 0} />,
+          optionTitle: schemaNameTranslation(category),
+          action: () => {
+            dispatch({
+              type: 'userSelectedRelatedEventCategory',
+              payload: {
+                subject: event,
+                category,
+              },
+            });
+
+            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
+          },
+        });
       }
-      return [relatedStatsList, runningTotal];
-    }, [relatedEventsStats, dispatch, event, pushToQueryParams, selfEntityId]);
+      return relatedStatsList;
+    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, selfEntityId]);
 
-    const relatedEventStatusOrOptions = (() => {
-      if (!relatedEventsStats) {
-        return subMenuAssets.initialMenuStatus;
-      }
+    const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
+      ? subMenuAssets.initialMenuStatus
+      : relatedEventOptions;
 
-      return relatedEventOptions;
-    })();
+    const grandTotal: number | null = useSelector(selectors.relatedEventTotalForProcess)(event);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
@@ -630,7 +627,7 @@ const ProcessEventDotComponents = React.memo(
             }}
           >
             <EuiFlexItem grow={false} className="related-dropdown">
-              {grandTotal > 0 && (
+              {grandTotal !== null && grandTotal > 0 && (
                 <NodeSubMenu
                   count={grandTotal}
                   buttonBorderColor={labelButtonFill}
@@ -649,9 +646,7 @@ const ProcessEventDotComponents = React.memo(
   }
 );
 
-ProcessEventDotComponents.displayName = 'ProcessEventDot';
-
-export const ProcessEventDot = styled(ProcessEventDotComponents)`
+export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   position: absolute;
   text-align: left;
   font-size: 10px;

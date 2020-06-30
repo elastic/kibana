@@ -107,7 +107,7 @@ export const ResolverMap = React.memo(function ({
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
                 adjacentNodeMap={adjacentNodeMap}
-                relatedEventsStats={
+                relatedEventsStatsForProcess={
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
