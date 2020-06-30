@@ -37,6 +37,18 @@ export interface AuditableEvent {
 export interface Auditor {
   /**
    * Add a record to audit log.
+   * Service attaches to a log record:
+   * - metadata about an end-user initiating an operation
+   * - scope name, if presents
+   *
+   * @example
+   * How to add a record in audit log:
+   * ```typescript
+   * router.get({ path: '/my_endpoint', validate: false }, async (context, request, response) => {
+   *   context.core.auditor.withScope('my_plugin_operation');
+   *   const value = await context.core.elasticsearch.legacy.client.callAsCurrentUser('...');
+   *   context.core.add({ type: 'operation.type', message: 'perform an operation in ... endpoint' });
+   * ```
    */
   add(event: AuditableEvent): void;
   /**
