@@ -15,8 +15,9 @@ import {
 } from '../../../../src/core/server';
 import { TagsRequestHandlerContext } from './types';
 import { setupRoutes } from './router';
-import { tagMappings } from './saved_objects';
-import { TagsClientProvider } from './tags/tags_client_provider';
+import { tagMappings, tagAttachmentMappings } from './saved_objects';
+import { TagsClientProvider } from './tags';
+import { TagAttachmentsClientProvider } from './tag_attachments';
 import { SecurityPluginSetup } from '../../security/server';
 
 export interface TagsPluginSetupDependencies {
@@ -29,10 +30,12 @@ export interface TagsPluginStartDependencies {
 
 export interface TagsPluginSetup {
   createTagsClient: TagsClientProvider['create'];
+  createAttachmentsClient: TagAttachmentsClientProvider['create'];
 }
 
 export interface TagsPluginStart {
   createTagsClient: TagsClientProvider['create'];
+  createAttachmentsClient: TagAttachmentsClientProvider['create'];
 }
 
 export class TagsPlugin
@@ -45,6 +48,7 @@ export class TagsPlugin
     > {
   private readonly logger: Logger;
   private tagsClientProvider?: TagsClientProvider;
+  private attachmentsClientProvider?: TagAttachmentsClientProvider;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'tags');
@@ -60,6 +64,7 @@ export class TagsPlugin
     logger.debug('setup()');
 
     this.tagsClientProvider = new TagsClientProvider({ logger });
+    this.attachmentsClientProvider = new TagAttachmentsClientProvider({ logger });
 
     savedObjects.registerType({
       name: 'tag',
@@ -74,6 +79,13 @@ export class TagsPlugin
       },
     });
 
+    savedObjects.registerType({
+      name: 'tag_attachment',
+      hidden: true,
+      namespaceType: 'single',
+      mappings: tagAttachmentMappings,
+    });
+
     const router = http.createRouter();
 
     http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core, plugins));
@@ -81,6 +93,7 @@ export class TagsPlugin
 
     return {
       createTagsClient: this.tagsClientProvider.create,
+      createAttachmentsClient: this.attachmentsClientProvider.create,
     };
   }
 
@@ -89,6 +102,7 @@ export class TagsPlugin
 
     return {
       createTagsClient: this.tagsClientProvider!.create,
+      createAttachmentsClient: this.attachmentsClientProvider!.create,
     };
   }
 
@@ -100,12 +114,15 @@ export class TagsPlugin
       const [core] = await setupCore.getStartServices();
       const { savedObjects } = core;
       const savedObjectsClient = savedObjects.getScopedClient(request);
-      const tagsClient = this.tagsClientProvider!.create({
+      const params = {
         savedObjectsClient,
         user: setupPlugins.security?.authc.getCurrentUser(request),
-      });
+      };
+      const tagsClient = this.tagsClientProvider!.create(params);
+      const attachmentsClient = this.attachmentsClientProvider!.create(params);
       const tagsContext: TagsRequestHandlerContext = {
         tagsClient,
+        attachmentsClient,
       };
 
       return tagsContext;

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagsClient } from './tags/tags_client';
+import { TagsClient } from './tags';
+import { TagAttachmentsClient } from './tag_attachments';
 
 export interface TagsRequestHandlerContext {
   tagsClient: TagsClient;
+  attachmentsClient: TagAttachmentsClient;
 }
 
 declare module 'src/core/server' {

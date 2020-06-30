@@ -7,7 +7,12 @@
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import { RawTag, RawTagWithId, ITagsClient, TagsClientCreateParams } from '../../common';
-import { validateTagTitle, validateTagDescription, validateTagColor } from './validators';
+import {
+  validateTagTitle,
+  validateTagDescription,
+  validateTagColor,
+  validateTagId,
+} from '../util/validators';
 
 export type TagSavedObject = SavedObject<RawTag>;
 
@@ -30,13 +35,13 @@ export class TagsClient implements ITagsClient {
   };
 
   public async create({ tag }: TagsClientCreateParams): Promise<{ tag: RawTagWithId }> {
-    const { savedObjectsClient, user } = this.params;
     const { title, description, color } = tag;
 
     validateTagTitle(title);
     validateTagDescription(description);
     validateTagColor(color);
 
+    const { savedObjectsClient, user } = this.params;
     const at = new Date().toISOString();
     const username = user ? user.username : null;
 
@@ -75,7 +80,7 @@ export class TagsClient implements ITagsClient {
   }
 
   public async del(id: string): Promise<void> {
-    // TODO: Validate ID.
+    validateTagId(id);
 
     const { savedObjectsClient } = this.params;
 

@@ -6,6 +6,18 @@
 
 import Boom from 'boom';
 
+export const validateTagId = (id: string) => {
+  if (typeof id !== 'string') throw Boom.badRequest('ID must be a string');
+  if (id.length < 10) throw Boom.badRequest('ID is too short.');
+  if (id.length > 256) throw Boom.badRequest('ID is too long.');
+};
+
+export const validateKRI = (kri: string) => {
+  if (typeof kri !== 'string') throw Boom.badRequest('KRI must be a string');
+  if (kri.length < 5) throw Boom.badRequest('KRI is too short.');
+  if (kri.length > 10e3) throw Boom.badRequest('KRI is too long.');
+};
+
 export const validateTagTitle = (title: string) => {
   if (typeof title !== 'string') throw Boom.badRequest('Tag title must be a string');
   if (title.length < 1) throw Boom.badRequest('Tag title is too short.');
