@@ -30,3 +30,10 @@ export const EDIT_EXCEPTION_SUCCESS = i18n.translate(
     defaultMessage: 'Successfully updated exception',
   }
 );
+
+export const BULK_CLOSE_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.bulkCloseLabel',
+  {
+    defaultMessage: 'Close all alerts that match attributes in this exception',
+  }
+);

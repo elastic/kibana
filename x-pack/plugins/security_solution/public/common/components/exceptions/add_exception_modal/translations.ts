@@ -30,3 +30,18 @@ export const ADD_EXCEPTION_SUCCESS = i18n.translate(
     defaultMessage: 'Successfully added exception',
   }
 );
+
+export const ADD_EXCEPTION_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.fetchError',
+  {
+    defaultMessage: 'Error fetching exception list',
+  }
+);
+
+export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.endpointQuarantineText',
+  {
+    defaultMessage:
+      'Any file in quarantine on any endpoint that matches the attribute(s) selected will automatically be restored to its original location',
+  }
+);

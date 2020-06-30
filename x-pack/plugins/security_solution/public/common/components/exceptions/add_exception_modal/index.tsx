@@ -21,12 +21,12 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   Comment,
-  useApi,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
@@ -56,7 +56,6 @@ export interface AddExceptionOnClick {
   alertData: TimelineNonEcsData[] | undefined;
 }
 
-// TODO: What's the different between ECS data and Non ECS data
 interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
@@ -90,7 +89,6 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-// TODO: add comment to exception items
 // TODO: for endpoint exceptions add OS to each entry in the exception items
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
@@ -106,7 +104,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
-  const { addExceptionList } = useApi(http);
 
   const onError = useCallback(
     (error: Error) => {
@@ -125,6 +122,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onError,
     http,
   });
+
+  useEffect(() => {
+    if (alertData !== undefined && exceptionListType === 'endpoint') {
+      setExceptionItemsToAdd(defaultEndpointExceptionItems(exceptionListType, ruleId, alertData)); // TODO: ruleId isnt correct here
+    }
+  }, [alertData, exceptionListType, ruleId, setExceptionItemsToAdd]);
 
   const onFetchOrCreateExceptionListError = useCallback(
     (error: Error) => {
@@ -178,9 +181,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     // TODO: if close checkbox is selected, refresh signals table
   }, [addExceptionItems, enrichExceptionItems]);
 
+  const isSubmitButtonDisabled = useCallback(
+    () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
+    [fetchOrCreateListError, exceptionItemsToAdd]
+  );
+
   // TODO: set default exception items in builder if type is endpoint and alert data is passed in
-  // TODO: intl error message
-  // TODO: disable submit button if the list of exception items is empty
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -193,7 +199,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
         {fetchOrCreateListError === true && (
           <EuiCallOut title={'Error'} color="danger" iconType="alert">
-            <p>{'Error fetching exception list'}</p>
+            <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
           </EuiCallOut>
         )}
         {fetchOrCreateListError === false && isLoadingExceptionList === true && (
@@ -203,7 +209,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <>
             <ModalBodySection className="builder-section">
               <ExceptionBuilder
-                exceptionItems={[]}
+                exceptionItems={exceptionItemsToAdd}
                 listId={ruleExceptionList.list_id}
                 listType={exceptionListType}
                 dataTestSubj="alert-exception-builder"
@@ -212,6 +218,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               />
 
               <EuiSpacer />
+
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
+                  <EuiSpacer />
+                </>
+              )}
 
               <AddExceptionComments
                 newCommentValue={comment}
@@ -240,7 +253,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <EuiButton
             onClick={onAddExceptionConfirm}
             isLoading={addExceptionIsLoading}
-            isDisabled={fetchOrCreateListError}
+            isDisabled={isSubmitButtonDisabled()}
             fill
           >
             {i18n.ADD_EXCEPTION}

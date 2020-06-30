@@ -303,7 +303,6 @@ export const getAlertActions = ({
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
     ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
     ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
-    // TODO: intl
     // TODO: disable this option if the alert is not an Endpoint alert
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
@@ -319,14 +318,12 @@ export const getAlertActions = ({
         }
       },
       id: 'addEndpointException',
-      iconType: 'documentEdit',
       isActionDisabled: !canUserCRUD || !hasIndexWrite,
       dataTestSubj: 'add-endpoint-exception-menu-item',
       ariaLabel: 'Add Endpoint Exception',
-      content: 'Add Endpoint Exception',
+      content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
       displayType: 'contextMenu',
     },
-    // TODO: intl
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
@@ -342,11 +339,10 @@ export const getAlertActions = ({
         }
       },
       id: 'addException',
-      iconType: 'documentEdit',
       isActionDisabled: !canUserCRUD || !hasIndexWrite,
       dataTestSubj: 'add-exception-menu-item',
       ariaLabel: 'Add Exception',
-      content: 'Add Exception',
+      content: <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>,
       displayType: 'contextMenu',
     },
   ];

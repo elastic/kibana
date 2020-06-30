@@ -77,7 +77,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
-  const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
+  const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
 
@@ -108,9 +108,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onCloseAlertCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setShouldCloseAlert(event.currentTarget.checked);
+      setShouldBulkCloseAlert(event.currentTarget.checked);
     },
-    [setShouldCloseAlert]
+    [setShouldBulkCloseAlert]
   );
 
   const enrichExceptionItems = useCallback(() => {
@@ -177,8 +177,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           <EuiFormRow>
             <EuiCheckbox
               id="close-alert-on-add-add-exception-checkbox"
-              label="Close this alert"
-              checked={shouldCloseAlert}
+              label={i18n.BULK_CLOSE_LABEL}
+              checked={shouldBulkCloseAlert}
               onChange={onCloseAlertCheckboxChange}
             />
           </EuiFormRow>
