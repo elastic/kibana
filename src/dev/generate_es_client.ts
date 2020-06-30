@@ -25,37 +25,26 @@ const GENERATION_START_SYMBOL = '/* GENERATED */';
 const GENERATION_END_SYMBOL = '/* /GENERATED */';
 
 const sourceFile = join(REPO_ROOT, 'node_modules', '@elastic', 'elasticsearch', 'index.d.ts');
-const apiFile = join(
-  REPO_ROOT,
-  'src',
-  'core',
-  'server',
-  'elasticsearch',
-  'client',
-  'client_facade.ts'
-);
-const implemFile = join(
-  REPO_ROOT,
-  'src',
-  'core',
-  'server',
-  'elasticsearch',
-  'client',
-  'client_wrapper.ts'
-);
+
+const targetFolder = join(REPO_ROOT, 'src', 'core', 'server', 'elasticsearch', 'client');
+const apiFile = join(targetFolder, 'client_facade.ts');
+const implemFile = join(targetFolder, 'get_client_facade.ts');
+const mockFile = join(targetFolder, 'client_facade.mock.ts');
 
 const generate = () => {
   const clientAPI = readClientAPI();
-  const { api, impl } = processClientAPI(clientAPI);
+  const { api, impl, mock } = processClientAPI(clientAPI);
 
   writeFacadeAPI(api);
   writeWrapperDefinition(impl);
+  writeMockDefinition(mock);
 
   // apply es-lint to the generated file
   // as indentation may not be correct, and some of our lint rules are not respected by the es lib.
   process.argv.push('--fix');
   process.argv.push(apiFile);
   process.argv.push(implemFile);
+  process.argv.push(mockFile);
   require('./run_eslint');
 };
 
@@ -68,6 +57,7 @@ const blockEndRegexp = /^[}]$/;
 const processClientAPI = (rawContent: string) => {
   const apiLines: string[] = [];
   const implementationLines: string[] = [];
+  const mockLines: string[] = [];
 
   let currentBlock: string | null = null;
   let inDeletedBlock = false;
@@ -87,11 +77,13 @@ const processClientAPI = (rawContent: string) => {
           // add `[blockName]: {` to both API and implementation
           apiLines.push(line);
           implementationLines.push(line);
+          mockLines.push(line);
         }
       } else if (blockEndRegexp.test(line)) {
         if (!inDeletedBlock) {
           apiLines.push('}');
           implementationLines.push('},');
+          mockLines.push('},');
         }
         currentBlock = null;
         inDeletedBlock = false;
@@ -107,12 +99,17 @@ const processClientAPI = (rawContent: string) => {
                 currentBlock ? '.' + currentBlock : ''
               }.${apiName}(params, addHeaders(options)),`
             );
+            mockLines.push(`${apiName}: jest.fn(),`);
           }
         }
       }
     });
 
-  return { api: apiLines.join('\n'), impl: implementationLines.join('\n') };
+  return {
+    api: apiLines.join('\n'),
+    impl: implementationLines.join('\n'),
+    mock: mockLines.join('\n'),
+  };
 };
 
 const readClientAPI = (): string => {
@@ -129,6 +126,10 @@ const writeFacadeAPI = (apiDefinition: string) => {
 
 const writeWrapperDefinition = (implemDefinition: string) => {
   injectGeneratedContent(implemFile, implemDefinition);
+};
+
+const writeMockDefinition = (mockDefinition: string) => {
+  injectGeneratedContent(mockFile, mockDefinition);
 };
 
 const injectGeneratedContent = (filepath: string, injectedContent: string) => {
