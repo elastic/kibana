@@ -32,8 +32,6 @@ module.exports = {
     ...jestConfig.collectCoverageFrom,
     '**/*.{js,mjs,jsx,ts,tsx}',
     '!**/*.stories.{js,mjs,ts,tsx}',
-    '!**/dev_docs/**',
-    '!**/e2e/**',
     '!**/target/**',
     '!**/typings/**',
   ],
