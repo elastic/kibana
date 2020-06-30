@@ -10,7 +10,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
-import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 const defaultSettings = {
   handleChange: () => {},
