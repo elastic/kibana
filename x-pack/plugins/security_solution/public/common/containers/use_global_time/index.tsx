@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { SetQuery, DeleteQuery } from './types';
 
 export const useGlobalTime = () => {
   const dispatch = useDispatch();
@@ -16,21 +17,13 @@ export const useGlobalTime = () => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
-    ({
-      id,
-      inspect,
-      loading,
-      refetch,
-    }: Pick<
-      Parameters<typeof inputsActions.setQuery>[0],
-      'id' | 'inspect' | 'loading' | 'refetch'
-    >) => dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    ({ id, inspect, loading, refetch }: SetQuery) =>
+      dispatch(inputsActions.setQuery({ inputId: 'global', id, inspect, loading, refetch })),
     [dispatch]
   );
 
   const deleteQuery = useCallback(
-    ({ id }: Pick<Parameters<typeof inputsActions.deleteOneQuery>[0], 'id'>) =>
-      dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    ({ id }: DeleteQuery) => dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
     [dispatch]
   );
 
