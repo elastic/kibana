@@ -31,7 +31,7 @@ export const getActions = (): FindActionResult[] => [
     actionTypeId: '.servicenow',
     name: 'ServiceNow',
     config: {
-      casesConfiguration: {
+      incidentConfiguration: {
         mapping: [
           {
             source: 'title',
@@ -51,6 +51,7 @@ export const getActions = (): FindActionResult[] => [
         ],
       },
       apiUrl: 'https://dev102283.service-now.com',
+      isCaseOwned: true,
     },
     isPreconfigured: false,
     referencedByCount: 0,
