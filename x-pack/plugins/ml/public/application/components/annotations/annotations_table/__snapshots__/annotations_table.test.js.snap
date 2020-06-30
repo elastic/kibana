@@ -43,6 +43,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "field": "event",
           "name": "Event",
           "sortable": true,
+          "width": "10%",
         },
         Object {
           "actions": Array [
@@ -56,6 +57,11 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "align": "right",
           "name": "Actions",
           "width": "60px",
+        },
+        Object {
+          "field": "detector_index",
+          "name": "Detector",
+          "width": "0px",
         },
       ]
     }
@@ -93,7 +99,6 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "incremental": true,
           "schema": true,
         },
-        "defaultQuery": "event:(user)",
         "filters": Array [
           Object {
             "field": "event",
@@ -103,6 +108,8 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
             "type": "field_value_selection",
           },
         ],
+        "onChange": [Function],
+        "query": "event:(user)",
       }
     }
     sorting={
