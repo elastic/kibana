@@ -172,7 +172,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
 |  [PublicLegacyAppInfo](./kibana-plugin-core-public.publiclegacyappinfo.md) | Information about a registered [legacy application](./kibana-plugin-core-public.legacyapp.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
-|  [RecursiveReadonly](./kibana-plugin-core-public.recursivereadonly.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
