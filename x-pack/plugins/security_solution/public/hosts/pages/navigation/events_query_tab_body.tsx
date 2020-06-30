@@ -17,6 +17,7 @@ import {
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
+import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -55,6 +56,15 @@ export const EventsQueryTabBody = ({
   setQuery,
   startDate,
 }: HostsComponentsQueryProps) => {
+  const { initializeTimeline } = useManageTimeline();
+
+  useEffect(() => {
+    initializeTimeline({
+      id: TimelineId.hostsPageEvents,
+      defaultModel: eventsDefaultModel,
+    });
+  }, [initializeTimeline]);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
