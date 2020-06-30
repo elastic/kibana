@@ -29,10 +29,10 @@ module.exports = {
   roots: [`${rootDir}/common`, `${rootDir}/public`, `${rootDir}/server`],
   collectCoverage: true,
   collectCoverageFrom: [
-    '**/*.{js,jsx,ts,tsx}',
+    '**/*.{js,mjs,jsx,ts,tsx}',
     '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
-    '!**/*.stories.{js,ts,tsx}',
-    '!**/*.test.{js,ts,tsx}',
+    '!**/*.stories.{js,mjs,ts,tsx}',
+    '!**/*.test.{js,mjs,ts,tsx}',
     '!**/dev_docs/**',
     '!**/e2e/**',
     '!**/scripts/**',
