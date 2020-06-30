@@ -9,6 +9,7 @@ import { initCustomElementsRoutes } from './custom_elements';
 import { initESFieldsRoutes } from './es_fields';
 import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
+import { initTemplateRoutes } from './templates';
 
 export interface RouteInitializerDeps {
   router: IRouter;
@@ -20,4 +21,5 @@ export function initRoutes(deps: RouteInitializerDeps) {
   initESFieldsRoutes(deps);
   initShareablesRoutes(deps);
   initWorkpadRoutes(deps);
+  initTemplateRoutes(deps);
 }

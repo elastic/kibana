@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Unit } from '@elastic/datemath';
 import { Comparator, AlertStates } from '../common/types';
 
 export { Comparator, AlertStates };
-
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 
 export enum Aggregators {
@@ -21,11 +21,9 @@ export enum Aggregators {
   P99 = 'p99',
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
-
 interface BaseMetricExpressionParams {
   timeSize: number;
-  timeUnit: TimeUnit;
+  timeUnit: Unit;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
