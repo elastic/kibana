@@ -5,6 +5,8 @@
  */
 
 import Boom from 'boom';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceNowConnectorConfiguration } from '../../../../../../triggers_actions_ui/public/common/constants';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
@@ -31,8 +33,13 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter((action) =>
-          SUPPORTED_CONNECTORS.includes(action.actionTypeId)
+        const results = (await actionsClient.getAll()).filter(
+          (action) =>
+            SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
+            // Need this filtering temporary to display only Case owned ServiceNow connectors
+            (action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
+              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
+                action.config!.isCaseOwned))
         );
         return response.ok({ body: results });
       } catch (error) {
