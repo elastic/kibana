@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from '../../../../../src/core/server';
+import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -34,7 +34,9 @@ export class Tokens {
    */
   private readonly logger: Logger;
 
-  constructor(private readonly options: Readonly<{ client: IClusterClient; logger: Logger }>) {
+  constructor(
+    private readonly options: Readonly<{ client: ILegacyClusterClient; logger: Logger }>
+  ) {
     this.logger = options.logger;
   }
 

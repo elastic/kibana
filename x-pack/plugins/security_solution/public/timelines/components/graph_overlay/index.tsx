@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import { connect, ConnectedProps, useDispatch, useSelector } from 'react-redux';
@@ -31,12 +25,17 @@ import {
   setInsertTimeline,
   updateTimelineGraphEventId,
 } from '../../../timelines/store/timeline/actions';
+import { Resolver } from '../../../resolver/view';
 
 import * as i18n from './translations';
 
 const OverlayContainer = styled.div<{ bodyHeight?: number }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   width: 100%;
+`;
+
+const StyledResolver = styled(Resolver)`
+  height: 100%;
 `;
 
 interface OwnProps {
@@ -117,9 +116,7 @@ const GraphOverlayComponent = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      <EuiTitle>
-        <>{`Resolver graph for event _id ${graphEventId}`}</>
-      </EuiTitle>
+      <StyledResolver databaseDocumentID={graphEventId} />
       <AllCasesModal
         onCloseCaseModal={onCloseCaseModal}
         showCaseModal={showCaseModal}

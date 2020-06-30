@@ -230,6 +230,49 @@ test('setContextConfig() updates config with relative contexts', () => {
   );
 });
 
+test('setContextConfig() updates config for a root context', () => {
+  const testsLogger = system.get('tests');
+  const testsChildLogger = system.get('tests', 'child');
+  const testsGrandchildLogger = system.get('tests', 'child', 'grandchild');
+
+  system.upgrade(
+    config.schema.validate({
+      appenders: { default: { kind: 'console', layout: { kind: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  system.setContextConfig(['tests', 'child'], {
+    appenders: new Map([
+      [
+        'custom',
+        { kind: 'console', layout: { kind: 'pattern', pattern: '[%level][%logger] %message' } },
+      ],
+    ]),
+    loggers: [{ context: '', appenders: ['custom'], level: 'debug' }],
+  });
+
+  testsLogger.warn('tests log to default!');
+  testsChildLogger.error('tests.child log to custom!');
+  testsGrandchildLogger.debug('tests.child.grandchild log to custom!');
+
+  expect(mockConsoleLog).toHaveBeenCalledTimes(3);
+  // Parent context is unaffected
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0])).toMatchObject({
+    context: 'tests',
+    message: 'tests log to default!',
+    level: 'WARN',
+  });
+  // Customized contexts
+  expect(mockConsoleLog.mock.calls[1][0]).toMatchInlineSnapshot(
+    `"[ERROR][tests.child] tests.child log to custom!"`
+  );
+
+  expect(mockConsoleLog.mock.calls[2][0]).toMatchInlineSnapshot(
+    `"[DEBUG][tests.child.grandchild] tests.child.grandchild log to custom!"`
+  );
+});
+
 test('custom context configs are applied on subsequent calls to update()', () => {
   system.setContextConfig(['tests', 'child'], {
     appenders: new Map([

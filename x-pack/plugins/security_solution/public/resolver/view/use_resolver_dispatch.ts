@@ -5,7 +5,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { ResolverAction } from '../types';
+import { ResolverAction } from '../store/actions';
 
 /**
  * Call `useDispatch`, but only accept `ResolverAction` actions.
