@@ -83,6 +83,7 @@ export const alertPreviewRequestParamsRT = rt.union([
   metricThresholdAlertPreviewRequestParamsRT,
   inventoryAlertPreviewRequestParamsRT,
 ]);
+export type AlertPreviewRequestParams = rt.TypeOf<typeof alertPreviewRequestParamsRT>;
 
 export const alertPreviewSuccessResponsePayloadRT = rt.type({
   numberOfGroups: rt.number,
@@ -90,7 +91,6 @@ export const alertPreviewSuccessResponsePayloadRT = rt.type({
     fired: rt.number,
     noData: rt.number,
     error: rt.number,
-    tooManyBuckets: rt.number,
   }),
 });
 export type AlertPreviewSuccessResponsePayload = rt.TypeOf<

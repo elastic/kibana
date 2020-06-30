@@ -39,7 +39,7 @@ export const createInventoryMetricThresholdExecutor = (
 
   const inventoryItems = Object.keys(first(results));
   for (const item of inventoryItems) {
-    const alertInstance = services.alertInstanceFactory(`${alertId}-${item}`);
+    const alertInstance = services.alertInstanceFactory(`${item}::${alertId}`);
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = results.every((result) => result[item].shouldFire);
 
