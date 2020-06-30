@@ -8,7 +8,6 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'kibana/public';
 import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
@@ -235,7 +234,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       // Set the index pattern titles which the user can choose as the source.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
-      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+      savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';

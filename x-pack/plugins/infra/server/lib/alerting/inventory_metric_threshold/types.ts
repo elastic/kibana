@@ -5,24 +5,11 @@
  */
 import { Unit } from '@elastic/datemath';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { Comparator, AlertStates } from '../common/types';
+
+export { Comparator, AlertStates };
 
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
-}
-
-export enum AlertStates {
-  OK,
-  ALERT,
-  NO_DATA,
-  ERROR,
-}
 
 export interface InventoryMetricConditions {
   metric: SnapshotMetricType;

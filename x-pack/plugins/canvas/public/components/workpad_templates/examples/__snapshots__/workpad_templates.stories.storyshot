@@ -1,0 +1,566 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadTemplates default 1`] = `
+<div
+  style={
+    Object {
+      "width": "500px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  >
+    <div
+      className="euiFlexItem euiSearchBar__searchHolder"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--fullWidth"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+            className="euiFieldSearch euiFieldSearch--fullWidth"
+            defaultValue=""
+            onKeyUp={[Function]}
+            placeholder="Find template"
+            type="search"
+          />
+          <div
+            className="euiFormControlLayoutIcons"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <div
+                aria-hidden="true"
+                className="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="search"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+    >
+      <div
+        className="euiFilterGroup"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter"
+          id="field_value_selection_0"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton--hasIcon"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <div
+                  aria-hidden="true"
+                  className="euiButtonEmpty__icon"
+                  data-euiicon-type="arrowDown"
+                  size="m"
+                />
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  <span
+                    className="euiFilterButton__textShift"
+                    data-text="Tags"
+                    title="Tags"
+                  >
+                    Tags
+                  </span>
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--l"
+  />
+  <div
+    className="euiBasicTable canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
+  >
+    <div>
+      <div
+        className="euiTableHeaderMobile"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              className="euiTableSortMobile"
+            >
+              <div
+                className="euiPopover euiPopover--anchorDownRight"
+                onKeyDown={[Function]}
+                onMouseDown={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchStart={[Function]}
+              >
+                <div
+                  className="euiPopover__anchor"
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonEmpty__content"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="euiButtonEmpty__icon"
+                        data-euiicon-type="arrowDown"
+                        size="m"
+                      />
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        Sorting
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table
+        className="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <caption
+          className="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              aria-live="polite"
+              aria-sort="ascending"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_name_0"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title={
+                      <Component
+                        ariaSortValue="ascending"
+                      />
+                    }
+                  >
+                    Template name
+                  </span>
+                  <div
+                    aria-label="Sorted in ascending order"
+                    className="euiTableSortIcon"
+                    data-euiicon-type="sortUp"
+                    size="m"
+                  />
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in descending order
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_help_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Description
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_tags_2"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Tags
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Template name
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Clone workpad template 'test1'"
+                  className="euiButtonEmpty euiButtonEmpty--primary"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      test1
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Description
+              </div>
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  This is a test template
+                </span>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Tags
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <div
+                  className="euiHealth"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        color="#666666"
+                        data-euiicon-type="dot"
+                      />
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      tag1
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiHealth"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        color="#666666"
+                        data-euiicon-type="dot"
+                      />
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      tag2
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Template name
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Clone workpad template 'test2'"
+                  className="euiButtonEmpty euiButtonEmpty--primary"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      test2
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Description
+              </div>
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  This is a second test template
+                </span>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "30%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Tags
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <div
+                  className="euiHealth"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        color="#666666"
+                        data-euiicon-type="dot"
+                      />
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      tag2
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiHealth"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        color="#666666"
+                        data-euiicon-type="dot"
+                      />
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      tag3
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--l"
+  />
+  <div
+    className="euiFlexGroup euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPagination"
+        role="group"
+      >
+        <button
+          aria-label="Previous page"
+          className="euiButtonIcon euiButtonIcon--text"
+          data-test-subj="pagination-button-previous"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowLeft"
+            size="m"
+          />
+        </button>
+        <button
+          aria-label="Page 1 of 1"
+          className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+          data-test-subj="pagination-button-0"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              1
+            </span>
+          </span>
+        </button>
+        <button
+          aria-label="Next page"
+          className="euiButtonIcon euiButtonIcon--text"
+          data-test-subj="pagination-button-next"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowRight"
+            size="m"
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
