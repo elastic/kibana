@@ -59,7 +59,7 @@ describe('PersistedLog', () => {
 
   describe('internal functionality', () => {
     test('reads from storage', () => {
-      // @ts-ignore
+      // @ts-expect-error
       const log = new PersistedLog(historyName, { maxLength: 10 }, storage);
 
       expect(storage.getItem).toHaveBeenCalledTimes(1);

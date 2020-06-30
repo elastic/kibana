@@ -8,7 +8,8 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverState, ResolverAction, ResolverUIState } from '../types';
+import { ResolverAction } from './actions';
+import { ResolverState, ResolverUIState } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
 
 /**
