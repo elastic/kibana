@@ -97,31 +97,19 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   }, 200);
 
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const layerName = e.target.value;
-    if (layerName === this.state.currentLayerName) {
-      return;
-    }
-    this.setState({ currentLayerName: layerName }, this._handleChange);
+    this.setState({ currentLayerName: e.target.value }, this._handleChange);
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
-    if (_.isEqual(this.state.currentFields, fields)) {
-      return;
-    }
     this.setState({ currentFields: fields }, this._handleChange);
   };
 
   _handleZoomRangeChange = (e: Value) => {
-    const minSourceZoom = parseInt(e[0] as string, 10);
-    const maxSourceZoom = parseInt(e[1] as string, 10);
-    if (
-      this.state.currentMinSourceZoom === minSourceZoom &&
-      this.state.currentMaxSourceZoom === maxSourceZoom
-    ) {
-      return;
-    }
     this.setState(
-      { currentMinSourceZoom: minSourceZoom, currentMaxSourceZoom: maxSourceZoom },
+      {
+        currentMinSourceZoom: parseInt(e[0] as string, 10),
+        currentMaxSourceZoom: parseInt(e[1] as string, 10),
+      },
       this._handleChange
     );
   };
