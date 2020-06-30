@@ -19,12 +19,17 @@
 
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildRangeFilter } from '../../../../../common';
+import { GetInternalStartServicesFn } from '../../../../types';
 
-export const createFilterRange = (aggConfig: IBucketAggConfig, params: any) => {
-  return buildRangeFilter(
-    aggConfig.params.field,
-    params,
-    aggConfig.getIndexPattern(),
-    aggConfig.fieldFormatter()(params)
-  );
+/** @internal */
+export const createFilterRange = (getInternalStartServices: GetInternalStartServicesFn) => {
+  return (aggConfig: IBucketAggConfig, params: any) => {
+    const { fieldFormats } = getInternalStartServices();
+    return buildRangeFilter(
+      aggConfig.params.field,
+      params,
+      aggConfig.getIndexPattern(),
+      fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
+    );
+  };
 };

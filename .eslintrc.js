@@ -1113,7 +1113,7 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
-        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/{,legacy/}plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1262,6 +1262,23 @@ module.exports = {
         ...require('eslint-config-prettier').rules,
         ...require('eslint-config-prettier/react').rules,
         ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+
+    {
+      files: [
+        // platform-team owned code
+        'src/core/**',
+        'x-pack/plugins/features/**',
+        'x-pack/plugins/licensing/**',
+        'x-pack/plugins/global_search/**',
+        'x-pack/plugins/cloud/**',
+        'packages/kbn-config-schema',
+        'src/plugins/status_page/**',
+        'src/plugins/saved_objects_management/**',
+      ],
+      rules: {
+        '@typescript-eslint/prefer-ts-expect-error': 'error',
       },
     },
   ],
