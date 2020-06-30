@@ -29,6 +29,8 @@ export const source = {
   logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
   logColumns: [],
+  inventoryDefaultView: 'host',
+  metricsExplorerDefaultView: 'host',
   fields: {
     host: 'host.name',
     container: 'container.id',

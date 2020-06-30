@@ -16,6 +16,13 @@ import {
   WaffleFiltersState,
 } from './use_waffle_filters';
 
+export const DEFAULT_WAFFLE_VIEW_STATE: WaffleViewState = {
+  ...DEFAULT_WAFFLE_OPTIONS_STATE,
+  filterQuery: DEFAULT_WAFFLE_FILTERS_STATE,
+  time: DEFAULT_WAFFLE_TIME_STATE.currentTime,
+  autoReload: DEFAULT_WAFFLE_TIME_STATE.isAutoReloading,
+};
+
 export const useWaffleViewState = () => {
   const {
     metric,
@@ -53,13 +60,6 @@ export const useWaffleViewState = () => {
     legend,
   };
 
-  const defaultViewState: WaffleViewState = {
-    ...DEFAULT_WAFFLE_OPTIONS_STATE,
-    filterQuery: DEFAULT_WAFFLE_FILTERS_STATE,
-    time: DEFAULT_WAFFLE_TIME_STATE.currentTime,
-    autoReload: DEFAULT_WAFFLE_TIME_STATE.isAutoReloading,
-  };
-
   const onViewChange = useCallback(
     (newState: WaffleViewState) => {
       setWaffleOptionsState({
@@ -89,7 +89,7 @@ export const useWaffleViewState = () => {
 
   return {
     viewState,
-    defaultViewState,
+    defaultViewState: DEFAULT_WAFFLE_VIEW_STATE,
     onViewChange,
   };
 };

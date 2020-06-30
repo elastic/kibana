@@ -210,6 +210,7 @@ describe('when on the hosts page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
+    let agentId: string;
     const dispatchServerReturnedHostPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
@@ -273,6 +274,8 @@ describe('when on the hosts page', () => {
           },
         },
       };
+
+      agentId = hostDetails.metadata.elastic.agent.id;
 
       coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
       coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
@@ -402,6 +405,32 @@ describe('when on the hosts page', () => {
       expect(
         policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
       ).not.toBeNull();
+    });
+
+    it('should include the link to reassignment in Ingest', async () => {
+      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+      const renderResult = render();
+      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      expect(linkToReassign).not.toBeNull();
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+      );
+    });
+
+    describe('when link to reassignment in Ingest is clicked', () => {
+      beforeEach(async () => {
+        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+        const renderResult = render();
+        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(linkToReassign);
+        });
+      });
+
+      it('should navigate to Ingest without full page refresh', () => {
+        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
+      });
     });
 
     it('should include the link to logs', async () => {
