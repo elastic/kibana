@@ -3,16 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { useGenericComboBox } from './hooks/use_generic_combo_box';
+import { getGenericComboBoxProps } from './helpers';
+import { GetGenericComboBoxPropsReturn } from './types';
 
 interface OperatorProps {
   placeholder: string;
-  selectedField: IFieldType | null;
-  indexPattern: IIndexPattern | null;
+  selectedField: IFieldType | undefined;
+  indexPattern: IIndexPattern | undefined;
   isLoading?: boolean;
   isDisabled?: boolean;
   isClearable?: boolean;
@@ -30,21 +31,33 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   fieldInputWidth = 190,
   onChange,
 }): JSX.Element => {
-  const getLabel = useCallback((field) => field.name, []);
-  const optionsMemo = useMemo(() => (indexPattern ? indexPattern.fields : []), [indexPattern]);
-  const selectedOptionsMemo = useMemo(() => (selectedField ? [selectedField] : []), [
+  const getLabel = useCallback((field): string => field.name, []);
+  const optionsMemo = useMemo((): IFieldType[] => (indexPattern ? indexPattern.fields : []), [
+    indexPattern,
+  ]);
+  const selectedOptionsMemo = useMemo((): IFieldType[] => (selectedField ? [selectedField] : []), [
     selectedField,
   ]);
-  const [{ comboOptions, labels, selectedComboOptions }] = useGenericComboBox<IFieldType>({
-    options: optionsMemo,
-    selectedOptions: selectedOptionsMemo,
-    getLabel,
-  });
+  const { comboOptions, labels, selectedComboOptions } = useMemo(
+    (): GetGenericComboBoxPropsReturn =>
+      getGenericComboBoxProps<IFieldType>({
+        options: optionsMemo,
+        selectedOptions: selectedOptionsMemo,
+        getLabel,
+      }),
+    [optionsMemo, selectedOptionsMemo, getLabel]
+  );
 
-  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]) => {
-    const newValues = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
+    const newValues: IFieldType[] = newOptions.map(
+      ({ label }) => optionsMemo[labels.indexOf(label)]
+    );
     onChange(newValues);
   };
+
+  useEffect(() => {
+    return () => console.log('unmounting');
+  }, []);
 
   return (
     <EuiComboBox

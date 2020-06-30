@@ -8,16 +8,17 @@ import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { useGenericComboBox } from './hooks/use_generic_combo_box';
-import { OperatorOption } from './types';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
+import { getGenericComboBoxProps, validateParams } from './helpers';
+import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+import { GetGenericComboBoxPropsReturn } from './types';
+import * as i18n from './translations';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
-  field: IFieldType | null;
-  operator: OperatorOption;
+  selectedField: IFieldType | undefined;
   selectedValue: string[];
-  indexPattern: IIndexPattern;
+  indexPattern: IIndexPattern | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
@@ -26,8 +27,7 @@ interface AutocompleteFieldMatchAnyProps {
 
 export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatchAnyProps> = ({
   placeholder,
-  field,
-  operator,
+  selectedField,
   selectedValue,
   indexPattern,
   isLoading,
@@ -36,24 +36,28 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   onChange,
 }): JSX.Element => {
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
-    selectedField: field,
-    operatorType: operator.type,
+    selectedField,
+    operatorType: OperatorTypeEnum.MATCH_ANY,
     fieldValue: selectedValue,
     indexPattern,
   });
-  const getLabel = useCallback((option: string) => option, []);
+  const getLabel = useCallback((option: string): string => option, []);
   const optionsMemo = useMemo(
-    () => (selectedValue ? uniq([...selectedValue, ...suggestions]) : suggestions),
+    (): string[] => (selectedValue ? uniq([...selectedValue, ...suggestions]) : suggestions),
     [suggestions, selectedValue]
   );
-  const [{ comboOptions, labels, selectedComboOptions }] = useGenericComboBox<string>({
-    options: optionsMemo,
-    selectedOptions: selectedValue,
-    getLabel,
-  });
+  const { comboOptions, labels, selectedComboOptions } = useMemo(
+    (): GetGenericComboBoxPropsReturn =>
+      getGenericComboBoxProps<string>({
+        options: optionsMemo,
+        selectedOptions: selectedValue,
+        getLabel,
+      }),
+    [optionsMemo, selectedValue, getLabel]
+  );
 
-  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]) => {
-    const newValues = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
+    const newValues: string[] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
     onChange(newValues);
   };
 
@@ -61,7 +65,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     const signal = new AbortController().signal;
 
     updateSuggestions({
-      fieldSelected: field,
+      fieldSelected: selectedField,
       value: `${searchVal}`,
       patterns: indexPattern,
       signal,
@@ -70,9 +74,16 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
 
   const onCreateOption = (option: string) => onChange([...(selectedValue || []), option]);
 
+  const isValid = useMemo((): boolean => {
+    const areAnyInvalid = selectedComboOptions.filter(
+      ({ label }) => !validateParams(label, selectedField ? selectedField.type : '')
+    );
+    return areAnyInvalid.length === 0;
+  }, [selectedComboOptions, selectedField]);
+
   return (
     <EuiComboBox
-      placeholder={placeholder}
+      placeholder={isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder}
       isLoading={isLoading || isLoadingSuggestions}
       isClearable={isClearable}
       isDisabled={isDisabled}
@@ -81,8 +92,11 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       onChange={handleValuesChange}
       onSearchChange={onSearchChange}
       onCreateOption={onCreateOption}
+      isInvalid={!isValid}
+      sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"
       fullWidth
+      async
     />
   );
 };

@@ -7,13 +7,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { useGenericComboBox } from './hooks/use_generic_combo_box';
-import { getOperators } from './helpers';
-import { OperatorOption } from './types';
+import { getOperators, getGenericComboBoxProps } from './helpers';
+import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
 
 interface OperatorState {
   placeholder: string;
-  field: IFieldType | null;
+  selectedField: IFieldType | undefined;
   operator: OperatorOption;
   isLoading: boolean;
   isDisabled: boolean;
@@ -25,7 +24,7 @@ interface OperatorState {
 
 export const OperatorComponent: React.FC<OperatorState> = ({
   placeholder,
-  field,
+  selectedField,
   operator,
   isLoading = false,
   isDisabled = false,
@@ -34,20 +33,28 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   operatorInputWidth = 150,
   onChange,
 }): JSX.Element => {
-  const getLabel = useCallback(({ message }) => message, []);
-  const optionsMemo = useMemo(() => (operatorOptions ? operatorOptions : getOperators(field)), [
-    operatorOptions,
-    field,
+  const getLabel = useCallback(({ message }): string => message, []);
+  const optionsMemo = useMemo(
+    (): OperatorOption[] => (operatorOptions ? operatorOptions : getOperators(selectedField)),
+    [operatorOptions, selectedField]
+  );
+  const selectedOptionsMemo = useMemo((): OperatorOption[] => (operator ? [operator] : []), [
+    operator,
   ]);
-  const selectedOptionsMemo = useMemo(() => (operator ? [operator] : []), [operator]);
-  const [{ comboOptions, labels, selectedComboOptions }] = useGenericComboBox<OperatorOption>({
-    options: optionsMemo,
-    selectedOptions: selectedOptionsMemo,
-    getLabel,
-  });
+  const { comboOptions, labels, selectedComboOptions } = useMemo(
+    (): GetGenericComboBoxPropsReturn =>
+      getGenericComboBoxProps<OperatorOption>({
+        options: optionsMemo,
+        selectedOptions: selectedOptionsMemo,
+        getLabel,
+      }),
+    [optionsMemo, selectedOptionsMemo, getLabel]
+  );
 
-  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]) => {
-    const newValues = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
+    const newValues: OperatorOption[] = newOptions.map(
+      ({ label }) => optionsMemo[labels.indexOf(label)]
+    );
     onChange(newValues);
   };
 

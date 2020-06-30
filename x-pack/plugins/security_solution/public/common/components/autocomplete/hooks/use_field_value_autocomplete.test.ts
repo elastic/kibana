@@ -6,8 +6,6 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { OperatorType } from '../types';
-
 import {
   UseFieldValueAutocompleteProps,
   UseFieldValueAutocompleteReturn,
@@ -16,6 +14,7 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
 import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -48,14 +47,14 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: undefined,
-          operatorType: OperatorType.MATCH,
+          operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: undefined,
         })
       );
       await waitForNextUpdate();
 
-      expect(result.current).toEqual([false, []]);
+      expect(result.current).toEqual([false, [], result.current[2]]);
     });
   });
 
@@ -67,14 +66,14 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: getField('machine.os'),
-          operatorType: OperatorType.EXISTS,
+          operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
         })
       );
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, []];
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, [], result.current[2]];
 
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
@@ -89,14 +88,14 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: undefined,
-          operatorType: OperatorType.EXISTS,
+          operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
         })
       );
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, []];
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, [], result.current[2]];
 
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
@@ -111,14 +110,14 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: getField('machine.os'),
-          operatorType: OperatorType.EXISTS,
+          operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: undefined,
         })
       );
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, []];
+      const expectedResult: UseFieldValueAutocompleteReturn = [false, [], result.current[2]];
 
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
@@ -133,7 +132,7 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: getField('ssl'),
-          operatorType: OperatorType.MATCH,
+          operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
         })
@@ -141,7 +140,11 @@ describe('useFieldValueAutocomplete', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, ['true', 'false']];
+      const expectedResult: UseFieldValueAutocompleteReturn = [
+        false,
+        ['true', 'false'],
+        result.current[2],
+      ];
 
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
@@ -156,7 +159,7 @@ describe('useFieldValueAutocomplete', () => {
       >(() =>
         useFieldValueAutocomplete({
           selectedField: getField('@tags'),
-          operatorType: OperatorType.MATCH,
+          operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
         })
@@ -164,12 +167,63 @@ describe('useFieldValueAutocomplete', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, ['value 1', 'value 2']];
+      const expectedResult: UseFieldValueAutocompleteReturn = [
+        false,
+        ['value 1', 'value 2'],
+        result.current[2],
+      ];
 
       expect(getValueSuggestionsMock).toHaveBeenCalledWith({
         field: getField('@tags'),
         indexPattern: stubIndexPatternWithFields,
         query: '',
+        signal: new AbortController().signal,
+      });
+      expect(result.current).toEqual(expectedResult);
+    });
+  });
+
+  test('returns new suggestions on subsequent calls', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<
+        UseFieldValueAutocompleteProps,
+        UseFieldValueAutocompleteReturn
+      >(() =>
+        useFieldValueAutocomplete({
+          selectedField: getField('@tags'),
+          operatorType: OperatorTypeEnum.MATCH,
+          fieldValue: '',
+          indexPattern: stubIndexPatternWithFields,
+        })
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      result.current[2]({
+        fieldSelected: getField('@tags'),
+        value: 'hello',
+        patterns: stubIndexPatternWithFields,
+        signal: new AbortController().signal,
+      });
+
+      await waitForNextUpdate();
+
+      const expectedResult: UseFieldValueAutocompleteReturn = [
+        false,
+        ['value 1', 'value 2'],
+        result.current[2],
+      ];
+
+      expect(getValueSuggestionsMock).toHaveBeenNthCalledWith(1, {
+        field: getField('@tags'),
+        indexPattern: stubIndexPatternWithFields,
+        query: '',
+        signal: new AbortController().signal,
+      });
+      expect(getValueSuggestionsMock).toHaveBeenNthCalledWith(2, {
+        field: getField('@tags'),
+        indexPattern: stubIndexPatternWithFields,
+        query: 'hello',
         signal: new AbortController().signal,
       });
       expect(result.current).toEqual(expectedResult);

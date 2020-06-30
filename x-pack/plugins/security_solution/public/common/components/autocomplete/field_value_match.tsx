@@ -8,16 +8,17 @@ import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-import { useGenericComboBox } from './hooks/use_generic_combo_box';
-import { OperatorOption } from './types';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
+import { validateParams, getGenericComboBoxProps } from './helpers';
+import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+import { GetGenericComboBoxPropsReturn } from './types';
+import * as i18n from './translations';
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
-  field: IFieldType | null;
-  operator: OperatorOption;
+  selectedField: IFieldType | undefined;
   selectedValue: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IIndexPattern | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
@@ -26,8 +27,7 @@ interface AutocompleteFieldMatchProps {
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
   placeholder,
-  field,
-  operator,
+  selectedField,
   selectedValue,
   indexPattern,
   isLoading,
@@ -36,28 +36,32 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   onChange,
 }): JSX.Element => {
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
-    selectedField: field,
-    operatorType: operator.type,
+    selectedField,
+    operatorType: OperatorTypeEnum.MATCH,
     fieldValue: selectedValue,
     indexPattern,
   });
-  const getLabel = useCallback((option: string) => option, []);
-  const optionsMemo = useMemo(() => {
+  const getLabel = useCallback((option: string): string => option, []);
+  const optionsMemo = useMemo((): string[] => {
     const valueAsStr = String(selectedValue);
     return selectedValue ? uniq([valueAsStr, ...suggestions]) : suggestions;
   }, [suggestions, selectedValue]);
-  const selectedValueMemo = useMemo(() => {
+  const selectedOptionsMemo = useMemo((): string[] => {
     const valueAsStr = String(selectedValue);
     return selectedValue ? [valueAsStr] : [];
   }, [selectedValue]);
 
-  const [{ comboOptions, labels, selectedComboOptions }] = useGenericComboBox<string>({
-    options: optionsMemo,
-    selectedOptions: selectedValueMemo,
-    getLabel,
-  });
+  const { comboOptions, labels, selectedComboOptions } = useMemo(
+    (): GetGenericComboBoxPropsReturn =>
+      getGenericComboBoxProps<string>({
+        options: optionsMemo,
+        selectedOptions: selectedOptionsMemo,
+        getLabel,
+      }),
+    [optionsMemo, selectedOptionsMemo, getLabel]
+  );
 
-  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]) => {
+  const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
     const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
     onChange(newValue ?? '');
   };
@@ -66,7 +70,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     const signal = new AbortController().signal;
 
     updateSuggestions({
-      fieldSelected: field,
+      fieldSelected: selectedField,
       value: `${searchVal}`,
       patterns: indexPattern,
       signal,
@@ -75,7 +79,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
   return (
     <EuiComboBox
-      placeholder={placeholder}
+      placeholder={isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder}
       isDisabled={isDisabled}
       isLoading={isLoading || isLoadingSuggestions}
       isClearable={isClearable}
@@ -85,8 +89,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       singleSelection={{ asPlainText: true }}
       onSearchChange={onSearchChange}
       onCreateOption={onChange}
+      isInvalid={!validateParams(selectedValue, selectedField ? selectedField.type : '')}
+      sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchComboxBox"
       fullWidth
+      async
     />
   );
 };

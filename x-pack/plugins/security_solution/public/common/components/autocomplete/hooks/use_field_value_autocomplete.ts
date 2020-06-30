@@ -9,24 +9,24 @@ import { debounce } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { OperatorType } from '../types';
+import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
 export type UseFieldValueAutocompleteReturn = [
   boolean,
   string[],
   (args: {
-    fieldSelected: IFieldType | null;
+    fieldSelected: IFieldType | undefined;
     value: string | string[] | undefined;
-    patterns: IIndexPattern | null;
+    patterns: IIndexPattern | undefined;
     signal: AbortSignal;
   }) => void
 ];
 
 export interface UseFieldValueAutocompleteProps {
-  selectedField: IFieldType | null;
-  operatorType: OperatorType;
+  selectedField: IFieldType | undefined;
+  operatorType: OperatorTypeEnum;
   fieldValue: string | string[] | undefined;
-  indexPattern: IIndexPattern | null;
+  indexPattern: IIndexPattern | undefined;
 }
 /**
  * Hook for using the field value autocomplete service
@@ -49,9 +49,9 @@ export const useFieldValueAutocomplete = ({
         patterns,
         signal,
       }: {
-        fieldSelected: IFieldType | null;
+        fieldSelected: IFieldType | undefined;
         value: string | string[] | undefined;
-        patterns: IIndexPattern | null;
+        patterns: IIndexPattern | undefined;
         signal: AbortSignal;
       }) => {
         if (fieldSelected == null || patterns == null) {
@@ -84,7 +84,7 @@ export const useFieldValueAutocomplete = ({
   useEffect(() => {
     const abortCtrl = new AbortController();
 
-    if (operatorType !== OperatorType.EXISTS) {
+    if (operatorType !== OperatorTypeEnum.EXISTS) {
       updateSuggestions.current({
         fieldSelected: selectedField,
         value: fieldValue,

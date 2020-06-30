@@ -5,15 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Operator, OperatorType, OperatorOption } from './types';
+import { OperatorOption } from './types';
+import { OperatorEnum, OperatorTypeEnum } from '../../../lists_plugin_deps';
 
 export const isOperator: OperatorOption = {
   message: i18n.translate('xpack.securitySolution.exceptions.isOperatorLabel', {
     defaultMessage: 'is',
   }),
   value: 'is',
-  type: OperatorType.MATCH,
-  operator: Operator.INCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  operator: OperatorEnum.INCLUDED,
 };
 
 export const isNotOperator: OperatorOption = {
@@ -21,8 +22,8 @@ export const isNotOperator: OperatorOption = {
     defaultMessage: 'is not',
   }),
   value: 'is_not',
-  type: OperatorType.MATCH,
-  operator: Operator.EXCLUDED,
+  type: OperatorTypeEnum.MATCH,
+  operator: OperatorEnum.EXCLUDED,
 };
 
 export const isOneOfOperator: OperatorOption = {
@@ -30,8 +31,8 @@ export const isOneOfOperator: OperatorOption = {
     defaultMessage: 'is one of',
   }),
   value: 'is_one_of',
-  type: OperatorType.MATCH_ANY,
-  operator: Operator.INCLUDED,
+  type: OperatorTypeEnum.MATCH_ANY,
+  operator: OperatorEnum.INCLUDED,
 };
 
 export const isNotOneOfOperator: OperatorOption = {
@@ -39,8 +40,8 @@ export const isNotOneOfOperator: OperatorOption = {
     defaultMessage: 'is not one of',
   }),
   value: 'is_not_one_of',
-  type: OperatorType.MATCH_ANY,
-  operator: Operator.EXCLUDED,
+  type: OperatorTypeEnum.MATCH_ANY,
+  operator: OperatorEnum.EXCLUDED,
 };
 
 export const existsOperator: OperatorOption = {
@@ -48,8 +49,8 @@ export const existsOperator: OperatorOption = {
     defaultMessage: 'exists',
   }),
   value: 'exists',
-  type: OperatorType.EXISTS,
-  operator: Operator.INCLUDED,
+  type: OperatorTypeEnum.EXISTS,
+  operator: OperatorEnum.INCLUDED,
 };
 
 export const doesNotExistOperator: OperatorOption = {
@@ -57,8 +58,8 @@ export const doesNotExistOperator: OperatorOption = {
     defaultMessage: 'does not exist',
   }),
   value: 'does_not_exist',
-  type: OperatorType.EXISTS,
-  operator: Operator.EXCLUDED,
+  type: OperatorTypeEnum.EXISTS,
+  operator: OperatorEnum.EXCLUDED,
 };
 
 export const isInListOperator: OperatorOption = {
@@ -66,8 +67,8 @@ export const isInListOperator: OperatorOption = {
     defaultMessage: 'is in list',
   }),
   value: 'is_in_list',
-  type: OperatorType.LIST,
-  operator: Operator.INCLUDED,
+  type: OperatorTypeEnum.LIST,
+  operator: OperatorEnum.INCLUDED,
 };
 
 export const isNotInListOperator: OperatorOption = {
@@ -75,8 +76,8 @@ export const isNotInListOperator: OperatorOption = {
     defaultMessage: 'is not in list',
   }),
   value: 'is_not_in_list',
-  type: OperatorType.LIST,
-  operator: Operator.EXCLUDED,
+  type: OperatorTypeEnum.LIST,
+  operator: OperatorEnum.EXCLUDED,
 };
 
 export const EXCEPTION_OPERATORS: OperatorOption[] = [
