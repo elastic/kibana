@@ -10,7 +10,7 @@ import { useToasts } from '../../../../../../../src/plugins/kibana_react/public'
 import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
 import { useServices } from '../../context';
 import { Tag } from '../../../../common';
-import { txtCouldNotCreate } from './i18n';
+import { txtTagCreated, txtCouldNotCreate } from './i18n';
 
 export interface Props {
   onCreate?: (tag: Tag) => void;
@@ -35,11 +35,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
       });
       if (!isMounted()) return;
       toasts.addSuccess({
-        title: (
-          <span>
-            Tag <code>{tag.title}</code> created.
-          </span>
-        ),
+        title: txtTagCreated,
       });
       if (onCreate) onCreate(tag);
     } catch (error) {
