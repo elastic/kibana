@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "A safer version of the lodash set and setWith functions",
   "main": "index.js",
+  "types": "index.d.ts",
   "dependencies": {},
   "devDependencies": {
     "dependency-check": "^4.1.0",
