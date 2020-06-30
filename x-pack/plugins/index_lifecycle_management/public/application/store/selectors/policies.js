@@ -37,10 +37,10 @@ import {
 import { filterItems, sortTable } from '../../services';
 
 import {
-  defaultEmptyDeletePhase,
-  defaultEmptyColdPhase,
-  defaultEmptyWarmPhase,
-  defaultEmptyHotPhase,
+  defaultDeletePhaseWhenEditing,
+  defaultColdPhaseWhenEditing,
+  defaultWarmPhaseWhenEditing,
+  defaultHotPhaseWhenEditing,
 } from '../defaults';
 
 export const getPolicies = (state) => state.policies.policies;
@@ -122,109 +122,122 @@ export const isEmptyObject = (obj) => {
   return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
 };
 
-const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
-  const policy = { ...defaultEmptyPolicy };
-  if (!phase) {
-    return policy;
+const deserializePhase = (serializedPhase, phaseName, defaultPhase) => {
+  const phase = { ...defaultPhase };
+
+  if (!serializedPhase) {
+    return phase;
   }
 
-  policy[PHASE_ENABLED] = true;
+  phase[PHASE_ENABLED] = true;
 
-  if (phase.min_age) {
-    if (phaseName === PHASE_WARM && phase.min_age === '0ms') {
-      policy[WARM_PHASE_ON_ROLLOVER] = true;
+  if (serializedPhase.min_age) {
+    if (phaseName === PHASE_WARM && serializedPhase.min_age === '0ms') {
+      phase[WARM_PHASE_ON_ROLLOVER] = true;
     } else {
-      const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(phase.min_age);
-      policy[PHASE_ROLLOVER_MINIMUM_AGE] = minAge;
-      policy[PHASE_ROLLOVER_MINIMUM_AGE_UNITS] = minAgeUnits;
+      const { size: minAge, units: minAgeUnits } = splitSizeAndUnits(serializedPhase.min_age);
+      phase[PHASE_ROLLOVER_MINIMUM_AGE] = minAge;
+      phase[PHASE_ROLLOVER_MINIMUM_AGE_UNITS] = minAgeUnits;
     }
   }
+
   if (phaseName === PHASE_WARM) {
-    policy[PHASE_SHRINK_ENABLED] = false;
-    policy[PHASE_FORCE_MERGE_ENABLED] = false;
+    phase[PHASE_SHRINK_ENABLED] = false;
+    phase[PHASE_FORCE_MERGE_ENABLED] = false;
   }
-  if (phase.actions) {
-    const actions = phase.actions;
+
+  if (serializedPhase.actions) {
+    const actions = serializedPhase.actions;
 
     if (actions.rollover) {
       const rollover = actions.rollover;
-      policy[PHASE_ROLLOVER_ENABLED] = true;
+      phase[PHASE_ROLLOVER_ENABLED] = true;
+
       if (rollover.max_age) {
         const { size: maxAge, units: maxAgeUnits } = splitSizeAndUnits(rollover.max_age);
-        policy[PHASE_ROLLOVER_MAX_AGE] = maxAge;
-        policy[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
+        phase[PHASE_ROLLOVER_MAX_AGE] = maxAge;
+        phase[PHASE_ROLLOVER_MAX_AGE_UNITS] = maxAgeUnits;
       }
+
       if (rollover.max_size) {
         const { size: maxSize, units: maxSizeUnits } = splitSizeAndUnits(rollover.max_size);
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED] = maxSize;
-        policy[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
+        phase[PHASE_ROLLOVER_MAX_SIZE_STORED] = maxSize;
+        phase[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS] = maxSizeUnits;
       }
+
       if (rollover.max_docs) {
-        policy[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
+        phase[PHASE_ROLLOVER_MAX_DOCUMENTS] = rollover.max_docs;
       }
     }
 
     if (actions.allocate) {
       const allocate = actions.allocate;
+
       if (allocate.require) {
         Object.entries(allocate.require).forEach((entry) => {
-          policy[PHASE_NODE_ATTRS] = entry.join(':');
+          phase[PHASE_NODE_ATTRS] = entry.join(':');
         });
+
         // checking for null or undefined here
         if (allocate.number_of_replicas != null) {
-          policy[PHASE_REPLICA_COUNT] = allocate.number_of_replicas;
+          phase[PHASE_REPLICA_COUNT] = allocate.number_of_replicas;
         }
       }
     }
 
     if (actions.forcemerge) {
       const forcemerge = actions.forcemerge;
-      policy[PHASE_FORCE_MERGE_ENABLED] = true;
-      policy[PHASE_FORCE_MERGE_SEGMENTS] = forcemerge.max_num_segments;
+      phase[PHASE_FORCE_MERGE_ENABLED] = true;
+      phase[PHASE_FORCE_MERGE_SEGMENTS] = forcemerge.max_num_segments;
     }
 
     if (actions.shrink) {
-      policy[PHASE_SHRINK_ENABLED] = true;
-      policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
+      phase[PHASE_SHRINK_ENABLED] = true;
+      phase[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
 
     if (actions.freeze) {
-      policy[PHASE_FREEZE_ENABLED] = true;
+      phase[PHASE_FREEZE_ENABLED] = true;
     }
 
     if (actions.set_priority) {
       const { priority } = actions.set_priority;
 
-      policy[PHASE_INDEX_PRIORITY] = priority ?? '';
+      phase[PHASE_INDEX_PRIORITY] = priority ?? '';
     }
 
     if (actions.wait_for_snapshot) {
-      policy[PHASE_WAIT_FOR_SNAPSHOT_POLICY] = actions.wait_for_snapshot.policy;
+      phase[PHASE_WAIT_FOR_SNAPSHOT_POLICY] = actions.wait_for_snapshot.policy;
     }
   }
-  return policy;
+
+  return phase;
 };
 
-export const policyFromES = (policy) => {
+export const deserializePolicy = (serializedPolicy) => {
   const {
     name,
     policy: { phases },
-  } = policy;
+  } = serializedPolicy;
 
   return {
     name,
-    phases: {
-      [PHASE_HOT]: phaseFromES(phases[PHASE_HOT], PHASE_HOT, defaultEmptyHotPhase),
-      [PHASE_WARM]: phaseFromES(phases[PHASE_WARM], PHASE_WARM, defaultEmptyWarmPhase),
-      [PHASE_COLD]: phaseFromES(phases[PHASE_COLD], PHASE_COLD, defaultEmptyColdPhase),
-      [PHASE_DELETE]: phaseFromES(phases[PHASE_DELETE], PHASE_DELETE, defaultEmptyDeletePhase),
-    },
-    isNew: false,
     saveAsNew: false,
+    isNew: false,
+    phases: {
+      [PHASE_HOT]: deserializePhase(phases[PHASE_HOT], PHASE_HOT, defaultHotPhaseWhenEditing),
+      [PHASE_WARM]: deserializePhase(phases[PHASE_WARM], PHASE_WARM, defaultWarmPhaseWhenEditing),
+      [PHASE_COLD]: deserializePhase(phases[PHASE_COLD], PHASE_COLD, defaultColdPhaseWhenEditing),
+      [PHASE_DELETE]: deserializePhase(
+        phases[PHASE_DELETE],
+        PHASE_DELETE,
+        defaultDeletePhaseWhenEditing
+      ),
+    },
   };
 };
 
-export const phaseToES = (phase, originalEsPhase) => {
+export const serializePhase = (phase, originalEsPhase) => {
   const esPhase = { ...originalEsPhase };
 
   if (!phase[PHASE_ENABLED]) {

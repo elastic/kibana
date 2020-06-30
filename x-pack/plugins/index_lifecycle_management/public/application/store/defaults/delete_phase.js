@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import {
   PHASE_ENABLED,
   PHASE_ROLLOVER_ENABLED,
@@ -12,7 +13,7 @@ import {
   PHASE_WAIT_FOR_SNAPSHOT_POLICY,
 } from '../../constants';
 
-export const defaultDeletePhase = {
+export const defaultDeletePhaseWhenNew = {
   [PHASE_ENABLED]: false,
   [PHASE_ROLLOVER_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
@@ -20,4 +21,7 @@ export const defaultDeletePhase = {
   [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: 'd',
   [PHASE_WAIT_FOR_SNAPSHOT_POLICY]: '',
 };
-export const defaultEmptyDeletePhase = defaultDeletePhase;
+
+export const defaultDeletePhaseWhenEditing = {
+  ...defaultDeletePhaseWhenNew,
+};

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export declare const defaultDeletePhase: any;
-export declare const defaultColdPhase: any;
-export declare const defaultWarmPhase: any;
-export declare const defaultHotPhase: any;
+export declare const defaultDeletePhaseWhenNew: any;
+export declare const defaultColdPhaseWhenNew: any;
+export declare const defaultWarmPhaseWhenNew: any;
+export declare const defaultHotPhaseWhenNew: any;

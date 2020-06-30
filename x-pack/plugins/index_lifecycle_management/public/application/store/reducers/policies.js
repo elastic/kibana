@@ -5,6 +5,15 @@
  */
 
 import { handleActions } from 'redux-actions';
+
+import {
+  PHASE_HOT,
+  PHASE_WARM,
+  PHASE_COLD,
+  PHASE_DELETE,
+  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
+} from '../../constants';
+
 import {
   fetchedPolicies,
   setSelectedPolicy,
@@ -17,30 +26,25 @@ import {
   policyPageSizeChanged,
   policySortChanged,
 } from '../actions';
-import { policyFromES } from '../selectors';
-import {
-  PHASE_HOT,
-  PHASE_WARM,
-  PHASE_COLD,
-  PHASE_DELETE,
-  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-} from '../../constants';
+
+import { deserializePolicy } from '../selectors';
 
 import {
-  defaultColdPhase,
-  defaultDeletePhase,
-  defaultHotPhase,
-  defaultWarmPhase,
+  defaultColdPhaseWhenNew,
+  defaultDeletePhaseWhenNew,
+  defaultHotPhaseWhenNew,
+  defaultWarmPhaseWhenNew,
 } from '../defaults';
+
 export const defaultPolicy = {
   name: '',
   saveAsNew: true,
   isNew: true,
   phases: {
-    [PHASE_HOT]: defaultHotPhase,
-    [PHASE_WARM]: defaultWarmPhase,
-    [PHASE_COLD]: defaultColdPhase,
-    [PHASE_DELETE]: defaultDeletePhase,
+    [PHASE_HOT]: defaultHotPhaseWhenNew,
+    [PHASE_WARM]: defaultWarmPhaseWhenNew,
+    [PHASE_COLD]: defaultColdPhaseWhenNew,
+    [PHASE_DELETE]: defaultDeletePhaseWhenNew,
   },
 };
 
@@ -85,7 +89,7 @@ export const policies = handleActions(
         selectedPolicySet: true,
         selectedPolicy: {
           ...defaultPolicy,
-          ...policyFromES(selectedPolicy),
+          ...deserializePolicy(selectedPolicy),
         },
       };
     },

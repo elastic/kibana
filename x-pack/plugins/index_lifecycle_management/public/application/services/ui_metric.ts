@@ -21,7 +21,11 @@ import {
   PHASE_INDEX_PRIORITY,
 } from '../constants';
 
-import { defaultColdPhase, defaultWarmPhase, defaultHotPhase } from '../store/defaults';
+import {
+  defaultColdPhaseWhenNew,
+  defaultWarmPhaseWhenNew,
+  defaultHotPhaseWhenNew,
+} from '../store/defaults';
 
 export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
 
@@ -45,9 +49,9 @@ export function getUiMetricsForPhases(phases: any): any {
       metric: UIM_CONFIG_SET_PRIORITY,
       isTracked: () => {
         const phaseToDefaultIndexPriorityMap = {
-          [PHASE_HOT]: defaultHotPhase[PHASE_INDEX_PRIORITY],
-          [PHASE_WARM]: defaultWarmPhase[PHASE_INDEX_PRIORITY],
-          [PHASE_COLD]: defaultColdPhase[PHASE_INDEX_PRIORITY],
+          [PHASE_HOT]: defaultHotPhaseWhenNew[PHASE_INDEX_PRIORITY],
+          [PHASE_WARM]: defaultWarmPhaseWhenNew[PHASE_INDEX_PRIORITY],
+          [PHASE_COLD]: defaultColdPhaseWhenNew[PHASE_INDEX_PRIORITY],
         };
 
         // We only care about whether the user has interacted with the priority of *any* phase at all.

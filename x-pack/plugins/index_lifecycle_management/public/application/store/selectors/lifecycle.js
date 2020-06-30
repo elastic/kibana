@@ -32,7 +32,7 @@ import {
 import {
   getPhase,
   getPhases,
-  phaseToES,
+  serializePhase,
   getSelectedPolicyName,
   isNumber,
   getSaveAsNewPolicy,
@@ -264,7 +264,7 @@ export const getLifecycle = (state) => {
     const esPolicy = getPolicyByName(state, policyName).policy || {};
     const esPhase = esPolicy.phases ? esPolicy.phases[phaseName] : {};
     if (phase[PHASE_ENABLED]) {
-      accum[phaseName] = phaseToES(phase, esPhase);
+      accum[phaseName] = serializePhase(phase, esPhase);
 
       // These seem to be constants
       if (phaseName === PHASE_DELETE) {
