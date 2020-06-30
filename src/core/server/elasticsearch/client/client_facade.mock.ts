@@ -19,8 +19,8 @@
 
 import { ClientFacade } from './client_facade';
 
-const createFacadeMock = (): jest.Mocked<ClientFacade> => {
-  const mock: jest.Mocked<ClientFacade> = {
+const createFacadeMock = () => {
+  const mock: DeeplyMockedKeys<ClientFacade> = {
     /* GENERATED */
     asyncSearch: {
       delete: jest.fn(),
@@ -387,6 +387,7 @@ const createFacadeMock = (): jest.Mocked<ClientFacade> => {
     },
     /* /GENERATED */
   };
+
   return mock;
 };
 
