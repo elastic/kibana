@@ -110,7 +110,7 @@ const requestGroupedNodes = async (
   >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
 };
 
-const calcualteIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
+const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
   const { metrics } = options;
   if (metrics.every((m) => m.type === 'logRate')) {
     return options.sourceConfiguration.logAlias;
@@ -125,7 +125,7 @@ const requestNodeMetrics = async (
   client: ESSearchClient,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
-  const index = calcualteIndexPatterBasedOnMetrics(options);
+  const index = calculateIndexPatterBasedOnMetrics(options);
   const query = {
     allowNoIndices: true,
     index,

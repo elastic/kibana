@@ -54,7 +54,7 @@ export const ConditionalToolTip = withTheme(
       currentTime,
       '',
       '',
-      false // Doesn't sent request until reload() reload is called
+      false // Doesn't send request until reload() is called
     );
 
     const handleDataLoad = useCallback(() => {
