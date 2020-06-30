@@ -28,7 +28,7 @@ import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { coreMock } from '../mocks';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
@@ -47,7 +47,7 @@ let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
 
 const setupDeps = coreMock.createInternalSetup();
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -138,7 +138,7 @@ describe('PluginsService', () => {
               [Error: Failed to initialize plugins:
               	Invalid JSON (invalid-manifest, path-1)]
             `);
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Invalid JSON (invalid-manifest, path-1)],
@@ -159,7 +159,7 @@ describe('PluginsService', () => {
               [Error: Failed to initialize plugins:
               	Incompatible version (incompatible-version, path-3)]
             `);
-      expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
             [Error: Incompatible version (incompatible-version, path-3)],
@@ -238,7 +238,7 @@ describe('PluginsService', () => {
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
-      expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
             "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
@@ -360,7 +360,7 @@ describe('PluginsService', () => {
         { coreId, env, logger, configService }
       );
 
-      const logs = loggingServiceMock.collect(logger);
+      const logs = loggingSystemMock.collect(logger);
       expect(logs.info).toHaveLength(0);
       expect(logs.error).toHaveLength(0);
     });

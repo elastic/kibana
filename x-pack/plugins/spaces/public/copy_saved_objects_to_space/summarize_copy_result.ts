@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessedImportResponse } from 'src/legacy/core_plugins/kibana/public';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
+import {
+  SavedObjectsManagementRecord,
+  ProcessedImportResponse,
+} from 'src/plugins/saved_objects_management/public';
 
 export interface SummarizedSavedObjectResult {
   type: string;

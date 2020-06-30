@@ -6,8 +6,10 @@
 
 import { DataStream, DataStreamFromEs } from '../types';
 
-export function deserializeDataStreamList(dataStreamsFromEs: DataStreamFromEs[]): DataStream[] {
-  return dataStreamsFromEs.map(({ name, timestamp_field, indices, generation }) => ({
+export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataStream {
+  const { name, timestamp_field, indices, generation } = dataStreamFromEs;
+
+  return {
     name,
     timeStampField: timestamp_field,
     indices: indices.map(
@@ -17,5 +19,9 @@ export function deserializeDataStreamList(dataStreamsFromEs: DataStreamFromEs[])
       })
     ),
     generation,
-  }));
+  };
+}
+
+export function deserializeDataStreamList(dataStreamsFromEs: DataStreamFromEs[]): DataStream[] {
+  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream));
 }

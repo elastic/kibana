@@ -45,15 +45,21 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType } from '../common';
+import { IngestManagerConfigType, NewDatasource } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  datasourceService,
 } from './services';
-import { getAgentStatusById } from './services/agents';
+import {
+  getAgentStatusById,
+  authenticateAgentWithAccessToken,
+  listAgents,
+  getAgent,
+} from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 
@@ -93,11 +99,30 @@ const allSavedObjectTypes = [
 ];
 
 /**
+ * Callbacks supported by the Ingest plugin
+ */
+export type ExternalCallback = [
+  'datasourceCreate',
+  (newDatasource: NewDatasource) => Promise<NewDatasource>
+];
+
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
+
+/**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
+  /**
+   * Services for Ingest's Datasources
+   */
+  datasourceService: typeof datasourceService;
+  /**
+   * Register callbacks for inclusion in ingest API processing
+   * @param args
+   */
+  registerExternalCallback: (...args: ExternalCallback) => void;
 }
 
 export class IngestManagerPlugin
@@ -216,8 +241,8 @@ export class IngestManagerPlugin
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ) {
-    appContextService.start({
+  ): Promise<IngestManagerStartContract> {
+    await appContextService.start({
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: this.security,
@@ -235,7 +260,14 @@ export class IngestManagerPlugin
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
+        getAgent,
+        listAgents,
         getAgentStatusById,
+        authenticateAgentWithAccessToken,
+      },
+      datasourceService,
+      registerExternalCallback: (...args: ExternalCallback) => {
+        return appContextService.addExternalCallback(...args);
       },
     };
   }

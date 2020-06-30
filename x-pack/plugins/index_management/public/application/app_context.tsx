@@ -6,9 +6,10 @@
 
 import React, { createContext, useContext } from 'react';
 import { ScopedHistory } from 'kibana/public';
-import { CoreStart } from '../../../../../src/core/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { CoreStart } from '../../../../../src/core/public';
+import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
@@ -22,6 +23,7 @@ export interface AppDependencies {
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
+    ingestManager?: IngestManagerSetup;
   };
   services: {
     uiMetricService: UiMetricService<IndexMgmtMetricsType>;

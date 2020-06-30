@@ -49,10 +49,10 @@ export const getCardinalityMetricAgg = ({
           values: { field: aggConfig.getFieldDisplayName() },
         });
       },
-      getFormat() {
-        const { fieldFormats } = getInternalStartServices();
-
-        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      getSerializedFormat(agg) {
+        return {
+          id: 'number',
+        };
       },
       params: [
         {

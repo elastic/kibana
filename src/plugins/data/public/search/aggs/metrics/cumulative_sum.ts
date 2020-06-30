@@ -46,14 +46,16 @@ const cumulativeSumTitle = i18n.translate('data.search.aggs.metrics.cumulativeSu
 export const getCumulativeSumMetricAgg = ({
   getInternalStartServices,
 }: CumulativeSumMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.CUMULATIVE_SUM,
       title: cumulativeSumTitle,
-      subtype: parentPipelineAggHelper.subtype,
       makeLabel: (agg) => makeNestedLabel(agg, cumulativeSumLabel),
-      params: [...parentPipelineAggHelper.params()],
-      getFormat: parentPipelineAggHelper.getFormat,
+      subtype,
+      params: [...params()],
+      getSerializedFormat,
     },
     {
       getInternalStartServices,

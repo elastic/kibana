@@ -31,7 +31,6 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
-  // @ts-ignore
   EuiFilePicker,
   EuiInMemoryTable,
   EuiSelect,
