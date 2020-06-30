@@ -6,6 +6,7 @@
 
 import uuid from 'uuid';
 import { filterEventsAgainstList } from './filter_events_with_list';
+import { buildRuleMessageFactory } from './rule_messages';
 import { mockLogger, repeatedSearchResultsWithSortId } from './__mocks__/es_results';
 
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -13,7 +14,12 @@ import { getListItemResponseMock } from '../../../../../lists/common/schemas/res
 import { listMock } from '../../../../../lists/server/mocks';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
-
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
   beforeEach(() => {
@@ -33,6 +39,7 @@ describe('filterEventsAgainstList', () => {
         '3.3.3.3',
         '7.7.7.7',
       ]),
+      buildRuleMessage,
     });
     expect(res.hits.hits.length).toEqual(4);
   });
@@ -57,6 +64,7 @@ describe('filterEventsAgainstList', () => {
         listClient,
         exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+        buildRuleMessage,
       });
       expect(res.hits.hits.length).toEqual(4);
     });
@@ -91,6 +99,7 @@ describe('filterEventsAgainstList', () => {
           '3.3.3.3',
           '7.7.7.7',
         ]),
+        buildRuleMessage,
       });
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
@@ -118,6 +127,7 @@ describe('filterEventsAgainstList', () => {
         listClient,
         exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+        buildRuleMessage,
       });
       expect(res.hits.hits.length).toEqual(0);
     });
@@ -152,6 +162,7 @@ describe('filterEventsAgainstList', () => {
           '3.3.3.3',
           '7.7.7.7',
         ]),
+        buildRuleMessage,
       });
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(

@@ -61,7 +61,7 @@ export const eventTypeOptions: EventTypeOptionItem[] = [
   },
   {
     value: 'alert',
-    inputDisplay: <EuiHealth color="warning">{i18n.SIGNAL_EVENT}</EuiHealth>,
+    inputDisplay: <EuiHealth color="warning">{i18n.ALERT_EVENT}</EuiHealth>,
   },
 ];
 
