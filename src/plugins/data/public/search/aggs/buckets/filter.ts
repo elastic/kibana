@@ -41,6 +41,7 @@ export const getFilterBucketAgg = ({ getInternalStartServices }: FilterBucketAgg
     {
       name: BUCKET_TYPES.FILTER,
       title: filterTitle,
+      makeLabel: () => filterTitle,
       params: [
         {
           name: 'geo_bounding_box',
