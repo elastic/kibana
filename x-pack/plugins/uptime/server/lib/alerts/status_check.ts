@@ -177,8 +177,16 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
   }),
   validate: {
     params: schema.object({
+      availability: schema.maybe(
+        schema.object({
+          range: schema.number(),
+          rangeUnit: schema.string(),
+          threshold: schema.number(),
+        })
+      ),
       filters: schema.maybe(
         schema.oneOf([
+          // deprecated
           schema.object({
             'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
             'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
@@ -188,17 +196,22 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           schema.string(),
         ])
       ),
+      // deprecated
       locations: schema.maybe(schema.arrayOf(schema.string())),
       numTimes: schema.number(),
       search: schema.maybe(schema.string()),
+      shouldCheckStatus: schema.maybe(schema.boolean()),
+      shouldCheckAvailability: schema.maybe(schema.boolean()),
       timerangeCount: schema.maybe(schema.number()),
       timerangeUnit: schema.maybe(schema.string()),
+      // deprecated
       timerange: schema.maybe(
         schema.object({
           from: schema.string(),
           to: schema.string(),
         })
       ),
+      version: schema.maybe(schema.number()),
     }),
   },
   defaultActionGroupId: MONITOR_STATUS.id,
