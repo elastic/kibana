@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { getIsEmsEnabled } from '../../kibana_services';
+import { getIsEmsEnabled } from '../kibana_services';
 
 export function getEmsUnavailableMessage(): string {
   const isEmsEnabled = getIsEmsEnabled();
