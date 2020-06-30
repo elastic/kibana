@@ -5,43 +5,46 @@
  */
 
 import React, { useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import { takeUntil } from 'rxjs/operators';
 import { useToasts } from '../../../../../../../src/plugins/kibana_react/public';
 import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
 import { useServices } from '../../context';
 import { RawTagWithId } from '../../../../common';
 import { txtTagCreated, txtCouldNotCreate } from './i18n';
+import { useUnmount$ } from '../../hooks/use_unmount';
 
 export interface Props {
   onCreate?: (tag: RawTagWithId) => void;
 }
 
 export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
-  const services = useServices();
-  const isMounted = useMountedState();
+  const unmount$ = useUnmount$();
+  const { manager } = useServices();
   const toasts = useToasts();
   const [title, setTitle] = useState('');
   const [color, setColor] = useState('#ffffff');
   const [description, setDescription] = useState('');
 
   const handleSubmit = async () => {
-    try {
-      const { tag } = await services.params.tags.client.create({
+    manager
+      .create$({
         tag: {
           title,
           color,
           description,
         },
-      });
-      if (!isMounted()) return;
-      toasts.addSuccess({
-        title: txtTagCreated,
-      });
-      if (onCreate) onCreate(tag);
-    } catch (error) {
-      if (!isMounted()) return;
-      toasts.addError(error, { title: txtCouldNotCreate });
-    }
+      })
+      .pipe(takeUntil(unmount$))
+      .subscribe(
+        () => {
+          toasts.addSuccess({
+            title: txtTagCreated,
+          });
+        },
+        (error) => {
+          toasts.addError(error, { title: txtCouldNotCreate });
+        }
+      );
   };
 
   return (

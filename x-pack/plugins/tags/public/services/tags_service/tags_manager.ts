@@ -7,10 +7,10 @@
 /* eslint-disable max-classes-per-file, react-hooks/rules-of-hooks */
 
 import { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, from } from 'rxjs';
+import { map, share } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
-import { ITagsClient, RawTagWithId } from '../../../common';
+import { ITagsClient, RawTagWithId, TagsClientCreateParams } from '../../../common';
 
 export interface TagsManagerParams {
   client: ITagsClient;
@@ -75,6 +75,12 @@ export class TagList {
     const observable = useMemo(() => this.data$, []);
     return useObservable(observable, observable.getValue());
   };
+
+  public add(rawTag: RawTagWithId): Tag {
+    const tag = new Tag(rawTag);
+    this.data$$.next({ ...this.data$$.getValue(), [tag.id]: tag });
+    return tag;
+  }
 }
 
 export class TagManager {
@@ -84,4 +90,15 @@ export class TagManager {
 
   public readonly useInitializing = this.list.useInitializing;
   public readonly useTags = this.list.useData;
+
+  public create$(params: TagsClientCreateParams): Observable<Tag> {
+    const { client } = this.params;
+    return from(client.create(params)).pipe(
+      share(),
+      map((response) => {
+        const tag = this.list.add(response.tag);
+        return tag;
+      })
+    );
+  }
 }
