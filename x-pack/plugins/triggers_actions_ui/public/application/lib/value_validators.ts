@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { constant, isEmpty } from 'lodash';
+import { constant } from 'lodash';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -35,7 +35,10 @@ export function throwIfIsntContained<T>(
 export const isValidUrl = (urlString: string, protocol?: string) => {
   try {
     const urlObject = new URL(urlString);
-    return !!protocol || urlObject.protocol === protocol;
+    if (protocol === undefined || urlObject.protocol === protocol) {
+      return true;
+    }
+    return false;
   } catch (err) {
     return false;
   }

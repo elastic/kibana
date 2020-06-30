@@ -151,7 +151,7 @@ describe('action_form', () => {
         },
         {
           secrets: {},
-          id: 'test5',
+          id: '.servicenow',
           actionTypeId: actionType.id,
           name: 'Non consumer connector',
           config: {

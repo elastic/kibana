@@ -59,9 +59,7 @@ describe('servicenow connector validation', () => {
       id: 'test',
       actionTypeId: '.servicenow',
       name: 'servicenow',
-      config: {
-        apiUrl: '',
-      },
+      config: {},
     } as unknown) as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({

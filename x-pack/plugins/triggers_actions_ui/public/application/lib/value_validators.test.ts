@@ -85,7 +85,11 @@ describe('isValidUrl', () => {
     expect(isValidUrl('this is not a url')).toBeFalsy();
   });
 
-  test('verifies valid url', () => {
+  test('verifies valid url any protocol', () => {
     expect(isValidUrl('https://www.elastic.co/')).toBeTruthy();
+  });
+
+  test('verifies valid url with specific protocol', () => {
+    expect(isValidUrl('https://www.elastic.co/', 'https:')).toBeTruthy();
   });
 });
