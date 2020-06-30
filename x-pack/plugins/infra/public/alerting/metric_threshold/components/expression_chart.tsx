@@ -151,7 +151,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
-  const timeLabel = TIME_LABELS[timeUnit];
+  const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   return (
     <>
