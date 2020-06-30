@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { ToastsProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { TagsManagementServices } from '../services';
 import { ServicesProvider } from './services';
 
@@ -15,6 +16,8 @@ export interface Props {
 
 export const Provider: React.FC<Props> = ({ services, children }) => (
   <ServicesProvider value={services}>
-    <Router history={services.params.history}>{children}</Router>
+    <ToastsProvider value={services.params.toasts}>
+      <Router history={services.params.history}>{children}</Router>
+    </ToastsProvider>
   </ServicesProvider>
 );

@@ -7,6 +7,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { LandingPage } from '../landing_page';
+import { CreateNewPage } from '../create_new_page';
 
 export const Section: React.FC = () => {
   return (
@@ -16,7 +17,7 @@ export const Section: React.FC = () => {
           <LandingPage />
         </Route>
         <Route path="/create">
-          <div>create new tag</div>
+          <CreateNewPage />
         </Route>
       </Switch>
     </div>

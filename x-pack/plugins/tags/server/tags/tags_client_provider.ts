@@ -10,7 +10,7 @@ export class TagsClientProvider {
   constructor(private readonly initParams: Pick<TagsClientParams, 'logger'>) {}
 
   public readonly create = (
-    remainingParams: Pick<TagsClientParams, 'savedObjectsClient'>
+    remainingParams: Pick<TagsClientParams, 'savedObjectsClient' | 'user'>
   ): TagsClient => {
     return new TagsClient({ ...this.initParams, ...remainingParams });
   };

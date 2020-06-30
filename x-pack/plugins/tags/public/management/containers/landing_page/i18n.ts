@@ -15,5 +15,5 @@ export const txtSubtitle = i18n.translate('xpack.tags.landingPage.subtitle', {
 });
 
 export const txtCreateATag = i18n.translate('xpack.tags.landingPage.createATag', {
-  defaultMessage: 'Create a tag',
+  defaultMessage: 'Create a new tag',
 });

@@ -25,6 +25,10 @@ export interface TagsClientCreateParams {
   tag: Pick<RawTag, 'title' | 'description' | 'color'>;
 }
 
+export interface TagsClientCreateResult {
+  tag: Tag;
+}
+
 export interface ITagsClient {
-  create(params: TagsClientCreateParams): Promise<Tag>;
+  create(params: TagsClientCreateParams): Promise<TagsClientCreateResult>;
 }
