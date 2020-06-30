@@ -114,12 +114,22 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
-        } else if (successParam === 'trueCopy') {
+        } else if (successParam === 'trueCopy' || successParam === 'newOrigin') {
           // the new ID was randomly generated
           expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
         } else {
           expect(destinationId).to.be(undefined);
         }
+
+        // This assertion is only needed for the case where True Copy mode is disabled and ambiguous source conflicts are detected. When
+        // True Copy mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be removed too.
+        const resultTrueCopy = object!.trueCopy as boolean | undefined;
+        if (successParam === 'newOrigin') {
+          expect(resultTrueCopy).to.be(true);
+        } else {
+          expect(resultTrueCopy).to.be(undefined);
+        }
+
         if (!singleRequest || overwrite || trueCopy) {
           // even if the object result was a "success" result, it may not have been created if other resolvable errors were returned
           const { _source } = await expectResponses.successCreated(

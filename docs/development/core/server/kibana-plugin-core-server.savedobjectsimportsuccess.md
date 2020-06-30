@@ -18,5 +18,6 @@ export interface SavedObjectsImportSuccess
 |  --- | --- | --- |
 |  [destinationId](./kibana-plugin-core-server.savedobjectsimportsuccess.destinationid.md) | <code>string</code> | If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
 |  [id](./kibana-plugin-core-server.savedobjectsimportsuccess.id.md) | <code>string</code> |  |
+|  [trueCopy](./kibana-plugin-core-server.savedobjectsimportsuccess.truecopy.md) | <code>boolean</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsimportsuccess.type.md) | <code>string</code> |  |
 

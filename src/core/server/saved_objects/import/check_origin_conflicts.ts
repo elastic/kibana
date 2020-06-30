@@ -236,8 +236,9 @@ export function getImportIdMapForRetries(
       throw new Error(`Retry was expected for "${type}:${id}" but not found`);
     }
     const { destinationId } = retry;
+    const omitOriginId = trueCopy || Boolean(retry.trueCopy);
     if (destinationId && destinationId !== id) {
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId: trueCopy });
+      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId });
     }
   });
 

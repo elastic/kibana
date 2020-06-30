@@ -20,5 +20,6 @@ export interface SavedObjectsImportRetry
 |  [id](./kibana-plugin-core-public.savedobjectsimportretry.id.md) | <code>string</code> |  |
 |  [overwrite](./kibana-plugin-core-public.savedobjectsimportretry.overwrite.md) | <code>boolean</code> |  |
 |  [replaceReferences](./kibana-plugin-core-public.savedobjectsimportretry.replacereferences.md) | <code>Array&lt;{</code><br/><code>        type: string;</code><br/><code>        from: string;</code><br/><code>        to: string;</code><br/><code>    }&gt;</code> |  |
+|  [trueCopy](./kibana-plugin-core-public.savedobjectsimportretry.truecopy.md) | <code>boolean</code> |  |
 |  [type](./kibana-plugin-core-public.savedobjectsimportretry.type.md) | <code>string</code> |  |
 

@@ -108,8 +108,13 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map(
-    ({ type, id, destinationId }) => {
-      return { type, id, ...(destinationId && { destinationId }) };
+    ({ type, id, destinationId, originId }) => {
+      return {
+        type,
+        id,
+        ...(destinationId && { destinationId }),
+        ...(destinationId && !originId && !trueCopy && { trueCopy: true }),
+      };
     }
   );
 

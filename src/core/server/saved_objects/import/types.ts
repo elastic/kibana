@@ -38,6 +38,13 @@ export interface SavedObjectsImportRetry {
     from: string;
     to: string;
   }>;
+  /**
+   * @deprecated
+   * If `trueCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where True Copy mode is
+   * disabled and ambiguous source conflicts are detected. When True Copy mode is permanently enabled, this field will be redundant and can
+   * be removed.
+   */
+  trueCopy?: boolean;
 }
 
 /**
@@ -119,6 +126,13 @@ export interface SavedObjectsImportSuccess {
    * If `destinationId` is specified, the new object has a new ID that is different from the import ID.
    */
   destinationId?: string;
+  /**
+   * @deprecated
+   * If `trueCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where True Copy mode is
+   * disabled and ambiguous source conflicts are detected. When True Copy mode is permanently enabled, this field will be redundant and can
+   * be removed.
+   */
+  trueCopy?: boolean;
 }
 
 /**

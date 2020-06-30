@@ -527,10 +527,10 @@ describe('#getImportIdMapForRetries', () => {
 
   const createRetry = (
     { type, id }: { type: string; id: string },
-    options: { destinationId?: string } = {}
+    options: { destinationId?: string; trueCopy?: boolean } = {}
   ): SavedObjectsImportRetry => {
-    const { destinationId } = options;
-    return { type, id, overwrite: false, destinationId, replaceReferences: [] };
+    const { destinationId, trueCopy } = options;
+    return { type, id, overwrite: false, destinationId, replaceReferences: [], trueCopy };
   };
 
   test('throws an error if retry is not found for an object', async () => {
@@ -548,17 +548,22 @@ describe('#getImportIdMapForRetries', () => {
     const obj1 = createObject('type-1', 'id-1');
     const obj2 = createObject('type-2', 'id-2');
     const obj3 = createObject('type-3', 'id-3');
-    const objects = [obj1, obj2, obj3];
+    const obj4 = createObject('type-4', 'id-4');
+    const objects = [obj1, obj2, obj3, obj4];
     const retries = [
       createRetry(obj1), // retries that do not have `destinationId` specified are ignored
       createRetry(obj2, { destinationId: obj2.id }), // retries that have `id` that matches `destinationId` are ignored
       createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
+      createRetry(obj4, { destinationId: 'id-Y', trueCopy: true }), // this retry will get added to the `importIdMap`!
     ];
     const options = setupOptions(retries);
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(objects, options);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }]])
+      new Map([
+        [`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
+        [`${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
+      ])
     );
   });
 

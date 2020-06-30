@@ -133,10 +133,11 @@ export async function resolveSavedObjectsImportErrors({
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
-      ...createdObjects.map(({ type, id, destinationId }) => ({
+      ...createdObjects.map(({ type, id, destinationId, originId }) => ({
         type,
         id,
         ...(destinationId && { destinationId }),
+        ...(destinationId && !originId && !trueCopy && { trueCopy: true }),
       })),
     ];
   };

@@ -273,20 +273,46 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({ success: false, successCount: 0, errors });
     });
 
-    test('handles a mix of successes and errors', async () => {
-      const options = setupOptions();
-      const errors = [createError()];
+    describe('handles a mix of successes and errors', () => {
       const obj1 = createObject();
-      const obj2 = { ...createObject(), destinationId: 'some-destinationId' };
-      getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects: [obj1, obj2] });
+      const tmp = createObject();
+      const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
+      const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId
+      const createdObjects = [obj1, obj2, obj3];
+      const errors = [createError()];
 
-      const result = await importSavedObjectsFromStream(options);
-      // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
-      const successResults = [
-        { type: obj1.type, id: obj1.id },
-        { type: obj2.type, id: obj2.id, destinationId: 'some-destinationId' },
-      ];
-      expect(result).toEqual({ success: false, successCount: 2, successResults, errors });
+      test('with trueCopy disabled', async () => {
+        const options = setupOptions();
+        getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
+
+        const result = await importSavedObjectsFromStream(options);
+        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        const successResults = [
+          { type: obj1.type, id: obj1.id },
+          { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
+          // trueCopy mode is not enabled, but obj3 ran into an ambiguous source conflict and it was created with an empty originId; hence,
+          // this specific object is a true copy -- we would need this information for rendering the appropriate originId in the client UI,
+          // and we would need it to construct a retry for this object if other objects had errors that needed to be resolved
+          { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, trueCopy: true },
+        ];
+        expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+      });
+
+      test('with trueCopy enabled', async () => {
+        // however, we include it here for posterity
+        const options = setupOptions(true);
+        getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
+
+        const result = await importSavedObjectsFromStream(options);
+        // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+        const successResults = [
+          { type: obj1.type, id: obj1.id },
+          // obj2 being created with trueCopy mode enabled isn't a realistic test case (all objects would have originId omitted)
+          { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
+          { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId },
+        ];
+        expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+      });
     });
 
     test('accumulates multiple errors', async () => {

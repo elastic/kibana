@@ -297,14 +297,16 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
       const errors = [createError()];
       const obj1 = createObject();
-      const obj2 = { ...createObject(), destinationId: 'some-destinationId' };
+      const tmp = createObject();
+      const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
+      const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a true copy
       getMockFn(createSavedObjects).mockResolvedValueOnce({
         errors,
         createdObjects: [obj1],
       });
       getMockFn(createSavedObjects).mockResolvedValueOnce({
         errors: [],
-        createdObjects: [obj2],
+        createdObjects: [obj2, obj3],
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
@@ -312,8 +314,9 @@ describe('#importSavedObjectsFromStream', () => {
       const successResults = [
         { type: obj1.type, id: obj1.id },
         { type: obj2.type, id: obj2.id, destinationId: obj2.destinationId },
+        { type: obj3.type, id: obj3.id, destinationId: obj3.destinationId, trueCopy: true },
       ];
-      expect(result).toEqual({ success: false, successCount: 2, successResults, errors });
+      expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
     });
 
     test('accumulates multiple errors', async () => {

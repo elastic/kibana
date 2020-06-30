@@ -36,9 +36,21 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_2b, originId: conflict_2
 //  * id: conflict_3
 //  * id: conflict_4a, originId: conflict_4
-// using the three conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
+// using the five conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
 export const TEST_CASES = Object.freeze({
   ...CASES,
+  CONFLICT_1A_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: `conflict_1a`,
+    originId: `conflict_1`,
+    expectedNewId: 'some-random-id',
+  }),
+  CONFLICT_1B_OBJ: Object.freeze({
+    type: 'sharedtype',
+    id: `conflict_1b`,
+    originId: `conflict_1`,
+    expectedNewId: 'another-random-id',
+  }),
   CONFLICT_2C_OBJ: Object.freeze({
     type: 'sharedtype',
     id: `conflict_2c`,
@@ -62,11 +74,19 @@ export const TEST_CASES = Object.freeze({
  * Test cases have additional properties that we don't want to send in HTTP Requests
  */
 const createRequest = (
-  { type, id, originId, expectedNewId }: ResolveImportErrorsTestCase,
+  { type, id, originId, expectedNewId, successParam }: ResolveImportErrorsTestCase,
   overwrite: boolean
 ): ResolveImportErrorsTestDefinition['request'] => ({
   objects: [{ type, id, ...(originId && { originId }) }],
-  retries: [{ type, id, overwrite, ...(expectedNewId && { destinationId: expectedNewId }) }],
+  retries: [
+    {
+      type,
+      id,
+      overwrite,
+      ...(expectedNewId && { destinationId: expectedNewId }),
+      ...(successParam === 'newOrigin' && { trueCopy: true }),
+    },
+  ],
 });
 
 export function resolveImportErrorsTestSuiteFactory(
@@ -114,11 +134,21 @@ export function resolveImportErrorsTestSuiteFactory(
             // the new ID was randomly generated
             expect(destinationId).to.match(/^[0-9a-f-]{36}$/);
           }
-        } else if (successParam === 'trueCopy') {
+        } else if (successParam === 'trueCopy' || successParam === 'newOrigin') {
           expect(destinationId).to.be(expectedNewId!);
         } else {
           expect(destinationId).to.be(undefined);
         }
+
+        // This assertion is only needed for the case where True Copy mode is disabled and ambiguous source conflicts are detected. When
+        // True Copy mode is permanently enabled, this field will be removed, and this assertion will be redundant and can be removed too.
+        const resultTrueCopy = object!.trueCopy as boolean | undefined;
+        if (successParam === 'newOrigin') {
+          expect(resultTrueCopy).to.be(true);
+        } else {
+          expect(resultTrueCopy).to.be(undefined);
+        }
+
         const { _source } = await expectResponses.successCreated(
           es,
           spaceId,

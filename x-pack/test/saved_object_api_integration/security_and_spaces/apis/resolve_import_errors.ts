@@ -23,6 +23,7 @@ const {
 const { fail400, fail409 } = testCaseFailures;
 const destinationId = (condition?: boolean) =>
   condition !== false ? { successParam: 'destinationId' } : {};
+const newOrigin = () => ({ successParam: 'newOrigin' });
 
 const createTrueCopyTestCases = () => {
   // for each outcome, if failure !== undefined then we expect to receive
@@ -69,6 +70,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       ...destinationId(spaceId !== SPACE_2_ID),
     },
+    { ...CASES.CONFLICT_1A_OBJ, ...newOrigin() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
+    { ...CASES.CONFLICT_1B_OBJ, ...newOrigin() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
     // if we call _resolve_import_errors and don't specify overwrite, each of these will result in a conflict because an object with that
     // `expectedDestinationId` already exists

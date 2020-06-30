@@ -123,6 +123,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 id: schema.string(),
                 overwrite: schema.boolean({ defaultValue: false }),
                 destinationId: schema.maybe(schema.string()),
+                trueCopy: schema.maybe(schema.boolean()),
               })
             )
           ),

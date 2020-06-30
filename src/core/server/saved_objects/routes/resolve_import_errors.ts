@@ -64,6 +64,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
                 }),
                 { defaultValue: [] }
               ),
+              trueCopy: schema.maybe(schema.boolean()),
             })
           ),
         }),
