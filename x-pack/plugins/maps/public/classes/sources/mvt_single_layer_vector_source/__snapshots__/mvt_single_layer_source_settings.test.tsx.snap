@@ -112,22 +112,7 @@ exports[`should render with fields 1`] = `
     labelType="label"
   >
     <MVTFieldConfigEditor
-      fields={
-        Array [
-          Object {
-            "name": "foo",
-            "type": "String",
-          },
-          Object {
-            "name": "food",
-            "type": "String",
-          },
-          Object {
-            "name": "fooz",
-            "type": "Number",
-          },
-        ]
-      }
+      fields={Array []}
       onChange={[Function]}
     />
   </EuiFormRow>

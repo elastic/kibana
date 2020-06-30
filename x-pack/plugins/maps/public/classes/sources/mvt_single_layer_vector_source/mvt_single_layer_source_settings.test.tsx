@@ -15,23 +15,10 @@ import { MVT_FIELD_TYPE } from '../../../../common/constants';
 const defaultSettings = {
   handleChange: () => {},
   layerName: 'foobar',
-  fields: [
-    {
-      name: 'foo',
-      type: MVT_FIELD_TYPE.STRING,
-    },
-    {
-      name: 'food',
-      type: MVT_FIELD_TYPE.STRING,
-    },
-    {
-      name: 'fooz',
-      type: MVT_FIELD_TYPE.NUMBER,
-    },
-  ],
+  fields: [],
   minSourceZoom: 4,
   maxSourceZoom: 14,
-  includeFields: true,
+  showFields: true,
 };
 
 test('should render with fields', async () => {
@@ -40,7 +27,7 @@ test('should render with fields', async () => {
 });
 
 test('should render without fields', async () => {
-  const settings = { ...defaultSettings, includeFields: false };
+  const settings = { ...defaultSettings, showFields: false };
   const component = shallow(<MVTSingleLayerSourceSettings {...settings} />);
   expect(component).toMatchSnapshot();
 });

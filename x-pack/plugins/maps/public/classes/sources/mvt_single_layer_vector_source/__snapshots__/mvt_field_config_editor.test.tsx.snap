@@ -8,7 +8,7 @@ exports[`should render error for dupes 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Fieldname"
+        aria-label="Field name"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -84,83 +84,7 @@ exports[`should render error for dupes 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Fieldname"
-        isInvalid={false}
-        onChange={[Function]}
-        placeholder=""
-        value="bar"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiSuperSelect
-        append={
-          <EuiButtonIcon
-            aria-label="Remove field"
-            color="danger"
-            iconType="trash"
-            onClick={[Function]}
-            title="Remove field"
-          />
-        }
-        compressed={false}
-        fullWidth={false}
-        hasDividers={false}
-        isInvalid={false}
-        isLoading={false}
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="string"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  string
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "String",
-            },
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="number"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  number
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "Number",
-            },
-          ]
-        }
-        valueOfSelected="String"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    key="2"
-  >
-    <EuiFlexItem>
-      <EuiFieldText
-        aria-label="Fieldname"
+        aria-label="Field name"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -261,83 +185,7 @@ exports[`should render error for empty name 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Fieldname"
-        isInvalid={false}
-        onChange={[Function]}
-        placeholder=""
-        value="foo"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiSuperSelect
-        append={
-          <EuiButtonIcon
-            aria-label="Remove field"
-            color="danger"
-            iconType="trash"
-            onClick={[Function]}
-            title="Remove field"
-          />
-        }
-        compressed={false}
-        fullWidth={false}
-        hasDividers={false}
-        isInvalid={false}
-        isLoading={false}
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="string"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  string
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "String",
-            },
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="number"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  number
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "Number",
-            },
-          ]
-        }
-        valueOfSelected="String"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    key="1"
-  >
-    <EuiFlexItem>
-      <EuiFieldText
-        aria-label="Fieldname"
+        aria-label="Field name"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -407,82 +255,6 @@ exports[`should render error for empty name 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    key="2"
-  >
-    <EuiFlexItem>
-      <EuiFieldText
-        aria-label="Fieldname"
-        isInvalid={false}
-        onChange={[Function]}
-        placeholder=""
-        value="fooz"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiSuperSelect
-        append={
-          <EuiButtonIcon
-            aria-label="Remove field"
-            color="danger"
-            iconType="trash"
-            onClick={[Function]}
-            title="Remove field"
-          />
-        }
-        compressed={false}
-        fullWidth={false}
-        hasDividers={false}
-        isInvalid={false}
-        isLoading={false}
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="string"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  string
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "String",
-            },
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="number"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  number
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "Number",
-            },
-          ]
-        }
-        valueOfSelected="Number"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiSpacer
     size="xs"
   />
@@ -514,10 +286,10 @@ exports[`should render field editor 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Fieldname"
+        aria-label="Field name"
         isInvalid={false}
         onChange={[Function]}
-        placeholder=""
+        placeholder="Field name"
         value="foo"
       />
     </EuiFlexItem>
@@ -590,87 +362,11 @@ exports[`should render field editor 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Fieldname"
+        aria-label="Field name"
         isInvalid={false}
         onChange={[Function]}
-        placeholder=""
-        value="food"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiSuperSelect
-        append={
-          <EuiButtonIcon
-            aria-label="Remove field"
-            color="danger"
-            iconType="trash"
-            onClick={[Function]}
-            title="Remove field"
-          />
-        }
-        compressed={false}
-        fullWidth={false}
-        hasDividers={false}
-        isInvalid={false}
-        isLoading={false}
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="string"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  string
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "String",
-            },
-            Object {
-              "inputDisplay": <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-              >
-                <EuiFlexItem
-                  grow={null}
-                >
-                  <FieldIcon
-                    fill="none"
-                    type="number"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  number
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              "value": "Number",
-            },
-          ]
-        }
-        valueOfSelected="String"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    gutterSize="xs"
-    key="2"
-  >
-    <EuiFlexItem>
-      <EuiFieldText
-        aria-label="Fieldname"
-        isInvalid={false}
-        onChange={[Function]}
-        placeholder=""
-        value="fooz"
+        placeholder="Field name"
+        value="bar"
       />
     </EuiFlexItem>
     <EuiFlexItem>

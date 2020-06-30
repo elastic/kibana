@@ -19,11 +19,7 @@ test('should render field editor', async () => {
       type: MVT_FIELD_TYPE.STRING,
     },
     {
-      name: 'food',
-      type: MVT_FIELD_TYPE.STRING,
-    },
-    {
-      name: 'fooz',
+      name: 'bar',
       type: MVT_FIELD_TYPE.NUMBER,
     },
   ];
@@ -35,16 +31,8 @@ test('should render field editor', async () => {
 test('should render error for empty name', async () => {
   const fields = [
     {
-      name: 'foo',
-      type: MVT_FIELD_TYPE.STRING,
-    },
-    {
       name: '',
       type: MVT_FIELD_TYPE.STRING,
-    },
-    {
-      name: 'fooz',
-      type: MVT_FIELD_TYPE.NUMBER,
     },
   ];
   const component = shallow(<MVTFieldConfigEditor fields={fields} onChange={() => {}} />);
@@ -56,10 +44,6 @@ test('should render error for dupes', async () => {
   const fields = [
     {
       name: 'foo',
-      type: MVT_FIELD_TYPE.STRING,
-    },
-    {
-      name: 'bar',
       type: MVT_FIELD_TYPE.STRING,
     },
     {

@@ -38,7 +38,7 @@ export interface Props {
   fields: MVTFieldDescriptor[];
   minSourceZoom: number;
   maxSourceZoom: number;
-  includeFields: boolean;
+  showFields: boolean;
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
@@ -128,7 +128,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
 
   render() {
     const fieldEditor =
-      this.props.includeFields && this.state.currentLayerName !== '' ? (
+      this.props.showFields && this.state.currentLayerName !== '' ? (
         <EuiFormRow
           label={i18n.translate(
             'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
