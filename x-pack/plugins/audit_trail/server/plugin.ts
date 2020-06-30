@@ -17,39 +17,44 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 
-import { AuditEvent, AuditTrailPluginSetup } from './types';
-import { AuditTrailClient } from './services/audit_trail_client';
+import { AuditEvent } from './types';
+import { AuditTrailClient } from './client/audit_trail_client';
 import { AuditTrailConfigType } from './config';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { LicensingPluginStart } from '../../licensing/server';
 
 interface DepsSetup {
   security: SecurityPluginSetup;
   spaces: SpacesPluginSetup;
 }
 
-export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
+interface DepStart {
+  licensing: LicensingPluginStart;
+}
+
+export class AuditTrailPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly config$: Observable<AuditTrailConfigType>;
+  private readonly event$ = new Subject<AuditEvent>();
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create();
   }
 
-  public async setup(core: CoreSetup, deps: DepsSetup) {
+  public setup(core: CoreSetup, deps: DepsSetup) {
     const depsApi = {
       getCurrentUser: deps.security.authc.getCurrentUser,
       getSpaceId: deps.spaces.spacesService.getSpaceId,
     };
 
-    const event$ = new Subject<AuditEvent>();
-    event$.subscribe(({ message, ...other }) => this.logger.debug(message, other));
+    this.event$.subscribe(({ message, ...other }) => this.logger.debug(message, other));
 
     core.auditTrail.register({
-      asScoped(request: KibanaRequest) {
-        return new AuditTrailClient(request, event$, depsApi);
+      asScoped: (request: KibanaRequest) => {
+        return new AuditTrailClient(request, this.event$, depsApi);
       },
     });
 
@@ -71,10 +76,6 @@ export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
         }))
       )
     );
-
-    return {
-      event$: event$.asObservable(),
-    };
   }
 
   private getAppender(config: AuditTrailConfigType): AppenderConfigType {
@@ -84,11 +85,13 @@ export class AuditTrailPlugin implements Plugin<AuditTrailPluginSetup> {
         layout: {
           kind: 'pattern',
           highlight: true,
-          // pattern: '[%level] %message %meta',
         },
       }
     );
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, deps: DepStart) {}
+  public stop() {
+    this.event$.complete();
+  }
 }
