@@ -1039,5 +1039,22 @@ module.exports = {
         ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
+
+    {
+      files: [
+        // platform-team owned code
+        'src/core/**',
+        'x-pack/plugins/features/**',
+        'x-pack/plugins/licensing/**',
+        'x-pack/plugins/global_search/**',
+        'x-pack/plugins/cloud/**',
+        'packages/kbn-config-schema',
+        'src/plugins/status_page/**',
+        'src/plugins/saved_objects_management/**',
+      ],
+      rules: {
+        '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
   ],
 };
