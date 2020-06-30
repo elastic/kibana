@@ -19,7 +19,7 @@ export interface Props {
 
 export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
   const unmount$ = useUnmount$();
-  const { manager } = useServices();
+  const { manager, params } = useServices();
   const toasts = useToasts();
   const [title, setTitle] = useState('');
   const [color, setColor] = useState('#ffffff');
@@ -40,6 +40,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
           toasts.addSuccess({
             title: txtTagCreated,
           });
+          params.history.push('/');
         },
         (error) => {
           toasts.addError(error, { title: txtCouldNotCreate });

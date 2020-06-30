@@ -48,6 +48,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
           name="first"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
+          autoFocus
           aria-label={txtTitle}
         />
       </EuiFormRow>
