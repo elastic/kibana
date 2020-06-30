@@ -29,7 +29,7 @@ import { documentationLinksService } from '../../../../services/documentation';
 
 import { useServices } from '../../../../app_context';
 
-import { DataStreamBadge } from './data_stream_badge';
+import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../shared';
 
 import { StepProps } from '../index';
 
@@ -41,9 +41,29 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 }) => {
   const { i18n } = useServices();
   const {
-    indices: snapshotIndices,
+    indices: unfilteredSnapshotIndices,
+    dataStreams: snapshotDataStreams,
     includeGlobalState: snapshotIncludeGlobalState,
   } = snapshotDetails;
+
+  const snapshotIndices = unfilteredSnapshotIndices.filter(
+    (index) => !isDataStreamBackingIndex(index)
+  );
+  const snapshotIndicesAndDataStreams = snapshotIndices.concat(snapshotDataStreams);
+
+  const comboBoxOptions = orderDataStreamsAndIndices<{
+    label: string;
+    value: { isDataStream: boolean; name: string };
+  }>({
+    dataStreams: snapshotDataStreams.map((dataStream) => ({
+      label: dataStream,
+      value: { isDataStream: true, name: dataStream },
+    })),
+    indices: snapshotIndices.map((index) => ({
+      label: index,
+      value: { isDataStream: false, name: index },
+    })),
+  });
 
   const {
     indices: restoreIndices,
@@ -54,29 +74,50 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   } = restoreSettings;
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
-  const [isAllIndices, setIsAllIndices] = useState<boolean>(!Boolean(restoreIndices));
-  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(
-    snapshotIndices.map(
-      (index): EuiSelectableOption => ({
-        label: index,
-        append: isDataStreamBackingIndex(index) ? <DataStreamBadge /> : undefined,
-        checked:
-          isAllIndices ||
-          // If indices is a string, we default to custom input mode, so we mark individual indices
-          // as selected if user goes back to list mode
-          typeof restoreIndices === 'string' ||
-          (Array.isArray(restoreIndices) && restoreIndices.includes(index))
-            ? 'on'
-            : undefined,
-      })
-    )
+  const [isAllIndicesAndDataStreams, setIsAllIndicesAndDataStreams] = useState<boolean>(
+    !Boolean(restoreIndices)
+  );
+  const [indicesAndDataStreamsOptions, setIndicesAndDataStreamsOptions] = useState<
+    EuiSelectableOption[]
+  >(() =>
+    orderDataStreamsAndIndices({
+      dataStreams: snapshotDataStreams.map(
+        (dataStream): EuiSelectableOption => ({
+          label: dataStream,
+          append: <DataStreamBadge />,
+          checked:
+            isAllIndicesAndDataStreams ||
+            // If indices is a string, we default to custom input mode, so we mark individual indices
+            // as selected if user goes back to list mode
+            typeof restoreIndices === 'string' ||
+            (Array.isArray(restoreIndices) && restoreIndices.includes(dataStream))
+              ? 'on'
+              : undefined,
+        })
+      ),
+      indices: snapshotIndices.map(
+        (index): EuiSelectableOption => ({
+          label: index,
+          checked:
+            isAllIndicesAndDataStreams ||
+            // If indices is a string, we default to custom input mode, so we mark individual indices
+            // as selected if user goes back to list mode
+            typeof restoreIndices === 'string' ||
+            (Array.isArray(restoreIndices) && restoreIndices.includes(index))
+              ? 'on'
+              : undefined,
+        })
+      ),
+    })
   );
 
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select
   // them instead, so we'll default to showing them the index pattern input.
   const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
-    typeof restoreIndices === 'string' || snapshotIndices.length > 100 ? 'custom' : 'list'
+    typeof restoreIndices === 'string' || snapshotIndicesAndDataStreams.length > 100
+      ? 'custom'
+      : 'list'
   );
 
   // State for custom patterns
@@ -91,7 +132,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 
   // Caching state for togglable settings
   const [cachedRestoreSettings, setCachedRestoreSettings] = useState<RestoreSettings>({
-    indices: [...snapshotIndices],
+    indices: [...snapshotIndicesAndDataStreams],
     renamePattern: '',
     renameReplacement: '',
   });
@@ -158,10 +199,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   defaultMessage="All indices and data streams, including system indices"
                 />
               }
-              checked={isAllIndices}
+              checked={isAllIndicesAndDataStreams}
               onChange={(e) => {
                 const isChecked = e.target.checked;
-                setIsAllIndices(isChecked);
+                setIsAllIndicesAndDataStreams(isChecked);
                 if (isChecked) {
                   updateRestoreSettings({ indices: undefined });
                 } else {
@@ -174,7 +215,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                 }
               }}
             />
-            {isAllIndices ? null : (
+            {isAllIndicesAndDataStreams ? null : (
               <Fragment>
                 <EuiSpacer size="m" />
                 <EuiFormRow
@@ -238,9 +279,11 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: EuiSelectableOption) => {
-                                    option.checked = undefined;
-                                  });
+                                  indicesAndDataStreamsOptions.forEach(
+                                    (option: EuiSelectableOption) => {
+                                      option.checked = undefined;
+                                    }
+                                  );
                                   updateRestoreSettings({ indices: [] });
                                   setCachedRestoreSettings({
                                     ...cachedRestoreSettings,
@@ -257,13 +300,17 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                               <EuiLink
                                 onClick={() => {
                                   // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesOptions.forEach((option: EuiSelectableOption) => {
-                                    option.checked = 'on';
+                                  indicesAndDataStreamsOptions.forEach(
+                                    (option: EuiSelectableOption) => {
+                                      option.checked = 'on';
+                                    }
+                                  );
+                                  updateRestoreSettings({
+                                    indices: [...snapshotIndicesAndDataStreams],
                                   });
-                                  updateRestoreSettings({ indices: [...snapshotIndices] });
                                   setCachedRestoreSettings({
                                     ...cachedRestoreSettings,
-                                    indices: [...snapshotIndices],
+                                    indices: [...snapshotIndicesAndDataStreams],
                                   });
                                 }}
                               >
@@ -283,7 +330,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   {selectIndicesMode === 'list' ? (
                     <EuiSelectable
                       allowExclusions={false}
-                      options={indicesOptions}
+                      options={indicesAndDataStreamsOptions}
                       onChange={(options) => {
                         const newSelectedIndices: string[] = [];
                         options.forEach(({ label, checked }) => {
@@ -291,7 +338,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             newSelectedIndices.push(label);
                           }
                         });
-                        setIndicesOptions(options);
+                        setIndicesAndDataStreamsOptions(options);
                         updateRestoreSettings({ indices: [...newSelectedIndices] });
                         setCachedRestoreSettings({
                           ...cachedRestoreSettings,
@@ -310,22 +357,22 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
-                      options={snapshotIndices.map((index) => ({ label: index, value: index }))}
+                      options={comboBoxOptions}
                       renderOption={({ value }) => {
-                        return isDataStreamBackingIndex(value!) ? (
+                        return value?.isDataStream ? (
                           <EuiFlexGroup
                             responsive={false}
                             justifyContent="spaceBetween"
                             alignItems="center"
                             gutterSize="none"
                           >
-                            <EuiFlexItem>{value!}</EuiFlexItem>
+                            <EuiFlexItem>{value.name}</EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <DataStreamBadge />
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         ) : (
-                          value!
+                          value?.name
                         );
                       }}
                       placeholder={i18n.translate(

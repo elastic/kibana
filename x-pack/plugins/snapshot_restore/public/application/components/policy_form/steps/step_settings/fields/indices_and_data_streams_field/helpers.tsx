@@ -6,17 +6,7 @@
 
 import React from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { DataStreamBadge } from '../components';
-
-export const orderDataStreamsAndIndices = <D extends any>({
-  dataStreams,
-  indices,
-}: {
-  indices: D[];
-  dataStreams: D[];
-}) => {
-  return dataStreams.concat(indices);
-};
+import { DataStreamBadge, orderDataStreamsAndIndices } from '../../../../../shared';
 
 export const mapSelectionToIndicesOptions = ({
   allSelected,

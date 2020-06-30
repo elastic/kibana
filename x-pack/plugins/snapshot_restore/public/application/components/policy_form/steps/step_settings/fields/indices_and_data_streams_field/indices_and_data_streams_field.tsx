@@ -27,13 +27,9 @@ import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
 import { PolicyValidation } from '../../../../../../services/validation';
 
-import { DataStreamBadge } from '../components';
+import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../../../shared';
 
-import {
-  mapSelectionToIndicesOptions,
-  determineListMode,
-  orderDataStreamsAndIndices,
-} from './helpers';
+import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
 interface Props {
   isManagedPolicy: boolean;
