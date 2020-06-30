@@ -76,7 +76,7 @@ export class ElasticsearchService
     this.legacyClient = this.createLegacyClusterClient('data', config, deps.http.getAuthHeaders);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: this.legacyClient.callAsInternalUser,
+      internalClient: this.client.asInternalUser(),
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),

@@ -63,4 +63,6 @@ export const elasticsearchClientMock = {
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
   createFacade: clientFacadeMock.create,
+  createClientResponse: clientFacadeMock.createApiResponse,
+  createClientError: clientFacadeMock.createApiError,
 };

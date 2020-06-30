@@ -19,7 +19,7 @@
 
 import { first } from 'rxjs/operators';
 
-import { MockClusterClient } from './elasticsearch_service.test.mocks';
+import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Env } from '../config';
@@ -31,6 +31,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>
@@ -56,11 +57,23 @@ configService.atPath.mockReturnValue(
 let env: Env;
 let coreContext: CoreContext;
 const logger = loggingSystemMock.create();
+
+let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
+let mockLegacyClusterClientInstance: ReturnType<typeof elasticsearchServiceMock.createCustomClusterClient>;
+
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
+
+  MockLegacyClusterClient.mockClear();
+  MockClusterClient.mockClear();
+
+  mockLegacyClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+  MockLegacyClusterClient.mockImplementation(() => mockLegacyClusterClientInstance);
+  mockClusterClientInstance = elasticsearchClientMock.createCustomClusterClient();
+  MockClusterClient.mockImplementation(() => mockClusterClientInstance);
 });
 
 afterEach(() => jest.clearAllMocks());
@@ -74,31 +87,28 @@ describe('#setup', () => {
     );
   });
 
-  it('returns elasticsearch client as a part of the contract', async () => {
-    const mockClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
-
+  it('returns legacy elasticsearch client as a part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(deps);
     const client = setupContract.legacy.client;
 
-    expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
     await client.callAsInternalUser('any');
-    expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
   });
 
-  describe('#createClient', () => {
+  describe('#createLegacyClient', () => {
     it('allows to specify config properties', async () => {
       const setupContract = await elasticsearchService.setup(deps);
 
-      const mockClusterClientInstance = { close: jest.fn() };
-      MockClusterClient.mockImplementation(() => mockClusterClientInstance);
+      // reset all mocks called during setup phase
+      MockLegacyClusterClient.mockClear();
 
       const customConfig = { logQueries: true };
       const clusterClient = setupContract.legacy.createClient('some-custom-type', customConfig);
 
-      expect(clusterClient).toBe(mockClusterClientInstance);
+      expect(clusterClient).toBe(mockLegacyClusterClientInstance);
 
-      expect(MockClusterClient).toHaveBeenCalledWith(
+      expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
         expect.any(Function)
@@ -107,8 +117,9 @@ describe('#setup', () => {
 
     it('falls back to elasticsearch default config values if property not specified', async () => {
       const setupContract = await elasticsearchService.setup(deps);
+
       // reset all mocks called during setup phase
-      MockClusterClient.mockClear();
+      MockLegacyClusterClient.mockClear();
 
       const customConfig = {
         hosts: ['http://8.8.8.8'],
@@ -117,7 +128,7 @@ describe('#setup', () => {
       };
       setupContract.legacy.createClient('some-custom-type', customConfig);
 
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
@@ -137,12 +148,13 @@ describe('#setup', () => {
     });
     it('falls back to elasticsearch config if custom config not passed', async () => {
       const setupContract = await elasticsearchService.setup(deps);
+
       // reset all mocks called during setup phase
-      MockClusterClient.mockClear();
+      MockLegacyClusterClient.mockClear();
 
       setupContract.legacy.createClient('another-type');
 
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT0.01S",
@@ -178,8 +190,9 @@ describe('#setup', () => {
       );
       elasticsearchService = new ElasticsearchService(coreContext);
       const setupContract = await elasticsearchService.setup(deps);
+
       // reset all mocks called during setup phase
-      MockClusterClient.mockClear();
+      MockLegacyClusterClient.mockClear();
 
       const customConfig = {
         hosts: ['http://8.8.8.8'],
@@ -188,7 +201,7 @@ describe('#setup', () => {
       };
       setupContract.legacy.createClient('some-custom-type', customConfig);
 
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
         Object {
           "healthCheckDelay": "PT2S",
@@ -209,66 +222,61 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
-    const clusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    MockClusterClient.mockImplementationOnce(() => clusterClientInstance);
-
-    clusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = elasticsearchClientMock.createFacade();
+    mockedClient.nodes.info.mockRejectedValue(new Error());
+    mockClusterClientInstance.asInternalUser.mockReturnValue(mockedClient);
 
     const setupContract = await elasticsearchService.setup(deps);
     await delay(10);
 
-    expect(clusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
     setupContract.esNodesCompatibility$.subscribe(() => {
-      expect(clusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
-    const mockClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
-
-    mockClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = elasticsearchClientMock.createFacade();
+    mockedClient.nodes.info.mockRejectedValue(new Error());
+    mockClusterClientInstance.asInternalUser.mockReturnValue(mockedClient);
 
     const setupContract = await elasticsearchService.setup(deps);
 
-    expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
     const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
       sub.unsubscribe();
       await delay(100);
-      expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });
 });
 
 describe('#stop', () => {
-  it('stops both admin and data clients', async () => {
-    const mockClusterClientInstance = { close: jest.fn() };
-    MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
-
+  it('stops both legacy and new clients', async () => {
     await elasticsearchService.setup(deps);
     await elasticsearchService.stop();
 
+    expect(mockLegacyClusterClientInstance.close).toHaveBeenCalledTimes(1);
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(2);
-    const mockClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
 
-    MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
-
-    mockClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
+    const mockedClient = elasticsearchClientMock.createFacade();
+    mockedClient.nodes.info.mockRejectedValue(new Error());
+    mockClusterClientInstance.asInternalUser.mockReturnValue(mockedClient);
 
     const setupContract = await elasticsearchService.setup(deps);
 
     setupContract.esNodesCompatibility$.subscribe(async () => {
-      expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
       await elasticsearchService.stop();
       await delay(100);
-      expect(mockClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
       done();
     });
   });
