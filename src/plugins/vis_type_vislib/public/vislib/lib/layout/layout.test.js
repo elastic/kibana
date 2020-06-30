@@ -18,21 +18,27 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import $ from 'jquery';
+import {
+  mockHTMLElementClientSizes,
+  setSVGElementGetBBox,
+  setSVGElementGetComputedTextLength,
+} from '../../../../../../test_utils/public/helpers';
 
 // Data
-import series from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-import columns from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_columns';
-import rows from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-import stackedSeries from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-import { getMockUiState } from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { Layout } from '../../../../../../../../plugins/vis_type_vislib/public/vislib/lib/layout/layout';
-import { VisConfig } from '../../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getVis } from '../../_vis_fixture';
+import series from '../../../fixtures/mock_data/date_histogram/_series';
+import columns from '../../../fixtures/mock_data/date_histogram/_columns';
+import rows from '../../../fixtures/mock_data/date_histogram/_rows';
+import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
+import { getMockUiState } from '../../../fixtures/mocks';
+import { Layout } from './layout';
+import { VisConfig } from '../vis_config';
+import { getVis } from '../../visualizations/_vis_fixture';
 
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
+
+let mockedHTMLElementClientSizes;
 
 dateHistogramArray.forEach(function (data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
@@ -40,6 +46,12 @@ dateHistogramArray.forEach(function (data, i) {
     let mockUiState;
     let numberOfCharts;
     let testLayout;
+
+    beforeAll(() => {
+      mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
+      setSVGElementGetBBox(100);
+      setSVGElementGetComputedTextLength(100);
+    });
 
     beforeEach(() => {
       vis = getVis();
@@ -52,19 +64,24 @@ dateHistogramArray.forEach(function (data, i) {
       vis.destroy();
     });
 
+    afterAll(() => {
+      mockedHTMLElementClientSizes.width.mockRestore();
+      mockedHTMLElementClientSizes.height.mockRestore();
+    });
+
     describe('createLayout Method', function () {
-      it('should append all the divs', function () {
-        expect($(vis.element).find('.visWrapper').length).to.be(1);
-        expect($(vis.element).find('.visAxis--y').length).to.be(2);
-        expect($(vis.element).find('.visWrapper__column').length).to.be(1);
-        expect($(vis.element).find('.visAxis__column--y').length).to.be(2);
-        expect($(vis.element).find('.y-axis-title').length).to.be.above(0);
-        expect($(vis.element).find('.visAxis__splitAxes--y').length).to.be(2);
-        expect($(vis.element).find('.visAxis__spacer--y').length).to.be(4);
-        expect($(vis.element).find('.visWrapper__chart').length).to.be(numberOfCharts);
-        expect($(vis.element).find('.visAxis--x').length).to.be(2);
-        expect($(vis.element).find('.visAxis__splitAxes--x').length).to.be(2);
-        expect($(vis.element).find('.x-axis-title').length).to.be.above(0);
+      test('should append all the divs', function () {
+        expect($(vis.element).find('.visWrapper').length).toBe(1);
+        expect($(vis.element).find('.visAxis--y').length).toBe(2);
+        expect($(vis.element).find('.visWrapper__column').length).toBe(1);
+        expect($(vis.element).find('.visAxis__column--y').length).toBe(2);
+        expect($(vis.element).find('.y-axis-title').length).toBeGreaterThan(0);
+        expect($(vis.element).find('.visAxis__splitAxes--y').length).toBe(2);
+        expect($(vis.element).find('.visAxis__spacer--y').length).toBe(4);
+        expect($(vis.element).find('.visWrapper__chart').length).toBe(numberOfCharts);
+        expect($(vis.element).find('.visAxis--x').length).toBe(2);
+        expect($(vis.element).find('.visAxis__splitAxes--x').length).toBe(2);
+        expect($(vis.element).find('.x-axis-title').length).toBeGreaterThan(0);
       });
     });
 
@@ -82,44 +99,44 @@ dateHistogramArray.forEach(function (data, i) {
         testLayout = new Layout(visConfig);
       });
 
-      it('should append a div with the correct class name', function () {
-        expect($(vis.element).find('.chart').length).to.be(numberOfCharts);
+      test('should append a div with the correct class name', function () {
+        expect($(vis.element).find('.chart').length).toBe(numberOfCharts);
       });
 
-      it('should bind data to the DOM element', function () {
-        expect(!!$(vis.element).find('.chart').data()).to.be(true);
+      test('should bind data to the DOM element', function () {
+        expect(!!$(vis.element).find('.chart').data()).toBe(true);
       });
 
-      it('should create children', function () {
-        expect(typeof $(vis.element).find('.x-axis-div')).to.be('object');
+      test('should create children', function () {
+        expect(typeof $(vis.element).find('.x-axis-div')).toBe('object');
       });
 
-      it('should call split function when provided', function () {
-        expect(typeof $(vis.element).find('.x-axis-div')).to.be('object');
+      test('should call split function when provided', function () {
+        expect(typeof $(vis.element).find('.x-axis-div')).toBe('object');
       });
 
-      it('should throw errors when incorrect arguments provided', function () {
+      test('should throw errors when incorrect arguments provided', function () {
         expect(function () {
           testLayout.layout({
             parent: vis.element,
             type: undefined,
             class: 'chart',
           });
-        }).to.throwError();
+        }).toThrowError();
 
         expect(function () {
           testLayout.layout({
             type: 'div',
             class: 'chart',
           });
-        }).to.throwError();
+        }).toThrowError();
 
         expect(function () {
           testLayout.layout({
             parent: 'histogram',
             type: 'div',
           });
-        }).to.throwError();
+        }).toThrowError();
 
         expect(function () {
           testLayout.layout({
@@ -129,7 +146,7 @@ dateHistogramArray.forEach(function (data, i) {
             },
             class: 'chart',
           });
-        }).to.throwError();
+        }).toThrowError();
       });
     });
 
@@ -139,9 +156,9 @@ dateHistogramArray.forEach(function (data, i) {
         vis.handler.layout.appendElem('.visChart', 'div', 'test');
       });
 
-      it('should append DOM element to el with a class name', function () {
-        expect(typeof $(vis.element).find('.column')).to.be('object');
-        expect(typeof $(vis.element).find('.test')).to.be('object');
+      test('should append DOM element to el with a class name', function () {
+        expect(typeof $(vis.element).find('.column')).toBe('object');
+        expect(typeof $(vis.element).find('.test')).toBe('object');
       });
     });
 
@@ -151,8 +168,8 @@ dateHistogramArray.forEach(function (data, i) {
         vis.handler.layout.removeAll(vis.element);
       });
 
-      it('should remove all DOM elements from the el', function () {
-        expect($(vis.element).children().length).to.be(0);
+      test('should remove all DOM elements from the el', function () {
+        expect($(vis.element).children().length).toBe(0);
       });
     });
   });

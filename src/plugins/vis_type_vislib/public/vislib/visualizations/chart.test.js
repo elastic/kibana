@@ -18,11 +18,13 @@
  */
 
 import d3 from 'd3';
-import expect from '@kbn/expect';
-
-import { Chart } from '../../../../../../../plugins/vis_type_vislib/public/vislib/visualizations/_chart';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-import { getVis } from '../_vis_fixture';
+import {
+  mockHTMLElementClientSizes,
+  setSVGElementGetBBox,
+} from '../../../../../test_utils/public/helpers';
+import { Chart } from './_chart';
+import { getMockUiState } from '../../fixtures/mocks';
+import { getVis } from './_vis_fixture';
 
 describe('Vislib _chart Test Suite', function () {
   let vis;
@@ -106,6 +108,13 @@ describe('Vislib _chart Test Suite', function () {
     yAxisLabel: 'Count',
   };
 
+  let mockedHTMLElementClientSizes = {};
+
+  beforeAll(() => {
+    mockedHTMLElementClientSizes = mockHTMLElementClientSizes(512, 512);
+    setSVGElementGetBBox(100);
+  });
+
   beforeEach(() => {
     el = d3.select('body').append('div').attr('class', 'column-chart');
 
@@ -127,11 +136,17 @@ describe('Vislib _chart Test Suite', function () {
     vis.destroy();
   });
 
-  it('should be a constructor for visualization modules', function () {
-    expect(myChart instanceof Chart).to.be(true);
+  afterAll(() => {
+    mockedHTMLElementClientSizes.width.mockRestore();
+    mockedHTMLElementClientSizes.height.mockRestore();
+    delete window.SVGElement.prototype.getBBox;
   });
 
-  it('should have a render method', function () {
-    expect(typeof myChart.render === 'function').to.be(true);
+  test('should be a constructor for visualization modules', function () {
+    expect(myChart instanceof Chart).toBe(true);
+  });
+
+  test('should have a render method', function () {
+    expect(typeof myChart.render === 'function').toBe(true);
   });
 });
