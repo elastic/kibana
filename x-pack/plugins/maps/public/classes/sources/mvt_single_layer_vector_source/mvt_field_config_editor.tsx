@@ -67,17 +67,24 @@ export interface Props {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface State {
+  previousFields: MVTFieldDescriptor[];
   currentFields: MVTFieldDescriptor[];
 }
 
 export class MVTFieldConfigEditor extends Component<Props, State> {
   state: State = {
     currentFields: [],
+    previousFields: [],
   };
 
-  static getDerivedStateFromProps(nextProps: Props) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (_.isEqual(nextProps.fields, prevState.previousFields)) {
+      return null;
+    }
+    const clonedFields = _.cloneDeep(nextProps.fields);
     return {
-      currentFields: _.cloneDeep(nextProps.fields),
+      currentFields: clonedFields,
+      previousFields: clonedFields,
     };
   }
 
@@ -169,17 +176,20 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         break;
       }
     }
+    const isInvalid = emptyName || hasDupes;
+    const placeholderText = isInvalid
+      ? i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
+          defaultMessage: 'Field name',
+        })
+      : '';
+
     return (
       <EuiFieldText
         value={mvtFieldConfig.name}
         onChange={onChange}
-        aria-label={i18n.translate('xpack.maps.mvtSource.fieldAriaLabelText', {
-          defaultMessage: 'Field name',
-        })}
-        placeholder={i18n.translate('xpack.maps.mvtSource.fieldPlaceholderText', {
-          defaultMessage: 'Field name',
-        })}
-        isInvalid={emptyName || hasDupes}
+        aria-label={'Fieldname'}
+        placeholder={placeholderText}
+        isInvalid={isInvalid}
       />
     );
   }

@@ -103,7 +103,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           fields={this.state.fields}
           minSourceZoom={this.state.minSourceZoom}
           maxSourceZoom={this.state.maxSourceZoom}
-          includeFields={false}
+          showFields={false}
         />
       </EuiPanel>
     );

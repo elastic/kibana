@@ -20,10 +20,10 @@ exports[`should render update source editor (fields _should_ be included) 1`] = 
     <MVTSingleLayerSourceSettings
       fields={Array []}
       handleChange={[Function]}
-      includeFields={true}
       layerName="foobar"
       maxSourceZoom={14}
       minSourceZoom={4}
+      showFields={true}
     />
   </EuiPanel>
   <EuiSpacer

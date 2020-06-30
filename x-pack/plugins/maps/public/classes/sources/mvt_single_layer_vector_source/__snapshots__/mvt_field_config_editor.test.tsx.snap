@@ -8,7 +8,7 @@ exports[`should render error for dupes 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Field name"
+        aria-label="Fieldname"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -84,7 +84,7 @@ exports[`should render error for dupes 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Field name"
+        aria-label="Fieldname"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -185,7 +185,7 @@ exports[`should render error for empty name 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Field name"
+        aria-label="Fieldname"
         isInvalid={true}
         onChange={[Function]}
         placeholder="Field name"
@@ -286,10 +286,10 @@ exports[`should render field editor 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Field name"
+        aria-label="Fieldname"
         isInvalid={false}
         onChange={[Function]}
-        placeholder="Field name"
+        placeholder=""
         value="foo"
       />
     </EuiFlexItem>
@@ -362,10 +362,10 @@ exports[`should render field editor 1`] = `
   >
     <EuiFlexItem>
       <EuiFieldText
-        aria-label="Field name"
+        aria-label="Fieldname"
         isInvalid={false}
         onChange={[Function]}
-        placeholder="Field name"
+        placeholder=""
         value="bar"
       />
     </EuiFlexItem>
