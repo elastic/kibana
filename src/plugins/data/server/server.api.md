@@ -109,7 +109,7 @@ import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
-import { RecursiveReadonly } from 'kibana/public';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -334,6 +334,14 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     ignoreUnavailable: boolean;
     restTotalHitsAsInt: boolean;
 };
+
+// Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
+    forceNow?: Date;
+    fieldName?: string;
+}): import("../..").RangeFilter | undefined;
 
 // @internal
 export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {

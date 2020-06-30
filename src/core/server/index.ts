@@ -309,7 +309,6 @@ export {
 } from './metrics';
 
 export {
-  RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
   URLMeaningfulParts,
