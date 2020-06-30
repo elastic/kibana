@@ -38,6 +38,9 @@ export interface Props {
 }
 
 export class MVTSingleLayerSourceSettings extends Component<Props, State> {
+  // Tracking in state to allow for debounce.
+  // Changes to layer-name and/or min/max zoom require heavy operation at map-level (removing and re-adding all sources/layers)
+  // To preserve snappyness of typing, debounce the dispatches.
   state = {
     currentLayerName: this.props.layerName,
     currentMinSourceZoom: this.props.minSourceZoom,
