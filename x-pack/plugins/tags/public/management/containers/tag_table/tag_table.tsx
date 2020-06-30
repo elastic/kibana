@@ -5,9 +5,25 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiInMemoryTable, EuiBadge, EuiButton } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiTextColor,
+  EuiLink,
+} from '@elastic/eui';
+import { Link } from 'react-router-dom';
 import { RawTagWithId } from '../../../../common';
 import { useServices } from '../../context';
+import {
+  txtTag,
+  txtTitle,
+  txtDescription,
+  txtActions,
+  txtEditSomething,
+  txtDeleteSomething,
+} from './i18n';
 
 const pagination = {
   initialPageSize: 25,
@@ -28,21 +44,67 @@ export const TagTable: React.FC = () => {
       columns={[
         {
           field: 'title',
-          name: 'Tag',
-          sortable: true,
-          render: (value: string, record: RawTagWithId) => (
-            <EuiBadge color={record.color}>{value}</EuiBadge>
+          name: txtTitle,
+          truncateText: true,
+          sortable: (tag) => tag.title.toLowerCase(),
+          render: (value: string, tag: RawTagWithId) => (
+            <Link to={`/tag/${tag.id}`}>
+              <EuiLink>{tag.title}</EuiLink>
+            </Link>
+          ),
+        },
+        {
+          name: txtTag,
+          render: (tag: RawTagWithId) => (
+            <Link to={`/tag/${tag.id}`}>
+              <EuiBadge color={tag.color}>{tag.title}</EuiBadge>
+            </Link>
           ),
         },
         {
           field: 'description',
-          name: 'Description',
+          name: txtDescription,
+          truncateText: true,
           sortable: true,
+          render: (value: string, record: RawTagWithId) => (
+            <EuiTextColor color="subdued">{record.description}</EuiTextColor>
+          ),
+        },
+        {
+          name: txtActions,
+          actions: [
+            {
+              render: (tag) => (
+                <Link to={`/tag/${tag.id}`}>
+                  <EuiButtonIcon
+                    aria-label={txtEditSomething(tag.title)}
+                    color={'primary'}
+                    iconType={'pencil'}
+                  />
+                </Link>
+              ),
+            },
+            {
+              render: (tag) => (
+                <EuiButtonIcon
+                  aria-label={txtDeleteSomething(tag.title)}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => manager.delete$([tag.id])}
+                />
+              ),
+            },
+          ],
         },
       ]}
       hasActions
       pagination={pagination}
-      sorting={true}
+      sorting={{
+        sort: {
+          field: 'title',
+          direction: 'asc',
+        },
+      }}
       search={{
         box: {
           placeholder: 'Search',
