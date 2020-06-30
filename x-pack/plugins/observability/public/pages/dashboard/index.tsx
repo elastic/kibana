@@ -77,7 +77,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      <EuiHorizontalRule style={{ width: 'auto', margin: '24px -24px' }} />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={9}>
