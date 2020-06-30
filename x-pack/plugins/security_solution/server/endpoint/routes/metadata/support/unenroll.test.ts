@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   findAllUnenrolledHostIds,
   fetchAllUnenrolledHostIdsWithScroll,
@@ -24,7 +24,7 @@ const noUnenrolledEndpoint = () =>
   } as unknown) as SearchResponse<HostId>);
 
 describe('test find all unenrolled HostId', () => {
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
 
   it('can find all hits with scroll', async () => {
     const firstHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
@@ -82,7 +82,7 @@ describe('test find all unenrolled HostId', () => {
 });
 
 describe('test find unenrolled endpoint host id by hostId', () => {
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
 
   it('can find unenrolled endpoint by the host id when unenrolled', async () => {
     const firstEndpointHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';

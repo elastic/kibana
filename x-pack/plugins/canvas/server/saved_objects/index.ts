@@ -6,5 +6,6 @@
 
 import { workpadType } from './workpad';
 import { customElementType } from './custom_element';
+import { workpadTemplateType } from './workpad_template';
 
-export { customElementType, workpadType };
+export { customElementType, workpadType, workpadTemplateType };

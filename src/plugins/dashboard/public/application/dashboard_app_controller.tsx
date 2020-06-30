@@ -58,7 +58,6 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-  SavedObjectEmbeddableInput,
   ContainerOutput,
   EmbeddableInput,
 } from '../../../embeddable/public';
@@ -432,14 +431,16 @@ export class DashboardAppController {
               .getIncomingEmbeddablePackage();
             if (incomingState) {
               if ('id' in incomingState) {
-                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                container.addNewEmbeddable<EmbeddableInput>(
-                  incomingState.type,
-                  incomingState.input
-                );
+                const input = incomingState.input;
+                delete input.id;
+                const explicitInput = {
+                  savedVis: input,
+                };
+                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
               }
             }
           }

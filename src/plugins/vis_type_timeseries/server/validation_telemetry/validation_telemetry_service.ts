@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
@@ -49,7 +49,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
         usageCollection.makeUsageCollector<Usage>({
           type: 'tsvb-validation',
           isReady: () => this.kibanaIndex !== '',
-          fetch: async (callCluster: APICaller) => {
+          fetch: async (callCluster: LegacyAPICaller) => {
             try {
               const response = await callCluster('get', {
                 index: this.kibanaIndex,

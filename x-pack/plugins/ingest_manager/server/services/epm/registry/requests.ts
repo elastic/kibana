@@ -6,7 +6,7 @@
 
 import fetch, { Response } from 'node-fetch';
 import { streamToString } from './streams';
-import { IngestManagerError, IngestManagerErrorType } from '../../../errors';
+import { RegistryError } from '../../../errors';
 
 export async function getResponse(url: string): Promise<Response> {
   try {
@@ -14,16 +14,12 @@ export async function getResponse(url: string): Promise<Response> {
     if (response.ok) {
       return response;
     } else {
-      throw new IngestManagerError(
-        IngestManagerErrorType.RegistryError,
+      throw new RegistryError(
         `Error connecting to package registry at ${url}: ${response.statusText}`
       );
     }
   } catch (e) {
-    throw new IngestManagerError(
-      IngestManagerErrorType.RegistryError,
-      `Error connecting to package registry at ${url}: ${e.message}`
-    );
+    throw new RegistryError(`Error connecting to package registry at ${url}: ${e.message}`);
   }
 }
 
