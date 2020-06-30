@@ -17,6 +17,7 @@
 /* hide unusable controls */
 kbn-top-nav,
 filter-bar,
+.kbnTopNavMenu__wrapper,
 ::-webkit-scrollbar,
 .euiNavDrawer {
   display: none !important;
@@ -55,7 +56,7 @@ discover-app .discover-table-footer {
 
 /* hide unusable controls
 *  !important is required to override resizable panel inline display */
-visualization-editor .visEditor--default > :not(.visEditor__visualization) {
+.visEditor__content .visEditor--default > :not(.visEditor__visualization) {
   display: none !important;
 }
 
@@ -73,7 +74,7 @@ visualization-editor .visEditor--default > :not(.visEditor__visualization) {
 /* remove left padding from visualizations so that map lines up with .leaflet-container and
 *  setting the position to be fixed and to take up the entire screen, because some zoom levels/viewports
 *  are triggering the media breakpoints that cause the .visEditor__canvas to take up more room than the viewport */
-visualize-app .visEditor__canvas {
+.visEditor .visEditor__canvas {
   padding-left: 0px;
   position: fixed;
   width: 100%;

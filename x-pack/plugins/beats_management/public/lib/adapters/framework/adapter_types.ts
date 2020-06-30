@@ -43,7 +43,7 @@ export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 export const RuntimeFrameworkUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,
