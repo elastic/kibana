@@ -30,15 +30,27 @@ import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_clie
 
 const noop = () => undefined;
 
-/** @public **/
+/**
+ * Represents an Elasticsearch cluster API client created by the platform.
+ * It allows to call API on behalf of the internal Kibana user and
+ * the actual user that is derived from the request headers (via `asScoped(...)`).
+ *
+ * @public
+ **/
 export interface IClusterClient {
+  /**
+   * Returns a {@link ClientFacade | facade} to be used to query the ES cluster on behalf of the Kibana internal user
+   */
   asInternalUser: () => ClientFacade;
+  /**
+   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
+   */
   asScoped: (request: ScopeableRequest) => IScopedClusterClient;
 }
 
 /** @internal **/
 export class ClusterClient implements IClusterClient {
-  private readonly internalWrapper: ClientFacade;
+  private readonly internalFacade: ClientFacade;
   private readonly scopedClient: Client;
 
   constructor(
@@ -46,18 +58,18 @@ export class ClusterClient implements IClusterClient {
     logger: Logger,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.internalWrapper = getClientFacade(configureClient(config, { logger }));
+    this.internalFacade = getClientFacade(configureClient(config, { logger }));
     this.scopedClient = configureClient(config, { logger, scoped: true });
   }
 
   asInternalUser() {
-    return this.internalWrapper;
+    return this.internalFacade;
   }
 
   asScoped(request: ScopeableRequest) {
     const headers = this.getScopedHeaders(request);
     const scopedWrapper = getClientFacade(this.scopedClient, headers);
-    return new ScopedClusterClient(this.internalWrapper, scopedWrapper);
+    return new ScopedClusterClient(this.internalFacade, scopedWrapper);
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
