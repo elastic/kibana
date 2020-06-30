@@ -207,10 +207,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return false;
   }
 
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   async filterAndFormatPropertiesToHtml(
     properties: GeoJsonProperties,
     featureId?: string | number

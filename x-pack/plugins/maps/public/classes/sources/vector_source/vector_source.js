@@ -137,8 +137,4 @@ export class AbstractVectorSource extends AbstractSource {
   getSyncMeta() {
     return {};
   }
-
-  supportsFieldMeta() {
-    return true;
-  }
 }
