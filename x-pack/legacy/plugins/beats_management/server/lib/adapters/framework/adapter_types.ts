@@ -126,7 +126,7 @@ export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServer
 export const RuntimeKibanaUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,
@@ -139,7 +139,7 @@ export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
   [internalAuthData]: AuthDataType;
   username: string;
-  roles: string[];
+  roles: readonly string[];
   full_name: string | null;
   email: string | null;
   enabled: boolean;

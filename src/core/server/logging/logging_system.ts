@@ -100,7 +100,9 @@ export class LoggingSystem implements LoggerFactory {
       // Automatically prepend the base context to the logger sub-contexts
       loggers: contextConfig.loggers.map((l) => ({
         ...l,
-        context: LoggingConfig.getLoggerContext([context, l.context]),
+        context: LoggingConfig.getLoggerContext(
+          l.context.length > 0 ? [context, l.context] : [context]
+        ),
       })),
     });
 
