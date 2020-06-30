@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   Filter,
@@ -35,7 +35,7 @@ interface FindListItemOptions {
   page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
   listItemIndex: string;
 }
