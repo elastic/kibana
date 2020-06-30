@@ -2,7 +2,7 @@
 [[glossary]]
 = Glossary
 
-<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | <<h_glos>> | <<i_glos>> | <<j_glos>> | <<k_glos>> | <<l_glos>> | <<m_glos>> | <<n_glos>> | <<o_glos>> | <<p_glos>> | <<q_glos>> | <<r_glos>> | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
+<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | H | I | J | <<k_glos>> | <<l_glos>> | <<m_glos>> | N | O | <<p_glos>> | <<q_glos>> | R | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
 
 [float]
 [[a_glos]]
@@ -150,7 +150,7 @@ that you are interested in.
 // tag::drilldown-def[]
 A navigation path that retains context (time range and filters)
 from the source to the destination, so you can view the data from a new perspective.
-For example, a dashboard that shows the overall status of multiple data center
+A dashboard that shows the overall status of multiple data centers
 might have a drilldown to a dashboard for a single data center. See {kibana-ref}/drilldowns.html[Drilldowns].
 // end::drilldown-def[]
 
@@ -210,21 +210,6 @@ syslog, Apache, and other webserver logs. See
 // end::grok-debugger-def[]
 
 
-
-[float]
-[[h_glos]]
-== H
-
-
-
-[float]
-[[i_glos]]
-== I
-
-[float]
-[[j_glos]]
-== J
-
 [float]
 [[k_glos]]
 == K
@@ -243,9 +228,9 @@ support for scripted fields. See
 
 [[glossary-lens]] Lens ::
 // tag::lens-def[]
-Enables you to quickly build visualizations by dragging and dropping data fields.
+Enables you to build visualizations by dragging and dropping data fields.
 Lens makes makes smart visualization suggestions for your data,
-allowing you to quickly switch between visualization types.
+allowing you to switch between visualization types.
 See {kibana-ref}/lens.html[Lens].
 // end::lens-def[]
 
@@ -274,14 +259,6 @@ An aggregation that calculates and tracks metrics for a set of documents.
 
 
 [float]
-[[n_glos]]
-== N
-
-[float]
-[[o_glos]]
-== O
-
-[float]
 [[p_glos]]
 == P
 
@@ -303,23 +280,11 @@ query element or visualization, such as a chart, table, or list.
 [[q_glos]]
 == Q
 
-[[glossary-query-bar]] query bar ::
-// tag::query-bar-def[]
-The text field where you enter a query expression to
-retrieve the data you want to interact with in {kib}.
-// end::query-bar-def[]
-
 [[glossary-query-profiler]] Query Profiler ::
 // tag::query-profiler-def[]
 A tool that enables you to inspect and analyze search queries to diagnose and debug poorly performing queries.
 See {kibana-ref}/xpack-profiler.html[Query Profiler].
 // end::query-profiler-def[]
-
-
-
-[float]
-[[r_glos]]
-== R
 
 [float]
 [[s_glos]]
