@@ -61,14 +61,6 @@ interface Mark {
 
 type Renderer = 'svg' | 'canvas';
 
-export interface KibanaConfig {
-  controlsLocation: ControlsLocation;
-  controlsDirection: ControlsDirection;
-  hideWarnings: boolean;
-  type: string;
-  renderer: Renderer;
-}
-
 interface VegaSpecConfig extends KibanaConfig {
   kibana: KibanaConfig;
   padding: Padding;
@@ -80,6 +72,30 @@ interface VegaSpecConfig extends KibanaConfig {
 
 interface Projection {
   name: string;
+}
+
+interface RequestDataObject {
+  values: SearchResponse<unknown>;
+}
+
+interface RequestObject {
+  url: string;
+}
+
+type ContextVarsObjectProps =
+  | string
+  | {
+      [CONSTANTS.AUTOINTERVAL]: number;
+    };
+
+type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
+
+export interface KibanaConfig {
+  controlsLocation: ControlsLocation;
+  controlsDirection: ControlsDirection;
+  hideWarnings: boolean;
+  type: string;
+  renderer: Renderer;
 }
 
 export interface VegaSpec {
@@ -170,28 +186,17 @@ export interface CacheBounds {
   max: number;
 }
 
-export interface Requests {
-  obj: {
-    url: string;
-  };
-  url: string;
+export interface Requests extends RequestObject {
+  obj: RequestObject;
   name: string;
-  dataObject: {
-    values: SearchResponse<unknown>;
-  };
+  dataObject: RequestDataObject;
 }
 
 export interface ContextVarsObject {
   [index: string]: any;
-  prop:
-    | string
-    | {
-        [CONSTANTS.AUTOINTERVAL]: number;
-      };
+  prop: ContextVarsObjectProps;
   interval: string;
 }
-
-type ToolTipPositions = 'top' | 'right' | 'bottom' | 'left';
 
 export interface TooltipConfig {
   position?: ToolTipPositions;
@@ -214,6 +219,7 @@ export interface DstObj {
 }
 
 export type ControlsLocation = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+
 export type ControlsDirection = 'horizontal' | 'vertical';
 
 export interface VegaConfig extends DstObj {
