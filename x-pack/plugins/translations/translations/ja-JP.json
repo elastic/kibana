@@ -14747,7 +14747,6 @@
     "xpack.securitySolution.timeline.rangePicker.oneYear": "1 年",
     "xpack.securitySolution.timeline.searchOrFilter.eventTypeAllEvent": "すべてのイベント",
     "xpack.securitySolution.timeline.searchOrFilter.eventTypeRawEvent": "未加工イベント",
-    "xpack.securitySolution.timeline.searchOrFilter.eventTypeSignalEvent": "シグナルイベント",
     "xpack.securitySolution.timeline.searchOrFilter.filterDescription": "上のデータプロバイダーからのイベントは、隣接の KQL でフィルターされます",
     "xpack.securitySolution.timeline.searchOrFilter.filterKqlPlaceholder": "イベントをフィルター",
     "xpack.securitySolution.timeline.searchOrFilter.filterKqlSelectedText": "フィルター",
