@@ -31,4 +31,8 @@ export class TagsClient implements ITagsClient {
   public async getAll(): Promise<TagsClientGetAllResult> {
     return await this.params.http.get<TagsClientGetAllResult>(this.path);
   }
+
+  public async del(id: string): Promise<void> {
+    await this.params.http.delete<TagsClientGetAllResult>(`${this.path}/tag/${id}`);
+  }
 }

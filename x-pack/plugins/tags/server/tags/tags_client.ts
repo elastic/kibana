@@ -73,4 +73,12 @@ export class TagsClient implements ITagsClient {
       tags: result.saved_objects.map(this.tagSavedObjectToTag),
     };
   }
+
+  public async del(id: string): Promise<void> {
+    // TODO: Validate ID.
+
+    const { savedObjectsClient } = this.params;
+
+    await savedObjectsClient.delete(this.type, id);
+  }
 }

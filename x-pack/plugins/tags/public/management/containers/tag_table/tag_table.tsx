@@ -48,7 +48,11 @@ export const TagTable: React.FC = () => {
           placeholder: 'Search',
         },
         toolsLeft: !selection.length ? undefined : (
-          <EuiButton color="danger" iconType="trash" onClick={() => {}}>
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            onClick={() => manager.delete$(selection.map(({ id }) => id))}
+          >
             Delete {selection.length} tags
           </EuiButton>
         ),

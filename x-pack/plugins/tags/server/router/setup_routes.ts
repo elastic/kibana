@@ -6,9 +6,11 @@
 
 import { createTag } from './routes/create_tag';
 import { getAllTags } from './routes/get_all_tags';
+import { deleteTag } from './routes/delete_tag';
 import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
   createTag(params);
   getAllTags(params);
+  deleteTag(params);
 };

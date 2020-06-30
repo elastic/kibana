@@ -81,6 +81,24 @@ export class TagList {
     this.data$$.next({ ...this.data$$.getValue(), [tag.id]: tag });
     return tag;
   }
+
+  public delete(ids: string[]): Tag[] {
+    const tags = this.data$$.getValue();
+    const newTags: TagMap = {};
+    const deletedTags: Tag[] = [];
+    for (const tag of Object.values(tags))
+      if (!ids.includes(tag.id)) newTags[tag.id] = tag;
+      else deletedTags.push(tag);
+    this.data$$.next(newTags);
+    return deletedTags;
+  }
+
+  public insert(tags: Tag[]) {
+    const oldTags = this.data$$.getValue();
+    const newTags: TagMap = {};
+    for (const tag of tags) newTags[tag.id] = tag;
+    this.data$$.next({ ...oldTags, ...newTags });
+  }
 }
 
 export class TagManager {
@@ -100,5 +118,18 @@ export class TagManager {
         return tag;
       })
     );
+  }
+
+  public delete$(ids: string[]): Observable<void> {
+    const { client } = this.params;
+    const deletedTags = this.list.delete(ids);
+    const promise = Promise.all(ids.map((id) => client.del(id))).then(() => undefined);
+    const observable = from(promise).pipe(share());
+
+    observable.subscribe({
+      error: () => this.list.insert(deletedTags),
+    });
+
+    return observable;
   }
 }

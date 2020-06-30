@@ -36,4 +36,5 @@ export interface TagsClientGetAllResult {
 export interface ITagsClient {
   create(params: TagsClientCreateParams): Promise<TagsClientCreateResult>;
   getAll(): Promise<TagsClientGetAllResult>;
+  del(id: string): Promise<void>;
 }
