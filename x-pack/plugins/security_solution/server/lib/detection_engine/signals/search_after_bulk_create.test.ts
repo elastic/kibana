@@ -14,12 +14,20 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import uuid from 'uuid';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
@@ -136,6 +144,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(9);
@@ -260,6 +269,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(12);
@@ -338,6 +348,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(3);
@@ -412,6 +423,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(mockService.callCluster).toHaveBeenCalledTimes(3);
@@ -460,6 +472,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(success).toEqual(false);
@@ -514,6 +527,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
@@ -584,6 +598,7 @@ describe('searchAfterAndBulkCreate', () => {
       refresh: false,
       tags: ['some fake tag 1', 'some fake tag 2'],
       throttle: 'no_actions',
+      buildRuleMessage,
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error

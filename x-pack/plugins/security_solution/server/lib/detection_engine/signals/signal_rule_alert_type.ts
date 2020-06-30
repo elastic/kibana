@@ -259,6 +259,7 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
             throttle,
+            buildRuleMessage,
           });
         }
 

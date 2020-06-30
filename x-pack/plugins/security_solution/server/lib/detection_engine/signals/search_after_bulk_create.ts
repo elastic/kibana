@@ -14,6 +14,7 @@ import { RuleTypeParams, RefreshTypes } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
+import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse } from './types';
 import { filterEventsAgainstList } from './filter_events_with_list';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
@@ -43,6 +44,7 @@ interface SearchAfterAndBulkCreateParams {
   refresh: RefreshTypes;
   tags: string[];
   throttle: string;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -78,6 +80,7 @@ export const searchAfterAndBulkCreate = async ({
   refresh,
   tags,
   throttle,
+  buildRuleMessage,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const toReturn: SearchAfterAndBulkCreateReturnType = {
     success: false,
@@ -113,20 +116,21 @@ export const searchAfterAndBulkCreate = async ({
     gap,
     previousStartedAt,
     interval,
+    buildRuleMessage,
   });
   const useSortIds = totalToFromTuples.length <= 1;
-  logger.debug(`totalToFromTuples: ${totalToFromTuples.length}`);
+  logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();
     if (tuple == null || tuple.to == null || tuple.from == null) {
-      logger.error(`[-] malformed date tuple`);
+      logger.error(buildRuleMessage(`[-] malformed date tuple`));
       toReturn.success = false;
       return toReturn;
     }
     searchResultSize = 0;
     while (searchResultSize < tuple.maxSignals) {
       try {
-        logger.debug(`sortIds: ${sortId}`);
+        logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
         const {
           // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
           searchResult,
@@ -150,8 +154,10 @@ export const searchAfterAndBulkCreate = async ({
           typeof searchResult.hits.total === 'number'
             ? searchResult.hits.total
             : searchResult.hits.total.value;
-        logger.debug(`totalHits: ${totalHits}`);
-        logger.debug(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`);
+        logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
+        logger.debug(
+          buildRuleMessage(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`)
+        );
         if (totalHits === 0) {
           toReturn.success = true;
           break;
@@ -173,6 +179,7 @@ export const searchAfterAndBulkCreate = async ({
                 exceptionsList,
                 logger,
                 eventSearchResult: searchResult,
+                buildRuleMessage,
               })
             : searchResult;
         if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
@@ -181,7 +188,6 @@ export const searchAfterAndBulkCreate = async ({
           break;
         }
 
-        logger.debug('next bulk index');
         const {
           bulkCreateDuration: bulkDuration,
           createdItemsCount: createdCount,
@@ -204,16 +210,17 @@ export const searchAfterAndBulkCreate = async ({
           tags,
           throttle,
         });
-        logger.debug('finished next bulk index');
-        logger.debug(`created ${createdCount} signals`);
+        logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         toReturn.createdSignalsCount += createdCount;
         if (bulkDuration) {
           toReturn.bulkCreateTimes.push(bulkDuration);
         }
 
-        logger.debug(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`);
+        logger.debug(
+          buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
+        );
         if (useSortIds && filteredEvents.hits.hits[0].sort == null) {
-          logger.debug('sortIds was empty on search');
+          logger.debug(buildRuleMessage('sortIds was empty on search'));
           toReturn.success = true;
           break;
         } else if (
@@ -226,13 +233,13 @@ export const searchAfterAndBulkCreate = async ({
             : undefined;
         }
       } catch (exc) {
-        logger.error(`[-] search_after and bulk threw an error ${exc}`);
+        logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
         toReturn.success = false;
         return toReturn;
       }
     }
   }
-  logger.debug(`[+] completed bulk index of ${toReturn.createdSignalsCount}`);
+  logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
   toReturn.success = true;
   return toReturn;
 };

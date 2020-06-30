@@ -10,6 +10,7 @@ import sinon from 'sinon';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
+import { buildRuleMessageFactory } from './rule_messages';
 
 import * as featureFlags from '../feature_flags';
 
@@ -32,6 +33,13 @@ import {
   sampleBulkErrorItem,
   mockLogger,
 } from './__mocks__/es_results';
+
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -645,11 +653,12 @@ describe('utils', () => {
       const someTuples = getSignalTimeTuples({
         logger: mockLogger,
         gap: null,
-        previousStartedAt: new Date(),
+        previousStartedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
         ruleParamsFrom: 'now-30s',
         ruleParamsTo: 'now',
         ruleParamsMaxSignals: 20,
+        buildRuleMessage,
       });
       const someTuple = someTuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -659,14 +668,15 @@ describe('utils', () => {
       const someTuples = getSignalTimeTuples({
         logger: mockLogger,
         gap: moment.duration(10, 's'),
-        previousStartedAt: new Date(),
+        previousStartedAt: moment().subtract(65, 's').toDate(),
         interval: '50s',
         ruleParamsFrom: 'now-55s',
         ruleParamsTo: 'now',
         ruleParamsMaxSignals: 20,
+        buildRuleMessage,
       });
       const someTuple = someTuples[1];
-      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(50);
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(10);
     });
 
     test('should return five tuples when give long gap', () => {
@@ -678,6 +688,7 @@ describe('utils', () => {
         ruleParamsFrom: 'now-13s',
         ruleParamsTo: 'now',
         ruleParamsMaxSignals: 20,
+        buildRuleMessage,
       });
       expect(someTuples.length).toEqual(5);
       someTuples.forEach((item, index) => {
@@ -686,6 +697,21 @@ describe('utils', () => {
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(10);
       });
+    });
+    test('should return single tuples when give a negative gap (rule ran sooner than expected)', () => {
+      const someTuples = getSignalTimeTuples({
+        logger: mockLogger,
+        gap: moment.duration(-15, 's'), // 64 is 5 times the interval + lookback, which will trigger max lookback
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        ruleParamsTo: 'now',
+        ruleParamsMaxSignals: 20,
+        buildRuleMessage,
+      });
+      expect(someTuples.length).toEqual(1);
+      const someTuple = someTuples[0];
+      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
     });
   });
 });

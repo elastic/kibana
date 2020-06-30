@@ -14,6 +14,7 @@ import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/comm
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import { hasListsFeature } from '../feature_flags';
 import { BulkResponse, BulkResponseErrorAggregation } from './types';
+import { BuildRuleMessage } from './rule_messages';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -259,6 +260,7 @@ export const errorAggregator = (
  * @param gap moment.Duration representing a gap in since the last time the rule ran
  * @param previousStartedAt Date at which the rule last ran
  * @param interval string the interval which the rule runs
+ * @param buildRuleMessage function provides meta information for logged event
  */
 export const getSignalTimeTuples = ({
   logger,
@@ -268,6 +270,7 @@ export const getSignalTimeTuples = ({
   gap,
   previousStartedAt,
   interval,
+  buildRuleMessage,
 }: {
   logger: Logger;
   ruleParamsFrom: string;
@@ -276,6 +279,7 @@ export const getSignalTimeTuples = ({
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
   interval: string;
+  buildRuleMessage: BuildRuleMessage;
 }): Array<{
   to: moment.Moment | undefined;
   from: moment.Moment | undefined;
@@ -288,7 +292,7 @@ export const getSignalTimeTuples = ({
     from: moment.Moment | undefined;
     maxSignals: number;
   }> = [];
-  if (gap != null && gap.asMilliseconds() > 0 && previousStartedAt != null) {
+  if (gap != null && gap.valueOf() > 0 && previousStartedAt != null) {
     const fromUnit = ruleParamsFrom[ruleParamsFrom.length - 1];
     if (isValidUnit(fromUnit)) {
       const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
@@ -306,44 +310,33 @@ export const getSignalTimeTuples = ({
           asFn: (duration: moment.Duration) => duration.asHours(),
         },
       };
-      const tempNow = moment();
 
-      // for quick testing uncomment line below and
-      // create a rule that runs every 20 seconds with
-      // a 2 second lookback (should trigger the gap)
-      // const newFrom = moment.duration(300, 's');
-      const newFrom = moment.duration(tempNow.diff(previousStartedAt));
-      const parsed = parseInt(shorthandMap[unit].asFn(newFrom).toString(), 10);
-
-      const calculatedFrom = `now-${parsed + unit}`;
-      logger.debug(`calculatedFrom: ${calculatedFrom}`);
+      /*
+      we need the total duration from now until the last time the rule ran.
+      the next few lines can be summed up as calculating
+      "how many second | minutes | hours have passed since the last time this ran?"
+      */
+      const nowToGapDiff = moment.duration(moment().diff(previousStartedAt));
+      const calculatedFrom = `now-${
+        parseInt(shorthandMap[unit].asFn(nowToGapDiff).toString(), 10) + unit
+      }`;
+      logger.debug(buildRuleMessage(`calculatedFrom: ${calculatedFrom}`));
 
       const intervalMoment = moment.duration(parseInt(interval, 10), unit);
-      logger.debug(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`);
+      logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
       const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
-      const calculatedNowAsMoment = dateMath.parse('now');
-      if (
-        calculatedFromAsMoment != null &&
-        calculatedNowAsMoment != null &&
-        intervalMoment != null
-      ) {
-        // calculate new max signals so that we keep constant max signals per time interval
-        // essentially if the rule is supposed to run every 5 minutes,
-        //  but there is a gap of one minute, then the number of rule executions missed
-        // due to the gap are (6 minutes - 5 minutes) / 5 minutes = 0.2 * MAX_SIGNALS = 20 signals
-        // allowed for the gapped interval.
-        // this is to keep our ratio of MAX_SIGNALS : rule intervals equivalent.
+      if (calculatedFromAsMoment != null && intervalMoment != null) {
         const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
         const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
         const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
 
-        // make an array that represents the number of intervals of (to, from) tuples
         const ratio = Math.abs(gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment));
 
         // maxCatchup is to ensure we are not trying to catch up too far back.
         // This allows for a maximum of 4 consecutive rule execution misses
         // to be included in the number of signals generated.
         const maxCatchup = ratio < 4 ? ratio : 4;
+        logger.debug(buildRuleMessage(`maxCatchup: ${ratio}`));
 
         let tempTo = dateMath.parse(ruleParamsFrom);
         if (tempTo == null) {
@@ -351,7 +344,6 @@ export const getSignalTimeTuples = ({
           throw new Error('dateMath parse failed');
         }
 
-        logger.debug(`maxCatchup: ${maxCatchup}`);
         let beforeMutatedFrom: moment.Moment | undefined;
         while (totalToFromTuples.length < maxCatchup) {
           // if maxCatchup is less than 1, we calculate the 'from' differently
@@ -385,6 +377,8 @@ export const getSignalTimeTuples = ({
           },
           ...totalToFromTuples,
         ];
+      } else {
+        logger.debug(buildRuleMessage('calculatedFromMoment was null or intervalMoment was null'));
       }
     }
   } else {
@@ -396,5 +390,8 @@ export const getSignalTimeTuples = ({
       },
     ];
   }
+  logger.debug(
+    buildRuleMessage(`totalToFromTuples: ${JSON.stringify(totalToFromTuples, null, 4)}`)
+  );
   return totalToFromTuples;
 };
