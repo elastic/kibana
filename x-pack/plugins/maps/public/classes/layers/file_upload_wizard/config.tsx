@@ -7,11 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import {
-  ClientFileCreateSourceEditor,
-  INDEX_SETUP_STEP_ID,
-  INDEXING_STEP_ID,
-} from './create_client_file_source_editor';
+import { ClientFileCreateSourceEditor, INDEX_SETUP_STEP_ID, INDEXING_STEP_ID } from './wizard';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],

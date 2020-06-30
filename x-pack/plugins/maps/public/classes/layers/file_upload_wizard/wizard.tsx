@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import {
@@ -13,11 +14,10 @@ import {
   SCALING_TYPES,
 } from '../../../../common/constants';
 import { getFileUploadComponent } from '../../../kibana_services';
-// @ts-ignore
-import { GeojsonFileSource } from './geojson_file_source';
+import { GeojsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 // @ts-ignore
-import { createDefaultLayerDescriptor } from '../es_search_source';
+import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
@@ -59,7 +59,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     }
   }
 
-  _onFileUpload = (geojsonFile: unknown, name: string) => {
+  _onFileUpload = (geojsonFile: FeatureCollection, name: string) => {
     if (!this._isMounted) {
       return;
     }
