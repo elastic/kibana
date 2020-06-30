@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -26,7 +26,7 @@ function findMatchingNodes(stats: any, nodeAttrs: string): any {
   }, []);
 }
 
-async function fetchNodeStats(callAsCurrentUser: APICaller): Promise<any> {
+async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
   const params = {
     format: 'json',
   };
