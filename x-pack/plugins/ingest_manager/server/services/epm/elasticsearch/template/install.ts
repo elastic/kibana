@@ -153,6 +153,7 @@ export async function installTemplateForDataset({
     fields,
     dataset,
     packageVersion: pkg.version,
+    packageName: pkg.name,
   });
 }
 
@@ -161,11 +162,13 @@ export async function installTemplate({
   fields,
   dataset,
   packageVersion,
+  packageName,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
   dataset: Dataset;
   packageVersion: string;
+  packageName: string;
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
@@ -177,7 +180,13 @@ export async function installTemplate({
       packageVersion,
     });
   }
-  const template = getTemplate(dataset.type, templateName, mappings, pipelineName);
+  const template = getTemplate({
+    type: dataset.type,
+    templateName,
+    mappings,
+    pipelineName,
+    packageName,
+  });
   // TODO: Check return values for errors
   const callClusterParams: {
     method: string;
