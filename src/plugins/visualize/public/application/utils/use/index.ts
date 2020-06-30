@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export { useVisualizeAppState } from './visualize_app_state';
-export { makeStateful } from './make_stateful';
-export { addEmbeddableToDashboardUrl } from '../../../../../dashboard/public/';
+export { useChromeVisibility } from './use_chrome_visibility';
+export { useEditorUpdates } from './use_editor_updates';
+export { useSavedVisInstance } from './use_saved_vis_instance';
+export { useVisualizeAppState } from './use_visualize_app_state';
+export { useLinkedSearchUpdates } from './use_linked_search_updates';

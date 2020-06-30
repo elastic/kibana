@@ -17,18 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export function addHelpMenuToAppChrome(chrome, docLinks) {
-  chrome.setHelpExtension({
-    appName: i18n.translate('visualize.helpMenu.appName', {
-      defaultMessage: 'Visualize',
-    }),
-    links: [
-      {
-        linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/visualize.html`,
-      },
-    ],
-  });
-}
+export { VisualizeListing } from './visualize_listing';
+export { VisualizeEditor } from './visualize_editor';
+export { VisualizeNoMatch } from './visualize_no_match';
