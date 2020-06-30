@@ -5,13 +5,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, SavedObjectsClientContract } from 'src/core/server';
+import { LegacyClusterClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {

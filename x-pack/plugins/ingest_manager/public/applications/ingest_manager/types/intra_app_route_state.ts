@@ -30,8 +30,17 @@ export interface AgentConfigDetailsDeployAgentAction {
 }
 
 /**
+ * Supported routing state for the agent config details page routes with deploy agents action
+ */
+export interface AgentDetailsReassignConfigAction {
+  /** On done, navigate to the given app */
+  onDoneNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
+
+/**
  * All possible Route states.
  */
 export type AnyIntraAppRouteState =
   | CreateDatasourceRouteState
-  | AgentConfigDetailsDeployAgentAction;
+  | AgentConfigDetailsDeployAgentAction
+  | AgentDetailsReassignConfigAction;

@@ -18,24 +18,24 @@
  */
 
 import { find } from 'lodash';
-import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
+import { SavedObjectsClientCommon, SavedObject } from '..';
 
 /**
  * Returns an object matching a given title
  *
- * @param client {SavedObjectsClientContract}
+ * @param client {SavedObjectsClientCommon}
  * @param title {string}
- * @returns {Promise<SimpleSavedObject|undefined>}
+ * @returns {Promise<SavedObject|undefined>}
  */
 export async function findByTitle(
-  client: SavedObjectsClientContract,
+  client: SavedObjectsClientCommon,
   title: string
-): Promise<SimpleSavedObject<any> | void> {
+): Promise<SavedObject<any> | void> {
   if (!title) {
     return Promise.resolve();
   }
 
-  const { savedObjects } = await client.find({
+  const savedObjects = await client.find({
     type: 'index-pattern',
     perPage: 10,
     search: `"${title}"`,
@@ -45,6 +45,6 @@ export async function findByTitle(
 
   return find(
     savedObjects,
-    (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
+    (obj: SavedObject<any>) => obj.attributes.title.toLowerCase() === title.toLowerCase()
   );
 }

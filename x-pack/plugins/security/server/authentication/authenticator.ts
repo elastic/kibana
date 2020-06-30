@@ -12,7 +12,7 @@ import {
   LoggerFactory,
   Logger,
   HttpServiceSetup,
-  IClusterClient,
+  ILegacyClusterClient,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
@@ -101,7 +101,7 @@ export interface AuthenticatorOptions {
   basePath: HttpServiceSetup['basePath'];
   license: SecurityLicense;
   loggers: LoggerFactory;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
 }
 
