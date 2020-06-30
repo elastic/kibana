@@ -7,7 +7,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { WebhookActionParams, WebhookActionConnector } from '../types';
-import { isUrlInvalid } from '../../../lib/value_validators';
+import { isValidUrl } from '../../../lib/value_validators';
 
 export function getActionType(): ActionTypeModel<WebhookActionConnector, WebhookActionParams> {
   return {
@@ -44,11 +44,11 @@ export function getActionType(): ActionTypeModel<WebhookActionConnector, Webhook
           )
         );
       }
-      if (isUrlInvalid(action.config.url)) {
+      if (action.config.url && !isValidUrl(action.config.url)) {
         errors.url = [
           ...errors.url,
           i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
+            'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
             {
               defaultMessage: 'URL is invalid.',
             }

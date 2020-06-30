@@ -85,6 +85,15 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
+  let url: URL;
+  try {
+    url = new URL(configObject.url);
+  } catch (err) {
+    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring webhook action: unable to parse host name from Url',
+    });
+  }
+
   try {
     configurationUtilities.ensureWhitelistedUri(configObject.url);
   } catch (whitelistError) {

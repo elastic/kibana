@@ -32,11 +32,14 @@ export function throwIfIsntContained<T>(
   };
 }
 
-const urlExpression = /^https?:\/\/([\w\d\-]+\.)+\w{2,}(\/.+)?$/;
-
-export const isUrlInvalid = (url: string | null | undefined) => {
-  if (!isEmpty(url) && url != null && url.match(urlExpression) == null) {
-    return true;
+export const isValidUrl = (urlString: string, protocol?: string) => {
+  try {
+    const urlObject = new URL(urlString);
+    if (protocol === undefined || urlObject.protocol === protocol) {
+      return true;
+    }
+    return false;
+  } catch (err) {
+    return false;
   }
-  return false;
 };
