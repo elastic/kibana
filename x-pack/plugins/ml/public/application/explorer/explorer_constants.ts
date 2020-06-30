@@ -67,5 +67,3 @@ export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', 
  * aggregations on influencers values.
  */
 export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
-
-export const RESIZE_IGNORED_DIFF_PX = 20;

@@ -21,9 +21,13 @@ import {
 
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { SwimLanePagination } from './swimlane_pagination';
-import { RESIZE_IGNORED_DIFF_PX, SWIMLANE_TYPE } from './explorer_constants';
+import { SWIMLANE_TYPE } from './explorer_constants';
 import { ViewBySwimLaneData } from './explorer_utils';
 
+/**
+ * Ignore insignificant resize, e.g. browser scrollbar appearance.
+ */
+const RESIZE_IGNORED_DIFF_PX = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
