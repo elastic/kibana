@@ -22,6 +22,14 @@ import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { Headers } from '../../http/router';
 import { ClientFacade } from './client_facade';
 
+/**
+ * Returns a {@link ClientFacade | facade} to be used to query given es client.
+ *
+ * This is used both for the internal client and the scoped ones. authorization header
+ * must be passed when creating a scoped facade.
+ *
+ * @internal
+ */
 export const getClientFacade = (client: Client, headers: Headers = {}): ClientFacade => {
   const addHeaders = (options?: TransportRequestOptions): TransportRequestOptions => {
     if (!options) {

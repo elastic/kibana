@@ -18,24 +18,25 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { getClientFacade } from './client_wrapper';
+import { Logger } from '../../logging';
+import { GetAuthHeaders, isRealRequest, Headers } from '../../http';
+import { ensureRawRequest, filterHeaders } from '../../http/router';
+import { ScopeableRequest } from '../types';
+import { getClientFacade } from './get_client_facade';
 import { ClientFacade } from './client_facade';
 import { configureClient } from './configure_client';
-import { Logger } from '../../logging';
-import { GetAuthHeaders, isRealRequest } from '../../http';
-import { Headers } from '../../http/router';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
-import { ScopeableRequest } from './types';
-import { ensureRawRequest, filterHeaders } from '../../http/router';
 
 const noop = () => undefined;
 
-interface IClusterClient {
+/** @public **/
+export interface IClusterClient {
   asInternalUser: () => ClientFacade;
   asScoped: (request: ScopeableRequest) => IScopedClusterClient;
 }
 
+/** @internal **/
 export class ClusterClient implements IClusterClient {
   private readonly internalWrapper: ClientFacade;
   private readonly scopedClient: Client;
