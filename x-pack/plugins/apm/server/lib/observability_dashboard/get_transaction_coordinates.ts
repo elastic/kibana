@@ -48,10 +48,12 @@ export async function getTransactionCoordinates({
     },
   });
 
+  const deltaAsMinutes = (end - start) / 1000 / 60;
+
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count,
+      y: bucket.doc_count / deltaAsMinutes,
     })) || []
   );
 }

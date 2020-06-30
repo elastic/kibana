@@ -60,7 +60,7 @@ describe('Observability dashboard data', () => {
           transactions: {
             type: 'number',
             label: 'Transactions',
-            value: 6,
+            value: 2,
             color: '#6092c0',
           },
         },

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { sum } from 'lodash';
+import mean from 'lodash.mean';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FetchDataParams } from '../../../../observability/public/data_handler';
 import { ApmFetchDataResponse } from '../../../../observability/public/typings/fetch_data_response';
@@ -47,7 +47,8 @@ export const fetchLandingPageData = async (
           'xpack.apm.observabilityDashboard.stats.transactions',
           { defaultMessage: 'Transactions' }
         ),
-        value: sum(transactionCoordinates.map((coordinates) => coordinates.y)),
+        value:
+          mean(transactionCoordinates.map((coordinates) => coordinates.y)) || 0,
         color: theme.euiColorVis1,
       },
     },
