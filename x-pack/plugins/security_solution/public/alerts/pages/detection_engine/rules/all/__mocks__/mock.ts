@@ -150,11 +150,17 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   version: 1,
 });
 
+// TODO: update types mapping
 export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   isNew,
+  author: ['Elastic'],
+  isBuildingBlock: false,
+  timestampOverride: '',
+  ruleNameOverride: '',
+  license: 'Elastic License',
   name: 'Query with rule-id',
   description: '24/7',
-  severity: 'low',
+  severity: { value: 'low' },
   riskScore: 21,
   references: ['www.test.co'],
   falsePositives: ['test'],

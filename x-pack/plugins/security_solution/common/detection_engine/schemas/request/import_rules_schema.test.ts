@@ -253,6 +253,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -324,6 +327,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -373,6 +379,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -420,6 +429,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -465,6 +477,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -545,6 +560,9 @@ describe('import rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: ImportRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -1543,6 +1561,9 @@ describe('import rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1593,6 +1614,9 @@ describe('import rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1651,6 +1675,9 @@ describe('import rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1727,6 +1754,9 @@ describe('import rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',

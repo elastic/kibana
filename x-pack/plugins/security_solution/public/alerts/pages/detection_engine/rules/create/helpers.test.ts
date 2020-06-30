@@ -339,13 +339,17 @@ describe('helpers', () => {
     test('returns formatted object as AboutStepRuleJson', () => {
       const result: AboutStepRuleJson = formatAboutStepData(mockData);
       const expected = {
+        author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
+        isBuildingBlock: false,
+        license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        severity: 'low',
+        ruleNameOverride: '',
+        severity: { value: 'low' },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -364,6 +368,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        timestampOverride: '',
       };
 
       expect(result).toEqual(expected);
@@ -377,13 +382,17 @@ describe('helpers', () => {
       };
       const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
       const expected = {
+        author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
+        isBuildingBlock: false,
+        license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        severity: 'low',
+        ruleNameOverride: '',
+        severity: { value: 'low' },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -402,6 +411,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        timestampOverride: '',
       };
 
       expect(result).toEqual(expected);
@@ -414,12 +424,16 @@ describe('helpers', () => {
       };
       const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
       const expected = {
+        author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
+        isBuildingBlock: false,
+        license: 'Elastic License',
         name: 'Query with rule-id',
         references: ['www.test.co'],
         risk_score: 21,
-        severity: 'low',
+        ruleNameOverride: '',
+        severity: { value: 'low' },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -438,6 +452,7 @@ describe('helpers', () => {
             ],
           },
         ],
+        timestampOverride: '',
       };
 
       expect(result).toEqual(expected);
@@ -481,13 +496,17 @@ describe('helpers', () => {
       };
       const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
       const expected = {
+        author: ['Elastic'],
+        isBuildingBlock: false,
+        license: 'Elastic License',
         description: '24/7',
         false_positives: ['test'],
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        severity: 'low',
+        ruleNameOverride: '',
+        severity: { value: 'low' },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -496,6 +515,7 @@ describe('helpers', () => {
             technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
           },
         ],
+        timestampOverride: '',
       };
 
       expect(result).toEqual(expected);

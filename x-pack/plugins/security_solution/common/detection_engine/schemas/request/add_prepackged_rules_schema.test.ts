@@ -261,6 +261,9 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -333,6 +336,9 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -430,6 +436,9 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -508,6 +517,9 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -1354,6 +1366,9 @@ describe('add prepackaged rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1404,6 +1419,9 @@ describe('add prepackaged rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1462,6 +1480,9 @@ describe('add prepackaged rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1539,6 +1560,9 @@ describe('add prepackaged rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',

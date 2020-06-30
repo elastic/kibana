@@ -248,6 +248,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -318,6 +321,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -366,6 +372,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -412,6 +421,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -438,6 +450,9 @@ describe('create rules schema', () => {
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
     const payload: CreateRulesSchema = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -456,6 +471,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -535,6 +553,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -1228,6 +1249,9 @@ describe('create rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: CreateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1399,6 +1423,9 @@ describe('create rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: CreateRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
       type: 'machine_learning',
       anomaly_threshold: 50,
       machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
@@ -1459,6 +1486,9 @@ describe('create rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: CreateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1516,6 +1546,9 @@ describe('create rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: CreateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',
@@ -1591,6 +1624,9 @@ describe('create rules schema', () => {
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
       const expected: CreateRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
         rule_id: 'rule-1',
         description: 'some description',
         from: 'now-5m',

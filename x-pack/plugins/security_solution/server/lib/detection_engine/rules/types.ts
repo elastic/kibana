@@ -73,6 +73,13 @@ import {
   LastSuccessMessage,
   LastFailureAt,
   LastFailureMessage,
+  AuthorOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  RuleNameOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
@@ -165,6 +172,8 @@ export const isRuleStatusFindTypes = (
 export interface CreateRulesOptions {
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
   falsePositives: FalsePositives;
@@ -181,13 +190,18 @@ export interface CreateRulesOptions {
   immutable: Immutable;
   index: IndexOrUndefined;
   interval: Interval;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
+  severityMapping: SeverityMappingOrUndefined;
   tags: Tags;
   threat: Threat;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
@@ -202,6 +216,8 @@ export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
   falsePositives: FalsePositives;
@@ -217,13 +233,18 @@ export interface UpdateRulesOptions {
   ruleId: RuleIdOrUndefined;
   index: IndexOrUndefined;
   interval: Interval;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
+  severityMapping: SeverityMappingOrUndefined;
   tags: Tags;
   threat: Threat;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
@@ -237,6 +258,8 @@ export interface PatchRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
@@ -251,13 +274,18 @@ export interface PatchRulesOptions {
   filters: PartialFilter[];
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
+  license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
   severity: SeverityOrUndefined;
+  severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
   references: ReferencesOrUndefined;

@@ -15,14 +15,19 @@ export const threatDefault = [
 ];
 
 export const stepAboutDefaultValue: AboutStepRule = {
+  author: [],
   name: '',
   description: '',
+  isBuildingBlock: false,
   isNew: true,
-  severity: 'low',
+  severity: { value: 'low' },
   riskScore: 50,
   references: [''],
   falsePositives: [''],
+  license: '',
+  ruleNameOverride: '',
   tags: [],
+  timestampOverride: '',
   threat: threatDefault,
   note: '',
 };

@@ -21,9 +21,12 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
     getPrepackagedRules: (): AddPrepackagedRulesSchemaDecoded[] => {
       return [
         {
+          author: ['Elastic'],
           tags: [],
           rule_id: 'rule-1',
           risk_score: 50,
+          risk_score_mapping: [],
+          severity_mapping: [],
           description: 'some description',
           from: 'now-5m',
           to: 'now',

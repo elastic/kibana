@@ -55,6 +55,13 @@ import {
   filters,
   meta,
   note,
+  author,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  risk_score_mapping,
+  severity_mapping,
 } from '../common/schemas';
 import { DefaultListArray } from '../types/lists_default_array';
 
@@ -120,9 +127,16 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  author,
+  building_block_type,
+  license,
   throttle,
+  risk_score_mapping,
+  rule_name_override,
+  severity_mapping,
   status: job_status,
   status_date,
+  timestamp_override,
   last_success_at,
   last_success_message,
   last_failure_at,

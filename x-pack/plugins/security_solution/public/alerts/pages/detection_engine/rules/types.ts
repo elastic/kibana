@@ -52,13 +52,18 @@ interface StepRuleData {
   isNew: boolean;
 }
 export interface AboutStepRule extends StepRuleData {
+  author: string[];
   name: string;
   description: string;
-  severity: string;
+  isBuildingBlock: boolean;
+  severity: { value: string };
   riskScore: number;
   references: string[];
   falsePositives: string[];
+  license: string;
+  ruleNameOverride: string;
   tags: string[];
+  timestampOverride: string;
   threat: IMitreEnterpriseAttack[];
   note: string;
 }
@@ -106,7 +111,7 @@ export interface DefineStepRuleJson {
 export interface AboutStepRuleJson {
   name: string;
   description: string;
-  severity: string;
+  severity: { value: string };
   risk_score: number;
   references: string[];
   false_positives: string[];

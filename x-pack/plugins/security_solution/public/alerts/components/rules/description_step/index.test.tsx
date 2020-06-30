@@ -257,7 +257,7 @@ describe('description_step', () => {
     test('returns expected ListItems array when given valid inputs', () => {
       const result: ListItems[] = buildListItems(mockAboutStep, schema, mockFilterManager);
 
-      expect(result.length).toEqual(9);
+      expect(result.length).toEqual(11);
     });
   });
 

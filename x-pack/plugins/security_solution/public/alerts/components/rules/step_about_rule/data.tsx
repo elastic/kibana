@@ -12,7 +12,7 @@ import * as I18n from './translations';
 
 export type SeverityValue = 'low' | 'medium' | 'high' | 'critical';
 
-interface SeverityOptionItem {
+export interface SeverityOptionItem {
   value: SeverityValue;
   inputDisplay: React.ReactElement;
 }

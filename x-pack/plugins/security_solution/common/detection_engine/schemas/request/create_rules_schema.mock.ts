@@ -30,6 +30,9 @@ export const getCreateMlRulesSchemaMock = (ruleId = 'rule-1') => {
 };
 
 export const getCreateRulesSchemaDecodedMock = (): CreateRulesSchemaDecoded => ({
+  author: [],
+  severity_mapping: [],
+  risk_score_mapping: [],
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',

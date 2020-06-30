@@ -116,6 +116,14 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
   const { name, description, note } = determineDetailsValue(rule, detailsView);
   const {
+    // TODO: Update types mapping
+    // author,
+    // building_block_type: buildingBlockType,
+    // license,
+    // risk_score_mapping: riskScoreMapping,
+    // rule_name_override: ruleNameOverride,
+    // severity_mapping: severityMapping,
+    // timestamp_override: timestampOverride,
     references,
     severity,
     false_positives: falsePositives,
@@ -124,13 +132,19 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     threat,
   } = rule;
 
+  // TODO: Update types mapping
   return {
     isNew: false,
+    author: [],
+    isBuildingBlock: false,
+    license: 'Elastic License',
+    ruleNameOverride: '',
+    timestampOverride: '',
     name,
     description,
     note: note!,
     references,
-    severity,
+    severity: { value: severity },
     tags,
     riskScore,
     falsePositives,
