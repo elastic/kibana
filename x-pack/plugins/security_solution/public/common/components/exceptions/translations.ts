@@ -137,33 +137,3 @@ export const SHOWING_EXCEPTIONS = (items: number) =>
     values: { items },
     defaultMessage: 'Showing {items} {items, plural, =1 {exception} other {exceptions}}',
   });
-
-export const FIELD = i18n.translate('xpack.securitySolution.exceptions.fieldDescription', {
-  defaultMessage: 'Field',
-});
-
-export const OPERATOR = i18n.translate('xpack.securitySolution.exceptions.operatorDescription', {
-  defaultMessage: 'Operator',
-});
-
-export const VALUE = i18n.translate('xpack.securitySolution.exceptions.valueDescription', {
-  defaultMessage: 'Value',
-});
-
-export const EXCEPTION_FIELD_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.exceptions.exceptionFieldPlaceholderDescription',
-  {
-    defaultMessage: 'Search',
-  }
-);
-
-export const EXCEPTION_OPERATOR_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.exceptions.exceptionOperatorPlaceholderDescription',
-  {
-    defaultMessage: 'Operator',
-  }
-);
-
-export const DELETE = i18n.translate('xpack.securitySolution.exceptions.deleteButtonLabel', {
-  defaultMessage: 'Delete',
-});
