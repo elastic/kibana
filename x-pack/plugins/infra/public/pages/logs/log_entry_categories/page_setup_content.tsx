@@ -14,44 +14,42 @@ import {
   LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
-export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
+interface LogEntryCategoriesSetupContentProps {
+  onOpenSetup: () => void;
+}
+
+export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCategoriesSetupContent> = ({
+  onOpenSetup,
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(true);
-  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
-
   return (
-    <>
-      <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
-      <LogAnalysisSetupPage>
-        <LogAnalysisSetupPageHeader>
-          <FormattedMessage
-            id="xpack.infra.logs.logEntryCategories.setupTitle"
-            defaultMessage="Setup log category analysis"
-          />
-        </LogAnalysisSetupPageHeader>
-        <LogAnalysisSetupPageContent>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.infra.logs.logEntryCategories.setupDescription"
-                defaultMessage="To show log categories, machine learning jobs need to be set up."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiButton fill onClick={openFlyout}>
+    <LogAnalysisSetupPage>
+      <LogAnalysisSetupPageHeader>
+        <FormattedMessage
+          id="xpack.infra.logs.logEntryCategories.setupTitle"
+          defaultMessage="Setup log category analysis"
+        />
+      </LogAnalysisSetupPageHeader>
+      <LogAnalysisSetupPageContent>
+        <EuiText size="s">
+          <p>
             <FormattedMessage
-              id="xpack.infra.logs.logEntryCategories.showAnalysisSetupButtonLabel"
-              defaultMessage="ML setup"
+              id="xpack.infra.logs.logEntryCategories.setupDescription"
+              defaultMessage="To show log categories, machine learning jobs need to be set up."
             />
-          </EuiButton>
-        </LogAnalysisSetupPageContent>
-      </LogAnalysisSetupPage>
-    </>
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton fill onClick={onOpenSetup}>
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryCategories.showAnalysisSetupButtonLabel"
+            defaultMessage="ML setup"
+          />
+        </EuiButton>
+      </LogAnalysisSetupPageContent>
+    </LogAnalysisSetupPage>
   );
 };

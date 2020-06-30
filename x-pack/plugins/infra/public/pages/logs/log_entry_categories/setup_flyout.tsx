@@ -67,6 +67,7 @@ export const LogEntryCategoriesSetupFlyout: React.FC<LogEntryCategoriesSetupFlyo
         setUp,
         setupStatus,
         viewResults,
+        onClose,
       }),
     ],
     [
@@ -83,6 +84,7 @@ export const LogEntryCategoriesSetupFlyout: React.FC<LogEntryCategoriesSetupFlyo
       validatedIndices,
       validationErrors,
       viewResults,
+      onClose,
     ]
   );
 

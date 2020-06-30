@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -21,6 +21,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
+import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 export const LogEntryCategoriesPageContent = () => {
   const {
@@ -39,11 +40,22 @@ export const LogEntryCategoriesPageContent = () => {
 
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryCategoriesModuleContext();
 
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
       fetchJobStatus();
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
+
+  // Open flyout if there are no ML jobs
+  useEffect(() => {
+    if (jobStatus['log-entry-categories-count'] === 'missing') {
+      openFlyout();
+    }
+  }, [jobStatus, openFlyout]);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
@@ -64,10 +76,20 @@ export const LogEntryCategoriesPageContent = () => {
   } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isJobStatusWithResults(jobStatus['log-entry-categories-count'])) {
-    return <LogEntryCategoriesResultsContent />;
+    return (
+      <>
+        <LogEntryCategoriesResultsContent onOpenSetup={openFlyout} />
+        <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return <MissingSetupPrivilegesPrompt />;
   } else {
-    return <LogEntryCategoriesSetupContent />;
+    return (
+      <>
+        <LogEntryCategoriesSetupContent onOpenSetup={openFlyout} />
+        <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   }
 };

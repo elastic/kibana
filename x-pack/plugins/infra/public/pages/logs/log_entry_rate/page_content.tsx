@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -21,6 +21,7 @@ import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
+import { LogEntryRateSetupFlyout } from './setup_flyout';
 
 export const LogEntryRatePageContent = () => {
   const {
@@ -38,6 +39,10 @@ export const LogEntryRatePageContent = () => {
   } = useLogAnalysisCapabilitiesContext();
 
   const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryRateModuleContext();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
+  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
@@ -64,10 +69,20 @@ export const LogEntryRatePageContent = () => {
   } else if (setupStatus.type === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isJobStatusWithResults(jobStatus['log-entry-rate'])) {
-    return <LogEntryRateResultsContent />;
+    return (
+      <>
+        <LogEntryRateResultsContent onOpenSetup={openFlyout} />
+        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   } else if (!hasLogAnalysisSetupCapabilities) {
     return <MissingSetupPrivilegesPrompt />;
   } else {
-    return <LogEntryRateSetupContent />;
+    return (
+      <>
+        <LogEntryRateSetupContent onOpenSetup={openFlyout} />
+        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+      </>
+    );
   }
 };

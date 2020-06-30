@@ -67,6 +67,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
         setUp,
         setupStatus,
         viewResults,
+        onClose,
       }),
     ],
     [
@@ -83,6 +84,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
       validatedIndices,
       validationErrors,
       viewResults,
+      onClose,
     ]
   );
 

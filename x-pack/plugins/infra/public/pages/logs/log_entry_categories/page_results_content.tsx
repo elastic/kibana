@@ -21,11 +21,16 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
-import { LogEntryCategoriesSetupFlyout } from './setup_flyout';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
+interface LogEntryCategoriesResultsContentProps {
+  onOpenSetup: () => void;
+}
+
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
+  onOpenSetup,
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
@@ -124,17 +129,15 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     [setAutoRefresh]
   );
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
   const viewSetupFlyoutForReconfiguration = useCallback(() => {
     viewSetupForReconfiguration();
-    setIsFlyoutOpen(true);
-  }, [viewSetupForReconfiguration]);
+    onOpenSetup();
+  }, [onOpenSetup, viewSetupForReconfiguration]);
 
   const viewSetupFlyoutForUpdate = useCallback(() => {
     viewSetupForUpdate();
-    setIsFlyoutOpen(true);
-  }, [viewSetupForUpdate]);
+    onOpenSetup();
+  }, [onOpenSetup, viewSetupForUpdate]);
 
   const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
     topLogEntryCategories.length,
@@ -172,57 +175,54 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   );
 
   return (
-    <>
-      <LogEntryCategoriesSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
-      <ResultsContentPage>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem />
-                <EuiFlexItem grow={false}>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CategoryJobNoticesSection
-              hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
-              hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
-              hasStoppedJobs={hasStoppedJobs}
-              isFirstUse={isFirstUse}
-              onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
-              onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
-              qualityWarnings={categoryQualityWarnings}
+    <ResultsContentPage>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="m">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CategoryJobNoticesSection
+            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+            hasStoppedJobs={hasStoppedJobs}
+            isFirstUse={isFirstUse}
+            onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
+            onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
+            qualityWarnings={categoryQualityWarnings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel paddingSize="m">
+            <TopCategoriesSection
+              availableDatasets={logEntryCategoryDatasets}
+              isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
+              isLoadingTopCategories={isLoadingTopLogEntryCategories}
+              jobId={jobIds['log-entry-categories-count']}
+              onChangeDatasetSelection={setCategoryQueryDatasets}
+              onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
+              selectedDatasets={categoryQueryDatasets}
+              sourceId={sourceId}
+              timeRange={categoryQueryTimeRange.timeRange}
+              topCategories={topLogEntryCategories}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <TopCategoriesSection
-                availableDatasets={logEntryCategoryDatasets}
-                isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
-                isLoadingTopCategories={isLoadingTopLogEntryCategories}
-                jobId={jobIds['log-entry-categories-count']}
-                onChangeDatasetSelection={setCategoryQueryDatasets}
-                onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
-                selectedDatasets={categoryQueryDatasets}
-                sourceId={sourceId}
-                timeRange={categoryQueryTimeRange.timeRange}
-                topCategories={topLogEntryCategories}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ResultsContentPage>
-    </>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ResultsContentPage>
   );
 };
 

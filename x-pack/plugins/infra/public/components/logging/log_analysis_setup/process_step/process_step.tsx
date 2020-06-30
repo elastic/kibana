@@ -17,7 +17,7 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { CreateMLJobsButton } from './create_ml_jobs_button';
@@ -30,6 +30,7 @@ interface ProcessStepProps {
   setUp: () => void;
   setupStatus: SetupStatus;
   viewResults: () => void;
+  onClose: () => void;
 }
 
 export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProps => ({
@@ -52,7 +53,12 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
   setUp,
   setupStatus,
   viewResults,
+  onClose,
 }) => {
+  const onViewResults = useCallback(() => {
+    viewResults();
+    onClose();
+  }, [viewResults, onClose]);
   return (
     <EuiText size="s">
       {setupStatus.type === 'pending' ? (
@@ -94,7 +100,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             defaultMessage="The ML jobs have been set up successfully"
           />
           <EuiSpacer />
-          <EuiButton fill onClick={viewResults}>
+          <EuiButton fill onClick={onViewResults}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
               defaultMessage="View results"
