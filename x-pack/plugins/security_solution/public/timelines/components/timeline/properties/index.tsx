@@ -125,18 +125,18 @@ export const Properties = React.memo<Props>(
       (id: string) => {
         onCloseCaseModal();
 
-        dispatch(
-          setInsertTimeline({
-            graphEventId,
-            timelineId,
-            timelineSavedObjectId: currentTimeline.savedObjectId,
-            timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
-          })
-        );
-
         navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
           path: getCaseDetailsUrl({ id }),
-        });
+        }).then(() =>
+          dispatch(
+            setInsertTimeline({
+              graphEventId,
+              timelineId,
+              timelineSavedObjectId: currentTimeline.savedObjectId,
+              timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+            })
+          )
+        );
       },
       [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
     );
