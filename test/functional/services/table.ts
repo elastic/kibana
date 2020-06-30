@@ -44,11 +44,11 @@ export function TableProvider({ getService }: FtrProviderContext) {
       const $ = await element.parseDomContent();
       return $('tr')
         .toArray()
-        .map(row =>
+        .map((row) =>
           $(row)
             .find('td')
             .toArray()
-            .map(cell =>
+            .map((cell) =>
               $(cell)
                 .text()
                 .replace(/&nbsp;/g, '')

@@ -16,7 +16,7 @@ import {
   RouteFactoryFn,
   HttpMethod,
   Route,
-  Params
+  Params,
 } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
@@ -35,17 +35,17 @@ export function createApi() {
 
       let config = {} as APMConfig;
 
-      config$.subscribe(val => {
+      config$.subscribe((val) => {
         config = val;
       });
 
-      factoryFns.forEach(fn => {
+      factoryFns.forEach((fn) => {
         const {
           params = {},
           path,
           options = { tags: ['access:apm'] },
           method,
-          handler
+          handler,
         } = fn(core) as Route<string, HttpMethod, Params, any>;
 
         const routerMethod = (method || 'GET').toLowerCase() as
@@ -68,7 +68,7 @@ export function createApi() {
             ? t.exact(t.intersection([params.query, debugRt]))
             : t.exact(debugRt),
           path: params.path ? t.exact(params.path) : t.strict({}),
-          body: bodyRt || t.null
+          body: bodyRt || t.null,
         };
 
         const anyObject = schema.object({}, { unknowns: 'allow' });
@@ -84,8 +84,8 @@ export function createApi() {
               // https://github.com/elastic/kibana/issues/50179
               body: schema.nullable(anyObject),
               params: anyObject,
-              query: anyObject
-            }
+              query: anyObject,
+            },
           },
           async (context, request, response) => {
             try {
@@ -94,8 +94,8 @@ export function createApi() {
                 body: request.body,
                 query: {
                   _debug: 'false',
-                  ...request.query
-                }
+                  ...request.query,
+                },
               };
 
               const parsedParams = (Object.keys(rts) as Array<
@@ -128,7 +128,7 @@ export function createApi() {
 
                 return {
                   ...acc,
-                  [key]: parsedValue
+                  [key]: parsedValue,
                 };
               }, {} as Record<keyof typeof params, any>);
 
@@ -142,8 +142,8 @@ export function createApi() {
                   // it's not defined in the route.
                   params: pick(parsedParams, ...Object.keys(params), 'query'),
                   config,
-                  logger
-                }
+                  logger,
+                },
               });
 
               return response.ok({ body: data });
@@ -156,7 +156,7 @@ export function createApi() {
           }
         );
       });
-    }
+    },
   };
 
   return api;
@@ -180,7 +180,7 @@ function convertBoomToKibanaResponse(
     default:
       return response.custom({
         statusCode: error.output.statusCode,
-        ...opts
+        ...opts,
       });
   }
 }

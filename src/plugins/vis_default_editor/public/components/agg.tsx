@@ -225,7 +225,7 @@ function DefaultEditorAgg({
     }
     return (
       <div {...dragHandleProps}>
-        {actionIcons.map(icon => {
+        {actionIcons.map((icon) => {
           if (icon.id === 'dragHandle') {
             return (
               <EuiIconTip

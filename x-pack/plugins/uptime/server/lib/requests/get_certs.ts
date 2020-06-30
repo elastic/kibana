@@ -51,7 +51,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
             },
             {
               range: {
-                '@timestamp': {
+                'monitor.timespan': {
                   gte: from,
                   lte: to,
                 },

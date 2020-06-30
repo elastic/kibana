@@ -5,9 +5,9 @@
  */
 
 import { Subscription } from 'rxjs';
-import { History } from 'history';
-import { createHashHistory } from 'history';
+import { History, createHashHistory } from 'history';
 import { MonitoringPluginDependencies } from './types';
+import { Legacy } from './legacy_shims';
 
 import {
   RefreshInterval,
@@ -83,7 +83,7 @@ export class GlobalState {
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 
     this.stateContainer = createStateContainer(initialStateFromUrl, {
-      set: state => (prop, value) => ({ ...state, [prop]: value }),
+      set: (state) => (prop, value) => ({ ...state, [prop]: value }),
     });
 
     this.stateSyncRef = syncState({
@@ -95,11 +95,11 @@ export class GlobalState {
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.lastAssignedState = this.getState();
       if (!this.stateContainer.get() && this.lastKnownGlobalState) {
-        rootScope.$applyAsync(() =>
-          ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace()
-        );
+        ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace();
       }
+      Legacy.shims.breadcrumbs.update();
       this.syncExternalState(externalState);
+      rootScope.$applyAsync();
     });
 
     this.syncQueryStateWithUrlManager = syncQueryStateWithUrl(queryService, this.stateStorage);

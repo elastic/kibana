@@ -21,7 +21,7 @@ export class SpacesLicenseService {
   public setup({ license$ }: SetupDeps) {
     let rawLicense: Readonly<ILicense> | undefined;
 
-    this.licenseSubscription = license$.subscribe(nextRawLicense => {
+    this.licenseSubscription = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
     });
 

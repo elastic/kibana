@@ -150,7 +150,7 @@ export class ToastsApi implements IToasts {
   public remove(toastOrId: Toast | string) {
     const toRemove = typeof toastOrId === 'string' ? toastOrId : toastOrId.id;
     const list = this.toasts$.getValue();
-    const listWithoutToast = list.filter(t => t.id !== toRemove);
+    const listWithoutToast = list.filter((t) => t.id !== toRemove);
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }

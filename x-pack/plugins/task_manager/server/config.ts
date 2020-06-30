@@ -30,7 +30,7 @@ export const configSchema = schema.object({
   /* The name of the index used to store task information. */
   index: schema.string({
     defaultValue: '.kibana_task_manager',
-    validate: val => {
+    validate: (val) => {
       if (val.toLowerCase() === '.tasks') {
         return `"${val}" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager`;
       }

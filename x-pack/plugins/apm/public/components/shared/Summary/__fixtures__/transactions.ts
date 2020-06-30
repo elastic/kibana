@@ -11,7 +11,7 @@ export const httpOk: Transaction = {
   agent: { name: 'go', version: '0' },
   http: {
     request: { method: 'GET' },
-    response: { status_code: 200 }
+    response: { status_code: 200 },
   },
   processor: { event: 'transaction', name: 'transaction' },
   service: { name: 'testServiceName' },
@@ -22,15 +22,15 @@ export const httpOk: Transaction = {
     id: 'testId',
     sampled: false,
     type: 'testType',
-    duration: { us: 0 }
-  }
+    duration: { us: 0 },
+  },
 };
 
 export const httpRumOK: Transaction = {
   '@timestamp': '0',
   agent: { name: 'rum-js', version: '0' },
   http: {
-    response: { status_code: 200 }
+    response: { status_code: 200 },
   },
   processor: { event: 'transaction', name: 'transaction' },
   service: { name: 'testServiceName' },
@@ -38,12 +38,12 @@ export const httpRumOK: Transaction = {
   trace: { id: 'testTrace' },
   transaction: {
     page: {
-      url: 'elastic.co'
+      url: 'elastic.co',
     },
     name: 'testTransaction',
     id: 'testId',
     sampled: false,
     type: 'testType',
-    duration: { us: 0 }
-  }
+    duration: { us: 0 },
+  },
 };

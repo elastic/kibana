@@ -25,27 +25,23 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
+import { IndexPattern, IIndexPatternFieldList } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
-import { FieldFormatsStart } from '../../field_formats';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
-  let fieldFormats: FieldFormatsStart;
 
   beforeEach(() => {
     jest.restoreAllMocks();
     mockDataServices();
-    fieldFormats = fieldFormatsServiceMock.createStartContract();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 
   describe('#toDsl', () => {
     it('calls #write()', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -60,7 +56,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the type name as the agg name', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -75,7 +71,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the params from #write() output as the agg params', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -105,7 +101,7 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
 
       const histoConfig = ac.byName('date_histogram')[0];
       const avgConfig = ac.byName('avg')[0];
@@ -215,8 +211,8 @@ describe('AggConfig', () => {
 
     testsIdentical.forEach((configState, index) => {
       it(`identical aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
-        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
+        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry });
+        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -256,8 +252,8 @@ describe('AggConfig', () => {
 
     testsIdenticalDifferentOrder.forEach((test, index) => {
       it(`identical aggregations (${index}) - init json is in different order`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -321,8 +317,8 @@ describe('AggConfig', () => {
 
     testsDifferent.forEach((test, index) => {
       it(`different aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(false);
       });
     });
@@ -330,7 +326,7 @@ describe('AggConfig', () => {
 
   describe('#serialize', () => {
     it('includes the aggs id, params, type and schema', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -361,8 +357,8 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
-      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry });
 
       // this relies on the assumption that js-engines consistently loop over properties in insertion order.
       // most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
@@ -370,21 +366,112 @@ describe('AggConfig', () => {
     });
   });
 
-  describe('#toExpressionAst', () => {
+  describe('#toSerializedFieldFormat', () => {
     beforeEach(() => {
-      fieldFormats.getDefaultInstance = (() => ({
-        getConverterFor: (t?: string) => t || identity,
-      })) as any;
-      indexPattern.fields.getByName = name =>
-        ({
-          format: {
-            getConverterFor: (t?: string) => t || identity,
-          },
-        } as IndexPatternField);
+      indexPattern.fields.getByName = identity as IIndexPatternFieldList['getByName'];
     });
 
+    it('works with aggs that have a special format type', () => {
+      const configStates = [
+        {
+          type: 'count',
+          params: {},
+        },
+        {
+          type: 'date_histogram',
+          params: { field: '@timestamp' },
+        },
+        {
+          type: 'terms',
+          params: { field: 'machine.os.keyword' },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "date",
+            "params": Object {
+              "pattern": "HH:mm:ss.SSS",
+            },
+          },
+          Object {
+            "id": "terms",
+            "params": Object {
+              "id": undefined,
+              "missingBucketLabel": "Missing",
+              "otherBucketLabel": "Other",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('works with pipeline aggs', () => {
+      const configStates = [
+        {
+          type: 'max_bucket',
+          params: {
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            buckets_path: '1',
+            customMetric: {
+              type: 'cardinality',
+              params: {
+                field: 'bytes',
+              },
+            },
+          },
+        },
+        {
+          type: 'percentile_ranks',
+          id: 'myMetricAgg',
+          params: {},
+        },
+        {
+          type: 'cumulative_sum',
+          params: {
+            metricAgg: 'myMetricAgg',
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "number",
+          },
+          Object {
+            "id": "percent",
+          },
+          Object {
+            "id": "percent",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('#toExpressionAst', () => {
     it('works with primitive param types', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         enabled: true,
         type: 'terms',
@@ -433,7 +520,7 @@ describe('AggConfig', () => {
     });
 
     it('creates a subexpression for params of type "agg"', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         type: 'terms',
         params: {
@@ -500,7 +587,7 @@ describe('AggConfig', () => {
       // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
       const range: MetricAggType = typesRegistry.get('range');
       range.expressionName = 'aggRange';
-      const rangesParam = range.params.find(p => p.name === 'ranges');
+      const rangesParam = range.params.find((p) => p.name === 'ranges');
       rangesParam!.toExpressionAst = (val: any) => ({
         type: 'function',
         function: 'aggRanges',
@@ -509,7 +596,7 @@ describe('AggConfig', () => {
         },
       });
 
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         type: 'range',
         params: {
@@ -540,7 +627,7 @@ describe('AggConfig', () => {
     });
 
     it('stringifies any other params which are an object', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         type: 'terms',
         params: {
@@ -555,7 +642,7 @@ describe('AggConfig', () => {
     });
 
     it(`returns undefined if an expressionName doesn't exist on the agg type`, () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       const configStates = {
         type: 'unknown type',
         params: {},
@@ -569,7 +656,7 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
       aggConfig = ac.createAggConfig({ type: 'count' } as CreateAggConfigParams);
     });
 
@@ -593,90 +680,6 @@ describe('AggConfig', () => {
       aggConfig.type = (undefined as unknown) as AggType;
       const label = aggConfig.makeLabel();
       expect(label).toBe('');
-    });
-  });
-
-  describe('#fieldFormatter - custom getFormat handler', () => {
-    it('returns formatter from getFormat handler', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
-      const configStates = {
-        enabled: true,
-        type: 'count',
-        schema: 'metric',
-        params: { field: '@timestamp' },
-      };
-      const aggConfig = ac.createAggConfig(configStates);
-
-      const fieldFormatter = aggConfig.fieldFormatter();
-      expect(fieldFormatter).toBeDefined();
-      expect(fieldFormatter('text')).toBe('text');
-    });
-  });
-
-  // TODO: Converting these field formatter tests from browser tests to unit
-  // tests makes them much less helpful due to the extensive use of mocking.
-  // We should revisit these and rewrite them into something more useful.
-  describe('#fieldFormatter - no custom getFormat handler', () => {
-    let aggConfig: AggConfig;
-
-    beforeEach(() => {
-      fieldFormats.getDefaultInstance = (() => ({
-        getConverterFor: (t?: string) => t || identity,
-      })) as any;
-      indexPattern.fields.getByName = name =>
-        ({
-          format: {
-            getConverterFor: (t?: string) => t || identity,
-          },
-        } as IndexPatternField);
-
-      const configStates = {
-        enabled: true,
-        type: 'histogram',
-        schema: 'bucket',
-        params: {
-          field: 'bytes',
-        },
-      };
-      const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry, fieldFormats });
-      aggConfig = ac.createAggConfig(configStates);
-    });
-
-    it("returns the field's formatter", () => {
-      aggConfig.params.field = {
-        format: {
-          getConverterFor: (t?: string) => t || identity,
-        },
-      };
-      expect(aggConfig.fieldFormatter().toString()).toBe(
-        aggConfig
-          .getField()
-          .format.getConverterFor()
-          .toString()
-      );
-    });
-
-    it('returns the string format if the field does not have a format', () => {
-      const agg = aggConfig;
-      agg.params.field = { type: 'number', format: null };
-      const fieldFormatter = agg.fieldFormatter();
-      expect(fieldFormatter).toBeDefined();
-      expect(fieldFormatter('text')).toBe('text');
-    });
-
-    it('returns the string format if there is no field', () => {
-      const agg = aggConfig;
-      delete agg.params.field;
-      const fieldFormatter = agg.fieldFormatter();
-      expect(fieldFormatter).toBeDefined();
-      expect(fieldFormatter('text')).toBe('text');
-    });
-
-    it('returns the html converter if "html" is passed in', () => {
-      const field = indexPattern.fields.getByName('bytes');
-      expect(aggConfig.fieldFormatter('html').toString()).toBe(
-        field!.format.getConverterFor('html').toString()
-      );
     });
   });
 });

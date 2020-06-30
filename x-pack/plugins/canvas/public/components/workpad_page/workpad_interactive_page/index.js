@@ -76,7 +76,7 @@ function closest(s) {
 
 // If you interact with an embeddable panel, only the header should be draggable
 // This function will determine if an element is an embeddable body or not
-const isEmbeddableBody = element => {
+const isEmbeddableBody = (element) => {
   const hasClosest = typeof element.closest === 'function';
 
   if (hasClosest) {
@@ -94,7 +94,7 @@ const isEmbeddableBody = element => {
 // Some elements in an embeddable may be portaled out of the embeddable container.
 // We do not want clicks on those to trigger drags, etc, in the workpad. This function
 // will check to make sure the clicked item is actually in the container
-const isInWorkpad = element => {
+const isInWorkpad = (element) => {
   const hasClosest = typeof element.closest === 'function';
   const workpadContainerSelector = '.canvasWorkpadContainer';
 
@@ -114,7 +114,7 @@ const componentLayoutState = ({
   width,
 }) => {
   const shapes = shapesForNodes(elements);
-  const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
+  const selectedShapes = selectedToplevelNodes.filter((e) => shapes.find((s) => s.id === e));
   const newState = {
     primaryUpdate: null,
     currentScene: {
@@ -145,13 +145,13 @@ const mapStateToProps = (state, ownProps) => {
   const selectedToplevelNodes = state.transient.selectedToplevelNodes;
   const nodes = getNodes(state, ownProps.pageId);
   const selectedPrimaryShapeObjects = selectedToplevelNodes
-    .map(id => nodes.find(s => s.id === id))
-    .filter(shape => shape);
+    .map((id) => nodes.find((s) => s.id === id))
+    .filter((shape) => shape);
   const selectedPersistentPrimaryNodes = flatten(
-    selectedPrimaryShapeObjects.map(shape =>
-      nodes.find(n => n.id === shape.id) // is it a leaf or a persisted group?
+    selectedPrimaryShapeObjects.map((shape) =>
+      nodes.find((n) => n.id === shape.id) // is it a leaf or a persisted group?
         ? [shape.id]
-        : nodes.filter(s => s.parent === shape.id).map(s => s.id)
+        : nodes.filter((s) => s.parent === shape.id).map((s) => s.id)
     )
   );
   const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
@@ -160,23 +160,25 @@ const mapStateToProps = (state, ownProps) => {
     isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
     elements: nodes,
     selectedToplevelNodes,
-    selectedNodes: selectedNodeIds.map(id => nodes.find(s => s.id === id)),
+    selectedNodes: selectedNodeIds.map((id) => nodes.find((s) => s.id === id)),
     pageStyle: getPageById(state, ownProps.pageId).style,
     zoomScale: getZoomScale(state),
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   dispatch,
   insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
   removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
-  selectToplevelNodes: nodes =>
-    dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
+  selectToplevelNodes: (nodes) =>
+    dispatch(selectToplevelNodes(nodes.filter((e) => !e.position.parent).map((e) => e.id))),
   elementLayer: (pageId, elementId, movement) =>
     dispatch(elementLayer({ pageId, elementId, movement })),
-  setMultiplePositions: pageId => repositionedNodes =>
+  setMultiplePositions: (pageId) => (repositionedNodes) =>
     dispatch(
-      setMultiplePositions(repositionedNodes.map(node => ({ ...node, pageId, elementId: node.id })))
+      setMultiplePositions(
+        repositionedNodes.map((node) => ({ ...node, pageId, elementId: node.id }))
+      )
     ),
 });
 
@@ -226,8 +228,8 @@ export const InteractivePage = compose(
     };
   }),
   withProps(({ aeroStore, elements }) => {
-    const elementLookup = new Map(elements.map(element => [element.id, element]));
-    const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map(shape => {
+    const elementLookup = new Map(elements.map((element) => [element.id, element]));
+    const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
         ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
@@ -240,7 +242,7 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: element => {
+    canDragElement: (element) => {
       return !isEmbeddableBody(element) && isInWorkpad(element);
 
       const hasClosest = typeof element.closest === 'function';

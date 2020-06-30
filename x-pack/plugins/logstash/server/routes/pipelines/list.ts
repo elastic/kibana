@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller, IRouter } from 'src/core/server';
+import { LegacyAPICaller, IRouter } from 'src/core/server';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../common/constants';
@@ -13,7 +13,7 @@ import { PipelineListItem } from '../../models/pipeline_list_item';
 import { fetchAllFromScroll } from '../../lib/fetch_all_from_scroll';
 import { checkLicense } from '../../lib/check_license';
 
-async function fetchPipelines(callWithRequest: APICaller) {
+async function fetchPipelines(callWithRequest: LegacyAPICaller) {
   const params = {
     index: INDEX_NAMES.PIPELINES,
     scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
@@ -40,7 +40,7 @@ export function registerPipelinesListRoute(router: IRouter) {
           const client = context.logstash!.esClient;
           const pipelinesHits = await fetchPipelines(client.callAsCurrentUser);
 
-          const pipelines = pipelinesHits.map(pipeline => {
+          const pipelines = pipelinesHits.map((pipeline) => {
             return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
           });
 

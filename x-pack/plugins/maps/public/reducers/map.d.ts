@@ -66,7 +66,6 @@ export type MapState = {
   openTooltips: TooltipState[];
   mapState: MapContext;
   selectedLayerId: string | null;
-  __transientLayerId: string | null;
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;

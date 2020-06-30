@@ -17,6 +17,6 @@ export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
 
   return {
     trace,
-    errorsPerTransaction
+    errorsPerTransaction,
   };
 }

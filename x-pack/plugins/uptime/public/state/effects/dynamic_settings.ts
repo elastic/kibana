@@ -34,7 +34,7 @@ export function* setDynamicSettingsEffect() {
   const couldNotSaveSettingsText = i18n.translate('xpack.uptime.settings.error.couldNotSave', {
     defaultMessage: 'Could not save settings!',
   });
-  yield takeLatest(String(setDynamicSettings), function*(action: Action<DynamicSettings>) {
+  yield takeLatest(String(setDynamicSettings), function* (action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
         const err = new Error('Cannot fetch effect without a payload');

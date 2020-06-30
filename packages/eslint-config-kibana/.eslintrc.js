@@ -40,6 +40,10 @@ module.exports = {
           disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
         },
         {
+          from: 'numeral',
+          to: '@elastic/numeral',
+        },
+        {
           from: '@kbn/elastic-idx',
           to: false,
           disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
@@ -51,6 +55,15 @@ module.exports = {
         {
           from: 'react-router',
           to: 'react-router-dom',
+        },
+        {
+          from: '@kbn/ui-shared-deps/monaco',
+          to: '@kbn/monaco',
+        },
+        {
+          from: 'monaco-editor',
+          to: false,
+          disallowedMessage: `Don't import monaco directly, use or add exports to @kbn/monaco`
         },
       ],
     ],

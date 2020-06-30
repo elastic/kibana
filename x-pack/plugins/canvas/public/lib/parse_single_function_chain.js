@@ -17,7 +17,7 @@ export function parseSingleFunctionChain(filterString) {
     throw new Error('Could not find function name in chain');
   }
 
-  const args = mapValues(get(ast, 'chain[0].arguments'), val => {
+  const args = mapValues(get(ast, 'chain[0].arguments'), (val) => {
     // TODO Check for literals only
     return map(val, 'value');
   });

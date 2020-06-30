@@ -6,7 +6,7 @@
 
 import { getWatcher, deleteWatcher, putWatcher } from './util';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   describe('watcher app', function describeIndexTests() {
     const config = getService('config');
     const servers = config.get('servers');
@@ -22,7 +22,7 @@ export default function({ getService, getPageObjects }) {
     const REPORTING_TEST_EMAILS = process.env.REPORTING_TEST_EMAILS;
 
     const PageObjects = getPageObjects(['common']);
-    describe('PDF Reporting watch', function() {
+    describe('PDF Reporting watch', function () {
       let id = 'watcher_report-';
       id = id + new Date().getTime(); // For debugging.
       const watch = { id };

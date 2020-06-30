@@ -39,7 +39,7 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-const createLevelSchema = schema.oneOf(
+const levelSchema = schema.oneOf(
   [
     schema.literal('all'),
     schema.literal('fatal'),
@@ -55,21 +55,26 @@ const createLevelSchema = schema.oneOf(
   }
 );
 
-const createLoggerSchema = schema.object({
+/**
+ * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
+ *
+ * @public
+ */
+export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
   context: schema.string(),
-  level: createLevelSchema,
+  level: levelSchema,
 });
 
-/** @internal */
-export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+/** @public */
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
 export const config = {
   path: 'logging',
   schema: schema.object({
     appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
       defaultValue: new Map<string, AppenderConfigType>(),
     }),
-    loggers: schema.arrayOf(createLoggerSchema, {
+    loggers: schema.arrayOf(loggerSchema, {
       defaultValue: [],
     }),
     root: schema.object(
@@ -78,7 +83,7 @@ export const config = {
           defaultValue: [DEFAULT_APPENDER_NAME],
           minSize: 1,
         }),
-        level: createLevelSchema,
+        level: levelSchema,
       },
       {
         validate(rawConfig) {
@@ -92,6 +97,29 @@ export const config = {
 };
 
 export type LoggingConfigType = TypeOf<typeof config.schema>;
+
+/**
+ * Config schema for validating the inputs to the {@link LoggingServiceStart.configure} API.
+ * See {@link LoggerContextConfigType}.
+ *
+ * @public
+ */
+export const loggerContextConfigSchema = schema.object({
+  appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
+    defaultValue: new Map<string, AppenderConfigType>(),
+  }),
+
+  loggers: schema.arrayOf(loggerSchema, { defaultValue: [] }),
+});
+
+/** @public */
+export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
+/** @public */
+export interface LoggerContextConfigInput {
+  // config-schema knows how to handle either Maps or Records
+  appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
+  loggers?: LoggerConfigType[];
+}
 
 /**
  * Describes the config used to fully setup logging subsystem.
@@ -147,9 +175,33 @@ export class LoggingConfig {
    */
   public readonly loggers: Map<string, LoggerConfigType> = new Map();
 
-  constructor(configType: LoggingConfigType) {
+  constructor(private readonly configType: LoggingConfigType) {
     this.fillAppendersConfig(configType);
     this.fillLoggersConfig(configType);
+  }
+
+  /**
+   * Returns a new LoggingConfig that merges the existing config with the specified config.
+   *
+   * @remarks
+   * Does not support merging the `root` config property.
+   *
+   * @param contextConfig
+   */
+  public extend(contextConfig: LoggerContextConfigType) {
+    // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
+    const mergedLoggers = new Map<string, LoggerConfigType>([
+      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+    ]);
+
+    const mergedConfig: LoggingConfigType = {
+      appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
+      loggers: [...mergedLoggers.values()],
+      root: this.configType.root,
+    };
+
+    return new LoggingConfig(mergedConfig);
   }
 
   private fillAppendersConfig(loggingConfig: LoggingConfigType) {
@@ -167,13 +219,13 @@ export class LoggingConfig {
     ];
 
     const loggerConfigByContext = new Map(
-      loggers.map(loggerConfig => toTuple(loggerConfig.context, loggerConfig))
+      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
       // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
-        appenderKey => !this.appenders.has(appenderKey)
+        (appenderKey) => !this.appenders.has(appenderKey)
       );
 
       if (unsupportedAppenderKey) {

@@ -28,10 +28,7 @@ export type ArrayOptions<T> = TypeOptions<T[]> & {
 
 export class ArrayType<T> extends Type<T[]> {
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
-    let schema = internals
-      .array()
-      .items(type.getSchema().optional())
-      .sparse(false);
+    let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
     if (options.minSize !== undefined) {
       schema = schema.min(options.minSize);

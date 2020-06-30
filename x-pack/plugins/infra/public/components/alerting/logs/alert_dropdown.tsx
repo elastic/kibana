@@ -15,8 +15,8 @@ export const AlertDropdown = () => {
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const manageAlertsLinkProps = useLinkProps(
     {
-      app: 'kibana',
-      hash: 'management/kibana/triggersActions/alerts',
+      app: 'management',
+      pathname: '/insightsAndAlerting/triggersActions/alerts',
     },
     {
       hrefOnly: true,

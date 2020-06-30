@@ -7,7 +7,7 @@
 import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
-import { fitToDataBounds } from '../../../actions/map_actions';
+import { fitToDataBounds } from '../../../actions';
 import { getFittableLayers } from '../../../selectors/map_selectors';
 import { FitToData } from './fit_to_data';
 
@@ -20,7 +20,7 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     fitToBounds: () => {
-      dispatch(fitToDataBounds());
+      dispatch<any>(fitToDataBounds());
     },
   };
 }

@@ -59,6 +59,11 @@ describe('createFieldList', () => {
           "type": "boolean",
           "value": true,
         },
+        Object {
+          "name": "references",
+          "type": "array",
+          "value": "[]",
+        },
       ]
     `);
   });
@@ -75,6 +80,11 @@ describe('createFieldList', () => {
           "value": "{
         \\"data\\": \\"value\\"
       }",
+        },
+        Object {
+          "name": "references",
+          "type": "array",
+          "value": "[]",
         },
       ]
     `);
@@ -93,6 +103,48 @@ describe('createFieldList', () => {
         1,
         2,
         3
+      ]",
+        },
+        Object {
+          "name": "references",
+          "type": "array",
+          "value": "[]",
+        },
+      ]
+    `);
+  });
+
+  it(`generates a field for the object's references`, () => {
+    const obj = createObject(
+      {
+        someString: 'foo',
+      },
+      [
+        { id: 'ref1', type: 'type', name: 'Ref 1' },
+        { id: 'ref12', type: 'other-type', name: 'Ref 2' },
+      ]
+    );
+    expect(createFieldList(obj)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "name": "someString",
+          "type": "text",
+          "value": "foo",
+        },
+        Object {
+          "name": "references",
+          "type": "array",
+          "value": "[
+        {
+          \\"id\\": \\"ref1\\",
+          \\"type\\": \\"type\\",
+          \\"name\\": \\"Ref 1\\"
+        },
+        {
+          \\"id\\": \\"ref12\\",
+          \\"type\\": \\"other-type\\",
+          \\"name\\": \\"Ref 2\\"
+        }
       ]",
         },
       ]
@@ -125,6 +177,11 @@ describe('createFieldList', () => {
           "name": "firstLevel.secondLevel.secondLevelFieldB",
           "type": "text",
           "value": "B",
+        },
+        Object {
+          "name": "references",
+          "type": "array",
+          "value": "[]",
         },
       ]
     `);

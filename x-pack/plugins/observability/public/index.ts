@@ -5,13 +5,15 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { Plugin, ClientSetup, ClientStart } from './plugin';
+import { Plugin, ObservabilityPluginSetup } from './plugin';
 
-export const plugin: PluginInitializer<ClientSetup, ClientStart> = (
+export const plugin: PluginInitializer<ObservabilityPluginSetup, void> = (
   context: PluginInitializerContext
 ) => {
   return new Plugin(context);
 };
+
+export { ObservabilityPluginSetup };
 
 export * from './components/action_menu';
 

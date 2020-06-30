@@ -16,7 +16,6 @@ import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_bor
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
-import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
@@ -26,6 +25,7 @@ import {
   LABEL_BORDER_SIZES,
   VECTOR_STYLES,
   STYLE_TYPE,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../../common/constants';
 
 export class VectorStyleEditor extends Component {
@@ -56,7 +56,7 @@ export class VectorStyleEditor extends Component {
   }
 
   async _loadFields() {
-    const getFieldMeta = async field => {
+    const getFieldMeta = async (field) => {
       return {
         label: await field.getLabel(),
         name: field.getName(),
@@ -75,13 +75,13 @@ export class VectorStyleEditor extends Component {
 
     this.setState({
       fields: fieldsArrayAll,
-      ordinalAndCategoricalFields: fieldsArrayAll.filter(field => {
+      ordinalAndCategoricalFields: fieldsArrayAll.filter((field) => {
         return (
           CATEGORICAL_DATA_TYPES.includes(field.type) || ORDINAL_DATA_TYPES.includes(field.type)
         );
       }),
-      dateFields: fieldsArrayAll.filter(field => field.type === 'date'),
-      numberFields: fieldsArrayAll.filter(field => field.type === 'number'),
+      dateFields: fieldsArrayAll.filter((field) => field.type === 'date'),
+      numberFields: fieldsArrayAll.filter((field) => field.type === 'number'),
     });
   }
 
@@ -96,11 +96,11 @@ export class VectorStyleEditor extends Component {
     }
 
     if (this.state.selectedFeature === null) {
-      let selectedFeature = VECTOR_SHAPE_TYPES.POLYGON;
+      let selectedFeature = VECTOR_SHAPE_TYPE.POLYGON;
       if (this.props.isPointsOnly) {
-        selectedFeature = VECTOR_SHAPE_TYPES.POINT;
+        selectedFeature = VECTOR_SHAPE_TYPE.POINT;
       } else if (this.props.isLinesOnly) {
-        selectedFeature = VECTOR_SHAPE_TYPES.LINE;
+        selectedFeature = VECTOR_SHAPE_TYPE.LINE;
       }
       this.setState({
         selectedFeature: selectedFeature,
@@ -112,11 +112,11 @@ export class VectorStyleEditor extends Component {
     return [...this.state.dateFields, ...this.state.numberFields];
   }
 
-  _handleSelectedFeatureChange = selectedFeature => {
+  _handleSelectedFeatureChange = (selectedFeature) => {
     this.setState({ selectedFeature });
   };
 
-  _onIsTimeAwareChange = event => {
+  _onIsTimeAwareChange = (event) => {
     this.props.onIsTimeAwareChange(event.target.checked);
   };
 
@@ -414,30 +414,30 @@ export class VectorStyleEditor extends Component {
 
     if (supportedFeatures.length === 1) {
       switch (supportedFeatures[0]) {
-        case VECTOR_SHAPE_TYPES.POINT:
+        case VECTOR_SHAPE_TYPE.POINT:
           return this._renderPointProperties();
-        case VECTOR_SHAPE_TYPES.LINE:
+        case VECTOR_SHAPE_TYPE.LINE:
           return this._renderLineProperties();
-        case VECTOR_SHAPE_TYPES.POLYGON:
+        case VECTOR_SHAPE_TYPE.POLYGON:
           return this._renderPolygonProperties();
       }
     }
 
     const featureButtons = [
       {
-        id: VECTOR_SHAPE_TYPES.POINT,
+        id: VECTOR_SHAPE_TYPE.POINT,
         label: i18n.translate('xpack.maps.vectorStyleEditor.pointLabel', {
           defaultMessage: 'Points',
         }),
       },
       {
-        id: VECTOR_SHAPE_TYPES.LINE,
+        id: VECTOR_SHAPE_TYPE.LINE,
         label: i18n.translate('xpack.maps.vectorStyleEditor.lineLabel', {
           defaultMessage: 'Lines',
         }),
       },
       {
-        id: VECTOR_SHAPE_TYPES.POLYGON,
+        id: VECTOR_SHAPE_TYPE.POLYGON,
         label: i18n.translate('xpack.maps.vectorStyleEditor.polygonLabel', {
           defaultMessage: 'Polygons',
         }),
@@ -445,9 +445,9 @@ export class VectorStyleEditor extends Component {
     ];
 
     let styleProperties = this._renderPolygonProperties();
-    if (selectedFeature === VECTOR_SHAPE_TYPES.LINE) {
+    if (selectedFeature === VECTOR_SHAPE_TYPE.LINE) {
       styleProperties = this._renderLineProperties();
-    } else if (selectedFeature === VECTOR_SHAPE_TYPES.POINT) {
+    } else if (selectedFeature === VECTOR_SHAPE_TYPE.POINT) {
       styleProperties = this._renderPointProperties();
     }
 

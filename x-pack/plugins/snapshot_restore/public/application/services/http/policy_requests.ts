@@ -58,7 +58,7 @@ export const executePolicy = async (name: SlmPolicy['name']) => {
 
 export const deletePolicies = async (names: Array<SlmPolicy['name']>) => {
   const result = sendRequest({
-    path: `${API_BASE_PATH}policies/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    path: `${API_BASE_PATH}policies/${names.map((name) => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 

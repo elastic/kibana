@@ -17,7 +17,7 @@ export const AdvancedSettingsSubtitle = (props: Props) => {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
 
   useEffect(() => {
-    props.getActiveSpace().then(space => setActiveSpace(space));
+    props.getActiveSpace().then((space) => setActiveSpace(space));
   }, [props]);
 
   if (!activeSpace) return null;

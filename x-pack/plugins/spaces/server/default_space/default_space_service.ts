@@ -100,7 +100,7 @@ export class DefaultSpaceService {
             })
           ).pipe(catchError(propagateUnavailableStatusAndScaleRetry()));
         }),
-        tap<ServiceStatus>(spacesStatus => {
+        tap<ServiceStatus>((spacesStatus) => {
           // This is temporary for debugging/visibility until we get a proper status service from core.
           // See issue #41983 for details.
           statusLogger.debug(`${spacesStatus.level.toString()}: ${spacesStatus.summary}`);

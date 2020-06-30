@@ -9,6 +9,7 @@ import React from 'react';
 interface TypeaheadProps {
   onChange: (inputValue: string, selectionStart: number) => void;
   onSubmit: (inputValue: string) => void;
+  loadMore: () => void;
   suggestions: unknown[];
   queryExample: string;
   initialValue?: string;
@@ -40,4 +41,6 @@ export class Typeahead extends React.Component<TypeaheadProps> {
   onSubmit(): void;
 
   render(): any;
+
+  loadMore(): void;
 }

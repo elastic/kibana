@@ -125,7 +125,7 @@ export function copyToSpaceTestSuiteFactory(
       b1.key < b2.key ? -1 : 1;
     const { buckets } = await collectSpaceContents();
 
-    const spaceBucket = buckets.find(b => b.key === spaceId);
+    const spaceBucket = buckets.find((b) => b.key === spaceId);
 
     if (!spaceBucket) {
       expect(Object.keys(expectedCounts).length).to.eql(0);

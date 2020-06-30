@@ -10,7 +10,7 @@ import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   TRANSACTION_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
@@ -27,52 +27,52 @@ export function getBoolFilter(urlParams: IUrlParams) {
         '@timestamp': {
           gte: new Date(start).getTime(),
           lte: new Date(end).getTime(),
-          format: 'epoch_millis'
-        }
-      }
-    }
+          format: 'epoch_millis',
+        },
+      },
+    },
   ];
 
   if (serviceName) {
     boolFilter.push({
-      term: { [SERVICE_NAME]: serviceName }
+      term: { [SERVICE_NAME]: serviceName },
     });
   }
 
   switch (processorEvent) {
     case 'transaction':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'transaction' }
+        term: { [PROCESSOR_EVENT]: 'transaction' },
       });
 
       if (urlParams.transactionName) {
         boolFilter.push({
-          term: { [TRANSACTION_NAME]: urlParams.transactionName }
+          term: { [TRANSACTION_NAME]: urlParams.transactionName },
         });
       }
 
       if (urlParams.transactionType) {
         boolFilter.push({
-          term: { [TRANSACTION_TYPE]: urlParams.transactionType }
+          term: { [TRANSACTION_TYPE]: urlParams.transactionType },
         });
       }
       break;
 
     case 'error':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'error' }
+        term: { [PROCESSOR_EVENT]: 'error' },
       });
 
       if (urlParams.errorGroupId) {
         boolFilter.push({
-          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId }
+          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId },
         });
       }
       break;
 
     case 'metric':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'metric' }
+        term: { [PROCESSOR_EVENT]: 'metric' },
       });
       break;
 
@@ -82,9 +82,9 @@ export function getBoolFilter(urlParams: IUrlParams) {
           should: [
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { term: { [PROCESSOR_EVENT]: 'transaction' } },
-            { term: { [PROCESSOR_EVENT]: 'metric' } }
-          ]
-        }
+            { term: { [PROCESSOR_EVENT]: 'metric' } },
+          ],
+        },
       });
   }
 

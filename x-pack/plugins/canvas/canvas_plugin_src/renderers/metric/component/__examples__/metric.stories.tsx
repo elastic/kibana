@@ -32,7 +32,7 @@ const metricFontSpec: CSSProperties = {
 };
 
 storiesOf('renderers/Metric', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div
       style={{
         width: '200px',

@@ -45,8 +45,8 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
         x: key + bucketSize,
         y: count,
         style: {
-          cursor: isEmpty(samples) ? 'default' : 'pointer'
-        }
+          cursor: isEmpty(samples) ? 'default' : 'pointer',
+        },
       };
     }
   );
@@ -62,8 +62,8 @@ const getFormatYShort = (transactionType: string | undefined) => (
         '{transCount} {transType, select, request {req.} other {trans.}}',
       values: {
         transCount: t,
-        transType: transactionType
-      }
+        transType: transactionType,
+      },
     }
   );
 };
@@ -76,8 +76,8 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
           defaultMessage:
             '{transCount, plural, =0 {# request} one {# request} other {# requests}}',
           values: {
-            transCount: t
-          }
+            transCount: t,
+          },
         }
       )
     : i18n.translate(
@@ -86,8 +86,8 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
           defaultMessage:
             '{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}',
           values: {
-            transCount: t
-          }
+            transCount: t,
+          },
         }
       );
 };
@@ -106,15 +106,17 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     distribution,
     urlParams: { transactionType },
     isLoading,
-    bucketIndex
+    bucketIndex,
   } = props;
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYShort = useCallback(getFormatYShort(transactionType), [
-    transactionType
+    transactionType,
   ]);
 
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const formatYLong = useCallback(getFormatYLong(transactionType), [
-    transactionType
+    transactionType,
   ]);
 
   // no data in response
@@ -127,7 +129,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
-          defaultMessage: 'No transactions were found.'
+          defaultMessage: 'No transactions were found.',
         })}
       />
     );
@@ -138,7 +140,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
     distribution.bucketSize
   );
 
-  const xMax = d3.max(buckets, d => d.x) || 0;
+  const xMax = d3.max(buckets, (d) => d.x) || 0;
   const timeFormatter = getDurationFormatter(xMax);
 
   return (
@@ -148,21 +150,21 @@ export const TransactionDistribution: FunctionComponent<Props> = (
           {i18n.translate(
             'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
             {
-              defaultMessage: 'Transactions duration distribution'
+              defaultMessage: 'Transactions duration distribution',
             }
           )}{' '}
           <EuiIconTip
             title={i18n.translate(
               'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
               {
-                defaultMessage: 'Sampling'
+                defaultMessage: 'Sampling',
               }
             )}
             content={i18n.translate(
               'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
               {
                 defaultMessage:
-                  "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
+                  "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration.",
               }
             )}
             position="top"
@@ -182,8 +184,8 @@ export const TransactionDistribution: FunctionComponent<Props> = (
               search: fromQuery({
                 ...toQuery(history.location.search),
                 transactionId: sample.transactionId,
-                traceId: sample.traceId
-              })
+                traceId: sample.traceId,
+              }),
             });
           }
         }}
@@ -202,7 +204,7 @@ export const TransactionDistribution: FunctionComponent<Props> = (
           i18n.translate(
             'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
             {
-              defaultMessage: 'No sample available for this bucket'
+              defaultMessage: 'No sample available for this bucket',
             }
           )
         }

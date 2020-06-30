@@ -5,8 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
@@ -19,7 +20,7 @@ export default function({ getPageObjects, getService }) {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
-        'courier:ignoreFilterIfFieldNotInIndex': true,
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
@@ -27,7 +28,7 @@ export default function({ getPageObjects, getService }) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({
-        'courier:ignoreFilterIfFieldNotInIndex': false,
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
       });
     });
 

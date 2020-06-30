@@ -21,7 +21,7 @@ function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
     return {
       ...item,
       color: getVizColorForIndex(index, theme),
-      type: 'linemark'
+      type: 'linemark',
     };
   });
 }
@@ -29,11 +29,11 @@ function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
 export function useAvgDurationByBrowser() {
   const {
     urlParams: { serviceName, start, end, transactionName },
-    uiFilters
+    uiFilters,
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname:
@@ -44,9 +44,9 @@ export function useAvgDurationByBrowser() {
               start,
               end,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -56,6 +56,6 @@ export function useAvgDurationByBrowser() {
   return {
     data: toTimeSeries(data),
     status,
-    error
+    error,
   };
 }

@@ -87,11 +87,11 @@ export const ConnectorAddModal = ({
     ...actionTypeModel?.validateConnector(connector).errors,
     ...validateBaseProperties(connector).errors,
   } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         if (toastNotifications) {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -107,7 +107,7 @@ export const ConnectorAddModal = ({
         }
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         setServerError(errorRes);
         return undefined;
       });

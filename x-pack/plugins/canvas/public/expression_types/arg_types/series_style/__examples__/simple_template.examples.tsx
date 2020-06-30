@@ -7,7 +7,7 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
 import { SimpleTemplate } from '../simple_template';
@@ -35,7 +35,7 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
     return (
       <SimpleTemplate
         argValue={this.state.argValue}
-        onValueChange={argValue => {
+        onValueChange={(argValue) => {
           action('onValueChange')(argValue);
           this.setState({ argValue });
         }}
@@ -49,13 +49,13 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
 }
 
 storiesOf('arguments/SeriesStyle', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple', () => <Interactive />);
 
 storiesOf('arguments/SeriesStyle/components', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
   .add('simple: no labels', () => (

@@ -32,18 +32,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return cases', async () => {
-      const { body: a } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
-      const { body: b } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
-      const { body: c } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+      const { body: a } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+      const { body: b } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+      const { body: c } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
       const { body } = await supertest
         .get(`${CASES_URL}/_find?sortOrder=asc`)
         .set('kbn-xsrf', 'true')
@@ -59,10 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('filters by tags', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -117,10 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('correctly counts open/closed', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')

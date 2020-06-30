@@ -23,7 +23,7 @@ import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follo
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   autoFollowPatterns: getListAutoFollowPatterns(state),
   autoFollowPatternId: getSelectedAutoFollowPatternId('detail')(state),
   apiStatus: getApiStatus(scope)(state),
@@ -31,9 +31,9 @@ const mapStateToProps = state => ({
   isAuthorized: isApiAuthorized(scope)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  loadAutoFollowPatterns: inBackground => dispatch(loadAutoFollowPatterns(inBackground)),
-  selectAutoFollowPattern: id => dispatch(selectDetailAutoFollowPattern(id)),
+const mapDispatchToProps = (dispatch) => ({
+  loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
+  selectAutoFollowPattern: (id) => dispatch(selectDetailAutoFollowPattern(id)),
   loadAutoFollowStats: () => dispatch(loadAutoFollowStats()),
 });
 

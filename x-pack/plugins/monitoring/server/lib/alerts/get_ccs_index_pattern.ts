@@ -6,8 +6,8 @@
 export function getCcsIndexPattern(indexPattern: string, remotes: string[]): string {
   return `${indexPattern},${indexPattern
     .split(',')
-    .map(pattern => {
-      return remotes.map(remoteName => `${remoteName}:${pattern}`).join(',');
+    .map((pattern) => {
+      return remotes.map((remoteName) => `${remoteName}:${pattern}`).join(',');
     })
     .join(',')}`;
 }

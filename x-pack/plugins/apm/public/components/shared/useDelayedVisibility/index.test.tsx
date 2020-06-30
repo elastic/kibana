@@ -7,7 +7,7 @@
 import {
   renderHook,
   act,
-  RenderHookResult
+  RenderHookResult,
 } from '@testing-library/react-hooks';
 import { useDelayedVisibility } from '.';
 
@@ -19,15 +19,15 @@ describe('useFetcher', () => {
   });
 
   it('is initially false', () => {
-    hook = renderHook(isLoading => useDelayedVisibility(isLoading), {
-      initialProps: false
+    hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
+      initialProps: false,
     });
     expect(hook.result.current).toEqual(false);
   });
 
   it('does not change to true immediately', () => {
-    hook = renderHook(isLoading => useDelayedVisibility(isLoading), {
-      initialProps: false
+    hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
+      initialProps: false,
     });
 
     hook.rerender(true);
@@ -44,8 +44,8 @@ describe('useFetcher', () => {
   });
 
   it('does not change to false immediately', () => {
-    hook = renderHook(isLoading => useDelayedVisibility(isLoading), {
-      initialProps: false
+    hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
+      initialProps: false,
     });
 
     hook.rerender(true);
@@ -58,8 +58,8 @@ describe('useFetcher', () => {
   });
 
   it('is true for minimum 1000ms', () => {
-    hook = renderHook(isLoading => useDelayedVisibility(isLoading), {
-      initialProps: false
+    hook = renderHook((isLoading) => useDelayedVisibility(isLoading), {
+      initialProps: false,
     });
 
     hook.rerender(true);

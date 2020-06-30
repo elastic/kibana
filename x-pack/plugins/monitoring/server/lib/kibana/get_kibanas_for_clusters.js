@@ -30,7 +30,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
-  return Bluebird.map(clusters, cluster => {
+  return Bluebird.map(clusters, (cluster) => {
     const clusterUuid = cluster.cluster_uuid;
     const metric = KibanaClusterMetric.getMetricFields();
     const params = {
@@ -160,7 +160,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
     };
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params).then(result => {
+    return callWithRequest(req, 'search', params).then((result) => {
       const aggregations = get(result, 'aggregations', {});
       const kibanaUuids = get(aggregations, 'kibana_uuids.buckets', []);
       const statusBuckets = get(aggregations, 'status.buckets', []);
@@ -177,12 +177,12 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
       if (kibanaUuids.length) {
         // get instance status by finding the latest status bucket
         const latestTimestamp = chain(statusBuckets)
-          .map(bucket => bucket.max_timestamp.value)
+          .map((bucket) => bucket.max_timestamp.value)
           .max()
           .value();
         const latestBucket = find(
           statusBuckets,
-          bucket => bucket.max_timestamp.value === latestTimestamp
+          (bucket) => bucket.max_timestamp.value === latestTimestamp
         );
         status = get(latestBucket, 'key');
 

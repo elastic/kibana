@@ -6,11 +6,11 @@
 
 import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
+import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ActionType } from './types';
 import { ActionsConfig } from './config';
 import {
@@ -21,10 +21,6 @@ import {
 } from './plugin';
 
 describe('Actions Plugin', () => {
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = ({
-    makeUsageCollector: jest.fn(),
-    registerCollector: jest.fn(),
-  } as unknown) as jest.Mocked<UsageCollectionSetup>;
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
@@ -46,7 +42,7 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
-        usageCollection: usageCollectionMock,
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
       };
     });
 
@@ -83,7 +79,9 @@ describe('Actions Plugin', () => {
                 client: {},
               },
               elasticsearch: {
-                adminClient: jest.fn(),
+                legacy: {
+                  client: jest.fn(),
+                },
               },
             },
           } as unknown) as RequestHandlerContext,
@@ -201,7 +199,7 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
-        usageCollection: usageCollectionMock,
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),

@@ -88,7 +88,7 @@ describe('validateActionTypeSecrets()', () => {
     actionType = getActionType({
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: url => {
+        ensureWhitelistedUri: (url) => {
           expect(url).toEqual('https://api.slack.com/');
         },
       },
@@ -103,7 +103,7 @@ describe('validateActionTypeSecrets()', () => {
     actionType = getActionType({
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedHostname: url => {
+        ensureWhitelistedHostname: (url) => {
           throw new Error(`target hostname is not whitelisted`);
         },
       },

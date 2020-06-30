@@ -51,7 +51,7 @@ describe('Executor', () => {
       for (const type of expressionTypes.typeSpecs) executor.registerType(type);
       const types = executor.getTypes();
       expect(Object.keys(types).sort()).toEqual(
-        expressionTypes.typeSpecs.map(spec => spec.name).sort()
+        expressionTypes.typeSpecs.map((spec) => spec.name).sort()
       );
     });
   });
@@ -81,7 +81,7 @@ describe('Executor', () => {
         executor.registerFunction(functionDefinition);
       const functions = executor.getFunctions();
       expect(Object.keys(functions).sort()).toEqual(
-        expressionFunctions.functionSpecs.map(spec => spec.name).sort()
+        expressionFunctions.functionSpecs.map((spec) => spec.name).sort()
       );
     });
   });

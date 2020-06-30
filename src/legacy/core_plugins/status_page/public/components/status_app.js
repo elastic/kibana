@@ -53,7 +53,7 @@ class StatusApp extends Component {
     };
   }
 
-  componentDidMount = async function() {
+  componentDidMount = async function () {
     const data = await loadStatus();
 
     if (data) {

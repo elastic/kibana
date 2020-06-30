@@ -14,7 +14,7 @@ import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     require: ['xpack_main'],
     name: `${NAME}-legacy`,

@@ -32,7 +32,7 @@ export const LogSearchInput = class extends React.PureComponent<
     query: '',
   };
 
-  public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
+  public handleSubmit: React.FormEventHandler<HTMLFormElement> = (evt) => {
     evt.preventDefault();
 
     const { query } = this.state;
@@ -44,7 +44,7 @@ export const LogSearchInput = class extends React.PureComponent<
     }
   };
 
-  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
+  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
     this.setState({
       query: evt.target.value,
     });
@@ -81,6 +81,6 @@ const PlainSearchField = euiStyled(EuiFieldSearch)`
   box-shadow: none;
 
   &:focus {
-    box-shadow: inset 0 -2px 0 0 ${props => props.theme.eui.euiColorPrimary};
+    box-shadow: inset 0 -2px 0 0 ${(props) => props.theme.eui.euiColorPrimary};
   }
 `;

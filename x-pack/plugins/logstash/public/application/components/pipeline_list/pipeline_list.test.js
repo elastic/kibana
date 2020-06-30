@@ -19,9 +19,9 @@ describe('PipelineList component', () => {
   const getGetPipelineList = (isSuccess, result) =>
     isSuccess ? () => Promise.resolve(result) : () => Promise.reject(result);
 
-  const getIsClusterInfoAvailable = isAvailable => () => Promise.resolve(isAvailable);
+  const getIsClusterInfoAvailable = (isAvailable) => () => Promise.resolve(isAvailable);
 
-  const getDeleteSelectedPipelines = isSuccess =>
+  const getDeleteSelectedPipelines = (isSuccess) =>
     isSuccess ? () => Promise.resolve({}) : () => Promise.reject({});
 
   beforeEach(() => {

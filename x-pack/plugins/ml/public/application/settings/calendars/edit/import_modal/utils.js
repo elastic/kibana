@@ -12,7 +12,7 @@ function createEvents(ical) {
   const events = ical.events();
   const mlEvents = [];
 
-  events.forEach(e => {
+  events.forEach((e) => {
     if (e.element === 'VEVENT') {
       const description = e.properties.SUMMARY;
       const start = e.properties.DTSTART;
@@ -38,7 +38,7 @@ function createEvents(ical) {
 
 export function filterEvents(events) {
   const now = moment().valueOf();
-  return events.filter(e => e.start_time > now);
+  return events.filter((e) => e.start_time > now);
 }
 
 export function parseICSFile(data) {

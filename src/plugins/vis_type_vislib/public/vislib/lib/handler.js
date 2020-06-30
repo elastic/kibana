@@ -58,8 +58,8 @@ export class Handler {
 
     this.categoryAxes = visConfig
       .get('categoryAxes')
-      .map(axisArgs => new Axis(visConfig, axisArgs));
-    this.valueAxes = visConfig.get('valueAxes').map(axisArgs => new Axis(visConfig, axisArgs));
+      .map((axisArgs) => new Axis(visConfig, axisArgs));
+    this.valueAxes = visConfig.get('valueAxes').map((axisArgs) => new Axis(visConfig, axisArgs));
     this.chartTitle = new ChartTitle(visConfig);
     this.alerts = new Alerts(this, visConfig.get('alerts'));
     this.grid = new Grid(this, visConfig.get('grid'));
@@ -83,9 +83,9 @@ export class Handler {
 
     // memoize so that the same function is returned every time,
     // allowing us to remove/re-add the same function
-    this.getProxyHandler = _.memoize(function(eventType) {
+    this.getProxyHandler = _.memoize(function (eventType) {
       const self = this;
-      return function(eventPayload) {
+      return function (eventPayload) {
         switch (eventType) {
           case 'brush':
             const xRaw = _.get(eventPayload.data, 'series[0].values[0].xRaw');
@@ -154,7 +154,7 @@ export class Handler {
     selection.selectAll('*').remove();
 
     this._validateData();
-    this.renderArray.forEach(function(property) {
+    this.renderArray.forEach(function (property) {
       if (typeof property.render === 'function') {
         property.render();
       }
@@ -163,10 +163,10 @@ export class Handler {
     // render the chart(s)
     let loadedCount = 0;
     const chartSelection = selection.selectAll('.chart');
-    chartSelection.each(function(chartData) {
+    chartSelection.each(function (chartData) {
       const chart = new self.ChartClass(self, this, chartData, self.deps);
 
-      self.vis.eventNames().forEach(function(event) {
+      self.vis.eventNames().forEach(function (event) {
         self.enable(event, chart);
       });
 
@@ -184,10 +184,10 @@ export class Handler {
   }
 
   chartEventProxyToggle(method) {
-    return function(event, chart) {
+    return function (event, chart) {
       const proxyHandler = this.getProxyHandler(event);
 
-      _.each(chart ? [chart] : this.charts, function(chart) {
+      _.each(chart ? [chart] : this.charts, function (chart) {
         chart.events[method](event, proxyHandler);
       });
     };
@@ -203,10 +203,7 @@ export class Handler {
    * child element removed
    */
   removeAll(el) {
-    return d3
-      .select(el)
-      .selectAll('*')
-      .remove();
+    return d3.select(el).selectAll('*').remove();
   }
 
   /**
@@ -241,13 +238,13 @@ export class Handler {
   destroy() {
     this.binder.destroy();
 
-    this.renderArray.forEach(function(renderable) {
+    this.renderArray.forEach(function (renderable) {
       if (_.isFunction(renderable.destroy)) {
         renderable.destroy();
       }
     });
 
-    this.charts.splice(0).forEach(function(chart) {
+    this.charts.splice(0).forEach(function (chart) {
       if (_.isFunction(chart.destroy)) {
         chart.destroy();
       }

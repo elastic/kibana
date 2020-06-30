@@ -42,14 +42,14 @@ export function PaginatedTable($filter) {
       percentageCol: '=',
     },
     controllerAs: 'paginatedTable',
-    controller: function($scope) {
+    controller: function ($scope) {
       const self = this;
       self.sort = {
         columnIndex: null,
         direction: null,
       };
 
-      self.sortColumn = function(colIndex, sortDirection = 'asc') {
+      self.sortColumn = function (colIndex, sortDirection = 'asc') {
         const col = $scope.columns[colIndex];
 
         if (!col) return;

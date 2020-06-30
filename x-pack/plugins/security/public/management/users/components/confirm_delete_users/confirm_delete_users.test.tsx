@@ -80,7 +80,7 @@ describe('ConfirmDeleteUsers', () => {
     const onCancel = jest.fn();
 
     const apiClientMock = userAPIClientMock.create();
-    apiClientMock.deleteUser.mockImplementation(user => {
+    apiClientMock.deleteUser.mockImplementation((user) => {
       if (user === 'foo') {
         return Promise.reject('something terrible happened');
       }

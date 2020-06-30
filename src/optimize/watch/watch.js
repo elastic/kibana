@@ -19,7 +19,7 @@
 
 import { isWorker } from 'cluster';
 
-export default async kbnServer => {
+export default async (kbnServer) => {
   if (!isWorker) {
     throw new Error(`watch optimization is only available when using the "--dev" cli flag`);
   }

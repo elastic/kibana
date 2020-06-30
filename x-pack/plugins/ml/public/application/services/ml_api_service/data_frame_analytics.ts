@@ -10,6 +10,7 @@ import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
+import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -30,6 +31,13 @@ export type GetDataFrameAnalyticsStatsResponse =
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
+}
+
+interface DeleteDataFrameAnalyticsWithIndexResponse {
+  acknowledged: boolean;
+  analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export const dataFrameAnalytics = {
@@ -83,6 +91,17 @@ export const dataFrameAnalytics = {
   deleteDataFrameAnalytics(analyticsId: string) {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      method: 'DELETE',
+    });
+  },
+  deleteDataFrameAnalyticsAndDestIndex(
+    analyticsId: string,
+    deleteDestIndex: boolean,
+    deleteDestIndexPattern: boolean
+  ) {
+    return http<DeleteDataFrameAnalyticsWithIndexResponse>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      query: { deleteDestIndex, deleteDestIndexPattern },
       method: 'DELETE',
     });
   },

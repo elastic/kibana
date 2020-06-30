@@ -12,23 +12,25 @@ import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { sourceTitle, WMSSource } from './wms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const wmsLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.wmsDescription', {
     defaultMessage: 'Maps from OGC Standard WMS',
   }),
   icon: 'grid',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: WMSSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },

@@ -103,7 +103,7 @@ export const alertInstancesTableColumns = (
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map(value => padLeft(`${value}`, 2, '0'))
+    .map((value) => padLeft(`${value}`, 2, '0'))
     .join(':');
 }
 
@@ -124,7 +124,7 @@ export function AlertInstances({
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
       alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
     ),
-    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
+    ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map((instanceId) =>
       alertInstanceToListItem(durationEpoch, alert, instanceId)
     ),
   ];
@@ -205,7 +205,7 @@ export function alertInstanceToListItem(
   instanceId: string,
   instance?: RawAlertInstance
 ): AlertInstanceListItem {
-  const isMuted = alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
+  const isMuted = alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
   return {
     instance: instanceId,
     status: instance

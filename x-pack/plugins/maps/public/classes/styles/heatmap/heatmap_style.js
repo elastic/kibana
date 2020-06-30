@@ -10,7 +10,7 @@ import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap_constants';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { getOrdinalColorRampStops } from '../color_utils';
+import { getOrdinalMbColorRampStops, GRADIENT_INTERVALS } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
@@ -85,7 +85,13 @@ export class HeatmapStyle extends AbstractStyle {
 
     const { colorRampName } = this._descriptor;
     if (colorRampName && colorRampName !== DEFAULT_HEATMAP_COLOR_RAMP_NAME) {
-      const colorStops = getOrdinalColorRampStops(colorRampName, MIN_RANGE, MAX_RANGE);
+      const colorStops = getOrdinalMbColorRampStops(
+        colorRampName,
+        MIN_RANGE,
+        MAX_RANGE,
+        GRADIENT_INTERVALS
+      );
+      // TODO handle null
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
         ['linear'],

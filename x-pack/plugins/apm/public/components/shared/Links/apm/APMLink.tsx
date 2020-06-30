@@ -26,7 +26,7 @@ export const PERSISTENT_APM_PARAMS = [
   'rangeTo',
   'refreshPaused',
   'refreshInterval',
-  'environment'
+  'environment',
 ];
 
 export function getAPMHref(
@@ -38,13 +38,13 @@ export function getAPMHref(
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
     ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-    ...query
+    ...query,
   };
   const nextSearch = fromQuery(nextQuery);
 
   return url.format({
     pathname: '',
-    hash: `${path}?${nextSearch}`
+    hash: `${path}?${nextSearch}`,
   });
 }
 

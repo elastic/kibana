@@ -16,9 +16,9 @@ function getDiscoverQuery(span: Span) {
       interval: 'auto',
       query: {
         language: 'kuery',
-        query
-      }
-    }
+        query,
+      },
+    },
   };
 }
 

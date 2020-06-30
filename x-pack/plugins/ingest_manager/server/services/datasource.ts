@@ -13,10 +13,18 @@ import {
   PackageInfo,
 } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, ListWithKuery } from '../types';
+import {
+  NewDatasource,
+  Datasource,
+  ListWithKuery,
+  DatasourceSOAttributes,
+  RegistryPackage,
+} from '../types';
 import { agentConfigService } from './agent_config';
-import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
+import * as Registry from './epm/registry';
+import { getPackageInfo, getInstallation } from './epm/packages';
+import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
@@ -32,7 +40,7 @@ class DatasourceService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
     const isoDate = new Date().toISOString();
-    const newSo = await soClient.create<Omit<Datasource, 'id'>>(
+    const newSo = await soClient.create<DatasourceSOAttributes>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
@@ -56,8 +64,46 @@ class DatasourceService {
     };
   }
 
+  public async bulkCreate(
+    soClient: SavedObjectsClientContract,
+    datasources: NewDatasource[],
+    configId: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<Datasource[]> {
+    const isoDate = new Date().toISOString();
+    const { saved_objects: newSos } = await soClient.bulkCreate<Omit<Datasource, 'id'>>(
+      datasources.map((datasource) => ({
+        type: SAVED_OBJECT_TYPE,
+        attributes: {
+          ...datasource,
+          config_id: configId,
+          revision: 1,
+          created_at: isoDate,
+          created_by: options?.user?.username ?? 'system',
+          updated_at: isoDate,
+          updated_by: options?.user?.username ?? 'system',
+        },
+      }))
+    );
+
+    // Assign it to the given agent config
+    await agentConfigService.assignDatasources(
+      soClient,
+      configId,
+      newSos.map((newSo) => newSo.id),
+      {
+        user: options?.user,
+      }
+    );
+
+    return newSos.map((newSo) => ({
+      id: newSo.id,
+      ...newSo.attributes,
+    }));
+  }
+
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Datasource | null> {
-    const datasourceSO = await soClient.get<Datasource>(SAVED_OBJECT_TYPE, id);
+    const datasourceSO = await soClient.get<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!datasourceSO) {
       return null;
     }
@@ -76,8 +122,8 @@ class DatasourceService {
     soClient: SavedObjectsClientContract,
     ids: string[]
   ): Promise<Datasource[] | null> {
-    const datasourceSO = await soClient.bulkGet<Datasource>(
-      ids.map(id => ({
+    const datasourceSO = await soClient.bulkGet<DatasourceSOAttributes>(
+      ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
       }))
@@ -86,7 +132,7 @@ class DatasourceService {
       return null;
     }
 
-    return datasourceSO.saved_objects.map(so => ({
+    return datasourceSO.saved_objects.map((so) => ({
       id: so.id,
       ...so.attributes,
     }));
@@ -98,7 +144,7 @@ class DatasourceService {
   ): Promise<{ items: Datasource[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, kuery } = options;
 
-    const datasources = await soClient.find<Datasource>({
+    const datasources = await soClient.find<DatasourceSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -112,12 +158,10 @@ class DatasourceService {
     });
 
     return {
-      items: datasources.saved_objects.map<Datasource>(datasourceSO => {
-        return {
-          id: datasourceSO.id,
-          ...datasourceSO.attributes,
-        };
-      }),
+      items: datasources.saved_objects.map<Datasource>((datasourceSO) => ({
+        id: datasourceSO.id,
+        ...datasourceSO.attributes,
+      })),
       total: datasources.total,
       page,
       perPage,
@@ -136,7 +180,7 @@ class DatasourceService {
       throw new Error('Datasource not found');
     }
 
-    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
+    await soClient.update<DatasourceSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
       updated_at: new Date().toISOString(),
@@ -215,15 +259,22 @@ class DatasourceService {
     pkgInfo: PackageInfo,
     inputs: DatasourceInput[]
   ): Promise<DatasourceInput[]> {
-    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgInfo, input));
+    const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
+    const inputsPromises = inputs.map((input) =>
+      _assignPackageStreamToInput(registryPkgInfo, pkgInfo, input)
+    );
 
     return Promise.all(inputsPromises);
   }
 }
 
-async function _assignPackageStreamToInput(pkgInfo: PackageInfo, input: DatasourceInput) {
-  const streamsPromises = input.streams.map(stream =>
-    _assignPackageStreamToStream(pkgInfo, input, stream)
+async function _assignPackageStreamToInput(
+  registryPkgInfo: RegistryPackage,
+  pkgInfo: PackageInfo,
+  input: DatasourceInput
+) {
+  const streamsPromises = input.streams.map((stream) =>
+    _assignPackageStreamToStream(registryPkgInfo, pkgInfo, input, stream)
   );
 
   const streams = await Promise.all(streamsPromises);
@@ -231,6 +282,7 @@ async function _assignPackageStreamToInput(pkgInfo: PackageInfo, input: Datasour
 }
 
 async function _assignPackageStreamToStream(
+  registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
   input: DatasourceInput,
   stream: DatasourceInputStream
@@ -238,32 +290,46 @@ async function _assignPackageStreamToStream(
   if (!stream.enabled) {
     return { ...stream, agent_stream: undefined };
   }
-  const dataset = getDataset(stream.dataset);
-  const datasource = pkgInfo.datasources?.[0];
-  if (!datasource) {
-    throw new Error('Stream template not found, no datasource');
+  const datasetPath = getDataset(stream.dataset.name);
+  const packageDatasets = pkgInfo.datasets;
+  if (!packageDatasets) {
+    throw new Error('Stream template not found, no datasets');
   }
 
-  const inputFromPkg = datasource.inputs.find(pkgInput => pkgInput.type === input.type);
-  if (!inputFromPkg) {
-    throw new Error(`Stream template not found, unable to found input ${input.type}`);
+  const packageDataset = packageDatasets.find(
+    (pkgDataset) => pkgDataset.name === stream.dataset.name
+  );
+  if (!packageDataset) {
+    throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);
   }
 
-  const streamFromPkg = inputFromPkg.streams.find(
-    pkgStream => pkgStream.dataset === stream.dataset
+  const streamFromPkg = (packageDataset.streams || []).find(
+    (pkgStream) => pkgStream.input === input.type
   );
   if (!streamFromPkg) {
-    throw new Error(`Stream template not found, unable to found stream ${stream.dataset}`);
+    throw new Error(`Stream template not found, unable to find stream for input ${input.type}`);
   }
 
-  if (!streamFromPkg.template) {
-    throw new Error(`Stream template not found for dataset ${dataset}`);
+  if (!streamFromPkg.template_path) {
+    throw new Error(`Stream template path not found for dataset ${datasetPath}`);
+  }
+
+  const [pkgStream] = await getAssetsData(
+    registryPkgInfo,
+    (path: string) => path.endsWith(streamFromPkg.template_path),
+    datasetPath
+  );
+
+  if (!pkgStream || !pkgStream.buffer) {
+    throw new Error(
+      `Unable to load stream template ${streamFromPkg.template_path} for dataset ${datasetPath}`
+    );
   }
 
   const yaml = createStream(
     // Populate template variables from input vars and stream vars
     Object.assign({}, input.vars, stream.vars),
-    streamFromPkg.template
+    pkgStream.buffer.toString()
   );
 
   stream.agent_stream = yaml;
@@ -271,4 +337,5 @@ async function _assignPackageStreamToStream(
   return { ...stream };
 }
 
+export type DatasourceServiceInterface = DatasourceService;
 export const datasourceService = new DatasourceService();

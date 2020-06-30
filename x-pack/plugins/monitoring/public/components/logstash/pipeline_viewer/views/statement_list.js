@@ -29,19 +29,19 @@ export class StatementList extends React.PureComponent {
     };
   }
 
-  expand = elementId => {
+  expand = (elementId) => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.delete(elementId);
     this.updateCollapsedElement(collapsedIds);
   };
 
-  collapse = elementId => {
+  collapse = (elementId) => {
     const collapsedIds = new Set(this.state.collapsedIds);
     collapsedIds.add(elementId);
     this.updateCollapsedElement(collapsedIds);
   };
 
-  updateCollapsedElement = collapsedIds => {
+  updateCollapsedElement = (collapsedIds) => {
     const { elements } = this.props;
     const collapsedChildIds = getCollapsedChildIds(elements, collapsedIds);
 
@@ -51,9 +51,9 @@ export class StatementList extends React.PureComponent {
     });
   };
 
-  elementIsCollapsed = elementId => this.state.collapsedIds.has(elementId);
+  elementIsCollapsed = (elementId) => this.state.collapsedIds.has(elementId);
 
-  renderStatement = element => {
+  renderStatement = (element) => {
     const { id, parentId } = element;
     const { onShowVertexDetails } = this.props;
 

@@ -308,7 +308,7 @@ export function getCurrentMethodAndTokenPaths(
 }
 
 // eslint-disable-next-line
-export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
+export default function ({ coreEditor: editor, parser }: { coreEditor: CoreEditor; parser: any }) {
   function isUrlPathToken(token: Token | null) {
     switch ((token || ({} as any)).type) {
       case 'url.slash':
@@ -321,7 +321,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
   }
 
   function addMetaToTermsList(list: any, meta: any, template?: string) {
-    return _.map(list, function(t: any) {
+    return _.map(list, function (t: any) {
       if (typeof t !== 'object') {
         t = { name: t };
       }
@@ -955,7 +955,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
       } else {
         const terms = _.map(
           context.autoCompleteSet.filter((term: any) => Boolean(term) && term.name != null),
-          function(term: any) {
+          function (term: any) {
             if (typeof term !== 'object') {
               term = {
                 name: term,
@@ -981,7 +981,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
           }
         );
 
-        terms.sort(function(t1: any, t2: any) {
+        terms.sort(function (t1: any, t2: any) {
           /* score sorts from high to low */
           if (t1.score > t2.score) {
             return -1;
@@ -1001,7 +1001,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
         callback(
           null,
-          _.map(terms, function(t: any, i: any) {
+          _.map(terms, function (t: any, i: any) {
             t.insertValue = t.insertValue || t.value;
             t.value = '' + t.value; // normalize to strings
             t.score = -i;

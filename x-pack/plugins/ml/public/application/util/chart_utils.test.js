@@ -10,7 +10,7 @@ jest.mock('./dependency_cache', () => {
   const dateMath = require('@elastic/datemath');
   let _time = undefined;
   const timefilter = {
-    setTime: time => {
+    setTime: (time) => {
       _time = time;
     },
     getActiveBounds: () => {
@@ -436,15 +436,12 @@ describe('ML - chart utils', () => {
         .innerTickSize(-chartHeight)
         .outerTickSize(0)
         .tickPadding(10)
-        .tickFormat(d => moment(d).format(xAxisTickFormat));
+        .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
       const tickValues = getTickValues(startTimeMs, interval, plotEarliest, plotLatest);
       xAxis.tickValues(tickValues);
 
-      const svg = chartElement
-        .append('svg')
-        .attr('width', svgWidth)
-        .attr('height', svgHeight);
+      const svg = chartElement.append('svg').attr('width', svgWidth).attr('height', svgHeight);
 
       const axes = svg.append('g');
 

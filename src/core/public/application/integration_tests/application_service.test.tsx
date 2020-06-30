@@ -31,7 +31,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('ApplicationService', () => {
   let setupDeps: MockLifecycle<'setup'>;
@@ -68,7 +68,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -102,7 +102,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -125,47 +125,74 @@ describe('ApplicationService', () => {
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
       });
+
+      it('replaces the current history entry when the `replace` option is true', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { path: '/foo' });
+        await navigateToApp('app1', { path: '/bar', replace: true });
+
+        expect(history.entries.map((entry) => entry.pathname)).toEqual(['/', '/app/app1/bar']);
+      });
     });
   });
 
-  it('redirects to full path when navigating to legacy app', async () => {
-    const redirectTo = jest.fn();
-    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => {});
-
-    // In the real application, we use a BrowserHistory instance configured with `basename`. However, in tests we must
-    // use MemoryHistory which does not support `basename`. In order to emulate this behavior, we will wrap this
-    // instance with a ScopedHistory configured with a basepath.
-    history.push(setupDeps.http.basePath.get()); // ScopedHistory constructor will fail if underlying history is not currently at basePath.
-    const { register, registerLegacyApp } = service.setup({
-      ...setupDeps,
-      redirectTo,
-      history: new ScopedHistory(history, setupDeps.http.basePath.get()),
+  describe('redirects', () => {
+    beforeAll(() => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          reload: jest.fn(),
+        },
+      });
     });
 
-    register(Symbol(), {
-      id: 'app1',
-      title: 'App1',
-      mount: ({ onAppLeave }: AppMountParameters) => {
-        onAppLeave(actions => actions.default());
-        return () => undefined;
-      },
+    it('to full path when navigating to legacy app', async () => {
+      const redirectTo = jest.fn();
+
+      // In the real application, we use a BrowserHistory instance configured with `basename`. However, in tests we must
+      // use MemoryHistory which does not support `basename`. In order to emulate this behavior, we will wrap this
+      // instance with a ScopedHistory configured with a basepath.
+      history.push(setupDeps.http.basePath.get()); // ScopedHistory constructor will fail if underlying history is not currently at basePath.
+      const { register, registerLegacyApp } = service.setup({
+        ...setupDeps,
+        redirectTo,
+        history: new ScopedHistory(history, setupDeps.http.basePath.get()),
+      });
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: ({ onAppLeave }: AppMountParameters) => {
+          onAppLeave((actions) => actions.default());
+          return () => undefined;
+        },
+      });
+      registerLegacyApp({
+        id: 'myLegacyTestApp',
+        appUrl: '/app/myLegacyTestApp',
+        title: 'My Legacy Test App',
+      });
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+
+      update = createRenderer(getComponent());
+
+      await navigate('/test/app/app1');
+      await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
+
+      expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
+      expect(window.location.reload).toHaveBeenCalled();
     });
-    registerLegacyApp({
-      id: 'myLegacyTestApp',
-      appUrl: '/app/myLegacyTestApp',
-      title: 'My Legacy Test App',
-    });
-
-    const { navigateToApp, getComponent } = await service.start(startDeps);
-
-    update = createRenderer(getComponent());
-
-    await navigate('/test/app/app1');
-    await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
-
-    expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
-    expect(reloadSpy).toHaveBeenCalled();
-    reloadSpy.mockRestore();
   });
 
   describe('leaving an application that registered an app leave handler', () => {
@@ -178,7 +205,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.default());
+          onAppLeave((actions) => actions.default());
           return () => undefined;
         },
       });
@@ -213,7 +240,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });
@@ -252,7 +279,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });

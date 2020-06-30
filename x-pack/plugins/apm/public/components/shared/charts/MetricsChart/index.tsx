@@ -15,7 +15,7 @@ import {
   asInteger,
   asDynamicBytes,
   getFixedByteFormatter,
-  asDuration
+  asDuration,
 } from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
@@ -32,9 +32,9 @@ export function MetricsChart({ chart }: Props) {
   const formatYValue = getYTickFormatter(chart);
   const formatTooltip = getTooltipFormatter(chart);
 
-  const transformedSeries = chart.series.map(series => ({
+  const transformedSeries = chart.series.map((series) => ({
     ...series,
-    legendValue: formatYValue(series.overallValue)
+    legendValue: formatYValue(series.overallValue),
   }));
 
   const syncedChartProps = useChartsSync();

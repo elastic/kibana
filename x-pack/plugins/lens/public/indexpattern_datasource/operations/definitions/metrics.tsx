@@ -41,7 +41,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
       return Boolean(
         newField &&
@@ -91,7 +91,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.min', {
     defaultMessage: 'Minimum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.minOf', {
       defaultMessage: 'Minimum of {name}',
       values: { name },
@@ -103,7 +103,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.max', {
     defaultMessage: 'Maximum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.maxOf', {
       defaultMessage: 'Maximum of {name}',
       values: { name },
@@ -116,7 +116,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.avgOf', {
       defaultMessage: 'Average of {name}',
       values: { name },
@@ -129,7 +129,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   displayName: i18n.translate('xpack.lens.indexPattern.sum', {
     defaultMessage: 'Sum',
   }),
-  ofName: name =>
+  ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
       values: { name },

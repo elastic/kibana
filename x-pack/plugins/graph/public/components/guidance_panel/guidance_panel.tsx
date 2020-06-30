@@ -147,7 +147,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   if (noIndexPatterns) {
     const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
-    const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
+    const indexPatternUrl = `${managementUrl}/kibana/indexPatterns`;
     const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
     content = (
       <EuiPanel paddingSize="none">
@@ -217,7 +217,7 @@ export const GuidancePanel = connect(
       hasFields: hasFieldsSelector(state),
     };
   },
-  dispatch => ({
+  (dispatch) => ({
     onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
       dispatch(
         requestDatasource({

@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiStat,
   EuiToolTip,
-  EuiCallOut
+  EuiCallOut,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +33,7 @@ import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
   host: '',
-  containerId: ''
+  containerId: '',
 };
 
 const Truncate = styled.span`
@@ -50,7 +50,7 @@ export function ServiceNodeMetrics() {
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && serviceNodeName && start && end) {
         return callApmApi({
           pathname:
@@ -60,9 +60,9 @@ export function ServiceNodeMetrics() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -90,7 +90,7 @@ export function ServiceNodeMetrics() {
           title={i18n.translate(
             'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningTitle',
             {
-              defaultMessage: 'Could not identify JVMs'
+              defaultMessage: 'Could not identify JVMs',
             }
           )}
           iconType="help"
@@ -111,7 +111,7 @@ export function ServiceNodeMetrics() {
                     { defaultMessage: 'documentation of APM Server' }
                   )}
                 </ElasticDocsLink>
-              )
+              ),
             }}
           />
         </EuiCallOut>
@@ -123,7 +123,7 @@ export function ServiceNodeMetrics() {
               description={i18n.translate(
                 'xpack.apm.serviceNodeMetrics.serviceName',
                 {
-                  defaultMessage: 'Service name'
+                  defaultMessage: 'Service name',
                 }
               )}
               title={
@@ -138,7 +138,7 @@ export function ServiceNodeMetrics() {
               titleSize="s"
               isLoading={isLoading}
               description={i18n.translate('xpack.apm.serviceNodeMetrics.host', {
-                defaultMessage: 'Host'
+                defaultMessage: 'Host',
               })}
               title={
                 <EuiToolTip content={host}>
@@ -154,7 +154,7 @@ export function ServiceNodeMetrics() {
               description={i18n.translate(
                 'xpack.apm.serviceNodeMetrics.containerId',
                 {
-                  defaultMessage: 'Container ID'
+                  defaultMessage: 'Container ID',
                 }
               )}
               title={
@@ -170,7 +170,7 @@ export function ServiceNodeMetrics() {
       {agentName && serviceNodeName && (
         <ChartsSyncContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map(chart => (
+            {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel>
                   <MetricsChart start={start} end={end} chart={chart} />

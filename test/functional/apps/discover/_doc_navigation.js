@@ -19,38 +19,33 @@
 
 import expect from '@kbn/expect';
 
-const TEST_COLUMN_NAMES = ['@message'];
-const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
-];
-
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62281
-  describe.skip('doc link in discover', function contextSize() {
-    before(async function() {
+  describe('doc link in discover', function contextSize() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();
-      for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
-      }
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-      }
     });
 
-    it('should open the doc view of the selected document', async function() {
+    it('should open the doc view of the selected document', async function () {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
-      await (await docTable.getRowActions({ rowIndex: 0 }))[1].click();
+
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
 
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);

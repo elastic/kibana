@@ -26,46 +26,79 @@ import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
+const getFilteredIndices = (followerIndices, queryText) => {
+  if (queryText) {
+    const normalizedSearchText = queryText.toLowerCase();
+
+    return followerIndices.filter((followerIndex) => {
+      const { name, remoteCluster, leaderIndex } = followerIndex;
+
+      if (name.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      if (leaderIndex.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      if (remoteCluster.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      return false;
+    });
+  }
+
+  return followerIndices;
+};
+
 export class FollowerIndicesTable extends PureComponent {
   static propTypes = {
     followerIndices: PropTypes.array,
     selectFollowerIndex: PropTypes.func.isRequired,
   };
 
-  state = {
-    selectedItems: [],
-  };
+  static getDerivedStateFromProps(props, state) {
+    const { followerIndices } = props;
+    const { prevFollowerIndices, queryText } = state;
+
+    // If a follower index gets deleted, we need to recreate the cached filtered follower indices.
+    if (prevFollowerIndices !== followerIndices) {
+      return {
+        prevFollowerIndices: followerIndices,
+        filteredIndices: getFilteredIndices(followerIndices, queryText),
+      };
+    }
+
+    return null;
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      prevFollowerIndices: props.followerIndices,
+      selectedItems: [],
+      filteredIndices: props.followerIndices,
+      queryText: '',
+    };
+  }
 
   onSearch = ({ query }) => {
+    const { followerIndices } = this.props;
     const { text } = query;
-    const normalizedSearchText = text.toLowerCase();
+
+    // We cache the filtered indices instead of calculating them inside render() because
+    // of https://github.com/elastic/eui/issues/3445.
     this.setState({
-      queryText: normalizedSearchText,
+      queryText: text,
+      filteredIndices: getFilteredIndices(followerIndices, text),
     });
   };
 
-  editFollowerIndex = id => {
-    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+  editFollowerIndex = (id) => {
+    const uri = routing.getFollowerIndexPath(id);
     routing.navigate(uri);
-  };
-
-  getFilteredIndices = () => {
-    const { followerIndices } = this.props;
-    const { queryText } = this.state;
-
-    if (queryText) {
-      return followerIndices.filter(followerIndex => {
-        const { name, remoteCluster, leaderIndex } = followerIndex;
-
-        const inName = name.toLowerCase().includes(queryText);
-        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
-        const inLeaderIndex = leaderIndex.toLowerCase().includes(queryText);
-
-        return inName || inRemoteCluster || inLeaderIndex;
-      });
-    }
-
-    return followerIndices.slice(0);
   };
 
   getTableColumns() {
@@ -74,7 +107,7 @@ export class FollowerIndicesTable extends PureComponent {
     const actions = [
       /* Pause or resume follower index */
       {
-        render: followerIndex => {
+        render: (followerIndex) => {
           const { name, isPaused } = followerIndex;
           const label = isPaused
             ? i18n.translate(
@@ -92,7 +125,7 @@ export class FollowerIndicesTable extends PureComponent {
 
           return isPaused ? (
             <FollowerIndexResumeProvider>
-              {resumeFollowerIndex => (
+              {(resumeFollowerIndex) => (
                 <span onClick={() => resumeFollowerIndex(name)} data-test-subj="resumeButton">
                   <EuiIcon aria-label={label} type="play" className="euiContextMenu__icon" />
                   <span>{label}</span>
@@ -101,7 +134,7 @@ export class FollowerIndicesTable extends PureComponent {
             </FollowerIndexResumeProvider>
           ) : (
             <FollowerIndexPauseProvider>
-              {pauseFollowerIndex => (
+              {(pauseFollowerIndex) => (
                 <span
                   onClick={() => pauseFollowerIndex(followerIndex)}
                   data-test-subj="pauseButton"
@@ -144,7 +177,7 @@ export class FollowerIndicesTable extends PureComponent {
 
           return (
             <FollowerIndexUnfollowProvider>
-              {unfollowLeaderIndex => (
+              {(unfollowLeaderIndex) => (
                 <span onClick={() => unfollowLeaderIndex(name)} data-test-subj="unfollowButton">
                   <EuiIcon aria-label={label} type="indexFlush" className="euiContextMenu__icon" />
                   <span>{label}</span>
@@ -167,7 +200,7 @@ export class FollowerIndicesTable extends PureComponent {
         ),
         sortable: true,
         truncateText: false,
-        render: name => {
+        render: (name) => {
           return (
             <EuiLink
               onClick={() => {
@@ -191,7 +224,7 @@ export class FollowerIndicesTable extends PureComponent {
         ),
         truncateText: true,
         sortable: true,
-        render: isPaused => {
+        render: (isPaused) => {
           return isPaused ? (
             <EuiHealth color="subdued">
               <FormattedMessage
@@ -258,7 +291,7 @@ export class FollowerIndicesTable extends PureComponent {
   };
 
   render() {
-    const { selectedItems } = this.state;
+    const { selectedItems, filteredIndices } = this.state;
 
     const sorting = {
       sort: {
@@ -273,25 +306,24 @@ export class FollowerIndicesTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: newSelectedItems => this.setState({ selectedItems: newSelectedItems }),
+      onSelectionChange: (newSelectedItems) => this.setState({ selectedItems: newSelectedItems }),
     };
 
     const search = {
       toolsLeft: selectedItems.length ? (
         <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,
+        'data-test-subj': 'followerIndexSearch',
       },
     };
 
     return (
       <Fragment>
         <EuiInMemoryTable
-          items={this.getFilteredIndices()}
+          items={filteredIndices}
           itemId="name"
           columns={this.getTableColumns()}
           search={search}

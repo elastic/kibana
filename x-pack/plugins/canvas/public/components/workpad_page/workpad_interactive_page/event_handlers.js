@@ -33,7 +33,7 @@ const setupHandler = (commit, canvasOrigin, zoomScale) => {
       commit('cursorPosition', {});
     }
   };
-  window.onmouseup = e => {
+  window.onmouseup = (e) => {
     e.stopPropagation();
     const { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey } = e;
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
@@ -81,7 +81,7 @@ const handleMouseDown = (commit, e, canvasOrigin, zoomScale, allowDrag = true) =
 };
 
 export const eventHandlers = {
-  onMouseDown: props => e =>
+  onMouseDown: (props) => (e) =>
     handleMouseDown(
       props.commit,
       e,
@@ -89,8 +89,9 @@ export const eventHandlers = {
       props.zoomScale,
       props.canDragElement(e.target)
     ),
-  onMouseMove: props => e => handleMouseMove(props.commit, e, props.canvasOrigin, props.zoomScale),
-  onMouseLeave: props => e => handleMouseLeave(props.commit, e),
-  onWheel: props => e => handleMouseMove(props.commit, e, props.canvasOrigin),
+  onMouseMove: (props) => (e) =>
+    handleMouseMove(props.commit, e, props.canvasOrigin, props.zoomScale),
+  onMouseLeave: (props) => (e) => handleMouseLeave(props.commit, e),
+  onWheel: (props) => (e) => handleMouseMove(props.commit, e, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
 };

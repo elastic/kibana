@@ -41,14 +41,14 @@ function getPageData($injector) {
 
   return $http
     .post(url, data)
-    .then(response => {
+    .then((response) => {
       const result = get(response, 'data', []);
       if (KIBANA_ALERTING_ENABLED) {
         return result.alerts;
       }
       return result;
     })
-    .catch(err => {
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -68,7 +68,6 @@ uiRoutes.when('/alerts', {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      const kbnUrl = $injector.get('kbnUrl');
 
       // breadcrumbs + page title
       $scope.cluster = find($route.current.locals.clusters, {
@@ -88,13 +87,12 @@ uiRoutes.when('/alerts', {
 
       this.data = $route.current.locals.alerts;
 
-      const renderReact = data => {
+      const renderReact = (data) => {
         const app = data.message ? (
           <p>{data.message}</p>
         ) : (
           <Alerts
             alerts={data}
-            angular={{ kbnUrl, scope: $scope }}
             sorting={this.sorting}
             pagination={this.pagination}
             onTableChange={this.onTableChange}
@@ -121,7 +119,7 @@ uiRoutes.when('/alerts', {
       };
       $scope.$watch(
         () => this.data,
-        data => renderReact(data)
+        (data) => renderReact(data)
       );
     }
   },

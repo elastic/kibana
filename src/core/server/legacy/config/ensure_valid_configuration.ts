@@ -36,7 +36,7 @@ export async function ensureValidConfiguration(
 
   if (unusedConfigKeys.length > 0) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys
-      .map(key => `"${key}"`)
+      .map((key) => `"${key}"`)
       .join(', ')}. Check for spelling errors and ensure that expected plugins are installed.`;
     throw new InvalidConfigurationError(message);
   }

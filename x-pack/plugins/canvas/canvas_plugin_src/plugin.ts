@@ -12,17 +12,16 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
-// @ts-ignore: untyped local
+// @ts-expect-error: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
 import { initializeElements } from './elements';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { transformSpecs } from './uis/transforms';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { datasourceSpecs } from './uis/datasources';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { modelSpecs } from './uis/models';
 import { initializeViews } from './uis/views';
-// @ts-ignore Untyped Local
 import { initializeArgs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
 import { templateSpecs } from './templates';

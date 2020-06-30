@@ -25,7 +25,9 @@ export interface VisualizationListItem {
   stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
+  description?: string;
   typeTitle: string;
+  image?: string;
 }
 
 export interface VisualizationsAppExtension {
@@ -68,8 +70,8 @@ interface VisTypeAliasRegistry {
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
-  add: newVisTypeAlias => {
-    if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
+  add: (newVisTypeAlias) => {
+    if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }
     registry.push(newVisTypeAlias);

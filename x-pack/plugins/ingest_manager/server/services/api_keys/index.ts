@@ -17,15 +17,15 @@ export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
   agentId: string
-): Promise<string> {
+): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
   const key = await createAPIKey(soClient, name, {
     'fleet-output': {
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*'],
-          privileges: ['write', 'create_index'],
+          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
@@ -35,7 +35,7 @@ export async function generateOutputApiKey(
     throw new Error('Unable to create an output api key');
   }
 
-  return `${key.id}:${key.api_key}`;
+  return { key: `${key.id}:${key.api_key}`, id: key.id };
 }
 
 export async function generateAccessApiKey(
@@ -104,9 +104,7 @@ export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
 }
 
 export function parseApiKey(apiKey: string) {
-  const apiKeyId = Buffer.from(apiKey, 'base64')
-    .toString('utf8')
-    .split(':')[0];
+  const apiKeyId = Buffer.from(apiKey, 'base64').toString('utf8').split(':')[0];
 
   return {
     apiKey,

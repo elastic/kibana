@@ -22,7 +22,7 @@ export const registerGetRoutes = ({
   router.get(
     { path: API_BASE_PATH, validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
 
       try {
         const pipelines = await callAsCurrentUser('ingest.getPipeline');
@@ -56,7 +56,7 @@ export const registerGetRoutes = ({
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const { name } = req.params;
 
       try {

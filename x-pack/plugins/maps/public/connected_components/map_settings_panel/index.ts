@@ -9,14 +9,13 @@ import { connect } from 'react-redux';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
-import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions';
+import { rollbackMapSettings, updateMapSetting, updateFlyout } from '../../actions';
 import {
   getMapCenter,
   getMapSettings,
   getMapZoom,
   hasMapSettingsChanges,
 } from '../../selectors/map_selectors';
-import { updateFlyout } from '../../actions/ui_actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {

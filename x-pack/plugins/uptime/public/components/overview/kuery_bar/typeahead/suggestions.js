@@ -46,6 +46,26 @@ class Suggestions extends Component {
     parent.scrollTop = scrollTop;
   };
 
+  handleScroll = () => {
+    const parent = this.parentNode;
+
+    if (!this.props.loadMore || !parent) {
+      return;
+    }
+
+    const position = parent.scrollTop + parent.offsetHeight;
+    const height = parent.scrollHeight;
+    const remaining = height - position;
+    const margin = 50;
+
+    if (!height || !position) {
+      return;
+    }
+    if (remaining <= margin) {
+      this.props.loadMore();
+    }
+  };
+
   componentDidUpdate(prevProps) {
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
@@ -61,7 +81,7 @@ class Suggestions extends Component {
       const key = suggestion + '_' + index;
       return (
         <Suggestion
-          innerRef={node => (this.childNodes[index] = node)}
+          innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
           suggestion={suggestion}
           onClick={this.props.onClick}
@@ -71,7 +91,11 @@ class Suggestions extends Component {
       );
     });
 
-    return <List innerRef={node => (this.parentNode = node)}>{suggestions}</List>;
+    return (
+      <List ref={(node) => (this.parentNode = node)} onScroll={this.handleScroll}>
+        {suggestions}
+      </List>
+    );
   }
 }
 
@@ -81,6 +105,7 @@ Suggestions.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   show: PropTypes.bool,
   suggestions: PropTypes.array.isRequired,
+  loadMore: PropTypes.func.isRequired,
 };
 
 export default Suggestions;

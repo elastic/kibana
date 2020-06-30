@@ -19,12 +19,12 @@
 
 import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import classNames from 'classnames';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, RenderError } from './types';
+import { IExpressionLoaderParams, ExpressionRenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
 import { ExpressionRendererEvent } from './render';
@@ -38,6 +38,10 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
+  /**
+   * An observable which can be used to re-run the expression without destroying the component
+   */
+  reload$?: Observable<unknown>;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -45,7 +49,7 @@ export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRen
 interface State {
   isEmpty: boolean;
   isLoading: boolean;
-  error: null | RenderError;
+  error: null | ExpressionRenderError;
 }
 
 export type ExpressionRendererComponent = React.FC<ReactExpressionRendererProps>;
@@ -63,6 +67,7 @@ export const ReactExpressionRenderer = ({
   renderError,
   expression,
   onEvent,
+  reload$,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -104,7 +109,7 @@ export const ReactExpressionRenderer = ({
     });
     if (onEvent) {
       subs.push(
-        expressionLoaderRef.current.events$.subscribe(event => {
+        expressionLoaderRef.current.events$.subscribe((event) => {
           onEvent(event);
         })
       );
@@ -112,11 +117,11 @@ export const ReactExpressionRenderer = ({
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
-        setState(prevState => ({ ...prevState, isLoading: true }));
+        setState((prevState) => ({ ...prevState, isLoading: true }));
       }),
       expressionLoaderRef.current.render$
         .pipe(filter(() => !hasHandledErrorRef.current))
-        .subscribe(item => {
+        .subscribe((item) => {
           setState(() => ({
             ...defaultState,
             isEmpty: false,
@@ -125,7 +130,7 @@ export const ReactExpressionRenderer = ({
     );
 
     return () => {
-      subs.forEach(s => s.unsubscribe());
+      subs.forEach((s) => s.unsubscribe());
       if (expressionLoaderRef.current) {
         expressionLoaderRef.current.destroy();
         expressionLoaderRef.current = null;
@@ -134,6 +139,15 @@ export const ReactExpressionRenderer = ({
       errorRenderHandlerRef.current = null;
     };
   }, [hasCustomRenderErrorHandler, onEvent]);
+
+  useEffect(() => {
+    const subscription = reload$?.subscribe(() => {
+      if (expressionLoaderRef.current) {
+        expressionLoaderRef.current.update(expression, expressionLoaderOptions);
+      }
+    });
+    return () => subscription?.unsubscribe();
+  }, [reload$, expression, ...Object.values(expressionLoaderOptions)]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(

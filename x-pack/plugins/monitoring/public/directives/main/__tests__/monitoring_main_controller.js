@@ -8,7 +8,7 @@ import { noop } from 'lodash';
 import expect from '@kbn/expect';
 import { MonitoringMainController } from '../';
 
-const getMockLicenseService = options => ({ mlIsSupported: () => options.mlIsSupported });
+const getMockLicenseService = (options) => ({ mlIsSupported: () => options.mlIsSupported });
 const getMockBreadcrumbsService = () => noop; // breadcrumb service has its own test
 
 describe('Monitoring Main Directive Controller', () => {

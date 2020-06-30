@@ -53,11 +53,11 @@ export default new Datasource('static', {
       const begin = _.first(target)[0];
       const end = _.last(target)[0];
       const step = (end - begin) / (points.length - 1);
-      data = _.map(points, function(point, i) {
+      data = _.map(points, function (point, i) {
         return [begin + i * step, parseFloat(point)];
       });
     } else {
-      data = _.map(target, function(bucket) {
+      data = _.map(target, function (bucket) {
         return [bucket[0], args.byName.value];
       });
     }

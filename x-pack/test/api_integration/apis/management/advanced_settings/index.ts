@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('advanced settings', () => {
     loadTestFile(require.resolve('./feature_controls'));
   });

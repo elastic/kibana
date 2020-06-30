@@ -104,7 +104,7 @@ export class AssetManager extends PureComponent<Props, State> {
   private handleFileUpload = (files: FileList | null) => {
     if (files == null) return;
     this.setState({ isLoading: true });
-    Promise.all(Array.from(files).map(file => this.props.onAssetAdd(file))).finally(() => {
+    Promise.all(Array.from(files).map((file) => this.props.onAssetAdd(file))).finally(() => {
       this.setState({ isLoading: false });
     });
   };

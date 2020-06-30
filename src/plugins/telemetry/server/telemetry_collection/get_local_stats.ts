@@ -24,6 +24,7 @@ import {
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import { getNodesUsage } from './get_nodes_usage';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -66,13 +67,22 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   const { callCluster, usageCollection } = config;
 
   return await Promise.all(
-    clustersDetails.map(async clustersDetail => {
-      const [clusterInfo, clusterStats, kibana] = await Promise.all([
+    clustersDetails.map(async (clustersDetail) => {
+      const [clusterInfo, clusterStats, nodesUsage, kibana] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(callCluster), // nodes_usage info
         getKibana(usageCollection, callCluster),
       ]);
-      return handleLocalStats(clusterInfo, clusterStats, kibana, context);
+      return handleLocalStats(
+        clusterInfo,
+        {
+          ...clusterStats,
+          nodes: { ...clusterStats.nodes, usage: nodesUsage },
+        },
+        kibana,
+        context
+      );
     })
   );
 };

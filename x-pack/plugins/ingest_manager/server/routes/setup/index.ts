@@ -12,6 +12,7 @@ import {
   createFleetSetupHandler,
   ingestManagerSetupHandler,
 } from './handlers';
+import { PostFleetSetupRequestSchema } from '../../types';
 
 export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
   // Ingest manager setup
@@ -44,7 +45,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
   router.post(
     {
       path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
-      validate: false,
+      validate: PostFleetSetupRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createFleetSetupHandler

@@ -57,6 +57,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     optionalPlugins: true,
     ui: true,
     server: true,
+    extraPublicDirs: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -70,7 +71,11 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo, log: Logger) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo,
+  log: Logger
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -130,6 +135,19 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  if (
+    manifest.extraPublicDirs &&
+    (!Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
+      )
+    );
+  }
+
   const expectedKibanaVersion =
     typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
       ? manifest.kibanaVersion
@@ -154,7 +172,9 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  const unknownManifestKeys = Object.keys(manifest).filter(key => !KNOWN_MANIFEST_FIELDS.has(key));
+  const unknownManifestKeys = Object.keys(manifest).filter(
+    (key) => !KNOWN_MANIFEST_FIELDS.has(key)
+  );
   if (unknownManifestKeys.length > 0) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -173,6 +193,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
+    extraPublicDirs: manifest.extraPublicDirs,
   };
 }
 

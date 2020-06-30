@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionValueError } from '../../public';
+import { ExpressionValueError } from '../../common';
 
 type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
 

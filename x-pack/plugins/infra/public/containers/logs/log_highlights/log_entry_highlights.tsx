@@ -42,7 +42,7 @@ export const useLogEntryHighlights = (
           highlightTerms,
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setLogEntryHighlights(response.data);
       },
     },
@@ -55,7 +55,7 @@ export const useLogEntryHighlights = (
 
   useEffect(() => {
     if (
-      highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
+      highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length &&
       startTimestamp &&
       endTimestamp
     ) {

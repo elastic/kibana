@@ -11,7 +11,7 @@ import { ElementCard } from '../element_card';
 import { elasticLogo } from '../../../lib/elastic_logo';
 
 storiesOf('components/Elements/ElementCard', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div
       style={{
         width: '210px',

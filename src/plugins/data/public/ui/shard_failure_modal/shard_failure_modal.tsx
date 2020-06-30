@@ -104,7 +104,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
       </EuiModalBody>
       <EuiModalFooter>
         <EuiCopy textToCopy={responseJSON}>
-          {copy => (
+          {(copy) => (
             <EuiButtonEmpty onClick={copy}>
               <FormattedMessage
                 id="data.search.searchSource.fetch.shardsFailedModal.copyToClipboard"

@@ -6,15 +6,17 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  MapQuery,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -24,9 +26,20 @@ export type GeoJsonWithMeta = {
   meta?: GeoJsonFetchMeta;
 };
 
+export type BoundsFilters = {
+  applyGlobalQuery: boolean;
+  filters: Filter[];
+  query: MapQuery;
+  sourceQuery: MapQuery;
+  timeFilters: TimeRange;
+};
+
 export interface IVectorSource extends ISource {
   filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -42,7 +55,10 @@ export interface IVectorSource extends ISource {
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -52,7 +68,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFields(): Promise<IField[]>;
   getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
-  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   canFormatFeatureProperties(): boolean;
   getApplyGlobalQuery(): boolean;
   getFieldNames(): string[];

@@ -41,12 +41,7 @@ describe('FeatureTableCell', () => {
     );
 
     expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature "`);
-    expect(
-      wrapper
-        .find(EuiIcon)
-        .first()
-        .props()
-    ).toMatchObject({
+    expect(wrapper.find(EuiIcon).first().props()).toMatchObject({
       type: feature.icon,
     });
     expect(wrapper.find(EuiIconTip).props().content).toMatchInlineSnapshot(`

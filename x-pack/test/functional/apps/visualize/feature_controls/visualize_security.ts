@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
@@ -76,13 +76,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Visualize');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', {
+        await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
         await testSubjects.existOrFail('newItemButton');
@@ -200,13 +200,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Visualize');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', {
+        await testSubjects.existOrFail('visualizationLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
         await testSubjects.existOrFail('newItemButton');
@@ -315,13 +315,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Visualize');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        await testSubjects.existOrFail('visualizeLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('newItemButton');
       });
 
@@ -409,10 +409,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.security.login(
           'no_visualize_privileges_user',
           'no_visualize_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-            shouldLoginIfPrompted: false,
-          }
+          { expectSpaceSelector: false }
         );
       });
 

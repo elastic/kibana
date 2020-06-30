@@ -7,7 +7,7 @@
 import { getLocalUIFilters } from './';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../../public/utils/testHelpers';
 import { getServicesProjection } from '../../../../common/projections/services';
 
@@ -25,14 +25,14 @@ describe('local ui filter queries', () => {
   });
 
   it('fetches local ui filter aggregations', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getLocalUIFilters({
         setup,
         localFilterNames: ['transactionResult', 'host'],
         projection: getServicesProjection({ setup }),
         uiFilters: {
-          transactionResult: ['2xx']
-        }
+          transactionResult: ['2xx'],
+        },
       })
     );
 

@@ -30,12 +30,13 @@
 
       <div class="kuiInfoPanelBody__message">
         <div class="kuiButtonGroup">
-          <button
-            ng-click="accessDenied.goToKibana();"
-            class="kuiButton kuiButton--primary"
-            i18n-id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
-            i18n-default-message="Back to Kibana"
-          ></button>
+          <a ng-href="{{ accessDenied.goToKibanaURL }}">
+            <button
+              class="kuiButton kuiButton--primary"
+              i18n-id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
+              i18n-default-message="Back to Kibana"
+            ></button>
+          </a>
         </div>
       </div>
     </div>

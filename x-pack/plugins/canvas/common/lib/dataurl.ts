@@ -6,7 +6,7 @@
 
 import { fromByteArray } from 'base64-js';
 
-// @ts-ignore @types/mime doesn't resolve mime/lite for some reason.
+// @ts-expect-error @types/mime doesn't resolve mime/lite for some reason.
 import mime from 'mime/lite';
 
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
@@ -55,7 +55,7 @@ export function encode(data: any | null, type = 'text/plain') {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = err => reject(err);
+      reader.onerror = (err) => reject(err);
       reader.readAsDataURL(data);
     });
   }

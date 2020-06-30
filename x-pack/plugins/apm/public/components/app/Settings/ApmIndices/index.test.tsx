@@ -12,9 +12,10 @@ import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContex
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
-    const spy = spyOn(hooks, 'useFetcher').and.returnValue({
+    const spy = jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       data: undefined,
-      status: 'loading'
+      status: hooks.FETCH_STATUS.LOADING,
+      refetch: jest.fn(),
     });
     const { getByText } = render(
       <MockApmPluginContextWrapper>

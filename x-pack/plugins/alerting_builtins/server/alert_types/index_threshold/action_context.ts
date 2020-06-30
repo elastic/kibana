@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions } from '../../../../alerting/server';
+import { AlertExecutorOptions } from '../../../../alerts/server';
 
 // alert type context provided to actions
 

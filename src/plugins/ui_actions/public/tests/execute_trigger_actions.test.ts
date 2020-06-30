@@ -42,7 +42,7 @@ function createTestAction<C extends object>(
     type: type as ActionType,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
-    execute: context => executeFn(context),
+    execute: (context) => executeFn(context),
   });
 }
 

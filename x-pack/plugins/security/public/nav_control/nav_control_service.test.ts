@@ -15,7 +15,7 @@ import { mockAuthenticatedUser } from '../../common/model/authenticated_user.moc
 
 const validLicense = {
   isAvailable: true,
-  getFeature: feature => {
+  getFeature: (feature) => {
     expect(feature).toEqual('security');
 
     return {

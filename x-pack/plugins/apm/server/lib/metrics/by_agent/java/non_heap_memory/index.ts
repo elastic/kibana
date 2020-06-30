@@ -10,12 +10,12 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_MAX,
   METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
-  AGENT_NAME
+  AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -25,30 +25,30 @@ const series = {
     title: i18n.translate(
       'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
       {
-        defaultMessage: 'Avg. used'
+        defaultMessage: 'Avg. used',
       }
     ),
-    color: theme.euiColorVis0
+    color: theme.euiColorVis0,
   },
   nonHeapMemoryCommitted: {
     title: i18n.translate(
       'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
       {
-        defaultMessage: 'Avg. committed'
+        defaultMessage: 'Avg. committed',
       }
     ),
-    color: theme.euiColorVis1
-  }
+    color: theme.euiColorVis1,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle', {
-    defaultMessage: 'Non-Heap Memory'
+    defaultMessage: 'Non-Heap Memory',
   }),
   key: 'non_heap_memory_area_chart',
   type: 'area',
   yUnit: 'bytes',
-  series
+  series,
 };
 
 export async function getNonHeapMemoryChart(
@@ -64,12 +64,12 @@ export async function getNonHeapMemoryChart(
     aggs: {
       nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
       nonHeapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED }
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED },
       },
       nonHeapMemoryUsed: {
-        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED }
-      }
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED },
+      },
     },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }]
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
   });
 }

@@ -1,4 +1,11 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["lib/index.d.ts"]
+  "compilerOptions": {
+    "outDir": "target",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }

@@ -225,39 +225,36 @@ export function geoShapeToGeometry(value, accumulator) {
   accumulator.push(geoJson);
 }
 
-function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
-  const top = clampToLatBounds(maxLat);
+export function makeESBbox({ maxLat, maxLon, minLat, minLon }) {
   const bottom = clampToLatBounds(minLat);
-
-  // geo_bounding_box does not support ranges outside of -180 and 180
-  // When the area crosses the 180° meridian,
-  // the value of the lower left longitude will be greater than the value of the upper right longitude.
-  // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#30
-  let boundingBox;
+  const top = clampToLatBounds(maxLat);
+  let esBbox;
   if (maxLon - minLon >= 360) {
-    boundingBox = {
+    esBbox = {
       top_left: [-180, top],
       bottom_right: [180, bottom],
     };
-  } else if (maxLon > 180) {
-    const overflow = maxLon - 180;
-    boundingBox = {
-      top_left: [minLon, top],
-      bottom_right: [-180 + overflow, bottom],
-    };
-  } else if (minLon < -180) {
-    const overflow = Math.abs(minLon) - 180;
-    boundingBox = {
-      top_left: [180 - overflow, top],
-      bottom_right: [maxLon, bottom],
-    };
   } else {
-    boundingBox = {
-      top_left: [minLon, top],
-      bottom_right: [maxLon, bottom],
+    // geo_bounding_box does not support ranges outside of -180 and 180
+    // When the area crosses the 180° meridian,
+    // the value of the lower left longitude will be greater than the value of the upper right longitude.
+    // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#30
+    //
+    // This ensures bbox goes West->East in the happy case,
+    // but will be formatted East->West in case it crosses the date-line
+    const newMinlon = ((minLon + 180 + 360) % 360) - 180;
+    const newMaxlon = ((maxLon + 180 + 360) % 360) - 180;
+    esBbox = {
+      top_left: [newMinlon, top],
+      bottom_right: [newMaxlon, bottom],
     };
   }
 
+  return esBbox;
+}
+
+function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
+  const boundingBox = makeESBbox({ maxLat, maxLon, minLat, minLon });
   return {
     geo_bounding_box: {
       [geoFieldName]: boundingBox,
@@ -438,10 +435,10 @@ export function clamp(val, min, max) {
 export function extractFeaturesFromFilters(filters) {
   const features = [];
   filters
-    .filter(filter => {
+    .filter((filter) => {
       return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
     })
-    .forEach(filter => {
+    .forEach((filter) => {
       let geometry;
       if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
         const distanceSplit = filter.geo_distance.distance.split('km');

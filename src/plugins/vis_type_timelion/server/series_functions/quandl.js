@@ -108,11 +108,11 @@ export default new Datasource('quandl', {
       config.apikey;
 
     return fetch(URL)
-      .then(function(resp) {
+      .then(function (resp) {
         return resp.json();
       })
-      .then(function(resp) {
-        const data = _.map(resp.data, function(bucket) {
+      .then(function (resp) {
+        const data = _.map(resp.data, function (bucket) {
           return [moment(bucket[0]).valueOf(), bucket[config.position]];
         });
 

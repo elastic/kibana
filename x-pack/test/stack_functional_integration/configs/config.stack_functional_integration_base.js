@@ -13,7 +13,7 @@ import { esTestConfig, kbnTestConfig } from '@kbn/test';
 const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
-const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
+const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -45,8 +45,7 @@ export default async ({ readConfigFile }) => {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/kibana',
-        hash: '/discover',
+        pathname: '/app/discover',
       },
       context: {
         pathname: '/app/discover',
@@ -62,12 +61,10 @@ export default async ({ readConfigFile }) => {
       },
       // deprecated settings, use management
       settings: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       management: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       timelion: {
         pathname: '/app/timelion',
@@ -77,12 +74,12 @@ export default async ({ readConfigFile }) => {
         hash: '/console',
       },
       home: {
-        pathname: '/app/kibana',
-        hash: '/home',
+        pathname: '/app/home',
+        hash: '/',
       },
       sampledata: {
-        pathname: '/app/kibana',
-        hash: '/home/tutorial_directory/sampleData',
+        pathname: '/app/home',
+        hash: '/tutorial_directory/sampleData',
       },
       monitoring: {
         pathname: '/app/monitoring',
@@ -100,7 +97,7 @@ export default async ({ readConfigFile }) => {
 };
 
 // Returns index 1 from the resulting array-like.
-const splitRight = re => testPath => re.exec(testPath)[1];
+const splitRight = (re) => (testPath) => re.exec(testPath)[1];
 
 function truncate(testPath) {
   const dropKibanaPath = splitRight(/^.+kibana[\\/](.*$)/gm);

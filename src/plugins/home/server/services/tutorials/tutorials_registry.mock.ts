@@ -26,6 +26,7 @@ import {
 const createSetupMock = (): jest.Mocked<TutorialsRegistrySetup> => {
   const setup = {
     registerTutorial: jest.fn(),
+    unregisterTutorial: jest.fn(),
     addScopedTutorialContextFactory: jest.fn(),
   };
   return setup;

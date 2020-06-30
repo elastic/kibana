@@ -24,7 +24,7 @@ export const ErrorCount = ({ count }: Props) => (
         {i18n.translate('xpack.apm.transactionDetails.errorCount', {
           defaultMessage:
             '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
-          values: { errorCount: count }
+          values: { errorCount: count },
         })}
       </EuiTextColor>
     </h4>

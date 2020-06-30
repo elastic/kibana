@@ -55,7 +55,9 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
             <span key={getId('span')}>
               {getPrettyShortcut(shortcut)
                 .split(/( )/g)
-                .map(key => (key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>))}
+                .map((key) =>
+                  key === ' ' ? key : <EuiCode key={getId('shortcut')}>{key}</EuiCode>
+                )}
             </span>
           );
           return acc;

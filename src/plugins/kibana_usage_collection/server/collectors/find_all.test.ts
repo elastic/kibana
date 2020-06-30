@@ -39,7 +39,7 @@ describe('telemetry_application_usage', () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     let total = 201;
     const doc = { id: 'test-id', attributes: { test: 1 } };
-    savedObjectClient.find.mockImplementation(async opts => {
+    savedObjectClient.find.mockImplementation(async (opts) => {
       if ((opts.page || 1) > 2) {
         return { saved_objects: [], total } as any;
       }

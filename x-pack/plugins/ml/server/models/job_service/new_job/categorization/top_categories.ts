@@ -125,7 +125,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
     const catCounts = await getTopCategoryCounts(jobId, numberOfCategories);
     const categories = await getCategories(
       jobId,
-      catCounts.map(c => c.id),
+      catCounts.map((c) => c.id),
       catCounts.length || numberOfCategories
     );
 
@@ -149,7 +149,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
     } else {
       return {
         total,
-        categories: categories.map(category => {
+        categories: categories.map((category) => {
           return {
             category,
           };

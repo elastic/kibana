@@ -44,7 +44,7 @@ export async function getAnnotations({
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
 
-  const bodiesPromises = annotations.map(annotation =>
+  const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities)
   );
   const searches = (await Promise.all(bodiesPromises)).reduce(

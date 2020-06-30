@@ -34,10 +34,10 @@ export function Screenshots(props: ScreenshotProps) {
 
   const ScreenshotsContainer = styled(EuiFlexGroup)`
     background: linear-gradient(360deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 100%),
-      ${styledProps => styledProps.theme.eui.euiColorPrimary};
-    padding: ${styledProps => getPadding(styledProps)};
+      ${(styledProps) => styledProps.theme.eui.euiColorPrimary};
+    padding: ${(styledProps) => getPadding(styledProps)};
     flex: 0 0 auto;
-    border-radius: ${styledProps => styledProps.theme.eui.euiBorderRadius};
+    border-radius: ${(styledProps) => styledProps.theme.eui.euiBorderRadius};
   `;
 
   // fixes ie11 problems with nested flex items

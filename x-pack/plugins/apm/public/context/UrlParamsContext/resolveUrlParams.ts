@@ -13,7 +13,7 @@ import {
   getEnd,
   toBoolean,
   toNumber,
-  toString
+  toString,
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
@@ -32,7 +32,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     serviceName,
     serviceNodeName,
     errorGroupId,
-    traceId: traceIdLink
+    traceId: traceIdLink,
   } = getPathParams(location.pathname);
 
   const query = toQuery(location.search);
@@ -56,7 +56,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
     environment,
-    searchTerm
+    searchTerm,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -97,6 +97,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
     // ui filters
     environment,
-    ...localUIFilters
+    ...localUIFilters,
   });
 }

@@ -46,7 +46,7 @@ function isNumericField(fieldCapability: FieldCapability) {
     'half_float',
     'scaled_float',
   ];
-  return numericTypes.some(numericType => fieldCapability[numericType as NumericField] != null);
+  return numericTypes.some((numericType) => fieldCapability[numericType as NumericField] != null);
 }
 
 /**

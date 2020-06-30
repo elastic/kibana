@@ -1,6 +1,7 @@
 {
   "id": "discover",
   "version": "kibana",
+  "optionalPlugins": ["share"],
   "server": true,
   "ui": true,
   "requiredPlugins": [

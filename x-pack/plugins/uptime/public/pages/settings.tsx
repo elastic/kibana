@@ -31,7 +31,10 @@ import {
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
-import { VALUE_MUST_BE_GREATER_THEN_ZEO } from '../../common/translations';
+import {
+  VALUE_MUST_BE_GREATER_THAN_ZERO,
+  VALUE_MUST_BE_AN_INTEGER,
+} from '../../common/translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -47,12 +50,15 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
-const isValidCertVal = (val: string | number) => {
-  if (val === '') {
-    return Translations.BLANK_STR;
+export const isValidCertVal = (val?: number): string | undefined => {
+  if (val === undefined || isNaN(val)) {
+    return Translations.settings.mustBeNumber;
   }
-  if (val === 0) {
-    return VALUE_MUST_BE_GREATER_THEN_ZEO;
+  if (val <= 0) {
+    return VALUE_MUST_BE_GREATER_THAN_ZERO;
+  }
+  if (val % 1) {
+    return VALUE_MUST_BE_AN_INTEGER;
   }
 };
 
@@ -95,9 +101,9 @@ export const SettingsPage: React.FC = () => {
 
   const fieldErrors = getFieldErrors(formFields);
 
-  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
+  const isFormValid = !(fieldErrors && Object.values(fieldErrors).find((v) => !!v));
 
-  const onChangeFormField: OnFieldChangeType = changedField => {
+  const onChangeFormField: OnFieldChangeType = (changedField) => {
     if (formFields) {
       setFormFields({
         ...formFields,

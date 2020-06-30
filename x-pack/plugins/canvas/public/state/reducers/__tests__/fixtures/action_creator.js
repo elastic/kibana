@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const actionCreator = type => {
+export const actionCreator = (type) => {
   return (payload, error = null, meta = null) => ({ type, payload, error, meta });
 };

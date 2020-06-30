@@ -41,7 +41,7 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
         return response.ok({
           body: {
             total: workpads.total,
-            workpads: workpads.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
+            workpads: workpads.saved_objects.map((hit) => ({ id: hit.id, ...hit.attributes })),
           },
         });
       } catch (error) {

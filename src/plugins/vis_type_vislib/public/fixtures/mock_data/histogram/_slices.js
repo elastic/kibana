@@ -322,7 +322,7 @@ export default {
     20000,
   ],
   hits: 3967374,
-  tooltipFormatter: function(event) {
+  tooltipFormatter: function (event) {
     return event.point;
   },
 };

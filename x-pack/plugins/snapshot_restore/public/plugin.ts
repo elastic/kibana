@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN } from '../common/constants';
 
 import { ClientConfigType } from './types';
@@ -40,13 +40,13 @@ export class SnapshotRestoreUIPlugin {
     textService.setup(i18n);
     httpService.setup(http);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Data).registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.snapshotRestore.appTitle', {
         defaultMessage: 'Snapshot and Restore',
       }),
-      order: 7,
-      mount: async params => {
+      order: 3,
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {
           uiMetricService: this.uiMetricService,

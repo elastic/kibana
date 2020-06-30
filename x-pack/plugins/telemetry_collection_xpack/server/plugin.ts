@@ -18,7 +18,7 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
 
   public setup(core: CoreSetup, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
     telemetryCollectionManager.setCollection({
-      esCluster: core.elasticsearch.dataClient,
+      esCluster: core.elasticsearch.legacy.client,
       title: 'local_xpack',
       priority: 1,
       statsGetter: getStatsWithXpack,

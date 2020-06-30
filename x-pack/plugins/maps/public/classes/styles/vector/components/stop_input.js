@@ -45,15 +45,15 @@ export class StopInput extends Component {
     }
   };
 
-  _onChange = selectedOptions => {
+  _onChange = (selectedOptions) => {
     this.props.onChange(_.get(selectedOptions, '[0].label', ''));
   };
 
-  _onCreateOption = newValue => {
+  _onCreateOption = (newValue) => {
     this.props.onChange(newValue);
   };
 
-  _onSearchChange = async searchValue => {
+  _onSearchChange = async (searchValue) => {
     this.setState(
       {
         isLoadingSuggestions: true,
@@ -65,7 +65,7 @@ export class StopInput extends Component {
     );
   };
 
-  _loadSuggestions = _.debounce(async searchValue => {
+  _loadSuggestions = _.debounce(async (searchValue) => {
     let suggestions = [];
     try {
       suggestions = await this.props.getValueSuggestions(searchValue);
@@ -81,7 +81,7 @@ export class StopInput extends Component {
     }
   }, 300);
 
-  _onFieldTextChange = event => {
+  _onFieldTextChange = (event) => {
     this.setState({ localFieldTextValue: event.target.value });
     // onChange can cause UI lag, ensure smooth input typing by debouncing onChange
     this._debouncedOnFieldTextChange();
@@ -92,7 +92,7 @@ export class StopInput extends Component {
   }, 500);
 
   _renderSuggestionInput() {
-    const suggestionOptions = this.state.suggestions.map(suggestion => {
+    const suggestionOptions = this.state.suggestions.map((suggestion) => {
       return { label: `${suggestion}` };
     });
 

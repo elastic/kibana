@@ -24,7 +24,7 @@ export function init(usageCollection: UsageCollectionSetup): void {
  */
 export function trackUserRequest(request: Promise<any>, actionType: string) {
   // Only track successful actions.
-  return request.then(response => {
+  return request.then((response) => {
     // It looks like we're using the wrong type here, added via
     // https://github.com/elastic/kibana/pull/41113/files#diff-e65a0a6696a9d723969afd871cbd60cdR19
     // but we'll keep it for now to avoid discontinuity in our telemetry data.

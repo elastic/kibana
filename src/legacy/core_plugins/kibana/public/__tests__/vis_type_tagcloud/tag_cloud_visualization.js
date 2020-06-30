@@ -42,7 +42,7 @@ import { setFormatService } from '../../../../../../plugins/vis_type_tagcloud/pu
 
 const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
-describe('TagCloudVisualizationTest', function() {
+describe('TagCloudVisualizationTest', function () {
   let domNode;
   let vis;
   let imageComparator;
@@ -76,8 +76,8 @@ describe('TagCloudVisualizationTest', function() {
 
   beforeEach(ngMock.module('kibana'));
 
-  describe('TagCloudVisualization - basics', function() {
-    beforeEach(async function() {
+  describe('TagCloudVisualization - basics', function () {
+    beforeEach(async function () {
       const visType = new BaseVisType(createTagCloudVisTypeDefinition({ colors: seedColors }));
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
@@ -91,12 +91,12 @@ describe('TagCloudVisualizationTest', function() {
       });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('simple draw', async function() {
+    it('simple draw', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
 
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
@@ -118,7 +118,7 @@ describe('TagCloudVisualizationTest', function() {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('with resize', async function() {
+    it('with resize', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -149,7 +149,7 @@ describe('TagCloudVisualizationTest', function() {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('with param change', async function() {
+    it('with param change', async function () {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,

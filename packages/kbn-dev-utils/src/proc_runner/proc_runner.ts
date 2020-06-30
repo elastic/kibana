@@ -50,7 +50,7 @@ export class ProcRunner {
 
   constructor(private log: ToolingLog) {
     this.signalUnsubscribe = exitHook(() => {
-      this.teardown().catch(error => {
+      this.teardown().catch((error) => {
         log.error(`ProcRunner teardown error: ${error.stack}`);
       });
     });
@@ -105,9 +105,9 @@ export class ProcRunner {
         // wait for process to log matching line
         await Rx.race(
           proc.lines$.pipe(
-            filter(line => wait.test(line)),
+            filter((line) => wait.test(line)),
             first(),
-            catchError(err => {
+            catchError((err) => {
               if (err.name !== 'EmptyError') {
                 throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
@@ -159,7 +159,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this.procs.map(proc => proc.outcomePromise));
+    await Promise.all(this.procs.map((proc) => proc.outcomePromise));
   }
 
   /**
@@ -181,19 +181,19 @@ export class ProcRunner {
       this.log.warning(
         '%d processes left running, stop them with procs.stop(name):',
         this.procs.length,
-        this.procs.map(proc => proc.name)
+        this.procs.map((proc) => proc.name)
       );
     }
 
     await Promise.all(
-      this.procs.map(async proc => {
+      this.procs.map(async (proc) => {
         await proc.stop(signal === 'exit' ? 'SIGKILL' : signal);
       })
     );
   }
 
   private getProc(name: string) {
-    return this.procs.find(proc => {
+    return this.procs.find((proc) => {
       return proc.name === name;
     });
   }
@@ -209,14 +209,14 @@ export class ProcRunner {
 
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
-      next: code => {
+      next: (code) => {
         const duration = moment.duration(Date.now() - startMs);
         this.log.info('[%s] exited with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();
       },
-      error: error => {
+      error: (error) => {
         if (this.closing) {
           this.log.error(error);
         }

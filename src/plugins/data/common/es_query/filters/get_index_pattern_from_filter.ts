@@ -24,5 +24,5 @@ export function getIndexPatternFromFilter(
   filter: Filter,
   indexPatterns: IIndexPattern[]
 ): IIndexPattern | undefined {
-  return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
+  return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
 }

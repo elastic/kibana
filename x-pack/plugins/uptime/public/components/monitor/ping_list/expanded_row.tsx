@@ -41,7 +41,7 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
           values: { bodyBytes: formatNumber(bodyBytes, '0b') },
         })
       : null;
-  const combinedText = [truncatedText, bodySizeText].filter(s => s).join(' ');
+  const combinedText = [truncatedText, bodySizeText].filter((s) => s).join(' ');
 
   return <EuiText>{combinedText}</EuiText>;
 };

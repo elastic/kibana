@@ -2,9 +2,11 @@
   "id": "urlGeneratorsExamples",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["url_generators_examples"],
   "server": false,
   "ui": true,
   "requiredPlugins": ["share"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": [
+    "public/url_generator"
+  ]
 }

@@ -8,12 +8,12 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'timePicker', 'visualize']);
 
-  before(function() {
+  before(function () {
     log.debug('navigateToApp Visualize');
     return PageObjects.common.navigateToApp('visualize', { insertTimestamp: false });
   });
 
-  it('Top Transactions for Time Period [APM]- should have expected test data', async function() {
+  it('Top Transactions for Time Period [APM]- should have expected test data', async function () {
     await PageObjects.visualize.openSavedVisualization('Top Transactions for Time Period [APM]');
     await PageObjects.common.sleep(1000);
     await PageObjects.common.tryForTime(40000, async () => {

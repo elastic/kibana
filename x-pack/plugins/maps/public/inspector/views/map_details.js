@@ -43,7 +43,7 @@ class MapDetails extends Component {
     selectedTabId: DETAILS_TAB_ID,
   };
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });

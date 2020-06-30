@@ -54,9 +54,9 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     );
   }
 
-  const deleteField: DeleteFieldFunc = field => {
+  const deleteField: DeleteFieldFunc = (field) => {
     const aliases = getAllDescendantAliases(field, fields)
-      .map(id => byId[id].path.join(' > '))
+      .map((id) => byId[id].path.join(' > '))
       .sort();
     const hasAliases = Boolean(aliases.length);
 

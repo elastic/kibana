@@ -6,7 +6,7 @@
 
 import getAnnotationsRequestMock from './__mocks__/get_annotations_request.json';
 import getAnnotationsResponseMock from './__mocks__/get_annotations_response.json';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { ML_ANNOTATIONS_INDEX_ALIAS_WRITE } from '../../../common/constants/index_patterns';
@@ -31,11 +31,11 @@ describe('annotation_service', () => {
         case 'search':
           return Promise.resolve(getAnnotationsResponseMock);
       }
-    }) as unknown) as APICaller;
+    }) as unknown) as LegacyAPICaller;
   });
 
   describe('deleteAnnotation()', () => {
-    it('should delete annotation', async done => {
+    it('should delete annotation', async (done) => {
       const { deleteAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -56,7 +56,7 @@ describe('annotation_service', () => {
   });
 
   describe('getAnnotation()', () => {
-    it('should get annotations for specific job', async done => {
+    it('should get annotations for specific job', async (done) => {
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -86,7 +86,7 @@ describe('annotation_service', () => {
 
       const callWithRequestSpyError = (jest.fn(() => {
         return Promise.resolve(mockEsError);
-      }) as unknown) as APICaller;
+      }) as unknown) as LegacyAPICaller;
 
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpyError);
 
@@ -104,7 +104,7 @@ describe('annotation_service', () => {
   });
 
   describe('indexAnnotation()', () => {
-    it('should index annotation', async done => {
+    it('should index annotation', async (done) => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -132,7 +132,7 @@ describe('annotation_service', () => {
       done();
     });
 
-    it('should remove ._id and .key before updating annotation', async done => {
+    it('should remove ._id and .key before updating annotation', async (done) => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 
@@ -164,7 +164,7 @@ describe('annotation_service', () => {
       done();
     });
 
-    it('should update annotation text and the username for modified_username', async done => {
+    it('should update annotation text and the username for modified_username', async (done) => {
       const { getAnnotations, indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
       const mockFunct = callWithRequestSpy;
 

@@ -65,7 +65,7 @@ export const sslSchema = schema.object(
     ),
   },
   {
-    validate: ssl => {
+    validate: (ssl) => {
       if (ssl.key && ssl.keystore.path) {
         return 'cannot use [key] when [keystore.path] is specified';
       }

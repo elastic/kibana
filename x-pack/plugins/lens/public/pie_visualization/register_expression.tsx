@@ -14,9 +14,8 @@ import {
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
-import { LensMultiTable, FormatFactory } from '../types';
+import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
-import { getExecuteTriggerActions } from '../services';
 import { PieComponent } from './render_function';
 
 export interface PieRender {
@@ -109,7 +108,9 @@ export const getPieRenderer = (dependencies: {
     config: PieExpressionProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+    const onClickValue = (data: LensFilterEvent['data']) => {
+      handlers.event({ name: 'filter', data });
+    };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
@@ -117,7 +118,7 @@ export const getPieRenderer = (dependencies: {
           {...config}
           {...dependencies}
           formatFactory={formatFactory}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           isDarkMode={dependencies.isDarkMode}
         />
       </I18nProvider>,

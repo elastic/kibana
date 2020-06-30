@@ -71,7 +71,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
             <EuiSwitch
               data-test-subj="returnToOriginModeSwitch"
               checked={returnToOriginMode}
-              onChange={event => {
+              onChange={(event) => {
                 setReturnToOriginMode(event.target.checked);
               }}
               label={

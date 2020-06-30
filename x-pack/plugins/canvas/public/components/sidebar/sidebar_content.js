@@ -18,7 +18,7 @@ import { ElementSettings } from './element_settings';
 
 const { SidebarContent: strings } = ComponentStrings;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   selectedToplevelNodes: getSelectedToplevelNodes(state),
   selectedElementId: getSelectedElementId(state),
 });

@@ -7,7 +7,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
@@ -18,7 +18,7 @@ export async function getDefaultMetricsCharts(
 ) {
   const charts = await Promise.all([
     getCPUChartData(setup, serviceName),
-    getMemoryChartData(setup, serviceName)
+    getMemoryChartData(setup, serviceName),
   ]);
 
   return { charts };

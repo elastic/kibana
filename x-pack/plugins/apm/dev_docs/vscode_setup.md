@@ -1,8 +1,8 @@
-### Visual Studio Code
+# Visual Studio Code
 
 When using [Visual Studio Code](https://code.visualstudio.com/) with APM it's best to set up a [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) and add the `x-pack/plugins/apm` directory, the `x-pack` directory, and the root of the Kibana repository to the workspace. This makes it so you can navigate and search within APM and use the wider workspace roots when you need to widen your search.
 
-#### Using the Jest extension
+## Using the Jest extension
 
 The [vscode-jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) is a good way to run your Jest tests inside the editor.
 
@@ -22,31 +22,21 @@ If you have a workspace configured as described above you should have:
 "jest.disabledWorkspaceFolders": ["kibana", "x-pack"]
 ```
 
-in your Workspace settings, and:
-
-```json
-"jest.pathToJest": "node scripts/jest.js --testPathPattern=plugins/apm",
-"jest.rootPath": "../../.."
-```
-
-in the settings for the APM folder.
-
-#### Jest debugging
+## Jest debugging
 
 To make the [VSCode debugger](https://vscode.readthedocs.io/en/latest/editor/debugging/) work with Jest (you can set breakpoints in the code and tests and use the VSCode debugger) you'll need the [Node Debug extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.node-debug2) installed and can set up a launch configuration like:
 
 ```json
 {
   "type": "node",
-  "name": "APM Jest",
+  "name": "vscode-jest-tests",
   "request": "launch",
-  "args": ["--runInBand", "--testPathPattern=plugins/apm"],
-  "cwd": "${workspaceFolder}/../../..",
-  "console": "internalConsole",
-  "internalConsoleOptions": "openOnSessionStart",
+  "args": ["--runInBand"],
+  "cwd": "${workspaceFolder}",
+  "console": "integratedTerminal",
+  "internalConsoleOptions": "neverOpen",
   "disableOptimisticBPs": true,
-  "program": "${workspaceFolder}/../../../scripts/jest.js",
-  "runtimeVersion": "10.15.2"
+  "program": "${workspaceFolder}/../../../node_modules/jest/bin/jest"
 }
 ```
 

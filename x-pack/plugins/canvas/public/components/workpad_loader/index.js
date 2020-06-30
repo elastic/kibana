@@ -20,7 +20,7 @@ import { WorkpadLoader as Component } from './workpad_loader';
 const { WorkpadLoader: strings } = ComponentStrings;
 const { WorkpadLoader: errors } = ErrorStrings;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   workpadId: getWorkpad(state).id,
   canUserWrite: canUserWrite(state),
 });
@@ -37,7 +37,7 @@ export const WorkpadLoader = compose(
   })),
   withHandlers(({ kibana }) => ({
     // Workpad creation via navigation
-    createWorkpad: props => async workpad => {
+    createWorkpad: (props) => async (workpad) => {
       // workpad data uploaded, create and load it
       if (workpad != null) {
         try {
@@ -55,7 +55,7 @@ export const WorkpadLoader = compose(
     },
 
     // Workpad search
-    findWorkpads: ({ setWorkpads }) => async text => {
+    findWorkpads: ({ setWorkpads }) => async (text) => {
       try {
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
@@ -65,10 +65,10 @@ export const WorkpadLoader = compose(
     },
 
     // Workpad import/export methods
-    downloadWorkpad: () => workpadId => downloadWorkpad(workpadId),
+    downloadWorkpad: () => (workpadId) => downloadWorkpad(workpadId),
 
     // Clone workpad given an id
-    cloneWorkpad: props => async workpadId => {
+    cloneWorkpad: (props) => async (workpadId) => {
       try {
         const workpad = await workpadService.get(workpadId);
         workpad.name = strings.getClonedWorkpadName(workpad.name);
@@ -81,20 +81,20 @@ export const WorkpadLoader = compose(
     },
 
     // Remove workpad given an array of id
-    removeWorkpads: props => async workpadIds => {
+    removeWorkpads: (props) => async (workpadIds) => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      const removeWorkpads = workpadIds.map(id =>
+      const removeWorkpads = workpadIds.map((id) =>
         workpadService
           .remove(id)
           .then(() => ({ id, err: null }))
-          .catch(err => ({
+          .catch((err) => ({
             id,
             err,
           }))
       );
 
-      return Promise.all(removeWorkpads).then(results => {
+      return Promise.all(removeWorkpads).then((results) => {
         let redirectHome = false;
 
         const [passes, errored] = results.reduce(
@@ -135,8 +135,8 @@ export const WorkpadLoader = compose(
       });
     },
   })),
-  withProps(props => ({
-    formatDate: date => {
+  withProps((props) => ({
+    formatDate: (date) => {
       const dateFormat = props.kibana.services.uiSettings.get('dateFormat');
       return date && moment(date).format(dateFormat);
     },

@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export class Listing extends PureComponent {
   getColumns() {
-    const { kbnUrl, scope } = this.props.angular;
     const setupMode = this.props.setupMode;
 
     return [
@@ -62,13 +62,7 @@ export class Listing extends PureComponent {
           return (
             <div>
               <div>
-                <EuiLink
-                  onClick={() => {
-                    scope.$evalAsync(() => {
-                      kbnUrl.changePath(`/logstash/node/${node.logstash.uuid}`);
-                    });
-                  }}
-                >
+                <EuiLink href={getSafeForExternalLink(`#/logstash/node/${node.logstash.uuid}`)}>
                   {name}
                 </EuiLink>
               </div>
@@ -84,7 +78,7 @@ export class Listing extends PureComponent {
         }),
         field: 'cpu_usage',
         sortable: true,
-        render: value => formatPercentageUsage(value, 100),
+        render: (value) => formatPercentageUsage(value, 100),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.loadAverageTitle', {
@@ -92,7 +86,7 @@ export class Listing extends PureComponent {
         }),
         field: 'load_average',
         sortable: true,
-        render: value => formatNumber(value, '0.00'),
+        render: (value) => formatNumber(value, '0.00'),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.jvmHeapUsedTitle', {
@@ -101,7 +95,7 @@ export class Listing extends PureComponent {
         }),
         field: 'jvm_heap_used',
         sortable: true,
-        render: value => formatPercentageUsage(value, 100),
+        render: (value) => formatPercentageUsage(value, 100),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
@@ -109,14 +103,14 @@ export class Listing extends PureComponent {
         }),
         field: 'events_out',
         sortable: true,
-        render: value => formatNumber(value, '0.[0]a'),
+        render: (value) => formatNumber(value, '0.[0]a'),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.nodes.configReloadsTitle', {
           defaultMessage: 'Config Reloads',
         }),
         sortable: true,
-        render: node => (
+        render: (node) => (
           <div>
             <div>
               <FormattedMessage
@@ -141,7 +135,7 @@ export class Listing extends PureComponent {
         }),
         field: 'version',
         sortable: true,
-        render: value => formatNumber(value),
+        render: (value) => formatNumber(value),
       },
     ];
   }
@@ -149,7 +143,7 @@ export class Listing extends PureComponent {
   render() {
     const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
-    const flattenedData = data.map(item => ({
+    const flattenedData = data.map((item) => ({
       ...item,
       name: get(item, 'logstash.name', 'N/A'),
       cpu_usage: get(item, 'process.cpu.percent', 'N/A'),

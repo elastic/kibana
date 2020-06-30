@@ -6,7 +6,7 @@
 
 import { call, put } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
-import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from 'src/core/public';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
@@ -24,7 +24,7 @@ export function fetchEffectFactory<T, R, S, F>(
   success: (response: R) => Action<S>,
   fail: (error: IHttpFetchError) => Action<F>
 ) {
-  return function*(action: Action<T>) {
+  return function* (action: Action<T>) {
     try {
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {

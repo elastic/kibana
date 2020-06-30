@@ -14,3 +14,18 @@ export const schemaTransformId = {
 export interface SchemaTransformId {
   transformId: string;
 }
+
+export const deleteTransformSchema = schema.object({
+  /**
+   * Delete Transform & Destination Index
+   */
+  transformsInfo: schema.arrayOf(
+    schema.object({
+      id: schema.string(),
+      state: schema.maybe(schema.string()),
+    })
+  ),
+  deleteDestIndex: schema.maybe(schema.boolean()),
+  deleteDestIndexPattern: schema.maybe(schema.boolean()),
+  forceDelete: schema.maybe(schema.boolean()),
+});

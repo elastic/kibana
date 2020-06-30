@@ -32,7 +32,7 @@ export const fetchPage = async (
   const monitorPage = await monitorGroupFetcher(queryContext, size);
 
   const checkGroups: string[] = flatten(
-    monitorPage.monitorGroups.map(monitorGroups => monitorGroups.groups.map(g => g.checkGroup))
+    monitorPage.monitorGroups.map((monitorGroups) => monitorGroups.groups.map((g) => g.checkGroup))
   );
 
   const enrichedMonitors = await monitorEnricher(queryContext, checkGroups);

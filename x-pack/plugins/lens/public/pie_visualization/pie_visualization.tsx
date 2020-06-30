@@ -57,13 +57,13 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
   },
 
   getLayerIds(state) {
-    return state.layers.map(l => l.layerId);
+    return state.layers.map((l) => l.layerId);
   },
 
   clearLayer(state) {
     return {
       shape: state.shape,
-      layers: state.layers.map(l => newLayerState(l.layerId)),
+      layers: state.layers.map((l) => newLayerState(l.layerId)),
     };
   },
 
@@ -91,12 +91,12 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     );
   },
 
-  getPersistableState: state => state,
+  getPersistableState: (state) => state,
 
   getSuggestions: suggestions,
 
   getConfiguration({ state, frame, layerId }) {
-    const layer = state.layers.find(l => l.layerId === layerId);
+    const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
       return { groups: [] };
     }
@@ -105,7 +105,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     const originalOrder = datasource
       .getTableSpec()
       .map(({ columnId }) => columnId)
-      .filter(columnId => columnId !== layer.metric);
+      .filter((columnId) => columnId !== layer.metric);
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.groups)));
 
@@ -171,10 +171,10 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       ...prevState,
 
       shape:
-        prevState.shape === 'donut' && prevState.layers.every(l => l.groups.length === 1)
+        prevState.shape === 'donut' && prevState.layers.every((l) => l.groups.length === 1)
           ? 'pie'
           : prevState.shape,
-      layers: prevState.layers.map(l => {
+      layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
         }
@@ -188,7 +188,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
   removeDimension({ prevState, layerId, columnId }) {
     return {
       ...prevState,
-      layers: prevState.layers.map(l => {
+      layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
         }
@@ -196,7 +196,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
         if (l.metric === columnId) {
           return { ...l, metric: undefined };
         }
-        return { ...l, groups: l.groups.filter(c => c !== columnId) };
+        return { ...l, groups: l.groups.filter((c) => c !== columnId) };
       }),
     };
   },

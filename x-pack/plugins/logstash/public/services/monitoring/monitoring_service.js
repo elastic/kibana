@@ -26,7 +26,7 @@ export class MonitoringService {
 
     return this.clusterService
       .loadCluster()
-      .then(cluster => {
+      .then((cluster) => {
         // This API call should live within the Monitoring plugin
         // https://github.com/elastic/kibana/issues/63931
         const url = `${ROUTES.MONITORING_API_ROOT}/v1/clusters/${cluster.uuid}/logstash/pipeline_ids`;
@@ -39,8 +39,8 @@ export class MonitoringService {
         });
         return this.http.post(url, { body });
       })
-      .then(response =>
-        response.map(pipeline => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
+      .then((response) =>
+        response.map((pipeline) => PipelineListItem.fromUpstreamMonitoringJSON(pipeline))
       )
       .catch(() => []);
   }

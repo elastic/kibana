@@ -13,6 +13,7 @@ import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
+import { PositionedElement } from '../../../../types';
 
 const { WorkpadHeaderEditMenu: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
@@ -65,7 +66,7 @@ export interface Props {
   /**
    * only more than one selected element can be grouped
    */
-  selectedNodes: string[];
+  selectedNodes: PositionedElement[];
   /**
    * groups selected elements
    */
@@ -441,7 +442,7 @@ EditMenu.propTypes = {
   distributeHorizontally: PropTypes.func.isRequired,
   distributeVertically: PropTypes.func.isRequired,
   createCustomElement: PropTypes.func.isRequired,
-  selectedNodes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  selectedNodes: PropTypes.arrayOf(PropTypes.object).isRequired,
   groupIsSelected: PropTypes.bool.isRequired,
   groupNodes: PropTypes.func.isRequired,
   ungroupNodes: PropTypes.func.isRequired,

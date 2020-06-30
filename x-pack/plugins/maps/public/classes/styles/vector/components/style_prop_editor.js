@@ -41,7 +41,7 @@ export class StylePropEditor extends Component {
     }
   };
 
-  _onFieldMetaOptionsChange = fieldMetaOptions => {
+  _onFieldMetaOptionsChange = (fieldMetaOptions) => {
     const options = {
       ...this.props.styleProperty.getOptions(),
       fieldMetaOptions,

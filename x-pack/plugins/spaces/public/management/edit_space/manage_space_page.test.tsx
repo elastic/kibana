@@ -7,13 +7,15 @@
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { SectionPanel } from './section_panel';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
-import { notificationServiceMock } from 'src/core/public/mocks';
+import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 import { Feature } from '../../../../features/public';
 
@@ -35,6 +37,9 @@ featuresStart.getFeatures.mockResolvedValue([
 ]);
 
 describe('ManageSpacePage', () => {
+  const getUrlForApp = (appId: string) => appId;
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+
   it('allows a space to be created', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
@@ -46,6 +51,8 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -103,6 +110,8 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -152,6 +161,8 @@ describe('ManageSpacePage', () => {
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -187,6 +198,8 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -246,6 +259,8 @@ describe('ManageSpacePage', () => {
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
+        getUrlForApp={getUrlForApp}
+        history={history}
         capabilities={{
           navLinks: {},
           management: {},
@@ -296,10 +311,7 @@ function toggleFeature(wrapper: ReactWrapper<any, any>) {
 
   wrapper.update();
 
-  wrapper
-    .find(EuiSwitch)
-    .find('button')
-    .simulate('click');
+  wrapper.find(EuiSwitch).find('button').simulate('click');
 
   wrapper.update();
 }

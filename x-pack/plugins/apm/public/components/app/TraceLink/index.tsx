@@ -22,7 +22,7 @@ const CentralizedContainer = styled.div`
 const redirectToTransactionDetailPage = ({
   transaction,
   rangeFrom,
-  rangeTo
+  rangeTo,
 }: {
   transaction: Transaction;
   rangeFrom?: string;
@@ -36,14 +36,14 @@ const redirectToTransactionDetailPage = ({
       transactionName: transaction.transaction.name,
       transactionType: transaction.transaction.type,
       rangeFrom,
-      rangeTo
-    }
+      rangeTo,
+    },
   });
 
 const redirectToTracePage = ({
   traceId,
   rangeFrom,
-  rangeTo
+  rangeTo,
 }: {
   traceId: string;
   rangeFrom?: string;
@@ -54,8 +54,8 @@ const redirectToTracePage = ({
     query: {
       kuery: encodeURIComponent(`${TRACE_ID} : "${traceId}"`),
       rangeFrom,
-      rangeTo
-    }
+      rangeTo,
+    },
   });
 
 export const TraceLink = () => {
@@ -63,15 +63,15 @@ export const TraceLink = () => {
   const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
 
   const { data = { transaction: null }, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (traceId) {
         return callApmApi({
           pathname: '/api/apm/transaction/{traceId}',
           params: {
             path: {
-              traceId
-            }
-          }
+              traceId,
+            },
+          },
         });
       }
     },
@@ -82,7 +82,7 @@ export const TraceLink = () => {
       ? redirectToTransactionDetailPage({
           transaction: data.transaction,
           rangeFrom,
-          rangeTo
+          rangeTo,
         })
       : redirectToTracePage({ traceId, rangeFrom, rangeTo });
     return <Redirect to={to} />;

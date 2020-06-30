@@ -1,0 +1,9 @@
+{
+  "rule_id": "query-with-list",
+  "exceptions_list": [
+    {
+      "id": "some_updated_fake_id",
+      "namespace_type": "single"
+    }
+  ]
+}

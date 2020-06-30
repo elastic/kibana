@@ -53,7 +53,7 @@ export const kibanaDatatable = {
       return {
         type: name,
         rows: context.rows,
-        columns: context.columns.map(column => {
+        columns: context.columns.map((column) => {
           return {
             id: column.name,
             name: column.name,

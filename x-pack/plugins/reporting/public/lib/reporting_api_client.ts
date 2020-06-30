@@ -6,11 +6,10 @@
 
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-
 import { HttpSetup } from 'src/core/public';
+import { JobId, SourceJob } from '../../common/types';
+import { API_BASE_GENERATE, API_LIST_URL, REPORTING_MANAGEMENT_HOME } from '../../constants';
 import { add } from './job_completion_notifications';
-import { API_LIST_URL, API_BASE_GENERATE, REPORTING_MANAGEMENT_HOME } from '../../constants';
-import { JobId, SourceJob } from '../..';
 
 export interface JobQueueEntry {
   _id: string;

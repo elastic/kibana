@@ -10,12 +10,12 @@ import { render } from '@testing-library/react';
 import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
-  wrapper: MockApmPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper,
 };
 
 function getError() {
@@ -34,9 +34,9 @@ function getError() {
       id: '7efbc7056b746fcb',
       notIncluded: 'error not included value',
       custom: {
-        someKey: 'custom value'
-      }
-    }
+        someKey: 'custom value',
+      },
+    },
   } as unknown) as APMError;
 }
 
@@ -56,7 +56,7 @@ describe('ErrorMetadata', () => {
       'Agent',
       'URL',
       'User',
-      'Custom'
+      'Custom',
     ]);
   });
 
@@ -75,7 +75,7 @@ describe('ErrorMetadata', () => {
       'agent.someKey',
       'url.someKey',
       'user.someKey',
-      'error.custom.someKey'
+      'error.custom.someKey',
     ]);
 
     // excluded keys
@@ -97,13 +97,13 @@ describe('ErrorMetadata', () => {
       'agent value',
       'url value',
       'user value',
-      'custom value'
+      'custom value',
     ]);
 
     // excluded values
     expectTextsNotInDocument(output, [
       'not included value',
-      'error not included value'
+      'error not included value',
     ]);
   });
 
@@ -123,7 +123,7 @@ describe('ErrorMetadata', () => {
       'Process',
       'Agent',
       'URL',
-      'Custom'
+      'Custom',
     ]);
   });
 });

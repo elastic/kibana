@@ -16,7 +16,7 @@ import { CODE_PATH_APM } from '../../../../common/constants';
 uiRoutes.when('/apm', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_APM] });
     },
@@ -40,7 +40,7 @@ uiRoutes.when('/apm', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(data);
         }
       );

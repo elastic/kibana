@@ -5,7 +5,7 @@
  */
 
 // call setNext on all the N-1 checkers to link them to the next checker
-const mapCheckers = _checkers => {
+const mapCheckers = (_checkers) => {
   return _checkers.map((current, checkerIndex) => {
     const next = _checkers[checkerIndex + 1];
     if (next !== undefined) {
@@ -22,7 +22,7 @@ const mapCheckers = _checkers => {
  * model its their own.
  */
 export async function startChecks(checkers, updateModel) {
-  const runCheck = async currentChecker => {
+  const runCheck = async (currentChecker) => {
     updateModel({ checkMessage: currentChecker.getMessage() });
 
     const { found, reason, error, errorReason } = await currentChecker.executeCheck();

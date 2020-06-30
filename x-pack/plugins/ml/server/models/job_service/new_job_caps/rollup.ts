@@ -67,7 +67,7 @@ async function loadRollupIndexPattern(
   });
 
   const obj = resp.saved_objects.find(
-    r =>
+    (r) =>
       r.attributes &&
       r.attributes.type === 'rollup' &&
       r.attributes.title === indexPattern &&

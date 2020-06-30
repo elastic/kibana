@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-export { Datasource, NewDatasource } from '../../../common';
 
 const ConfigRecordSchema = schema.recordOf(
   schema.string(),
@@ -17,7 +16,7 @@ const ConfigRecordSchema = schema.recordOf(
 const DatasourceBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.string({ minLength: 1 }),
   config_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(
@@ -47,7 +46,7 @@ const DatasourceBaseSchema = {
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
-          dataset: schema.string(),
+          dataset: schema.object({ name: schema.string(), type: schema.string() }),
           processors: schema.maybe(schema.arrayOf(schema.string())),
           vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(

@@ -85,6 +85,7 @@ describe('action_status', () => {
       beforeEach(() => {
         upstreamJson = {
           id: 'my-action',
+          lastCheckedRawFormat: '2017-03-01T20:55:49.679Z',
           actionStatusJson: {
             ack: {
               timestamp: '2017-03-01T20:56:58.442Z',
@@ -107,7 +108,7 @@ describe('action_status', () => {
       });
 
       describe(`correctly calculates ACTION_STATES.ERROR`, () => {
-        it('lastExecutionSuccessful is equal to false', () => {
+        it('lastExecutionSuccessful is equal to false and it is the most recent execution', () => {
           upstreamJson.actionStatusJson.last_execution.successful = false;
           const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
           expect(actionStatus.state).to.be(ACTION_STATES.ERROR);

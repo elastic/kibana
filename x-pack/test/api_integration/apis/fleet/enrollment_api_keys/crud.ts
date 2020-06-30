@@ -11,7 +11,7 @@ import { setupIngest, getEsClientForAPIKey } from '../agents/services';
 
 const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const es = getService('es');

@@ -7,7 +7,7 @@ import { isEmpty } from 'lodash';
 import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
 import {
   IWaterfallError,
-  IServiceColors
+  IServiceColors,
 } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
 
@@ -25,12 +25,12 @@ export const getErrorMarks = (
     return [];
   }
 
-  return errorItems.map(error => ({
+  return errorItems.map((error) => ({
     type: 'errorMark',
     offset: error.offset + error.skew,
     verticalLine: false,
     id: error.doc.error.id,
     error: error.doc,
-    serviceColor: serviceColors[error.doc.service.name]
+    serviceColor: serviceColors[error.doc.service.name],
   }));
 };

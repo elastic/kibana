@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TelemetryPluginSetup } from '../../../../../../src/plugins/telemetry/public';
+import type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
 
-export { OptInExampleFlyout } from '../../../../../../src/plugins/telemetry_management_section/public/components';
-export { PRIVACY_STATEMENT_URL } from '../../../../../../src/plugins/telemetry/common/constants';
-export { TelemetryPluginSetup, shouldShowTelemetryOptIn };
+export type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
+export { shouldShowTelemetryOptIn };
 
 function shouldShowTelemetryOptIn(
-  telemetry?: TelemetryPluginSetup
-): telemetry is TelemetryPluginSetup {
+  telemetry?: TelemetryPluginStart
+): telemetry is TelemetryPluginStart {
   if (telemetry) {
     const { telemetryService } = telemetry;
     const isOptedIn = telemetryService.getIsOptedIn();

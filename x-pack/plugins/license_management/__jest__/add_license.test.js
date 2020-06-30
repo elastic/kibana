@@ -6,7 +6,11 @@
 
 import { AddLicense } from '../public/application/sections/license_dashboard/add_license';
 import { createMockLicense, getComponent } from './util';
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('AddLicense component when license is active', () => {
   test('should display correct verbiage', () => {

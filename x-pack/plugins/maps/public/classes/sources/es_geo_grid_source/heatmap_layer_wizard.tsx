@@ -14,24 +14,25 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 // @ts-ignore
 import { HeatmapLayer } from '../../layers/heatmap_layer/heatmap_layer';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { RENDER_AS } from '../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
       const layerDescriptor = HeatmapLayer.createDescriptor({
         sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return (

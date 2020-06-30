@@ -21,7 +21,7 @@ export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 const MAX_LABEL_WIDTH = 100;
 
 export function chartLimits(data = []) {
-  const domain = d3.extent(data, d => {
+  const domain = d3.extent(data, (d) => {
     let metricValue = d.value;
     if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
       // If an anomaly coincides with a gap in the data, use the anomaly actual value.
@@ -32,7 +32,7 @@ export function chartLimits(data = []) {
   const limits = { max: domain[1], min: domain[0] };
 
   if (limits.max === limits.min) {
-    limits.max = d3.max(data, d => {
+    limits.max = d3.max(data, (d) => {
       if (d.typical) {
         return Math.max(d.value, d.typical);
       } else {
@@ -42,7 +42,7 @@ export function chartLimits(data = []) {
         return d.value;
       }
     });
-    limits.min = d3.min(data, d => {
+    limits.min = d3.min(data, (d) => {
       if (d.typical) {
         return Math.min(d.value, d.typical);
       } else {
@@ -65,6 +65,44 @@ export function chartLimits(data = []) {
   return limits;
 }
 
+export function chartExtendedLimits(data = [], functionDescription) {
+  let _min = Infinity;
+  let _max = -Infinity;
+  data.forEach((d) => {
+    let metricValue = d.value;
+    const actualValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    const typicalValue = Array.isArray(d.typical) ? d.typical[0] : d.typical;
+
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = actualValue;
+    }
+
+    if (d.anomalyScore !== undefined) {
+      _min = Math.min(_min, metricValue, actualValue, typicalValue);
+      _max = Math.max(_max, metricValue, actualValue, typicalValue);
+    } else {
+      _min = Math.min(_min, metricValue);
+      _max = Math.max(_max, metricValue);
+    }
+  });
+  const limits = { max: _max, min: _min };
+
+  // add padding of 5% of the difference between max and min
+  // if we ended up with the same value for both of them
+  if (limits.max === limits.min) {
+    const padding = limits.max * 0.05;
+    limits.max += padding;
+    limits.min -= padding;
+  }
+
+  // makes sure the domain starts at 0 if the aggregation is by count
+  // since the number should always be positive
+  if (functionDescription === 'count' && limits.min < 0) {
+    limits.min = 0;
+  }
+  return limits;
+}
 export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, radius = 1.5) {
   // We need to do this because when creating a line for a chart which has data gaps,
   // if there are single datapoints without any valid data before and after them,
@@ -96,10 +134,7 @@ export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, rad
   // use d3's enter/update/exit pattern to render the dots
   const dots = dotGroup.selectAll('circle').data(dotsData);
 
-  dots
-    .enter()
-    .append('circle')
-    .attr('r', radius);
+  dots.enter().append('circle').attr('r', radius);
 
   dots.attr('cx', lineChartValuesLine.x()).attr('cy', lineChartValuesLine.y());
 
@@ -118,7 +153,7 @@ export function filterAxisLabels(selection, chartWidth) {
     .selectAll('.tick text')
     // don't refactor this to an arrow function because
     // we depend on using `this` here.
-    .text(function() {
+    .text(function () {
       const parent = d3.select(this.parentNode);
       const labelWidth = parent.node().getBBox().width;
       const labelXPos = d3.transform(parent.attr('transform')).translate[0];
@@ -142,13 +177,13 @@ export function getChartType(config) {
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over') === false
+    config.entityFields.some((f) => f.fieldType === 'over') === false
   ) {
     chartType = CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over') &&
+    config.entityFields.some((f) => f.fieldType === 'over') &&
     config.metricFunction !== null // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
     chartType = CHART_TYPE.POPULATION_DISTRIBUTION;
@@ -161,12 +196,12 @@ export function getChartType(config) {
     // Check that the config does not use script fields defined in the datafeed config.
     if (config.datafeedConfig !== undefined && config.datafeedConfig.script_fields !== undefined) {
       const scriptFields = Object.keys(config.datafeedConfig.script_fields);
-      const checkFields = config.entityFields.map(entity => entity.fieldName);
+      const checkFields = config.entityFields.map((entity) => entity.fieldName);
       if (config.metricFieldName) {
         checkFields.push(config.metricFieldName);
       }
       const usesScriptFields =
-        checkFields.find(fieldName => scriptFields.includes(fieldName)) !== undefined;
+        checkFields.find((fieldName) => scriptFields.includes(fieldName)) !== undefined;
       if (usesScriptFields === true) {
         // Only single metric chart type supports query of model plot data.
         chartType = CHART_TYPE.SINGLE_METRIC;
@@ -193,7 +228,7 @@ export function getExploreSeriesLink(series) {
   // Initially pass them in the mlTimeSeriesExplorer part of the AppState.
   // TODO - do we want to pass the entities via the filter?
   const entityCondition = {};
-  series.entityFields.forEach(entity => {
+  series.entityFields.forEach((entity) => {
     entityCondition[entity.fieldName] = entity.fieldValue;
   });
 
@@ -310,7 +345,8 @@ const LABEL_WRAP_THRESHOLD = 60;
 // and entity fields) is above LABEL_WRAP_THRESHOLD.
 export function isLabelLengthAboveThreshold({ detectorLabel, entityFields }) {
   const labelLength =
-    detectorLabel.length + entityFields.map(d => `${d.fieldName} ${d.fieldValue}`).join(' ').length;
+    detectorLabel.length +
+    entityFields.map((d) => `${d.fieldName} ${d.fieldValue}`).join(' ').length;
   return labelLength > LABEL_WRAP_THRESHOLD;
 }
 
@@ -335,13 +371,10 @@ export function getXTransform(t) {
 export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
   // Put emphasis on all tick lines, will again de-emphasize the
   // ones where we remove the label in the next steps.
-  axis
-    .selectAll('g.tick')
-    .select('line')
-    .classed('ml-tick-emphasis', true);
+  axis.selectAll('g.tick').select('line').classed('ml-tick-emphasis', true);
 
   function getNeighborTickFactory(operator) {
-    return function(ts) {
+    return function (ts) {
       switch (operator) {
         case TICK_DIRECTION.PREVIOUS:
           return ts - tickInterval;
@@ -353,8 +386,8 @@ export function removeLabelOverlap(axis, startTimeMs, tickInterval, width) {
 
   function getTickDataFactory(operator) {
     const getNeighborTick = getNeighborTickFactory(operator);
-    const fn = function(ts) {
-      const filteredTicks = axis.selectAll('.tick').filter(d => d === ts);
+    const fn = function (ts) {
+      const filteredTicks = axis.selectAll('.tick').filter((d) => d === ts);
 
       if (filteredTicks.length === 0 || filteredTicks[0].length === 0) {
         return false;

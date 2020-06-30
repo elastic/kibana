@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { SWIMLANE_TYPE, SwimlaneType } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embeddable';
 
 export interface AnomalySwimlaneInitializerProps {
@@ -31,14 +31,14 @@ export interface AnomalySwimlaneInitializerProps {
   >;
   onCreate: (swimlaneProps: {
     panelTitle: string;
-    swimlaneType: string;
+    swimlaneType: SwimlaneType;
     viewBy?: string;
     limit?: number;
   }) => void;
   onCancel: () => void;
 }
 
-const limitOptions = [5, 10, 25, 50].map(limit => ({
+const limitOptions = [5, 10, 25, 50].map((limit) => ({
   value: limit,
   text: `${limit}`,
 }));
@@ -51,8 +51,8 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(
-    (initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL) as SWIMLANE_TYPE
+  const [swimlaneType, setSwimlaneType] = useState(
+    initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL
   );
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
   const [limit, setLimit] = useState(initialInput?.limit ?? 5);
@@ -72,7 +72,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     },
   ];
 
-  const viewBySwimlaneOptions = ['', ...influencers].map(influencer => {
+  const viewBySwimlaneOptions = ['', ...influencers].map((influencer) => {
     return {
       value: influencer,
       text: influencer,
@@ -92,7 +92,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.title"
-            defaultMessage="Anomaly swimlane configuration"
+            defaultMessage="Anomaly swim lane configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -112,7 +112,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
-              onChange={e => setPanelTitle(e.target.value)}
+              onChange={(e) => setPanelTitle(e.target.value)}
               isInvalid={!isPanelTitleValid}
             />
           </EuiFormRow>
@@ -121,7 +121,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             label={
               <FormattedMessage
                 id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
-                defaultMessage="Swimlane type"
+                defaultMessage="Swim lane type"
               />
             }
           >
@@ -131,11 +131,11 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
               color="primary"
               isFullWidth
               legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
-                defaultMessage: 'Swimlane type',
+                defaultMessage: 'Swim lane type',
               })}
               options={swimlaneTypeOptions}
               idSelected={swimlaneType}
-              onChange={id => setSwimlaneType(id as SWIMLANE_TYPE)}
+              onChange={(id) => setSwimlaneType(id as SwimlaneType)}
             />
           </EuiFormRow>
 
@@ -151,7 +151,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   name="selectViewBy"
                   options={viewBySwimlaneOptions}
                   value={viewBySwimlaneFieldName}
-                  onChange={e => setViewBySwimlaneFieldName(e.target.value)}
+                  onChange={(e) => setViewBySwimlaneFieldName(e.target.value)}
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -164,7 +164,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   name="limit"
                   options={limitOptions}
                   value={limit}
-                  onChange={e => setLimit(Number(e.target.value))}
+                  onChange={(e) => setLimit(Number(e.target.value))}
                 />
               </EuiFormRow>
             </>

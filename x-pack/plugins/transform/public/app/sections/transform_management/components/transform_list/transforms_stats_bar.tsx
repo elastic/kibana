@@ -59,7 +59,7 @@ function createTranformStats(transformsList: TransformListRow[]) {
   let failedTransforms = 0;
   let startedTransforms = 0;
 
-  transformsList.forEach(transform => {
+  transformsList.forEach((transform) => {
     if (transform.mode === TRANSFORM_MODE.CONTINUOUS) {
       transformStats.continuous.value++;
     } else if (transform.mode === TRANSFORM_MODE.BATCH) {

@@ -10,6 +10,7 @@ import React, { memo, useEffect, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiCodeBlock,
@@ -27,6 +28,8 @@ import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
+// TODO Fix row hovering + bar highlighting
+// import { hoveredRow$ } from './column_chart';
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">
@@ -52,9 +55,11 @@ function isWithHeader(arg: any): arg is PropsWithHeader {
 type Props = PropsWithHeader | PropsWithoutHeader;
 
 export const DataGrid: FC<Props> = memo(
-  props => {
+  (props) => {
     const {
-      columns,
+      chartsVisible,
+      chartsButtonVisible,
+      columnsWithCharts,
       dataTestSubj,
       errorMessage,
       invalidSortingColumnns,
@@ -70,12 +75,21 @@ export const DataGrid: FC<Props> = memo(
       status,
       tableItems: data,
       toastNotifications,
+      toggleChartVisibility,
       visibleColumns,
     } = props;
 
+    // TODO Fix row hovering + bar highlighting
+    // const getRowProps = (item: any) => {
+    //   return {
+    //     onMouseOver: () => hoveredRow$.next(item),
+    //     onMouseLeave: () => hoveredRow$.next(null),
+    //   };
+    // };
+
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
-        invalidSortingColumnns.forEach(columnId => {
+        invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
               defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
@@ -162,22 +176,50 @@ export const DataGrid: FC<Props> = memo(
             <EuiSpacer size="m" />
           </div>
         )}
-        <EuiDataGrid
-          aria-label={isWithHeader(props) ? props.title : ''}
-          columns={columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={euiDataGridStyle}
-          rowCount={rowCount}
-          renderCellValue={renderCellValue}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={euiDataGridToolbarSettings}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: [5, 10, 25],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-        />
+        <div className="mlDataGrid">
+          <EuiDataGrid
+            aria-label={isWithHeader(props) ? props.title : ''}
+            columns={columnsWithCharts.map((c) => {
+              c.initialWidth = 165;
+              return c;
+            })}
+            columnVisibility={{ visibleColumns, setVisibleColumns }}
+            gridStyle={euiDataGridStyle}
+            rowCount={rowCount}
+            renderCellValue={renderCellValue}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={{
+              ...euiDataGridToolbarSettings,
+              ...(chartsButtonVisible
+                ? {
+                    additionalControls: (
+                      <EuiButtonEmpty
+                        aria-checked={chartsVisible}
+                        className={`euiDataGrid__controlBtn${
+                          chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                        }`}
+                        data-test-subj={`${dataTestSubj}HistogramButton`}
+                        size="xs"
+                        iconType="visBarVertical"
+                        color="text"
+                        onClick={toggleChartVisibility}
+                      >
+                        {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
+                          defaultMessage: 'Histogram charts',
+                        })}
+                      </EuiButtonEmpty>
+                    ),
+                  }
+                : {}),
+            }}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: [5, 10, 25],
+              onChangeItemsPerPage,
+              onChangePage,
+            }}
+          />
+        </div>
       </div>
     );
   },
@@ -186,7 +228,7 @@ export const DataGrid: FC<Props> = memo(
 
 function pickProps(props: Props) {
   return [
-    props.columns,
+    props.columnsWithCharts,
     props.dataTestSubj,
     props.errorMessage,
     props.invalidSortingColumnns,

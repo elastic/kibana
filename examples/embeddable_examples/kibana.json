@@ -2,9 +2,9 @@
   "id": "embeddableExamples",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["embeddable_examples"],
   "server": true,
   "ui": true,
   "requiredPlugins": ["embeddable"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"]
 }

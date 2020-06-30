@@ -35,7 +35,7 @@ export class NewGroupInput extends Component {
     };
   }
 
-  changeTempNewGroup = e => {
+  changeTempNewGroup = (e) => {
     const tempNewGroupName = e.target.value;
     let groupsValidationError = '';
 
@@ -59,7 +59,7 @@ export class NewGroupInput extends Component {
     });
   };
 
-  newGroupKeyPress = e => {
+  newGroupKeyPress = (e) => {
     if (
       e.keyCode === keyCodes.ENTER &&
       this.state.groupsValidationError === '' &&

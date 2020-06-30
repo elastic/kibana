@@ -31,7 +31,7 @@ const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescri
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const ecommerceSpecProvider = function(): SampleDatasetSchema {
+export const ecommerceSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'ecommerce',
     name: ecommerceName,

@@ -36,7 +36,7 @@ export function isNpUiPluginPublicDirs(x: any): x is NpUiPluginPublicDirs {
   return (
     Array.isArray(x) &&
     x.every(
-      s => typeof s === 'object' && s && typeof s.id === 'string' && typeof s.path === 'string'
+      (s) => typeof s === 'object' && s && typeof s.id === 'string' && typeof s.path === 'string'
     )
   );
 }

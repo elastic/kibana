@@ -83,7 +83,7 @@ const expectNoPrivileges = (displayedPrivileges: any, expectSubFeatures: boolean
 };
 
 describe('PrivilegeSummaryTable', () => {
-  [true, false].forEach(allowSubFeaturePrivileges => {
+  [true, false].forEach((allowSubFeaturePrivileges) => {
     describe(`when sub feature privileges are ${
       allowSubFeaturePrivileges ? 'allowed' : 'disallowed'
     }`, () => {

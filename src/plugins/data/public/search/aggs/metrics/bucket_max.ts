@@ -45,14 +45,16 @@ const maxBucketTitle = i18n.translate('data.search.aggs.metrics.maxBucketTitle',
 export const getBucketMaxMetricAgg = ({
   getInternalStartServices,
 }: BucketMaxMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.MAX_BUCKET,
       title: maxBucketTitle,
-      makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
-      subtype: siblingPipelineAggHelper.subtype,
-      params: [...siblingPipelineAggHelper.params()],
-      getFormat: siblingPipelineAggHelper.getFormat,
+      makeLabel: (agg) => makeNestedLabel(agg, overallMaxLabel),
+      subtype,
+      params: [...params()],
+      getSerializedFormat,
     },
     {
       getInternalStartServices,

@@ -36,7 +36,7 @@ export class AWSCloudService extends CloudService {
 
     return (
       promisify(request)(req)
-        .then(response => this._parseResponse(response.body, body => this._parseBody(body)))
+        .then((response) => this._parseResponse(response.body, (body) => this._parseBody(body)))
         // fall back to file detection
         .catch(() => this._tryToDetectUuid())
     );
@@ -100,7 +100,7 @@ export class AWSCloudService extends CloudService {
   _tryToDetectUuid() {
     // Windows does not have an easy way to check
     if (!this._isWindows) {
-      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8').then(uuid => {
+      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8').then((uuid) => {
         if (isString(uuid)) {
           // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
           uuid = uuid.trim().toLowerCase();

@@ -7,7 +7,6 @@
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
-// @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 import { notifyService } from '../services';
@@ -15,16 +14,16 @@ import { platformService } from '../services';
 
 const { esService: strings } = ErrorStrings;
 
-const getApiPath = function() {
+const getApiPath = function () {
   const basePath = platformService.getService().coreStart.http.basePath.get();
   return basePath + API_ROUTE;
 };
 
-const getSavedObjectsClient = function() {
+const getSavedObjectsClient = function () {
   return platformService.getService().coreStart.savedObjects.client;
 };
 
-const getAdvancedSettings = function() {
+const getAdvancedSettings = function () {
   return platformService.getService().coreStart.uiSettings;
 };
 
@@ -33,7 +32,7 @@ export const getFields = (index = '_all') => {
     .get(`${getApiPath()}/es_fields?index=${index}`)
     .then(({ data: mapping }: { data: object }) =>
       Object.keys(mapping)
-        .filter(field => !field.startsWith('_')) // filters out meta fields
+        .filter((field) => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
     .catch((err: Error) =>
@@ -51,8 +50,8 @@ export const getIndices = () =>
       searchFields: ['title'],
       perPage: 1000,
     })
-    .then(resp => {
-      return resp.savedObjects.map(savedObject => {
+    .then((resp) => {
+      return resp.savedObjects.map((savedObject) => {
         return savedObject.attributes.title;
       });
     })
@@ -66,8 +65,8 @@ export const getDefaultIndex = () => {
   return defaultIndexId
     ? getSavedObjectsClient()
         .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
-        .then(defaultIndex => defaultIndex.attributes.title)
-        .catch(err =>
+        .then((defaultIndex) => defaultIndex.attributes.title)
+        .catch((err) =>
           notifyService
             .getService()
             .error(err, { title: strings.getDefaultIndexFetchErrorMessage() })

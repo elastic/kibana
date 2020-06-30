@@ -12,7 +12,7 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { CertType } from '../../../../../plugins/uptime/common/runtime_types';
 import { makeChecksWithStatus } from './helper/make_checks';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const legacyEsService = getService('legacyEs');
   const esArchiver = getService('esArchiver');

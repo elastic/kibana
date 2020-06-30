@@ -21,7 +21,18 @@ export { Logger, LogMeta } from './logger';
 export { LoggerFactory } from './logger_factory';
 export { LogRecord } from './log_record';
 export { LogLevel } from './log_level';
-/** @internal */
-export { config, LoggingConfigType } from './logging_config';
-/** @internal */
-export { LoggingService, ILoggingService } from './logging_service';
+export {
+  config,
+  LoggingConfigType,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  loggerContextConfigSchema,
+  loggerSchema,
+} from './logging_config';
+export { LoggingSystem, ILoggingSystem } from './logging_system';
+export {
+  InternalLoggingServiceSetup,
+  LoggingServiceSetup,
+  LoggingService,
+} from './logging_service';
+export { appendersSchema, AppenderConfigType } from './appenders/appenders';

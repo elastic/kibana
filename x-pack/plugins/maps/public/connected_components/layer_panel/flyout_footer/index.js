@@ -8,13 +8,13 @@ import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { updateFlyout } from '../../../actions/ui_actions';
 import { hasDirtyState } from '../../../selectors/map_selectors';
 import {
   setSelectedLayer,
   removeSelectedLayer,
   removeTrackedLayerStateForSelectedLayer,
-} from '../../../actions/map_actions';
+  updateFlyout,
+} from '../../../actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -22,7 +22,7 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));

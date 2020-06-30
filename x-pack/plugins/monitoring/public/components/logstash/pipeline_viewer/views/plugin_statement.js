@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eu
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
 import { i18n } from '@kbn/i18n';
+import './plugin_statement.scss';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {
   return [
@@ -69,7 +70,7 @@ export function PluginStatement({
   return (
     <EuiFlexGroup
       alignItems="center"
-      className="monPipelineViewer__statement"
+      className="monPipelineViewer__pluginStatement"
       gutterSize="none"
       justifyContent="spaceBetween"
     >

@@ -243,7 +243,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     );
 
     return this.getDisplaySpaces().filter(
-      displaySpace => !spacesToExclude.includes(displaySpace.id)
+      (displaySpace) => !spacesToExclude.includes(displaySpace.id)
     );
   };
 

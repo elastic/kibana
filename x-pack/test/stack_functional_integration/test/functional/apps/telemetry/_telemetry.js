@@ -12,7 +12,7 @@ export default ({ getService, getPageObjects }) => {
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'monitoring', 'header']);
 
-  describe('telemetry', function() {
+  describe('telemetry', function () {
     before(async () => {
       log.debug('monitoring');
       await browser.setWindowSize(1200, 800);

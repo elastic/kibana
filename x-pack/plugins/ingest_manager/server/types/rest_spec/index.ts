@@ -12,3 +12,4 @@ export * from './enrollment_api_key';
 export * from './install_script';
 export * from './output';
 export * from './settings';
+export * from './setup';

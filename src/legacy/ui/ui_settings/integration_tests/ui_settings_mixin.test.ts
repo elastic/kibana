@@ -52,13 +52,22 @@ describe('uiSettingsMixin()', () => {
       log: sinon.stub(),
       route: sinon.stub(),
       addMemoizedFactoryToRequest(name: string, factory: (...args: any[]) => any) {
-        this.decorate('request', name, function(this: typeof server) {
+        this.decorate('request', name, function (this: typeof server) {
           return factory(this);
         });
       },
       decorate: sinon.spy((type: keyof Decorators, name: string, value: any) => {
         decorations[type][name] = value;
       }),
+      newPlatform: {
+        setup: {
+          core: {
+            uiSettings: {
+              register: sinon.stub(),
+            },
+          },
+        },
+      },
     };
 
     // "promise" returned from kbnServer.ready()
@@ -70,13 +79,6 @@ describe('uiSettingsMixin()', () => {
       server,
       uiExports: { uiSettingDefaults },
       ready: sinon.stub().returns(readyPromise),
-      newPlatform: {
-        __internals: {
-          uiSettings: {
-            register: sinon.stub(),
-          },
-        },
-      },
     };
 
     uiSettingsMixin(kbnServer, server);
@@ -92,10 +94,10 @@ describe('uiSettingsMixin()', () => {
   afterEach(() => sandbox.restore());
 
   it('passes uiSettingsDefaults to the new platform', () => {
-    const { kbnServer } = setup();
-    sinon.assert.calledOnce(kbnServer.newPlatform.__internals.uiSettings.register);
+    const { server } = setup();
+    sinon.assert.calledOnce(server.newPlatform.setup.core.uiSettings.register);
     sinon.assert.calledWithExactly(
-      kbnServer.newPlatform.__internals.uiSettings.register,
+      server.newPlatform.setup.core.uiSettings.register,
       uiSettingDefaults
     );
   });
@@ -103,9 +105,7 @@ describe('uiSettingsMixin()', () => {
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
       const { decorations } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettingsServiceFactory')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       const uiSettingsServiceFactoryStub = sandbox.stub(
         uiSettingsServiceFactoryNS,
@@ -118,9 +118,7 @@ describe('uiSettingsMixin()', () => {
 
     it('passes `server` and `options` argument to factory', () => {
       const { decorations, server } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettingsServiceFactory')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       const uiSettingsServiceFactoryStub = sandbox.stub(
         uiSettingsServiceFactoryNS,
@@ -143,9 +141,7 @@ describe('uiSettingsMixin()', () => {
   describe('request.getUiSettingsService()', () => {
     it('exposes "getUiSettingsService" on requests', () => {
       const { decorations } = setup();
-      expect(decorations.request)
-        .to.have.property('getUiSettingsService')
-        .a('function');
+      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       const getUiSettingsServiceForRequestStub = sandbox.stub(
         getUiSettingsServiceForRequestNS,
@@ -158,9 +154,7 @@ describe('uiSettingsMixin()', () => {
 
     it('passes request to getUiSettingsServiceForRequest', () => {
       const { server, decorations } = setup();
-      expect(decorations.request)
-        .to.have.property('getUiSettingsService')
-        .a('function');
+      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       const getUiSettingsServiceForRequestStub = sandbox.stub(
         getUiSettingsServiceForRequestNS,
@@ -176,9 +170,7 @@ describe('uiSettingsMixin()', () => {
   describe('server.uiSettings()', () => {
     it('throws an error, links to pr', () => {
       const { decorations } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettings')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettings').a('function');
       expect(() => {
         decorations.server.uiSettings();
       }).to.throwError('http://github.com' as any); // incorrect typings

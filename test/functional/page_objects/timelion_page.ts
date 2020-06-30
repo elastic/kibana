@@ -57,7 +57,7 @@ export function TimelionPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getSuggestionItemsText() {
       const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
     }
 
     public async clickSuggestion(suggestionIndex = 0, waitTime = 500) {

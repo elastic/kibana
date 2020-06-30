@@ -15,7 +15,7 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
   if (environments.length < 3) {
     return (
       <>
-        {environments.map(env => (
+        {environments.map((env) => (
           <EuiBadge color="hollow" key={env}>
             {env}
           </EuiBadge>
@@ -26,7 +26,7 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
   return (
     <EuiToolTip
       position="right"
-      content={environments.map(env => (
+      content={environments.map((env) => (
         <React.Fragment key={env}>
           {env}
           <br />
@@ -37,7 +37,7 @@ export const EnvironmentBadge: React.FC<Props> = ({ environments = [] }) => {
         {i18n.translate('xpack.apm.servicesTable.environmentCount', {
           values: { environmentCount: environments.length },
           defaultMessage:
-            '{environmentCount, plural, one {1 environment} other {# environments}}'
+            '{environmentCount, plural, one {1 environment} other {# environments}}',
         })}
       </EuiBadge>
     </EuiToolTip>

@@ -83,7 +83,7 @@ export default class WatchOptimizer extends BaseOptimizer {
   registerCompilerDoneHook() {
     super.registerCompilerDoneHook();
 
-    this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
+    this.compiler.hooks.done.tap('watch_optimizer-done', (stats) => {
       if (stats.compilation.needAdditionalPass) {
         return;
       }
@@ -145,7 +145,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerWatchErrorHandler = error => {
+  compilerWatchErrorHandler = (error) => {
     if (error) {
       this.status$.next({
         type: STATUS.FATAL,

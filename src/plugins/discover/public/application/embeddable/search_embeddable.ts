@@ -48,6 +48,7 @@ import {
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
+import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -211,7 +212,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = sort => {
+    searchScope.setSortOrder = (sort) => {
       this.updateInput({ sort });
     };
 
@@ -248,7 +249,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         operator,
         indexPattern.id!
       );
-      filters = filters.map(filter => ({
+      filters = filters.map((filter) => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
       }));
@@ -273,13 +274,13 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
+    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get('discover:sort:defaultOrder')
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
@@ -296,14 +297,14 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
-    this.searchScope.isLoading = true;
+    this.updateOutput({ loading: true, error: undefined });
 
     try {
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
       });
-      this.searchScope.isLoading = false;
+      this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector
       inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
@@ -314,14 +315,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         this.searchScope!.totalHitCount = resp.hits.total;
       });
     } catch (error) {
-      // If the fetch was aborted, no need to surface this in the UI
-      if (error.name === 'AbortError') return;
-
-      getServices().toastNotifications.addError(error, {
-        title: i18n.translate('discover.embeddable.errorTitle', {
-          defaultMessage: 'Error fetching data',
-        }),
-      });
+      this.updateOutput({ loading: false, error });
     }
   };
 

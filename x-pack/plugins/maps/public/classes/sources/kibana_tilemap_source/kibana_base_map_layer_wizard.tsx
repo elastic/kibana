@@ -12,24 +12,26 @@ import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../layers/tile_layer/tile_layer';
-// @ts-ignore
 import { getKibanaTileMap } from '../../../meta';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const tilemap = getKibanaTileMap();
+    // @ts-ignore
     return !!tilemap.url;
   },
   description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
     defaultMessage: 'Tile map service configured in kibana.yml',
   }),
   icon: 'logoKibana',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = () => {
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: KibanaTilemapSource.createDescriptor(),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },

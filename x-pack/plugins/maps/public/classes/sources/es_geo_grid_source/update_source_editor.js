@@ -54,26 +54,26 @@ export class UpdateSourceEditor extends Component {
     }
 
     this.setState({
-      fields: indexPattern.fields.filter(field => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
     });
   }
 
-  _onMetricsChange = metrics => {
+  _onMetricsChange = (metrics) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onResolutionChange = e => {
+  _onResolutionChange = (e) => {
     this.props.onChange({ propName: 'resolution', value: e });
   };
 
-  _onRequestTypeSelect = requestType => {
+  _onRequestTypeSelect = (requestType) => {
     this.props.onChange({ propName: 'requestType', value: requestType });
   };
 
   _renderMetricsPanel() {
     const metricsFilter =
       this.props.renderAs === RENDER_AS.HEATMAP
-        ? metric => {
+        ? (metric) => {
             //these are countable metrics, where blending heatmap color blobs make sense
             return isMetricCountable(metric.value);
           }

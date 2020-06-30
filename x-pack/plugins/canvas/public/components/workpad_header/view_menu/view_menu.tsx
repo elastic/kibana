@@ -180,7 +180,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
           content: (
             <AutoRefreshControls
               refreshInterval={refreshInterval}
-              setRefresh={val => setRefresh(val)}
+              setRefresh={(val) => setRefresh(val)}
               disableInterval={() => disableInterval()}
             />
           ),

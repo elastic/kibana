@@ -18,6 +18,7 @@
  */
 
 import './legacy/styles.scss';
-import { fooLibFn } from '../../foo/public/index';
+import './index.scss';
+import { fooLibFn } from '../../foo/public';
 export * from './lib';
 export { fooLibFn };

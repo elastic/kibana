@@ -5,9 +5,7 @@
  */
 
 import { camelCase } from 'lodash';
-// @ts-ignore unconverted local file
 import { getClipboardData, setClipboardData } from './clipboard';
-// @ts-ignore unconverted local file
 import { cloneSubgraphs } from './clone_subgraphs';
 import { notifyService } from '../services';
 import * as customElementService from './custom_element_service';
@@ -37,7 +35,7 @@ export interface Props {
   /**
    * selects elements on the page
    */
-  selectToplevelNodes: (elements: PositionedElement) => void;
+  selectToplevelNodes: (elements: PositionedElement[]) => void;
   /**
    * deletes elements from the page
    */
@@ -95,8 +93,9 @@ export const basicHandlerCreators = {
         )
         .catch((error: Error) =>
           notifyService.getService().warning(error, {
-            title: `Custom element '${customElement.displayName ||
-              customElement.id}' was not saved`,
+            title: `Custom element '${
+              customElement.displayName || customElement.id
+            }' was not saved`,
           })
         );
     }
@@ -186,7 +185,7 @@ export const layerHandlerCreators = {
 export const positionHandlerCreators = {
   shiftUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.top -= ELEMENT_SHIFT_OFFSET;
         return element;
       })
@@ -194,7 +193,7 @@ export const positionHandlerCreators = {
   },
   shiftDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.top += ELEMENT_SHIFT_OFFSET;
         return element;
       })
@@ -202,7 +201,7 @@ export const positionHandlerCreators = {
   },
   shiftLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.left -= ELEMENT_SHIFT_OFFSET;
         return element;
       })
@@ -210,7 +209,7 @@ export const positionHandlerCreators = {
   },
   shiftRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.left += ELEMENT_SHIFT_OFFSET;
         return element;
       })
@@ -218,7 +217,7 @@ export const positionHandlerCreators = {
   },
   nudgeUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.top -= ELEMENT_NUDGE_OFFSET;
         return element;
       })
@@ -226,7 +225,7 @@ export const positionHandlerCreators = {
   },
   nudgeDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.top += ELEMENT_NUDGE_OFFSET;
         return element;
       })
@@ -234,7 +233,7 @@ export const positionHandlerCreators = {
   },
   nudgeLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.left -= ELEMENT_NUDGE_OFFSET;
         return element;
       })
@@ -242,7 +241,7 @@ export const positionHandlerCreators = {
   },
   nudgeRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
     setMultiplePositions(
-      selectedNodes.map(element => {
+      selectedNodes.map((element) => {
         element.position.left += ELEMENT_NUDGE_OFFSET;
         return element;
       })

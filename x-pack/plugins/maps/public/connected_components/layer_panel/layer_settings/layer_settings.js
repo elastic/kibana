@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
 export function LayerSettings(props) {
-  const onLabelChange = event => {
+  const onLabelChange = (event) => {
     const label = event.target.value;
     props.updateLabel(props.layerId, label);
   };
@@ -23,7 +23,7 @@ export function LayerSettings(props) {
     props.updateMaxZoom(props.layerId, Math.min(props.maxVisibilityZoom, parseInt(max, 10)));
   };
 
-  const onAlphaChange = alpha => {
+  const onAlphaChange = (alpha) => {
     props.updateAlpha(props.layerId, alpha);
   };
 

@@ -13,7 +13,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
   describe('create email action', () => {
     it('should return 403 when creating an email action', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An email action',

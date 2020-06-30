@@ -84,7 +84,7 @@ export function registerSnapshotsRoutes({
 
           // Decorate each snapshot with the repository with which it's associated.
           fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
-            fetchedSnapshots.forEach(snapshot => {
+            fetchedSnapshots.forEach((snapshot) => {
               snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
             });
           });
@@ -210,7 +210,7 @@ export function registerSnapshotsRoutes({
 
           await callAsCurrentUser('snapshot.delete', { snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
-            .catch(e =>
+            .catch((e) =>
               response.errors.push({
                 id: { snapshot, repository },
                 error: wrapEsError(e),

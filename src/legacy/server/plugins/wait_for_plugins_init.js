@@ -27,7 +27,7 @@ const queues = new WeakMap();
 export function waitForInitSetupMixin(kbnServer) {
   queues.set(kbnServer, []);
 
-  kbnServer.afterPluginsInit = function(callback) {
+  kbnServer.afterPluginsInit = function (callback) {
     const queue = queues.get(kbnServer);
 
     if (!queue) {

@@ -5,36 +5,29 @@
  */
 
 import Boom from 'boom';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
-import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
+  LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
 } from '../../../../common/http_api/log_analysis';
-import { throwErrors } from '../../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
+import { createValidationFunction } from '../../../../common/runtime_types';
+import type { InfraBackendLibs } from '../../../lib/infra_types';
+import {
+  getTopLogEntryCategories,
+  NoLogAnalysisResultsIndexError,
+} from '../../../lib/log_analysis';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-const anyObject = schema.object({}, { unknowns: 'allow' });
-
-export const initGetLogEntryCategoriesRoute = ({
-  framework,
-  logEntryCategoriesAnalysis,
-}: InfraBackendLibs) => {
+export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH,
       validate: {
-        // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
-        body: anyObject,
+        body: createValidationFunction(getLogEntryCategoriesRequestPayloadRT),
       },
     },
-    async (requestContext, request, response) => {
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
           categoryCount,
@@ -43,24 +36,19 @@ export const initGetLogEntryCategoriesRoute = ({
           timeRange: { startTime, endTime },
           datasets,
         },
-      } = pipe(
-        getLogEntryCategoriesRequestPayloadRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      } = request.body;
 
       try {
-        const {
-          data: topLogEntryCategories,
-          timing,
-        } = await logEntryCategoriesAnalysis.getTopLogEntryCategories(
+        assertHasInfraMlPlugins(requestContext);
+
+        const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
           requestContext,
-          request,
           sourceId,
           startTime,
           endTime,
           categoryCount,
           datasets ?? [],
-          histograms.map(histogram => ({
+          histograms.map((histogram) => ({
             bucketCount: histogram.bucketCount,
             endTime: histogram.timeRange.endTime,
             id: histogram.id,
@@ -76,18 +64,22 @@ export const initGetLogEntryCategoriesRoute = ({
             timing,
           }),
         });
-      } catch (e) {
-        const { statusCode = 500, message = 'Unknown error occurred' } = e;
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
 
-        if (e instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message } });
+        if (error instanceof NoLogAnalysisResultsIndexError) {
+          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({
-          statusCode,
-          body: { message },
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
         });
       }
-    }
+    })
   );
 };

@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { SavedObjectsStart } from 'kibana/public';
-import { NotificationsStart, IUiSettingsClient } from 'src/core/public';
+import {
+  CoreStart,
+  SavedObjectsStart,
+  NotificationsStart,
+  IUiSettingsClient,
+} from 'src/core/public';
+
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { MapsLegacyConfigType } from '../../maps_legacy/public';
@@ -34,6 +39,10 @@ export const [getKibanaMapFactory, setKibanaMapFactory] = createGetterSetter<any
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreStart['injectedMetadata']
+>('InjectedMetadata');
+
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'
 );
@@ -48,6 +57,5 @@ export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<Map
   'MapsLegacyConfig'
 );
 
-export const getEsShardTimeout = () => getInjectedVars().esShardTimeout;
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;

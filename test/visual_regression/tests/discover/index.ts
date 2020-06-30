@@ -23,13 +23,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // Width must be the same as visual_testing or canvas image widths will get skewed
 const [SCREEN_WIDTH] = DEFAULT_OPTIONS.widths || [];
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
-  describe('discover app', function() {
+  describe('discover app', function () {
     this.tags('ciGroup6');
 
-    before(function() {
+    before(function () {
       return browser.setWindowSize(SCREEN_WIDTH, 1000);
     });
 

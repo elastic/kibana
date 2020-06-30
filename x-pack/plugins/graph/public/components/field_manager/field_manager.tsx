@@ -40,7 +40,7 @@ export function FieldManagerComponent(props: {
 }) {
   return (
     <EuiFlexGroup gutterSize="s" className="gphFieldManager" alignItems="center">
-      {props.selectedFields.map(field => (
+      {props.selectedFields.map((field) => (
         <EuiFlexItem key={field.name} grow={false}>
           <FieldEditor {...props} field={field} />
         </EuiFlexItem>
@@ -58,7 +58,7 @@ export const FieldManager = connect(
     allFields: fieldsSelector(state),
     selectedFields: selectedFieldsSelector(state),
   }),
-  dispatch =>
+  (dispatch) =>
     bindActionCreators(
       {
         updateFieldProperties,

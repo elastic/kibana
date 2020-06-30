@@ -8,22 +8,21 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   borderRadius,
   fontFamilyCode,
   fontSize,
   px,
   unit,
-  units
+  units,
 } from '../../../../../../../style/variables';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 
 const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${theme.euiColorLightestShade};
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
   border-radius: ${borderRadius};
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;

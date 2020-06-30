@@ -55,7 +55,7 @@ export const createStubClient = (
   responses: Array<(name: string, params: any) => any | Promise<any>> = []
 ): MockClient => {
   const createStubClientMethod = (name: string) =>
-    sinon.spy(async params => {
+    sinon.spy(async (params) => {
       if (responses.length === 0) {
         throw new Error(`unexpected client.${name} call`);
       }

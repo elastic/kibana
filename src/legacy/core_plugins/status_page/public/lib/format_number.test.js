@@ -21,42 +21,42 @@ import formatNumber from './format_number';
 
 describe('format byte', () => {
   test('zero', () => {
-    expect(formatNumber(0, 'byte')).toEqual('0.00 B');
+    expect(formatNumber(0, 'byte')).toMatchInlineSnapshot(`"0.00 B"`);
   });
 
   test('mb', () => {
-    expect(formatNumber(181142512, 'byte')).toEqual('181.14 MB');
+    expect(formatNumber(181142512, 'byte')).toMatchInlineSnapshot(`"172.75 MB"`);
   });
 
   test('gb', () => {
-    expect(formatNumber(273727485000, 'byte')).toEqual('273.73 GB');
+    expect(formatNumber(273727485000, 'byte')).toMatchInlineSnapshot(`"254.93 GB"`);
   });
 });
 
 describe('format ms', () => {
   test('zero', () => {
-    expect(formatNumber(0, 'ms')).toEqual('0.00 ms');
+    expect(formatNumber(0, 'ms')).toMatchInlineSnapshot(`"0.00 ms"`);
   });
 
   test('sub ms', () => {
-    expect(formatNumber(0.128, 'ms')).toEqual('0.13 ms');
+    expect(formatNumber(0.128, 'ms')).toMatchInlineSnapshot(`"0.13 ms"`);
   });
 
   test('many ms', () => {
-    expect(formatNumber(3030.284, 'ms')).toEqual('3030.28 ms');
+    expect(formatNumber(3030.284, 'ms')).toMatchInlineSnapshot(`"3030.28 ms"`);
   });
 });
 
 describe('format integer', () => {
   test('zero', () => {
-    expect(formatNumber(0, 'integer')).toEqual('0');
+    expect(formatNumber(0, 'integer')).toMatchInlineSnapshot(`"0"`);
   });
 
   test('sub integer', () => {
-    expect(formatNumber(0.728, 'integer')).toEqual('1');
+    expect(formatNumber(0.728, 'integer')).toMatchInlineSnapshot(`"1"`);
   });
 
   test('many integer', () => {
-    expect(formatNumber(3030.284, 'integer')).toEqual('3030');
+    expect(formatNumber(3030.284, 'integer')).toMatchInlineSnapshot(`"3030"`);
   });
 });

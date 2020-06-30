@@ -13,7 +13,7 @@ import { ArgumentStrings } from '../../../i18n';
 const { Percentage: strings } = ArgumentStrings;
 
 const PercentageArgInput = ({ onValueChange, argValue }) => {
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(ev.target.value / 100);
   };
 

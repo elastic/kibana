@@ -14,7 +14,7 @@ import { wrapComponent } from './setup_context';
 const testBedConfig = {
   store: createRollupJobsStore,
   memoryRouter: {
-    onRouter: router => {
+    onRouter: (router) => {
       // register our react memory router
       registerRouter(router);
     },

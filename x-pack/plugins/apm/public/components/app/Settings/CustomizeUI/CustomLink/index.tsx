@@ -28,7 +28,7 @@ export const CustomLinkOverview = () => {
   >();
 
   const { data: customLinks, status, refetch } = useFetcher(
-    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom_links' }),
+    (callApmApi) => callApmApi({ pathname: '/api/apm/settings/custom_links' }),
     []
   );
 
@@ -99,7 +99,7 @@ export const CustomLinkOverview = () => {
               'xpack.apm.settings.customizeUI.customLink.license.text',
               {
                 defaultMessage:
-                  "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."
+                  "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
               }
             )}
           />

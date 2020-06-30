@@ -20,6 +20,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import { getIndexPatternService, getUiSettings, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
@@ -42,7 +43,7 @@ export class FilterEditor extends Component {
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
-    const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
+    const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
         const indexPattern = await getIndexPatternService().get(indexPatternId);
         indexPatterns.push(indexPattern);
@@ -61,7 +62,7 @@ export class FilterEditor extends Component {
   };
 
   _toggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -75,7 +76,7 @@ export class FilterEditor extends Component {
     this._close();
   };
 
-  _onApplyGlobalQueryChange = applyGlobalQuery => {
+  _onApplyGlobalQueryChange = (applyGlobalQuery) => {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
   };
 
@@ -101,7 +102,7 @@ export class FilterEditor extends Component {
             query={
               layerQuery
                 ? layerQuery
-                : { language: uiSettings.get('search:queryLanguage'), query: '' }
+                : { language: uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE), query: '' }
             }
             onQuerySubmit={this._onQueryChange}
             indexPatterns={this.state.indexPatterns}

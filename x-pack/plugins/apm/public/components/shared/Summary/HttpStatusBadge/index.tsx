@@ -15,7 +15,7 @@ interface HttpStatusBadgeProps {
 }
 export function HttpStatusBadge({ status }: HttpStatusBadgeProps) {
   const label = i18n.translate('xpack.apm.transactionDetails.statusCode', {
-    defaultMessage: 'Status code'
+    defaultMessage: 'Status code',
   });
 
   return (

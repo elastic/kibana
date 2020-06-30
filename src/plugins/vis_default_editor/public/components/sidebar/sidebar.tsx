@@ -23,9 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import { Vis, PersistedState } from 'src/plugins/visualizations/public';
-import { SavedSearch } from 'src/plugins/discover/public';
+import {
+  Vis,
+  PersistedState,
+  VisualizeEmbeddableContract,
+} from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -34,6 +38,7 @@ import { SidebarTitle } from './sidebar_title';
 import { Schema } from '../../schemas';
 
 interface DefaultEditorSideBarProps {
+  embeddableHandler: VisualizeEmbeddableContract;
   isCollapsed: boolean;
   onClickCollapse: () => void;
   optionTabs: OptionTab[];
@@ -41,11 +46,12 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedObject;
   timeRange: TimeRange;
 }
 
 function DefaultEditorSideBar({
+  embeddableHandler,
   isCollapsed,
   onClickCollapse,
   optionTabs,
@@ -66,10 +72,10 @@ function DefaultEditorSideBar({
   ]);
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
-    () => responseAggs.filter(agg => metricSchemas.includes(get(agg, 'schema'))),
+    () => responseAggs.filter((agg) => metricSchemas.includes(get(agg, 'schema'))),
     [responseAggs, metricSchemas]
   );
-  const hasHistogramAgg = useMemo(() => responseAggs.some(agg => agg.type.name === 'histogram'), [
+  const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
     responseAggs,
   ]);
 
@@ -100,17 +106,19 @@ function DefaultEditorSideBar({
     vis.setState({
       ...vis.serialize(),
       params: state.params,
-      data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
+      data: {
+        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+      },
     });
-    eventEmitter.emit('updateVis');
+    embeddableHandler.reload();
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
+  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter, embeddableHandler]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
-    event => {
+    (event) => {
       if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
         event.preventDefault();
         event.stopPropagation();
@@ -177,7 +185,7 @@ function DefaultEditorSideBar({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem className="visEditorSidebar__formWrapper">
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"

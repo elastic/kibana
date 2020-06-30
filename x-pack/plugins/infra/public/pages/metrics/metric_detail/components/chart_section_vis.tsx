@@ -45,6 +45,7 @@ export const ChartSectionVis = ({
 }: VisSectionProps) => {
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const [dateFormat] = useKibanaUiSetting('dateFormat');
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [
     formatter,
     formatterTemplate,
@@ -117,7 +118,7 @@ export const ChartSectionVis = ({
           />
           <Axis id="values" position={Position.Left} tickFormat={valueFormatter} />
           {metric &&
-            metric.series.map(series => (
+            metric.series.map((series) => (
               <SeriesChart
                 key={`series-${id}-${series.id}`}
                 id={`series-${id}-${series.id}`}

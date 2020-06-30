@@ -21,7 +21,6 @@ import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('get columns', () => {
   beforeEach(() => {
@@ -29,7 +28,6 @@ describe('get columns', () => {
   });
 
   const typesRegistry = mockAggTypesRegistry();
-  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const createAggConfigs = (aggs: any[] = []) => {
     const field = {
@@ -45,10 +43,7 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(indexPattern, aggs, {
-      typesRegistry,
-      fieldFormats,
-    });
+    return new AggConfigs(indexPattern, aggs, { typesRegistry });
   };
 
   test('should inject the metric after each bucket if the vis is hierarchical', () => {
@@ -159,7 +154,7 @@ describe('get columns', () => {
       false
     );
 
-    expect(columns.map(c => c.name)).toEqual([
+    expect(columns.map((c) => c.name)).toEqual([
       '@timestamp per 20 seconds',
       'Sum of @timestamp',
       '@timestamp per 10 seconds',

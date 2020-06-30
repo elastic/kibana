@@ -79,7 +79,7 @@ export function convertDirectiveToRenderFn(
       directive.controller,
       getInjector
     );
-    cleanupFnPromise.catch(e => {
+    cleanupFnPromise.catch((e) => {
       rejected = true;
       render(<DocViewerError error={e} />, domNode);
     });
@@ -88,7 +88,7 @@ export function convertDirectiveToRenderFn(
       if (!rejected) {
         // for cleanup
         // http://roubenmeschian.com/rubo/?p=51
-        cleanupFnPromise.then(cleanup => cleanup());
+        cleanupFnPromise.then((cleanup) => cleanup());
       }
     };
   };

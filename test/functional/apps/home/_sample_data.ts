@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');

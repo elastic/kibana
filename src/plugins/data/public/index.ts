@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
 
 /*
  * Filters:
@@ -169,7 +168,6 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
-  serializeFieldFormat,
 } from '../common/field_formats';
 
 import { DateFormat } from './field_formats';
@@ -179,8 +177,6 @@ export { baseFormattersPublic } from './field_formats';
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -253,8 +249,6 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   Field as IndexPatternField,
-  TypeMeta as IndexPatternTypeMeta,
-  AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   getIndexPatternFieldListCreator,
 } from './index_patterns';
@@ -266,6 +260,9 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  UI_SETTINGS,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
 } from '../common';
 
 /*
@@ -341,8 +338,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
@@ -360,6 +355,7 @@ export {
   ISearchSource,
   parseSearchSourceJSON,
   injectSearchSourceReferences,
+  getSearchParamsFromRequest,
   extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
@@ -425,7 +421,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
   getQueryLog,
   getDefaultQuery,
   FilterManager,
@@ -439,10 +434,15 @@ export {
 } from './query';
 
 export {
+  getTime,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
+export * from '../common/field_mapping';
 
 /*
  * Plugin setup
@@ -450,7 +450,7 @@ export {
 
 import { DataPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);
 }
 

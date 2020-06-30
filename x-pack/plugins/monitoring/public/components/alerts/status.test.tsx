@@ -71,7 +71,7 @@ describe('Status', () => {
 
   it('should render a success message if all alerts have been migrated and in setup mode', async () => {
     (Legacy.shims.kfetch as jest.Mock).mockReturnValue({
-      data: ALERT_TYPES.map(type => ({ alertTypeId: type })),
+      data: ALERT_TYPES.map((type) => ({ alertTypeId: type })),
     });
 
     (getSetupModeState as jest.Mock).mockReturnValue({

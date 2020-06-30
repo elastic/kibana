@@ -65,7 +65,7 @@ function NumberInputOption<ParamName extends string>({
         max={max}
         min={min}
         value={value}
-        onChange={ev =>
+        onChange={(ev) =>
           setValue(paramName, isNaN(ev.target.valueAsNumber) ? '' : ev.target.valueAsNumber)
         }
       />

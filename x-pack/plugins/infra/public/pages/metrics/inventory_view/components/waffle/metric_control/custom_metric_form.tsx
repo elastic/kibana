@@ -52,7 +52,7 @@ const AGGREGATION_LABELS = {
 };
 
 interface Props {
-  theme: EuiTheme;
+  theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
   fields: IFieldType[];
   customMetrics: SnapshotCustomMetricInput[];
@@ -89,7 +89,7 @@ export const CustomMetricForm = withTheme(
     }, [metric, aggregation, field, onChange, label]);
 
     const handleLabelChange = useCallback(
-      e => {
+      (e) => {
         setLabel(e.target.value);
       },
       [setLabel]
@@ -103,7 +103,7 @@ export const CustomMetricForm = withTheme(
     );
 
     const handleAggregationChange = useCallback(
-      e => {
+      (e) => {
         const value = e.target.value;
         const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
           ? value
@@ -114,10 +114,10 @@ export const CustomMetricForm = withTheme(
     );
 
     const fieldOptions = fields
-      .filter(f => f.aggregatable && f.type === 'number' && !(field && field === f.name))
-      .map(f => ({ label: f.name }));
+      .filter((f) => f.aggregatable && f.type === 'number' && !(field && field === f.name))
+      .map((f) => ({ label: f.name }));
 
-    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map(k => ({
+    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
       text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
       value: k,
     }));
@@ -158,8 +158,8 @@ export const CustomMetricForm = withTheme(
           </EuiPopoverTitle>
           <div
             style={{
-              padding: theme.eui.paddingSizes.m,
-              borderBottom: `${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiBorderColor}`,
+              padding: theme?.eui.paddingSizes.m,
+              borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
             }}
           >
             <EuiFormRow
@@ -219,11 +219,11 @@ export const CustomMetricForm = withTheme(
               />
             </EuiFormRow>
           </div>
-          <div style={{ padding: theme.eui.paddingSizes.m, textAlign: 'right' }}>
+          <div style={{ padding: theme?.eui.paddingSizes.m, textAlign: 'right' }}>
             <EuiButtonEmpty
               onClick={onCancel}
               size="s"
-              style={{ paddingRight: theme.eui.paddingSizes.xl }}
+              style={{ paddingRight: theme?.eui.paddingSizes.xl }}
             >
               <FormattedMessage
                 id="xpack.infra.waffle.customMetrics.cancelLabel"

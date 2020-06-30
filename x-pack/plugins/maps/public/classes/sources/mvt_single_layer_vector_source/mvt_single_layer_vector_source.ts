@@ -7,16 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
-import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';
@@ -117,8 +115,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     };
   }
 
-  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]> {
-    return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
+    return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
   canFormatFeatureProperties() {
@@ -133,13 +131,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {
-    return {
-      maxLat: 90,
-      maxLon: 180,
-      minLat: -90,
-      minLon: -180,
-    };
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null {
+    return null;
   }
 
   getFieldByName(fieldName: string): IField | null {

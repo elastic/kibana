@@ -172,12 +172,8 @@ describe('EventLogStart', () => {
       };
       esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
 
-      const start = moment()
-        .subtract(1, 'days')
-        .toISOString();
-      const end = moment()
-        .add(1, 'days')
-        .toISOString();
+      const start = moment().subtract(1, 'days').toISOString();
+      const end = moment().add(1, 'days').toISOString();
 
       expect(
         await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {

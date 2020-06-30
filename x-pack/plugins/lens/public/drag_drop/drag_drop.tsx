@@ -88,11 +88,39 @@ type Props = DraggableProps | NonDraggableProps;
  *
  * @param props
  */
-export function DragDrop(props: Props) {
+
+export const DragDrop = (props: Props) => {
   const { dragging, setDragging } = useContext(DragContext);
+  const { value, draggable, droppable } = props;
+  return (
+    <DragDropInner
+      {...props}
+      dragging={droppable ? dragging : undefined}
+      isDragging={!!(draggable && value === dragging)}
+      setDragging={setDragging}
+    />
+  );
+};
+
+const DragDropInner = React.memo(function DragDropInner(
+  props: Props & {
+    dragging: unknown;
+    setDragging: (dragging: unknown) => void;
+    isDragging: boolean;
+  }
+) {
   const [state, setState] = useState({ isActive: false });
-  const { className, onDrop, value, children, droppable, draggable } = props;
-  const isDragging = draggable && value === dragging;
+  const {
+    className,
+    onDrop,
+    value,
+    children,
+    droppable,
+    draggable,
+    dragging,
+    setDragging,
+    isDragging,
+  } = props;
 
   const classes = classNames('lnsDragDrop', className, {
     'lnsDragDrop-isDropTarget': droppable,
@@ -166,4 +194,4 @@ export function DragDrop(props: Props) {
       {children}
     </div>
   );
-}
+});

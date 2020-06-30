@@ -167,12 +167,12 @@ export const iconChoices = [
 ];
 
 export const getSuitableIcon = (fieldName: string) =>
-  iconChoices.find(choice => choice.patterns.some(pattern => pattern.test(fieldName))) ||
+  iconChoices.find((choice) => choice.patterns.some((pattern) => pattern.test(fieldName))) ||
   iconChoices[0];
 
 export const iconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
 
-iconChoices.forEach(icon => {
+iconChoices.forEach((icon) => {
   iconChoicesByClass[icon.class] = icon;
 });
 
@@ -251,7 +251,7 @@ export const urlTemplateIconChoices = [
 ];
 export const urlTemplateIconChoicesByClass: Partial<Record<string, FontawesomeIcon>> = {};
 
-urlTemplateIconChoices.forEach(icon => {
+urlTemplateIconChoices.forEach((icon) => {
   urlTemplateIconChoicesByClass[icon.class] = icon;
 });
 

@@ -6,12 +6,12 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
-import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
-import { useLinks } from '.';
+import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 import { InstallStatus } from '../../../types';
 
 interface PackagesInstall {
@@ -29,7 +29,8 @@ type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
 type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
-  const { toDetailView } = useLinks();
+  const history = useHistory();
+  const { getPath } = useLink();
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
@@ -88,12 +89,11 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         if (fromUpdate) {
-          const settingsUrl = toDetailView({
-            name,
-            version,
+          const settingsPath = getPath('integration_details', {
+            pkgkey: `${name}-${version}`,
             panel: 'settings',
           });
-          window.location.href = settingsUrl;
+          history.push(settingsPath);
         }
         notifications.toasts.addSuccess({
           title: toMountPoint(
@@ -113,7 +113,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, toDetailView]
+    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, getPath, history]
   );
 
   const uninstallPackage = useCallback(
@@ -181,8 +181,8 @@ export const [
   useUninstallPackage,
 ] = createContainer(
   usePackageInstall,
-  value => value.installPackage,
-  value => value.setPackageInstallStatus,
-  value => value.getPackageInstallStatus,
-  value => value.uninstallPackage
+  (value) => value.installPackage,
+  (value) => value.setPackageInstallStatus,
+  (value) => value.getPackageInstallStatus,
+  (value) => value.uninstallPackage
 );

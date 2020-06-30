@@ -50,7 +50,7 @@ export function extractIntlMessages(node) {
     'id',
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
-  ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
+  ].map((key) => options.properties.find((property) => isPropertyWithKey(property, key)));
 
   const messageId = messageIdProperty
     ? formatJSString(extractMessageIdFromNode(messageIdProperty.value))
@@ -92,7 +92,9 @@ export function extractFormattedMessages(node) {
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
     VALUES_KEY,
-  ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
+  ].map((key) =>
+    node.attributes.find((attribute) => isJSXIdentifier(attribute.name, { name: key }))
+  );
 
   const messageId = messageIdAttribute
     ? formatHTMLString(extractMessageIdFromNode(messageIdAttribute.value))

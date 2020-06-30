@@ -94,7 +94,7 @@ export class PageManager extends React.PureComponent {
     }
   };
 
-  confirmDelete = pageId => {
+  confirmDelete = (pageId) => {
     this._isMounted && this.props.setDeleteId(pageId);
   };
 
@@ -133,13 +133,13 @@ export class PageManager extends React.PureComponent {
 
     return (
       <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
-        {provided => (
+        {(provided) => (
           <div
             key={page.id}
             className={`canvasPageManager__page ${
               page.id === selectedPage ? 'canvasPageManager__page-isActive' : ''
             }`}
-            ref={el => {
+            ref={(el) => {
               if (page.id === selectedPage) {
                 this.activePageRef = el;
               }
@@ -194,12 +194,12 @@ export class PageManager extends React.PureComponent {
           <EuiFlexItem className="canvasPageManager__pages">
             <DragDropContext onDragEnd={this.onDragEnd}>
               <Droppable droppableId="droppable-page-manager" direction="horizontal">
-                {provided => (
+                {(provided) => (
                   <div
                     className={`canvasPageManager__pageList ${
                       showTrayPop ? 'canvasPageManager--trayPop' : ''
                     }`}
-                    ref={el => {
+                    ref={(el) => {
                       this.pageListRef = el;
                       provided.innerRef(el);
                     }}
@@ -219,7 +219,10 @@ export class PageManager extends React.PureComponent {
                 content="Add a new page to this workpad"
                 position="left"
               >
-                <button onClick={addPage} className="canvasPageManager__addPage">
+                <button
+                  onClick={addPage}
+                  className="canvasPageManager__addPage kbn-resetFocusState"
+                >
                   <EuiIcon color="ghost" type="plusInCircle" size="l" />
                 </button>
               </EuiToolTip>

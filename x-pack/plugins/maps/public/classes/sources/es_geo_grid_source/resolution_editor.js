@@ -41,7 +41,7 @@ export function ResolutionEditor({ resolution, onChange }) {
       <EuiSelect
         options={OPTIONS}
         value={resolution}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         compressed
       />
     </EuiFormRow>

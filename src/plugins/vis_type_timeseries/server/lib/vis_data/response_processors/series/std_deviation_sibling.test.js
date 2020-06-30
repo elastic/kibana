@@ -84,7 +84,7 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdDeviationSibling(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 

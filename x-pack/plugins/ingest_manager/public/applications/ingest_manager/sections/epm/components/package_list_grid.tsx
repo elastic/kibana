@@ -65,9 +65,9 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter(item =>
+      ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map(match => match[searchIdField])
+            .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
@@ -123,7 +123,7 @@ function GridColumn({ list }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
-        list.map(item => (
+        list.map((item) => (
           <EuiFlexItem key={`${item.name}-${item.version}`}>
             <PackageCard {...item} />
           </EuiFlexItem>

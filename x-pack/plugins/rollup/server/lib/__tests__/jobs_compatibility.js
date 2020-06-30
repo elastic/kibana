@@ -32,27 +32,13 @@ describe('areJobsCompatible', () => {
 
 describe('mergeJobConfigurations', () => {
   it('should throw an error for null/invalid jobs', () => {
-    expect(mergeJobConfigurations)
-      .withArgs()
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs(null)
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs(undefined)
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs(true)
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs('foo')
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs(123)
-      .to.throwException();
-    expect(mergeJobConfigurations)
-      .withArgs([])
-      .to.throwException();
+    expect(mergeJobConfigurations).withArgs().to.throwException();
+    expect(mergeJobConfigurations).withArgs(null).to.throwException();
+    expect(mergeJobConfigurations).withArgs(undefined).to.throwException();
+    expect(mergeJobConfigurations).withArgs(true).to.throwException();
+    expect(mergeJobConfigurations).withArgs('foo').to.throwException();
+    expect(mergeJobConfigurations).withArgs(123).to.throwException();
+    expect(mergeJobConfigurations).withArgs([]).to.throwException();
   });
 
   it('should return aggregations for one job', () => {
@@ -147,8 +133,6 @@ describe('mergeJobConfigurations', () => {
   });
 
   it('should throw an error if jobs are not compatible', () => {
-    expect(mergeJobConfigurations)
-      .withArgs([jobs[0], jobs[1], jobs[2]])
-      .to.throwException();
+    expect(mergeJobConfigurations).withArgs([jobs[0], jobs[1], jobs[2]]).to.throwException();
   });
 });

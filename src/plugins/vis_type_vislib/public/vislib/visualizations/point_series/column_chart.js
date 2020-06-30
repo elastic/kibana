@@ -75,7 +75,7 @@ export class ColumnChart extends PointSeries {
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
     const bars = layer.selectAll('rect').data(
-      data.values.filter(function(d) {
+      data.values.filter(function (d) {
         return !_.isNull(d.y);
       })
     );
@@ -206,7 +206,7 @@ export class ColumnChart extends PointSeries {
 
     const layer = d3.select(bars[0].parentNode);
     const barLabels = layer.selectAll('text').data(
-      chartData.values.filter(function(d) {
+      chartData.values.filter(function (d) {
         return !_.isNull(d.y);
       })
     );
@@ -329,7 +329,7 @@ export class ColumnChart extends PointSeries {
 
     const layer = d3.select(bars[0].parentNode);
     const barLabels = layer.selectAll('text').data(
-      chartData.values.filter(function(d) {
+      chartData.values.filter(function (d) {
         return !_.isNull(d.y);
       })
     );
@@ -366,8 +366,8 @@ export class ColumnChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 

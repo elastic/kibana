@@ -14,7 +14,7 @@ export function getPlotValues({
   xMin = 0,
   xMax,
   height,
-  margins
+  margins,
 }: {
   width: number;
   xMin?: number;
@@ -33,6 +33,6 @@ export function getPlotValues({
     width,
     xDomain: xScale.domain(),
     xMax,
-    xScale
+    xScale,
   };
 }

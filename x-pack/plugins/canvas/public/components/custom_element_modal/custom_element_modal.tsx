@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  // @ts-ignore hasn't been converted to TypeScript yet
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +26,6 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-// @ts-ignore converting /libs/constants to TS breaks CI
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';
@@ -137,7 +135,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 <EuiFieldText
                   value={name}
                   className="canvasCustomElementForm__name"
-                  onChange={e =>
+                  onChange={(e) =>
                     e.target.value.length <= MAX_NAME_LENGTH &&
                     this._handleChange('name', e.target.value)
                   }
@@ -154,7 +152,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 <EuiTextArea
                   value={description}
                   rows={2}
-                  onChange={e =>
+                  onChange={(e) =>
                     e.target.value.length <= MAX_DESCRIPTION_LENGTH &&
                     this._handleChange('description', e.target.value)
                   }

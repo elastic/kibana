@@ -10,7 +10,7 @@ import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -33,7 +33,7 @@ export default function({ getService }) {
 
         // Load the templates and verify that our new template is in the list
         const { body } = await loadTemplates().expect(200);
-        expect(body.map(t => t.name)).to.contain(templateName);
+        expect(body.map((t) => t.name)).to.contain(templateName);
       });
 
       it('should filter out the system template whose index patterns does not contain wildcard', async () => {
@@ -44,14 +44,14 @@ export default function({ getService }) {
 
         // Load the templates and verify that our new template is **not** in the list
         const { body } = await loadTemplates().expect(200);
-        expect(body.map(t => t.name)).not.to.contain(templateName);
+        expect(body.map((t) => t.name)).not.to.contain(templateName);
       });
     });
 
     describe('update', () => {
       it('should add a policy to a template', async () => {
         // Create policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('template-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 

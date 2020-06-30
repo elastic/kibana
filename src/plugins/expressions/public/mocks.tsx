@@ -75,7 +75,7 @@ const createStartContract = (): Start => {
     getType: jest.fn(),
     getTypes: jest.fn(),
     loader: jest.fn(),
-    ReactExpressionRenderer: jest.fn(props => <></>),
+    ReactExpressionRenderer: jest.fn((props) => <></>),
     render: jest.fn(),
     run: jest.fn(),
   };

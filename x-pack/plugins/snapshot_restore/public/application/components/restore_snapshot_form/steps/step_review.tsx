@@ -249,7 +249,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                 <EuiDescriptionListDescription>
                   <EuiText>
                     <ul>
-                      {ignoreIndexSettings.map(setting => (
+                      {ignoreIndexSettings.map((setting) => (
                         <li key={setting}>
                           <EuiTitle size="xs">
                             <span>{setting}</span>

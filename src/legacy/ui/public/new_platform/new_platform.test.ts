@@ -113,7 +113,7 @@ describe('ui/new_platform', () => {
       controller(scopeMock, elementMock);
       // Flush promise queue. Must be done this way because the controller cannot return a Promise without breaking
       // angular.
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 1));
 
       const [event, eventHandler] = scopeMock.$on.mock.calls[0];
       expect(event).toEqual('$destroy');

@@ -20,11 +20,13 @@ import {
   USER,
   USER_AGENT,
   CUSTOM_TRANSACTION,
-  MESSAGE_TRANSACTION
+  MESSAGE_TRANSACTION,
+  TRACE,
 } from '../sections';
 
 export const TRANSACTION_METADATA_SECTIONS: Section[] = [
   { ...LABELS, required: true },
+  TRACE,
   TRANSACTION,
   HTTP,
   HOST,
@@ -38,5 +40,5 @@ export const TRANSACTION_METADATA_SECTIONS: Section[] = [
   { ...PAGE, key: 'transaction.page' },
   { ...USER, required: true },
   USER_AGENT,
-  CUSTOM_TRANSACTION
+  CUSTOM_TRANSACTION,
 ];

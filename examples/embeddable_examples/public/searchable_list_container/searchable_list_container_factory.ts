@@ -19,6 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ContainerOutput,
+  EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
@@ -32,7 +34,12 @@ interface StartServices {
   embeddableServices: EmbeddableStart;
 }
 
-export class SearchableListContainerFactory implements EmbeddableFactoryDefinition {
+export type SearchableListContainerFactory = EmbeddableFactory<
+  SearchableContainerInput,
+  ContainerOutput
+>;
+export class SearchableListContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<SearchableContainerInput, ContainerOutput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 

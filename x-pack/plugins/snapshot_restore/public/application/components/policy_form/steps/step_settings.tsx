@@ -88,7 +88,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
         checked={isAllIndices}
         disabled={isManagedPolicy}
         data-test-subj="allIndicesToggle"
-        onChange={e => {
+        onChange={(e) => {
           const isChecked = e.target.checked;
           setIsAllIndices(isChecked);
           if (isChecked) {
@@ -250,7 +250,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                     <EuiSelectable
                       allowExclusions={false}
                       options={indicesOptions}
-                      onChange={options => {
+                      onChange={(options) => {
                         const newSelectedIndices: string[] = [];
                         options.forEach(({ label, checked }) => {
                           if (checked === 'on') {
@@ -273,14 +273,14 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
-                      options={indices.map(index => ({ label: index }))}
+                      options={indices.map((index) => ({ label: index }))}
                       placeholder={i18n.translate(
                         'xpack.snapshotRestore.policyForm.stepSettings.indicesPatternPlaceholder',
                         {
                           defaultMessage: 'Enter index patterns, i.e. logstash-*',
                         }
                       )}
-                      selectedOptions={indexPatterns.map(pattern => ({ label: pattern }))}
+                      selectedOptions={indexPatterns.map((pattern) => ({ label: pattern }))}
                       onCreateOption={(pattern: string) => {
                         if (!pattern.trim().length) {
                           return;
@@ -339,7 +339,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={Boolean(config.ignoreUnavailable)}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               ignoreUnavailable: e.target.checked,
             });
@@ -379,7 +379,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={Boolean(config.partial)}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               partial: e.target.checked,
             });
@@ -419,7 +419,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             />
           }
           checked={config.includeGlobalState === undefined || config.includeGlobalState}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicyConfig({
               includeGlobalState: e.target.checked,
             });

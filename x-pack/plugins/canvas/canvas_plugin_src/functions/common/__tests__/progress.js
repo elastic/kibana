@@ -18,9 +18,7 @@ describe('progress', () => {
 
   it('returns a render as progress', () => {
     const result = fn(0.2);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'progress');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'progress');
   });
 
   it('sets the progress to context', () => {

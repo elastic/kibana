@@ -35,8 +35,6 @@ uiRoutes.when('/kibana/instances', {
         $injector,
       });
 
-      const kbnUrl = $injector.get('kbnUrl');
-
       const renderReact = () => {
         this.renderReact(
           <SetupModeRenderer
@@ -53,10 +51,6 @@ uiRoutes.when('/kibana/instances', {
                   pagination={this.pagination}
                   onTableChange={this.onTableChange}
                   clusterStatus={this.data.clusterStatus}
-                  angular={{
-                    $scope,
-                    kbnUrl,
-                  }}
                 />
                 {bottomBarComponent}
               </Fragment>
@@ -67,7 +61,7 @@ uiRoutes.when('/kibana/instances', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data) {
             return;
           }

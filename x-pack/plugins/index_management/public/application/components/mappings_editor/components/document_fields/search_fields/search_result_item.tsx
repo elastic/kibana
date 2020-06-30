@@ -68,7 +68,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
 
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
-            {deleteField => (
+            {(deleteField) => (
               <EuiToolTip content={deleteButtonLabel}>
                 <EuiButtonIcon
                   iconType="trash"

@@ -38,18 +38,21 @@ export function getBytesRt({ min, max }: { min?: string; max?: string }) {
     'bytesRt',
     t.string.is,
     (input, context) => {
-      return either.chain(t.string.validate(input, context), inputAsString => {
-        const inputAsBytes = amountAndUnitToBytes(inputAsString);
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          const inputAsBytes = amountAndUnitToBytes(inputAsString);
 
-        const isValidAmount =
-          inputAsBytes !== undefined &&
-          inputAsBytes >= minAsBytes &&
-          inputAsBytes <= maxAsBytes;
+          const isValidAmount =
+            inputAsBytes !== undefined &&
+            inputAsBytes >= minAsBytes &&
+            inputAsBytes <= maxAsBytes;
 
-        return isValidAmount
-          ? t.success(inputAsString)
-          : t.failure(input, context, message);
-      });
+          return isValidAmount
+            ? t.success(inputAsString)
+            : t.failure(input, context, message);
+        }
+      );
     },
     t.identity
   );

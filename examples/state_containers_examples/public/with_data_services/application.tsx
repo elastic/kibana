@@ -27,7 +27,7 @@ import { createKbnUrlStateStorage } from '../../../../src/plugins/kibana_utils/p
 export const renderApp = (
   { notifications, http }: CoreStart,
   { navigation, data }: AppPluginDependencies,
-  { appBasePath, element, history }: AppMountParameters
+  { element, history }: AppMountParameters
 ) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 

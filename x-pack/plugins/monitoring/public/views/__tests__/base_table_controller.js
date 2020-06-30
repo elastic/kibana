@@ -8,7 +8,7 @@ import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseTableController } from '../';
 
-describe('MonitoringViewBaseTableController', function() {
+describe('MonitoringViewBaseTableController', function () {
   let ctrl;
   let $injector;
   let $scope;

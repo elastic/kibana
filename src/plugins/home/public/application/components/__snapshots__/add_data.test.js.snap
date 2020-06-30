@@ -202,17 +202,17 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -277,7 +277,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -468,17 +468,17 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -543,7 +543,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -765,17 +765,17 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -876,7 +876,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -1067,17 +1067,17 @@ exports[`render 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -1142,7 +1142,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",

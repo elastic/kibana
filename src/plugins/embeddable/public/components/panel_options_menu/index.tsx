@@ -45,7 +45,7 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
   }, [close]);
 
   const handleContextMenuClick = () => {
-    setOpen(isOpen => !isOpen);
+    setOpen((isOpen) => !isOpen);
   };
 
   const handlePopoverClose = () => {

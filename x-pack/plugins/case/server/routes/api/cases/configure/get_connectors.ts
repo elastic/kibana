@@ -31,7 +31,7 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter(action =>
+        const results = (await actionsClient.getAll()).filter((action) =>
           SUPPORTED_CONNECTORS.includes(action.actionTypeId)
         );
         return response.ok({ body: results });

@@ -109,7 +109,7 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
 
     while (await isSnapshotPending(repository, found.snapshot)) {
       // wait a bit before getting status again
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     return;

@@ -216,12 +216,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   const removeValueAxis = useCallback(
     (axis: ValueAxis) => {
-      const newValueAxes = stateParams.valueAxes.filter(valAxis => valAxis.id !== axis.id);
+      const newValueAxes = stateParams.valueAxes.filter((valAxis) => valAxis.id !== axis.id);
 
       setValue('valueAxes', newValueAxes);
 
       let isSeriesUpdated = false;
-      const series = stateParams.seriesParams.map(ser => {
+      const series = stateParams.seriesParams.map((ser) => {
         if (axis.id === ser.valueAxis) {
           isSeriesUpdated = true;
           return { ...ser, valueAxis: newValueAxes[0].id };
@@ -265,8 +265,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
   useEffect(() => {
-    const updatedSeries = metrics.map(agg => {
-      const params = stateParams.seriesParams.find(param => param.data.id === agg.id);
+    const updatedSeries = metrics.map((agg) => {
+      const params = stateParams.seriesParams.find((param) => param.data.id === agg.id);
       const label = agg.makeLabel();
 
       // update labels for existing params or create new one

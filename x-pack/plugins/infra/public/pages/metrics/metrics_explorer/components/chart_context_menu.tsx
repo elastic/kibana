@@ -39,15 +39,16 @@ export interface Props {
 
 const fieldToNodeType = (
   source: SourceConfiguration,
-  field: string
+  groupBy: string | string[]
 ): InventoryItemType | undefined => {
-  if (source.fields.host === field) {
+  const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
+  if (fields.includes(source.fields.host)) {
     return 'host';
   }
-  if (source.fields.pod === field) {
+  if (fields.includes(source.fields.pod)) {
     return 'pod';
   }
-  if (source.fields.container === field) {
+  if (fields.includes(source.fields.container)) {
     return 'container';
   }
 };
@@ -88,10 +89,16 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     // onFilter needs check for Typescript even though it's
     // covered by supportFiltering variable
     if (supportFiltering && onFilter) {
-      onFilter(`${options.groupBy}: "${series.id}"`);
+      if (Array.isArray(options.groupBy)) {
+        onFilter(
+          options.groupBy.map((field, index) => `${field}: "${series.keys?.[index]}"`).join(' and ')
+        );
+      } else {
+        onFilter(`${options.groupBy}: "${series.id}"`);
+      }
     }
     setPopoverState(false);
-  }, [supportFiltering, options.groupBy, series.id, onFilter]);
+  }, [supportFiltering, onFilter, options, series.keys, series.id]);
 
   // Only display the "Add Filter" option if it's supported
   const filterByItem = supportFiltering

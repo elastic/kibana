@@ -133,12 +133,12 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
                     )
                   : undefined
               }
-              options={this.props.runAsUsers.map(username => ({
+              options={this.props.runAsUsers.map((username) => ({
                 id: username,
                 label: username,
                 isGroupLabelOption: false,
               }))}
-              selectedOptions={this.props.role.elasticsearch.run_as.map(u => ({ label: u }))}
+              selectedOptions={this.props.role.elasticsearch.run_as.map((u) => ({ label: u }))}
               onCreateOption={this.onCreateRunAsOption}
               onChange={this.onRunAsUserChange}
               isDisabled={!editable}

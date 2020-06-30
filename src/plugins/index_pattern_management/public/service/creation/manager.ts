@@ -21,52 +21,56 @@ import { HttpSetup } from '../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
-  private configs: IndexPatternCreationConfig[];
+  private configs: IndexPatternCreationConfig[] = [];
 
-  constructor() {
-    this.configs = [];
-  }
+  setup(httpClient: HttpSetup) {
+    return {
+      addCreationConfig: (Config: typeof IndexPatternCreationConfig) => {
+        const config = new Config({ httpClient });
 
-  public addCreationConfig = (httpClient: HttpSetup) => (
-    Config: typeof IndexPatternCreationConfig
-  ) => {
-    const config = new Config({ httpClient });
-    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
-      throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
-    }
-    this.configs.push(config);
-  };
-
-  public getType(key: string | undefined): IndexPatternCreationConfig | null {
-    if (key) {
-      const index = this.configs.findIndex(config => config.key === key);
-      return this.configs[index] || null;
-    } else {
-      return this.getType('default');
-    }
-  }
-
-  public async getIndexPatternCreationOptions(urlHandler: UrlHandler) {
-    const options: IndexPatternCreationOption[] = [];
-    await Promise.all(
-      this.configs.map(async config => {
-        const option = config.getIndexPatternCreationOption
-          ? await config.getIndexPatternCreationOption(urlHandler)
-          : null;
-        if (option) {
-          options.push(option);
+        if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
+          throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
         }
-      })
-    );
-    return options;
+
+        this.configs.push(config);
+      },
+    };
   }
 
-  setup = (httpClient: HttpSetup) => ({
-    addCreationConfig: this.addCreationConfig(httpClient).bind(this),
-  });
+  start() {
+    const getType = (key: string | undefined): IndexPatternCreationConfig => {
+      if (key) {
+        const index = this.configs.findIndex((config) => config.key === key);
+        const config = this.configs[index];
 
-  start = () => ({
-    getType: this.getType.bind(this),
-    getIndexPatternCreationOptions: this.getIndexPatternCreationOptions.bind(this),
-  });
+        if (config) {
+          return config;
+        } else {
+          throw new Error(`Index pattern creation type not found: ${key}`);
+        }
+      } else {
+        return getType('default');
+      }
+    };
+
+    return {
+      getType,
+      getIndexPatternCreationOptions: async (urlHandler: UrlHandler) => {
+        const options: IndexPatternCreationOption[] = [];
+
+        await Promise.all(
+          this.configs.map(async (config) => {
+            const option = config.getIndexPatternCreationOption
+              ? await config.getIndexPatternCreationOption(urlHandler)
+              : null;
+            if (option) {
+              options.push(option);
+            }
+          })
+        );
+
+        return options;
+      },
+    };
+  }
 }

@@ -19,7 +19,7 @@ import { SubFeatureForm } from '../sub_feature_form';
 
 export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
   const allExpanderButtons = findTestSubject(wrapper, 'expandFeaturePrivilegeRow');
-  allExpanderButtons.forEach(button => button.simulate('click'));
+  allExpanderButtons.forEach((button) => button.simulate('click'));
 
   // each expanded row renders its own `EuiTableRow`, so there are 2 rows
   // for each feature: one for the primary feature privilege, and one for the sub privilege form

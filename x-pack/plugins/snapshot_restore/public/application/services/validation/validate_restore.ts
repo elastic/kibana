@@ -76,7 +76,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
       const modifiedSettingsCount = modifiedSettings.length;
       const unmodifiableSettings =
         modifiedSettingsCount > 0
-          ? modifiedSettings.filter(setting => UNMODIFIABLE_INDEX_SETTINGS.includes(setting))
+          ? modifiedSettings.filter((setting) => UNMODIFIABLE_INDEX_SETTINGS.includes(setting))
           : null;
 
       if (modifiedSettingsCount === 0) {
@@ -116,7 +116,7 @@ export const validateRestore = (restoreSettings: RestoreSettings): RestoreValida
     const ignoredSettingsCount = ignoreIndexSettings.length;
     const unremovableSettings =
       ignoredSettingsCount > 0
-        ? ignoreIndexSettings.filter(setting => UNREMOVABLE_INDEX_SETTINGS.includes(setting))
+        ? ignoreIndexSettings.filter((setting) => UNREMOVABLE_INDEX_SETTINGS.includes(setting))
         : null;
 
     if (ignoredSettingsCount === 0) {

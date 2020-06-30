@@ -97,7 +97,7 @@ export function SearchBarComponent(props: SearchBarProps) {
 
   return (
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         if (!isLoading && currentIndexPattern) {
           onQuerySubmit(queryToString(query, currentIndexPattern));
@@ -185,7 +185,7 @@ export const SearchBar = connect(
         datasource.current.type === 'indexpattern' ? datasource.current : undefined,
     };
   },
-  dispatch => ({
+  (dispatch) => ({
     onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => {
       dispatch(
         requestDatasource({

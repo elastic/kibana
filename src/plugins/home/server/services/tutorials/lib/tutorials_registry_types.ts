@@ -22,7 +22,7 @@ import { KibanaRequest } from 'src/core/server';
 /** @public */
 export enum TutorialsCategory {
   LOGGING = 'logging',
-  SIEM = 'siem',
+  SECURITY_SOLUTION = 'security',
   METRICS = 'metrics',
   OTHER = 'other',
 }

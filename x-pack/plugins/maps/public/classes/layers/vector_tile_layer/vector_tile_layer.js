@@ -6,7 +6,7 @@
 
 import { TileLayer } from '../tile_layer/tile_layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { isRetina } from '../../../meta';
 import {
   addSpriteSheetToMapFromImageData,
@@ -45,10 +45,6 @@ export class VectorTileLayer extends TileLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
-      return;
-    }
-
     const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
@@ -60,16 +56,16 @@ export class VectorTileLayer extends TileLayer {
 
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
-      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
+      startLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataFilters);
       const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png);
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
       };
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, nextMeta);
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data, nextMeta);
     } catch (error) {
-      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
   }
 
@@ -121,7 +117,7 @@ export class VectorTileLayer extends TileLayer {
     if (!vectorStyle) {
       return [];
     }
-    return vectorStyle.layers.map(layer => this._generateMbId(layer.id));
+    return vectorStyle.layers.map((layer) => this._generateMbId(layer.id));
   }
 
   getMbSourceIds() {
@@ -130,7 +126,7 @@ export class VectorTileLayer extends TileLayer {
       return [];
     }
     const sourceIds = Object.keys(vectorStyle.sources);
-    return sourceIds.map(sourceId => this._generateMbSourceId(sourceId));
+    return sourceIds.map((sourceId) => this._generateMbSourceId(sourceId));
   }
 
   ownsMbLayerId(mbLayerId) {
@@ -149,7 +145,7 @@ export class VectorTileLayer extends TileLayer {
   _requiresPrevSourceCleanup(mbMap) {
     const sourceIdPrefix = this._generateMbSourceIdPrefix();
     const mbStyle = mbMap.getStyle();
-    return Object.keys(mbStyle.sources).some(mbSourceId => {
+    return Object.keys(mbStyle.sources).some((mbSourceId) => {
       const doesMbSourceBelongToLayer = this.ownsMbSourceId(mbSourceId);
       const doesMbSourceBelongToSource = mbSourceId.startsWith(sourceIdPrefix);
       return doesMbSourceBelongToLayer && !doesMbSourceBelongToSource;
@@ -166,7 +162,7 @@ export class VectorTileLayer extends TileLayer {
 
     let initialBootstrapCompleted = false;
     const sourceIds = Object.keys(vectorStyle.sources);
-    sourceIds.forEach(sourceId => {
+    sourceIds.forEach((sourceId) => {
       if (initialBootstrapCompleted) {
         return;
       }
@@ -201,7 +197,7 @@ export class VectorTileLayer extends TileLayer {
       addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       //sync layers
-      vectorStyle.layers.forEach(layer => {
+      vectorStyle.layers.forEach((layer) => {
         const mbLayerId = this._generateMbId(layer.id);
         const mbLayer = mbMap.getLayer(mbLayerId);
         if (mbLayer) {
@@ -246,7 +242,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    opacityProps.forEach(opacityProp => {
+    opacityProps.forEach((opacityProp) => {
       if (mbLayer.paint && typeof mbLayer.paint[opacityProp] === 'number') {
         const newOpacity = mbLayer.paint[opacityProp] * this.getAlpha();
         mbMap.setPaintProperty(mbLayerId, opacityProp, newOpacity);
@@ -274,7 +270,7 @@ export class VectorTileLayer extends TileLayer {
       return;
     }
 
-    vectorStyle.layers.forEach(mbLayer => {
+    vectorStyle.layers.forEach((mbLayer) => {
       const mbLayerId = this._generateMbId(mbLayer.id);
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);

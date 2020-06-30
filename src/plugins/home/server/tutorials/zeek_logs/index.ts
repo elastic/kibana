@@ -37,7 +37,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.zeekLogs.nameTitle', {
       defaultMessage: 'Zeek logs',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Zeek/Bro.',
     }),

@@ -5,7 +5,7 @@
  */
 
 export default ({ loadTestFile }) => {
-  describe('sample data', function() {
+  describe('sample data', function () {
     loadTestFile(require.resolve('./e_commerce'));
   });
 };

@@ -63,8 +63,8 @@ describe('toExpression', () => {
 
     const colors = ast.chain[0].arguments.colors as Ast[];
 
-    const aColor = colors.find(color => color.chain[0].arguments.label[0] === 'a');
-    const bColor = colors.find(color => color.chain[0].arguments.label[0] === 'b');
+    const aColor = colors.find((color) => color.chain[0].arguments.label[0] === 'a');
+    const bColor = colors.find((color) => color.chain[0].arguments.label[0] === 'b');
 
     expect(aColor?.chain[0].arguments.color[0]).toBe(colorMap.a);
     expect(bColor?.chain[0].arguments.color[0]).toBe(colorMap.b);

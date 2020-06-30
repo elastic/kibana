@@ -26,10 +26,7 @@ const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions =
       },
       config() {
         return {
-          get: sinon
-            .stub()
-            .withArgs('server.uuid')
-            .returns('kibana-1234'),
+          get: sinon.stub().withArgs('server.uuid').returns('kibana-1234'),
         };
       },
       usage: {

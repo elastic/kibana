@@ -39,7 +39,7 @@ export function getSplits(resp, panel, series, meta) {
     if (Array.isArray(buckets)) {
       const size = buckets.length;
       const colors = getSplitColors(series.color, size, series.split_color_mode);
-      return buckets.map(bucket => {
+      return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.label = formatKey(bucket.key, series);
         bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
@@ -49,7 +49,7 @@ export function getSplits(resp, panel, series, meta) {
     }
 
     if (series.split_mode === 'filters' && _.isPlainObject(buckets)) {
-      return series.split_filters.map(filter => {
+      return series.split_filters.map((filter) => {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
@@ -67,8 +67,8 @@ export function getSplits(resp, panel, series, meta) {
     timeseries,
   };
   series.metrics
-    .filter(m => /_bucket/.test(m.type))
-    .forEach(m => {
+    .filter((m) => /_bucket/.test(m.type))
+    .forEach((m) => {
       mergeObj[m.id] = _.get(resp, `aggregations.${series.id}.${m.id}`);
     });
   return [

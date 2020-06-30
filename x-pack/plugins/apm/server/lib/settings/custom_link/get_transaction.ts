@@ -13,7 +13,7 @@ import { splitFilterValueByComma } from './helper';
 
 export async function getTransaction({
   setup,
-  filters = {}
+  filters = {},
 }: {
   setup: Setup;
   filters?: t.TypeOf<typeof filterOptionsRt>;
@@ -28,7 +28,7 @@ export async function getTransaction({
       }
     })
     // removes filters without value
-    .filter(value => value);
+    .filter((value) => value);
 
   const params = {
     terminateAfter: 1,
@@ -39,11 +39,11 @@ export async function getTransaction({
         bool: {
           filter: [
             { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            ...esFilters
-          ]
-        }
-      }
-    }
+            ...esFilters,
+          ],
+        },
+      },
+    },
   };
   const resp = await client.search<Transaction>(params);
   return resp.hits.hits[0]?._source;

@@ -1,0 +1,5 @@
+{
+  "description": "This is a sample exception list with auto created list_id since none was provided",
+  "name": "Sample Exception List without a whole lot going on",
+  "type": "endpoint"
+}

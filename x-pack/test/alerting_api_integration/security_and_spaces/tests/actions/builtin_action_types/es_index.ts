@@ -26,7 +26,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
     it('should be created successfully', async () => {
       // create action with no config
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -53,7 +53,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(typeof createdActionID).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdActionID}`)
+        .get(`/api/actions/action/${createdActionID}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -66,7 +66,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       // create action with all config props
       const { body: createdActionWithIndex } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action with index config',
@@ -94,7 +94,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(typeof createdActionIDWithIndex).to.be('string');
 
       const { body: fetchedActionWithIndex } = await supertest
-        .get(`/api/action/${createdActionIDWithIndex}`)
+        .get(`/api/actions/action/${createdActionIDWithIndex}`)
         .expect(200);
 
       expect(fetchedActionWithIndex).to.eql({
@@ -112,7 +112,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
     it('should respond with error when creation unsuccessful', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -132,7 +132,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
     it('should execute successly when expected for a single body', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -145,7 +145,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdAction.id}/_execute`)
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -162,7 +162,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
     it('should execute successly when expected for with multiple bodies', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -175,7 +175,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdAction.id}/_execute`)
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -206,7 +206,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
     it('should execute successly with refresh false', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -220,7 +220,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdAction.id}/_execute`)
+        .post(`/api/actions/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -235,7 +235,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(items.length).to.be.lessThan(2);
 
       const { body: createdActionWithRefresh } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',
@@ -248,7 +248,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       const { body: result2 } = await supertest
-        .post(`/api/action/${createdActionWithRefresh.id}/_execute`)
+        .post(`/api/actions/action/${createdActionWithRefresh.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

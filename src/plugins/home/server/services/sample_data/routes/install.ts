@@ -61,7 +61,7 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.elasticsearch.adminClient.callAsCurrentUser('bulk', {
+    const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser('bulk', {
       body: bulk,
     });
     if (resp.errors) {
@@ -110,7 +110,7 @@ export function createInstallRoute(
 
         // clean up any old installation of dataset
         try {
-          await context.core.elasticsearch.dataClient.callAsCurrentUser('indices.delete', {
+          await context.core.elasticsearch.legacy.client.callAsCurrentUser('indices.delete', {
             index,
           });
         } catch (err) {
@@ -125,7 +125,7 @@ export function createInstallRoute(
               mappings: { properties: dataIndexConfig.fields },
             },
           };
-          await context.core.elasticsearch.dataClient.callAsCurrentUser(
+          await context.core.elasticsearch.legacy.client.callAsCurrentUser(
             'indices.create',
             createIndexParams
           );
@@ -162,7 +162,7 @@ export function createInstallRoute(
         logger.warn(errMsg);
         return res.internalError({ body: errMsg });
       }
-      const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
+      const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
         return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {

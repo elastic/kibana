@@ -26,13 +26,13 @@ Table of Contents
     - [Executor](#executor)
     - [Example](#example)
   - [RESTful API](#restful-api)
-    - [`POST /api/action`: Create action](#post-apiaction-create-action)
-    - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_getAll`: Get all actions](#get-apiactiongetall-get-all-actions)
-    - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
-    - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
-    - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
-    - [`POST /api/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
+    - [`POST /api/actions/action`: Create action](#post-apiaction-create-action)
+    - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionid-delete-action)
+    - [`GET /api/actions`: Get all actions](#get-apiactiongetall-get-all-actions)
+    - [`GET /api/actions/action/{id}`: Get action](#get-apiactionid-get-action)
+    - [`GET /api/actions/list_action_types`: List action types](#get-apiactiontypes-list-action-types)
+    - [`PUT /api/actions/action/{id}`: Update action](#put-apiactionid-update-action)
+    - [`POST /api/actions/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
   - [Firing actions](#firing-actions)
   - [Example](#example-1)
 - [Built-in Action Types](#built-in-action-types)
@@ -163,7 +163,7 @@ The built-in email action type provides a good example of creating an action typ
 
 Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See below for CRUD operations using the API.
 
-### `POST /api/action`: Create action
+### `POST /api/actions/action`: Create action
 
 Payload:
 
@@ -174,7 +174,7 @@ Payload:
 | config       | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets      | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `DELETE /api/action/{id}`: Delete action
+### `DELETE /api/actions/action/{id}`: Delete action
 
 Params:
 
@@ -182,7 +182,7 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/action/_getAll`: Get all actions
+### `GET /api/actions`: Get all actions
 
 No parameters.
 
@@ -190,7 +190,7 @@ Return all actions from saved objects merged with predefined list.
 Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
 List of predefined actions should be set up in Kibana.yaml.
 
-### `GET /api/action/{id}`: Get action
+### `GET /api/actions/action/{id}`: Get action
 
 Params:
 
@@ -198,11 +198,11 @@ Params:
 | -------- | ------------------------------------------ | ------ |
 | id       | The id of the action you're trying to get. | string |
 
-### `GET /api/action/types`: List action types
+### `GET /api/actions/list_action_types`: List action types
 
 No parameters.
 
-### `PUT /api/action/{id}`: Update action
+### `PUT /api/actions/action/{id}`: Update action
 
 Params:
 
@@ -218,7 +218,7 @@ Payload:
 | config   | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets  | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `POST /api/action/{id}/_execute`: Execute action
+### `POST /api/actions/action/{id}/_execute`: Execute action
 
 Params:
 
@@ -234,9 +234,24 @@ Payload:
 
 ## Firing actions
 
-The plugin exposes an execute function that you can use to run actions.
+Running actions is possible by using the ActionsClient which is provided by the `getActionsClientWithRequest` function part of the plugin's Start Contract.
+By providing the user's Request you'll receive an instance of the ActionsClient which is tailered to the current user and is scoped to the resources the user is authorized to access.
 
-**server.plugins.actions.execute(options)**
+## Accessing a scoped ActionsClient
+
+```
+const actionsClient = server.plugins.actions.getActionsClientWithRequest(request);
+```
+
+Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
+
+### actionsClient.enqueueExecution(options)
+
+This api schedules a task which will run the action using the current user scope at the soonest opportunity.
+
+Running the action by scheduling a task means that we will no longer have a user request by which to ascertain the action's privileges and so you might need to provide these yourself:
+- The **SpaceId** in which the user's action is expected to run
+- When security is enabled you'll also need to provide an **apiKey** which allows us to mimic the user and their privileges.
 
 The following table describes the properties of the `options` object.
 
@@ -251,10 +266,39 @@ The following table describes the properties of the `options` object.
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
-```
-server.plugins.actions.execute({
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   spaceId: 'default', // The spaceId of the action
+  params: {
+    from: 'example@elastic.co',
+    to: ['destination@elastic.co'],
+    subject: 'My email subject',
+    body: 'My email body',
+  },
+});
+```
+
+### actionsClient.execute(options)
+
+This api runs the action and asynchronously returns the result of running the action.
+
+The following table describes the properties of the `options` object.
+
+| Property | Description                                                                                            | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
+| id       | The id of the action you want to execute.                                                              | string |
+| params   | The `params` value to give the action type executor.                                                   | object |
+
+## Example
+
+As with the previous example, we'll use the action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` to send an email. 
+
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+const result = await actionsClient.execute({
+  id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],

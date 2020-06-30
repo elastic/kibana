@@ -91,7 +91,11 @@ describe('MonitorPage', () => {
   it('shallow renders expected elements for valid props', () => {
     expect(
       shallowWithRouter(
-        <OverviewPageComponent indexPattern={indexPattern} setEsKueryFilters={jest.fn()} />
+        <OverviewPageComponent
+          indexPattern={indexPattern}
+          setEsKueryFilters={jest.fn()}
+          loading={false}
+        />
       )
     ).toMatchSnapshot();
   });

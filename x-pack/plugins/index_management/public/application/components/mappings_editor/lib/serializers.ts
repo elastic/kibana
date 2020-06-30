@@ -9,9 +9,9 @@ import {
   PARAMETER_SERIALIZERS,
   PARAMETER_DESERIALIZERS,
 } from '../components/document_fields/field_parameters';
-import { Field, DataType, MainType, SubType } from '../types';
-import { INDEX_DEFAULT, MAIN_DATA_TYPE_DEFINITION } from '../constants';
-import { getMainTypeFromSubType } from './utils';
+import { Field, DataType } from '../types';
+import { INDEX_DEFAULT } from '../constants';
+import { getTypeMetaFromSource } from './utils';
 
 const sanitizeField = (field: Field): Field =>
   Object.entries(field)
@@ -48,7 +48,7 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
   const { otherTypeJson, ...rest } = field;
   const updatedField: Field = Boolean(otherTypeJson) ? { ...otherTypeJson, ...rest } : { ...rest };
 
-  // If a subType is present, use it as type for ES
+  // If a subType is present, use it as an Elasticsearch datatype
   if ({}.hasOwnProperty.call(updatedField, 'subType')) {
     updatedField.type = updatedField.subType as DataType;
     delete updatedField.subType;
@@ -61,17 +61,11 @@ export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
 };
 
 export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field => {
-  if (!MAIN_DATA_TYPE_DEFINITION[field.type as MainType]) {
-    // IF the type if not one of the main one, it is then probably a "sub" type.
-    const type = getMainTypeFromSubType(field.type as SubType);
-    if (!type) {
-      throw new Error(
-        `Property type "${field.type}" not recognized and no subType was found for it.`
-      );
-    }
-    field.subType = field.type as SubType;
-    field.type = type;
-  }
+  // Read the type provided and detect if it is a SubType or not
+  // e.g. if "float" is provided, the field.type will be "numeric" and the field.subType will be "float"
+  const typeMeta = getTypeMetaFromSource(field.type);
+  field.type = typeMeta.mainType;
+  field.subType = typeMeta.subType;
 
   if (field.type === 'other') {
     const { type, subType, name, ...otherTypeJson } = field;

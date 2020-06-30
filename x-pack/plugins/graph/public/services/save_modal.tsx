@@ -60,7 +60,7 @@ export function openSaveModal({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
-    return saveWorkspace(saveOptions, dataConsent, services).then(response => {
+    return saveWorkspace(saveOptions, dataConsent, services).then((response) => {
       // If the save wasn't successful, put the original values back.
       if (!('id' in response) || !Boolean(response.id)) {
         workspace.title = currentTitle;

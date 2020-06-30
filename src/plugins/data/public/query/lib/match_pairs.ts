@@ -31,8 +31,8 @@
  */
 
 const pairs = ['()', '[]', '{}', `''`, '""'];
-const openers = pairs.map(pair => pair[0]);
-const closers = pairs.map(pair => pair[1]);
+const openers = pairs.map((pair) => pair[0]);
+const closers = pairs.map((pair) => pair[1]);
 
 interface MatchPairsOptions {
   value: string;

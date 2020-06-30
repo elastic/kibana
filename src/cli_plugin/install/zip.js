@@ -34,29 +34,29 @@ export function analyzeArchive(archive) {
   const regExp = new RegExp('(kibana[\\\\/][^\\\\/]+)[\\\\/]package.json', 'i');
 
   return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function(err, zipfile) {
+    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
         return reject(err);
       }
 
       zipfile.readEntry();
-      zipfile.on('entry', function(entry) {
+      zipfile.on('entry', function (entry) {
         const match = entry.fileName.match(regExp);
 
         if (!match) {
           return zipfile.readEntry();
         }
 
-        zipfile.openReadStream(entry, function(err, readable) {
+        zipfile.openReadStream(entry, function (err, readable) {
           const chunks = [];
 
           if (err) {
             return reject(err);
           }
 
-          readable.on('data', chunk => chunks.push(chunk));
+          readable.on('data', (chunk) => chunks.push(chunk));
 
-          readable.on('end', function() {
+          readable.on('end', function () {
             const contents = Buffer.concat(chunks).toString();
             const pkg = JSON.parse(contents);
 
@@ -92,14 +92,14 @@ export function _isDirectory(filename) {
 
 export function extractArchive(archive, targetDir, extractPath) {
   return new Promise((resolve, reject) => {
-    yauzl.open(archive, { lazyEntries: true }, function(err, zipfile) {
+    yauzl.open(archive, { lazyEntries: true }, function (err, zipfile) {
       if (err) {
         return reject(err);
       }
 
       zipfile.readEntry();
       zipfile.on('close', resolve);
-      zipfile.on('entry', function(entry) {
+      zipfile.on('entry', function (entry) {
         let fileName = entry.fileName;
 
         if (extractPath && fileName.startsWith(extractPath)) {
@@ -113,7 +113,7 @@ export function extractArchive(archive, targetDir, extractPath) {
         }
 
         if (_isDirectory(fileName)) {
-          mkdir(fileName, { recursive: true }, function(err) {
+          mkdir(fileName, { recursive: true }, function (err) {
             if (err) {
               return reject(err);
             }
@@ -122,13 +122,13 @@ export function extractArchive(archive, targetDir, extractPath) {
           });
         } else {
           // file entry
-          zipfile.openReadStream(entry, function(err, readStream) {
+          zipfile.openReadStream(entry, function (err, readStream) {
             if (err) {
               return reject(err);
             }
 
             // ensure parent directory exists
-            mkdir(path.dirname(fileName), { recursive: true }, function(err) {
+            mkdir(path.dirname(fileName), { recursive: true }, function (err) {
               if (err) {
                 return reject(err);
               }
@@ -136,7 +136,7 @@ export function extractArchive(archive, targetDir, extractPath) {
               readStream.pipe(
                 createWriteStream(fileName, { mode: entry.externalFileAttributes >>> 16 })
               );
-              readStream.on('end', function() {
+              readStream.on('end', function () {
                 zipfile.readEntry();
               });
             });

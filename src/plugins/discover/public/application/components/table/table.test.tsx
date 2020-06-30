@@ -58,11 +58,11 @@ const indexPattern = {
   ],
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
-  formatHit: jest.fn(hit => hit._source),
+  formatHit: jest.fn((hit) => hit._source),
 } as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
-  return indexPattern.fields.find(field => field.name === name);
+  return indexPattern.fields.find((field) => field.name === name);
 };
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
@@ -146,7 +146,7 @@ describe('DocViewTable at Discover', () => {
       toggleColumnButton: true,
       underScoreWarning: false,
     },
-  ].forEach(check => {
+  ].forEach((check) => {
     const rowComponent = findTestSubject(component, `tableDocViewRow-${check._property}`);
 
     it(`renders row for ${check._property}`, () => {
@@ -158,7 +158,7 @@ describe('DocViewTable at Discover', () => {
       'collapseBtn',
       'toggleColumnButton',
       'underscoreWarning',
-    ] as const).forEach(element => {
+    ] as const).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
@@ -172,7 +172,7 @@ describe('DocViewTable at Discover', () => {
       }
     });
 
-    (['noMappingWarning'] as const).forEach(element => {
+    (['noMappingWarning'] as const).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {

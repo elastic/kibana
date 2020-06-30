@@ -76,6 +76,7 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   history={
     Object {
       "push": [MockFunction],
+      "replace": [MockFunction],
     }
   }
   mounters={Map {}}

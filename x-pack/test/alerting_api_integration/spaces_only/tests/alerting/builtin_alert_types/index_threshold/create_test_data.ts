@@ -32,14 +32,14 @@ export async function createEsDocuments(
 ) {
   const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
-  times(intervals, interval => {
+  times(intervals, (interval) => {
     const date = endDateMillis - interval * intervalMillis;
 
     // base value for each window is 2^interval
     const testedValue = 2 ** interval;
 
     // don't need await on these, wait at the end of the function
-    times(groups, group => {
+    times(groups, (group) => {
       createEsDocument(es, date, testedValue + group, `group-${group}`);
     });
   });

@@ -70,7 +70,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
         <Axis
           id="values"
           position="left"
-          tickFormat={value => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
+          tickFormat={(value) => numeral(value.toPrecision(3)).format('0[.][00]a')} // https://github.com/adamwdraper/Numeral-js/issues/194
         />
         <BarSeries
           id="averageValues"

@@ -233,7 +233,7 @@ export class GithubApi {
           this.log.error(`Unable to reach github, waiting ${waitMs}ms to retry`);
         }
 
-        await new Promise(resolve => setTimeout(resolve, waitMs));
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
         return await this.request<T>(
           {
             ...options,

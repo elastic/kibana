@@ -15,7 +15,7 @@ import { KIBANA_ALERTING_ENABLED } from '../../../plugins/monitoring/common/cons
  */
 const deps = ['kibana', 'elasticsearch', 'xpack_main'];
 if (KIBANA_ALERTING_ENABLED) {
-  deps.push(...['alerting', 'actions']);
+  deps.push(...['alerts', 'actions']);
 }
 export const monitoring = (kibana: any) => {
   return new kibana.Plugin({

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore Untyped library
+// @ts-expect-error untyped library
 import uniqBy from 'lodash.uniqby';
-// @ts-ignore Untyped Elastic library
+// @ts-expect-error untyped Elastic library
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
@@ -18,13 +18,10 @@ import {
   PointSeriesColumnName,
   PointSeriesColumns,
 } from 'src/plugins/expressions/common';
-// @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
-// @ts-ignore Untyped local
 import { unquoteString } from '../../../../common/lib/unquote_string';
-// @ts-ignore Untyped local
 import { isColumnReference } from './lib/is_column_reference';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 
@@ -81,7 +78,7 @@ export function pointseries(): ExpressionFunctionDefinition<
     fn: (input, args) => {
       const errors = getFunctionErrors().pointseries;
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
-      const columnNames = input.columns.map(col => col.name);
+      const columnNames = input.columns.map((col) => col.name);
       const mathScope = pivotObjectArray(input.rows, columnNames);
       const autoQuoteColumn = (col: string | null) => {
         if (!col || !columnNames.includes(col)) {
@@ -97,7 +94,7 @@ export function pointseries(): ExpressionFunctionDefinition<
 
       // Separates args into dimensions and measures arrays
       // by checking if arg is a column reference (dimension)
-      keysOf(args).forEach(argName => {
+      keysOf(args).forEach((argName) => {
         const mathExp = autoQuoteColumn(args[argName]);
 
         if (mathExp != null && mathExp.trim() !== '') {
@@ -125,7 +122,7 @@ export function pointseries(): ExpressionFunctionDefinition<
             col.role = 'measure';
           }
 
-          // @ts-ignore untyped local: get_expression_type
+          // @ts-expect-error untyped local: get_expression_type
           columns[argName] = col;
         }
       });
@@ -175,7 +172,7 @@ export function pointseries(): ExpressionFunctionDefinition<
       // Measures
       // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
       // for each measure
-      const measureKeys = groupBy<DatatableRow>(rows, row =>
+      const measureKeys = groupBy<DatatableRow>(rows, (row) =>
         dimensions
           .map(({ name }) => {
             const value = args[name];
@@ -185,13 +182,13 @@ export function pointseries(): ExpressionFunctionDefinition<
       );
 
       // Then compute that 1 value for each measure
-      Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+      Object.values<DatatableRow[]>(measureKeys).forEach((valueRows) => {
         const subtable = { type: 'datatable', columns: input.columns, rows: valueRows };
         const subScope = pivotObjectArray(
           subtable.rows,
-          subtable.columns.map(col => col.name)
+          subtable.columns.map((col) => col.name)
         );
-        const measureValues = measureNames.map(measure => {
+        const measureValues = measureNames.map((measure) => {
           try {
             const ev = evaluate(args[measure], subScope);
             if (Array.isArray(ev)) {
@@ -205,14 +202,14 @@ export function pointseries(): ExpressionFunctionDefinition<
           }
         });
 
-        valueRows.forEach(row => {
+        valueRows.forEach((row) => {
           Object.assign(results[row[PRIMARY_KEY]], zipObject(measureNames, measureValues));
         });
       });
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        Object.values(results).map(row => omit(row, PRIMARY_KEY)),
+        Object.values(results).map((row) => omit(row, PRIMARY_KEY)),
         JSON.stringify
       );
 

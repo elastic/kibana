@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "include": [
+    "mocks.ts",
     "typings/**/*",
     "legacy/common/**/*",
     "legacy/server/**/*",
@@ -11,8 +12,9 @@
   ],
   "exclude": [
     "test/**/*",
-    "plugins/siem/cypress/**/*",
+    "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
+    "plugins/apm/scripts/**/*",
     "**/typespec_tests.ts"
   ],
   "compilerOptions": {
@@ -26,9 +28,6 @@
       "plugins/xpack_main/*": [
         "x-pack/legacy/plugins/xpack_main/public/*"
       ],
-      "plugins/security/*": [
-        "x-pack/legacy/plugins/security/public/*"
-      ],
       "plugins/spaces/*": [
         "x-pack/legacy/plugins/spaces/public/*"
       ],
@@ -41,7 +40,9 @@
     "types": [
       "node",
       "jest",
-      "flot"
+      "flot",
+      "jest-styled-components",
+      "@testing-library/jest-dom"
     ]
   }
 }

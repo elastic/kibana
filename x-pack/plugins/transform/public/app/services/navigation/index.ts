@@ -6,4 +6,3 @@
 
 export { breadcrumbService, BREADCRUMB_SECTION } from './breadcrumb';
 export { docTitleService } from './doc_title';
-export * from './links';

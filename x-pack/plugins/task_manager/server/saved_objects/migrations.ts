@@ -7,7 +7,7 @@ import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../
 import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
 export const migrations: SavedObjectMigrationMap = {
-  '7.4.0': doc => ({
+  '7.4.0': (doc) => ({
     ...doc,
     updated_at: new Date().toISOString(),
   }),

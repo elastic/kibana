@@ -3,15 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { AppMountParameters, DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
+
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  AppMountParameters,
+} from 'kibana/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../triggers_actions_ui/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
+import { alertTypeInitializers } from '../lib/alert_types';
+import { kibanaService } from '../state/kibana_service';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -21,9 +36,15 @@ export interface ClientPluginsSetup {
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
-export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, ClientPluginsStart> {
+export type ClientSetup = void;
+export type ClientStart = void;
+
+export class UptimePlugin
+  implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
   public async setup(
@@ -46,26 +67,40 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
       appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
-      order: 8900,
+      order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
         const { getKibanaFrameworkAdapter } = await import(
           '../lib/adapters/framework/new_platform_adapter'
         );
 
         const { element } = params;
+
         const libs: UMFrontendLibs = {
           framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
         };
-        libs.framework.render(element);
-        return () => {};
+        return libs.framework.render(element);
       },
     });
   }
 
-  public start(_start: CoreStart, _plugins: {}): void {}
+  public start(start: CoreStart, plugins: ClientPluginsStart): void {
+    kibanaService.core = start;
+    alertTypeInitializers.forEach((init) => {
+      const alertInitializer = init({
+        core: start,
+        plugins,
+      });
+      if (
+        plugins.triggers_actions_ui &&
+        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+      }
+    });
+  }
 
   public stop(): void {}
 }

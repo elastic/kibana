@@ -88,7 +88,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                 ]
               : [defaultOption]
           }
-          onChange={choices => {
+          onChange={(choices) => {
             if (choices.length === 0) {
               return;
             }
@@ -117,7 +117,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             value={state.decimalPlaces}
             min={0}
             max={20}
-            onChange={e => {
+            onChange={(e) => {
               setState({ decimalPlaces: Number(e.target.value) });
               onChange({
                 id: (selectedColumn.params as { format: { id: string } }).format.id,

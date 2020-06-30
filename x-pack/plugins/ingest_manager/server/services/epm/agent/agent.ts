@@ -94,7 +94,10 @@ function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yaml
 
   let patchedTemplate = yamlTemplate;
   Object.entries(yamlVariables).forEach(([key, val]) => {
-    patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), safeDump(val));
+    patchedTemplate = patchedTemplate.replace(
+      new RegExp(`^"${key}"`, 'gm'),
+      val ? safeDump(val) : ''
+    );
   });
 
   return patchedTemplate;

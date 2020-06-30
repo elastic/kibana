@@ -193,16 +193,16 @@ export class Execution<
     const { resolve, reject } = this.firstResultFuture;
     const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
 
-    this.race(chainPromise).then(resolve, error => {
+    this.race(chainPromise).then(resolve, (error) => {
       if (this.abortController.signal.aborted) resolve(createAbortErrorValue());
       else reject(error);
     });
 
     this.firstResultFuture.promise.then(
-      result => {
+      (result) => {
         this.state.transitions.setResult(result);
       },
-      error => {
+      (error) => {
         this.state.transitions.setError(error);
       }
     );
@@ -396,7 +396,7 @@ export class Execution<
 
     // Actually resolve unless the argument definition says not to
     const resolvedArgValues = await Promise.all(
-      argNames.map(argName => {
+      argNames.map((argName) => {
         const interpretFns = resolveArgFns[argName];
         if (!argDefs[argName].resolve) return interpretFns;
         return Promise.all(interpretFns.map((fn: any) => fn()));

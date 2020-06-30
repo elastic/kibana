@@ -1,3 +1,5 @@
 cypress/screenshots/*
 cypress/test-results
+cypress/videos/*
+/snapshots.js
 tmp

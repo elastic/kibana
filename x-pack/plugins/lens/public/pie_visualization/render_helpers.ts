@@ -6,8 +6,8 @@
 
 import { Datum, LayerValue } from '@elastic/charts';
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
-import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { ColumnGroups } from './types';
+import { LensFilterEvent } from '../types';
 
 export function getSliceValueWithFallback(
   d: Datum,
@@ -20,7 +20,7 @@ export function getSliceValueWithFallback(
   // Sometimes there is missing data for outer groups
   // When there is missing data, we fall back to the next groups
   // This creates a sunburst effect
-  const hasMetric = reverseGroups.find(group => group.metrics.length && d[group.metrics[0].id]);
+  const hasMetric = reverseGroups.find((group) => group.metrics.length && d[group.metrics[0].id]);
   return hasMetric ? d[hasMetric.metrics[0].id] || Number.EPSILON : Number.EPSILON;
 }
 
@@ -28,8 +28,8 @@ export function getFilterContext(
   clickedLayers: LayerValue[],
   layerColumnIds: string[],
   table: KibanaDatatable
-): ValueClickTriggerContext {
-  const matchingIndex = table.rows.findIndex(row =>
+): LensFilterEvent['data'] {
+  const matchingIndex = table.rows.findIndex((row) =>
     clickedLayers.every((layer, index) => {
       const columnId = layerColumnIds[index];
       return row[columnId] === layer.groupByRollup;
@@ -37,13 +37,11 @@ export function getFilterContext(
   );
 
   return {
-    data: {
-      data: clickedLayers.map((clickedLayer, index) => ({
-        column: table.columns.findIndex(col => col.id === layerColumnIds[index]),
-        row: matchingIndex,
-        value: clickedLayer.groupByRollup,
-        table,
-      })),
-    },
+    data: clickedLayers.map((clickedLayer, index) => ({
+      column: table.columns.findIndex((col) => col.id === layerColumnIds[index]),
+      row: matchingIndex,
+      value: clickedLayer.groupByRollup,
+      table,
+    })),
   };
 }

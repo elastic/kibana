@@ -40,11 +40,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await xAxis.parseDomContent();
       return $('.x > g > text')
         .toArray()
-        .map(tick =>
-          $(tick)
-            .text()
-            .trim()
-        );
+        .map((tick) => $(tick).text().trim());
     }
 
     public async getYAxisLabels() {
@@ -52,11 +48,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await yAxis.parseDomContent();
       return $('.y > g > text')
         .toArray()
-        .map(tick =>
-          $(tick)
-            .text()
-            .trim()
-        );
+        .map((tick) => $(tick).text().trim());
     }
 
     /**
@@ -137,7 +129,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
       // 4). for each chart element, find the green circle, then the cy position
       const chartData = await Promise.all(
-        chartTypes.map(async chart => {
+        chartTypes.map(async (chart) => {
           const cy = Number(await chart.getAttribute('cy'));
           // the point_series_options test has data in the billions range and
           // getting 11 digits of precision with these calculations is very hard
@@ -159,7 +151,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`)
         .toArray()
-        .map(chart => {
+        .map((chart) => {
           const barHeight = Number($(chart).attr('height'));
           return Math.round(barHeight * yAxisRatio);
         });
@@ -268,7 +260,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         defaultFindTimeout * 2
       );
       return await Promise.all(
-        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+        legendEntries.map(async (chart) => await chart.getAttribute('data-label'))
       );
     }
 
@@ -312,6 +304,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     * @deprecated Use getTableVisContent instead.
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
@@ -332,10 +325,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         }
 
         const allData = await Promise.all(
-          allTables.map(async t => {
+          allTables.map(async (t) => {
             let data = await table.getDataFromElement(t);
             if (stripEmptyRows) {
-              data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+              data = data.filter(
+                (row) => row.length > 0 && row.some((cell) => cell.trim().length > 0)
+              );
             }
             return data;
           })
@@ -357,13 +352,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         '[data-test-subj="visualizationLoader"] .mtrVis__container'
       );
       const values = await Promise.all(
-        elements.map(async element => {
+        elements.map(async (element) => {
           const text = await element.getVisibleText();
           return text;
         })
       );
       return values
-        .filter(item => item.length > 0)
+        .filter((item) => item.length > 0)
         .reduce((arr: string[], item) => arr.concat(item.split('\n')), []);
     }
 
@@ -372,12 +367,12 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         '[data-test-subj="visualizationLoader"] .chart svg text'
       );
       const values = await Promise.all(
-        elements.map(async element => {
+        elements.map(async (element) => {
           const text = await element.getVisibleText();
           return text;
         })
       );
-      return values.filter(item => item.length > 0);
+      return values.filter((item) => item.length > 0);
     }
 
     public async getRightValueAxes() {
@@ -395,17 +390,25 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const $ = await grid.parseDomContent();
       return $('path')
         .toArray()
-        .map(line => {
+        .map((line) => {
           const dAttribute = $(line).attr('d');
-          const firstPoint = dAttribute
-            .split('L')[0]
-            .replace('M', '')
-            .split(',');
+          const firstPoint = dAttribute.split('L')[0].replace('M', '').split(',');
           return {
             x: parseFloat(firstPoint[0]),
             y: parseFloat(firstPoint[1]),
           };
         });
+    }
+
+    public async getChartValues() {
+      const elements = await find.allByCssSelector('.series.histogram text');
+      const values = await Promise.all(
+        elements.map(async (element) => {
+          const text = await element.getVisibleText();
+          return text;
+        })
+      );
+      return values;
     }
   }
 

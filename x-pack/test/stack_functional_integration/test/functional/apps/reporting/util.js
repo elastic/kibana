@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export const pretty = x => JSON.stringify(x, null, 2);
+export const pretty = (x) => JSON.stringify(x, null, 2);
 export const buildUrl = ({ protocol, auth, hostname, port }) =>
   new URL(`${protocol}://${auth}@${hostname}:${port}`);
 export const putWatcher = async (watch, id, body, client, log) => {

@@ -20,6 +20,7 @@ import {
   logEntriesSummaryResponseRT,
 } from '../../../common/http_api/log_entries';
 import { parseFilterQuery } from '../../utils/serialized_query';
+import { UsageCollector } from '../../usage/usage_collector';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -46,6 +47,8 @@ export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBacke
           bucketSize,
           parseFilterQuery(query)
         );
+
+        UsageCollector.countLogs();
 
         return response.ok({
           body: logEntriesSummaryResponseRT.encode({

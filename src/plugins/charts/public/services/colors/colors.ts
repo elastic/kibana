@@ -57,7 +57,7 @@ export class ColorsService {
       );
     }
 
-    arrayOfStringsOrNumbers.forEach(function(val) {
+    arrayOfStringsOrNumbers.forEach(function (val) {
       if (!_.isString(val) && !_.isNumber(val) && !_.isUndefined(val)) {
         throw new TypeError(
           'createColorLookupFunction expects an array of strings, numbers, or undefined values'

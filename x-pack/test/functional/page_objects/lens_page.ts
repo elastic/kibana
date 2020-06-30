@@ -30,15 +30,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsIndexPatternFiltersToggle');
     },
 
-    /**
-     * Toggles the field existence checkbox.
-     */
-    async toggleExistenceFilter() {
-      await this.toggleIndexPatternFiltersPopover();
-      await testSubjects.click('lnsEmptyFilter');
-      await this.toggleIndexPatternFiltersPopover();
-    },
-
     async findAllFields() {
       return await testSubjects.findAll('lnsFieldListPanelField');
     },
@@ -63,7 +54,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       let actualText: string | undefined;
 
       await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
-        actualText = await find.byCssSelector(selector).then(el => el.getVisibleText());
+        actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
 
@@ -79,7 +70,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param expectedText - the expected text
      */
     assertExactText(selector: string, expectedText: string) {
-      return this.assertExpectedText(selector, value => value === expectedText);
+      return this.assertExpectedText(selector, (value) => value === expectedText);
     },
 
     /**

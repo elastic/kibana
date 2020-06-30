@@ -316,7 +316,7 @@ describe('xy_visualization', () => {
         layerId: 'first',
       }).groups;
       expect(options).toHaveLength(3);
-      expect(options.map(o => o.groupId)).toEqual(['x', 'y', 'breakdown']);
+      expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
     it('should only accept bucketed operations for x', () => {
@@ -325,7 +325,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      const filterOperations = options.find(o => o.groupId === 'x')!.filterOperations;
+      const filterOperations = options.find((o) => o.groupId === 'x')!.filterOperations;
 
       const exampleOperation: Operation = {
         dataType: 'number',
@@ -354,7 +354,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      expect(options.find(o => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
+      expect(options.find((o) => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
     });
 
     it('should allow number operations on y', () => {
@@ -363,7 +363,7 @@ describe('xy_visualization', () => {
         frame,
         layerId: 'first',
       }).groups;
-      const filterOperations = options.find(o => o.groupId === 'y')!.filterOperations;
+      const filterOperations = options.find((o) => o.groupId === 'y')!.filterOperations;
       const exampleOperation: Operation = {
         dataType: 'number',
         isBucketed: false,
@@ -375,7 +375,7 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'boolean' },
         { ...exampleOperation, dataType: 'date' },
       ];
-      expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
+      expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
     });
   });
 });

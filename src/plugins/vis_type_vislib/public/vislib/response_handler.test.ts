@@ -58,7 +58,7 @@ describe('response_handler', () => {
     beforeAll(() => {
       setFormatService({
         deserialize: () => ({
-          convert: jest.fn(v => v),
+          convert: jest.fn((v) => v),
         }),
       } as any);
     });

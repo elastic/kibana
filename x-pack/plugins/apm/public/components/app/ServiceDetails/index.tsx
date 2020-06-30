@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
@@ -28,10 +34,16 @@ export function ServiceDetails({ tab }: Props) {
   const canSaveAlerts = !!plugin.core.application.capabilities.apm[
     'alerting:save'
   ];
-  const isAlertingPluginEnabled = 'alerting' in plugin.plugins;
+  const isAlertingPluginEnabled = 'alerts' in plugin.plugins;
 
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
+
+  const { core } = useApmPluginContext();
+
+  const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {
+    defaultMessage: 'Add data',
+  });
 
   return (
     <div>
@@ -53,6 +65,16 @@ export function ServiceDetails({ tab }: Props) {
               />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+              size="s"
+              color="primary"
+              iconType="plusInCircle"
+            >
+              {ADD_DATA_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
 

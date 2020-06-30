@@ -58,9 +58,7 @@ export const createMLJob = async ({
     prefix: `${getJobPrefix(monitorId)}`,
     useDedicatedIndex: false,
     startDatafeed: true,
-    start: moment()
-      .subtract(2, 'w')
-      .valueOf(),
+    start: moment().subtract(2, 'w').valueOf(),
     indexPatternName: heartbeatIndices,
     query: {
       bool: {

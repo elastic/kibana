@@ -47,10 +47,6 @@ describe('LoginForm', () => {
     });
   });
 
-  afterAll(() => {
-    delete (window as any).location;
-  });
-
   it('renders as expected', () => {
     const coreStartMock = coreMock.createStart();
     expect(
@@ -275,7 +271,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.secLoginCard').map(card => {
+        wrapper.find('.secLoginCard').map((card) => {
           const hint = card.find('.secLoginCard__hint');
           return {
             title: card.find('p.secLoginCard__title').text(),
@@ -316,7 +312,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.secLoginCard').map(card => {
+        wrapper.find('.secLoginCard').map((card) => {
           const hint = card.find('.secLoginCard__hint');
           return {
             title: card.find('p.secLoginCard__title').text(),
@@ -359,7 +355,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -403,7 +399,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'saml1').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
 
       await act(async () => {
         await nextTick();
@@ -445,7 +441,7 @@ describe('LoginForm', () => {
 
       expectPageMode(wrapper, PageMode.Selector);
 
-      wrapper.findWhere(node => node.key() === 'basic').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
       wrapper.update();
       expectPageMode(wrapper, PageMode.Form);
 
@@ -512,7 +508,7 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       // Going to login form.
-      wrapper.findWhere(node => node.key() === 'basic').simulate('click');
+      wrapper.findWhere((node) => node.key() === 'basic').simulate('click');
       wrapper.update();
       expectPageMode(wrapper, PageMode.Form);
 

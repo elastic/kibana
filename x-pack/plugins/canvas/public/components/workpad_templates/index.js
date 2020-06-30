@@ -22,7 +22,7 @@ export const WorkpadTemplates = compose(
   withKibana,
   withHandlers(({ kibana }) => ({
     // Clone workpad given an id
-    cloneWorkpad: props => workpad => {
+    cloneWorkpad: (props) => (workpad) => {
       workpad.id = getId('workpad');
       workpad.name = `My Canvas Workpad - ${workpad.name}`;
       // Remove unneeded fields
@@ -32,7 +32,7 @@ export const WorkpadTemplates = compose(
       return workpadService
         .create(workpad)
         .then(() => props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 }))
-        .catch(err =>
+        .catch((err) =>
           kibana.services.canvas.notify.error(err, { title: `Couldn't clone workpad template` })
         );
     },

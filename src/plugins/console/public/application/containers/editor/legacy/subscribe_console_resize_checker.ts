@@ -22,7 +22,7 @@ import { ResizeChecker } from '../../../../../../kibana_utils/public';
 export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
   const checker = new ResizeChecker(el);
   checker.on('resize', () =>
-    editors.forEach(e => {
+    editors.forEach((e) => {
       if (e.getCoreEditor) {
         e.getCoreEditor().resize();
       } else {

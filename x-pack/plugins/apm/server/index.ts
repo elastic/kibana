@@ -12,7 +12,7 @@ import { APMPlugin } from './plugin';
 export const config = {
   exposeToBrowser: {
     serviceMapEnabled: true,
-    ui: true
+    ui: true,
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -20,7 +20,7 @@ export const config = {
     serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
     serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
     serviceMapFingerprintGlobalBucketSize: schema.number({
-      defaultValue: 1000
+      defaultValue: 1000,
     }),
     serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
     serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
@@ -28,10 +28,10 @@ export const config = {
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       transactionGroupBucketSize: schema.number({ defaultValue: 100 }),
-      maxTraceItems: schema.number({ defaultValue: 1000 })
+      maxTraceItems: schema.number({ defaultValue: 1000 }),
     }),
-    telemetryCollectionEnabled: schema.boolean({ defaultValue: true })
-  })
+    telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
+  }),
 };
 
 export type APMXPackConfig = TypeOf<typeof config.schema>;
@@ -64,7 +64,8 @@ export function mergeConfigs(
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,
     'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
-    'xpack.apm.telemetryCollectionEnabled': apmConfig.telemetryCollectionEnabled
+    'xpack.apm.telemetryCollectionEnabled':
+      apmConfig.telemetryCollectionEnabled,
   };
 }
 

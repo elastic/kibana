@@ -22,8 +22,8 @@ def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-d
 kibanaPipeline(timeoutMinutes: 150) {
   catchErrors {
     slackNotifications.onFailure(
-      title: ":broken_heart: *<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
-      message: ":broken_heart: [${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
+      title: "*<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
+      message: "[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
     ) {
       retryable.enable(2)
       withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {

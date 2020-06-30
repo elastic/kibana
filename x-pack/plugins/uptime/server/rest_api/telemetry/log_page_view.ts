@@ -29,8 +29,12 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
     request,
     response
   ): Promise<any> => {
+    const pageView = request.body as PageViewParams;
+    if (pageView.refreshTelemetryHistory) {
+      KibanaTelemetryAdapter.clearLocalTelemetry();
+    }
     await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(callES, savedObjectsClient);
-    const pageViewResult = KibanaTelemetryAdapter.countPageView(request.body as PageViewParams);
+    const pageViewResult = KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
 
     return response.ok({
       body: pageViewResult,

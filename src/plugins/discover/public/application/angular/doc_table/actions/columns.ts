@@ -24,7 +24,7 @@
  */
 function buildColumns(columns: string[]) {
   if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter(col => col !== '_source');
+    return columns.filter((col) => col !== '_source');
   } else if (columns.length !== 0) {
     return columns;
   }
@@ -42,7 +42,7 @@ export function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(columns.filter(col => col !== columnName));
+  return buildColumns(columns.filter((col) => col !== columnName));
 }
 
 export function moveColumn(columns: string[], columnName: string, newIndex: number) {

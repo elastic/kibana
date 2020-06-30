@@ -10,6 +10,6 @@ export {
   UseRequestConfig,
   sendRequest,
   useRequest,
-} from '../../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+} from '../../../../../src/plugins/es_ui_shared/public/';
 
 export { useXJsonMode } from '../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';

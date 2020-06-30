@@ -83,4 +83,22 @@ foo: bar
       custom: { foo: 'bar' },
     });
   });
+
+  it('should support optional yaml values at root level', () => {
+    const streamTemplate = `
+input: logs
+{{custom}}
+    `;
+    const vars = {
+      custom: {
+        type: 'yaml',
+        value: null,
+      },
+    };
+
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'logs',
+    });
+  });
 });

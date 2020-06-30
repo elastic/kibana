@@ -22,10 +22,10 @@ import expect from '@kbn/expect';
 import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
-describe('PhraseFilterManager', function() {
+describe('PhraseFilterManager', function () {
   const controlId = 'control1';
 
-  describe('createFilter', function() {
+  describe('createFilter', function () {
     const indexPatternId = '1';
     const fieldMock = {
       name: 'field1',
@@ -53,7 +53,7 @@ describe('PhraseFilterManager', function() {
       );
     });
 
-    test('should create match phrase filter from single value', function() {
+    test('should create match phrase filter from single value', function () {
       const newFilter = filterManager.createFilter(['ios']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -63,7 +63,7 @@ describe('PhraseFilterManager', function() {
       expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match_phrase":{"field1":"ios"}}');
     });
 
-    test('should create bool filter from multiple values', function() {
+    test('should create bool filter from multiple values', function () {
       const newFilter = filterManager.createFilter(['ios', 'win xp']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -82,7 +82,7 @@ describe('PhraseFilterManager', function() {
     });
   });
 
-  describe('getValueFromFilterBar', function() {
+  describe('getValueFromFilterBar', function () {
     class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
       mockFilters: Filter[];
 
@@ -117,7 +117,7 @@ describe('PhraseFilterManager', function() {
       );
     });
 
-    test('should extract value from match phrase filter', function() {
+    test('should extract value from match phrase filter', function () {
       filterManager.setMockFilters([
         {
           query: {
@@ -133,7 +133,7 @@ describe('PhraseFilterManager', function() {
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
-    test('should extract value from multiple filters', function() {
+    test('should extract value from multiple filters', function () {
       filterManager.setMockFilters([
         {
           query: {
@@ -159,7 +159,7 @@ describe('PhraseFilterManager', function() {
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
-    test('should extract value from bool filter', function() {
+    test('should extract value from bool filter', function () {
       filterManager.setMockFilters([
         {
           query: {
@@ -183,7 +183,7 @@ describe('PhraseFilterManager', function() {
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
-    test('should return undefined when filter value can not be extracted from Kibana filter', function() {
+    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
       filterManager.setMockFilters([
         {
           query: {

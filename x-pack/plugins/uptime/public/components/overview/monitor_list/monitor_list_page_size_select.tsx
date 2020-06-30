@@ -101,7 +101,7 @@ export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
-      button={<PopoverButton setIsOpen={value => setIsOpen(value)} size={size} />}
+      button={<PopoverButton setIsOpen={(value) => setIsOpen(value)} size={size} />}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="upLeft"

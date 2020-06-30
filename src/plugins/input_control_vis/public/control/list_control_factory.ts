@@ -33,7 +33,7 @@ import { InputControlSettings, InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
-  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
+  return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 
 interface TermsAggArgs {

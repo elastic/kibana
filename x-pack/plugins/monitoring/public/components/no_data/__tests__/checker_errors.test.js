@@ -18,7 +18,7 @@ describe('CheckerErrors', () => {
   test('should render typical boom errors from api response', () => {
     const err1 = forbidden(new Error('no access for you'));
     const err2 = boomify(new Error('bad thing happened'));
-    const errors = [err1, err2].map(err => err.output.payload);
+    const errors = [err1, err2].map((err) => err.output.payload);
     const component = renderWithIntl(<CheckerErrors errors={errors} />);
     expect(component).toMatchSnapshot();
   });

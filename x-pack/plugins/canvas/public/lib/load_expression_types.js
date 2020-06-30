@@ -9,5 +9,5 @@ import { argTypeRegistry } from '../expression_types';
 
 export function loadExpressionTypes() {
   // register default args, arg types, and expression types
-  argTypeSpecs.forEach(expFn => argTypeRegistry.register(expFn));
+  argTypeSpecs.forEach((expFn) => argTypeRegistry.register(expFn));
 }

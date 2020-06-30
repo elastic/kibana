@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { ILicense } from '../common/types';
-import { LicensingPluginSetup } from './types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
@@ -20,7 +20,7 @@ export const licensingSessionStorageKey = 'xpack.licensing';
  * A plugin for fetching, refreshing, and receiving information about the license for the
  * current Kibana instance.
  */
-export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
+export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart> {
   /**
    * Used as a flag to halt all other plugin observables.
    */
@@ -36,6 +36,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   private readonly infoEndpoint = '/api/licensing/info';
   private coreStart?: CoreStart;
   private prevSignature?: string;
+
+  private refresh?: () => Promise<ILicense>;
+  private license$?: Observable<ILicense>;
 
   constructor(
     context: PluginInitializerContext,
@@ -75,7 +78,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.getSaved()
     );
 
-    this.internalSubscription = license$.subscribe(license => {
+    this.internalSubscription = license$.subscribe((license) => {
       if (license.isAvailable) {
         this.prevSignature = license.signature;
         this.save(license);
@@ -92,7 +95,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     });
 
     this.removeInterceptor = core.http.intercept({
-      response: async httpResponse => {
+      response: async (httpResponse) => {
         // we don't track license as anon users do not have one.
         if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) return httpResponse;
         if (httpResponse.response) {
@@ -107,6 +110,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       },
     });
 
+    this.refresh = refreshManually;
+    this.license$ = license$;
+
     return {
       refresh: refreshManually,
       license$,
@@ -115,6 +121,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
   public async start(core: CoreStart) {
     this.coreStart = core;
+    if (!this.refresh || !this.license$) {
+      throw new Error('Setup has not been completed');
+    }
+    return {
+      refresh: this.refresh,
+      license$: this.license$,
+    };
   }
 
   public stop() {
@@ -148,7 +161,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
   private showExpiredBanner(license: ILicense) {
     const uploadUrl = this.coreStart!.http.basePath.prepend(
-      '/app/kibana#/management/elasticsearch/license_management/upload_license'
+      '/app/management/stack/license_management/upload_license'
     );
     this.coreStart!.overlays.banners.add(
       mountExpiredBanner({

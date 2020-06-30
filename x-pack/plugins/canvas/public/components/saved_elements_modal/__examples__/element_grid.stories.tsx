@@ -11,7 +11,7 @@ import { ElementGrid } from '../element_grid';
 import { testCustomElements } from './fixtures/test_elements';
 
 storiesOf('components/SavedElementsModal/ElementGrid', module)
-  .addDecorator(story => (
+  .addDecorator((story) => (
     <div
       style={{
         width: '1000px',

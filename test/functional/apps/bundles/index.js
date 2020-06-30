@@ -21,11 +21,11 @@
  * These supertest-based tests live in the functional test suite because they depend on the optimizer bundles being built
  * and served
  */
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('bundle compression', function() {
-    this.tags('ciGroup12');
+  describe('bundle compression', function () {
+    this.tags(['ciGroup12', 'skipCoverage']);
 
     let buildNum;
     before(async () => {
@@ -65,7 +65,7 @@ export default function({ getService }) {
 
     it('returns gzip files when no brotli version exists', () =>
       supertest
-        .get(`/${buildNum}/bundles/commons.style.css`) // legacy optimizer does not create brotli outputs
+        .get(`/${buildNum}/bundles/light_theme.style.css`) // legacy optimizer does not create brotli outputs
         .set('Accept-Encoding', 'gzip, br')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));

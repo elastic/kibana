@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { buildUrl } from '../reporting/util';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const log = getService('log');
   const retry = getService('retry');
@@ -24,10 +24,10 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('simple watch', function() {
+    describe('simple watch', function () {
       const watchId = 'cluster_health_watch_' + new Date().getTime();
 
-      it('should successfully add a new watch for cluster health yellow', function() {
+      it('should successfully add a new watch for cluster health yellow', function () {
         log.debug(
           '### config.servers.elasticsearch.protocol = ' + config.servers.elasticsearch.protocol
         );
@@ -65,7 +65,7 @@ export default function({ getService, getPageObjects }) {
           },
         };
         log.debug(clusterHealthWatch);
-        return esClient.putWatch(watchId, clusterHealthWatch).then(response => {
+        return esClient.putWatch(watchId, clusterHealthWatch).then((response) => {
           log.debug(response);
           expect(response.body._id).to.eql(watchId);
           expect(response.statusCode).to.eql('201');
@@ -73,18 +73,18 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('should be successful and update revision', function() {
+      it('should be successful and update revision', function () {
         return PageObjects.common.sleep(9000).then(() => {
           return retry.try(() => {
             return esClient
               .search('.watcher-history*', 'watch_id:' + watchId)
-              .then(response => {
+              .then((response) => {
                 log.debug('\n.watcher-history*=' + JSON.stringify(response) + '\n');
               })
               .then(() => {
                 return esClient.get('.watches', '_doc', watchId);
               })
-              .then(response => {
+              .then((response) => {
                 log.debug('\nresponse=' + JSON.stringify(response) + '\n');
                 expect(response.body._id).to.eql(watchId);
                 expect(response.body.found).to.eql(true);

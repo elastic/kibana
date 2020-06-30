@@ -17,28 +17,23 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
-import {
-  LayerDescriptor,
-  MapExtent,
-  MapFilters,
-  StyleDescriptor,
-} from '../../../common/descriptor_types';
+import { LayerDescriptor, MapExtent, StyleDescriptor } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import { SyncContext } from '../../actions/map_actions';
+import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
-  getBounds(mapFilters: MapFilters): Promise<MapExtent>;
+  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
-  syncData(syncContext: SyncContext): void;
+  syncData(syncContext: DataRequestContext): void;
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
@@ -77,6 +72,10 @@ export interface ILayer {
   }: {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
   }): ReactElement<any> | null;
+  getInFlightRequestTokens(): symbol[];
+  getPrevRequestToken(dataId: string): symbol | undefined;
+  destroy: () => void;
+  isPreviewLayer: () => boolean;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -132,7 +131,7 @@ export class AbstractLayer implements ILayer {
     this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
-        dataRequest => new DataRequest(dataRequest)
+        (dataRequest) => new DataRequest(dataRequest)
       );
     } else {
       this._dataRequests = [];
@@ -159,7 +158,7 @@ export class AbstractLayer implements ILayer {
     // @ts-ignore
     if (clonedDescriptor.joins) {
       // @ts-ignore
-      clonedDescriptor.joins.forEach(joinDescriptor => {
+      clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
         // @ts-ignore
         joinDescriptor.right.id = uuid();
@@ -174,6 +173,10 @@ export class AbstractLayer implements ILayer {
 
   isJoinable(): boolean {
     return this.getSource().isJoinable();
+  }
+
+  isPreviewLayer(): boolean {
+    return !!this._descriptor.__isPreviewLayer;
   }
 
   supportsElasticsearchFilters(): boolean {
@@ -331,7 +334,7 @@ export class AbstractLayer implements ILayer {
       // @ts-ignore
       const mbStyle = mbMap.getStyle();
       // @ts-ignore
-      mbStyle.layers.forEach(mbLayer => {
+      mbStyle.layers.forEach((mbLayer) => {
         // @ts-ignore
         if (this.ownsMbLayerId(mbLayer.id)) {
           // @ts-ignore
@@ -339,7 +342,7 @@ export class AbstractLayer implements ILayer {
         }
       });
       // @ts-ignore
-      Object.keys(mbStyle.sources).some(mbSourceId => {
+      Object.keys(mbStyle.sources).some((mbSourceId) => {
         // @ts-ignore
         if (this.ownsMbSourceId(mbSourceId)) {
           // @ts-ignore
@@ -385,7 +388,7 @@ export class AbstractLayer implements ILayer {
       return [];
     }
 
-    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
     // @ts-ignore
@@ -393,15 +396,15 @@ export class AbstractLayer implements ILayer {
   }
 
   getSourceDataRequest(): DataRequest | undefined {
-    return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
+    return this.getDataRequest(SOURCE_DATA_REQUEST_ID);
   }
 
   getDataRequest(id: string): DataRequest | undefined {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
+    return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
   isLayerLoading(): boolean {
-    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
+    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   hasErrors(): boolean {
@@ -414,7 +417,7 @@ export class AbstractLayer implements ILayer {
       : '';
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     // no-op by default
   }
 
@@ -447,13 +450,8 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(mapFilters: MapFilters): Promise<MapExtent> {
-    return {
-      minLon: -180,
-      maxLon: 180,
-      minLat: -89,
-      maxLat: 89,
-    };
+  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+    return null;
   }
 
   renderStyleEditor({

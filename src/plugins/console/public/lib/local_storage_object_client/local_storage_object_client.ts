@@ -40,7 +40,7 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
   }
 
   async findAll(): Promise<O[]> {
-    const allLocalKeys = this.client.keys().filter(key => {
+    const allLocalKeys = this.client.keys().filter((key) => {
       return key.includes(this.prefix);
     });
 

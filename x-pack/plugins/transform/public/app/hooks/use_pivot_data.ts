@@ -7,12 +7,14 @@
 import moment from 'moment-timezone';
 import { useEffect, useMemo, useState } from 'react';
 
+import { EuiDataGridColumn } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import { dictionaryToArray } from '../../../common/types/common';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/utils/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../shared_imports';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import {
@@ -31,21 +33,35 @@ import {
   PivotGroupByConfig,
   PivotQuery,
   PreviewMappings,
+  PivotAggsConfig,
 } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
+import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
+
+/**
+ * Checks if the aggregations collection is invalid.
+ */
+function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
+  return aggsArray.some((agg) => {
+    return (
+      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
+      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
+    );
+  });
+}
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some((d) => d.aggName === a) && groupByArr.some((d) => d.aggName === b)) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some(d => d.aggName === a)) {
+    if (groupByArr.some((d) => d.aggName === a)) {
       return -1;
     }
-    if (groupByArr.some(d => d.aggName === b)) {
+    if (groupByArr.some((d) => d.aggName === b)) {
       return 1;
     }
     return a.localeCompare(b);
@@ -61,17 +77,17 @@ export const usePivotData = (
   const [previewMappings, setPreviewMappings] = useState<PreviewMappings>({ properties: {} });
   const api = useApi();
 
-  const aggsArr = dictionaryToArray(aggs);
-  const groupByArr = dictionaryToArray(groupBy);
+  const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
+  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappings.properties).filter(
-    key => previewMappings.properties[key].type !== 'object'
+    (key) => previewMappings.properties[key].type !== 'object'
   );
   columnKeys.sort(sortColumns(groupByArr));
 
   // EuiDataGrid State
-  const columns = columnKeys.map(id => {
+  const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
     const field = previewMappings.properties[id];
 
     // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -135,6 +151,10 @@ export const usePivotData = (
       return;
     }
 
+    if (isConfigInvalid(aggsArr)) {
+      return;
+    }
+
     setErrorMessage('');
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
@@ -176,9 +196,8 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    JSON.stringify(aggsArr),
-    JSON.stringify(groupByArr),
-    JSON.stringify(query),
+    aggsArr,
+    JSON.stringify([groupByArr, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
@@ -233,7 +252,7 @@ export const usePivotData = (
 
   return {
     ...dataGrid,
-    columns,
+    chartsButtonVisible: false,
     renderCellValue,
   };
 };

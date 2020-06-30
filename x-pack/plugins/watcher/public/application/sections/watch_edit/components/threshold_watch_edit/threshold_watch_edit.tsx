@@ -116,7 +116,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
   }
 
   const matchingIndices = (await getMatchingIndices(patternString)) as string[];
-  const matchingIndexPatterns = indexPatterns.filter(anIndexPattern => {
+  const matchingIndexPatterns = indexPatterns.filter((anIndexPattern) => {
     return anIndexPattern.includes(patternString);
   }) as string[];
 
@@ -131,7 +131,7 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
         }
       ),
       options: matchingOptions
-        .map(match => {
+        .map((match) => {
           return {
             label: match,
             value: match,
@@ -201,7 +201,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
   const { errors } = watch.validate();
 
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const actionErrors = watch.actions.reduce((acc: any, action: any) => {
     const actionValidationErrors = action.validate();
@@ -209,14 +209,14 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
     return acc;
   }, {});
 
-  const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
+  const hasActionErrors = !!Object.keys(actionErrors).find((actionError) => {
     return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
       return actionErrors[actionError][actionErrorKey].length >= 1;
     });
   });
 
   const hasExpressionErrors = !!Object.keys(errors).find(
-    errorKey => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
+    (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
   const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
@@ -278,7 +278,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
             name="name"
             data-test-subj="nameInput"
             value={watch.name || ''}
-            onChange={e => {
+            onChange={(e) => {
               setWatchProperty('name', e.target.value);
             }}
             onBlur={() => {
@@ -326,16 +326,16 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                 onChange={async (selected: EuiComboBoxOptionOption[]) => {
                   setWatchProperty(
                     'index',
-                    selected.map(aSelected => aSelected.value)
+                    selected.map((aSelected) => aSelected.value)
                   );
-                  const indices = selected.map(s => s.value as string);
+                  const indices = selected.map((s) => s.value as string);
 
                   // reset time field and expression fields if indices are deleted
                   if (indices.length === 0) {
                     setTimeFieldOptions(getTimeFieldOptions([]));
                     setWatchProperty('timeFields', []);
 
-                    expressionFields.forEach(expressionField => {
+                    expressionFields.forEach((expressionField) => {
                       setWatchProperty(expressionField, null);
                     });
                     return;
@@ -347,7 +347,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   setWatchProperty('timeFields', timeFields);
                   setTimeFieldOptions(timeFields);
                 }}
-                onSearchChange={async search => {
+                onSearchChange={async (search) => {
                   setIsIndiciesLoading(true);
                   setIndexOptions(await getIndexOptions(search, indexPatterns));
                   setIsIndiciesLoading(false);
@@ -380,7 +380,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                 name="watchTimeField"
                 data-test-subj="watchTimeFieldSelect"
                 value={watch.timeField}
-                onChange={e => {
+                onChange={(e) => {
                   setWatchProperty('timeField', e.target.value);
                 }}
                 onBlur={() => {
@@ -412,12 +412,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     min={1}
                     value={watch.triggerIntervalSize}
                     data-test-subj="triggerIntervalSizeInput"
-                    onChange={e => {
+                    onChange={(e) => {
                       const { value } = e.target;
                       const triggerIntervalSize = value !== '' ? parseInt(value, 10) : value;
                       setWatchProperty('triggerIntervalSize', triggerIntervalSize);
                     }}
-                    onBlur={e => {
+                    onBlur={(e) => {
                       if (watch.triggerIntervalSize === undefined) {
                         setWatchProperty('triggerIntervalSize', '');
                       }
@@ -434,7 +434,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                         defaultMessage: 'Duration time unit',
                       }
                     )}
-                    onChange={e => {
+                    onChange={(e) => {
                       setWatchProperty('triggerIntervalUnit', e.target.value);
                     }}
                     options={getTimeOptions(watch.triggerIntervalSize)}
@@ -494,7 +494,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     </EuiPopoverTitle>
                     <EuiSelect
                       value={watch.aggType}
-                      onChange={e => {
+                      onChange={(e) => {
                         setWatchProperty('aggType', e.target.value);
                         setAggTypePopoverOpen(false);
                       }}
@@ -569,7 +569,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                                 return esFieldOptions;
                               }, [])}
                               selectedOptions={watch.aggField ? [{ label: watch.aggField }] : []}
-                              onChange={selectedOptions => {
+                              onChange={(selectedOptions) => {
                                 setWatchProperty(
                                   'aggField',
                                   selectedOptions.length === 1
@@ -645,7 +645,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.groupBy}
-                          onChange={e => {
+                          onChange={(e) => {
                             setWatchProperty('termSize', null);
                             setWatchProperty('termField', null);
                             setWatchProperty('groupBy', e.target.value);
@@ -669,7 +669,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                             >
                               <EuiFieldNumber
                                 value={watch.termSize}
-                                onChange={e => {
+                                onChange={(e) => {
                                   setWatchProperty('termSize', e.target.value);
                                 }}
                                 min={1}
@@ -684,7 +684,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                             >
                               <EuiSelect
                                 value={watch.termField || ''}
-                                onChange={e => {
+                                onChange={(e) => {
                                   setWatchProperty('termField', e.target.value);
                                 }}
                                 options={esFields.reduce(
@@ -751,7 +751,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
-                          onChange={e => {
+                          onChange={(e) => {
                             setWatchProperty('thresholdComparator', e.target.value);
                           }}
                           options={Object.values(comparators).map(({ text, value }) => {
@@ -783,7 +783,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                                     value={watch.threshold[i] == null ? '' : watch.threshold[i]}
                                     min={0}
                                     step={0.1}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                       const { value } = e.target;
                                       const threshold = value !== '' ? parseFloat(value) : value;
                                       const newThreshold = [...watch.threshold];
@@ -848,7 +848,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                           <EuiFieldNumber
                             min={1}
                             value={watch.timeWindowSize || ''}
-                            onChange={e => {
+                            onChange={(e) => {
                               const { value } = e.target;
                               const timeWindowSize = value !== '' ? parseInt(value, 10) : value;
                               setWatchProperty('timeWindowSize', timeWindowSize);
@@ -859,7 +859,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.timeWindowUnit}
-                          onChange={e => {
+                          onChange={(e) => {
                             setWatchProperty('timeWindowUnit', e.target.value);
                           }}
                           options={getTimeOptions(watch.timeWindowSize)}

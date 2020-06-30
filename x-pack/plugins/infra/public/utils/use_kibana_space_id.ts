@@ -19,7 +19,7 @@ export const useKibanaSpaceId = (): string => {
     activeSpaceRT.decode(activeSpace),
     fold(
       () => 'default',
-      decodedActiveSpace => decodedActiveSpace.space.id
+      (decodedActiveSpace) => decodedActiveSpace.space.id
     )
   );
 };

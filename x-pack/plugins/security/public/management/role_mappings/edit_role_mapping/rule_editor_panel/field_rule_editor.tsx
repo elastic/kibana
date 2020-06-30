@@ -41,7 +41,7 @@ const userFields = [
   },
 ];
 
-const fieldOptions = userFields.map(f => ({ label: f.name }));
+const fieldOptions = userFields.map((f) => ({ label: f.name }));
 
 type ComparisonOption = 'text' | 'number' | 'null' | 'boolean';
 const comparisonOptions: Record<
@@ -196,7 +196,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
           ]}
           data-test-subj={`fieldRuleEditorValueType-${valueIndex}`}
           value={inputType}
-          onChange={e =>
+          onChange={(e) =>
             this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
           }
         />

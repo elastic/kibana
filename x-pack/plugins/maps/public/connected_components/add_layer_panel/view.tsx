@@ -4,153 +4,194 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
-import { EuiTitle, EuiFlyoutHeader } from '@elastic/eui';
+import React, { Component } from 'react';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlyoutFooter } from './flyout_footer';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { LayerWizard } from '../../classes/layers/layer_wizard_registry';
 
+const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
+const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
+  defaultMessage: 'Add layer',
+});
+const SELECT_WIZARD_LABEL = ADD_LAYER_STEP_LABEL;
+
 interface Props {
-  flyoutVisible: boolean;
-  isIndexingReady: boolean;
-  isIndexingSuccess: boolean;
-  isIndexingTriggered: boolean;
-  previewLayer: (layerDescriptor: LayerDescriptor) => void;
-  removeTransientLayer: () => void;
-  resetIndexing: () => void;
-  selectLayerAndAdd: () => void;
-  setIndexingTriggered: () => void;
+  addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
+  closeFlyout: () => void;
+  hasPreviewLayers: boolean;
+  isLoadingPreviewLayers: boolean;
+  promotePreviewLayers: () => void;
 }
 
 interface State {
-  importView: boolean;
-  isIndexingSource: boolean;
-  layerDescriptor: LayerDescriptor | null;
-  layerImportAddReady: boolean;
+  currentStepIndex: number;
+  currentStep: { id: string; label: string } | null;
+  layerSteps: Array<{ id: string; label: string }> | null;
   layerWizard: LayerWizard | null;
+  isNextStepBtnEnabled: boolean;
+  isStepLoading: boolean;
 }
 
+const INITIAL_STATE: State = {
+  currentStepIndex: 0,
+  currentStep: null,
+  layerSteps: null,
+  layerWizard: null,
+  isNextStepBtnEnabled: false,
+  isStepLoading: false,
+};
+
 export class AddLayerPanel extends Component<Props, State> {
-  private _isMounted: boolean = false;
-
   state = {
-    layerWizard: null,
-    layerDescriptor: null, // TODO get this from redux store instead of storing locally
-    isIndexingSource: false,
-    importView: false,
-    layerImportAddReady: false,
+    ...INITIAL_STATE,
   };
 
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  componentDidUpdate() {
-    if (!this.state.layerImportAddReady && this.props.isIndexingSuccess) {
-      this.setState({ layerImportAddReady: true });
-    }
-  }
-
-  _previewLayer = (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => {
-    if (!this._isMounted) {
-      return;
-    }
-    if (!layerDescriptor) {
-      this.setState({
-        layerDescriptor: null,
-        isIndexingSource: false,
-      });
-      this.props.removeTransientLayer();
-      return;
-    }
-
-    this.setState({ layerDescriptor, isIndexingSource: !!isIndexingSource });
-    this.props.previewLayer(layerDescriptor);
+  _previewLayers = (layerDescriptors: LayerDescriptor[]) => {
+    this.props.addPreviewLayers(layerDescriptors);
   };
 
-  _clearLayerData = ({ keepSourceType = false }: { keepSourceType: boolean }) => {
-    if (!this._isMounted) {
-      return;
-    }
-
-    const newState: Partial<State> = {
-      layerDescriptor: null,
-      isIndexingSource: false,
-    };
-    if (!keepSourceType) {
-      newState.layerWizard = null;
-      newState.importView = false;
-    }
-    // @ts-ignore
-    this.setState(newState);
-
-    this.props.removeTransientLayer();
+  _clearLayerWizard = () => {
+    this.setState(INITIAL_STATE);
+    this.props.addPreviewLayers([]);
   };
 
   _onWizardSelect = (layerWizard: LayerWizard) => {
-    this.setState({ layerWizard, importView: !!layerWizard.isIndexingSource });
+    const layerSteps = [
+      ...(layerWizard.prerequisiteSteps ? layerWizard.prerequisiteSteps : []),
+      {
+        id: ADD_LAYER_STEP_ID,
+        label: ADD_LAYER_STEP_LABEL,
+      },
+    ];
+    this.setState({
+      ...INITIAL_STATE,
+      layerWizard,
+      layerSteps,
+      currentStep: layerSteps[0],
+    });
   };
 
-  _layerAddHandler = () => {
-    if (this.state.isIndexingSource && !this.props.isIndexingTriggered) {
-      this.props.setIndexingTriggered();
+  _onNext = () => {
+    if (!this.state.layerSteps) {
+      return;
+    }
+
+    if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
+      // last step
+      this.props.promotePreviewLayers();
     } else {
-      this.props.selectLayerAndAdd();
-      if (this.state.importView) {
-        this.setState({
-          layerImportAddReady: false,
-        });
-        this.props.resetIndexing();
-      }
+      this.setState((prevState) => {
+        const nextIndex = prevState.currentStepIndex + 1;
+        return {
+          currentStepIndex: nextIndex,
+          currentStep: prevState.layerSteps![nextIndex],
+          isNextStepBtnEnabled: false,
+          isStepLoading: false,
+        };
+      });
     }
   };
 
-  render() {
-    if (!this.props.flyoutVisible) {
+  _enableNextBtn = () => {
+    this.setState({ isNextStepBtnEnabled: true });
+  };
+
+  _disableNextBtn = () => {
+    this.setState({ isNextStepBtnEnabled: false });
+  };
+
+  _startStepLoading = () => {
+    this.setState({ isStepLoading: true });
+  };
+
+  _stopStepLoading = () => {
+    this.setState({ isStepLoading: false });
+  };
+
+  _renderNextButton() {
+    if (!this.state.currentStep) {
       return null;
     }
 
-    const panelDescription =
-      this.state.layerImportAddReady || !this.state.importView
-        ? i18n.translate('xpack.maps.addLayerPanel.addLayer', {
-            defaultMessage: 'Add layer',
-          })
-        : i18n.translate('xpack.maps.addLayerPanel.importFile', {
-            defaultMessage: 'Import file',
-          });
-    const isNextBtnEnabled = this.state.importView
-      ? this.props.isIndexingReady || this.props.isIndexingSuccess
-      : !!this.state.layerDescriptor;
+    let isDisabled = !this.state.isNextStepBtnEnabled;
+    let isLoading = this.state.isStepLoading;
+    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
+      isDisabled = !this.props.hasPreviewLayers;
+      isLoading = this.props.isLoadingPreviewLayers;
+    } else {
+      isDisabled = !this.state.isNextStepBtnEnabled;
+      isLoading = this.state.isStepLoading;
+    }
 
     return (
-      <Fragment>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="importFileButton"
+          disabled={isDisabled || isLoading}
+          isLoading={isLoading}
+          iconSide="right"
+          iconType={'sortRight'}
+          onClick={this._onNext}
+          fill
+        >
+          {this.state.currentStep.label}
+        </EuiButton>
+      </EuiFlexItem>
+    );
+  }
+
+  render() {
+    return (
+      <>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{panelDescription}</h2>
+            <h2>{this.state.currentStep ? this.state.currentStep.label : SELECT_WIZARD_LABEL}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
         <FlyoutBody
           layerWizard={this.state.layerWizard}
-          onClear={() => this._clearLayerData({ keepSourceType: false })}
-          onRemove={() => this._clearLayerData({ keepSourceType: true })}
+          onClear={this._clearLayerWizard}
           onWizardSelect={this._onWizardSelect}
-          previewLayer={this._previewLayer}
+          previewLayers={this._previewLayers}
+          showBackButton={!this.state.isStepLoading}
+          currentStepId={this.state.currentStep ? this.state.currentStep.id : null}
+          enableNextBtn={this._enableNextBtn}
+          disableNextBtn={this._disableNextBtn}
+          startStepLoading={this._startStepLoading}
+          stopStepLoading={this._stopStepLoading}
+          advanceToNextStep={this._onNext}
         />
 
-        <FlyoutFooter
-          showNextButton={!!this.state.layerWizard}
-          disableNextButton={!isNextBtnEnabled}
-          onClick={this._layerAddHandler}
-          nextButtonText={panelDescription}
-        />
-      </Fragment>
+        <EuiFlyoutFooter className="mapLayerPanel__footer">
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={this.props.closeFlyout}
+                flush="left"
+                data-test-subj="layerAddCancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.maps.addLayerPanel.footer.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {this._renderNextButton()}
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </>
     );
   }
 }

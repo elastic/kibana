@@ -28,7 +28,7 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
       return new Promise((resolve, reject) => {
         const interval = { name: '1m', ms: 60000 };
         this.performSearch(interval.ms)
-          .then(resp => {
+          .then((resp) => {
             const fullBuckets = _.get(resp, 'aggregations.non_empty_buckets.buckets', []);
             const result = this.isPolledData(fullBuckets, interval);
             if (result.pass) {
@@ -42,7 +42,7 @@ export function polledDataCheckerFactory(callAsCurrentUser) {
               minimumBucketSpan: this.minimumBucketSpan,
             });
           })
-          .catch(resp => {
+          .catch((resp) => {
             reject(resp);
           });
       });

@@ -8,7 +8,7 @@ import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 
-import pluginHelpers from '@kbn/plugin-helpers';
+import * as pluginHelpers from '@kbn/plugin-helpers';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import gulp from 'gulp';
 import del from 'del';

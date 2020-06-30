@@ -6,6 +6,7 @@
 
 import { getPivotDropdownOptions } from '../common';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { FilterAggForm } from './filter_agg/components';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
@@ -28,7 +29,7 @@ describe('Transform: Define Pivot Common', () => {
 
     const options = getPivotDropdownOptions(indexPattern);
 
-    expect(options).toEqual({
+    expect(options).toMatchObject({
       aggOptions: [
         {
           label: ' the-f[i]e>ld ',
@@ -40,6 +41,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'percentiles( the-f[i]e>ld )' },
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
+            { label: 'filter( the-f[i]e>ld )' },
           ],
         },
       ],
@@ -74,6 +76,13 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
           percents: [1, 5, 25, 50, 75, 95, 99],
+        },
+        'filter( the-f[i]e>ld )': {
+          agg: 'filter',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field.filter',
+          dropDownName: 'filter( the-f[i]e>ld )',
+          AggFormComponent: FilterAggForm,
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',

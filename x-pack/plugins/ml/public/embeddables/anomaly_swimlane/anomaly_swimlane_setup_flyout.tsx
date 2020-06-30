@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { IUiSettingsClient, OverlayStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
@@ -14,7 +13,10 @@ import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embeddable';
+import {
+  AnomalySwimlaneEmbeddableInput,
+  getDefaultPanelTitle,
+} from './anomaly_swimlane_embeddable';
 
 export async function resolveAnomalySwimlaneUserInput(
   {
@@ -52,12 +54,7 @@ export async function resolveAnomalySwimlaneUserInput(
             reject();
           }}
           onSelectionConfirmed={async ({ jobIds, groups }) => {
-            const title =
-              input?.title ??
-              i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
-                defaultMessage: 'ML anomaly swimlane for {jobIds}',
-                values: { jobIds: jobIds.join(', ') },
-              });
+            const title = input?.title ?? getDefaultPanelTitle(jobIds);
 
             const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 

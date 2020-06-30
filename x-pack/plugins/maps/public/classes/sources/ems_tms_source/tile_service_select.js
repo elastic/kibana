@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiPanel } from '@elastic/eui';
 
-import { getEMSClient } from '../../../meta';
-import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { getEmsTmsServices } from '../../../meta';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { i18n } from '@kbn/i18n';
 
 export const AUTO_SELECT = 'auto_select';
@@ -29,14 +29,13 @@ export class TileServiceSelect extends React.Component {
   }
 
   _loadTmsOptions = async () => {
-    const emsClient = getEMSClient();
-    const emsTMSServices = await emsClient.getTMSServices();
+    const emsTMSServices = await getEmsTmsServices();
 
     if (!this._isMounted) {
       return;
     }
 
-    const emsTmsOptions = emsTMSServices.map(tmsService => {
+    const emsTmsOptions = emsTMSServices.map((tmsService) => {
       return {
         value: tmsService.getId(),
         text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
@@ -51,7 +50,7 @@ export class TileServiceSelect extends React.Component {
     this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
-  _onChange = e => {
+  _onChange = (e) => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({
@@ -72,23 +71,25 @@ export class TileServiceSelect extends React.Component {
     }
 
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.source.emsTile.label', {
-          defaultMessage: 'Tile service',
-        })}
-        helpText={helpText}
-        display="columnCompressed"
-      >
-        <EuiSelect
-          hasNoInitialSelection={!selectedId}
-          value={selectedId}
-          options={this.state.emsTmsOptions}
-          onChange={this._onChange}
-          isLoading={!this.state.hasLoaded}
-          disabled={this.state.hasLoaded && this.state.emsTmsOptions.length === 0}
-          compressed
-        />
-      </EuiFormRow>
+      <EuiPanel>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.emsTile.label', {
+            defaultMessage: 'Tile service',
+          })}
+          helpText={helpText}
+          display="columnCompressed"
+        >
+          <EuiSelect
+            hasNoInitialSelection={!selectedId}
+            value={selectedId}
+            options={this.state.emsTmsOptions}
+            onChange={this._onChange}
+            isLoading={!this.state.hasLoaded}
+            disabled={this.state.hasLoaded && this.state.emsTmsOptions.length === 0}
+            compressed
+          />
+        </EuiFormRow>
+      </EuiPanel>
     );
   }
 }

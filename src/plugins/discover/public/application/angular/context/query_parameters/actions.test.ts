@@ -48,7 +48,7 @@ beforeEach(() => {
   };
 });
 
-describe('context query_parameter actions', function() {
+describe('context query_parameter actions', function () {
   describe('action addFilter', () => {
     it('should pass the given arguments to the filterManager', () => {
       const { addFilter } = getQueryParameterActions(filterManager);
@@ -90,7 +90,7 @@ describe('context query_parameter actions', function() {
     });
   });
   describe('action setSuccessorCount', () => {
-    it('should set the successorCount to the given value', function() {
+    it('should set the successorCount to the given value', function () {
       const { setSuccessorCount } = getQueryParameterActions(filterManager);
       setSuccessorCount(state)(20);
 
@@ -109,10 +109,10 @@ describe('context query_parameter actions', function() {
       expect(state.queryParameters.successorCount).toBe(10000);
     });
   });
-  describe('action setQueryParameters', function() {
+  describe('action setQueryParameters', function () {
     const { setQueryParameters } = getQueryParameterActions(filterManager);
 
-    it('should update the queryParameters with valid properties from the given object', function() {
+    it('should update the queryParameters with valid properties from the given object', function () {
       const newState = {
         ...state,
         queryParameters: {
@@ -144,7 +144,7 @@ describe('context query_parameter actions', function() {
       });
     });
 
-    it('should ignore invalid properties', function() {
+    it('should ignore invalid properties', function () {
       const newState = { ...state };
 
       setQueryParameters(newState)({

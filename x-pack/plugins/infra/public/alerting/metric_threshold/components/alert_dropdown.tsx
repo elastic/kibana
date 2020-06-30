@@ -7,13 +7,17 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertFlyout } from './alert_flyout';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useAlertPrefillContext } from '../../use_alert_prefill';
+import { AlertFlyout } from './alert_flyout';
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const kibana = useKibana();
+
+  const { metricThresholdPrefill } = useAlertPrefillContext();
+  const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -35,12 +39,13 @@ export const MetricsAlertDropdown = () => {
         icon="tableOfContents"
         key="manageLink"
         href={kibana.services?.application?.getUrlForApp(
-          'kibana#/management/kibana/triggersActions/alerts'
+          'management/insightsAndAlerting/triggersActions/alerts'
         )}
       >
         <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
       </EuiContextMenuItem>,
     ];
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [kibana.services]);
 
   return (
@@ -56,7 +61,11 @@ export const MetricsAlertDropdown = () => {
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
-      <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
+      <AlertFlyout
+        setVisible={setFlyoutVisible}
+        visible={flyoutVisible}
+        options={{ groupBy, filterQuery, metrics }}
+      />
     </>
   );
 };

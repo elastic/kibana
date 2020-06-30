@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function StaticSizeForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onSizeChange = size => {
+  const onSizeChange = (size) => {
     onStaticStyleChange(styleProperty.getStyleName(), { size });
   };
 

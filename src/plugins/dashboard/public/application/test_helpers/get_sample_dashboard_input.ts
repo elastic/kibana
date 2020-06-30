@@ -27,6 +27,7 @@ export function getSampleDashboardInput(
     id: '123',
     filters: [],
     useMargins: false,
+    isEmbeddedExternally: false,
     isFullScreenMode: false,
     title: 'My Dashboard',
     query: {
@@ -57,8 +58,6 @@ export function getSampleDashboardPanel<TEmbeddableInput extends EmbeddableInput
       y: 0,
       i: overrides.explicitInput.id,
     },
-    type: overrides.type,
-    explicitInput: overrides.explicitInput,
     ...overrides,
   };
 }

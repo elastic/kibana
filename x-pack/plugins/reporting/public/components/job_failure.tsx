@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { JobSummary, ManagementLinkFn } from '../../index.d';
+import { JobSummary, ManagementLinkFn } from '../../common/types';
 
 export const getFailureToast = (
   errorText: string,

@@ -9,12 +9,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { AlphaFlyout } from './alpha_flyout';
 
-const Message = styled(EuiText).attrs(props => ({
+const Message = styled(EuiText).attrs((props) => ({
   color: 'subdued',
   textAlign: 'center',
   size: 's',
 }))`
-  padding: ${props => props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-top: auto;
 `;
 
 export const AlphaMessaging: React.FC<{}> = () => {

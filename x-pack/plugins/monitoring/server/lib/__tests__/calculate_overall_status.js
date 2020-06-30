@@ -24,13 +24,13 @@ describe('Calculate Kibana Cluster Helath', () => {
       ['red'],
     ];
 
-    greens.forEach(set => {
+    greens.forEach((set) => {
       expect(calculateOverallStatus(set)).to.be('green');
     });
-    yellows.forEach(set => {
+    yellows.forEach((set) => {
       expect(calculateOverallStatus(set)).to.be('yellow');
     });
-    reds.forEach(set => {
+    reds.forEach((set) => {
       expect(calculateOverallStatus(set)).to.be('red');
     });
   });

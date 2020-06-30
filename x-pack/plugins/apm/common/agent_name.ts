@@ -23,7 +23,7 @@ export const AGENT_NAMES: AgentName[] = [
   'java',
   'nodejs',
   'python',
-  'ruby'
+  'ruby',
 ];
 
 export function isAgentName(agentName: string): agentName is AgentName {
@@ -40,4 +40,17 @@ export function isJavaAgentName(
   agentName: string | undefined
 ): agentName is 'java' {
   return agentName === 'java';
+}
+
+/**
+ * "Normalizes" and agent name by:
+ *
+ * * Converting to lowercase
+ * * Converting "rum-js" to "js-base"
+ *
+ * This helps dealing with some older agent versions
+ */
+export function getNormalizedAgentName(agentName?: string) {
+  const lowercased = agentName && agentName.toLowerCase();
+  return isRumAgentName(lowercased) ? 'js-base' : lowercased;
 }

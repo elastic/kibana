@@ -26,50 +26,30 @@ export const monitorStatusSelector = (state: AppState) => state.monitorStatus.st
 
 export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => {
-  return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
-};
+export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern;
 
-export const selectPingHistogram = ({ ping, ui }: AppState) => {
-  return {
-    data: ping.pingHistogram,
-    loading: ping.loading,
-    lastRefresh: ui.lastRefresh,
-    esKuery: ui.esKuery,
-  };
-};
+export const selectPingHistogram = ({ ping }: AppState) => ping;
 
-export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => ({
-  pings: pingList,
-  lastRefresh,
-});
+export const selectPingList = ({ pingList }: AppState) => pingList;
 
-export const snapshotDataSelector = ({
-  snapshot: { count, loading },
-  ui: { lastRefresh, esKuery },
-}: AppState) => ({
-  count,
-  lastRefresh,
-  loading,
-  esKuery,
-});
+export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
 
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
 
-export const hasMLFeatureAvailable = createSelector(
+export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities =>
+  (mlCapabilities) =>
     mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
@@ -84,9 +64,7 @@ export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
 export const anomaliesSelector = ({ ml }: AppState) => ml.anomalies.data;
 
-export const selectDurationLines = ({ monitorDuration }: AppState) => {
-  return monitorDuration;
-};
+export const selectDurationLines = ({ monitorDuration }: AppState) => monitorDuration;
 
 export const selectAlertFlyoutVisibility = ({ ui: { alertFlyoutVisible } }: AppState) =>
   alertFlyoutVisible;
@@ -99,24 +77,14 @@ export const selectMonitorStatusAlert = ({ indexPattern, overviewFilters, ui }: 
   locations: overviewFilters.filters.locations,
 });
 
-export const indexStatusSelector = ({ indexStatus }: AppState) => {
-  return indexStatus.indexStatus;
-};
+export const indexStatusSelector = ({ indexStatus }: AppState) => indexStatus.indexStatus;
 
-export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppState) => ({
-  monitorList,
-  lastRefresh,
-});
+export const monitorListSelector = ({ monitorList }: AppState) => monitorList;
 
-export const overviewFiltersSelector = ({ overviewFilters }: AppState) => {
-  return overviewFilters.filters;
-};
+export const overviewFiltersSelector = ({ overviewFilters }: AppState) => overviewFilters;
 
-export const filterGroupDataSelector = ({
-  overviewFilters: { loading, filters },
-  ui: { esKuery },
-}: AppState) => ({
-  esKuery,
-  filters,
-  loading,
-});
+export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
+
+export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
+
+export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;

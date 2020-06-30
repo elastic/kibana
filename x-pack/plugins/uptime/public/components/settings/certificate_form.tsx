@@ -10,7 +10,7 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiCode,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiText,
   EuiTitle,
   EuiSpacer,
@@ -80,17 +80,17 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
-            <EuiFieldNumber
-              min={1}
+            <EuiFieldText
               aria-label={certificateFormTranslations.expirationInputAriaLabel}
               data-test-subj={`expiration-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
+              isInvalid={!!fieldErrors?.expirationThresholdError}
               isLoading={loading}
               value={formFields?.certExpirationThreshold ?? ''}
-              onChange={e =>
+              onChange={(e) =>
                 onChange({
-                  certExpirationThreshold: Number(e.target.value),
+                  certExpirationThreshold: Number(e.target.value) || undefined,
                 })
               }
             />
@@ -128,17 +128,17 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
-            <EuiFieldNumber
-              min={1}
+            <EuiFieldText
               aria-label={certificateFormTranslations.ageInputAriaLabel}
               data-test-subj={`age-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
+              isInvalid={!!fieldErrors?.ageThresholdError}
               isLoading={loading}
               value={formFields?.certAgeThreshold ?? ''}
-              onChange={({ currentTarget: { value } }) =>
+              onChange={({ target: { value } }) =>
                 onChange({
-                  certAgeThreshold: Number(value),
+                  certAgeThreshold: Number(value) || undefined,
                 })
               }
             />

@@ -34,7 +34,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   const [alertingHealth, setAlertingHealth] = React.useState<Option<AlertingFrameworkHealth>>(none);
 
   React.useEffect(() => {
-    (async function() {
+    (async function () {
       setAlertingHealth(some(await health({ http })));
     })();
   }, [http]);
@@ -45,7 +45,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     alertingHealth,
     fold(
       () => <EuiLoadingSpinner size="m" />,
-      healthCheck => {
+      (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (

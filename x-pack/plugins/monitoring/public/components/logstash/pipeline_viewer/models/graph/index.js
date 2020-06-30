@@ -32,11 +32,11 @@ export class Graph {
   }
 
   get queueVertex() {
-    return this.getVertices().find(v => v instanceof QueueVertex);
+    return this.getVertices().find((v) => v instanceof QueueVertex);
   }
 
   get processorVertices() {
-    return this.getVertices().filter(v => v.isProcessor);
+    return this.getVertices().filter((v) => v.isProcessor);
   }
 
   get edges() {
@@ -46,7 +46,7 @@ export class Graph {
   update(jsonRepresentation) {
     this.json = jsonRepresentation;
 
-    jsonRepresentation.vertices.forEach(vJson => {
+    jsonRepresentation.vertices.forEach((vJson) => {
       const existingVertex = this.verticesById[vJson.id];
       if (existingVertex !== undefined) {
         existingVertex.update(vJson);
@@ -56,7 +56,7 @@ export class Graph {
       }
     });
 
-    jsonRepresentation.edges.forEach(eJson => {
+    jsonRepresentation.edges.forEach((eJson) => {
       const existingEdge = this.edgesById[eJson.id];
       if (existingEdge !== undefined) {
         existingEdge.update(eJson);
@@ -79,11 +79,11 @@ export class Graph {
   }
 
   get startVertices() {
-    return this.getVertices().filter(v => v.incomingEdges.length === 0);
+    return this.getVertices().filter((v) => v.incomingEdges.length === 0);
   }
 
   get endVertices() {
-    return this.getVertices().filter(v => v.outgoingEdges.length === 0);
+    return this.getVertices().filter((v) => v.outgoingEdges.length === 0);
   }
 
   get hasQueueVertex() {
@@ -115,7 +115,7 @@ export class Graph {
 
     // At this point, we know there are input stage vertices. Further, they
     // must be all the start vertices of the graph
-    this.startVertices.forEach(v => (v.pipelineStage = 'input'));
+    this.startVertices.forEach((v) => (v.pipelineStage = 'input'));
   }
 
   /**
@@ -133,7 +133,7 @@ export class Graph {
     // Now we can guarantee that the end vertices are plugin vertices, in either the
     // filter or output stages of the pipeline. If they are filter plugin vertices, we
     // are done here
-    if (this.endVertices.every(v => v.pluginType === 'filter')) {
+    if (this.endVertices.every((v) => v.pluginType === 'filter')) {
       return;
     }
 
@@ -151,9 +151,9 @@ export class Graph {
       const parents = currentVertex.incomingVertices;
 
       const isParentFilterPluginVertex = parents.some(
-        p => p instanceof PluginVertex && p.pluginType === 'filter'
+        (p) => p instanceof PluginVertex && p.pluginType === 'filter'
       );
-      const isParentQueueVertex = parents.some(p => p instanceof QueueVertex);
+      const isParentQueueVertex = parents.some((p) => p instanceof QueueVertex);
       const isParentNothing = parents.length === 0;
 
       const isParentOutputStageVertex = !(
@@ -167,7 +167,7 @@ export class Graph {
       } else {
         currentVertex.pipelineStage = 'output';
         const descendantVertices = currentVertex.descendants().vertices;
-        descendantVertices.forEach(v => (v.pipelineStage = 'output'));
+        descendantVertices.forEach((v) => (v.pipelineStage = 'output'));
       }
     }
   }

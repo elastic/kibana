@@ -22,19 +22,19 @@ import { getSort, getSortArray } from './get_sort';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { IndexPattern } from '../../../../kibana_services';
 
-describe('docTable', function() {
+describe('docTable', function () {
   let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = FixturesStubbedLogstashIndexPatternProvider() as IndexPattern;
   });
 
-  describe('getSort function', function() {
-    test('should be a function', function() {
+  describe('getSort function', function () {
+    test('should be a function', function () {
       expect(typeof getSort === 'function').toBeTruthy();
     });
 
-    test('should return an array of objects', function() {
+    test('should return an array of objects', function () {
       expect(getSort([['bytes', 'desc']], indexPattern)).toEqual([{ bytes: 'desc' }]);
 
       delete indexPattern.timeFieldName;
@@ -45,7 +45,7 @@ describe('docTable', function() {
       expect(getSort([{ bytes: 'desc' }], indexPattern)).toEqual([{ bytes: 'desc' }]);
     });
 
-    test('should return an empty array when passed an unsortable field', function() {
+    test('should return an empty array when passed an unsortable field', function () {
       expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
       expect(getSort([['lol_nope', 'asc']], indexPattern)).toEqual([]);
 
@@ -53,27 +53,27 @@ describe('docTable', function() {
       expect(getSort([['non-sortable', 'asc']], indexPattern)).toEqual([]);
     });
 
-    test('should return an empty array ', function() {
+    test('should return an empty array ', function () {
       expect(getSort([], indexPattern)).toEqual([]);
       expect(getSort([['foo', 'bar']], indexPattern)).toEqual([]);
       expect(getSort([{ foo: 'bar' }], indexPattern)).toEqual([]);
     });
   });
 
-  describe('getSortArray function', function() {
-    test('should have an array method', function() {
+  describe('getSortArray function', function () {
+    test('should have an array method', function () {
       expect(getSortArray).toBeInstanceOf(Function);
     });
 
-    test('should return an array of arrays for sortable fields', function() {
+    test('should return an array of arrays for sortable fields', function () {
       expect(getSortArray([['bytes', 'desc']], indexPattern)).toEqual([['bytes', 'desc']]);
     });
 
-    test('should return an array of arrays from an array of elasticsearch sort objects', function() {
+    test('should return an array of arrays from an array of elasticsearch sort objects', function () {
       expect(getSortArray([{ bytes: 'desc' }], indexPattern)).toEqual([['bytes', 'desc']]);
     });
 
-    test('should sort by an empty array when an unsortable field is given', function() {
+    test('should sort by an empty array when an unsortable field is given', function () {
       expect(getSortArray([{ 'non-sortable': 'asc' }], indexPattern)).toEqual([]);
       expect(getSortArray([{ lol_nope: 'asc' }], indexPattern)).toEqual([]);
 

@@ -29,7 +29,7 @@ export interface I18nFlags {
 
 export function checkCompatibility(config: I18nConfig, flags: I18nFlags, log: ToolingLog) {
   const { fix, ignoreIncompatible, ignoreUnused, ignoreMissing } = flags;
-  return config.translations.map(translationsPath => ({
+  return config.translations.map((translationsPath) => ({
     task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
       // If `fix` is set we should try apply all possible fixes and override translations file.
       await integrateLocaleFiles(messages, {

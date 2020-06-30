@@ -71,7 +71,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       <div
         key={pageId}
         id={pageId}
-        ref={node => {
+        ref={(node) => {
           if (!canvasOrigin && node && node.getBoundingClientRect) {
             saveCanvasOrigin(() => () => node.getBoundingClientRect());
           }
@@ -92,7 +92,7 @@ export class InteractiveWorkpadPage extends PureComponent {
         <InteractionBoundary />
         {shortcuts}
         {elements
-          .map(node => {
+          .map((node) => {
             if (node.type === 'annotation') {
               const props = {
                 key: node.id,
@@ -127,7 +127,7 @@ export class InteractiveWorkpadPage extends PureComponent {
               return <ElementWrapper key={node.id} element={node} />;
             }
           })
-          .filter(element => !!element)}
+          .filter((element) => !!element)}
       </div>
     );
   }

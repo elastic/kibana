@@ -11,6 +11,6 @@ export function getEligibleTypes(
 ) {
   return typeRegistry
     .getAllTypes()
-    .filter(type => !typeRegistry.isNamespaceAgnostic(type.name))
-    .map(type => type.name);
+    .filter((type) => !typeRegistry.isNamespaceAgnostic(type.name))
+    .map((type) => type.name);
 }

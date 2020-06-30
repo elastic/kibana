@@ -36,7 +36,7 @@ describe('loadActionTypes', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/types",
+        "/api/actions/list_action_types",
       ]
     `);
   });
@@ -50,7 +50,7 @@ describe('loadAllActions', () => {
     expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/_getAll",
+        "/api/actions",
       ]
     `);
   });
@@ -72,7 +72,7 @@ describe('createActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.post.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action",
+        "/api/actions/action",
         Object {
           "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -98,7 +98,7 @@ describe('updateActionConnector', () => {
     expect(result).toEqual(resolvedValue);
     expect(http.put.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/action/123",
+        "/api/actions/action/123",
         Object {
           "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
         },
@@ -116,13 +116,13 @@ describe('deleteActions', () => {
     expect(http.delete.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/action/1",
+          "/api/actions/action/1",
         ],
         Array [
-          "/api/action/2",
+          "/api/actions/action/2",
         ],
         Array [
-          "/api/action/3",
+          "/api/actions/action/3",
         ],
       ]
     `);

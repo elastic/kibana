@@ -49,15 +49,15 @@ export class SetViewControl extends Component {
     this.props.openSetView();
   };
 
-  _onLatChange = evt => {
+  _onLatChange = (evt) => {
     this._onChange('lat', evt);
   };
 
-  _onLonChange = evt => {
+  _onLonChange = (evt) => {
     this._onChange('lon', evt);
   };
 
-  _onZoomChange = evt => {
+  _onZoomChange = (evt) => {
     this._onChange('zoom', evt);
   };
 

@@ -20,25 +20,25 @@
 import sinon from 'sinon';
 import index from './index';
 
-describe('kibana cli', function() {
-  describe('plugin installer', function() {
-    describe('commander options', function() {
+describe('kibana cli', function () {
+  describe('plugin installer', function () {
+    describe('commander options', function () {
       const program = {
-        command: function() {
+        command: function () {
           return program;
         },
-        description: function() {
+        description: function () {
           return program;
         },
-        option: function() {
+        option: function () {
           return program;
         },
-        action: function() {
+        action: function () {
           return program;
         },
       };
 
-      it('should define the command', function() {
+      it('should define the command', function () {
         sinon.spy(program, 'command');
 
         index(program);
@@ -47,7 +47,7 @@ describe('kibana cli', function() {
         program.command.restore();
       });
 
-      it('should define the description', function() {
+      it('should define the description', function () {
         sinon.spy(program, 'description');
 
         index(program);
@@ -56,7 +56,7 @@ describe('kibana cli', function() {
         program.description.restore();
       });
 
-      it('should define the command line options', function() {
+      it('should define the command line options', function () {
         const spy = sinon.spy(program, 'option');
 
         const options = [/-q/, /-s/, /-c/, /-t/, /-d/];
@@ -77,7 +77,7 @@ describe('kibana cli', function() {
         expect(options).toHaveLength(0);
       });
 
-      it('should call the action function', function() {
+      it('should call the action function', function () {
         sinon.spy(program, 'action');
 
         index(program);

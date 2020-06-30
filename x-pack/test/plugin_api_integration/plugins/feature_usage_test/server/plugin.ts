@@ -38,9 +38,9 @@ export class FeatureUsageTestPlugin
     }: CoreSetup<FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart>,
     { licensing }: FeatureUsageTestSetupDependencies
   ) {
-    licensing.featureUsage.register('test_feature_a');
-    licensing.featureUsage.register('test_feature_b');
-    licensing.featureUsage.register('test_feature_c');
+    licensing.featureUsage.register('Test feature A', 'basic');
+    licensing.featureUsage.register('Test feature B', 'gold');
+    licensing.featureUsage.register('Test feature C', 'platinum');
 
     registerRoutes(http.createRouter(), getStartServices);
 

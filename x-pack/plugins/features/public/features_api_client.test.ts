@@ -32,7 +32,7 @@ describe('Features API Client', () => {
 
       const client = new FeaturesAPIClient(coreSetup.http);
       const result = await client.getFeatures();
-      expect(result.map(f => f.id)).toEqual([
+      expect(result.map((f) => f.id)).toEqual([
         'feature-a',
         'feature-b',
         'feature-c',

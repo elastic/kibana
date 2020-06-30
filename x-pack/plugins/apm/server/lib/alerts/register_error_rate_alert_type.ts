@@ -12,19 +12,19 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
 } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerting/server';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
+  alerts: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -33,22 +33,22 @@ const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
-  environment: schema.string()
+  environment: schema.string(),
 });
 
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
 
 export function registerErrorRateAlertType({
-  alerting,
-  config$
+  alerts,
+  config$,
 }: RegisterAlertParams) {
-  alerting.registerType({
+  alerts.registerType({
     id: AlertType.ErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
     defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
-      params: paramsSchema
+      params: paramsSchema,
     },
     actionVariables: {
       context: [
@@ -56,12 +56,12 @@ export function registerErrorRateAlertType({
           description: i18n.translate(
             'xpack.apm.registerErrorRateAlertType.variables.serviceName',
             {
-              defaultMessage: 'Service name'
+              defaultMessage: 'Service name',
             }
           ),
-          name: 'serviceName'
-        }
-      ]
+          name: 'serviceName',
+        },
+      ],
     },
     producer: 'apm',
     executor: async ({ services, params }) => {
@@ -71,7 +71,7 @@ export function registerErrorRateAlertType({
 
       const indices = await getApmIndices({
         config,
-        savedObjectsClient: services.savedObjectsClient
+        savedObjectsClient: services.savedObjectsClient,
       });
 
       const environmentTerm =
@@ -89,26 +89,26 @@ export function registerErrorRateAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
-                    }
-                  }
+                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                    },
+                  },
                 },
                 {
                   term: {
-                    [PROCESSOR_EVENT]: 'error'
-                  }
+                    [PROCESSOR_EVENT]: 'error',
+                  },
                 },
                 {
                   term: {
-                    [SERVICE_NAME]: alertParams.serviceName
-                  }
+                    [SERVICE_NAME]: alertParams.serviceName,
+                  },
                 },
-                ...environmentTerm
-              ]
-            }
+                ...environmentTerm,
+              ],
+            },
           },
-          track_total_hits: true
-        }
+          track_total_hits: true,
+        },
       };
 
       const response: ESSearchResponse<
@@ -123,11 +123,11 @@ export function registerErrorRateAlertType({
           AlertType.ErrorRate
         );
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          serviceName: alertParams.serviceName
+          serviceName: alertParams.serviceName,
         });
       }
 
       return {};
-    }
+    },
   });
 }

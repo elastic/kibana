@@ -33,7 +33,7 @@ export class SampleDataViewDataButton extends React.Component {
   };
 
   togglePopoverVisibility = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

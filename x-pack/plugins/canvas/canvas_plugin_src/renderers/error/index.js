@@ -21,7 +21,7 @@ export const error = () => ({
   render(domNode, config, handlers) {
     const draw = () => {
       const buttonSize = Math.min(domNode.clientHeight, domNode.clientWidth);
-      const button = handleClick => (
+      const button = (handleClick) => (
         <EuiIcon
           className="canvasRenderError__icon"
           onClick={handleClick}

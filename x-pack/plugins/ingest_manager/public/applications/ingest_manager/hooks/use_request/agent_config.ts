@@ -14,10 +14,13 @@ import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
+  CopyAgentConfigRequest,
+  CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
 } from '../../types';
@@ -39,7 +42,7 @@ export const useGetOneAgentConfig = (agentConfigId: string | undefined) => {
 };
 
 export const useGetOneAgentConfigFull = (agentConfigId: string) => {
-  return useRequest({
+  return useRequest<GetFullAgentConfigResponse>({
     path: agentConfigRouteService.getInfoFullPath(agentConfigId),
     method: 'get',
   });
@@ -71,6 +74,17 @@ export const sendUpdateAgentConfig = (
   return sendRequest<UpdateAgentConfigResponse>({
     path: agentConfigRouteService.getUpdatePath(agentConfigId),
     method: 'put',
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendCopyAgentConfig = (
+  agentConfigId: string,
+  body: CopyAgentConfigRequest['body']
+) => {
+  return sendRequest<CopyAgentConfigResponse>({
+    path: agentConfigRouteService.getCopyPath(agentConfigId),
+    method: 'post',
     body: JSON.stringify(body),
   });
 };

@@ -21,7 +21,7 @@ import { AbortError, toPromise, getCombinedSignal } from './abort_utils';
 
 jest.useFakeTimers();
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {

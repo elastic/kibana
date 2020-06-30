@@ -48,12 +48,12 @@ export const RegularExpressionRepresentation: React.FunctionComponent<{
 });
 
 const CategoryPattern = euiStyled.span`
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
   word-break: break-all;
 `;
 
 const CategoryPatternWildcard = euiStyled.span`
-  color: ${props => props.theme.eui.euiColorMediumShade};
+  color: ${(props) => props.theme.eui.euiColorMediumShade};
 `;
 
 const CategoryPatternSegment = euiStyled.span`

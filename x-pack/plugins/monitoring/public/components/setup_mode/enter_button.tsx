@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import './enter_button.scss';
 
 export interface SetupModeEnterButtonProps {
   enabled: boolean;

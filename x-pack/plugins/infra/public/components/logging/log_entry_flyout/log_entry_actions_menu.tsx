@@ -99,7 +99,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
       const { field, value } = fieldItem;
       try {
         const parsedValue = decodeOrThrow(rt.array(rt.string))(JSON.parse(value));
-        return acc.concat(parsedValue.map(val => `${field}:${val}`));
+        return acc.concat(parsedValue.map((val) => `${field}:${val}`));
       } catch (e) {
         return acc.concat([`${field}:${value}`]);
       }

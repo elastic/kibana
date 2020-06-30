@@ -15,7 +15,7 @@ test('MLLink produces the correct URL', async () => {
       <MLLink path="/some/path" query={{ ml: { jobIds: ['something'] } }} />
     ),
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
     } as Location
   );
 

@@ -39,7 +39,7 @@ const getJobSummary = async (spaceId: string, sourceId: string) => {
   const response = await callJobsSummaryAPI(spaceId, sourceId, logEntryCategoriesJobTypes);
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
-  return response.filter(jobSummary => jobIds.includes(jobSummary.id));
+  return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
 const getModuleDefinition = async () => {

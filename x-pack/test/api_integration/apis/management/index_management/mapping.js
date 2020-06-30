@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './mapping.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -32,7 +32,7 @@ export default function({ getService }) {
 
       const { body } = await getIndexMapping(index).expect(200);
 
-      expect(body.mapping).to.eql(mappings);
+      expect(body.mappings).to.eql(mappings);
     });
   });
 }

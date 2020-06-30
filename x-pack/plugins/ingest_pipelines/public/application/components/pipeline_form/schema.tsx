@@ -104,7 +104,7 @@ export const pipelineFormSchema: FormSchema = {
         }}
       />
     ),
-    serializer: value => {
+    serializer: (value) => {
       const result = parseJson(value);
       // If an empty array was passed, strip out this value entirely.
       if (!result.length) {
@@ -115,7 +115,7 @@ export const pipelineFormSchema: FormSchema = {
     deserializer: stringifyJson,
     validations: [
       {
-        validator: validationArg => {
+        validator: (validationArg) => {
           if (!validationArg.value) {
             return;
           }

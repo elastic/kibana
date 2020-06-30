@@ -9,7 +9,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { TimeRange, Filter, Query } from 'src/plugins/data/public';
-import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from 'src/plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -20,12 +23,14 @@ export interface ExpressionWrapperProps {
     filters?: Filter[];
     lastReloadRequestTime?: number;
   };
+  handleEvent: (event: ExpressionRendererEvent) => void;
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
   context,
+  handleEvent,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -50,7 +55,8 @@ export function ExpressionWrapper({
             padding="m"
             expression={expression}
             searchContext={{ ...context }}
-            renderError={error => <div data-test-subj="expression-renderer-error">{error}</div>}
+            renderError={(error) => <div data-test-subj="expression-renderer-error">{error}</div>}
+            onEvent={handleEvent}
           />
         </div>
       )}
