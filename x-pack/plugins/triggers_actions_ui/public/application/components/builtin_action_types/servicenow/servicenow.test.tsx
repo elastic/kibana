@@ -56,7 +56,7 @@ describe('servicenow connector validation', () => {
       secrets: {
         username: 'user',
       },
-      id: 'test',
+      id: '.servicenow',
       actionTypeId: '.servicenow',
       name: 'servicenow',
       config: {},

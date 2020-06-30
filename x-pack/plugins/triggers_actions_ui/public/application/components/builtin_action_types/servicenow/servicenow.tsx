@@ -25,7 +25,7 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
-  if (!isValidUrl(action.config.apiUrl, 'https:')) {
+  if (action.config.apiUrl && !isValidUrl(action.config.apiUrl, 'https:')) {
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
   }
 

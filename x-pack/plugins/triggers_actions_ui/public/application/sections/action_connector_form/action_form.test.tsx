@@ -152,7 +152,7 @@ describe('action_form', () => {
         {
           secrets: {},
           id: '.servicenow',
-          actionTypeId: actionType.id,
+          actionTypeId: '.servicenow',
           name: 'Non consumer connector',
           config: {
             isCaseOwned: true,
