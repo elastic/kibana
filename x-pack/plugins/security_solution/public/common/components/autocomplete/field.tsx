@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
