@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './index_pattern';
+export * from './load_index_pattern';
