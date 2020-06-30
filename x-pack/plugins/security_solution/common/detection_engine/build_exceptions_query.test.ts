@@ -17,13 +17,13 @@ import {
   buildNested,
 } from './build_exceptions_query';
 import {
-  EntriesArray,
+  EntryNested,
   EntryExists,
   EntryMatch,
   EntryMatchAny,
-  EntryNested,
-} from '../../../../../lists/common/schemas';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+  EntriesArray,
+} from '../../../lists/common/schemas';
+import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('build_exceptions_query', () => {
   describe('getLanguageBooleanOperator', () => {
