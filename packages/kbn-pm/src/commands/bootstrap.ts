@@ -82,7 +82,7 @@ export const BootstrapCommand: ICommand = {
     }
 
     if (cachedProjectCount > 0) {
-      log.success(`${cachedProjectCount} bootsrap builds are cached`);
+      log.success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
     await parallelizeBatches(batchedProjects, async (project) => {
