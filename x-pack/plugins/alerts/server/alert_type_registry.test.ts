@@ -77,7 +77,7 @@ describe('register()', () => {
 
   test('throws if AlertType Id isnt a string', () => {
     const alertType = {
-      id: (123 as any) as string,
+      id: (123 as unknown) as string,
       name: 'Test',
       actionGroups: [
         {
