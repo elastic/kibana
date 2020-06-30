@@ -16,23 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SkipBottomButton } from './skip_bottom_button';
 
-import { parse } from 'eslint/lib/options';
-
-const options = parse(process.argv);
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
-
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+export function createSkipBottomButtonDirective(reactDirective: any) {
+  return reactDirective(SkipBottomButton, [['onClick', { watchDepth: 'reference' }]]);
 }
-
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
-
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
-
-// common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');

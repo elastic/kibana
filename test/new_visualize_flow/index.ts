@@ -16,23 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
-import { parse } from 'eslint/lib/options';
-
-const options = parse(process.argv);
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
-
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('New Visualize Flow', function () {
+    this.tags('ciGroup2');
+    loadTestFile(require.resolve('./dashboard_embedding'));
+  });
 }
-
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
-
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
-
-// common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');

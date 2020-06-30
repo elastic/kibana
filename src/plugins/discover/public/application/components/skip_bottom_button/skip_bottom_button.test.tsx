@@ -16,23 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
+import { SkipBottomButton, SkipBottomButtonProps } from './skip_bottom_button';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { parse } from 'eslint/lib/options';
+describe('Skip to Bottom Button', function () {
+  let props: SkipBottomButtonProps;
+  let component: ReactWrapper<SkipBottomButtonProps>;
 
-const options = parse(process.argv);
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
+  beforeAll(() => {
+    props = {
+      onClick: jest.fn(),
+    };
+  });
 
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
-}
-
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
-
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
-
-// common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');
+  it('should be clickable', function () {
+    component = mountWithIntl(<SkipBottomButton {...props} />);
+    component.simulate('click');
+    expect(props.onClick).toHaveBeenCalled();
+  });
+});
