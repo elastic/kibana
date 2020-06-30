@@ -11,12 +11,20 @@ export const defaultRequestParameters = {
   trackTotalHits: false,
 };
 
-export const createJobIdFilters = (jobId: string) => [
+export const createJobIdFilter = (jobId: string) => [
   {
     term: {
       job_id: {
         value: jobId,
       },
+    },
+  },
+];
+
+export const createJobIdFilters = (jobIds: string[]) => [
+  {
+    terms: {
+      job_id: jobIds,
     },
   },
 ];

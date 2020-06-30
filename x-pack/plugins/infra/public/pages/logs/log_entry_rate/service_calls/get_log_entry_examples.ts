@@ -10,13 +10,13 @@ import { identity } from 'fp-ts/lib/function';
 import { npStart } from '../../../../legacy_singletons';
 
 import {
-  getLogEntryRateExamplesRequestPayloadRT,
-  getLogEntryRateExamplesSuccessReponsePayloadRT,
+  getLogEntryExamplesRequestPayloadRT,
+  getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../../common/http_api/log_analysis';
 import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 
-export const callGetLogEntryRateExamplesAPI = async (
+export const callGetLogEntryExamplesAPI = async (
   sourceId: string,
   startTime: number,
   endTime: number,
@@ -26,7 +26,7 @@ export const callGetLogEntryRateExamplesAPI = async (
   const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH, {
     method: 'POST',
     body: JSON.stringify(
-      getLogEntryRateExamplesRequestPayloadRT.encode({
+      getLogEntryExamplesRequestPayloadRT.encode({
         data: {
           dataset,
           exampleCount,
@@ -41,7 +41,7 @@ export const callGetLogEntryRateExamplesAPI = async (
   });
 
   return pipe(
-    getLogEntryRateExamplesSuccessReponsePayloadRT.decode(response),
+    getLogEntryExamplesSuccessReponsePayloadRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };

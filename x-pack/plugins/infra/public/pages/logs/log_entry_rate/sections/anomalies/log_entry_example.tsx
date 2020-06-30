@@ -28,7 +28,7 @@ import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
-import { LogEntryRateExample } from '../../../../../../common/http_api/log_analysis/results';
+import { LogEntryExample } from '../../../../../../common/http_api/log_analysis/results';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -58,12 +58,12 @@ const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
   }
 );
 
-type Props = LogEntryRateExample & {
+type Props = LogEntryExample & {
   timeRange: TimeRange;
   jobId: string;
 };
 
-export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   id,
   dataset,
   message,
@@ -233,11 +233,11 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
+export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
   dateTime: number;
 }> = ({ dateTime }) => {
   return (
-    <LogEntryRateExampleMessageHeadersWrapper>
+    <LogEntryExampleMessageHeadersWrapper>
       <>
         {exampleMessageColumnConfigurations.map((columnConfiguration) => {
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
@@ -280,11 +280,11 @@ export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
           {null}
         </LogColumnHeader>
       </>
-    </LogEntryRateExampleMessageHeadersWrapper>
+    </LogEntryExampleMessageHeadersWrapper>
   );
 };
 
-const LogEntryRateExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
+const LogEntryExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
   border-bottom: none;
   box-shadow: none;
   padding-right: 0;

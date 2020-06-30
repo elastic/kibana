@@ -19,18 +19,18 @@ import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { getJobId, jobCustomSettingsRT } from '../../../common/log_analysis';
 import {
-  createLogEntryRateExamplesQuery,
-  logEntryRateExamplesResponseRT,
-} from './queries/log_entry_rate_examples';
+  createLogEntryExamplesQuery,
+  logEntryExamplesResponseRT,
+} from './queries/log_entry_examples';
 import {
   InsufficientLogAnalysisMlJobConfigurationError,
-  NoLogAnalysisMlJobError,
   NoLogAnalysisResultsIndexError,
 } from './errors';
 import { InfraSource } from '../sources';
 import type { MlSystem } from '../../types';
 import { InfraRequestHandlerContext } from '../../types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import { fetchMlJob } from './common';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -144,7 +144,7 @@ export async function getLogEntryRateBuckets(
   }, []);
 }
 
-export async function getLogEntryRateExamples(
+export async function getLogEntryExamples(
   context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
   startTime: number,
@@ -154,16 +154,14 @@ export async function getLogEntryRateExamples(
   sourceConfiguration: InfraSource,
   callWithRequest: KibanaFramework['callWithRequest']
 ) {
-  const finalizeLogEntryRateExamplesSpan = startTracingSpan(
-    'get log entry rate example log entries'
-  );
+  const finalizeLogEntryExamplesSpan = startTracingSpan('get log entry rate example log entries');
 
   const jobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
 
   const {
     mlJob,
     timing: { spans: fetchMlJobSpans },
-  } = await fetchMlJob(context, jobId);
+  } = await fetchMlJob(context.infra.mlAnomalyDetectors, jobId);
 
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
@@ -178,8 +176,8 @@ export async function getLogEntryRateExamples(
 
   const {
     examples,
-    timing: { spans: fetchLogEntryRateExamplesSpans },
-  } = await fetchLogEntryRateExamples(
+    timing: { spans: fetchLogEntryExamplesSpans },
+  } = await fetchLogEntryExamples(
     context,
     indices,
     timestampField,
@@ -191,17 +189,17 @@ export async function getLogEntryRateExamples(
     callWithRequest
   );
 
-  const logEntryRateExamplesSpan = finalizeLogEntryRateExamplesSpan();
+  const logEntryExamplesSpan = finalizeLogEntryExamplesSpan();
 
   return {
     data: examples,
     timing: {
-      spans: [logEntryRateExamplesSpan, ...fetchMlJobSpans, ...fetchLogEntryRateExamplesSpans],
+      spans: [logEntryExamplesSpan, ...fetchMlJobSpans, ...fetchLogEntryExamplesSpans],
     },
   };
 }
 
-export async function fetchLogEntryRateExamples(
+export async function fetchLogEntryExamples(
   context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   indices: string,
   timestampField: string,
@@ -216,11 +214,11 @@ export async function fetchLogEntryRateExamples(
 
   const {
     hits: { hits },
-  } = decodeOrThrow(logEntryRateExamplesResponseRT)(
+  } = decodeOrThrow(logEntryExamplesResponseRT)(
     await callWithRequest(
       context,
       'search',
-      createLogEntryRateExamplesQuery(
+      createLogEntryExamplesQuery(
         indices,
         timestampField,
         tiebreakerField,
@@ -244,29 +242,6 @@ export async function fetchLogEntryRateExamples(
     })),
     timing: {
       spans: [esSearchSpan],
-    },
-  };
-}
-
-async function fetchMlJob(
-  context: RequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
-  logEntryRateJobId: string
-) {
-  const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');
-  const {
-    jobs: [mlJob],
-  } = await context.infra.mlAnomalyDetectors.jobs(logEntryRateJobId);
-
-  const mlGetJobSpan = finalizeMlGetJobSpan();
-
-  if (mlJob == null) {
-    throw new NoLogAnalysisMlJobError(`Failed to find ml job ${logEntryRateJobId}.`);
-  }
-
-  return {
-    mlJob,
-    timing: {
-      spans: [mlGetJobSpan],
     },
   };
 }

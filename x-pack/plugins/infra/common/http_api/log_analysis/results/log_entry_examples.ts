@@ -14,13 +14,13 @@ import {
 } from '../../shared';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH =
-  '/api/infra/log_analysis/results/log_entry_rate_examples';
+  '/api/infra/log_analysis/results/log_entry_examples';
 
 /**
  * request
  */
 
-export const getLogEntryRateExamplesRequestPayloadRT = rt.type({
+export const getLogEntryExamplesRequestPayloadRT = rt.type({
   data: rt.type({
     // the dataset to fetch the log rate examples from
     dataset: rt.string,
@@ -33,15 +33,15 @@ export const getLogEntryRateExamplesRequestPayloadRT = rt.type({
   }),
 });
 
-export type GetLogEntryRateExamplesRequestPayload = rt.TypeOf<
-  typeof getLogEntryRateExamplesRequestPayloadRT
+export type GetLogEntryExamplesRequestPayload = rt.TypeOf<
+  typeof getLogEntryExamplesRequestPayloadRT
 >;
 
 /**
  * response
  */
 
-const logEntryRateExampleRT = rt.type({
+const logEntryExampleRT = rt.type({
   id: rt.string,
   dataset: rt.string,
   message: rt.string,
@@ -49,12 +49,12 @@ const logEntryRateExampleRT = rt.type({
   tiebreaker: rt.number,
 });
 
-export type LogEntryRateExample = rt.TypeOf<typeof logEntryRateExampleRT>;
+export type LogEntryExample = rt.TypeOf<typeof logEntryExampleRT>;
 
-export const getLogEntryRateExamplesSuccessReponsePayloadRT = rt.intersection([
+export const getLogEntryExamplesSuccessReponsePayloadRT = rt.intersection([
   rt.type({
     data: rt.type({
-      examples: rt.array(logEntryRateExampleRT),
+      examples: rt.array(logEntryExampleRT),
     }),
   }),
   rt.partial({
@@ -62,16 +62,16 @@ export const getLogEntryRateExamplesSuccessReponsePayloadRT = rt.intersection([
   }),
 ]);
 
-export type GetLogEntryRateExamplesSuccessReponsePayload = rt.TypeOf<
-  typeof getLogEntryRateExamplesSuccessReponsePayloadRT
+export type GetLogEntryExamplesSuccessReponsePayload = rt.TypeOf<
+  typeof getLogEntryExamplesSuccessReponsePayloadRT
 >;
 
-export const getLogEntryRateExamplesResponsePayloadRT = rt.union([
-  getLogEntryRateExamplesSuccessReponsePayloadRT,
+export const getLogEntryExamplesResponsePayloadRT = rt.union([
+  getLogEntryExamplesSuccessReponsePayloadRT,
   badRequestErrorRT,
   forbiddenErrorRT,
 ]);
 
-export type GetLogEntryRateExamplesResponsePayload = rt.TypeOf<
-  typeof getLogEntryRateExamplesResponsePayloadRT
+export type GetLogEntryExamplesResponsePayload = rt.TypeOf<
+  typeof getLogEntryExamplesResponsePayloadRT
 >;

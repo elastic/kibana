@@ -7,21 +7,21 @@
 import Boom from 'boom';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
-import { NoLogAnalysisResultsIndexError, getLogEntryRateExamples } from '../../../lib/log_analysis';
+import { NoLogAnalysisResultsIndexError, getLogEntryExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import {
-  getLogEntryRateExamplesRequestPayloadRT,
-  getLogEntryRateExamplesSuccessReponsePayloadRT,
+  getLogEntryExamplesRequestPayloadRT,
+  getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
 
-export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
       validate: {
-        body: createValidationFunction(getLogEntryRateExamplesRequestPayloadRT),
+        body: createValidationFunction(getLogEntryExamplesRequestPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
@@ -42,7 +42,7 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
       try {
         assertHasInfraMlPlugins(requestContext);
 
-        const { data: logEntryRateExamples, timing } = await getLogEntryRateExamples(
+        const { data: logEntryExamples, timing } = await getLogEntryExamples(
           requestContext,
           sourceId,
           startTime,
@@ -54,9 +54,9 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
         );
 
         return response.ok({
-          body: getLogEntryRateExamplesSuccessReponsePayloadRT.encode({
+          body: getLogEntryExamplesSuccessReponsePayloadRT.encode({
             data: {
-              examples: logEntryRateExamples,
+              examples: logEntryExamples,
             },
             timing,
           }),
