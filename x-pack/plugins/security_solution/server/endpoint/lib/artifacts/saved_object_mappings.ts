@@ -13,7 +13,6 @@ export const manifestSavedObjectType = ManifestConstants.SAVED_OBJECT_TYPE;
 
 export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
-    // e.g. 'global-whitelist-windows-1.0.0'
     identifier: {
       type: 'keyword',
     },

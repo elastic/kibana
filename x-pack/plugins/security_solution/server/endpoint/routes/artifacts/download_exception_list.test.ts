@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
   SavedObjectsClientContract,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   RouteConfig,
   RequestHandler,
   KibanaResponseFactory,
@@ -74,8 +74,8 @@ const AuthHeader = 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoS
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
+  let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   // @ts-ignore
