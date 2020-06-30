@@ -78,7 +78,6 @@ describe('date_range params', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };

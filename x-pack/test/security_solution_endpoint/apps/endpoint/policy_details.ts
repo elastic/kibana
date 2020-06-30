@@ -9,7 +9,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
+  const pageObjects = getPageObjects([
+    'common',
+    'endpoint',
+    'policy',
+    'endpointPageUtils',
+    'ingestManagerCreateDatasource',
+  ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
@@ -104,9 +110,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               id: policyInfo.datasource.id,
               dataset: { namespace: 'default' },
               name: 'Protect East Coast',
-              package: {
-                name: 'endpoint',
-                version: policyInfo.packageInfo.version,
+              meta: {
+                package: {
+                  name: 'endpoint',
+                  version: policyInfo.packageInfo.version,
+                },
               },
               policy: {
                 linux: {
@@ -183,6 +191,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
           },
         });
+      });
+    });
+
+    describe('when on Ingest Configurations Edit Datasource page', async () => {
+      let policyInfo: PolicyTestResourceInfo;
+      beforeEach(async () => {
+        // Create a policy and navigate to Ingest app
+        policyInfo = await policyTestResources.createPolicy();
+        await pageObjects.ingestManagerCreateDatasource.navigateToAgentConfigEditDatasource(
+          policyInfo.agentConfig.id,
+          policyInfo.datasource.id
+        );
+      });
+      afterEach(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
+      it('should show a link to Policy Details', async () => {
+        await testSubjects.existOrFail('editLinkToPolicyDetails');
+      });
+      it('should navigate to Policy Details when the link is clicked', async () => {
+        const linkToPolicy = await testSubjects.find('editLinkToPolicyDetails');
+        await linkToPolicy.click();
+        await pageObjects.policy.ensureIsOnDetailsPage();
+      });
+      it('should allow the user to navigate, edit and save Policy Details', async () => {
+        await (await testSubjects.find('editLinkToPolicyDetails')).click();
+        await pageObjects.policy.ensureIsOnDetailsPage();
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
+        await pageObjects.policy.confirmAndSave();
+
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
       });
     });
   });

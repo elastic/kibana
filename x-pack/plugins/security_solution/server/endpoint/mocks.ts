@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
@@ -35,6 +35,9 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 export const createMockAgentService = (): jest.Mocked<AgentService> => {
   return {
     getAgentStatusById: jest.fn(),
+    authenticateAgentWithAccessToken: jest.fn(),
+    getAgent: jest.fn(),
+    listAgents: jest.fn(),
   };
 };
 
@@ -59,7 +62,7 @@ export const createMockIngestManagerStartContract = (
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: jest.Mocked<ILegacyScopedClusterClient>,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
 ) {
   const context = xpackMocks.createRequestHandlerContext();

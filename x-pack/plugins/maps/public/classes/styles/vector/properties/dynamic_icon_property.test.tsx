@@ -34,8 +34,8 @@ const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mock
   );
 };
 
-describe('DynamicIconProperty', () => {
-  it('should derive category number from palettes', async () => {
+describe('getNumberOfCategories', () => {
+  test('should derive category number from palettes', async () => {
     const filled = makeProperty({
       iconPaletteId: 'filledShapes',
     });
@@ -47,15 +47,53 @@ describe('DynamicIconProperty', () => {
   });
 });
 
-test('Should render categorical legend with breaks', async () => {
-  const iconStyle = makeProperty({
-    iconPaletteId: 'filledShapes',
+describe('renderLegendDetailRow', () => {
+  test('Should render categorical legend with breaks', async () => {
+    const iconStyle = makeProperty({
+      iconPaletteId: 'filledShapes',
+    });
+
+    const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
+    const component = shallow(legendRow);
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+
+    expect(component).toMatchSnapshot();
   });
+});
 
-  const legendRow = iconStyle.renderLegendDetailRow({ isPointsOnly: true, isLinesOnly: false });
-  const component = shallow(legendRow);
-  await new Promise((resolve) => process.nextTick(resolve));
-  component.update();
+describe('get mapbox icon-image expression (via internal _getMbIconImageExpression)', () => {
+  describe('categorical icon palette', () => {
+    test('should return mapbox expression for pre-defined icon palette', async () => {
+      const iconStyle = makeProperty({
+        iconPaletteId: 'filledShapes',
+      });
+      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+        'match',
+        ['to-string', ['get', 'foobar']],
+        'US',
+        'circle-15',
+        'CN',
+        'marker-15',
+        'square-15',
+      ]);
+    });
 
-  expect(component).toMatchSnapshot();
+    test('should return mapbox expression for custom icon palette', async () => {
+      const iconStyle = makeProperty({
+        useCustomIconMap: true,
+        customIconStops: [
+          { stop: null, icon: 'circle' },
+          { stop: 'MX', icon: 'marker' },
+        ],
+      });
+      expect(iconStyle._getMbIconImageExpression(15)).toEqual([
+        'match',
+        ['to-string', ['get', 'foobar']],
+        'MX',
+        'marker-15',
+        'circle-15',
+      ]);
+    });
+  });
 });

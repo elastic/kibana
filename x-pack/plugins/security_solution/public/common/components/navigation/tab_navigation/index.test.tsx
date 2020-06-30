@@ -71,6 +71,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     };
     test('it mounts with correct tab highlighted', () => {
@@ -128,6 +129,7 @@ describe('Tab Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     };
     test('it mounts with correct tab highlighted', () => {
