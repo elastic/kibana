@@ -7,16 +7,20 @@
 Pluggable state from registry items can often end up stored inside saved objects, for instance:
 Embeddables, Expression strings, Url generators, ...
 
-When plugin A (persister) stores some state that belongs to another plugin B a few issues arise:
+When plugin A (persister) stores some state that belongs to another plugin B (registrator) a few issues arise:
 - How does persister know if plugin B state contains references to saved objects
 - How does persister migrate the saved object when it contains state that belongs to plugin B
 - How does persister know if state that belongs to plugin B contains state that belongs to plugin C
 
+In order to solve the problem we are proposing implementing a `PersistableStateRegistry` to which registrators can register `PersistableStateDefinition` which persisters can then use to do the above tasks.
+
 # Basic example
+
+registrator plugin registers its `PersistableStateDefinition`
 
 ```ts
 
-const MY_STATE_ID = 'MyState';
+export const MY_STATE_ID = 'MyState';
 
 interface MyStateV76 extends PersistableState {
   object: string,
@@ -44,7 +48,7 @@ const migrate = (state: unknown, version: string) => {
     v78 = { objectId: v77.objectId, value: v77.val };
   }
   
-  return newState;
+  return v78;
 }
 
 const inject = (state: MyState, savedObjectReferences: SavedObjectReference[]) => {
@@ -62,9 +66,11 @@ const extract = (state: MyState) => {
 persistableStateService.register(MY_STATE_ID, { migrate, inject, extract });
 ```
 
+Persister plugin can then use the service to prepare state for saving or get it ready after loading.
+
 ```ts
-  const stateReadyForPersisting = persistableStateService.get(MY_STATE_ID),beforeSave(myState);
-  const stateReadyForConsuming = persistableStateService.get(MY_STATE_ID).afterLoad(stateReadyForPersisting);
+  const stateReadyForPersisting = persistableStateService.get(id),beforeSave(myState);
+  const stateReadyForConsuming = persistableStateService.get(id).afterLoad(await savedObjectsClient.get(...));
 ```
 
 # Motivation
@@ -74,6 +80,8 @@ We need a formal way for authors of registry implementations to add migrations f
 We also need to make sure that all the persited state containing references to saved objects extracts those before being saved and injects them later.
 
 # Detailed design
+
+We plan to implement `PersistableStateRegistry ` which will be exposed under `share` plugin
 
 ```ts
 interface PersistableState extends Serializable {}
@@ -91,7 +99,7 @@ interface PersistableStateDefinition<P extends PersistableState = PersistableSta
   extract: (state: P) => { state: P, references: SavedObjectReference[] }
 }
 
-class PersistableStatePlugin {
+class PersistableStateRegistry {
   setup(core, plugins) {
     return {
       // if one of the functions is not provided default is used 
@@ -112,25 +120,38 @@ class PersistableStatePlugin {
 }
 ```
 
+# Server or Client ?
+
+Persistable state service will be available on both, server and client, under same interface. We suggest to register your persistable state definition on both client and server even if you are using just one of those as you cannot know where the consuming side is running.
+
 
 # Consuming and edge cases
 
 When plugin A wants to store some state that it does not own it should check with persistableStateRegistry for a registered persistable state definition and execute `beforeSave` function.
 
 ```ts
-  const stateForSaving = persistableStatePlugin.beforeSave(id, myState);
+  const stateForSaving = persistableStateRegistry.beforeSave(id, myState);
 
 ``` 
 
-WARNING: If state id is known at compile time we should rather import the correct utilities directly from expression plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
+WARNING: If state id is known at compile time we should rather import the correct utilities directly from the registrator plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
+
+```ts
+  import { extract } from 'src/plugins/pluginOwningState';
+  const stateForSaving = extract(myState);
+```
 
 ## Handling corrupt state
 
 In current proposal handling of corrupt state is up to the implementator of PersistableStateDefinition. State incoming to migrate function could not match with version string provided so author should validate the incoming state first.
 
-## EnhacedDrilldownEmbeddableInput
+## Handling enhancements
 
-Drilldown  plugin adds to the state of embeddable:
+Related github issue: https://github.com/elastic/kibana/issues/68880
+
+The registrator needs to explicitly support enhancements. Its state should contain an `enhancement` property which is an object where every key represents a state belonging to enhancer.
+
+Drilldown  plugin (enhancer) adds to the state of embeddable (registrator):
 
 ```ts
 interface EnhancedDrilldownEmbeddableInput extends EmbeddableInput {
@@ -139,23 +160,50 @@ interface EnhancedDrilldownEmbeddableInput extends EmbeddableInput {
   }
 }
 ```
-Embeddable is aware that it has an enhancements property on its state, where every key represents state of another plugin.
+Embeddable (registrator) is aware that it has an `enhancements` property on its state, where every key represents state of another plugin.
 
 ```ts
 const inject = (state, references) => {
   Object.getKeys(state.enhancements).forEach(key => {
-    State.enhancements[key] = persistableStatePlugin.get(key).inject(state.enhancements[key], references);
+    State.enhancements[key] = persistableStateRegistry.get(key).inject(state.enhancements[key], references);
   }
 }
 ```
 
 And drilldown plugin registers its state with persistableStateService.
 
-##
+## what about state which extends some base state ?
+
+With embeddables we currently have `SpecializedState extends BaseState` scenario. If possible don't do this but rather use the enhancements pattern described above.
+
+Migrations can still work, but there are edgecases they can't handle. For example `embeddable-baseInput` migrator would do something like:
+
+```ts
+const migrate = (state, version) => {
+  // migrate the base input properties
+  
+  // run the extended type migration which will migrate the rest of the properties
+  return persistableStateRegistry.get(state.type).migrate(state, version);
+}
+
+```
+
+or do it the other way around, first running the extending class migration and then the base one.
+
+However there could be clashes using this approach due to conflicts with property names, so special care needs to be taken to not run into them. For this reason we suggest migrating towards enhancements pattern.
+
+For example if base class has a property named `x` which it wants to migrate to `y` and extended class has a property named `y` which it wants to migrate to `z` this will only work if we do extending class migration first, the other way around we will lose information during migration.
+
 
 ## Use a `{pluginId}+{stateType}` pattern for your ID
 
 To avoid clashes with other unknown plugins.
+
+A plugin could have a single `stateType`, for example `visualizations` plugin has a `savedVis` state, so it use `visualizations-savedVis` as id. Other plugins might have multiple state types they want to register. Lets say that we introduce a new state type to `visualizations` plugin called `visState` we would use `visualizations-visState` as id.
+
+A good example of plugin exposing multiple state types is expressions plugin, where each of the functions it registers into the registry will also register a persistable state definition.
+
+Persistable state ID should be a const exported on plugin contract.
 
 ## We have to avoid shared persistable state
 
@@ -212,7 +260,7 @@ First app arch team will add persistable state definitions for saved visualizati
 
 # How we teach this
 
-If state id is known at compile time we should rather import the correct utilities directly from expression plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
+If state id is known at compile time we should rather import the correct utilities directly from registrator plugin. As using the registry can hide dependencies between plugins when possible plugins should directly depend on plugins providing the state they want to store.
 
 # Unresolved questions
 
