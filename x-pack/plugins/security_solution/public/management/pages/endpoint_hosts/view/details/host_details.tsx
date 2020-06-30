@@ -19,7 +19,8 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useHostIngestUrl } from '../hooks';
+import { useHostSelector, useAgentDetailsIngestUrl } from '../hooks';
+import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
@@ -28,6 +29,7 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import { getEndpointDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -46,8 +48,15 @@ const LinkToExternalApp = styled.div`
   }
 `;
 
+const openReassignFlyoutSearch = '?openReassignFlyout=true';
+
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
-  const { url: ingestUrl, appId: ingestAppId, appPath: ingestAppPath } = useHostIngestUrl();
+  const agentId = details.elastic.agent.id;
+  const {
+    url: agentDetailsUrl,
+    appId: ingestAppId,
+    appPath: agentDetailsAppPath,
+  } = useAgentDetailsIngestUrl(agentId);
   const queryParams = useHostSelector(uiQueryParams);
   const policyStatus = useHostSelector(
     policyResponseStatus
@@ -88,6 +97,22 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       }),
     ];
   }, [details.host.id, formatUrl, queryParams]);
+
+  const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
+  const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
+  const handleReassignEndpointsClick = useNavigateToAppEventHandler<
+    AgentDetailsReassignConfigAction
+  >(ingestAppId, {
+    path: agentDetailsWithFlyoutPath,
+    state: {
+      onDoneNavigateTo: [
+        'securitySolution:management',
+        {
+          path: getEndpointDetailsPath({ name: 'endpointDetails', selected_host: details.host.id }),
+        },
+      ],
+    },
+  });
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
@@ -200,8 +225,9 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       <LinkToExternalApp>
         <LinkToApp
           appId={ingestAppId}
-          appPath={ingestAppPath}
-          href={ingestUrl}
+          appPath={agentDetailsWithFlyoutPath}
+          href={agentDetailsWithFlyoutUrl}
+          onClick={handleReassignEndpointsClick}
           data-test-subj="hostDetailsLinkToIngest"
         >
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
