@@ -8,12 +8,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
-import { alertsHeaders as alertsDefaultHeaders } from '../../../alerts/components/alerts_table/default_config';
-import { alertsHeaders as commonAlertsDefaultHeaders } from '../../../common/components/alerts_viewer/default_headers';
-import { defaultHeaders as eventsDefaultHeaders } from '../../../common/components/events_viewer/default_headers';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Header } from './header';
-import { TimelineId } from '../../../../common/types/timeline';
 
 const timelineId = 'test';
 
@@ -76,116 +72,6 @@ describe('Header', () => {
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
     expect(onUpdateColumns).toBeCalledWith(defaultHeaders);
-  });
-
-  test('it updates the columns correctly for Hosts/Events timeline', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={TimelineId.hostsPageEvents}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalledWith(eventsDefaultHeaders);
-  });
-
-  test('it updates the columns correctly for Hosts/External Alerts timeline', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={TimelineId.hostsPageExternalAlerts}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalledWith(commonAlertsDefaultHeaders);
-  });
-
-  test('it updates the columns correctly for Alerts timeline', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={TimelineId.alertsPage}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalledWith(alertsDefaultHeaders);
-  });
-
-  test('it updates the columns correctly for Alerts/Rule timeline', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={TimelineId.alertsRulesDetailsPage}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalledWith(alertsDefaultHeaders);
-  });
-
-  test('it updates the columns correctly for Network timeline', () => {
-    const onUpdateColumns = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Header
-          filteredBrowserFields={mockBrowserFields}
-          isSearching={false}
-          onOutsideClick={jest.fn()}
-          onSearchInputChange={jest.fn()}
-          onUpdateColumns={onUpdateColumns}
-          searchInput=""
-          timelineId={TimelineId.networkPageExternalAlerts}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
-
-    expect(onUpdateColumns).toBeCalledWith(commonAlertsDefaultHeaders);
   });
 
   test('it invokes onOutsideClick when the user clicks the Reset Fields button', () => {

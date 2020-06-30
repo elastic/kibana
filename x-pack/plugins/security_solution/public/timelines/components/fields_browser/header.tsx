@@ -15,17 +15,13 @@ import {
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { TimelineId } from '../../../../common/types/timeline';
 import { BrowserFields } from '../../../common/containers/source';
-import { alertsHeaders as alertsDefaultHeaders } from '../../../alerts/components/alerts_table/default_config';
-import { alertsHeaders as commonAlertsDefaultHeaders } from '../../../common/components/alerts_viewer/default_headers';
-import { defaultHeaders as eventsDefaultHeaders } from '../../../common/components/events_viewer/default_headers';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
 
 import * as i18n from './translations';
+import { useManageTimeline } from '../manage_timeline';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
@@ -100,22 +96,13 @@ const TitleRow = React.memo<{
   isEventViewer?: boolean;
   onOutsideClick: () => void;
   onUpdateColumns: OnUpdateColumns;
-}>(({ id, isEventViewer, onOutsideClick, onUpdateColumns }) => {
+}>(({ id, onOutsideClick, onUpdateColumns }) => {
+  const { getManageTimelineById } = useManageTimeline();
   const handleResetColumns = useCallback(() => {
-    let resetDefaultHeaders = defaultHeaders;
-    if (id === TimelineId.hostsPageEvents) {
-      resetDefaultHeaders = eventsDefaultHeaders;
-    } else if (
-      id === TimelineId.hostsPageExternalAlerts ||
-      id === TimelineId.networkPageExternalAlerts
-    ) {
-      resetDefaultHeaders = commonAlertsDefaultHeaders;
-    } else if (id === TimelineId.alertsPage || id === TimelineId.alertsRulesDetailsPage) {
-      resetDefaultHeaders = alertsDefaultHeaders;
-    }
-    onUpdateColumns(resetDefaultHeaders);
+    const timeline = getManageTimelineById(id);
+    onUpdateColumns(timeline.defaultModel.columns);
     onOutsideClick();
-  }, [id, onUpdateColumns, onOutsideClick]);
+  }, [id, onUpdateColumns, onOutsideClick, getManageTimelineById]);
 
   return (
     <EuiFlexGroup
