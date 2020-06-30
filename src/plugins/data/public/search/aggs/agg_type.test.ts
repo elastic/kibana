@@ -159,47 +159,6 @@ describe('AggType Class', () => {
       });
     });
 
-    describe('getFormat', function () {
-      let aggConfig: IAggConfig;
-      let field: any;
-
-      beforeEach(() => {
-        aggConfig = ({
-          getField: jest.fn(() => field),
-        } as unknown) as IAggConfig;
-      });
-
-      test('returns the formatter for the aggConfig', () => {
-        const aggType = new AggType(
-          {
-            name: 'name',
-            title: 'title',
-          },
-          dependencies
-        );
-
-        field = {
-          format: 'format',
-        };
-
-        expect(aggType.getFormat(aggConfig)).toBe('format');
-      });
-
-      test('returns default formatter', () => {
-        const aggType = new AggType(
-          {
-            name: 'name',
-            title: 'title',
-          },
-          dependencies
-        );
-
-        field = undefined;
-
-        expect(aggType.getFormat(aggConfig)).toBe('default');
-      });
-    });
-
     describe('getSerializedFormat', () => {
       test('returns the default serialized field format if it exists', () => {
         const aggConfig = ({

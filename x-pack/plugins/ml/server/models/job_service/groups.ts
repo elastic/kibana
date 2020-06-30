@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
@@ -23,7 +23,7 @@ interface Results {
   };
 }
 
-export function groupsProvider(callAsCurrentUser: APICaller) {
+export function groupsProvider(callAsCurrentUser: LegacyAPICaller) {
   const calMngr = new CalendarManager(callAsCurrentUser);
 
   async function getAllGroups() {
