@@ -58,7 +58,6 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
-  SavedObjectEmbeddableInput,
   ContainerOutput,
   EmbeddableInput,
 } from '../../../embeddable/public';

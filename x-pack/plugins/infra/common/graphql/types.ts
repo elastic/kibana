@@ -329,6 +329,10 @@ export interface UpdateSourceInput {
   logAlias?: string | null;
   /** The field mapping to use for this source */
   fields?: UpdateSourceFieldsInput | null;
+  /** Default view for inventory */
+  inventoryDefaultView?: string | null;
+  /** Default view for Metrics Explorer */
+  metricsExplorerDefaultView?: string | null;
   /** The log columns to display for this source */
   logColumns?: UpdateSourceLogColumnInput[] | null;
 }
@@ -875,6 +879,10 @@ export namespace SourceConfigurationFields {
     fields: Fields;
 
     logColumns: LogColumns[];
+
+    inventoryDefaultView: string;
+
+    metricsExplorerDefaultView: string;
   };
 
   export type Fields = {

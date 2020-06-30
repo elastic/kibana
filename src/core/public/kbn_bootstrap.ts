@@ -42,7 +42,6 @@ export function __kbnBootstrap__() {
   const APM_ENABLED = process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && apmConfig != null;
 
   if (APM_ENABLED) {
-    // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { init, apm } = require('@elastic/apm-rum');
     if (apmConfig.globalLabels) {
