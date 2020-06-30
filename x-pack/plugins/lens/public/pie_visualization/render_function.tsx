@@ -142,7 +142,9 @@ export function PieComponent(
               return 'rgba(0,0,0,0)';
             }
             // only use the top level series layer for coloring
-            seriesLayers.pop();
+            if (seriesLayers.length > 1) {
+              seriesLayers.pop();
+            }
           }
 
           const outputColor = palette.getColor(seriesLayers);
