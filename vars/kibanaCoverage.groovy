@@ -130,7 +130,7 @@ def ingestData(jobName, buildNum, buildUrl, title) {
     source src/dev/ci_setup/setup_env.sh
     yarn kbn bootstrap --prefer-offline
     # Using existing target/kibana-coverage folder
-    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${jobName} ${buildNum} ${buildUrl}
+    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}'
   """, title)
 }
 
