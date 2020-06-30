@@ -26,8 +26,10 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
   const [title, setTitle] = useState('');
   const [color, setColor] = useState(defaultColor);
   const [description, setDescription] = useState('');
+  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = async () => {
+    setDisabled(true);
     manager
       .create$({
         tag: {
@@ -46,6 +48,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
         },
         (error) => {
           toasts.addError(error, { title: txtCouldNotCreate });
+          setDisabled(false);
         }
       );
   };
@@ -55,6 +58,7 @@ export const CreateNewTagForm: React.FC<Props> = ({ onCreate }) => {
       title={title}
       color={color}
       description={description}
+      disabled={disabled}
       onTitleChange={setTitle}
       onColorChange={setColor}
       onDescriptionChange={setDescription}

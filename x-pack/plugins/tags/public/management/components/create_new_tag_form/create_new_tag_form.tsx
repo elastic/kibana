@@ -20,6 +20,7 @@ export interface Props {
   title: string;
   color?: string;
   description?: string;
+  disabled?: boolean;
   onTitleChange: (title: string) => void;
   onColorChange?: (color: string) => void;
   onDescriptionChange?: (description: string) => void;
@@ -30,6 +31,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
   title,
   color,
   description,
+  disabled,
   onTitleChange,
   onColorChange,
   onDescriptionChange,
@@ -50,6 +52,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
           onChange={(e) => onTitleChange(e.target.value)}
           autoFocus
           aria-label={txtTitle}
+          disabled={disabled}
         />
       </EuiFormRow>
 
@@ -59,6 +62,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
             color={color}
             onChange={(newColor) => onColorChange(newColor)}
             aria-label={txtColor}
+            disabled={disabled}
           />
         </EuiFormRow>
       )}
@@ -69,6 +73,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
             aria-label={txtDescription}
+            disabled={disabled}
           />
         </EuiFormRow>
       )}
