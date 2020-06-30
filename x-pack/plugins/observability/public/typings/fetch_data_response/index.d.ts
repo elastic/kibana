@@ -16,7 +16,7 @@ export interface Coordinates {
   y?: number;
 }
 
-export interface Series {
+interface Series {
   label: string;
   coordinates: Coordinates[];
   color?: string;

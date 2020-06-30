@@ -11,7 +11,7 @@ import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { MetricsFetchDataResponse, Series } from '../../../../typings/fetch_data_response';
+import { MetricsFetchDataResponse } from '../../../../typings/fetch_data_response';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 
@@ -20,6 +20,8 @@ interface Props {
   endTime?: string;
   bucketSize?: string;
 }
+
+type MetricsSeries = MetricsFetchDataResponse['series'];
 
 export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
   const { data, status } = useFetcher(() => {
@@ -46,7 +48,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
             const stat = data.stats[statKey];
             const value = formatStatValue(stat);
 
-            const serie = data.series[key as keyof MetricsFetchDataResponse['series']];
+            const serie = data.series[key as keyof MetricsSeries];
 
             const chart = serie ? (
               <AreaChart serie={serie} isLoading={isLoading} />
@@ -70,7 +72,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
   );
 };
 
-const AreaChart = ({ serie, isLoading }: { serie: Series; isLoading: boolean }) => {
+const AreaChart = ({ serie, isLoading }: { serie: MetricsSeries; isLoading: boolean }) => {
   const theme = useContext(ThemeContext);
 
   return (
