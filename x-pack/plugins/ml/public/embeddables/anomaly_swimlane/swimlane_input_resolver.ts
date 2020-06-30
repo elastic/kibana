@@ -16,6 +16,7 @@ import {
   skipWhile,
   startWith,
   switchMap,
+  tap,
 } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
@@ -67,6 +68,7 @@ export function useSwimlaneInputResolver(
   number,
   (perPage: number) => void,
   TimeBuckets,
+  boolean,
   Error | null | undefined
 ] {
   const [{ uiSettings }, , { anomalyTimelineService, anomalyDetectorService }] = services;
@@ -75,6 +77,7 @@ export function useSwimlaneInputResolver(
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>();
   const [error, setError] = useState<Error | null>();
   const [perPage, setPerPage] = useState<number | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
   const fromPage$ = useMemo(() => new Subject<number>(), []);
@@ -105,6 +108,7 @@ export function useSwimlaneInputResolver(
       refresh.pipe(startWith(null)),
     ])
       .pipe(
+        tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         switchMap(([jobs, input, swimlaneContainerWidth, fromPageInput, perPageFromState]) => {
           const {
@@ -195,6 +199,7 @@ export function useSwimlaneInputResolver(
         if (data !== undefined) {
           setError(null);
           setSwimlaneData(data);
+          setIsLoading(false);
         }
       });
 
@@ -222,6 +227,7 @@ export function useSwimlaneInputResolver(
     perPage ?? EMBEDDABLE_DEFAULT_PER_PAGE,
     setPerPage,
     timeBuckets,
+    isLoading,
     error,
   ];
 }

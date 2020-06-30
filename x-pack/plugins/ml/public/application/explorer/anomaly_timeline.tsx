@@ -37,6 +37,7 @@ import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import { OverallSwimlaneData } from './explorer_utils';
+import { NoOverallData } from './components/no_overall_data';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -170,11 +171,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
     }, []);
 
-    const showViewBySwimlane =
-      viewBySwimlaneData !== null &&
-      viewBySwimlaneData.laneLabels &&
-      viewBySwimlaneData.laneLabels.length > 0;
-
     const menuItems = useMemo(() => {
       const items = [];
       if (canEditDashboards) {
@@ -301,6 +297,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               selection={selectedCells}
               swimlaneRenderDoneListener={swimlaneRenderDoneListener}
               onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
+              isLoading={loading}
+              noDataWarning={<NoOverallData />}
             />
           </div>
 
@@ -342,19 +340,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                         explorerService.setViewByFromPage(fromPageUpdate);
                       }
                     }}
+                    isLoading={loading || viewBySwimlaneDataLoading}
+                    noDataWarning={
+                      typeof viewBySwimlaneFieldName === 'string' ? (
+                        <ExplorerNoInfluencersFound
+                          viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                          showFilterMessage={filterActive === true}
+                        />
+                      ) : null
+                    }
                   />
                 </div>
               </>
-
-              {!loading &&
-                !showViewBySwimlane &&
-                !viewBySwimlaneDataLoading &&
-                typeof viewBySwimlaneFieldName === 'string' && (
-                  <ExplorerNoInfluencersFound
-                    viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                    showFilterMessage={filterActive === true}
-                  />
-                )}
             </>
           )}
         </EuiPanel>

@@ -50,8 +50,20 @@ export const SwimlaneContainer: FC<
     perPage?: number;
     swimlaneLimit?: number;
     onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
+    isLoading: boolean;
+    noDataWarning: string | JSX.Element | null;
   }
-> = ({ children, onResize, perPage, fromPage, swimlaneLimit, onPaginationChange, ...props }) => {
+> = ({
+  children,
+  onResize,
+  perPage,
+  fromPage,
+  swimlaneLimit,
+  onPaginationChange,
+  isLoading,
+  noDataWarning,
+  ...props
+}) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const resizeHandler = useCallback(
@@ -67,9 +79,13 @@ export const SwimlaneContainer: FC<
   );
 
   const showSwimlane =
-    props.swimlaneData && props.swimlaneData.laneLabels && props.swimlaneData.laneLabels.length > 0;
+    props.swimlaneData &&
+    props.swimlaneData.laneLabels &&
+    props.swimlaneData.laneLabels.length > 0 &&
+    props.swimlaneData.points.length > 0;
 
   const isPaginationVisible =
+    (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
     onPaginationChange &&
     props.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
@@ -83,14 +99,14 @@ export const SwimlaneContainer: FC<
           <EuiFlexGroup
             gutterSize={'none'}
             direction={'column'}
-            style={{ width: '100%', height: '100%' }}
+            style={{ width: '100%', height: '100%', overflow: 'hidden' }}
             ref={(el) => {
               resizeRef(el);
             }}
           >
             <EuiFlexItem style={{ width: '100%', overflowY: 'auto' }} grow={false}>
               <EuiText color="subdued" size="s">
-                {showSwimlane ? (
+                {showSwimlane && !isLoading && (
                   <MlTooltipComponent>
                     {(tooltipService) => (
                       <ExplorerSwimlane
@@ -100,11 +116,13 @@ export const SwimlaneContainer: FC<
                       />
                     )}
                   </MlTooltipComponent>
-                ) : (
+                )}
+                {isLoading && (
                   <EuiText textAlign={'center'}>
                     <EuiLoadingChart size="xl" />
                   </EuiText>
                 )}
+                {!isLoading && !showSwimlane && noDataWarning}
               </EuiText>
             </EuiFlexItem>
             {isPaginationVisible && (

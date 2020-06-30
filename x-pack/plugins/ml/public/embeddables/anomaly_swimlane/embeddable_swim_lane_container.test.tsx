@@ -89,6 +89,8 @@ describe('ExplorerSwimlaneContainer', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      undefined,
       { message: 'Something went wrong' },
     ]);
 

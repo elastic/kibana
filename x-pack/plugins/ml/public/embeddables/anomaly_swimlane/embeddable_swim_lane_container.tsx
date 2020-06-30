@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
@@ -47,6 +47,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     perPage,
     setPerPage,
     timeBuckets,
+    isLoading,
     error,
   ] = useSwimlaneInputResolver(
     embeddableInput,
@@ -96,6 +97,15 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
             setPerPage(update.perPage);
           }
         }}
+        isLoading={isLoading}
+        noDataWarning={
+          <EuiText textAlign={'center'} size="m">
+            <FormattedMessage
+              id="xpack.ml.swimlaneEmbeddable.noDataFound"
+              defaultMessage="No anomalies found"
+            />
+          </EuiText>
+        }
       />
     </div>
   );

@@ -46,6 +46,9 @@ describe('AnomalySwimlaneEmbeddableFactory', () => {
     });
     expect(Object.keys(createServices[0])).toEqual(Object.keys(coreStart));
     expect(createServices[1]).toMatchObject(pluginsStart);
-    expect(Object.keys(createServices[2])).toEqual(['anomalyDetectorService', 'explorerService']);
+    expect(Object.keys(createServices[2])).toEqual([
+      'anomalyDetectorService',
+      'anomalyTimelineService',
+    ]);
   });
 });
