@@ -23,5 +23,9 @@
         "type": "text"
       }
     }
+  },
+  "maps-telemetry": {
+    "type": "object",
+    "enabled": false
   }
 }
