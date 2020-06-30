@@ -27,7 +27,6 @@ import {
 } from './types';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-import { searchSavedObjectType } from '../saved_objects';
 import { DataPluginStart } from '../plugin';
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -36,8 +35,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
-    core.savedObjects.registerType(searchSavedObjectType);
-
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
       esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
