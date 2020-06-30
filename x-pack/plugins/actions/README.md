@@ -612,13 +612,15 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
 
 When creating a new action type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the actions plugin, but there are some additional things to think about about and implement.
 
+Consider working with the alerting team on early structure /design feedback of new actions, especially as the APIs and infrastructure are still under development.
+
 ## licensing
 
 Currently actions are licensed as "basic" if the action only interacts with the stack, eg the server log and es index actions.  Other actions are at least "gold" level.  
 
 ## plugin location
 
-Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.
+Currently actions that are licensed as "basic" **MUST** be implemented in the actions plugin, other actions can be implemented in any other plugin that pre-reqs the actions plugin.  If the new action is generic across the stack, it probably belongs in the actions plugin, but if your action is very specific to a plugin/solution, it might be easiest to implement it in the plugin/solution.  Keep in mind that if Kibana is run without the plugin being enabled, any actions defined in that plugin will not run, nor will those actions be available via APIs or UI.
 
 Actions that take URLs or hostnames should check that those values are whitelisted.  The whitelisting utilities are currently internal to the actions plugin, and so such actions will need to be implemented in the actions plugin.  Longer-term, we will expose these utilities so they can be used by alerts implemented in other plugins; see [issue #64659](https://github.com/elastic/kibana/issues/64659).
 
@@ -640,4 +642,4 @@ Instead of `schema.maybe()`, use `schema.nullable()`, which is the same as `sche
 
 ## user interface
 
-In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).
+In order to make this action usable in the Kibana UI, you will need to provide all the UI editing aspects of the action.  The existing action type user interfaces are defined in [`x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`](../triggers_actions_ui/public/application/components/builtin_action_types).  For more information, see the [UI documentation](../triggers_actions_ui/README.md#create-and-register-new-action-type-ui).
