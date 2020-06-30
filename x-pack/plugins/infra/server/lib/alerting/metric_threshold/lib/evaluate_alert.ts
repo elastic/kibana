@@ -15,8 +15,8 @@ import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
 import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
+import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
-import { DOCUMENT_COUNT_I18N } from '../messages';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 interface Aggregation {

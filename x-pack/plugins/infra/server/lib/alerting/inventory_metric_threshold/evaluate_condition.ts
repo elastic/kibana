@@ -17,13 +17,12 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
 
-interface ConditionResult {
+type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean | boolean[];
-  currentValue?: number | null;
-  metric: string;
+  currentValue: number;
   isNoData: boolean;
   isError: boolean;
-}
+};
 
 export const evaluateCondition = async (
   condition: InventoryMetricConditions,
@@ -59,17 +58,23 @@ export const evaluateCondition = async (
   const comparisonFunction = comparatorMap[comparator];
 
   return mapValues(currentValues, (value) => ({
+    ...condition,
     shouldFire:
       value !== undefined &&
       value !== null &&
       (Array.isArray(value)
         ? value.map((v) => comparisonFunction(Number(v), threshold))
         : comparisonFunction(value, threshold)),
-    metric,
     isNoData: value === null,
     isError: value === undefined,
-    ...(!Array.isArray(value) ? { currentValue: value } : {}),
+    currentValue: getCurrentValue(value),
   }));
+};
+
+const getCurrentValue: (value: any) => number = (value) => {
+  if (Array.isArray(value)) return getCurrentValue(last(value));
+  if (value !== null) return Number(value);
+  return NaN;
 };
 
 const getData = async (

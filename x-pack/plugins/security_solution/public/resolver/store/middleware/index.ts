@@ -43,7 +43,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
         action.type === 'appDetectedMissingEventData'
       ) {
         const entityIdToFetchFor = action.payload;
-        let result: ResolverRelatedEvents;
+        let result: ResolverRelatedEvents | undefined;
         try {
           result = await context.services.http.get(
             `/api/endpoint/resolver/${entityIdToFetchFor}/events`,
@@ -51,15 +51,17 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (context) => {
               query: { events: 100 },
             }
           );
-
-          api.dispatch({
-            type: 'serverReturnedRelatedEventData',
-            payload: result,
-          });
-        } catch (e) {
+        } catch {
           api.dispatch({
             type: 'serverFailedToReturnRelatedEventData',
             payload: action.payload,
+          });
+        }
+
+        if (result) {
+          api.dispatch({
+            type: 'serverReturnedRelatedEventData',
+            payload: result,
           });
         }
       }

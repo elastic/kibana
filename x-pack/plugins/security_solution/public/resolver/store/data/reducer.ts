@@ -9,7 +9,6 @@ import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
 
 const initialState: DataState = {
-  relatedEventsStats: new Map(),
   relatedEvents: new Map(),
   relatedEventsReady: new Map(),
 };
