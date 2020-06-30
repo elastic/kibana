@@ -18,7 +18,7 @@ import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
 import { formatDateTimeLocal } from '../../common/formatting';
 import { AlertState } from '../../server/alerts/types';
-import { AlertStatus } from './status';
+import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
 
@@ -31,7 +31,7 @@ function getDateFromState(states: CommonAlertState[]) {
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
 }
-export const AlertsList: React.FC<Props> = (props: Props) => {
+export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode();
   const alerts = Object.values(props.alerts).filter(Boolean);
@@ -70,7 +70,7 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
           width: 400,
           content: (
             <div style={{ padding: '1rem' }}>
-              <AlertStatus alert={alertStatus} />
+              <AlertPanel alert={alertStatus} />
             </div>
           ),
         };
@@ -147,7 +147,7 @@ export const AlertsList: React.FC<Props> = (props: Props) => {
             width: 400,
             content: (
               <div style={{ padding: '1rem' }}>
-                <AlertStatus alert={alertStatus} />
+                <AlertPanel alert={alertStatus} />
               </div>
             ),
           };

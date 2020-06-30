@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsList } from '../../../alerts/list';
+import { AlertsBadge } from '../../../alerts/badge';
 
 const getColumns = (setupMode, alerts) => {
   const columns = [
@@ -91,7 +91,7 @@ const getColumns = (setupMode, alerts) => {
         if (alerts) {
           return (
             <div>
-              <AlertsList alerts={alerts} />
+              <AlertsBadge alerts={alerts} />
             </div>
           );
         }

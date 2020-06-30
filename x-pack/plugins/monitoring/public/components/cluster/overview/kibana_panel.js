@@ -30,7 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { KIBANA_SYSTEM_ID, ALERT_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { AlertsList } from '../../../alerts/list';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 
 const INSTANCES_PANEL_ALERTS = [ALERT_KIBANA_VERSION_MISMATCH];
 
@@ -59,14 +60,11 @@ export function KibanaPanel(props) {
     ) : null;
 
   let instancesAlertStatus = null;
-  if (
-    (setupMode && setupMode.enabled) ||
-    INSTANCES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
-  ) {
+  if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS)) {
     const alertsList = INSTANCES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     instancesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }
@@ -137,7 +135,7 @@ export function KibanaPanel(props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -166,7 +164,7 @@ export function KibanaPanel(props) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {setupModeTooltip}
                   {instancesAlertStatus}
                 </EuiFlexGroup>

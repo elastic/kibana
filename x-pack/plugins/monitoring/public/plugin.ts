@@ -25,7 +25,7 @@ import {
   KIBANA_CLUSTER_ALERTS_ENABLED,
 } from '../common/constants';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import { createCpuUsageAlertType } from './alerts/cpu_usage';
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
 
 export class MonitoringPlugin

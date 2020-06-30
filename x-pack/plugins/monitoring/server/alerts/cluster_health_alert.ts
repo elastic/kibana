@@ -76,8 +76,9 @@ export class ClusterHealthAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
+    const size = this.config.ui.max_bucket_size;
     const [clustersHealth, legacyAlerts] = await Promise.all([
-      await fetchClusterHealth(callCluster, clusters, esIndexPattern),
+      await fetchClusterHealth(callCluster, clusters, esIndexPattern, size),
       await fetchLegacyAlerts(
         callCluster,
         clusters,

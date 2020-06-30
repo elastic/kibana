@@ -7,9 +7,9 @@
 import React, { Fragment } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { CommonAlertParamDetails } from '../../../common/types';
-import { AlertParamDuration } from '../alert_param_duration';
+import { AlertParamDuration } from '../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../common/enums';
-import { AlertParamPercentage } from '../alert_param_percentage';
+import { AlertParamPercentage } from '../flyout_expressions/alert_param_percentage';
 
 export interface Props {
   alertParams: { [property: string]: any };

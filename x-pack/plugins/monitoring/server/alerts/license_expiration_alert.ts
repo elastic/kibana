@@ -25,6 +25,7 @@ import {
   ALERT_LICENSE_EXPIRATION,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
+  FORMAT_DURATION_TEMPLATE_SHORT,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -85,8 +86,9 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
+    const size = this.config.ui.max_bucket_size;
     const [licenses, legacyAlerts] = await Promise.all([
-      await fetchLicenses(callCluster, clusters, esIndexPattern),
+      await fetchLicenses(callCluster, clusters, esIndexPattern, size),
       await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
     ]);
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
@@ -205,13 +207,13 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
-        expiredDate: $expiry.calendar(),
+        expiredDate: $expiry.format(FORMAT_DURATION_TEMPLATE_SHORT).trim(),
         clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
         state: FIRING,
-        expiredDate: $expiry.calendar(),
+        expiredDate: $expiry.format(FORMAT_DURATION_TEMPLATE_SHORT).trim(),
         clusterName: cluster.clusterName,
         action: i18n.translate('xpack.monitoring.alerts.licenseExpiration.action', {
           defaultMessage: 'Please update your license',
@@ -232,7 +234,7 @@ export class LicenseExpirationAlert extends BaseAlert {
             },
           }),
           message: i18n.translate('xpack.monitoring.alerts.licenseExpiration.emailMessage', {
-            defaultMessage: `Your license will expire on {expiredDate} for {clusterName}. {action}`,
+            defaultMessage: `Your license will expire in {expiredDate} for {clusterName}. {action}`,
             values: {
               expiredDate: '{{context.expiredDate}}',
               action: '{{context.action}}',
@@ -243,7 +245,7 @@ export class LicenseExpirationAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_LOG:
         return {
           message: i18n.translate('xpack.monitoring.alerts.licenseExpiration.serverLog', {
-            defaultMessage: `License expiration alert is {state} for {clusterName}. Your license will expire on {expiredDate}. {action}`,
+            defaultMessage: `License expiration alert is {state} for {clusterName}. Your license will expire in {expiredDate}. {action}`,
             values: {
               state: '{{context.state}}',
               expiredDate: '{{context.expiredDate}}',

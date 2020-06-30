@@ -3,85 +3,92 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
-import { EuiSpacer, EuiCallOut, EuiButton } from '@elastic/eui';
-
+import React from 'react';
+import { EuiToolTip, EuiHealth } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { CommonAlertStatus } from '../../common/types';
-import { AlertMessage } from '../../server/alerts/types';
-import { Legacy } from '../legacy_shims';
-import { replaceTokens } from './replace_tokens';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertEdit } from '../../../triggers_actions_ui/public';
-import { isInSetupMode } from '../lib/setup_mode';
+import { AlertSeverity } from '../../common/enums';
+import { AlertState } from '../../server/alerts/types';
 
 interface Props {
-  alert: CommonAlertStatus;
+  alerts: { [alertTypeId: string]: CommonAlertStatus };
 }
 export const AlertStatus: React.FC<Props> = (props: Props) => {
-  const {
-    alert: { states, alert },
-  } = props;
-  const [showFlyout, setShowFlyout] = React.useState(false);
-  const inSetupMode = isInSetupMode();
+  const { alerts } = props;
 
-  if (!alert.rawAlert) {
-    return null;
-  }
-
-  const flyoutUi = showFlyout ? (
-    <AlertsContextProvider
-      value={{
-        http: Legacy.shims.http,
-        actionTypeRegistry: Legacy.shims.actionTypeRegistry,
-        alertTypeRegistry: Legacy.shims.alertTypeRegistry,
-        toastNotifications: Legacy.shims.toastNotifications,
-        uiSettings: Legacy.shims.uiSettings,
-        docLinks: Legacy.shims.docLinks,
-        charts: undefined,
-        dataFieldsFormats: undefined,
-        reloadAlerts: async () => {},
-        capabilities: Legacy.shims.capabilities,
-      }}
-    >
-      <AlertEdit initialAlert={alert.rawAlert} onClose={() => setShowFlyout(false)} />
-    </AlertsContextProvider>
-  ) : null;
-
-  const firingStates = states.filter((state) => state.firing);
-  if (!firingStates.length) {
-    if (inSetupMode) {
-      return (
-        <Fragment>
-          <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
-          {flyoutUi}
-        </Fragment>
-      );
+  let atLeastOneDanger = false;
+  const count = Object.values(alerts).reduce((cnt, alertStatus) => {
+    if (alertStatus.states.length) {
+      for (const state of alertStatus.states) {
+        if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
+          atLeastOneDanger = true;
+        }
+      }
+      cnt++;
     }
-    return null;
+    return cnt;
+  }, 0);
+
+  if (count === 0) {
+    return (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.monitoring.cluster.listing.alertsInticator.clearStatusTooltip',
+          {
+            defaultMessage: 'Cluster status is clear!',
+          }
+        )}
+        position="bottom"
+      >
+        <EuiHealth color="success" data-test-subj="alertIcon">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.listing.alertsInticator.clearTooltip"
+            defaultMessage="Clear"
+          />
+        </EuiHealth>
+      </EuiToolTip>
+    );
   }
 
-  const firingState = firingStates[0];
-  const nextStepsUi =
-    firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
-      <ul>
-        {firingState.state.ui.message.nextSteps.map((step: AlertMessage, index: number) => (
-          <li key={index}>{replaceTokens(step)}</li>
-        ))}
-      </ul>
-    ) : null;
+  const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;
+
+  const tooltipText = (() => {
+    switch (severity) {
+      case AlertSeverity.Danger:
+        return i18n.translate(
+          'xpack.monitoring.cluster.listing.alertsInticator.highSeverityTooltip',
+          {
+            defaultMessage:
+              'There are some critical cluster issues that require your immediate attention!',
+          }
+        );
+      case AlertSeverity.Warning:
+        return i18n.translate(
+          'xpack.monitoring.cluster.listing.alertsInticator.mediumSeverityTooltip',
+          {
+            defaultMessage: 'There are some issues that might have impact on your cluster.',
+          }
+        );
+      default:
+        // might never show
+        return i18n.translate(
+          'xpack.monitoring.cluster.listing.alertsInticator.lowSeverityTooltip',
+          {
+            defaultMessage: 'There are some low-severity cluster issues',
+          }
+        );
+    }
+  })();
 
   return (
-    <Fragment>
-      <EuiCallOut
-        title={replaceTokens(firingState.state.ui.message)}
-        color={firingState.state.ui.severity}
-      >
-        {nextStepsUi}
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-      <EuiButton onClick={() => setShowFlyout(true)}>View alert configuration</EuiButton>
-      {flyoutUi}
-    </Fragment>
+    <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
+      <EuiHealth color={severity} data-test-subj="alertIcon">
+        <FormattedMessage
+          id="xpack.monitoring.cluster.listing.alertsInticator.alertsTooltip"
+          defaultMessage="Alerts"
+        />
+      </EuiHealth>
+    </EuiToolTip>
   );
 };

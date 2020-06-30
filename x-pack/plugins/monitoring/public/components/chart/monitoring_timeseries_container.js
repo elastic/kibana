@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertsList } from '../../alerts/list';
+import { AlertsBadge } from '../../alerts/badge';
 import { AlertSeverity } from '../../../common/enums';
 import { CommonAlertSeverityColorMap } from '../../../common/types';
 
@@ -75,7 +75,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   if (series.alerts) {
     alertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={series.alerts} />
+        <AlertsBadge alerts={series.alerts} />
       </EuiFlexItem>
     );
     let severity;

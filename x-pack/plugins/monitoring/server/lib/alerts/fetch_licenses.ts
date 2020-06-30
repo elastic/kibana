@@ -9,7 +9,8 @@ import { AlertLicense, AlertCluster } from '../../alerts/types';
 export async function fetchLicenses(
   callCluster: any,
   clusters: AlertCluster[],
-  index: string
+  index: string,
+  size: number
 ): Promise<AlertLicense[]> {
   const params = {
     index,
@@ -19,7 +20,7 @@ export async function fetchLicenses(
       'hits.hits._index',
     ],
     body: {
-      size: 1,
+      size,
       sort: [{ timestamp: { order: 'desc' } }],
       query: {
         bool: {
@@ -43,6 +44,9 @@ export async function fetchLicenses(
             },
           ],
         },
+      },
+      collapse: {
+        field: 'cluster_uuid',
       },
     },
   };

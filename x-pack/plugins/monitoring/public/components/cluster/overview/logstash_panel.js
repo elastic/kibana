@@ -35,7 +35,8 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { AlertsList } from '../../../alerts/list';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 
 const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
 
@@ -65,14 +66,11 @@ export function LogstashPanel(props) {
     ) : null;
 
   let nodesAlertStatus = null;
-  if (
-    (setupMode && setupMode.enabled) ||
-    NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
-  ) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }
@@ -134,7 +132,7 @@ export function LogstashPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -163,7 +161,7 @@ export function LogstashPanel(props) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {setupModeTooltip}
                   {nodesAlertStatus}
                 </EuiFlexGroup>

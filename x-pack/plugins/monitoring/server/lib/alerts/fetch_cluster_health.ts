@@ -9,7 +9,8 @@ import { AlertCluster, AlertClusterHealth } from '../../alerts/types';
 export async function fetchClusterHealth(
   callCluster: any,
   clusters: AlertCluster[],
-  index: string
+  index: string,
+  size: number
 ): Promise<AlertClusterHealth[]> {
   const params = {
     index,
@@ -19,7 +20,7 @@ export async function fetchClusterHealth(
       'hits.hits._index',
     ],
     body: {
-      size: 1,
+      size,
       sort: [{ timestamp: { order: 'desc' } }],
       query: {
         bool: {
@@ -43,6 +44,9 @@ export async function fetchClusterHealth(
             },
           ],
         },
+      },
+      collapse: {
+        field: 'cluster_uuid',
       },
     },
   };

@@ -13,7 +13,7 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
-import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
+import { verifyMonitoringLicense } from '../../cluster_alerts/verify_monitoring_license';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
 import {
@@ -29,6 +29,7 @@ import {
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
+import { fetchStatus } from '../alerts/fetch_status';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
@@ -47,7 +48,6 @@ export async function getClustersFromRequest(
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
-    alertsIndex,
     filebeatIndexPattern,
   } = indexPatterns;
 
@@ -117,21 +117,53 @@ export async function getClustersFromRequest(
 
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
-      const clustersAlerts = await alertsClustersAggregation(
-        req,
-        alertsIndex,
-        clusters,
-        checkLicenseForAlerts
-      );
-      clusters.forEach((cluster) => {
+      const alertsClient = req.getAlertsClient();
+      for (const cluster of clusters) {
+        const verification = verifyMonitoringLicense(req.server);
+        if (!verification.enabled) {
+          // return metadata detailing that alerts is disabled because of the monitoring cluster license
+          cluster.alerts = {
+            alertsMeta: {
+              enabled: verification.enabled,
+              message: verification.message, // NOTE: this is only defined when the alert feature is disabled
+            },
+            list: {},
+          };
+          continue;
+        }
+
+        // check the license type of the production cluster for alerts feature support
+        const license = cluster.license || {};
+        const prodLicenseInfo = checkLicenseForAlerts(
+          license.type,
+          license.status === 'active',
+          'production'
+        );
+        if (prodLicenseInfo.clusterAlerts.enabled) {
+          cluster.alerts = {
+            list: await fetchStatus(alertsClient, undefined, cluster.cluster_uuid, start, end, []),
+          };
+          continue;
+        }
+
         cluster.alerts = {
-          alertsMeta: {
-            enabled: clustersAlerts.alertsMeta.enabled,
-            message: clustersAlerts.alertsMeta.message, // NOTE: this is only defined when the alert feature is disabled
+          list: {},
+          clusterMeta: {
+            enabled: false,
+            message: i18n.translate(
+              'xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription',
+              {
+                defaultMessage:
+                  'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
+                values: {
+                  clusterName: cluster.cluster_name,
+                  licenseType: `${license.type}`,
+                },
+              }
+            ),
           },
-          ...clustersAlerts[cluster.cluster_uuid],
         };
-      });
+      }
     }
   }
 

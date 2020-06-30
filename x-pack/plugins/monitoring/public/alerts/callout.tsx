@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
-import { replaceTokens } from './replace_tokens';
+import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage } from '../../server/alerts/types';
 
 const TYPES = [

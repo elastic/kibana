@@ -11,12 +11,12 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertMessageDocLinkToken,
-} from '../../server/alerts/types';
+} from '../../../server/alerts/types';
 // @ts-ignore
-import { formatTimestampToDuration } from '../../common';
-import { CALCULATE_DURATION_UNTIL } from '../../common/constants';
-import { AlertMessageTokenType } from '../../common/enums';
-import { Legacy } from '../legacy_shims';
+import { formatTimestampToDuration } from '../../../common';
+import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
+import { AlertMessageTokenType } from '../../../common/enums';
+import { Legacy } from '../../legacy_shims';
 
 // interface Props {
 //   alertMessage: AlertMessage;

@@ -17,16 +17,46 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { AlertStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import './listing.scss';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
+};
+
+/*
+ * This checks if alerts feature is supported via monitoring cluster
+ * license. If the alerts feature is not supported because the prod cluster
+ * license is basic, IsClusterSupported makes the status col hidden
+ * completely
+ */
+const IsAlertsSupported = (props) => {
+  const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
+  if (alertsMeta.enabled && clusterMeta.enabled) {
+    return <span>{props.children}</span>;
+  }
+
+  const message =
+    alertsMeta.message ||
+    clusterMeta.message ||
+    i18n.translate('xpack.monitoring.cluster.listing.unknownHealthMessage', {
+      defaultMessage: 'Unknown',
+    });
+
+  return (
+    <EuiToolTip content={message} position="bottom">
+      <EuiHealth color="subdued" data-test-subj="alertIcon">
+        N/A
+      </EuiHealth>
+    </EuiToolTip>
+  );
 };
 
 const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
@@ -79,22 +109,21 @@ const getColumns = (
         );
       },
     },
-    // TODO: use new alerts here
-    // {
-    //   name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
-    //     defaultMessage: 'Status',
-    //   }),
-    //   field: 'status',
-    //   'data-test-subj': 'alertsStatus',
-    //   sortable: true,
-    //   render: (_status, cluster) => (
-    //     <IsClusterSupported {...cluster}>
-    //       <IsAlertsSupported cluster={cluster}>
-    //         <AlertsIndicator alerts={cluster.alerts} />
-    //       </IsAlertsSupported>
-    //     </IsClusterSupported>
-    //   ),
-    // },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
+        defaultMessage: 'Status',
+      }),
+      field: 'status',
+      'data-test-subj': 'alertsStatus',
+      sortable: true,
+      render: (_status, cluster) => (
+        <IsClusterSupported {...cluster}>
+          <IsAlertsSupported cluster={cluster}>
+            <AlertStatus alerts={cluster.alerts.list} />
+          </IsAlertsSupported>
+        </IsClusterSupported>
+      ),
+    },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.nodesColumnTitle', {
         defaultMessage: 'Nodes',

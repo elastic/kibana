@@ -42,7 +42,8 @@ import {
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
 } from '../../../../common/constants';
-import { AlertsList } from '../../../alerts/list';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -149,6 +150,8 @@ function renderLog(log) {
   );
 }
 
+const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
+
 const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,
   ALERT_NODES_CHANGED,
@@ -218,28 +221,21 @@ export function ElasticsearchPanel(props) {
   };
 
   let nodesAlertStatus = null;
-  if (
-    (setupMode && setupMode.enabled) ||
-    NODES_PANEL_ALERTS.find((name) => alerts[name] && alerts[name].states.length)
-  ) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }
 
   let overviewAlertStatus = null;
-  if (
-    (setupMode && setupMode.enabled) ||
-    alerts[ALERT_CLUSTER_HEALTH] ||
-    alerts[ALERT_LICENSE_EXPIRATION]
-  ) {
-    const alertsList = [alerts[ALERT_CLUSTER_HEALTH], alerts[ALERT_LICENSE_EXPIRATION]];
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS)) {
+    const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsList alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }
@@ -249,7 +245,7 @@ export function ElasticsearchPanel(props) {
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -350,7 +346,7 @@ export function ElasticsearchPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -367,7 +363,7 @@ export function ElasticsearchPanel(props) {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {setupModeTooltip}
                   {nodesAlertStatus}
                 </EuiFlexGroup>

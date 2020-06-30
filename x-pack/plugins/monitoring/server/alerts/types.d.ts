@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UiSettingsServiceStart, ICustomClusterClient, Logger } from 'kibana/server';
+import { UiSettingsServiceStart, ILegacyCustomClusterClient, Logger } from 'kibana/server';
 import { AlertClusterHealthType, AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { MonitoringConfig } from '../config';
 
@@ -109,7 +109,7 @@ export interface AlertParams {
 
 export interface AlertCreationParameters {
   getUiSettingsService: () => Promise<UiSettingsServiceStart>;
-  monitoringCluster: ICustomClusterClient;
+  monitoringCluster: ILegacyCustomClusterClient;
   getLogger: (...scopes: string[]) => Logger;
   config: MonitoringConfig;
   kibanaUrl: string;

@@ -31,7 +31,7 @@ import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID, ALERT_CPU_USAGE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsList } from '../../../alerts/list';
+import { AlertsBadge } from '../../../alerts/badge';
 import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 const getNodeTooltip = (node) => {
@@ -136,7 +136,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       if (alerts) {
         return (
           <div>
-            <AlertsList alerts={alerts} />
+            <AlertsBadge alerts={alerts} />
           </div>
         );
       }
