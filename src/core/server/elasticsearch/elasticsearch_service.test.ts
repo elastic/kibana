@@ -31,6 +31,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>

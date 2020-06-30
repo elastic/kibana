@@ -175,8 +175,8 @@ export const elasticsearchServiceMock = {
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
-  createClusterClient: createClusterClientMock,
-  createCustomClusterClient: createCustomClusterClientMock,
-  createScopedClusterClient: createScopedClusterClientMock,
-  createElasticsearchClient: createElasticsearchClientMock,
+  createLegacyClusterClient: createClusterClientMock,
+  createLegacyCustomClusterClient: createCustomClusterClientMock,
+  createLegacyScopedClusterClient: createScopedClusterClientMock,
+  createLegacyElasticsearchClient: createElasticsearchClientMock,
 };

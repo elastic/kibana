@@ -29,7 +29,7 @@ describe('test find all unenrolled HostId', () => {
   it('can find all hits with scroll', async () => {
     const firstHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
     const secondHostId = '2fdca33f-799f-49f4-939c-ea4383c77672';
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockScopedClient.callAsCurrentUser
       .mockImplementationOnce(() => Promise.resolve(createSearchResponse(secondHostId, 'scrollId')))
       .mockImplementationOnce(noUnenrolledEndpoint);
@@ -46,7 +46,7 @@ describe('test find all unenrolled HostId', () => {
   it('can find all unerolled endpoint host ids', async () => {
     const firstEndpointHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
     const secondEndpointHostId = '2fdca33f-799f-49f4-939c-ea4383c77672';
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockScopedClient.callAsCurrentUser
       .mockImplementationOnce(() =>
         Promise.resolve(createSearchResponse(firstEndpointHostId, 'initialScrollId'))
@@ -86,7 +86,7 @@ describe('test find unenrolled endpoint host id by hostId', () => {
 
   it('can find unenrolled endpoint by the host id when unenrolled', async () => {
     const firstEndpointHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() =>
       Promise.resolve(createSearchResponse(firstEndpointHostId, 'initialScrollId'))
     );
@@ -119,7 +119,7 @@ describe('test find unenrolled endpoint host id by hostId', () => {
 
   it('find unenrolled endpoint host by the host id return undefined when no unenrolled host', async () => {
     const firstHostId = '1fdca33f-799f-49f4-939c-ea4383c77671';
-    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(noUnenrolledEndpoint);
     const hostId = await findUnenrolledHostByHostId(mockScopedClient, firstHostId);
     expect(hostId).toBeFalsy();
