@@ -88,6 +88,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
               try {
                 const json = jsonContent.current.data.format();
                 const { processors, on_failure: onFailure } = json;
+                // This function will throw if it cannot parse the pipeline object
                 deserialize({ processors, onFailure });
                 onDone(json as any);
                 setIsModalVisible(false);
