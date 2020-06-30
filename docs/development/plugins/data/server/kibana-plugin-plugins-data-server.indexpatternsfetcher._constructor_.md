@@ -9,12 +9,12 @@ Constructs a new instance of the `IndexPatternsFetcher` class
 <b>Signature:</b>
 
 ```typescript
-constructor(callDataCluster: APICaller);
+constructor(callDataCluster: LegacyAPICaller);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  callDataCluster | <code>APICaller</code> |  |
+|  callDataCluster | <code>LegacyAPICaller</code> |  |
 

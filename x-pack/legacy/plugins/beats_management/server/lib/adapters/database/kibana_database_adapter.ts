@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ElasticsearchServiceStart, IClusterClient } from 'src/core/server';
+import { ElasticsearchServiceStart, ILegacyClusterClient } from 'src/core/server';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
 import {
@@ -23,7 +23,7 @@ import {
 } from './adapter_types';
 
 export class KibanaDatabaseAdapter implements DatabaseAdapter {
-  private es: IClusterClient;
+  private es: ILegacyClusterClient;
 
   constructor(elasticsearch: ElasticsearchServiceStart) {
     this.es = elasticsearch.legacy.client;

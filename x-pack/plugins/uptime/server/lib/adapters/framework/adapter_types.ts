@@ -7,7 +7,7 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   IRouter,
-  CallAPIOptions,
+  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from 'src/core/server';
@@ -18,7 +18,7 @@ import { DynamicSettings } from '../../../../common/runtime_types';
 export type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (

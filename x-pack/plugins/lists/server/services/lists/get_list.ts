@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
 import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 interface GetListOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
 }
 
