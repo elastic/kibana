@@ -19,7 +19,7 @@
 
 import { clientFacadeMock } from './client_facade.mock';
 import { IScopedClusterClient } from './scoped_cluster_client';
-import { IClusterClient } from './cluster_client';
+import { IClusterClient, ICustomClusterClient } from './cluster_client';
 
 const createScopedClusterClientMock = () => {
   const mock: jest.Mocked<IScopedClusterClient> = {
@@ -45,8 +45,22 @@ const createClusterClientMock = () => {
   return mock;
 };
 
-export const clientMock = {
+const createCustomClusterClientMock = () => {
+  const mock: jest.Mocked<ICustomClusterClient> = {
+    asInternalUser: jest.fn(),
+    asScoped: jest.fn(),
+    close: jest.fn(),
+  };
+
+  mock.asInternalUser.mockReturnValue(clientFacadeMock.create());
+  mock.asScoped.mockReturnValue(createScopedClusterClientMock());
+
+  return mock;
+};
+
+export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
+  createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
   createFacade: clientFacadeMock.create,
 };

@@ -24,6 +24,8 @@ import {
   ILegacyCustomClusterClient,
   ILegacyScopedClusterClient,
 } from './legacy';
+import { IClusterClient, ICustomClusterClient } from './client';
+import { elasticsearchClientMock } from './client/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
@@ -56,6 +58,11 @@ interface MockedElasticSearchServiceSetup {
   };
 }
 
+interface MockedElasticSearchServiceStart extends MockedElasticSearchServiceSetup {
+  client: jest.Mocked<IClusterClient>;
+  createClient: jest.Mock<ICustomClusterClient>;
+}
+
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
     legacy: {
@@ -68,15 +75,16 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
-
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
+    client: elasticsearchClientMock.createClusterClient(),
+    createClient: jest.fn(),
     legacy: {
       createClient: jest.fn(),
       client: createClusterClientMock(),
     },
   };
+  startContract.createClient.mockReturnValue(elasticsearchClientMock.createCustomClusterClient());
   startContract.legacy.createClient.mockReturnValue(createCustomClusterClientMock());
   startContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
   return startContract;

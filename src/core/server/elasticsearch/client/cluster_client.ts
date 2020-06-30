@@ -48,6 +48,14 @@ export interface IClusterClient {
   asScoped: (request: ScopeableRequest) => IScopedClusterClient;
 }
 
+export interface ICustomClusterClient extends IClusterClient {
+  /**
+   * Closes the cluster client. After that client cannot be used and one should
+   * create a new client instance to be able to interact with Elasticsearch API.
+   */
+  close: () => void;
+}
+
 /** @internal **/
 export class ClusterClient implements IClusterClient {
   private readonly internalClient: Client;
@@ -76,10 +84,6 @@ export class ClusterClient implements IClusterClient {
     return new ScopedClusterClient(this.internalFacade, scopedWrapper);
   }
 
-  /**
-   * Closes the cluster client. After that client cannot be used and one should
-   * create a new client instance to be able to interact with Elasticsearch API.
-   */
   public close() {
     if (this.isClosed) {
       return;

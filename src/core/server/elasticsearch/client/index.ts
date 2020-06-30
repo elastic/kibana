@@ -20,5 +20,5 @@
 export { IScopedClusterClient, ScopedClusterClient } from './scoped_cluster_client';
 export { ClientFacade } from './client_facade';
 export { ElasticsearchClientConfig } from './client_config';
-export { IClusterClient, ClusterClient } from './cluster_client';
+export { IClusterClient, ICustomClusterClient, ClusterClient } from './cluster_client';
 export { configureClient } from './configure_client';
