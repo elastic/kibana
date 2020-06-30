@@ -6,9 +6,7 @@
 
 import { fetchLandingPageData, hasData } from './observability_dashboard';
 import * as createCallApmApi from './createCallApmApi';
-import { getTheme } from '../../utils/get_theme';
-
-const theme = getTheme({ isDarkMode: false });
+import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi');
