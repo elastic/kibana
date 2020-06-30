@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function customLinksTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestRead = getService('supertestAsApmReadUser');
+  const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
 
   function searchCustomLinks(filters?: any) {
@@ -18,12 +18,12 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       pathname: `/api/apm/settings/custom_links`,
       query: filters,
     });
-    return supertest.get(path).set('kbn-xsrf', 'foo');
+    return supertestRead.get(path).set('kbn-xsrf', 'foo');
   }
 
   async function createCustomLink(customLink: CustomLink) {
     log.debug('creating configuration', customLink);
-    const res = await supertest
+    const res = await supertestWrite
       .post(`/api/apm/settings/custom_links`)
       .send(customLink)
       .set('kbn-xsrf', 'foo');
@@ -35,7 +35,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
   async function updateCustomLink(id: string, customLink: CustomLink) {
     log.debug('updating configuration', id, customLink);
-    const res = await supertest
+    const res = await supertestWrite
       .put(`/api/apm/settings/custom_links/${id}`)
       .send(customLink)
       .set('kbn-xsrf', 'foo');
@@ -47,7 +47,7 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
 
   async function deleteCustomLink(id: string) {
     log.debug('deleting configuration', id);
-    const res = await supertest
+    const res = await supertestWrite
       .delete(`/api/apm/settings/custom_links/${id}`)
       .set('kbn-xsrf', 'foo');
 

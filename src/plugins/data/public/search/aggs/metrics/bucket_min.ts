@@ -45,7 +45,7 @@ const minBucketTitle = i18n.translate('data.search.aggs.metrics.minBucketTitle',
 export const getBucketMinMetricAgg = ({
   getInternalStartServices,
 }: BucketMinMetricAggDependencies) => {
-  const { subtype, params, getFormat, getSerializedFormat } = siblingPipelineAggHelper;
+  const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
 
   return new MetricAggType(
     {
@@ -54,7 +54,6 @@ export const getBucketMinMetricAgg = ({
       makeLabel: (agg) => makeNestedLabel(agg, overallMinLabel),
       subtype,
       params: [...params()],
-      getFormat,
       getSerializedFormat,
     },
     {

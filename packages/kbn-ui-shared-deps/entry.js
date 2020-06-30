@@ -38,6 +38,7 @@ export const ReactDomServer = require('react-dom/server');
 export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
+export const StyledComponents = require('styled-components');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 

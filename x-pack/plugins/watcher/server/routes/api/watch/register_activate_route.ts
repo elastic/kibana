@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
@@ -13,7 +13,7 @@ import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_facto
 // @ts-ignore
 import { WatchStatus } from '../../../models/watch_status/index';
 
-function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
+function activateWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   return dataClient.callAsCurrentUser('watcher.activateWatch', {
     id: watchId,
   });

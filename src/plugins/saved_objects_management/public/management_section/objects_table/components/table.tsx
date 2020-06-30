@@ -20,7 +20,6 @@
 import { IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
-  // @ts-ignore
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
