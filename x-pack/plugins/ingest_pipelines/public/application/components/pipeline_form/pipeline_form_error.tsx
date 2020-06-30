@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { useKibana } from '../../../shared_imports';
 
 interface Props {
@@ -80,6 +80,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
   const [isShowingAllErrors, setIsShowingAllErrors] = useState<boolean>(false);
   const safeErrorResult = toKnownError(error);
   const hasMoreErrors = safeErrorResult.errors.length > 5;
+  const hiddenErrorsCount = safeErrorResult.errors.length - 5;
   const results = isShowingAllErrors ? safeErrorResult.errors : safeErrorResult.errors.slice(0, 5);
 
   const renderErrorListItem = ({ processorType, reason }: PipelineError) => {
@@ -118,21 +119,40 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
             responsive={false}
             gutterSize="s"
             justifyContent="center"
-            alignItems="flexEnd"
+            alignItems="flexStart"
           >
             <EuiFlexItem grow={false}>
               {isShowingAllErrors ? (
-                <EuiButton onClick={() => setIsShowingAllErrors(false)} color="danger" fill={false}>
-                  {i18n.translate('xpack.ingestPipelines.form.savePipelineError.showFewerButton', {
-                    defaultMessage: 'Show fewer errors',
-                  })}
-                </EuiButton>
+                <EuiButtonEmpty
+                  onClick={() => setIsShowingAllErrors(false)}
+                  color="danger"
+                  iconSide="right"
+                  iconType="arrowUp"
+                >
+                  {i18n.translate(
+                    'xpack.ingestPipelines.form.savePip10mbelineError.showFewerButton',
+                    {
+                      defaultMessage: 'Hide {count, plural, one {# error} other {# errors}}',
+                      values: {
+                        count: hiddenErrorsCount,
+                      },
+                    }
+                  )}
+                </EuiButtonEmpty>
               ) : (
-                <EuiButton onClick={() => setIsShowingAllErrors(true)} color="danger" fill={false}>
+                <EuiButtonEmpty
+                  onClick={() => setIsShowingAllErrors(true)}
+                  color="danger"
+                  iconSide="right"
+                  iconType="arrowDown"
+                >
                   {i18n.translate('xpack.ingestPipelines.form.savePipelineError.showAllButton', {
-                    defaultMessage: 'Show all errors',
+                    defaultMessage: 'Show {count, plural, one {# error} other {# errors}}',
+                    values: {
+                      count: hiddenErrorsCount,
+                    },
                   })}
-                </EuiButton>
+                </EuiButtonEmpty>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
