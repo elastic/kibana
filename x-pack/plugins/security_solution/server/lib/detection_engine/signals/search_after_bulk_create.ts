@@ -132,12 +132,10 @@ export const searchAfterAndBulkCreate = async ({
       try {
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
         const {
-          // @ts-ignore https://github.com/microsoft/TypeScript/issues/35546
           searchResult,
           searchDuration,
         }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter(
           {
-            // @ts-ignore we are using sortId before being assigned but that's ok.
             searchAfterSortId: useSortIds ? sortId : undefined,
             index: inputIndexPattern,
             from: tuple.from.toISOString(),
