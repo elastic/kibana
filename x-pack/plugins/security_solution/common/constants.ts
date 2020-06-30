@@ -33,6 +33,7 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
+export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
 export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;

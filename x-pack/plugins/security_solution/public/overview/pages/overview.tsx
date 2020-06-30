@@ -28,6 +28,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -41,16 +42,25 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
 }) => {
+  const endpointMetadataIndex = useMemo<string[]>(() => {
+    return [ENDPOINT_METADATA_INDEX];
+  }, []);
+
   const { indicesExist, indexPattern } = useWithSource();
+  const { indicesExist: metadataIndexExists } = useWithSource(
+    'default',
+    endpointMetadataIndex,
+    true
+  );
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),
     [hasMessage]
   );
 
-  const [showEndpointNotice, setShowEndpointNotice] = useState(!hasDismissEndpointNoticeMessage);
+  const [dismissMessage, setDismissMessage] = useState<boolean>(hasDismissEndpointNoticeMessage);
   const dismissEndpointNotice = () => {
-    setShowEndpointNotice(false);
+    setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   };
 
@@ -62,7 +72,9 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          {showEndpointNotice && <EndpointNotice onDismiss={dismissEndpointNotice} />}
+          {!dismissMessage && !metadataIndexExists && (
+            <EndpointNotice onDismiss={dismissEndpointNotice} />
+          )}
 
           <WrapperPage>
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
