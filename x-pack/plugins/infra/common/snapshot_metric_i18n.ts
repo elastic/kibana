@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { SnapshotMetricType } from './inventory_models/types';
 
 const Translations = {
   CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {

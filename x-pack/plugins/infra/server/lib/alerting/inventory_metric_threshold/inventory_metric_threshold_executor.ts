@@ -75,9 +75,10 @@ export const createInventoryMetricThresholdExecutor = (
     if (nextState === AlertStates.ALERT) {
       reason = results
         .map((result) => {
+          if (!result[item]) return '';
           const resultWithVerboseMetricName = {
             ...result[item],
-            metric: toMetricOpt(result[item].metric).text,
+            metric: toMetricOpt(result[item].metric)?.text as string,
           };
           return buildFiredAlertReason(resultWithVerboseMetricName);
         })
