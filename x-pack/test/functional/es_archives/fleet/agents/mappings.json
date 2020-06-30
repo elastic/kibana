@@ -1829,7 +1829,7 @@
             "updated_by": {
               "type": "keyword"
             },
-            "updated_on": {
+            "updated_at": {
               "type": "keyword"
             }
           }
