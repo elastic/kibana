@@ -31,7 +31,7 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
-    return `/api/endpoint/allowlist/download/${this.getIdentifier()}/${this.getSha256()}`;
+    return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getSha256()}`;
   }
 
   public getArtifact(): InternalArtifactSchema {

@@ -8,7 +8,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray } from '../../../../../lists/common/schemas/types/entries';
+import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types/entries';
 import { getFullEndpointExceptionList } from './lists';
 
 describe('buildEventTypeSignal', () => {
@@ -25,13 +25,13 @@ describe('buildEventTypeSignal', () => {
         {
           entries: [
             {
-              field: 'some.not.nested.field',
+              field: 'nested.field',
               operator: 'included',
               type: 'exact_cased',
               value: 'some value',
             },
           ],
-          field: 'some.field',
+          field: 'some.parentField',
           type: 'nested',
         },
         {
@@ -138,8 +138,11 @@ describe('buildEventTypeSignal', () => {
         field: 'server.domain',
         operator: 'included',
         type: 'list',
-        value: ['lists', 'not', 'supported'],
-      },
+        list: {
+          id: 'lists_not_supported',
+          type: 'keyword',
+        },
+      } as EntryList,
       { field: 'server.ip', operator: 'included', type: 'exists' },
     ];
 

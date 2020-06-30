@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsServiceStart, KibanaRequest, SavedObjectsClient } from 'src/core/server';
+import {
+  SavedObjectsServiceStart,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getDatasourceCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
@@ -12,7 +16,7 @@ export type EndpointAppContextServiceStartContract = Pick<
   IngestManagerStartContract,
   'agentService'
 > & {
-  manifestManager: ManifestManager;
+  manifestManager?: ManifestManager | undefined;
   registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
@@ -30,10 +34,13 @@ export class EndpointAppContextService {
     this.agentService = dependencies.agentService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
-    dependencies.registerIngestCallback(
-      'datasourceCreate',
-      getDatasourceCreateCallback(this.manifestManager)
-    );
+
+    if (this.manifestManager !== undefined) {
+      dependencies.registerIngestCallback(
+        'datasourceCreate',
+        getDatasourceCreateCallback(this.manifestManager)
+      );
+    }
   }
 
   public stop() {}
@@ -49,11 +56,10 @@ export class EndpointAppContextService {
     return this.manifestManager;
   }
 
-  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClient | undefined {
-    let client: SavedObjectsClient;
-    if (this.savedObjectsStart !== undefined) {
-      client = this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
+  public getScopedSavedObjectsClient(req: KibanaRequest): SavedObjectsClientContract {
+    if (!this.savedObjectsStart) {
+      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
-    return client;
+    return this.savedObjectsStart.getScopedClient(req, { excludedWrappers: ['security'] });
   }
 }

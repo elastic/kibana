@@ -5,7 +5,7 @@
  */
 
 export const ArtifactConstants = {
-  GLOBAL_ALLOWLIST_NAME: 'endpoint-allowlist',
+  GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   SAVED_OBJECT_TYPE: 'securitySolution:endpoint:exceptions-artifact',
   SUPPORTED_OPERATING_SYSTEMS: ['linux', 'macos', 'windows'],
   SCHEMA_VERSION: '1.0.0',

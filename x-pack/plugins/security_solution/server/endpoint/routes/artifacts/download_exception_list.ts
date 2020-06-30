@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, SavedObjectsClientContract, HttpResponseOptions } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
@@ -18,7 +18,7 @@ import {
 } from '../../schemas/artifacts';
 import { EndpointAppContext } from '../../types';
 
-const allowlistBaseRoute: string = '/api/endpoint/allowlist';
+const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 
 /**
  * Registers the exception list route to enable sensors to download a compressed  allowlist
@@ -39,8 +39,9 @@ export function registerDownloadExceptionListRoute(
       },
       options: { tags: [] },
     },
+    // @ts-ignore
     async (context, req, res) => {
-      let scopedSOClient;
+      let scopedSOClient: SavedObjectsClientContract;
       const logger = endpointContext.logFactory.get('download_exception_list');
 
       // The ApiKey must be associated with an enrolled Fleet agent
@@ -63,11 +64,13 @@ export function registerDownloadExceptionListRoute(
             'content-disposition': `attachment; filename=${artName}.xz`,
           },
         };
+
         const [validated, errors] = validate(artifact, downloadArtifactResponseSchema);
-        if (errors != null) {
-          return res.internalError({ body: errors });
+
+        if (errors !== null || validated === null) {
+          return res.internalError({ body: errors! });
         } else {
-          return res.ok(validated);
+          return res.ok((validated as unknown) as HttpResponseOptions);
         }
       };
 

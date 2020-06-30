@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { LoggerFactory } from 'kibana/server';
-import { EndpointAppContextService } from './endpoint_app_context_services';
 import { ConfigType } from '../config';
+import { EndpointAppContextService } from './endpoint_app_context_services';
 
 /**
  * The context for Endpoint apps.

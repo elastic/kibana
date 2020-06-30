@@ -976,9 +976,11 @@ export class EndpointDocGenerator {
           streams: [],
           config: {
             artifact_manifest: {
-              manifest_version: 'baseline',
-              schema_version: '1.0.0',
-              artifacts: {},
+              value: {
+                manifest_version: 'v0',
+                schema_version: '1.0.0',
+                artifacts: {},
+              },
             },
             policy: {
               value: policyFactory(),

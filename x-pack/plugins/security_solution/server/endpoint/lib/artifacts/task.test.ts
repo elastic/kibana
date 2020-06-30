@@ -8,7 +8,6 @@ import { taskManagerMock } from '../../../../../task_manager/server/mocks';
 import { TaskStatus } from '../../../../../task_manager/server';
 
 import { createMockEndpointAppContext } from '../../mocks';
-import { getManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 
 import { ManifestTaskConstants, ManifestTask } from './task';
 import { MockManifestTask } from './task.mock';
@@ -25,7 +24,7 @@ describe('task', () => {
 
     test('task should be registered', () => {
       const mockTaskManager = taskManagerMock.createSetup();
-      const manifestTask = new ManifestTask({
+      new ManifestTask({
         endpointAppContext: createMockEndpointAppContext(),
         taskManager: mockTaskManager,
       });

@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-
 import { operator } from '../../../../../lists/common/schemas';
 
 export const translatedEntryMatchAny = t.exact(

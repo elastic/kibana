@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { getArtifactClientMock } from './artifact_client.mock';

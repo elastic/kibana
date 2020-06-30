@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../../../../../../src/kibana/server';
+import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../../plugins/task_manager/server';
+} from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
 
 export const ManifestTaskConstants = {
@@ -74,7 +74,7 @@ export class ManifestTask {
     return `${ManifestTaskConstants.TYPE}:${ManifestTaskConstants.VERSION}`;
   };
 
-  private runTask = async (taskId: string) => {
+  public runTask = async (taskId: string) => {
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       // old task, return
@@ -92,12 +92,12 @@ export class ManifestTask {
     manifestManager
       .refresh()
       .then((wrappedManifest) => {
-        if (wrappedManifest !== null) {
+        if (wrappedManifest) {
           return manifestManager.dispatch(wrappedManifest);
         }
       })
       .then((wrappedManifest) => {
-        if (wrappedManifest !== null) {
+        if (wrappedManifest) {
           return manifestManager.commit(wrappedManifest);
         }
       })

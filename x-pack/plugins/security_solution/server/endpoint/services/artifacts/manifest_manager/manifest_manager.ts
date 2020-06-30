@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, SavedObjectsClient } from '../../../../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { DatasourceServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
-import { NewPolicyData } from '../../../../../common/endpoint/types';
+import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   ArtifactConstants,
   ManifestConstants,
@@ -15,13 +15,14 @@ import {
   buildArtifact,
   getFullEndpointExceptionList,
   ExceptionsCache,
+  ManifestDiff,
 } from '../../../lib/artifacts';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 
 export interface ManifestManagerContext {
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   artifactClient: ArtifactClient;
   exceptionListClient: ExceptionListClient;
   datasourceService: DatasourceServiceInterface;
@@ -39,12 +40,12 @@ export interface WrappedManifest {
 }
 
 export class ManifestManager {
-  private artifactClient: ArtifactClient;
-  private exceptionListClient: ExceptionListClient;
-  private datasourceService: DatasourceServiceInterface;
-  private savedObjectsClient: SavedObjectsClient;
-  private logger: Logger;
-  private cache: ExceptionsCache;
+  protected artifactClient: ArtifactClient;
+  protected exceptionListClient: ExceptionListClient;
+  protected datasourceService: DatasourceServiceInterface;
+  protected savedObjectsClient: SavedObjectsClientContract;
+  protected logger: Logger;
+  protected cache: ExceptionsCache;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -56,7 +57,7 @@ export class ManifestManager {
   }
 
   private getManifestClient(schemaVersion: string): ManifestClient {
-    return new ManifestClient(this.savedObjectsClient, schemaVersion);
+    return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
   }
 
   private async buildExceptionListArtifacts(
@@ -79,41 +80,41 @@ export class ManifestManager {
   }
 
   private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    const manifestClient = this.getManifestClient(schemaVersion);
+    return this.getManifestClient(schemaVersion)
+      .getManifest()
+      .then(async (manifestSo: SavedObject<InternalManifestSchema>) => {
+        if (manifestSo.version === undefined) {
+          throw new Error('No version returned for manifest.');
+        }
+        const manifest = new Manifest(
+          new Date(manifestSo.attributes.created),
+          schemaVersion,
+          manifestSo.version
+        );
 
-    let manifestSo: InternalManifestSchema;
-    try {
-      manifestSo = await manifestClient.getManifest();
-    } catch (err) {
-      if (err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
+        for (const id of manifestSo.attributes.ids) {
+          const artifactSo = await this.artifactClient.getArtifact(id);
+          manifest.addEntry(artifactSo.attributes);
+        }
 
-    if (manifestSo !== undefined) {
-      const manifest = new Manifest(manifestSo.attributes.created, schemaVersion);
-      manifest.setVersion(manifestSo.version);
-
-      for (const id of manifestSo.attributes.ids) {
-        const artifactSo = await this.artifactClient.getArtifact(id);
-        manifest.addEntry(artifactSo.attributes);
-      }
-
-      return manifest;
-    } else {
-      return null;
-    }
+        return manifest;
+      })
+      .catch((err) => {
+        if (err.output.statusCode !== 404) {
+          throw err;
+        }
+        return null;
+      });
   }
 
   public async refresh(opts?: ManifestRefreshOpts): Promise<WrappedManifest | null> {
-    let oldManifest: Manifest;
+    let oldManifest: Manifest | null;
 
     // Get the last-dispatched manifest
     oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
-    // console.log(oldManifest);
 
     if (oldManifest === null && opts !== undefined && opts.initialize) {
-      oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION); // create empty manifest
+      oldManifest = new Manifest(new Date(), ManifestConstants.SCHEMA_VERSION, 'v0'); // create empty manifest
     } else if (oldManifest == null) {
       this.logger.debug('Manifest does not exist yet. Waiting...');
       return null;
@@ -123,8 +124,11 @@ export class ManifestManager {
     const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
 
     // Build new manifest
-    const newManifest = Manifest.fromArtifacts(artifacts, ManifestConstants.SCHEMA_VERSION);
-    newManifest.setVersion(oldManifest.getVersion());
+    const newManifest = Manifest.fromArtifacts(
+      artifacts,
+      ManifestConstants.SCHEMA_VERSION,
+      oldManifest.getVersion()
+    );
 
     // Get diffs
     const diffs = newManifest.diff(oldManifest);
@@ -159,7 +163,7 @@ export class ManifestManager {
    *
    * @return {WrappedManifest | null} WrappedManifest if all dispatched, else null
    */
-  public async dispatch(wrappedManifest: WrappedManifest | null): WrappedManifest | null {
+  public async dispatch(wrappedManifest: WrappedManifest | null): Promise<WrappedManifest | null> {
     if (wrappedManifest === null) {
       this.logger.debug('wrappedManifest was null, aborting dispatch');
       return null;
@@ -180,14 +184,20 @@ export class ManifestManager {
 
       while (paging) {
         const { items, total, page } = await this.datasourceService.list(this.savedObjectsClient, {
+          page: 1,
+          perPage: 20,
           kuery: 'ingest-datasources.package.name:endpoint',
         });
 
         for (const datasource of items) {
           const { id, revision, updated_at, updated_by, ...newDatasource } = datasource;
 
-          if (newDatasource.inputs.length > 0) {
-            newDatasource.inputs[0].config.artifact_manifest = wrappedManifest.manifest.toEndpointFormat();
+          if (newDatasource.inputs.length > 0 && newDatasource.inputs[0].config !== undefined) {
+            const artifactManifest = newDatasource.inputs[0].config.artifact_manifest ?? {
+              value: {},
+            };
+            artifactManifest.value = wrappedManifest.manifest.toEndpointFormat();
+            newDatasource.inputs[0].config.artifact_manifest = artifactManifest;
 
             await this.datasourceService
               .update(this.savedObjectsClient, id, newDatasource)
@@ -201,7 +211,7 @@ export class ManifestManager {
               });
           } else {
             success = false;
-            this.logger.debug(`Datasource ${id} has no inputs.`);
+            this.logger.debug(`Datasource ${id} has no config.`);
           }
         }
 
@@ -225,11 +235,11 @@ export class ManifestManager {
     const manifestClient = this.getManifestClient(wrappedManifest.manifest.getSchemaVersion());
 
     // Commit the new manifest
-    if (wrappedManifest.manifest.getVersion() === undefined) {
+    if (wrappedManifest.manifest.getVersion() === 'v0') {
       await manifestClient.createManifest(wrappedManifest.manifest.toSavedObject());
     } else {
       const version = wrappedManifest.manifest.getVersion();
-      if (version === 'baseline') {
+      if (version === 'v0') {
         throw new Error('Updating existing manifest with baseline version. Bad state.');
       }
       await manifestClient.updateManifest(wrappedManifest.manifest.toSavedObject(), {

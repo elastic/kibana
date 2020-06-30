@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalArtifactSchema, InternalManifestSchema } from './saved_objects';
-import { getTranslatedExceptionListMock } from './lists.mock';
 import { ArtifactConstants, buildArtifact } from '../../lib/artifacts';
+import { getTranslatedExceptionListMock } from './lists.mock';
+import { InternalArtifactSchema, InternalManifestSchema } from './saved_objects';
 
 export const getInternalArtifactMock = async (
   os: string,
@@ -28,6 +28,7 @@ export const getInternalArtifactsMock = async (
   os: string,
   schemaVersion: string
 ): Promise<InternalArtifactSchema[]> => {
+  // @ts-ignore
   return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map(async () => {
     await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
   });

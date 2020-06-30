@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-
+import { SavedObjectsClientContract } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ManifestClient } from './manifest_client';
 
 export const getManifestClientMock = (
-  savedObjectsClient?: typeof savedObjectsClientMock.create
+  savedObjectsClient?: SavedObjectsClientContract
 ): ManifestClient => {
   if (savedObjectsClient !== undefined) {
     return new ManifestClient(savedObjectsClient, '1.0.0');

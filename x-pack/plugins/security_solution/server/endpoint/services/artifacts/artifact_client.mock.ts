@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { ArtifactClient } from './artifact_client';
 
 export const getArtifactClientMock = (
-  savedObjectsClient?: typeof savedObjectsClientMock.create
+  savedObjectsClient?: SavedObjectsClientContract
 ): ArtifactClient => {
   if (savedObjectsClient !== undefined) {
     return new ArtifactClient(savedObjectsClient);

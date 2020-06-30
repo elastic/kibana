@@ -12,7 +12,6 @@ import { getSupertestWithoutAuth } from '../fleet/agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const authKey = 'OFpuVDdISUJ3TEZ2a1VFUFFhVDM6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==';
 
@@ -22,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should fail to find artifact with invalid hash', async () => {
       const { body } = await supertestWithoutAuth
-        .get('/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/abcd')
+        .get('/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/abcd')
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${authKey}`)
         .send()
@@ -32,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should download an artifact with correct hash', async () => {
       const { body } = await supertestWithoutAuth
         .get(
-          '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${authKey}`)

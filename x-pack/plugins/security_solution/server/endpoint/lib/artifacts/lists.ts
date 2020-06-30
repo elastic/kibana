@@ -166,7 +166,9 @@ function translateEntry(
 export function compressExceptionList(
   exceptionList: WrappedTranslatedExceptionList
 ): Promise<Buffer> {
-  return lzma.compress(JSON.stringify(exceptionList), (res: Buffer) => {
-    return res;
+  return new Promise((resolve, reject) => {
+    lzma.compress(JSON.stringify(exceptionList), undefined, (res: Buffer) => {
+      resolve(res);
+    });
   });
 }

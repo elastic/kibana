@@ -6,14 +6,14 @@
 
 import {
   SavedObject,
-  SavedObjectsClient,
+  SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from '../../../../../../../src/core/server';
-import { validate } from '../../../../common/validate';
+} from 'src/core/server';
 import {
   manifestSchemaVersion,
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
+import { validate } from '../../../../common/validate';
 import { ManifestConstants } from '../../lib/artifacts';
 import { InternalManifestSchema } from '../../schemas/artifacts';
 
@@ -23,9 +23,12 @@ interface UpdateManifestOpts {
 
 export class ManifestClient {
   private schemaVersion: ManifestSchemaVersion;
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(savedObjectsClient: SavedObjectsClient, schemaVersion: ManifestSchemaVersion) {
+  constructor(
+    savedObjectsClient: SavedObjectsClientContract,
+    schemaVersion: ManifestSchemaVersion
+  ) {
     this.savedObjectsClient = savedObjectsClient;
 
     const [validated, errors] = validate(
@@ -33,7 +36,7 @@ export class ManifestClient {
       manifestSchemaVersion
     );
 
-    if (errors != null) {
+    if (errors != null || validated === null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);
     }
 

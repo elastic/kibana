@@ -676,7 +676,9 @@ export type NewPolicyData = NewDatasource & {
       enabled: boolean;
       streams: [];
       config: {
-        artifact_manifest: ManifestSchema;
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };

@@ -78,6 +78,7 @@ describe('test alerts route', () => {
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  // @ts-ignore
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
   let endpointAppContextService: EndpointAppContextService;
@@ -98,6 +99,7 @@ describe('test alerts route', () => {
     // The authentication with the Fleet Plugin needs a separate scoped SO Client
     ingestSavedObjectClient = savedObjectsClientMock.create();
     ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
+    // @ts-ignore
     startContract.savedObjectsStart.getScopedClient.mockReturnValue(ingestSavedObjectClient);
     endpointAppContextService.start(startContract);
 
@@ -114,7 +116,7 @@ describe('test alerts route', () => {
 
   it('should serve the compressed artifact to download', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
+      path: `/api/endpoint/artifacts/download/${mockArtifactName}/123456`,
       method: 'get',
       params: { sha256: '123456' },
       headers: {
@@ -144,7 +146,7 @@ describe('test alerts route', () => {
     ingestSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/allowlist/download')
+      path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
     await routeHandler(
@@ -172,7 +174,7 @@ describe('test alerts route', () => {
 
   it('should handle fetching a non-existent artifact', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: `/api/endpoint/allowlist/download/${mockArtifactName}/123456`,
+      path: `/api/endpoint/artifacts/download/${mockArtifactName}/123456`,
       method: 'get',
       params: { sha256: '789' },
       headers: {
@@ -186,7 +188,7 @@ describe('test alerts route', () => {
     );
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/allowlist/download')
+      path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
     await routeHandler(
@@ -206,7 +208,7 @@ describe('test alerts route', () => {
   it('should utilize the cache', async () => {
     const mockSha = '123456789';
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      path: `/api/endpoint/artifacts/download/${mockArtifactName}/${mockSha}`,
       method: 'get',
       params: { sha256: mockSha, identifier: mockArtifactName },
       headers: {
@@ -220,7 +222,7 @@ describe('test alerts route', () => {
     cache.set(cacheKey, mockCompressedArtifact.toString('binary'));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/allowlist/download')
+      path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
     await routeHandler(
@@ -242,13 +244,13 @@ describe('test alerts route', () => {
   it('should respond with a 401 if a valid API Token is not supplied', async () => {
     const mockSha = '123456789';
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      path: `/api/endpoint/artifacts/download/${mockArtifactName}/${mockSha}`,
       method: 'get',
       params: { sha256: mockSha, identifier: mockArtifactName },
     });
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/allowlist/download')
+      path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
     await routeHandler(
@@ -268,7 +270,7 @@ describe('test alerts route', () => {
   it('should respond with a 404 if an agent cannot be linked to the API token', async () => {
     const mockSha = '123456789';
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: `/api/endpoint/allowlist/download/${mockArtifactName}/${mockSha}`,
+      path: `/api/endpoint/artifacts/download/${mockArtifactName}/${mockSha}`,
       method: 'get',
       params: { sha256: mockSha, identifier: mockArtifactName },
       headers: {
@@ -282,7 +284,7 @@ describe('test alerts route', () => {
     ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/allowlist/download')
+      path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
     await routeHandler(

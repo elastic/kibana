@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClient } from '../../../../../../../src/core/server';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export class ArtifactClient {
-  private savedObjectsClient: SavedObjectsClient;
+  private savedObjectsClient: SavedObjectsClientContract;
 
-  constructor(savedObjectsClient: SavedObjectsClient) {
+  constructor(savedObjectsClient: SavedObjectsClientContract) {
     this.savedObjectsClient = savedObjectsClient;
   }
 

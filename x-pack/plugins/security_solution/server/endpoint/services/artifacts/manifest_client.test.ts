@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
 import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
 import { getManifestClientMock } from './manifest_client.mock';
@@ -19,7 +20,7 @@ describe('manifest_client', () => {
 
     test('cannot create ManifestClient with invalid schema version', () => {
       expect(() => {
-        new ManifestClient(savedObjectsClientMock.create(), 'invalid');
+        new ManifestClient(savedObjectsClientMock.create(), 'invalid' as ManifestSchemaVersion);
       }).toThrow();
     });
 

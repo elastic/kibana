@@ -24,18 +24,19 @@ export class Manifest {
   private schemaVersion: ManifestSchemaVersion;
 
   // For concurrency control
-  private version: string | undefined;
+  private version: string;
 
-  constructor(created: Date, schemaVersion: string) {
+  constructor(created: Date, schemaVersion: string, version: string) {
     this.created = created;
     this.entries = {};
+    this.version = version;
 
     const [validated, errors] = validate(
       (schemaVersion as unknown) as object,
       manifestSchemaVersion
     );
 
-    if (errors != null) {
+    if (errors != null || validated === null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);
     }
 
@@ -44,9 +45,10 @@ export class Manifest {
 
   public static fromArtifacts(
     artifacts: InternalArtifactSchema[],
-    schemaVersion: ManifestSchemaVersion
+    schemaVersion: string,
+    version: string
   ): Manifest {
-    const manifest = new Manifest(new Date(), schemaVersion);
+    const manifest = new Manifest(new Date(), schemaVersion, version);
     artifacts.forEach((artifact) => {
       manifest.addEntry(artifact);
     });
@@ -57,11 +59,11 @@ export class Manifest {
     return this.schemaVersion;
   }
 
-  public getVersion(): string | undefined {
+  public getVersion(): string {
     return this.version;
   }
 
-  public setVersion(version: string | undefined) {
+  public setVersion(version: string) {
     this.version = version;
   }
 
@@ -102,7 +104,7 @@ export class Manifest {
 
   public toEndpointFormat(): ManifestSchema {
     const manifestObj: ManifestSchema = {
-      manifest_version: this.version ?? 'baseline',
+      manifest_version: this.version ?? 'v0',
       schema_version: this.schemaVersion,
       artifacts: {},
     };

@@ -6,7 +6,6 @@
 
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
@@ -14,6 +13,7 @@ import {
   ExternalCallback,
 } from '../../../ingest_manager/server';
 import { createDatasourceServiceMock } from '../../../ingest_manager/server/mocks';
+import { ConfigType } from '../config';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -23,14 +23,18 @@ import {
   ManifestManagerMock,
   getManifestManagerMock,
 } from './services/artifacts/manifest_manager/manifest_manager.mock';
+import { EndpointAppContext } from './types';
 
 /**
  * Creates a mocked EndpointAppContext.
  */
-export const createMockEndpointAppContext = (mockManifestManager?: ManifestManagerMock) => {
+export const createMockEndpointAppContext = (
+  mockManifestManager?: ManifestManagerMock
+): EndpointAppContext => {
   return {
     logFactory: loggingSystemMock.create(),
-    config: createMockConfig(),
+    // @ts-ignore
+    config: createMockConfig() as ConfigType,
     service: createMockEndpointAppContextService(mockManifestManager),
   };
 };
@@ -45,6 +49,7 @@ export const createMockEndpointAppContextService = (
     start: jest.fn(),
     stop: jest.fn(),
     getAgentService: jest.fn(),
+    // @ts-ignore
     getManifestManager: mockManifestManager ?? jest.fn(),
     getScopedSavedObjectsClient: jest.fn(),
   };
@@ -59,6 +64,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   return {
     agentService: createMockAgentService(),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
+    // @ts-ignore
     manifestManager: getManifestManagerMock(),
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,

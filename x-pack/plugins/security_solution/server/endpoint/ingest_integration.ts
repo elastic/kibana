@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NewDatasource } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
-import { NewDatasource } from '../../../ingest_manager/common/types/models';
 import { ManifestManager } from './services/artifacts';
 
 /**

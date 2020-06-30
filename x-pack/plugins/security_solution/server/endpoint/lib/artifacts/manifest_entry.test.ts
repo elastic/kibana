@@ -24,12 +24,12 @@ describe('manifest_entry', () => {
 
     test('Correct doc_id is returned', () => {
       expect(manifestEntry.getDocId()).toEqual(
-        'endpoint-allowlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+        'endpoint-exceptionlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
       );
     });
 
     test('Correct identifier is returned', () => {
-      expect(manifestEntry.getIdentifier()).toEqual('endpoint-allowlist-windows-1.0.0');
+      expect(manifestEntry.getIdentifier()).toEqual('endpoint-exceptionlist-windows-1.0.0');
     });
 
     test('Correct sha256 is returned', () => {
@@ -44,7 +44,7 @@ describe('manifest_entry', () => {
 
     test('Correct url is returned', () => {
       expect(manifestEntry.getUrl()).toEqual(
-        '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+        '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
       );
     });
 
@@ -57,7 +57,7 @@ describe('manifest_entry', () => {
         sha256: '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
         size: 268,
         url:
-          '/api/endpoint/allowlist/download/endpoint-allowlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
       });
     });
   });

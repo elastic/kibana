@@ -4,56 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ArtifactConstants, ManifestConstants, Manifest } from '../../../lib/artifacts';
-import { getArtifactClientMock } from '../artifact_client.mock';
-import { getManifestClientMock } from '../manifest_client.mock';
-import { ManifestManager } from './manifest_manager';
 import { getDatasourceServiceMock, getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
-    beforeAll(async () => {});
-
     test('ManifestManager can refresh manifest', async () => {
       const manifestManager = getManifestManagerMock();
       const manifestWrapper = await manifestManager.refresh();
-      expect(manifestManager.getLastDispatchedManifest).toHaveBeenCalled();
-      expect(manifestWrapper.diffs).toEqual([
+      expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-allowlist-linux-1.0.0-a0b2886af05849e1e7e7b05bd6e38ea2e2de6566bfb5f4bdbdeda8236de0ff5c',
+            'endpoint-exceptionlist-linux-1.0.0-a0b2886af05849e1e7e7b05bd6e38ea2e2de6566bfb5f4bdbdeda8236de0ff5c',
           type: 'add',
         },
       ]);
-      expect(manifestWrapper.manifest).toBeInstanceOf(Manifest);
+      expect(manifestWrapper!.manifest).toBeInstanceOf(Manifest);
     });
 
     test('ManifestManager can dispatch manifest', async () => {
       const datasourceService = getDatasourceServiceMock();
-      const manifestManager = getManifestManagerMock({ datasourceServiceMock: datasourceService });
+      const manifestManager = getManifestManagerMock({ datasourceService });
       const manifestWrapperRefresh = await manifestManager.refresh();
       const manifestWrapperDispatch = await manifestManager.dispatch(manifestWrapperRefresh);
       expect(manifestWrapperRefresh).toEqual(manifestWrapperDispatch);
-      const entries = manifestWrapperDispatch.manifest.entries;
-      const artifact = Object.values(entries)[0].artifact;
-      expect(datasourceService.update.mock.calls[0][2].inputs[0].config.artifact_manifest).toEqual({
-        manifest_version: 'baseline',
+      const entries = manifestWrapperDispatch!.manifest.getEntries();
+      const artifact = Object.values(entries)[0].getArtifact();
+      expect(
+        datasourceService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
+      ).toEqual({
+        manifest_version: 'v0',
         schema_version: '1.0.0',
         artifacts: {
           [artifact.identifier]: {
             sha256: artifact.sha256,
             size: artifact.size,
-            url: `/api/endpoint/allowlist/download/${artifact.identifier}/${artifact.sha256}`,
+            url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.sha256}`,
           },
         },
       });
     });
 
     test('ManifestManager can commit manifest', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create> = savedObjectsClientMock.create();
       const manifestManager = getManifestManagerMock({
-        savedObjectsClientMock: savedObjectsClient,
+        savedObjectsClient,
       });
 
       const manifestWrapperRefresh = await manifestManager.refresh();
@@ -62,7 +58,7 @@ describe('manifest_manager', () => {
         id: 'abcd',
         type: 'delete',
       };
-      manifestWrapperDispatch.diffs.push(diff);
+      manifestWrapperDispatch!.diffs.push(diff);
 
       await manifestManager.commit(manifestWrapperDispatch);
 
