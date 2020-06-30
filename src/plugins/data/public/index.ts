@@ -420,6 +420,7 @@ export {
   syncQueryStateWithUrl,
   QueryState,
   getDefaultQuery,
+  getQueryLog,
   FilterManager,
   SavedQuery,
   SavedQueryService,

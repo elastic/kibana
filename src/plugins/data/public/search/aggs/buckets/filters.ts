@@ -25,9 +25,7 @@ import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
-import { getQueryLog } from '../../../query';
 import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
@@ -71,16 +69,6 @@ export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies
         write(aggConfig, output) {
           const inFilters: FilterValue[] = aggConfig.params.filters;
           if (!size(inFilters)) return;
-
-          inFilters.forEach((filter) => {
-            const persistedLog = getQueryLog(
-              uiSettings,
-              new Storage(window.localStorage),
-              'vis_default_editor',
-              filter.input.language
-            );
-            persistedLog.add(filter.input.query);
-          });
 
           const outFilters = transform(
             inFilters,

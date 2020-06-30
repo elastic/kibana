@@ -28,14 +28,22 @@ import {
   PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
-import { TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
+import { getQueryLog, IAggConfigs, TimeRange, Query } from '../../../../../plugins/data/public';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { Schema } from '../../schemas';
+
+interface FilterValue {
+  input: Query;
+  label: string;
+  id: string;
+}
 
 interface DefaultEditorSideBarProps {
   embeddableHandler: VisualizeEmbeddableContract;
@@ -62,6 +70,8 @@ function DefaultEditorSideBar({
   savedSearch,
   timeRange,
 }: DefaultEditorSideBarProps) {
+  const { services } = useKibana();
+
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
@@ -103,11 +113,30 @@ function DefaultEditorSideBar({
       return;
     }
 
+    const getAggsJSON = (aggs: IAggConfigs) => {
+      return aggs.aggs.map((agg) => {
+        if (agg.type.name === 'filters') {
+          // For filters aggs we need to store each filter to the query log
+          // so that it is made available in the autocomplete.
+          agg.params.filters.forEach((filter: FilterValue) => {
+            const persistedLog = getQueryLog(
+              services.uiSettings,
+              new Storage(window.localStorage),
+              'vis_default_editor',
+              filter.input.language
+            );
+            persistedLog.add(filter.input.query);
+          });
+        }
+        return agg.serialize();
+      });
+    };
+
     vis.setState({
       ...vis.serialize(),
       params: state.params,
       data: {
-        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+        aggs: state.data.aggs ? (getAggsJSON(state.data.aggs) as any) : [],
       },
     });
     embeddableHandler.reload();
@@ -115,7 +144,16 @@ function DefaultEditorSideBar({
       isDirty: false,
     });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter, embeddableHandler]);
+  }, [
+    vis,
+    state,
+    formState.invalid,
+    setTouched,
+    isDirty,
+    eventEmitter,
+    embeddableHandler,
+    services.uiSettings,
+  ]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {
