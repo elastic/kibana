@@ -22,6 +22,5 @@ export { TimefilterService, TimefilterSetup } from './timefilter_service';
 export * from './types';
 export { Timefilter, TimefilterContract } from './timefilter';
 export { TimeHistory, TimeHistoryContract } from './time_history';
-export { getTime, calculateBounds } from './get_time';
 export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
 export { extractTimeFilter } from './lib/extract_time_filter';
