@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 /*
  * Accepts a Kibana data object with a rows or columns key
@@ -30,5 +30,5 @@ export function flattenSeries(obj) {
 
   obj = obj.rows ? obj.rows : obj.columns;
 
-  return _.chain(obj).pluck('series').flattenDeep().value();
+  return _.chain(obj).map('series').flattenDeep().value();
 }

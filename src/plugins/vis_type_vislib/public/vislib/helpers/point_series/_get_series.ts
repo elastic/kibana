@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { partial } from 'lodash3';
+import { partial } from 'lodash';
 import { getPoint } from './_get_point';
 import { addToSiri, Serie } from './_add_to_siri';
 import { Chart } from './point_series';
@@ -71,7 +71,7 @@ export function getSeries(table: Table, chart: Chart) {
         seriesLabel = prefix + seriesLabel;
       }
 
-      (point.seriesId as any) = seriesId;
+      (point.seriesId as string | number) = seriesId;
       addToSiri(
         seriesMap,
         point,

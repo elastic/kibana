@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 /**
  * Returns an array of names ordered by appearance in the nested array
@@ -39,7 +39,7 @@ export function getPieNames(data: any[]): string[] {
     });
   });
 
-  return _.uniq(names, 'label');
+  return _.uniqBy(names, 'label');
 }
 
 /**
@@ -61,7 +61,7 @@ function getNames(data: any, columns: any): string[] {
       .sortBy(function (obj) {
         return obj.index;
       })
-      .unique(function (d) {
+      .uniqBy(function (d) {
         return d.label;
       })
       .value();

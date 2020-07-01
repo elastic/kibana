@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash3';
+import _ from 'lodash';
 import $ from 'jquery';
 import numeral from '@elastic/numeral';
 import { PieContainsAllZeros, ContainerTooSmall } from '../errors';

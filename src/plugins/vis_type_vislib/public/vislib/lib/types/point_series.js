@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function getSeriId(seri) {

@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import _ from 'lodash3';
+import _ from 'lodash';
 
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';

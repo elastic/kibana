@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 /*
  * Accepts a Kibana data object, flattens the data.series values array,
@@ -35,9 +35,9 @@ export function flattenData(obj) {
   }
 
   return _(charts ? charts : [obj])
-    .pluck('series')
+    .map('series')
     .flattenDeep()
-    .pluck('values')
+    .map('values')
     .flattenDeep()
     .filter(Boolean)
     .value();
