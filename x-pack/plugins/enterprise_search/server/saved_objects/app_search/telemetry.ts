@@ -15,7 +15,6 @@ export interface ITelemetrySavedObject {
   };
   ui_error: {
     cannot_connect: number;
-    no_as_account: number;
   };
   ui_clicked: {
     create_first_engine_button: number;
@@ -47,11 +46,6 @@ export const appSearchTelemetryType: SavedObjectsType = {
       ui_error: {
         properties: {
           cannot_connect: {
-            type: 'long',
-            null_value: 0,
-            index: false,
-          },
-          no_as_account: {
             type: 'long',
             null_value: 0,
             index: false,

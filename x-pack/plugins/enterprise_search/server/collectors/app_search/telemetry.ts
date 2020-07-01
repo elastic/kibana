@@ -61,7 +61,6 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
     },
     ui_error: {
       cannot_connect: 0,
-      no_as_account: 0,
     },
     ui_clicked: {
       create_first_engine_button: 0,

@@ -23,9 +23,6 @@
           "properties": {
             "cannot_connect": {
               "type": "long"
-            },
-            "no_as_account": {
-              "type": "long"
             }
           }
         },
