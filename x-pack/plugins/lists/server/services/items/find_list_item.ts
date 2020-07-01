@@ -26,7 +26,7 @@ import {
   transformElasticToListItem,
 } from '../utils';
 
-interface FindListItemOptions {
+export interface FindListItemOptions {
   listId: ListId;
   filter: Filter;
   currentIndexPosition: number;

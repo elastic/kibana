@@ -53,3 +53,15 @@ export const getSearchListMock = (): SearchResponse<SearchEsListSchema> => ({
   timed_out: false,
   took: 10,
 });
+
+export const getEmptySearchListMock = (): SearchResponse<SearchEsListSchema> => ({
+  _scroll_id: '123',
+  _shards: getShardMock(),
+  hits: {
+    hits: [],
+    max_score: 0,
+    total: 0,
+  },
+  timed_out: false,
+  took: 10,
+});
