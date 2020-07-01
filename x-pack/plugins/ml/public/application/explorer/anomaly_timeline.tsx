@@ -285,7 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           <EuiSpacer size="m" />
 
           <div
-            className="ml-explorer-swimlane euiText"
+            className="mlExplorerSwimlane euiText"
             onMouseEnter={onSwimlaneEnterHandler}
             onMouseLeave={onSwimlaneLeaveHandler}
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
@@ -311,7 +311,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             <>
               <>
                 <div
-                  className="ml-explorer-swimlane euiText"
+                  className="mlExplorerSwimlane euiText"
                   onMouseEnter={onSwimlaneEnterHandler}
                   onMouseLeave={onSwimlaneLeaveHandler}
                   data-test-subj="mlAnomalyExplorerSwimlaneViewBy"

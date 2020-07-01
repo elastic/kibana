@@ -211,7 +211,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const { swimlaneType } = this.props;
 
     // This selects both overall and viewby swimlane
-    const wrapper = d3.selectAll('.ml-explorer-swimlane');
+    const wrapper = d3.selectAll('.mlExplorerSwimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', true);
     wrapper
@@ -242,7 +242,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   maskIrrelevantSwimlanes(maskAll: boolean) {
     if (maskAll === true) {
       // This selects both overall and viewby swimlane
-      const allSwimlanes = d3.selectAll('.ml-explorer-swimlane');
+      const allSwimlanes = d3.selectAll('.mlExplorerSwimlane');
       allSwimlanes.selectAll('.lane-label').classed('lane-label-masked', true);
       allSwimlanes
         .selectAll('.sl-cell-inner,.sl-cell-inner-dragselect')
@@ -258,7 +258,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
   clearSelection() {
     // This selects both overall and viewby swimlane
-    const wrapper = d3.selectAll('.ml-explorer-swimlane');
+    const wrapper = d3.selectAll('.mlExplorerSwimlane');
 
     wrapper.selectAll('.lane-label').classed('lane-label-masked', false);
     wrapper.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', false);

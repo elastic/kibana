@@ -1,3 +1,5 @@
+$borderRadius: $euiBorderRadius / 2;
+
 .ml-swimlane-selector {
   visibility: hidden;
 }
@@ -104,7 +106,7 @@
 
   // SASSTODO: This entire selector needs to be rewritten.
   // It looks extremely brittle with very specific sizing units
-  .ml-explorer-swimlane {
+  .mlExplorerSwimlane {
     user-select: none;
     padding: 0;
     margin-bottom: $euiSizeS;
@@ -218,7 +220,7 @@
   div.lane {
     height: 30px;
     border-bottom: 0px;
-    border-radius: 2px;
+    border-radius: $borderRadius;
     white-space: nowrap;
 
     &:not(:first-child) {
@@ -227,11 +229,11 @@
 
     div.lane-label {
       display: inline-block;
-      font-size: 13px;
+      font-size: $euiFontSizeXS;
       height: 30px;
       text-align: right;
       vertical-align: middle;
-      border-radius: 2px;
+      border-radius: $borderRadius;
       padding-right: 5px;
       margin-right: 5px;
       border: 1px solid transparent;
@@ -264,7 +266,7 @@
         .sl-cell-inner-dragselect {
           height: 26px;
           margin: 1px;
-          border-radius: 2px;
+          border-radius: $borderRadius;
           text-align: center;
         }
 
@@ -296,7 +298,7 @@
         .sl-cell-inner,
         .sl-cell-inner-dragselect {
           border: 2px solid $euiColorDarkShade;
-          border-radius: 2px;
+          border-radius: $borderRadius;
           opacity: 1;
         }
       }
