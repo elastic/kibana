@@ -29,10 +29,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { ClientFacade } from '../client';
+import { LegacyAPICaller } from '../legacy';
 
 export interface PollEsNodesVersionOptions {
-  internalClient: ClientFacade;
+  callWithInternalUser: LegacyAPICaller;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
@@ -137,7 +137,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 }
 
 export const pollEsNodesVersion = ({
-  internalClient,
+  callWithInternalUser,
   log,
   kibanaVersion,
   ignoreVersionMismatch,
@@ -147,19 +147,18 @@ export const pollEsNodesVersion = ({
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
-        internalClient.nodes.info<NodesInfo>({
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        callWithInternalUser('nodes.info', {
+          filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
-        map((response) => response.body),
         catchError((_err) => {
           return of({ nodes: {} });
         })
       );
     }),
-    map((nodesInfo: NodesInfo) => {
-      return mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch);
-    }),
+    map((nodesInfo: NodesInfo) =>
+      mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch)
+    ),
     distinctUntilChanged(compareNodes) // Only emit if there are new nodes or versions
   );
 };
