@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { toArray } from 'lodash3';
+import { toArray } from 'lodash';
 import { SerializedFieldFormat } from '../../../../../expressions/common/types';
 import { getFormatService } from '../../../services';
 import { Table } from '../../types';

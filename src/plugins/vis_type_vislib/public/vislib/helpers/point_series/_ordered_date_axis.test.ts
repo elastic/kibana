@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import _ from 'lodash3';
+import _ from 'lodash';
 import { orderedDateAxis } from './_ordered_date_axis';
 import { DateHistogramParams, OrderedChart } from './point_series';
 
