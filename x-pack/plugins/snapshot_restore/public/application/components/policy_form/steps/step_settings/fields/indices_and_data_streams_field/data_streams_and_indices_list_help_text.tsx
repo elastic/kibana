@@ -21,6 +21,29 @@ export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
   indices,
   dataStreams,
 }) => {
+  if (selectedIndicesAndDataStreams.length === 0) {
+    return (
+      <FormattedMessage
+        id="xpack.snapshotRestore.policyForm.stepSettings.noDataStreamsOrIndicesHelpText"
+        defaultMessage="Nothing will be backed up. {selectAllLink}"
+        values={{
+          selectAllLink: (
+            <EuiLink
+              onClick={() => {
+                onSelectionChange('all');
+              }}
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.stepSettings.selectAllIndicesLink"
+                defaultMessage="Select all"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }
+
   const indicesCount = selectedIndicesAndDataStreams.reduce(
     (acc, v) => (indices.includes(v) ? acc + 1 : acc),
     0
@@ -29,50 +52,28 @@ export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
     (acc, v) => (dataStreams.includes(v) ? acc + 1 : acc),
     0
   );
-  const i18nValues = {
-    indicesCount,
-    dataStreamsCount,
-    selectOrDeselectAllLink:
-      selectedIndicesAndDataStreams.length > 0 ? (
-        <EuiLink
-          data-test-subj="deselectIndicesLink"
-          onClick={() => {
-            onSelectionChange('none');
-          }}
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
-            defaultMessage="Deselect all"
-          />
-        </EuiLink>
-      ) : (
-        <EuiLink
-          onClick={() => {
-            onSelectionChange('all');
-          }}
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepSettings.selectAllIndicesLink"
-            defaultMessage="Select all"
-          />
-        </EuiLink>
-      ),
-  };
 
-  if (selectedIndicesAndDataStreams.length === 0) {
-    return (
-      <FormattedMessage
-        id="xpack.snapshotRestore.policyForm.stepSettings.noDataStreamsOrIndicesHelpText"
-        defaultMessage="Nothing will be backed up. {selectOrDeselectAllLink}"
-        values={i18nValues}
-      />
-    );
-  }
   return (
     <FormattedMessage
       id="xpack.snapshotRestore.policyForm.stepSettings.selectDataStreamsIndicesHelpText"
-      defaultMessage="{indicesCount} {indicesCount, plural, one {index} other {indices}} and {dataStreamsCount} data {dataStreamsCount, plural, one {stream} other {streams}} will be backed up. {selectOrDeselectAllLink}"
-      values={i18nValues}
+      defaultMessage="{indicesCount} {indicesCount, plural, one {index} other {indices}} and {dataStreamsCount} data {dataStreamsCount, plural, one {stream} other {streams}} will be backed up. {deselectAllLink}"
+      values={{
+        dataStreamsCount,
+        indicesCount,
+        deselectAllLink: (
+          <EuiLink
+            data-test-subj="deselectIndicesLink"
+            onClick={() => {
+              onSelectionChange('none');
+            }}
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
+              defaultMessage="Deselect all"
+            />
+          </EuiLink>
+        ),
+      }}
     />
   );
 };
