@@ -16,7 +16,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerSourceSettings } from './mvt_single_layer_source_settings';
 
-export interface Props {
+interface Props {
   onSourceConfigChange: (sourceConfig: TiledSingleLayerVectorSourceSettings) => void;
 }
 
