@@ -84,10 +84,14 @@ interface Options {
   /**
    * style themes that sass files will be converted to, the correct style will be
    * loaded in the browser automatically by checking the global `__kbnThemeTag__`.
-   * Specifying additional styles increases build time. Defaults to all styles when
-   * building the dist
+   * Specifying additional styles increases build time.
+   *
+   * Defaults:
+   *  - "*" when building the dist
+   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEME` env var
+   *  - "k7light"
    */
-  themes?: ThemeTag[];
+  themes?: ThemeTag | '*' | ThemeTag[];
 }
 
 interface ParsedOptions {
