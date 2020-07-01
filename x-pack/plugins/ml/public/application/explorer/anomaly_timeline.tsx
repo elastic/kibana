@@ -36,7 +36,7 @@ import { ExplorerState } from './reducers/explorer_reducer';
 import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
-import { OverallSwimlaneData } from './explorer_utils';
+import { OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
@@ -161,15 +161,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     }, []);
 
     // Listener for click events in the swimlane to load corresponding anomaly data.
-    const swimlaneCellClick = useCallback((selectedCellsUpdate: any) => {
-      // If selectedCells is an empty object we clear any existing selection,
-      // otherwise we save the new selection in AppState and update the Explorer.
-      if (Object.keys(selectedCellsUpdate).length === 0) {
-        setSelectedCells();
-      } else {
-        setSelectedCells(selectedCellsUpdate);
-      }
-    }, []);
+    const swimlaneCellClick = useCallback(
+      (selectedCellsUpdate: any) => {
+        // If selectedCells is an empty object we clear any existing selection,
+        // otherwise we save the new selection in AppState and update the Explorer.
+        if (Object.keys(selectedCellsUpdate).length === 0) {
+          setSelectedCells();
+        } else {
+          setSelectedCells(selectedCellsUpdate);
+        }
+      },
+      [setSelectedCells]
+    );
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -324,7 +327,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     }
                     timeBuckets={timeBuckets}
                     swimlaneCellClick={swimlaneCellClick}
-                    swimlaneData={viewBySwimlaneData as OverallSwimlaneData}
+                    swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
                     swimlaneType={'viewBy'}
                     selection={selectedCells}
                     swimlaneRenderDoneListener={swimlaneRenderDoneListener}

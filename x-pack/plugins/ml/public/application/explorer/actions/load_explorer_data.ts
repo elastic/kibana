@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject } from 'rxjs';
-import { debounceTime, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
@@ -292,14 +292,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     return loadExplorerDataProvider(service);
   }, []);
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
-  const explorerData$ = useMemo(
-    () =>
-      loadExplorerData$.pipe(
-        debounceTime(500),
-        switchMap((config: LoadExplorerDataConfig) => loadExplorerData(config))
-      ),
-    []
-  );
+  const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);
 
   const update = useCallback((c) => {
