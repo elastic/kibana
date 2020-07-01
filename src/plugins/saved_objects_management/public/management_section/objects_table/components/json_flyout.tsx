@@ -62,11 +62,11 @@ export const JsonFlyout: React.FC<JsonFlyoutProps> = ({
               <EuiIcon
                 aria-label={getSavedObjectLabel(savedObject.type)}
                 size="m"
-                type={savedObject.meta.icon || 'apps'}
+                type={(savedObject as any).meta.icon || 'apps'}
               />
             </EuiToolTip>
             &nbsp;&nbsp;
-            {savedObject.meta.title || getDefaultTitle(savedObject)}
+            {(savedObject as any).meta.title || getDefaultTitle(savedObject)}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
