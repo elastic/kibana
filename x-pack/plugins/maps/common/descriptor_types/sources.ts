@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
 import {
   AGG_TYPE,
@@ -130,6 +131,12 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
+export type GeojsonFileSourceDescriptor = {
+  __featureCollection: FeatureCollection;
+  name: string;
+  type: string;
+};
+
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
@@ -150,7 +157,8 @@ export type SourceDescriptor =
   | ESPewPewSourceDescriptor
   | TiledSingleLayerVectorSourceDescriptor
   | EMSTMSSourceDescriptor
-  | EMSFileSourceDescriptor;
+  | EMSFileSourceDescriptor
+  | GeojsonFileSourceDescriptor;
 
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
