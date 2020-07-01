@@ -61,7 +61,10 @@ describe('alert_add', () => {
         ],
         defaultActionGroupId: 'testActionGroup',
         producer: ALERTS_FEATURE_ID,
-        authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
         actionVariables: {
           context: [],
           state: [],

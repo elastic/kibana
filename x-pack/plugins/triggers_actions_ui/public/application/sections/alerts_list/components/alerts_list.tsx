@@ -33,11 +33,11 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import { hasAllPrivilege } from '../../../lib/capabilities';
 
 const ENTER_KEY = 13;
 
@@ -65,9 +65,6 @@ export const AlertsList: React.FunctionComponent = () => {
     charts,
     dataPlugin,
   } = useAppDependencies();
-  const canDelete = hasDeleteAlertsCapability(capabilities);
-  const canSave = hasSaveAlertsCapability(capabilities);
-
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -246,11 +243,13 @@ export const AlertsList: React.FunctionComponent = () => {
     },
   ];
 
+  const authorizedAlertTypes = [...alertTypesState.data.values()];
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={Object.values(alertTypesState.data)
+      options={authorizedAlertTypes
         .map((alertType) => ({
           value: alertType.id,
           name: alertType.name,
@@ -264,7 +263,9 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave) {
+  if (
+    authorizedAlertTypes.some((alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all)
+  ) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
@@ -280,10 +281,16 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   }
 
+  const authorizedToModifySelectedAlerts = selectedIds.length
+    ? filterAlertsById(alertsState.data, selectedIds).every((selectedAlert) =>
+        hasAllPrivilege(selectedAlert, alertTypesState.data.get(selectedAlert.alertTypeId))
+      )
+    : false;
+
   const table = (
     <Fragment>
       <EuiFlexGroup gutterSize="s">
-        {selectedIds.length > 0 && canDelete && (
+        {selectedIds.length > 0 && authorizedToModifySelectedAlerts && (
           <EuiFlexItem grow={false}>
             <BulkOperationPopover>
               <AlertQuickEditButtons
@@ -355,15 +362,12 @@ export const AlertsList: React.FunctionComponent = () => {
           /* Don't display alert count until we have the alert types initialized */
           totalItemCount: alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
         }}
-        selection={
-          canDelete
-            ? {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
-                },
-              }
-            : undefined
-        }
+        selection={{
+          selectable: (alert: AlertTableItem) => alert.isEditable,
+          onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+            setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
+          },
+        }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPage(changedPage);
         }}
@@ -459,5 +463,6 @@ function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIn
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
+    isEditable: hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)),
   }));
 }

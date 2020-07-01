@@ -8,7 +8,12 @@ import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
 import { PluginStartContract as FeaturesStartContract, Feature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import { AlertsAuthorization, ensureFieldIsSafeForQuery } from './alerts_authorization';
+import {
+  AlertsAuthorization,
+  ensureFieldIsSafeForQuery,
+  WriteOperations,
+  ReadOperations,
+} from './alerts_authorization';
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 
@@ -171,7 +176,7 @@ describe('ensureAuthorized', () => {
       auditLogger,
     });
 
-    await alertAuthorization.ensureAuthorized('myType', 'myApp', 'create');
+    await alertAuthorization.ensureAuthorized('myType', 'myApp', WriteOperations.Create);
 
     expect(alertTypeRegistry.get).toHaveBeenCalledTimes(0);
   });
@@ -196,7 +201,7 @@ describe('ensureAuthorized', () => {
       privileges: [],
     });
 
-    await alertAuthorization.ensureAuthorized('myType', 'myApp', 'create');
+    await alertAuthorization.ensureAuthorized('myType', 'myApp', WriteOperations.Create);
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
@@ -238,7 +243,7 @@ describe('ensureAuthorized', () => {
       privileges: [],
     });
 
-    await alertAuthorization.ensureAuthorized('myType', 'alerts', 'create');
+    await alertAuthorization.ensureAuthorized('myType', 'alerts', WriteOperations.Create);
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
@@ -280,7 +285,7 @@ describe('ensureAuthorized', () => {
       auditLogger,
     });
 
-    await alertAuthorization.ensureAuthorized('myType', 'myOtherApp', 'create');
+    await alertAuthorization.ensureAuthorized('myType', 'myOtherApp', WriteOperations.Create);
 
     expect(alertTypeRegistry.get).toHaveBeenCalledWith('myType');
 
@@ -338,7 +343,7 @@ describe('ensureAuthorized', () => {
     });
 
     await expect(
-      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', 'create')
+      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', WriteOperations.Create)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
     );
@@ -386,7 +391,7 @@ describe('ensureAuthorized', () => {
     });
 
     await expect(
-      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', 'create')
+      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', WriteOperations.Create)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unauthorized to create a \\"myType\\" alert by \\"myApp\\""`
     );
@@ -434,7 +439,7 @@ describe('ensureAuthorized', () => {
     });
 
     await expect(
-      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', 'create')
+      alertAuthorization.ensureAuthorized('myType', 'myOtherApp', WriteOperations.Create)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
     );
@@ -545,20 +550,12 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'find'),
-          authorized: true,
-        },
-        {
           privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'find'),
           authorized: true,
         },
         {
           privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'find'),
           authorized: false,
-        },
-        {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'find'),
-          authorized: true,
         },
         {
           privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
@@ -611,20 +608,12 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'find'),
-          authorized: true,
-        },
-        {
           privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'find'),
           authorized: true,
         },
         {
           privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'find'),
           authorized: false,
-        },
-        {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'find'),
-          authorized: true,
         },
         {
           privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'find'),
@@ -696,19 +685,31 @@ describe('filterByAlertTypeAuthorization', () => {
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
-        'create'
+        [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
             Set {
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
-                "authorizedConsumers": Array [
-                  "alerts",
-                  "myApp",
-                  "myOtherApp",
-                  "myAppWithSubFeature",
-                ],
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myAppWithSubFeature": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
                 "defaultActionGroupId": "default",
                 "id": "myAppAlertType",
                 "name": "myAppAlertType",
@@ -717,12 +718,24 @@ describe('filterByAlertTypeAuthorization', () => {
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
-                "authorizedConsumers": Array [
-                  "alerts",
-                  "myApp",
-                  "myOtherApp",
-                  "myAppWithSubFeature",
-                ],
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myAppWithSubFeature": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",
@@ -743,20 +756,12 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'create'),
-          authorized: true,
-        },
-        {
           privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
           authorized: true,
         },
         {
           privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
           authorized: false,
-        },
-        {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'create'),
-          authorized: true,
         },
         {
           privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
@@ -781,17 +786,23 @@ describe('filterByAlertTypeAuthorization', () => {
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
-        'create'
+        [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
             Set {
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
-                "authorizedConsumers": Array [
-                  "alerts",
-                  "myApp",
-                ],
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",
@@ -800,11 +811,187 @@ describe('filterByAlertTypeAuthorization', () => {
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
-                "authorizedConsumers": Array [
-                  "alerts",
-                  "myApp",
-                  "myOtherApp",
-                ],
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
+                "defaultActionGroupId": "default",
+                "id": "myAppAlertType",
+                "name": "myAppAlertType",
+                "producer": "myApp",
+              },
+            }
+          `);
+  });
+
+  test('authorizes user under the Alerts consumer when they are authorized by the producer', async () => {
+    const authorization = mockAuthorization();
+    const checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >> = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+          authorized: false,
+        },
+      ],
+    });
+
+    const alertAuthorization = new AlertsAuthorization({
+      request,
+      authorization,
+      alertTypeRegistry,
+      features,
+      auditLogger,
+    });
+    alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+    await expect(
+      alertAuthorization.filterByAlertTypeAuthorization(new Set([myAppAlertType]), [
+        WriteOperations.Create,
+      ])
+    ).resolves.toMatchInlineSnapshot(`
+            Set {
+              Object {
+                "actionGroups": Array [],
+                "actionVariables": undefined,
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
+                "defaultActionGroupId": "default",
+                "id": "myAppAlertType",
+                "name": "myAppAlertType",
+                "producer": "myApp",
+              },
+            }
+          `);
+  });
+
+  test('augments a list of types with consumers under which multiple operations are authorized', async () => {
+    const authorization = mockAuthorization();
+    const checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >> = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
+          authorized: false,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
+          authorized: false,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'create'),
+          authorized: false,
+        },
+        {
+          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'get'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'get'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'get'),
+          authorized: true,
+        },
+        {
+          privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'get'),
+          authorized: true,
+        },
+      ],
+    });
+
+    const alertAuthorization = new AlertsAuthorization({
+      request,
+      authorization,
+      alertTypeRegistry,
+      features,
+      auditLogger,
+    });
+    alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
+
+    await expect(
+      alertAuthorization.filterByAlertTypeAuthorization(
+        new Set([myAppAlertType, alertingAlertType]),
+        [WriteOperations.Create, ReadOperations.Get]
+      )
+    ).resolves.toMatchInlineSnapshot(`
+            Set {
+              Object {
+                "actionGroups": Array [],
+                "actionVariables": undefined,
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": false,
+                    "read": true,
+                  },
+                },
+                "defaultActionGroupId": "default",
+                "id": "alertingAlertType",
+                "name": "alertingAlertType",
+                "producer": "alerts",
+              },
+              Object {
+                "actionGroups": Array [],
+                "actionVariables": undefined,
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": false,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": false,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": false,
+                    "read": true,
+                  },
+                },
                 "defaultActionGroupId": "default",
                 "id": "myAppAlertType",
                 "name": "myAppAlertType",
@@ -825,20 +1012,12 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'alerts', 'create'),
-          authorized: true,
-        },
-        {
           privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
           authorized: true,
         },
         {
           privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
           authorized: true,
-        },
-        {
-          privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'create'),
-          authorized: false,
         },
         {
           privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'create'),
@@ -863,18 +1042,27 @@ describe('filterByAlertTypeAuthorization', () => {
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
         new Set([myAppAlertType, alertingAlertType]),
-        'create'
+        [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
             Set {
               Object {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
-                "authorizedConsumers": Array [
-                  "alerts",
-                  "myApp",
-                  "myOtherApp",
-                ],
+                "authorizedConsumers": Object {
+                  "alerts": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                  "myOtherApp": Object {
+                    "all": true,
+                    "read": true,
+                  },
+                },
                 "defaultActionGroupId": "default",
                 "id": "alertingAlertType",
                 "name": "alertingAlertType",

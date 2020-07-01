@@ -99,7 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
-  authorizedConsumers: string[];
+  authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   producer: string;
 }
 
@@ -110,6 +110,7 @@ export type AlertWithoutId = Omit<Alert, 'id'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  isEditable: boolean;
 }
 
 export interface AlertTypeParamsExpressionProps<

@@ -25,6 +25,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../x-pack/plug
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
 import { INDEX_THRESHOLD_ID } from '../../../x-pack/plugins/alerting_builtins/server';
+import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -38,7 +39,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
     alerts.registerType(peopleInSpaceAlert);
 
     features.registerFeature({
-      id: 'alertsExample',
+      id: ALERTING_EXAMPLE_APP_ID,
       name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
         defaultMessage: 'Alerts Example',
       }),

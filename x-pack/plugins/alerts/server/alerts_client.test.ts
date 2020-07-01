@@ -2196,7 +2196,9 @@ describe('find()', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
           producer: 'alerts',
-          authorizedConsumers: ['myApp'],
+          authorizedConsumers: {
+            myApp: { read: true, all: true },
+          },
         },
       ])
     );
@@ -3712,6 +3714,12 @@ describe('listAlertTypes', () => {
   };
   const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
 
+  const authorizedConsumers = {
+    alerts: { read: true, all: true },
+    myApp: { read: true, all: true },
+    myOtherApp: { read: true, all: true },
+  };
+
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
   });
@@ -3720,14 +3728,14 @@ describe('listAlertTypes', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
     authorization.filterByAlertTypeAuthorization.mockResolvedValue(
       new Set([
-        { ...myAppAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
-        { ...alertingAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
+        { ...myAppAlertType, authorizedConsumers },
+        { ...alertingAlertType, authorizedConsumers },
       ])
     );
     expect(await alertsClient.listAlertTypes()).toEqual(
       new Set([
-        { ...myAppAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
-        { ...alertingAlertType, authorizedConsumers: ['alerts', 'myApp', 'myOtherApp'] },
+        { ...myAppAlertType, authorizedConsumers },
+        { ...alertingAlertType, authorizedConsumers },
       ])
     );
   });
@@ -3762,7 +3770,9 @@ describe('listAlertTypes', () => {
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
           producer: 'alerts',
-          authorizedConsumers: ['myApp'],
+          authorizedConsumers: {
+            myApp: { read: true, all: true },
+          },
         },
       ]);
       authorization.filterByAlertTypeAuthorization.mockResolvedValue(authorizedTypes);

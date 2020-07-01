@@ -31,8 +31,6 @@ jest.mock('../../../app_context', () => ({
       get: jest.fn(() => ({})),
       securitySolution: {
         'alerting:show': true,
-        'alerting:save': true,
-        'alerting:delete': true,
       },
     },
     actionTypeRegistry: jest.fn(),
@@ -68,7 +66,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
-  hasSaveAlertsCapability: jest.fn(() => true),
+  hasAllPrivilege: jest.fn(() => true),
 }));
 
 const mockAlertApis = {
@@ -77,6 +75,10 @@ const mockAlertApis = {
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
   requestRefresh: jest.fn(),
+};
+
+const authorizedConsumers = {
+  [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
 
 // const AlertDetails = withBulkAlertOperations(RawAlertDetails);
@@ -92,7 +94,7 @@ describe('alert_details', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     expect(
@@ -131,7 +133,7 @@ describe('alert_details', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     expect(
@@ -161,7 +163,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
-        authorizedConsumers: [ALERTS_FEATURE_ID],
+        authorizedConsumers,
       };
 
       const actionTypes: ActionType[] = [
@@ -215,7 +217,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
-        authorizedConsumers: [ALERTS_FEATURE_ID],
+        authorizedConsumers,
       };
       const actionTypes: ActionType[] = [
         {
@@ -274,7 +276,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
-        authorizedConsumers: [ALERTS_FEATURE_ID],
+        authorizedConsumers,
       };
 
       expect(
@@ -294,7 +296,7 @@ describe('alert_details', () => {
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
         producer: ALERTS_FEATURE_ID,
-        authorizedConsumers: [ALERTS_FEATURE_ID],
+        authorizedConsumers,
       };
 
       expect(
@@ -323,7 +325,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -351,7 +353,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -379,7 +381,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const disableAlert = jest.fn();
@@ -416,7 +418,7 @@ describe('disable button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableAlert = jest.fn();
@@ -456,7 +458,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -485,7 +487,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -514,7 +516,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const muteAlert = jest.fn();
@@ -552,7 +554,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const unmuteAlert = jest.fn();
@@ -590,7 +592,7 @@ describe('mute button', () => {
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
       producer: ALERTS_FEATURE_ID,
-      authorizedConsumers: [ALERTS_FEATURE_ID],
+      authorizedConsumers,
     };
 
     const enableButton = shallow(
@@ -614,7 +616,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     name: `alert-${uuid.v4()}`,
     tags: [],
     alertTypeId: '.noop',
-    consumer: 'consumer',
+    consumer: ALERTS_FEATURE_ID,
     schedule: { interval: '1m' },
     actions: [],
     params: {},

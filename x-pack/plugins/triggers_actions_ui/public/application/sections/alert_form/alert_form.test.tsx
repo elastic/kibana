@@ -82,7 +82,10 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: ALERTS_FEATURE_ID,
-          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
         },
       ];
       loadAlertTypes.mockResolvedValue(alertTypes);
@@ -191,7 +194,10 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: ALERTS_FEATURE_ID,
-          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
         },
         {
           id: 'same-consumer-producer-alert-type',
@@ -204,7 +210,10 @@ describe('alert_form', () => {
           ],
           defaultActionGroupId: 'testActionGroup',
           producer: 'test',
-          authorizedConsumers: [ALERTS_FEATURE_ID, 'test'],
+          authorizedConsumers: {
+            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            test: { read: true, all: true },
+          },
         },
       ]);
       const mocks = coreMock.createSetup();

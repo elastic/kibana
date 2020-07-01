@@ -43,7 +43,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        authorizedConsumers: [],
+        authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],
@@ -69,7 +69,7 @@ describe('listAlertTypesRoute', () => {
               "context": Array [],
               "state": Array [],
             },
-            "authorizedConsumers": Array [],
+            "authorizedConsumers": Object {},
             "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
@@ -107,7 +107,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        authorizedConsumers: [],
+        authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],
@@ -156,7 +156,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
-        authorizedConsumers: [],
+        authorizedConsumers: {},
         actionVariables: {
           context: [],
           state: [],

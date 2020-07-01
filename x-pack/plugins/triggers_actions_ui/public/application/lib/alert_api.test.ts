@@ -46,7 +46,7 @@ describe('loadAlertTypes', () => {
         producer: ALERTS_FEATURE_ID,
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        authorizedConsumers: [],
+        authorizedConsumers: {},
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

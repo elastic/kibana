@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pluck, mapValues, remove, omit, isUndefined } from 'lodash';
+import { pluck, mapValues, remove, omit, isUndefined, zipObject } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
@@ -16,9 +16,35 @@ import { FeatureKibanaPrivileges, SubFeaturePrivilegeConfig } from '../../../fea
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 
-export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
-  authorizedConsumers: string[];
+export enum ReadOperations {
+  Get = 'get',
+  GetAlertState = 'getAlertState',
+  Find = 'find',
 }
+
+export enum WriteOperations {
+  Create = 'create',
+  Delete = 'delete',
+  Update = 'update',
+  UpdateApiKey = 'updateApiKey',
+  Enable = 'enable',
+  Disable = 'disable',
+  MuteAll = 'muteAll',
+  UnmuteAll = 'unmuteAll',
+  MuteInstance = 'muteInstance',
+  UnmuteInstance = 'unmuteInstance',
+}
+
+interface HasPrivileges {
+  read: boolean;
+  all: boolean;
+}
+type AuthorizedConsumers = Record<string, HasPrivileges>;
+export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
+  authorizedConsumers: AuthorizedConsumers;
+}
+
+type IsAuthorizedAtProducerLevel = boolean;
 
 export interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
@@ -49,7 +75,11 @@ export class AlertsAuthorization {
     this.auditLogger = auditLogger;
   }
 
-  public async ensureAuthorized(alertTypeId: string, consumer: string, operation: string) {
+  public async ensureAuthorized(
+    alertTypeId: string,
+    consumer: string,
+    operation: ReadOperations | WriteOperations
+  ) {
     const { authorization } = this;
     if (authorization) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
@@ -123,10 +153,12 @@ export class AlertsAuthorization {
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
   }> {
     if (this.authorization) {
-      const { username, authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
-        this.alertTypeRegistry.list(),
-        'find'
-      );
+      const {
+        username,
+        authorizedAlertTypes,
+      } = await this.augmentAlertTypesWithAuthorization(this.alertTypeRegistry.list(), [
+        ReadOperations.Find,
+      ]);
 
       if (!authorizedAlertTypes.size) {
         throw Boom.forbidden(
@@ -136,7 +168,7 @@ export class AlertsAuthorization {
 
       const authorizedAlertTypeIdsToConsumers = new Set<string>(
         [...authorizedAlertTypes].reduce<string[]>((alertTypeIdConsumerPairs, alertType) => {
-          for (const consumer of alertType.authorizedConsumers) {
+          for (const consumer of Object.keys(alertType.authorizedConsumers)) {
             alertTypeIdConsumerPairs.push(`${alertType.id}/${consumer}`);
           }
           return alertTypeIdConsumerPairs;
@@ -175,18 +207,18 @@ export class AlertsAuthorization {
 
   public async filterByAlertTypeAuthorization(
     alertTypes: Set<RegistryAlertType>,
-    operation: string
+    operations: Array<ReadOperations | WriteOperations>
   ): Promise<Set<RegistryAlertTypeWithAuth>> {
     const { authorizedAlertTypes } = await this.augmentAlertTypesWithAuthorization(
       alertTypes,
-      operation
+      operations
     );
     return authorizedAlertTypes;
   }
 
   private async augmentAlertTypesWithAuthorization(
     alertTypes: Set<RegistryAlertType>,
-    operation: string
+    operations: Array<ReadOperations | WriteOperations>
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -210,7 +242,10 @@ export class AlertsAuthorization {
       })
       .map((feature) => feature.id);
 
-    const allPossibleConsumers = [ALERTS_FEATURE_ID, ...featuresIds];
+    const allPossibleConsumers: AuthorizedConsumers = asAuthorizedConsumers(
+      [ALERTS_FEATURE_ID, ...featuresIds],
+      { read: true, all: true }
+    );
 
     if (!this.authorization) {
       return {
@@ -223,29 +258,35 @@ export class AlertsAuthorization {
       );
 
       // add an empty `authorizedConsumers` array on each alertType
-      const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes, []);
+      const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes, {});
       const preAuthorizedAlertTypes = new Set<RegistryAlertTypeWithAuth>();
 
       // map from privilege to alertType which we can refer back to when analyzing the result
       // of checkPrivileges
-      const privilegeToAlertType = new Map<string, [RegistryAlertTypeWithAuth, string[]]>();
+      const privilegeToAlertType = new Map<
+        string,
+        [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
+      >();
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
       for (const alertType of alertTypesWithAutherization) {
         if (alertType.producer === ALERTS_FEATURE_ID) {
-          alertType.authorizedConsumers.push(ALERTS_FEATURE_ID);
+          alertType.authorizedConsumers[ALERTS_FEATURE_ID] = { read: true, all: true };
           preAuthorizedAlertTypes.add(alertType);
         }
 
         for (const feature of featuresIds) {
-          privilegeToAlertType.set(
-            this.authorization!.actions.alerting.get(alertType.id, feature, operation),
-            [
-              alertType,
-              // granting privileges under the producer automatically authorized the Alerts Management UI as well
-              alertType.producer === feature ? [ALERTS_FEATURE_ID, feature] : [feature],
-            ]
-          );
+          for (const operation of operations) {
+            privilegeToAlertType.set(
+              this.authorization!.actions.alerting.get(alertType.id, feature, operation),
+              [
+                alertType,
+                feature,
+                hasPrivilegeByOperation(operation),
+                alertType.producer === feature,
+              ]
+            );
+          }
         }
       }
 
@@ -262,8 +303,24 @@ export class AlertsAuthorization {
           : // only has some of the required privileges
             privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
-                const [alertType, consumers] = privilegeToAlertType.get(privilege)!;
-                alertType.authorizedConsumers.push(...consumers);
+                const [
+                  alertType,
+                  feature,
+                  hasPrivileges,
+                  isAuthorizedAtProducerLevel,
+                ] = privilegeToAlertType.get(privilege)!;
+                alertType.authorizedConsumers[feature] = mergeHasPrivileges(
+                  hasPrivileges,
+                  alertType.authorizedConsumers[feature]
+                );
+
+                if (isAuthorizedAtProducerLevel) {
+                  // granting privileges under the producer automatically authorized the Alerts Management UI as well
+                  alertType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
+                    hasPrivileges,
+                    alertType.authorizedConsumers[ALERTS_FEATURE_ID]
+                  );
+                }
                 authorizedAlertTypes.add(alertType);
               }
               return authorizedAlertTypes;
@@ -274,12 +331,12 @@ export class AlertsAuthorization {
 
   private augmentWithAuthorizedConsumers(
     alertTypes: Set<RegistryAlertType>,
-    authorizedConsumers: string[]
+    authorizedConsumers: AuthorizedConsumers
   ): Set<RegistryAlertTypeWithAuth> {
     return new Set(
       Array.from(alertTypes).map((alertType) => ({
         ...alertType,
-        authorizedConsumers: [...authorizedConsumers],
+        authorizedConsumers: { ...authorizedConsumers },
       }))
     );
   }
@@ -288,7 +345,9 @@ export class AlertsAuthorization {
     return Array.from(alertTypes).reduce<string[]>((filters, { id, authorizedConsumers }) => {
       ensureFieldIsSafeForQuery('alertTypeId', id);
       filters.push(
-        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:(${authorizedConsumers
+        `(alert.attributes.alertTypeId:${id} and alert.attributes.consumer:(${Object.keys(
+          authorizedConsumers
+        )
           .map((consumer) => {
             ensureFieldIsSafeForQuery('alertTypeId', id);
             return consumer;
@@ -324,4 +383,27 @@ function hasAnyAlertingPrivileges(
   return (
     ((privileges?.alerting?.all?.length ?? 0) || (privileges?.alerting?.read?.length ?? 0)) > 0
   );
+}
+
+function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPrivileges {
+  return {
+    read: (left.read || right?.read) ?? false,
+    all: (left.all || right?.all) ?? false,
+  };
+}
+
+function hasPrivilegeByOperation(operation: ReadOperations | WriteOperations): HasPrivileges {
+  const read = Object.values(ReadOperations).includes((operation as unknown) as ReadOperations);
+  const all = Object.values(WriteOperations).includes((operation as unknown) as WriteOperations);
+  return {
+    read: read || all,
+    all,
+  };
+}
+
+function asAuthorizedConsumers(
+  consumers: string[],
+  hasPrivileges: HasPrivileges
+): AuthorizedConsumers {
+  return zipObject(consumers.map((feature) => [feature, hasPrivileges]));
 }

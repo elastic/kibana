@@ -67,34 +67,77 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
               expect(restrictedNoOpAlertType).to.eql(undefined);
-              expect(noOpAlertType.authorizedConsumers).to.eql(['alerts', 'alertsFixture']);
+              expect(noOpAlertType.authorizedConsumers).to.eql({
+                alerts: { read: true, all: true },
+                alertsFixture: { read: true, all: true },
+              });
               break;
             case 'global_read at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
               expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
-              expect(noOpAlertType.authorizedConsumers).to.contain('alertsFixture');
-              expect(noOpAlertType.authorizedConsumers).to.contain('alertsRestrictedFixture');
+              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+                read: true,
+                all: false,
+              });
+              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: false,
+              });
 
               expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
                 expectedRestrictedNoOpType
               );
-              expect(restrictedNoOpAlertType.authorizedConsumers).not.to.contain('alertsFixture');
-              expect(restrictedNoOpAlertType.authorizedConsumers).to.contain(
-                'alertsRestrictedFixture'
+              expect(Object.keys(restrictedNoOpAlertType.authorizedConsumers)).not.to.contain(
+                'alertsFixture'
               );
+              expect(restrictedNoOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: false,
+              });
+              break;
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
+              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+                read: true,
+                all: true,
+              });
+              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: true,
+              });
+
+              expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
+                expectedRestrictedNoOpType
+              );
+              expect(Object.keys(restrictedNoOpAlertType.authorizedConsumers)).not.to.contain(
+                'alertsFixture'
+              );
+              expect(restrictedNoOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: true,
+              });
               break;
             case 'superuser at space1':
               expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
-              expect(noOpAlertType.authorizedConsumers).to.contain('alertsFixture');
-              expect(noOpAlertType.authorizedConsumers).to.contain('alertsRestrictedFixture');
+              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+                read: true,
+                all: true,
+              });
+              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: true,
+              });
 
               expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
                 expectedRestrictedNoOpType
               );
-              expect(restrictedNoOpAlertType.authorizedConsumers).to.contain('alertsFixture');
-              expect(restrictedNoOpAlertType.authorizedConsumers).to.contain(
-                'alertsRestrictedFixture'
-              );
+              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+                read: true,
+                all: true,
+              });
+              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+                read: true,
+                all: true,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

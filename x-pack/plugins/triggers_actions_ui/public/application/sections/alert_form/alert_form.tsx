@@ -174,9 +174,9 @@ export const AlertForm = ({
         .filter(
           (alertTypeRegistryItem: AlertTypeModel) =>
             alertTypesIndex.has(alertTypeRegistryItem.id) &&
-            alertTypesIndex
-              .get(alertTypeRegistryItem.id)!
-              .authorizedConsumers.includes(alert.consumer)
+            (alertTypesIndex.get(alertTypeRegistryItem.id)?.authorizedConsumers[alert.consumer]
+              ?.all ??
+              false)
         )
         .filter((alertTypeRegistryItem: AlertTypeModel) =>
           alert.consumer === ALERTS_FEATURE_ID

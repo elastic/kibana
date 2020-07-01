@@ -36,7 +36,11 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { RegistryAlertType } from './alert_type_registry';
-import { AlertsAuthorization } from './authorization/alerts_authorization';
+import {
+  AlertsAuthorization,
+  WriteOperations,
+  ReadOperations,
+} from './authorization/alerts_authorization';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -172,7 +176,11 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
-    await this.authorization.ensureAuthorized(data.alertTypeId, data.consumer, 'create');
+    await this.authorization.ensureAuthorized(
+      data.alertTypeId,
+      data.consumer,
+      WriteOperations.Create
+    );
 
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
@@ -233,14 +241,18 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       result.attributes.alertTypeId,
       result.attributes.consumer,
-      'get'
+      ReadOperations.Get
     );
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
     const alert = await this.get({ id });
-    await this.authorization.ensureAuthorized(alert.alertTypeId, alert.consumer, 'getAlertState');
+    await this.authorization.ensureAuthorized(
+      alert.alertTypeId,
+      alert.consumer,
+      ReadOperations.GetAlertState
+    );
     if (alert.scheduledTaskId) {
       const { state } = taskInstanceToAlertTaskInstance(
         await this.taskManager.get(alert.scheduledTaskId),
@@ -317,7 +329,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'delete'
+      WriteOperations.Delete
     );
 
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
@@ -348,7 +360,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       alertSavedObject.attributes.alertTypeId,
       alertSavedObject.attributes.consumer,
-      'update'
+      WriteOperations.Update
     );
 
     const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
@@ -454,7 +466,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'updateApiKey'
+      WriteOperations.UpdateApiKey
     );
 
     const username = await this.getUserName();
@@ -516,7 +528,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'enable'
+      WriteOperations.Enable
     );
 
     if (attributes.enabled === false) {
@@ -568,7 +580,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'disable'
+      WriteOperations.Disable
     );
 
     if (attributes.enabled === true) {
@@ -600,7 +612,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'muteAll'
+      WriteOperations.MuteAll
     );
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
@@ -615,7 +627,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'unmuteAll'
+      WriteOperations.UnmuteAll
     );
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
@@ -634,7 +646,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'muteInstance'
+      WriteOperations.MuteInstance
     );
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
@@ -666,7 +678,7 @@ export class AlertsClient {
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
-      'unmuteInstance'
+      WriteOperations.UnmuteInstance
     );
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
@@ -684,10 +696,10 @@ export class AlertsClient {
   }
 
   public async listAlertTypes() {
-    return await this.authorization.filterByAlertTypeAuthorization(
-      this.alertTypeRegistry.list(),
-      'get'
-    );
+    return await this.authorization.filterByAlertTypeAuthorization(this.alertTypeRegistry.list(), [
+      ReadOperations.Get,
+      WriteOperations.Create,
+    ]);
   }
 
   private async scheduleAlert(id: string, alertTypeId: string) {
