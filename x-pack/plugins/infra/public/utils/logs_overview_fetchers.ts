@@ -12,6 +12,7 @@ import {
   FetchDataParams,
 } from '../../../observability/public';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
+import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
 
 interface StatsAggregation {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -37,10 +38,9 @@ export function getLogsHasDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
 ): HasData {
   return async () => {
-    const [, startPlugins] = await getStartServices();
-    const { data } = startPlugins;
-
-    return await hasLogsOverview('filebeat-*', data);
+    const [core] = await getStartServices();
+    const sourceStatus = await callFetchLogSourceStatusAPI('default', core.http.fetch);
+    return sourceStatus.data.logIndexNames.length > 0;
   };
 }
 
@@ -72,30 +72,6 @@ export function getLogsOverviewDataFetcher(
       series,
     };
   };
-}
-
-async function hasLogsOverview(
-  index: string,
-  dataPlugin: InfraClientStartDeps['data']
-): Promise<boolean> {
-  const esSearcher = dataPlugin.search.getSearchStrategy('es');
-  return new Promise((resolve, reject) => {
-    esSearcher
-      .search({
-        params: {
-          index,
-          body: {
-            size: 0,
-          },
-        },
-      })
-      .subscribe(
-        (response) => {
-          resolve(response.rawResponse.hits.total > 0);
-        },
-        (error) => reject(error)
-      );
-  });
 }
 
 async function fetchLogsOverview(
