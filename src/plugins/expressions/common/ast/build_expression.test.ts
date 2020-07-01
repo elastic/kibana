@@ -48,7 +48,7 @@ describe('isExpressionAst()', () => {
       {},
     ];
 
-    invalidValues.forEach(value => {
+    invalidValues.forEach((value) => {
       expect(isExpressionAst(value)).toBe(false);
     });
   });
@@ -71,7 +71,7 @@ describe('isExpressionAstBuilder()', () => {
       {},
     ];
 
-    invalidValues.forEach(value => {
+    invalidValues.forEach((value) => {
       expect(isExpressionAstBuilder(value)).toBe(false);
     });
   });
@@ -188,7 +188,7 @@ describe('buildExpression()', () => {
     test('returns an array of buildExpressionFunctions', () => {
       const exp = buildExpression(ast);
       expect(exp.functions).toHaveLength(1);
-      expect(exp.functions.map(f => f.name)).toEqual(['foo']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['foo']);
     });
 
     test('functions.push() adds new function to the AST', () => {
@@ -243,25 +243,25 @@ describe('buildExpression()', () => {
       const exp = buildExpression(ast);
       const fn = buildExpressionFunction('test', { abc: [123] });
       exp.functions.push(fn);
-      expect(exp.functions.map(f => f.name)).toEqual(['foo', 'test']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['foo', 'test']);
       const testFn = exp.functions[1];
       exp.functions[1] = exp.functions[0];
       exp.functions[0] = testFn;
-      expect(exp.functions.map(f => f.name)).toEqual(['test', 'foo']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['test', 'foo']);
       const barFn = buildExpressionFunction('bar', {});
       const fooFn = exp.functions[1];
       exp.functions[1] = barFn;
       exp.functions[2] = fooFn;
-      expect(exp.functions.map(f => f.name)).toEqual(['test', 'bar', 'foo']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['test', 'bar', 'foo']);
     });
 
     test('functions can be removed', () => {
       const exp = buildExpression(ast);
       const fn = buildExpressionFunction('test', { abc: [123] });
       exp.functions.push(fn);
-      expect(exp.functions.map(f => f.name)).toEqual(['foo', 'test']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['foo', 'test']);
       exp.functions.shift();
-      expect(exp.functions.map(f => f.name)).toEqual(['test']);
+      expect(exp.functions.map((f) => f.name)).toEqual(['test']);
     });
   });
 
@@ -322,7 +322,7 @@ describe('buildExpression()', () => {
     test('finds a function by name', () => {
       const exp = buildExpression(`where | is | waldo`);
       const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('waldo');
-      expect(fns.map(fn => fn.toAst())).toMatchInlineSnapshot(`
+      expect(fns.map((fn) => fn.toAst())).toMatchInlineSnapshot(`
         Array [
           Object {
             "arguments": Object {},
@@ -338,7 +338,7 @@ describe('buildExpression()', () => {
         `miss | miss sub={miss} | miss sub={hit sub={miss sub={hit sub={hit}}}} sub={miss}`
       );
       const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('hit');
-      expect(fns.map(fn => fn.name)).toMatchInlineSnapshot(`
+      expect(fns.map((fn) => fn.name)).toMatchInlineSnapshot(`
         Array [
           "hit",
           "hit",
@@ -356,7 +356,7 @@ describe('buildExpression()', () => {
 
       // Migrates all `bar` functions in the expression
       const exp = buildExpression(before);
-      exp.findFunction('bar').forEach(fn => {
+      exp.findFunction('bar').forEach((fn) => {
         const arg = fn.getArgument('a');
         if (arg) {
           fn.replaceArgument('a', [1, 2]);
@@ -377,8 +377,8 @@ describe('buildExpression()', () => {
         `miss | miss sub={miss} | miss sub={hit sub={miss sub={hit sub={hit}}}} sub={miss}`
       );
       const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('hit');
-      const subexpressionArgs = fns.map(fn =>
-        fn.getArgument('sub')?.map(arg => isExpressionAstBuilder(arg))
+      const subexpressionArgs = fns.map((fn) =>
+        fn.getArgument('sub')?.map((arg) => isExpressionAstBuilder(arg))
       );
       expect(subexpressionArgs).toEqual([undefined, [true], [true]]);
     });

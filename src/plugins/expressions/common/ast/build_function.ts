@@ -173,7 +173,7 @@ export function buildExpressionFunction<F extends string>(
 ): ExpressionAstFunctionBuilder<F> {
   const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
     if (Array.isArray(value)) {
-      acc[key] = value.map(v => {
+      acc[key] = value.map((v) => {
         return isExpressionAst(v) ? buildExpression(v) : v;
       });
     } else {
@@ -221,7 +221,7 @@ export function buildExpressionFunction<F extends string>(
         type: 'function',
         function: fnName,
         arguments: Object.entries(args).reduce((acc, [key, values]) => {
-          acc[key] = values.map(val => {
+          acc[key] = values.map((val) => {
             return isExpressionAstBuilder(val) ? val.toAst() : val;
           });
           return acc;

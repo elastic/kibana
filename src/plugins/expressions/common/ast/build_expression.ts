@@ -86,7 +86,7 @@ export interface ExpressionAstExpressionBuilder {
 
 const generateExpressionAst = (fns: ExpressionAstFunctionBuilder[]): ExpressionAstExpression => ({
   type: 'expression',
-  chain: fns.map(fn => fn.toAst()),
+  chain: fns.map((fn) => fn.toAst()),
 });
 
 /**
@@ -102,7 +102,7 @@ export function buildExpression(
   initialState?: ExpressionAstFunctionBuilder[] | ExpressionAstExpression | string
 ): ExpressionAstExpressionBuilder {
   const chainToFunctionBuilder = (chain: ExpressionAstFunction[]): ExpressionAstFunctionBuilder[] =>
-    chain.map(fn => buildExpressionFunction(fn.function, fn.arguments));
+    chain.map((fn) => buildExpressionFunction(fn.function, fn.arguments));
 
   // Takes `initialState` and converts it to an array of `ExpressionAstFunctionBuilder`
   const extractFunctionsFromState = (
@@ -128,8 +128,8 @@ export function buildExpression(
     findFunction<Fn extends string>(fnName: Fn) {
       const foundFns: Array<ExpressionAstFunctionBuilder<Fn>> = [];
       return fns.reduce((found, currFn) => {
-        Object.values(currFn.arguments).forEach(values => {
-          values.forEach(value => {
+        Object.values(currFn.arguments).forEach((values) => {
+          values.forEach((value) => {
             if (isExpressionAstBuilder(value)) {
               // `value` is a subexpression, recurse and continue searching
               found = found.concat(value.findFunction(fnName));

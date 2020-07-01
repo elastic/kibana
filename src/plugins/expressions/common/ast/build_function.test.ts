@@ -319,7 +319,7 @@ describe('buildExpressionFunction()', () => {
       expect(fn.getArgument('world')).toEqual([0, 1, 2]);
       fn.replaceArgument(
         'world',
-        arg!.filter(a => a !== 1)
+        arg!.filter((a) => a !== 1)
       );
       expect(fn.getArgument('world')).toEqual([0, 2]);
     });
