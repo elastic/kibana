@@ -218,6 +218,7 @@ export class Server {
     const uiSettingsStart = await this.uiSettings.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    this.usageCollection.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -256,6 +257,7 @@ export class Server {
     await this.elasticsearch.stop();
     await this.http.stop();
     await this.uiSettings.stop();
+    await this.usageCollection.stop();
     await this.rendering.stop();
     await this.metrics.stop();
     await this.status.stop();
