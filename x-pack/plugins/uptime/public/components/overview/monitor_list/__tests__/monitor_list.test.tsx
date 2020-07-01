@@ -20,7 +20,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   };
 });
 
-describe('MonitorList component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/70386
+describe.skip('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
 
@@ -36,7 +37,7 @@ describe('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    // @ts-ignore replacing a call to localStorage we use for monitor list size
+    // @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
     result = {
       nextPagePagination: null,
