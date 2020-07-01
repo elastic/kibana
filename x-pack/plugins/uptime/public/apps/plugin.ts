@@ -27,10 +27,14 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { kibanaService } from '../state/kibana_service';
+import { fetchIndexStatus } from '../state/api';
+import { ObservabilityPluginSetup } from '../../../observability/public';
+import { fetchUptimeOverviewData } from './uptime_overview_fetcher';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home: HomePublicPluginSetup;
+  observability: ObservabilityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
@@ -62,6 +66,15 @@ export class UptimePlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    plugins.observability.dashboard.register({
+      appName: 'uptime',
+      hasData: async () => {
+        const status = await fetchIndexStatus();
+        return status.docCount > 0;
+      },
+      fetchData: fetchUptimeOverviewData,
+    });
 
     core.application.register({
       appRoute: '/app/uptime#/',
