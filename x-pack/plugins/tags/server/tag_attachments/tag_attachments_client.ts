@@ -5,6 +5,7 @@
  */
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import Boom from 'boom';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   RawTagAttachment,
@@ -41,11 +42,14 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     };
   };
 
-  public async create({
-    attachment,
-  }: TagAttachmentClientCreateParams): Promise<TagAttachmentClientCreateResult> {
-    const { tagId, kid } = attachment;
+  private getId(tagId: string, kid: string) {
+    return `${tagId}|${kid}`;
+  }
 
+  private readonly createAttachment = async ({
+    tagId,
+    kid,
+  }: Pick<RawTagAttachment, 'tagId' | 'kid'>): Promise<RawTagAttachmentWithId> => {
     validateTagId(tagId);
     validateKID(kid);
 
@@ -53,6 +57,7 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     const at = new Date().toISOString();
     const username = user ? user.username : null;
 
+    const id = this.getId(tagId, kid);
     const rawAttachment: RawTagAttachment = {
       tagId,
       kid,
@@ -62,10 +67,20 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     const savedObject: TagAttachmentSavedObject = await savedObjectsClient.create<RawTagAttachment>(
       this.type,
       rawAttachment,
-      {}
+      { id }
     );
 
-    return { attachment: this.toTagAttachment(savedObject) };
+    return this.toTagAttachment(savedObject);
+  };
+
+  public async create({
+    attachments,
+  }: TagAttachmentClientCreateParams): Promise<TagAttachmentClientCreateResult> {
+    if (!Array.isArray(attachments)) throw Boom.badRequest('Expected a list of attachments.');
+
+    const results = await Promise.all(attachments.map(this.createAttachment));
+
+    return { attachments: results };
   }
 
   public async getAttachedTags({

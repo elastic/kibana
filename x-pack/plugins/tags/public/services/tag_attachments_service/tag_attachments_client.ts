@@ -9,6 +9,8 @@ import {
   ITagAttachmentsClient,
   TagAttachmentClientCreateParams,
   TagAttachmentClientCreateResult,
+  TagAttachmentClientGetResourceTagsParams,
+  TagAttachmentClientGetResourceTagsResult,
 } from '../../../common';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
@@ -27,5 +29,13 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     return await this.params.http.post<TagAttachmentClientCreateResult>(`${this.path}/attachment`, {
       body: JSON.stringify(params),
     });
+  }
+
+  public async getAttachedTags({
+    kid,
+  }: TagAttachmentClientGetResourceTagsParams): Promise<TagAttachmentClientGetResourceTagsResult> {
+    return await this.params.http.get<TagAttachmentClientGetResourceTagsResult>(
+      `${this.path}/resource/${btoa(kid)}/tags`
+    );
   }
 }

@@ -9,21 +9,19 @@ import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
 
-export const createAttachment = ({ router }: RouteParams) => {
-  router.post(
+export const getResourceTags = ({ router }: RouteParams) => {
+  router.get(
     {
-      path: `${TAGS_API_PATH}/attachment`,
+      path: `${TAGS_API_PATH}/resource/{kid}/tags`,
       validate: {
-        body: schema.object({
-          attachment: schema.object({
-            tagId: schema.string(),
-            kid: schema.string(),
-          }),
+        params: schema.object({
+          kid: schema.string(),
         }),
       },
     },
     assertTagsContext(async ({ tags }, req, res) => {
-      const body = await tags.attachmentsClient.create(req.body);
+      const { kid } = req.params;
+      const body = await tags.attachmentsClient.getAttachedTags({ kid });
       return res.ok({ body });
     })
   );

@@ -9,7 +9,7 @@ import { readTag } from './routes/read_tag';
 import { updateTag } from './routes/update_tag';
 import { getAllTags } from './routes/get_all_tags';
 import { deleteTag } from './routes/delete_tag';
-import { createAttachment } from './routes/create_attachment';
+import { createAttachments } from './routes/create_attachments';
 import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
@@ -18,5 +18,5 @@ export const setupRoutes = (params: RouteParams) => {
   updateTag(params);
   deleteTag(params);
   getAllTags(params);
-  createAttachment(params);
+  createAttachments(params);
 };

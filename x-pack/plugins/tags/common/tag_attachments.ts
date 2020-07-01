@@ -23,11 +23,11 @@ export interface RawTagAttachmentWithId extends RawTagAttachment {
 }
 
 export interface TagAttachmentClientCreateParams {
-  attachment: Pick<RawTagAttachment, 'tagId' | 'kid'>;
+  attachments: Array<Pick<RawTagAttachment, 'tagId' | 'kid'>>;
 }
 
 export interface TagAttachmentClientCreateResult {
-  attachment: RawTagAttachmentWithId;
+  attachments: RawTagAttachmentWithId[];
 }
 
 export interface TagAttachmentClientGetResourceTagsParams {
