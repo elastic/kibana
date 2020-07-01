@@ -4,10 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as t from 'io-ts';
+import { isRight } from 'fp-ts/lib/Either';
+import { flow } from 'fp-ts/lib/function';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { useKibana } from '../../../shared_imports';
+
+interface ErrorNode {
+  reason: string;
+  processor_type?: string;
+  suppressed?: ErrorNode[];
+}
+
+const errorNodeRT = t.recursion<ErrorNode>('ErrorNode', (ErrorNode) =>
+  t.intersection([
+    t.interface({
+      reason: t.string,
+    }),
+    t.partial({
+      processor_type: t.string,
+      suppressed: t.array(ErrorNode),
+    }),
+  ])
+);
+
+const errorAttributesObjectRT = t.interface({
+  attributes: t.interface({
+    error: t.interface({
+      root_cause: t.array(errorNodeRT),
+    }),
+  }),
+});
+
+const isProcessorsError = flow(errorAttributesObjectRT.decode, isRight);
+
+type ErrorAttributesObject = t.TypeOf<typeof errorAttributesObjectRT>;
 
 interface Props {
   error: unknown;
@@ -18,20 +51,6 @@ interface PipelineError {
 }
 interface PipelineErrors {
   errors: PipelineError[];
-}
-
-interface ErrorNode {
-  reason: string;
-  processor_type?: string;
-  suppressed?: ErrorNode[];
-}
-
-interface ErrorAttributesObject {
-  attributes: {
-    error: {
-      root_cause: [ErrorNode];
-    };
-  };
 }
 
 const i18nTexts = {
@@ -77,12 +96,8 @@ const flattenErrorsTree = (node: ErrorNode): PipelineError[] => {
   return result;
 };
 
-const toKnownError = (error: unknown): PipelineErrors => {
-  if (
-    typeof error === 'object' &&
-    error != null &&
-    (error as any).attributes?.error?.root_cause?.[0]
-  ) {
+export const toKnownError = (error: unknown): PipelineErrors => {
+  if (typeof error === 'object' && error != null && isProcessorsError(error)) {
     const errorAttributes = error as ErrorAttributesObject;
     const rootCause = errorAttributes.attributes.error.root_cause[0];
     return { errors: flattenErrorsTree(rootCause) };
@@ -159,6 +174,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   color="danger"
                   iconSide="right"
                   iconType="arrowUp"
+                  data-test-subj="hideErrorsButton"
                 >
                   {i18nTexts.errors.hideErrors(hiddenErrorsCount)}
                 </EuiButtonEmpty>
@@ -169,6 +185,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   color="danger"
                   iconSide="right"
                   iconType="arrowDown"
+                  data-test-subj="showErrorsButton"
                 >
                   {i18nTexts.errors.showErrors(hiddenErrorsCount)}
                 </EuiButtonEmpty>
