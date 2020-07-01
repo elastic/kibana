@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import { debounce } from 'lodash';
-// @ts-ignore
+// @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import {
   EuiSpacer,
