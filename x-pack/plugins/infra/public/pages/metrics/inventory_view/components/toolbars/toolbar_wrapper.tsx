@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+
 import { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/source';
