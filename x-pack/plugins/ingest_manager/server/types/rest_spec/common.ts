@@ -6,8 +6,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const ListWithKuerySchema = schema.object({
-  page: schema.number({ defaultValue: 1 }),
-  perPage: schema.number({ defaultValue: 20 }),
+  page: schema.maybe(schema.number({ defaultValue: 1 })),
+  perPage: schema.maybe(schema.number({ defaultValue: 20 })),
   kuery: schema.maybe(schema.string()),
 });
 

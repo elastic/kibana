@@ -38,8 +38,12 @@ export const getAgentConfigsHandler: RequestHandler<
   TypeOf<typeof GetAgentConfigsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const { full: withPackageConfigs = false, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await agentConfigService.list(soClient, request.query);
+    const { items, total, page, perPage } = await agentConfigService.list(soClient, {
+      withPackageConfigs,
+      ...restOfQuery,
+    });
     const body: GetAgentConfigsResponse = {
       items,
       total,
