@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
 import { DataRecognizer, RecognizeResult } from '../../models/data_recognizer';
 import {
@@ -16,7 +16,7 @@ import {
 
 export interface ModulesProvider {
   modulesProvider(
-    callAsCurrentUser: APICaller,
+    callAsCurrentUser: LegacyAPICaller,
     savedObjectsClient: SavedObjectsClientContract
   ): {
     recognize(indexPatternTitle: string): Promise<RecognizeResult[]>;
@@ -40,7 +40,10 @@ export interface ModulesProvider {
 
 export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider {
   return {
-    modulesProvider(callAsCurrentUser: APICaller, savedObjectsClient: SavedObjectsClientContract) {
+    modulesProvider(
+      callAsCurrentUser: LegacyAPICaller,
+      savedObjectsClient: SavedObjectsClientContract
+    ) {
       isFullLicense();
       return {
         recognize(indexPatternTitle: string) {
@@ -91,7 +94,7 @@ export function getModulesProvider(isFullLicense: LicenseCheck): ModulesProvider
 }
 
 function dataRecognizerFactory(
-  callAsCurrentUser: APICaller,
+  callAsCurrentUser: LegacyAPICaller,
   savedObjectsClient: SavedObjectsClientContract
 ) {
   return new DataRecognizer(callAsCurrentUser, savedObjectsClient);

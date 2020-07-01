@@ -26,12 +26,6 @@ export interface DescriptionListItem {
   description: NonNullable<ReactNode>;
 }
 
-export interface Comment {
-  created_by: string;
-  created_at: string;
-  comment: string;
-}
-
 export enum ExceptionListType {
   DETECTION_ENGINE = 'detection',
   ENDPOINT = 'endpoint',

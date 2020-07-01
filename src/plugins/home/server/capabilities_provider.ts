@@ -24,6 +24,6 @@ export const capabilitiesProvider = () => ({
     visualize: true,
     console: true,
     advanced_settings: true,
-    index_patterns: true,
+    indexPatterns: true,
   },
 });

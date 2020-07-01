@@ -24,8 +24,15 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
+  };
+});
+
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
@@ -95,8 +102,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
       });
+      component.update();
       act(() => {
-        find(dropZoneSelector).last().simulate('click');
+        find(dropZoneSelector).simulate('click');
       });
       component.update();
     },
@@ -122,13 +130,6 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
-    duplicateProcessor(processorSelector: string) {
-      find(`${processorSelector}.moreMenu.button`).simulate('click');
-      act(() => {
-        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
-      });
-    },
-
     startAndCancelMove(processorSelector: string) {
       act(() => {
         find(`${processorSelector}.moveItemButton`).simulate('click');
@@ -136,6 +137,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
       act(() => {
         find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+      });
+    },
+
+    duplicateProcessor(processorSelector: string) {
+      find(`${processorSelector}.moreMenu.button`).simulate('click');
+      act(() => {
+        find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
       });
     },
 

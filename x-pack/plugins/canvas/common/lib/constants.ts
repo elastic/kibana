@@ -20,7 +20,6 @@ export const LOCALSTORAGE_PREFIX = `kibana.canvas`;
 export const LOCALSTORAGE_CLIPBOARD = `${LOCALSTORAGE_PREFIX}.clipboard`;
 export const SESSIONSTORAGE_LASTPATH = 'lastPath:canvas';
 export const FETCH_TIMEOUT = 30000; // 30 seconds
-export const CANVAS_USAGE_TYPE = 'canvas';
 export const DEFAULT_WORKPAD_CSS = '.canvasPage {\n\n}';
 export const DEFAULT_ELEMENT_CSS = '.canvasRenderEl{\n\n}';
 export const VALID_IMAGE_TYPES = ['gif', 'jpeg', 'png', 'svg+xml'];

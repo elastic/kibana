@@ -54,7 +54,12 @@ import {
   AgentService,
   datasourceService,
 } from './services';
-import { getAgentStatusById, authenticateAgentWithAccessToken } from './services/agents';
+import {
+  getAgentStatusById,
+  authenticateAgentWithAccessToken,
+  listAgents,
+  getAgent,
+} from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 
@@ -236,7 +241,7 @@ export class IngestManagerPlugin
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ) {
+  ): Promise<IngestManagerStartContract> {
     await appContextService.start({
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
@@ -255,6 +260,8 @@ export class IngestManagerPlugin
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
+        getAgent,
+        listAgents,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },

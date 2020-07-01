@@ -56,6 +56,6 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: { success: true, registerDatasource },
+    ingestManager: { success: Promise.resolve(true), registerDatasource },
   };
 };

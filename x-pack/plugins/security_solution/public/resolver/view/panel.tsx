@@ -22,7 +22,7 @@ import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
 import { EventCountsForProcess } from './panels/panel_content_related_counts';
@@ -51,6 +51,7 @@ const PanelContent = memo(function PanelContent() {
   const urlSearch = history.location.search;
   const dispatch = useResolverDispatch();
 
+  const { timestamp } = useContext(SideEffectContext);
   const queryParams: CrumbInfo = useMemo(() => {
     return { crumbId: '', crumbEvent: '', ...querystring.parse(urlSearch.slice(1)) };
   }, [urlSearch]);
@@ -84,7 +85,7 @@ const PanelContent = memo(function PanelContent() {
   const paramsSelectedEvent = useMemo(() => {
     return graphableProcesses.find((evt) => event.entityId(evt) === idFromParams);
   }, [graphableProcesses, idFromParams]);
-  const { timestamp } = useContext(SideEffectContext);
+
   const [lastUpdatedProcess, setLastUpdatedProcess] = useState<null | ResolverEvent>(null);
 
   /**
@@ -140,15 +141,10 @@ const PanelContent = memo(function PanelContent() {
     [history, urlSearch]
   );
 
-  // GO JONNY GO
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForIdFromParams = useMemo(() => {
-    if (idFromParams) {
-      return relatedEventStats.get(idFromParams);
-    }
-    return undefined;
-  }, [relatedEventStats, idFromParams]);
+  const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
+    idFromParams && relatedEventStats ? relatedEventStats.get(idFromParams) : undefined;
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters
@@ -218,11 +214,19 @@ const PanelContent = memo(function PanelContent() {
   }, [panelToShow, dispatch]);
 
   const currentPanelView = useSelector(selectors.currentPanelView);
+  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+  const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
+  const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
 
   const panelInstance = useMemo(() => {
     if (currentPanelView === 'processDetails') {
       return (
-        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
+        <ProcessDetails
+          processEvent={uiSelectedEvent!}
+          pushToQueryParams={pushToQueryParams}
+          isProcessTerminated={isProcessTerminated}
+          isProcessOrigin={false}
+        />
       );
     }
 
@@ -261,7 +265,13 @@ const PanelContent = memo(function PanelContent() {
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
+    return (
+      <ProcessListWithCounts
+        pushToQueryParams={pushToQueryParams}
+        isProcessTerminated={isProcessTerminated}
+        isProcessOrigin={false}
+      />
+    );
   }, [
     uiSelectedEvent,
     crumbEvent,
@@ -269,6 +279,7 @@ const PanelContent = memo(function PanelContent() {
     pushToQueryParams,
     relatedStatsForIdFromParams,
     currentPanelView,
+    isProcessTerminated,
   ]);
 
   return <>{panelInstance}</>;
