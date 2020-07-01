@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
@@ -16,6 +16,7 @@ import {
 } from './monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
+import { AvailabilityExpressionSelect } from './monitor_expressions/availability_expression_select';
 import { KueryBar } from '..';
 
 export interface AlertMonitorStatusProps {
@@ -83,7 +84,11 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         setAlertParams={setAlertParams}
       />
 
-      <EuiSpacer size="xs" />
+      <EuiHorizontalRule />
+
+      <AvailabilityExpressionSelect setAlertParams={setAlertParams} />
+
+      <EuiSpacer size="s" />
 
       <FiltersExpressionSelectContainer
         alertParams={alertParams}

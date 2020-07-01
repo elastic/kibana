@@ -69,4 +69,10 @@ export const timeExpLabels = {
       defaultMessage: 'Selectable field for the time range units alerts should use',
     }
   ),
+  SELECT_TIME_RANGE_HEADLINE: i18n.translate(
+    'xpack.uptime.alerts.monitorStatus.timerangeSelectionHeader',
+    {
+      defaultMessage: 'Select time range unit',
+    }
+  ),
 };

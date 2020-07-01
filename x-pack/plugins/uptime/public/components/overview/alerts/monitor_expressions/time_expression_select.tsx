@@ -11,6 +11,7 @@ import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
 import { timeExpLabels } from './translations';
+import { TimeUnitSelectable, TimeRangeOption } from './time_unit_selectable';
 
 interface Props {
   defaultTimerangeCount?: number;
@@ -20,7 +21,7 @@ interface Props {
 
 const DEFAULT_TIMERANGE_UNIT = 'm';
 
-const TimeRangeOptions = [
+const TimeRangeOptions: TimeRangeOption[] = [
   {
     'aria-label': labels.SECONDS_TIME_RANGE,
     'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
@@ -90,32 +91,17 @@ export const TimeExpressionSelect: React.FC<Props> = ({
         <AlertExpressionPopover
           aria-label={timeExpLabels.OPEN_TIME_POPOVER}
           content={
-            <>
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.uptime.alerts.monitorStatus.timerangeSelectionHeader"
-                    defaultMessage="Select time range unit"
-                  />
-                </h5>
-              </EuiTitle>
-              <EuiSelectable
-                aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
-                data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
-                options={timerangeUnitOptions}
-                onChange={(newOptions) => {
-                  if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
-                    setTimerangeUnitOptions(newOptions);
-                  }
-                }}
-                singleSelection={true}
-                listProps={{
-                  showIcons: true,
-                }}
-              >
-                {(list) => list}
-              </EuiSelectable>
-            </>
+            <TimeUnitSelectable
+              aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
+              data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
+              headlineText={timeExpLabels.SELECT_TIME_RANGE_HEADLINE}
+              onChange={(newOptions: TimeRangeOption[]) => {
+                if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
+                  setTimerangeUnitOptions(newOptions);
+                }
+              }}
+              timeRangeOptions={timerangeUnitOptions}
+            />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
           description=""
