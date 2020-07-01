@@ -19,7 +19,7 @@
 
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../data/common';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -121,7 +121,7 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
   };
 };
 
-export const searchSavedObjectTypeMigrations = {
+export const searchMigrations = {
   '6.7.2': flow<SavedObjectMigrationFn<any, any>>(migrateMatchAllQuery),
   '7.0.0': flow<SavedObjectMigrationFn<any, any>>(setNewReferences),
   '7.4.0': flow<SavedObjectMigrationFn<any, any>>(migrateSearchSortToNestedArray),

@@ -18,9 +18,9 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { searchSavedObjectTypeMigrations } from './search_migrations';
+import { searchMigrations } from './search_migrations';
 
-export const searchSavedObjectType: SavedObjectsType = {
+export const search: SavedObjectsType = {
   name: 'search',
   hidden: false,
   namespaceType: 'single',
@@ -43,18 +43,18 @@ export const searchSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
-      columns: { type: 'keyword' },
+      columns: { type: 'keyword', index: false },
       description: { type: 'text' },
-      hits: { type: 'integer' },
+      hits: { type: 'integer', index: false },
       kibanaSavedObjectMeta: {
         properties: {
-          searchSourceJSON: { type: 'text' },
+          searchSourceJSON: { type: 'text', index: false },
         },
       },
-      sort: { type: 'keyword' },
+      sort: { type: 'keyword', index: false },
       title: { type: 'text' },
       version: { type: 'integer' },
     },
   },
-  migrations: searchSavedObjectTypeMigrations,
+  migrations: searchMigrations,
 };
