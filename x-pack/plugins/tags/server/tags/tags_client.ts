@@ -13,8 +13,8 @@ import {
   ITagsClient,
   TagsClientCreateParams,
   TagsClientDeleteParams,
-  TagsClientGetParams,
-  TagsClientGetResult,
+  TagsClientReadParams,
+  TagsClientReadResult,
   TagsClientUpdateParams,
   TagsClientUpdateResult,
 } from '../../common';
@@ -77,7 +77,7 @@ export class TagsClient implements ITagsClient {
     return { tag: this.savedObjectToTag(savedObject) };
   }
 
-  public async read({ id }: TagsClientGetParams): Promise<TagsClientGetResult> {
+  public async read({ id }: TagsClientReadParams): Promise<TagsClientReadResult> {
     validateTagId(id);
 
     const { savedObjectsClient } = this.params;

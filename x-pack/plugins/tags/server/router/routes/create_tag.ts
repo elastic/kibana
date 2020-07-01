@@ -12,7 +12,7 @@ import { RouteParams } from '../types';
 export const createTag = ({ router }: RouteParams) => {
   router.post(
     {
-      path: `${TAGS_API_PATH}`,
+      path: `${TAGS_API_PATH}/tag`,
       validate: {
         body: schema.object({
           tag: schema.object({

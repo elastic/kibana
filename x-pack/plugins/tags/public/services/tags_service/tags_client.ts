@@ -9,7 +9,12 @@ import {
   TAGS_API_PATH,
   TagsClientCreateParams,
   TagsClientCreateResult,
+  TagsClientReadParams,
+  TagsClientReadResult,
   TagsClientGetAllResult,
+  TagsClientDeleteParams,
+  TagsClientUpdateParams,
+  TagsClientUpdateResult,
 } from '../../../common';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
@@ -23,16 +28,27 @@ export class TagsClient implements ITagsClient {
   constructor(private readonly params: TagsClientParams) {}
 
   public async create(params: TagsClientCreateParams): Promise<TagsClientCreateResult> {
-    return await this.params.http.post<TagsClientCreateResult>(this.path, {
+    return await this.params.http.post<TagsClientCreateResult>(`${this.path}/tag`, {
       body: JSON.stringify(params),
     });
   }
 
-  public async getAll(): Promise<TagsClientGetAllResult> {
-    return await this.params.http.get<TagsClientGetAllResult>(this.path);
+  public async read({ id }: TagsClientReadParams): Promise<TagsClientReadResult> {
+    return await this.params.http.get<TagsClientReadResult>(`${this.path}/tag/${id}`);
   }
 
-  public async del(id: string): Promise<void> {
+  public async update({ patch }: TagsClientUpdateParams): Promise<TagsClientUpdateResult> {
+    const { id, ...rest } = patch;
+    return await this.params.http.post<TagsClientUpdateResult>(`${this.path}/tag/${id}`, {
+      body: JSON.stringify({ patch: rest }),
+    });
+  }
+
+  public async del({ id }: TagsClientDeleteParams): Promise<void> {
     await this.params.http.delete<TagsClientGetAllResult>(`${this.path}/tag/${id}`);
+  }
+
+  public async getAll(): Promise<TagsClientGetAllResult> {
+    return await this.params.http.get<TagsClientGetAllResult>(`${this.path}/tag`);
   }
 }

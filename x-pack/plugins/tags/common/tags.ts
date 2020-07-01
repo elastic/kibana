@@ -29,11 +29,11 @@ export interface TagsClientCreateResult {
   tag: RawTagWithId;
 }
 
-export interface TagsClientGetParams {
+export interface TagsClientReadParams {
   id: string;
 }
 
-export interface TagsClientGetResult {
+export interface TagsClientReadResult {
   tag: RawTagWithId;
 }
 
@@ -58,7 +58,7 @@ export interface TagsClientGetAllResult {
  */
 export interface ITagsClient {
   create(params: TagsClientCreateParams): Promise<TagsClientCreateResult>;
-  read(params: TagsClientGetParams): Promise<TagsClientGetResult>;
+  read(params: TagsClientReadParams): Promise<TagsClientReadResult>;
   update(params: TagsClientUpdateParams): Promise<TagsClientUpdateResult>;
   del(params: TagsClientDeleteParams): Promise<void>;
   getAll(): Promise<TagsClientGetAllResult>;

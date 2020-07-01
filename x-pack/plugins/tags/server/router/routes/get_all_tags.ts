@@ -11,7 +11,7 @@ import { RouteParams } from '../types';
 export const getAllTags = ({ router }: RouteParams) => {
   router.get(
     {
-      path: `${TAGS_API_PATH}`,
+      path: `${TAGS_API_PATH}/tag`,
       validate: {},
     },
     assertTagsContext(async ({ tags }, req, res) => {
