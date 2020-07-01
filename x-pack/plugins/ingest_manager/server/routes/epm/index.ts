@@ -8,7 +8,7 @@ import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import {
   getCategoriesHandler,
   getListHandler,
-  getRestrictedListHandler,
+  getLimitedListHandler,
   getFileHandler,
   getInfoHandler,
   installPackageHandler,
@@ -43,11 +43,11 @@ export const registerRoutes = (router: IRouter) => {
 
   router.get(
     {
-      path: EPM_API_ROUTES.RESTRICTED_LIST_PATTERN,
+      path: EPM_API_ROUTES.LIMITED_LIST_PATTERN,
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    getRestrictedListHandler
+    getLimitedListHandler
   );
 
   router.get(

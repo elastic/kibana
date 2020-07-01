@@ -19,7 +19,7 @@ export {
   getInstallation,
   getPackageInfo,
   getPackages,
-  getRestrictedPackages,
+  getLimitedPackages,
   SearchParams,
 } from './get';
 

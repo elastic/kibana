@@ -34,7 +34,7 @@ export interface GetPackagesResponse {
   success: boolean;
 }
 
-export interface GetRestrictedPackagesResponse {
+export interface GetLimitedPackagesResponse {
   response: string[];
   success: boolean;
 }

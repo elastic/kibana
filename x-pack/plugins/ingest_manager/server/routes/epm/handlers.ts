@@ -16,7 +16,7 @@ import {
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
-  GetRestrictedPackagesResponse,
+  GetLimitedPackagesResponse,
 } from '../../types';
 import {
   getCategories,
@@ -25,7 +25,7 @@ import {
   getPackageInfo,
   installPackage,
   removeInstallation,
-  getRestrictedPackages,
+  getLimitedPackages,
 } from '../../services/epm/packages';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
@@ -69,11 +69,11 @@ export const getListHandler: RequestHandler<
   }
 };
 
-export const getRestrictedListHandler: RequestHandler = async (context, request, response) => {
+export const getLimitedListHandler: RequestHandler = async (context, request, response) => {
   try {
     const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getRestrictedPackages({ savedObjectsClient });
-    const body: GetRestrictedPackagesResponse = {
+    const res = await getLimitedPackages({ savedObjectsClient });
+    const body: GetLimitedPackagesResponse = {
       response: res,
       success: true,
     };

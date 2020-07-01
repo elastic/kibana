@@ -12,7 +12,7 @@ import { AgentConfig, PackageInfo, PackageConfig, GetPackagesResponse } from '..
 import {
   useGetOneAgentConfig,
   useGetPackages,
-  useGetRestrictedPackages,
+  useGetLimitedPackages,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
@@ -33,7 +33,7 @@ export const StepSelectPackage: React.FunctionComponent<{
   const { data: agentConfigData, error: agentConfigError } = useGetOneAgentConfig(agentConfigId);
 
   // Fetch packages info
-  // Filter out restricted packages already part of selected agent config
+  // Filter out limited packages already part of selected agent config
   const [packages, setPackages] = useState<GetPackagesResponse['response']>([]);
   const {
     data: packagesData,
@@ -41,19 +41,19 @@ export const StepSelectPackage: React.FunctionComponent<{
     isLoading: isPackagesLoading,
   } = useGetPackages();
   const {
-    data: restrictedPackagesData,
-    isLoading: isRestrictedPackagesLoading,
-  } = useGetRestrictedPackages();
+    data: limitedPackagesData,
+    isLoading: isLimitedPackagesLoading,
+  } = useGetLimitedPackages();
   useEffect(() => {
-    if (packagesData?.response && restrictedPackagesData?.response && agentConfigData?.item) {
+    if (packagesData?.response && limitedPackagesData?.response && agentConfigData?.item) {
       const allPackages = packagesData.response;
-      const restrictedPackages = restrictedPackagesData.response;
-      const usedRestrictedPackages = (agentConfigData.item.package_configs as PackageConfig[])
+      const limitedPackages = limitedPackagesData.response;
+      const usedLimitedPackages = (agentConfigData.item.package_configs as PackageConfig[])
         .map((packageConfig) => packageConfig.package?.name || '')
-        .filter((pkgName) => restrictedPackages.includes(pkgName));
-      setPackages(allPackages.filter((pkg) => !usedRestrictedPackages.includes(pkg.name)));
+        .filter((pkgName) => limitedPackages.includes(pkgName));
+      setPackages(allPackages.filter((pkg) => !usedLimitedPackages.includes(pkg.name)));
     }
-  }, [packagesData, restrictedPackagesData, agentConfigData]);
+  }, [packagesData, limitedPackagesData, agentConfigData]);
 
   // Update parent agent config state
   useEffect(() => {
@@ -121,7 +121,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isPackagesLoading || isRestrictedPackagesLoading}
+          isLoading={isPackagesLoading || isLimitedPackagesLoading}
           options={packages.map(({ title, name, version, icons }) => {
             const pkgkey = `${name}-${version}`;
             return {
