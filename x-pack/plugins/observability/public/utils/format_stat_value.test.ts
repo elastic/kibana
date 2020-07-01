@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { formatStatValue } from './format_stat_value';
-import { Stat } from '../typings/fetch_data_response';
+import { Stat } from '../typings';
 
 describe('formatStatValue', () => {
   it('formats value as number', () => {

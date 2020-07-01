@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UptimeFetchDataResponse } from '../typings/fetch_data_response';
-import { FetchData } from '../data_handler';
+import { UptimeFetchDataResponse, FetchData } from '../typings';
 
 export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
   return new Promise((resolve) => {

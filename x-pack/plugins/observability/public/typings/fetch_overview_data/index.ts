@@ -6,7 +6,7 @@
 
 import { ObservabilityApp } from '../../../typings/common';
 
-interface Stat {
+export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   label: string;
   value: number;
@@ -18,7 +18,7 @@ export interface Coordinates {
   y?: number;
 }
 
-interface Series {
+export interface Series {
   label: string;
   coordinates: Coordinates[];
   color?: string;

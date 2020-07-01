@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApmFetchDataResponse } from '../../../../../typings/fetch_data_response';
+import { ApmFetchDataResponse } from '../../../../../typings';
 
 export const response: ApmFetchDataResponse = {
   title: i18n.translate('apm.observabilityDashboard.title', {

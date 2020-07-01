@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LogsFetchDataResponse } from '../typings/fetch_data_response';
-import { FetchData } from '../data_handler';
+import { LogsFetchDataResponse, FetchData } from '../typings';
 
 export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
   return new Promise((resolve) => {

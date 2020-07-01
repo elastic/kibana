@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricsFetchDataResponse } from '../typings/fetch_data_response';
-import { FetchData } from '../data_handler';
+import { MetricsFetchDataResponse, FetchData } from '../typings';
 
 export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
   return new Promise((resolve) => {

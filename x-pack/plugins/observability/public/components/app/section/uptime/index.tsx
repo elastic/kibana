@@ -25,7 +25,7 @@ import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { UptimeFetchDataResponse } from '../../../../typings/fetch_data_response';
+import { UptimeFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { onBrushEnd } from '../helper';

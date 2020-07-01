@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApmFetchDataResponse } from '../typings/fetch_data_response';
-import { FetchData } from '../data_handler';
+import { ApmFetchDataResponse, FetchData } from '../typings';
 
 export const fetchApmData: FetchData<ApmFetchDataResponse> = () => {
   return Promise.resolve(response);

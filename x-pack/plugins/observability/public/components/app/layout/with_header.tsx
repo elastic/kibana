@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPage, EuiPageBody, EuiPageProps } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer, EuiPageProps } from '@elastic/eui';
 import { Header } from '../header/index';
 
 const getPaddingSize = (props: EuiPageProps) => (props.restrictWidth ? 0 : '24px');
