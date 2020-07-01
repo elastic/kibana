@@ -97,7 +97,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   public inputRef: HTMLTextAreaElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
-  private abortController: AbortController | undefined;
+  private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
 
@@ -523,6 +523,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   }
 
   public componentWillUnmount() {
+    if (this.abortController) this.abortController.abort();
     this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
   }
