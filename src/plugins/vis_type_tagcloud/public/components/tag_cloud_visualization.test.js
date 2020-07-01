@@ -61,13 +61,26 @@ describe('TagCloudVisualizationTest', () => {
     },
   });
 
+  const originTransformSVGElement = window.SVGElement.prototype.transform;
+
   beforeAll(() => {
     setFormatService(fieldFormatsServiceMock.createStartContract());
+    Object.defineProperties(window.SVGElement.prototype, {
+      transform: {
+        get: () => ({
+          baseVal: {
+            consolidate: () => {},
+          },
+        }),
+        configurable: true,
+      },
+    });
   });
 
   afterAll(() => {
     SVGElementGetBBoxSpyInstance.mockRestore();
     HTMLElementOffsetMockInstance.mockRestore();
+    window.SVGElement.prototype.transform = originTransformSVGElement;
   });
 
   describe('TagCloudVisualization - basics', () => {
@@ -136,17 +149,6 @@ describe('TagCloudVisualizationTest', () => {
 
       SVGElementGetBBoxSpyInstance.mockRestore();
       SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(256, 368);
-
-      Object.defineProperties(window.SVGElement.prototype, {
-        transform: {
-          get: () => ({
-            baseVal: {
-              consolidate: () => {},
-            },
-          }),
-          configurable: true,
-        },
-      });
 
       HTMLElementOffsetMockInstance.mockRestore();
       HTMLElementOffsetMockInstance = setHTMLElementOffset(256, 386);
