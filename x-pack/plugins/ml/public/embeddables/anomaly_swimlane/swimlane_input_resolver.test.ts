@@ -19,6 +19,7 @@ describe('useSwimlaneInputResolver', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: Subject<any>;
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  let onInputChange: jest.Mock;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -41,7 +42,7 @@ describe('useSwimlaneInputResolver', () => {
       } as CoreStart,
       (null as unknown) as MlStartDependencies,
       ({
-        explorerService: {
+        anomalyTimelineService: {
           setTimeRange: jest.fn(),
           loadOverallData: jest.fn(() =>
             Promise.resolve({
@@ -69,6 +70,7 @@ describe('useSwimlaneInputResolver', () => {
         },
       } as unknown) as AnomalySwimlaneServices,
     ];
+    onInputChange = jest.fn();
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -76,11 +78,10 @@ describe('useSwimlaneInputResolver', () => {
   });
 
   test('should fetch jobs only when input job ids have been changed', async () => {
-    const updateSpy = jest.fn();
     const { result, waitForNextUpdate } = renderHook(() =>
       useSwimlaneInputResolver(
         embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
-        updateSpy,
+        onInputChange,
         refresh,
         services,
         1000,
