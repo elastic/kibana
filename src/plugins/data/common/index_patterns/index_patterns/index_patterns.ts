@@ -228,6 +228,17 @@ export class IndexPatternsService {
 
     return indexPattern.init();
   }
+
+  /**
+   * Deletes an index pattern from .kibana index
+   * @param indexPattern: IndexPattern instance to delete
+   */
+  async delete(indexPattern: IndexPattern) {
+    if (indexPattern.id) {
+      indexPatternCache.clear(indexPattern.id);
+      return this.savedObjectsClient.delete('index-pattern', indexPattern.id);
+    }
+  }
 }
 
 export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
