@@ -16,6 +16,7 @@ import {
   EuiSelectable,
   EuiSelectableMessage,
   EuiSelectableProps,
+  EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,71 +36,123 @@ const PolicyEmptyState = React.memo<{
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
 }>(({ loading, onActionClick, actionDisabled }) => {
-  const policySteps = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
-          defaultMessage: 'Head over to Ingest Manager.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepOne"
-              defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepTwoTitle', {
-          defaultMessage: 'We’ll create a recommended security policy for you.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepTwo"
-              defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepThreeTitle', {
-          defaultMessage: 'Enroll your agents through Fleet.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepThree"
-              defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
-            />
-          </EuiText>
-        ),
-      },
-    ],
-    []
-  );
-
   return (
-    <ManagementEmptyState
-      loading={loading}
-      onActionClick={onActionClick}
-      actionDisabled={actionDisabled}
-      dataTestSubj="emptyPolicyTable"
-      steps={policySteps}
-      headerComponent={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policyList.noPolicyPrompt"
-          defaultMessage="Looks like you're not using the Elastic Endpoint"
-        />
-      }
-      bodyComponent={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policyList.noPolicyInstructions"
-          defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
-        />
-      }
-    />
+    <div data-test-sub="emptyPolicyTable">
+      {loading ? (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText>
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
+                  defaultMessage="Get started with Elastic Endpoint Security"
+                />
+              </h3>
+            </EuiText>
+            <EuiSpacer size="xl" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
+                defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+              />
+            </EuiText>
+            <EuiSpacer size="xl" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo"
+                defaultMessage="You’ll be able to view and manage hosts in your environment running the Elastic Endpoint from this page."
+              />
+            </EuiText>
+            <EuiSpacer size="xl" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
+                    <EuiIcon type="search" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
+                    <EuiText>
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.policyList.onboardingHostTitle"
+                          defaultMessage="Hosts"
+                        />
+                      </h4>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyList.onboardingHostInfo"
+                    defaultMessage="Hosts running the Elastic Endpoint"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
+                    <EuiIcon type="tableDensityExpanded" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
+                    <EuiText>
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.policyList.onboardingPolicyTitle"
+                          defaultMessage="Policies"
+                        />
+                      </h4>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyList.onboardingPolicyInfo"
+                    defaultMessage="View and configure protections"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xl" />
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
+                defaultMessage="To get started, you’ll have to add the Elastic Endpoint integration to your Agents. Let’s do that now!"
+              />
+            </EuiText>
+            <EuiSpacer size="xl" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  iconType="plusInCircle"
+                  onClick={onActionClick}
+                  isDisabled={actionDisabled}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policyList.actionButtonText"
+                    defaultMessage="Add Endpoint Security"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyList.placeholdForPictures"
+              defaultMessage="Pictures!!!"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </div>
   );
 });
 
