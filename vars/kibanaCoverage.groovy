@@ -14,7 +14,7 @@ def downloadPrevious(title) {
 
     ''', title)
 
-    def previous = sh(script: 'cat downloaded_previous', label: '### Capture Previous Sha', returnStdout: true).trim()
+    def previous = sh(script: 'cat downloaded_previous.txt', label: '### Capture Previous Sha', returnStdout: true).trim()
 
     return previous
   }
