@@ -11,6 +11,7 @@ import {
   EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
@@ -127,7 +128,13 @@ export const SwimlaneContainer: FC<
                     <EuiLoadingChart size="xl" data-test-subj="mlSwimLaneLoadingIndicator" />
                   </EuiText>
                 )}
-                {!isLoading && !showSwimlane && noDataWarning}
+                {!isLoading && !showSwimlane && (
+                  <EuiEmptyPrompt
+                    titleSize="xs"
+                    style={{ padding: 0 }}
+                    title={<h2>{noDataWarning}</h2>}
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             {isPaginationVisible && (

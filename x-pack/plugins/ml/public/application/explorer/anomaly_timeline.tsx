@@ -343,10 +343,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     isLoading={loading || viewBySwimlaneDataLoading}
                     noDataWarning={
                       typeof viewBySwimlaneFieldName === 'string' ? (
-                        <ExplorerNoInfluencersFound
-                          viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                          showFilterMessage={filterActive === true}
-                        />
+                        viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
+                          <FormattedMessage
+                            id="xpack.ml.explorer.noResultForSelectedJobsMessage"
+                            defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
+                            values={{ jobsCount: selectedJobs?.length ?? 1 }}
+                          />
+                        ) : (
+                          <ExplorerNoInfluencersFound
+                            viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                            showFilterMessage={filterActive === true}
+                          />
+                        )
                       ) : null
                     }
                   />
