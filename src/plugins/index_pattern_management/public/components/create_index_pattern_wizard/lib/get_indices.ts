@@ -24,7 +24,7 @@ import { IndexPatternCreationConfig } from '../../../../../index_pattern_managem
 import { MatchedItem, ResolveIndexResponse } from '../types';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
-const dataStreamLabel = i18n.translate('indexPatternManagement.aliasLabel', {
+const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
   defaultMessage: 'Data stream',
 });
 
