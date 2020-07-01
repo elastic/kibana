@@ -4,4 +4,3 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export const PLUGIN_ID = 'ingestManager';
-export const USAGE_TYPE = 'ingest_manager';

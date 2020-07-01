@@ -63,6 +63,7 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
+import { registerIngestManagerUsageCollector } from './collectors/register';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -164,6 +165,9 @@ export class IngestManagerPlugin
 
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
+
+    // Register usage collection
+    registerIngestManagerUsageCollector(deps.usageCollection);
 
     // Register feature
     // TODO: Flesh out privileges

@@ -5,8 +5,10 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { APICaller } from 'kibana/server';
-import { USAGE_TYPE } from '../../common';
+
+interface Usage {
+  fleet_enabled: boolean;
+}
 
 export function registerIngestManagerUsageCollector(usageCollection?: UsageCollectionSetup): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
@@ -15,29 +17,19 @@ export function registerIngestManagerUsageCollector(usageCollection?: UsageColle
   }
 
   // create usage collector
-  const ingestManagerCollector = usageCollection.makeUsageCollector({
-    type: USAGE_TYPE,
+  const ingestManagerCollector = usageCollection.makeUsageCollector<Usage>({
+    type: 'ingest_manager',
     isReady: () => true,
-    fetch: async (callCluster: APICaller) => {
+    fetch: async () => {
       // query ES and get some data
       // summarize the data into a model
       // return the modeled object that includes whatever you want to track
-
       return {
-        packages_installed: [
-          {
-            name: 'system',
-            version: '0.0.1',
-          },
-          {
-            name: 'endpoint',
-            version: '1.0.0',
-          },
-        ],
-        agents_enrolled: 42,
-        agent_configs_present: 23,
         fleet_enabled: true,
       };
+    },
+    schema: {
+      fleet_enabled: { type: 'boolean' },
     },
   });
 
