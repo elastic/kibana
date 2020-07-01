@@ -14,14 +14,15 @@ CI_RUN_URL=$3
 export CI_RUN_URL
 echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 
+FETCHED_PREVIOUS=$4
+export FETCHED_PREVIOUS
+echo "### debug FETCHED_PREVIOUS: ${FETCHED_PREVIOUS}"
+
 ES_HOST="https://${USER_FROM_VAULT}:${PASS_FROM_VAULT}@${HOST_FROM_VAULT}"
 export ES_HOST
 
 STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
-
-FETCHED_PREVIOUS=$(cat ../../../../downloaded_previous.txt)
-export FETCHED_PREVIOUS
 
 DELAY=100
 export DELAY
