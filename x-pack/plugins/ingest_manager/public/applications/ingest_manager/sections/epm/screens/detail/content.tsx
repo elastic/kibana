@@ -73,17 +73,11 @@ export function ContentPanel(props: ContentPanelProps) {
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
-  const { assets, requirement, panel } = props;
+  const { assets, panel } = props;
   switch (panel) {
     case 'overview':
       return (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <Requirements requirements={requirement} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xl" />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>
