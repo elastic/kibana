@@ -7,7 +7,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
@@ -113,7 +113,7 @@ export class DataRecognizer {
   jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
   constructor(
-    private callAsCurrentUser: APICaller,
+    private callAsCurrentUser: LegacyAPICaller,
     private savedObjectsClient: SavedObjectsClientContract
   ) {}
 
