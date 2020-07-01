@@ -19,7 +19,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   dashboard: 'Dashboard',
   ilm_policy: 'ILM Policy',
   ingest_pipeline: 'Ingest Pipeline',
-  index_pattern: 'Index Pattern',
+  'index-pattern': 'Index Pattern',
   index_template: 'Index Template',
   component_template: 'Component Template',
   search: 'Saved Search',
