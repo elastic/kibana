@@ -11,16 +11,17 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
-import { PipelineRequestFlyout } from './pipeline_request_flyout';
-import { PipelineTestFlyout } from './pipeline_test_flyout';
-import { PipelineFormFields } from './pipeline_form_fields';
-import { PipelineFormError } from './pipeline_form_error';
-import { pipelineFormSchema } from './schema';
 import {
   OnUpdateHandlerArg,
   OnUpdateHandler,
   SerializeResult,
 } from '../pipeline_processors_editor';
+
+import { PipelineRequestFlyout } from './pipeline_request_flyout';
+import { PipelineTestFlyout } from './pipeline_test_flyout';
+import { PipelineFormFields } from './pipeline_form_fields';
+import { PipelineFormError } from './pipeline_form_error';
+import { pipelineFormSchema } from './schema';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;

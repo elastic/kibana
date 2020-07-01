@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toKnownError } from './pipeline_form_error';
-import { nestedProcessorsErrorFixture } from '../../../../__jest__/client_integration/fixtures';
+import { toKnownError } from './error_utils';
+import { nestedProcessorsErrorFixture } from '../../../../../__jest__/client_integration/fixtures';
 
 describe('toKnownError', () => {
   test('undefined, null, numbers, arrays and bad objects', () => {
