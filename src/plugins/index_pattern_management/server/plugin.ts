@@ -47,13 +47,17 @@ export class IndexPatternManagementPlugin implements Plugin<void, void> {
         },
       },
       async (context, req, res) => {
-        const query = req.query.expand_wildcards
+        const queryString = req.query.expand_wildcards
           ? { expand_wildcards: req.query.expand_wildcards }
           : null;
         const result = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'transport.request',
-          // todo make sense of paraams vs query string
-          { method: 'GET', path: `/_resolve/index/${encodeURIComponent(req.params.query)}`, query }
+          {
+            method: 'GET',
+            path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
+              queryString ? '?' + new URLSearchParams(queryString).toString() : ''
+            }`,
+          }
         );
         return res.ok({ body: result });
       }

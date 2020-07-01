@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -47,7 +48,7 @@ export const Header = ({
   indexPatternName: string;
   showSystemIndices?: boolean;
   isIncludingSystemIndices: boolean;
-  onChangeIncludingSystemIndices: () => void;
+  onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isBeta?: boolean;
 }) => {
   const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
@@ -96,8 +97,8 @@ export const Header = ({
             <EuiSwitch
               label={
                 <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                  defaultMessage="Include system indices"
+                  id="indexPatternManagement.createIndexPattern.includeSystemAAndHiddenIndicesToggleSwitchLabel"
+                  defaultMessage="Include system and hidden indices"
                 />
               }
               id="checkboxShowSystemIndices"

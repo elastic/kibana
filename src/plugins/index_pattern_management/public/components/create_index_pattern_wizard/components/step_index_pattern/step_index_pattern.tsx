@@ -307,8 +307,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const isInputInvalid = showingIndexPatternQueryErrors && containsErrors && errors.length > 0;
     const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
-    // todo define next step OR create index pattern.
-    // look at matched indices
     // if all are data streams with same time field then create index pattern
     const {
       allMatchingDataStreams: uniformDataStreams,
@@ -347,7 +345,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         query={query}
         onQueryChanged={this.onQueryChanged}
         goToNextStep={() => goToNextStep(query, uniformDataStreams ? matchingTimestamp : undefined)}
-        // goToNextStep={nextStepOrCreate}
         isNextStepDisabled={isNextStepDisabled}
       />
     );

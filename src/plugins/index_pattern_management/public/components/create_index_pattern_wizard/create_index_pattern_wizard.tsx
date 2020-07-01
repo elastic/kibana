@@ -19,7 +19,12 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPanel } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  EuiPanel,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -30,7 +35,6 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
-
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';
@@ -210,10 +214,8 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
-    this.setState((prevState) => ({
-      isIncludingSystemIndices: !prevState.isIncludingSystemIndices,
-    }));
+  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
+    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
 
   renderHeader() {
