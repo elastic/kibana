@@ -52,7 +52,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations }: TablePluginSetupDependencies
   ) {
     expressions.registerFunction(createTableVisFn);
-    visualizations.createBaseVisualization(
+    visualizations.createReactVisualization(
       getTableVisTypeDefinition(core, this.initializerContext)
     );
   }

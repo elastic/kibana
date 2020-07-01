@@ -19,8 +19,17 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { IUiSettingsClient } from 'kibana/public';
 import { Vis, VisualizationController } from '../types';
 import { getI18n, getUISettings } from '../services';
+
+export interface ReactVisComponentProps<TData, TParams> {
+  config: IUiSettingsClient;
+  vis: Vis;
+  visData: TData;
+  visParams: TParams;
+  renderComplete: () => void;
+}
 
 export class ReactVisController implements VisualizationController {
   private el: HTMLElement;

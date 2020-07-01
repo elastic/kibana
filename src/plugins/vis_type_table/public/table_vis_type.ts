@@ -22,10 +22,7 @@ import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
 import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
-// @ts-ignore
-import tableVisTemplate from './table_vis.html';
-import { TableOptions } from './components/table_vis_options_lazy';
-import { getTableVisualizationControllerClass } from './vis_controller';
+import { TableOptions, TableVisualization } from './components';
 
 export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
   return {
@@ -38,8 +35,8 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
     description: i18n.translate('visTypeTable.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
-    visualization: getTableVisualizationControllerClass(core, context),
     visConfig: {
+      component: TableVisualization,
       defaults: {
         perPage: 10,
         showPartialRows: false,
@@ -52,7 +49,6 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
         totalFunc: 'sum',
         percentageCol: '',
       },
-      template: tableVisTemplate,
     },
     editorConfig: {
       optionsTemplate: TableOptions,

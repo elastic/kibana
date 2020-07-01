@@ -33,6 +33,7 @@ export { TypesService } from './vis_types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
 
 /** @public types */
+export { ReactVisComponentProps } from './vis_types/react_vis_controller';
 export { VisualizationsSetup, VisualizationsStart };
 export { VisTypeAlias, VisType } from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
