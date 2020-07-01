@@ -67,7 +67,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
   });
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ margin: 0 }}>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
