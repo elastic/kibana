@@ -993,6 +993,75 @@ describe('xy_expression', () => {
       });
     });
 
+    describe('y series coloring', () => {
+      test('color is applied to chart for multiple series', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+                {
+                  forAccessor: 'b',
+                  color: '#FFFF00',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  color: '#FEECDF',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect(component.find(LineSeries).at(0).prop('color')!()).toEqual('#550000');
+        expect(component.find(LineSeries).at(1).prop('color')!()).toEqual('#FFFF00');
+        expect(component.find(LineSeries).at(2).prop('color')!()).toEqual('#FEECDF');
+      });
+      test('color is not applied to chart when splitAccessor is defined or when not configured', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect(component.find(LineSeries).at(0).prop('color')!()).toEqual(null);
+        expect(component.find(LineSeries).at(1).prop('color')!()).toEqual(null);
+      });
+    });
+
     describe('provides correct series naming', () => {
       const nameFnArgs = {
         seriesKeys: [],

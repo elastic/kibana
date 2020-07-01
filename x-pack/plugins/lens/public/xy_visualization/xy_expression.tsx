@@ -34,7 +34,7 @@ import {
   LensFilterEvent,
   LensBrushEvent,
 } from '../types';
-import { LayerConfig, YConfig, XYArgs, SeriesType, visualizationTypes } from './types';
+import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';

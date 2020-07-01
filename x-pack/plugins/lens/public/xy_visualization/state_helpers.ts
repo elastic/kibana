@@ -5,7 +5,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { SeriesType, visualizationTypes } from './types';
+import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return seriesType === 'bar_horizontal' || seriesType === 'bar_horizontal_stacked';
