@@ -13,6 +13,11 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
+  KibanaRequest,
+  LifecycleResponseFactory,
+  OnPreAuthToolkit,
+  OnPreResponseToolkit,
+  OnPreResponseInfo,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -45,7 +50,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType, NewDatasource } from '../common';
+import { IngestManagerConfigType, NewDatasource, AGENT_ROUTE_TAG } from '../common';
 import {
   appContextService,
   licenseService,
@@ -152,6 +157,35 @@ export class IngestManagerPlugin
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    const maxConcurrentRequests = 1;
+    let concurrentRequests = 0;
+    const isAgentRequest = (request: KibanaRequest) => {
+      const tags = request.route.options.tags;
+      return tags.includes(AGENT_ROUTE_TAG);
+    };
+    core.http.registerOnPreAuth(
+      (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreAuthToolkit) => {
+        if (!isAgentRequest(request)) {
+          return toolkit.next();
+        }
+
+        if (concurrentRequests >= maxConcurrentRequests) {
+          return response.customError({ body: 'Too Many Agents', statusCode: 429 });
+        }
+
+        concurrentRequests += 1;
+        return toolkit.next();
+      }
+    );
+    core.http.registerOnPreResponse(
+      (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => {
+        if (isAgentRequest(request) && preResponse.statusCode !== 429) {
+          concurrentRequests -= 1;
+        }
+
+        return toolkit.next();
+      }
+    );
     this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {

@@ -16,3 +16,5 @@ export const AGENT_POLLING_THRESHOLD_MS = 30000;
 export const AGENT_POLLING_INTERVAL = 1000;
 export const AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS = 30000;
 export const AGENT_UPDATE_ACTIONS_INTERVAL_MS = 5000;
+
+export const AGENT_ROUTE_TAG = 'fleet:agent-route';

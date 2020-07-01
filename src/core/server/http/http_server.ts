@@ -282,7 +282,7 @@ export class HttpServer {
       this.log.warn(`registerOnPreAuth called after stop`);
     }
 
-    this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
+    this.server.ext('onPreAuth', adoptToHapiOnPreAuthFormat(fn, this.log));
   }
 
   private registerOnPreResponse(fn: OnPreResponseHandler) {
