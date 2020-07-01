@@ -7,7 +7,7 @@
 import { ApplicationStart, ToastsStart } from 'kibana/public';
 import { getLongQueryNotification } from './long_query_notification';
 import { getBackgroundRunningNotification } from './background_running_notification';
-import { BackgroundSessionService } from '../background_session';
+import { SessionService } from '../session';
 import { SearchInterceptor, DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
@@ -19,10 +19,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * @param toasts The `core.notifications.toasts` service
    * @param application The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
-   * @param backgroundSessionService Used to submit sessions to background upon request
+   * @param sessionService Used to submit sessions to background upon request
    */
   constructor(
-    private readonly backgroundSessionService: BackgroundSessionService,
+    private readonly sessionService: SessionService,
     private readonly data: DataPublicPluginStart,
     toasts: ToastsStart,
     application: ApplicationStart,
@@ -47,7 +47,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.hideToast();
     this.timeoutSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.timeoutSubscriptions.clear();
-    const stored = await this.backgroundSessionService.store();
+    const stored = await this.sessionService.store();
     if (stored) {
       this.events$.next({
         name: 'background',
@@ -74,7 +74,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     // set before await to avoid additional fetches
     this.isRestoreCache.set(currentSessionId, false);
 
-    const bgSession = await this.backgroundSessionService.get();
+    const bgSession = await this.sessionService.get();
     const isRestore = !bgSession;
     this.isRestoreCache.set(currentSessionId, isRestore);
 
