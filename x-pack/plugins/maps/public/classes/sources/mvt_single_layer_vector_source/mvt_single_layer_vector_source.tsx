@@ -169,19 +169,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   canFormatFeatureProperties() {
-    if (!this._tooltipFields.length) {
-      return false;
-    }
-
-    for (let i = 0; i < this._tooltipFields.length; i++) {
-      const tooltip: MVTField = this._tooltipFields[i];
-      for (let j = 0; j < this._descriptor.fields.length; j++) {
-        if (tooltip.getName() === this._descriptor.fields[j].name) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return !!this._tooltipFields.length;
   }
 
   getMinZoom() {
@@ -214,13 +202,13 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     const tooltips = [];
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
-        const field = this._tooltipFields.find((mvtField: MVTField) => {
-          return mvtField.getName() === key;
-        });
-
-        if (field) {
-          const tooltip = new TooltipProperty(key, key, properties[key]);
-          tooltips.push(tooltip);
+        for (let i = 0; i < this._tooltipFields.length; i++) {
+          const mvtField = this._tooltipFields[i];
+          if (mvtField.getName() === key) {
+            const tooltip = new TooltipProperty(key, key, properties[key]);
+            tooltips.push(tooltip);
+            break;
+          }
         }
       }
     }
