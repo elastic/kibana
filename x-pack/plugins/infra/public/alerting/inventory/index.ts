@@ -24,10 +24,10 @@ export function createInventoryMetricAlertType(): AlertTypeModel {
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
       {
-        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\}
+        defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
 
-\\{\\{context.metricOf.condition0\\}\\} has crossed a threshold of \\{\\{context.thresholdOf.condition0\\}\\}
-Current value is \\{\\{context.valueOf.condition0\\}\\}
+Reason:
+\\{\\{context.reason\\}\\}
 `,
       }
     ),
