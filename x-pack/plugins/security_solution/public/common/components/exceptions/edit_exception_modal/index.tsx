@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../../exception_builder';
-import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { useAddOrUpdateException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
@@ -93,11 +93,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     onConfirm();
   }, [dispatchToaster, onConfirm]);
 
-  const [{ isLoading: addExceptionIsLoading }, addExceptionItems] = useAddException({
-    onSuccess,
-    onError,
-    http,
-  });
+  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
+    {
+      http,
+      onSuccess,
+      onError,
+    }
+  );
 
   const onCommentChange = useCallback(
     (value: string) => {
@@ -139,8 +141,10 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     console.log(enrichExceptionItems());
     // TODO: Create API hook for persisting and closing
     // TODO: insert OS tag into entries before persisting for endpoint exceptions
-    addExceptionItems(enrichExceptionItems());
-  }, [addExceptionItems, enrichExceptionItems]);
+    if (addOrUpdateExceptionItems !== null) {
+      addOrUpdateExceptionItems(enrichExceptionItems());
+    }
+  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
 
   // TODO: builder - Grab appropriate listId that's associated with the rule
   // TODO: builder - dynamically set listType

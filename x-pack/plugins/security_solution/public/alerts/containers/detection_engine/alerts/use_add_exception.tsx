@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HttpStart } from '../../../../../../../../src/core/public';
 
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
@@ -16,49 +16,89 @@ import { getUpdateAlertsQuery } from '../../../components/alerts_table/actions';
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
- * @param exceptionItemsToAdd array of ExceptionListItemSchema to add
+ * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  *
  */
-type AddExceptionItemsFunc = (
-  exceptionItemsToAdd: ExceptionListItemSchema[],
+export type AddOrUpdateExceptionItemsFunc = (
+  exceptionItemsToAddOrUpdate: ExceptionListItemSchema[],
   alertIdToClose?: string
 ) => Promise<void>;
 
-export type ReturnUseAddException = [{ isLoading: boolean }, AddExceptionItemsFunc];
+export type ReturnUseAddOrUpdateException = [
+  { isLoading: boolean },
+  AddOrUpdateExceptionItemsFunc | null
+];
 
-// TODO: what does the callback take as arguments?
-export interface UseAddExceptionSuccess {}
-
-export interface UseAddExceptionProps {
+export interface UseAddOrUpdateExceptionProps {
   http: HttpStart;
-  exceptionItems: ExceptionListItemSchema[];
   onError: (arg: Error) => void;
-  onSuccess: (arg: UseAddExceptionSuccess) => void;
+  onSuccess: () => void;
 }
 
 /**
- * Hook for adding an exception item
+ * Hook for adding and updating an exception item
  *
  * @param http Kibana http service
  * @param onError error callback
  * @param onSuccess callback when all lists fetched successfully
  *
  */
-export const useAddException = ({
+export const useAddOrUpdateException = ({
   http,
   onError,
   onSuccess,
-}: UseAddExceptionProps): ReturnUseAddException => {
+}: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
   const [isLoading, setIsLoading] = useState(false);
-  const addException = useRef<AddExceptionItemsFunc | null>(null);
+  const addOrUpdateException = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const addExceptionItems: AddExceptionItemsFunc = async (
-      exceptionItemsToAdd,
+    const addOrUpdateItems = async (
+      exceptionItemsToAddOrUpdate: ExceptionListItemSchema[]
+    ): Promise<void> => {
+      const toAdd: ExceptionListItemSchema[] = [];
+      const toUpdate: ExceptionListItemSchema[] = [];
+      exceptionItemsToAddOrUpdate.forEach((item: ExceptionListItemSchema) => {
+        if (item.id) {
+          toUpdate.push(item);
+        } else {
+          // TODO: builder should set item.id to undefined
+          delete item.id;
+          toAdd.push(item);
+        }
+      });
+
+      console.log('exceptionItemsToAdd', toAdd);
+      console.log('exceptionItemToEdit', toUpdate);
+      const promises: Array<Promise<ExceptionListItemSchema>> = [];
+      // TODO: use bulk api
+      toAdd.forEach((item: ExceptionListItemSchema) => {
+        promises.push(
+          addExceptionListItem({
+            http,
+            listItem: item,
+            signal: abortCtrl.signal,
+          })
+        );
+      });
+      // TODO: use bulk api
+      toUpdate.forEach((item: ExceptionListItemSchema) => {
+        promises.push(
+          updateExceptionListItem({
+            http,
+            listItem: item,
+            signal: abortCtrl.signal,
+          })
+        );
+      });
+      await Promise.all(promises);
+    };
+
+    const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
+      exceptionItemsToAddOrUpdate,
       alertIdToClose
     ) => {
       try {
@@ -70,63 +110,26 @@ export const useAddException = ({
           });
         }
 
-        const itemsMap: {
-          toAdd: ExceptionListItemSchema[];
-          toUpdate: ExceptionListItemSchema[];
-        } = exceptionItemsToAdd.reduce(
-          function (memo, item: ExceptionListItemSchema) {
-            if (item.id) {
-              memo.toUpdate.push(item);
-            } else {
-              // TODO: builder should set item.id to undefined
-              delete item.id;
-              memo.toAdd.push(item);
-            }
-            return memo;
-          },
-          {
-            toAdd: [],
-            toUpdate: [],
-          }
-        );
+        await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
-        console.log('exceptionItemsToAdd', itemsMap.toAdd);
-        console.log('exceptionItemToEdit', itemsMap.toUpdate);
-        console.log(alertIdToClose);
-        if (itemsMap.toAdd.length > 0) {
-          await addExceptionListItem({
-            http,
-            listItem: itemsMap.toAdd[0],
-            signal: abortCtrl.signal,
-          });
-        }
-        if (itemsMap.toUpdate.length > 0) {
-          await updateExceptionListItem({
-            http,
-            listItem: itemsMap.toUpdate[0],
-            signal: abortCtrl.signal,
-          });
-        }
-        await new Promise((resolve) => setTimeout(resolve, 2000));
         if (isSubscribed) {
+          setIsLoading(false);
           onSuccess();
         }
       } catch (error) {
         if (isSubscribed) {
+          setIsLoading(false);
           onError(error);
         }
       }
-      if (isSubscribed) {
-        setIsLoading(false);
-      }
     };
 
-    addException.current = addExceptionItems;
+    addOrUpdateException.current = addOrUpdateExceptionItems;
     return (): void => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [http, onSuccess, onError]);
 
-  return [{ isLoading }, addException.current];
+  return [{ isLoading }, addOrUpdateException.current];
 };

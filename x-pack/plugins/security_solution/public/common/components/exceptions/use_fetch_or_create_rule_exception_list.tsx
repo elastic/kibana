@@ -24,7 +24,7 @@ export interface UseFetchOrCreateRuleExceptionListProps {
 }
 
 /**
- * Hook for adding an exception item
+ * Hook for fetching or creating an exception list
  *
  * @param http Kibana http service
  * @param ruleId id of the rule

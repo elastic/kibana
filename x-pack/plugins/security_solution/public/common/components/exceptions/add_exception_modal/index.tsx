@@ -36,7 +36,7 @@ import { useRule } from '../../../../../alerts/containers/detection_engine/rules
 import { ExceptionBuilder } from '../../exception_builder';
 import { ExceptionItem } from '../../exception_builder/types';
 import { Loader } from '../../loader';
-import { useAddException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { useAddOrUpdateException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -117,11 +117,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onConfirm();
   }, [dispatchToaster, onConfirm]);
 
-  const [{ isLoading: addExceptionIsLoading }, addExceptionItems] = useAddException({
-    onSuccess,
-    onError,
-    http,
-  });
+  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
+    {
+      http,
+      onSuccess,
+      onError,
+    }
+  );
 
   useEffect(() => {
     if (alertData !== undefined && exceptionListType === 'endpoint') {
@@ -177,9 +179,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const onAddExceptionConfirm = useCallback(() => {
     console.log(enrichExceptionItems());
     // TODO: Create API hook for persisting and closing
-    addExceptionItems(enrichExceptionItems());
     // TODO: if close checkbox is selected, refresh signals table
-  }, [addExceptionItems, enrichExceptionItems]);
+    if (addOrUpdateExceptionItems !== null) {
+      addOrUpdateExceptionItems(enrichExceptionItems());
+    }
+  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
 
   const isSubmitButtonDisabled = useCallback(
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
