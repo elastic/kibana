@@ -5,7 +5,6 @@
  */
 
 import { createHash } from 'crypto';
-import lzma from 'lzma-native';
 import { validate } from '../../../../common/validate';
 
 import {
@@ -32,19 +31,16 @@ export async function buildArtifact(
   os: string,
   schemaVersion: string
 ): Promise<InternalArtifactSchema> {
-  const compressedExceptions: Buffer = await compressExceptionList(exceptions);
-
-  const sha256 = createHash('sha256')
-    .update(compressedExceptions.toString('utf8'), 'utf8')
-    .digest('hex');
+  const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
+  const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
     sha256,
-    encoding: 'xz',
+    encoding: 'application/json',
     created: Date.now(),
-    body: compressedExceptions.toString('binary'),
-    size: Buffer.from(JSON.stringify(exceptions)).byteLength,
+    body: exceptionsBuffer.toString('base64'),
+    size: exceptionsBuffer.byteLength,
   };
 }
 
@@ -158,17 +154,4 @@ function translateEntry(
       break;
   }
   return translatedEntry || undefined;
-}
-
-/**
- * Compresses the exception list
- */
-export function compressExceptionList(
-  exceptionList: WrappedTranslatedExceptionList
-): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    lzma.compress(JSON.stringify(exceptionList), undefined, (res: Buffer) => {
-      resolve(res);
-    });
-  });
 }

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, SavedObjectsClientContract, HttpResponseOptions } from 'src/core/server';
+import {
+  IRouter,
+  SavedObjectsClientContract,
+  HttpResponseOptions,
+  IKibanaResponse,
+  SavedObject,
+} from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
@@ -21,7 +27,7 @@ import { EndpointAppContext } from '../../types';
 const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 
 /**
- * Registers the exception list route to enable sensors to download a compressed  allowlist
+ * Registers the exception list route to enable sensors to download an allowlist artifact
  */
 export function registerDownloadExceptionListRoute(
   router: IRouter,
@@ -56,17 +62,16 @@ export function registerDownloadExceptionListRoute(
         }
       }
 
-      const buildAndValidateResponse = (artName: string, body: string): object => {
-        const artifact = {
-          body: Buffer.from(body, 'binary'),
+      const buildAndValidateResponse = (artName: string, body: string): IKibanaResponse => {
+        const artifact: HttpResponseOptions = {
+          body,
           headers: {
-            'content-encoding': 'xz',
-            'content-disposition': `attachment; filename=${artName}.xz`,
+            'content-encoding': 'application/json',
+            'content-disposition': `attachment; filename=${artName}.json`,
           },
         };
 
         const [validated, errors] = validate(artifact, downloadArtifactResponseSchema);
-
         if (errors !== null || validated === null) {
           return res.internalError({ body: errors! });
         } else {
@@ -84,12 +89,10 @@ export function registerDownloadExceptionListRoute(
         logger.debug(`Cache MISS artifact ${id}`);
         return scopedSOClient
           .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
-          .then((artifact) => {
-            cache.set(id, artifact.attributes.body);
-            return buildAndValidateResponse(
-              artifact.attributes.identifier,
-              artifact.attributes.body
-            );
+          .then((artifact: SavedObject<InternalArtifactSchema>) => {
+            const body = Buffer.from(artifact.attributes.body, 'base64').toString();
+            cache.set(id, body);
+            return buildAndValidateResponse(artifact.attributes.identifier, body);
           })
           .catch((err) => {
             if (err?.output?.statusCode === 404) {

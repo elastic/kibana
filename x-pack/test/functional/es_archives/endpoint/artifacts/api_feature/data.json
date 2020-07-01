@@ -1,17 +1,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:exceptions-artifact:endpoint-exceptionlist-macos-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+    "id": "endpoint:exceptions-artifact:endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
     "index": ".kibana",
     "source": {
       "references": [
       ],
       "endpoint:exceptions-artifact": {
-        "body": "ý7zXZ\u0000\u0000\u0001i\"Þ6\u0002\u0000!\u0001\u0016\u0000\u0000\u0000t/å£\u0001\u0000\u0015{\"exceptions_list\":[]}\u0000\u0000\u000052¤\u0000\u0001*\u0016RÌ9»B\r\u0001\u0000\u0000\u0000\u0000\u0001YZ",
+        "body": "eyJleGNlcHRpb25zX2xpc3QiOltdfQ==",
         "created": 1593016187465,
-        "encoding": "xz",
-        "identifier": "endpoint-exceptionlist-macos-1.0.0",
-        "sha256": "1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
+        "encoding": "application/json",
+        "identifier": "endpoint-exceptionlist-linux-1.0.0",
+        "sha256": "a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
         "size": 22
       },
       "type": "endpoint:exceptions-artifact",
@@ -31,9 +31,9 @@
       "endpoint:exceptions-manifest": {
         "created": 1593183699663,
         "ids": [
-          "endpoint-exceptionlist-linux-1.0.0-6b065fbf5d9ae82039ca20e2f3f1629d2cd9d8d3f3517d0f295f879bf939a269",
-          "endpoint-exceptionlist-macos-1.0.0-1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975",
-          "endpoint-exceptionlist-windows-1.0.0-dbba762118dadd31597eb2cf6a39ff5a45aa31b27c1671f8b4d1e403d2102a77"
+          "endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
+          "endpoint-exceptionlist-macos-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
+          "endpoint-exceptionlist-windows-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d"
         ]
       },
       "type": "endpoint:exceptions-manifest",

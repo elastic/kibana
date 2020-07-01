@@ -144,7 +144,6 @@
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
-    "@types/lzma-native": "^4.0.0",
     "JSONStream": "1.3.5",
     "abortcontroller-polyfill": "^1.4.0",
     "accept": "3.0.2",

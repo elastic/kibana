@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { encoding } from '../common';
 
-const body = t.unknown; // TODO: create Buffer type
+const body = t.string;
 const headers = t.exact(
   t.type({
     'content-encoding': encoding,

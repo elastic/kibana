@@ -5361,13 +5361,6 @@
   resolved "https://registry.yarnpkg.com/@types/lru-cache/-/lru-cache-5.1.0.tgz#57f228f2b80c046b4a1bd5cac031f81f207f4f03"
   integrity sha512-RaE0B+14ToE4l6UqdarKPnXwVDuigfFv+5j9Dze/Nqr23yyuqdNvzcZi3xB+3Agvi5R4EOgAksfv3lXX4vBt9w==
 
-"@types/lzma-native@4.0.0", "@types/lzma-native@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@types/lzma-native/-/lzma-native-4.0.0.tgz#86440e70b1431f2bc1a470eb0ea8bcfc5788fe14"
-  integrity sha512-9mBLyFWJe8/whIRjGwca5pbXv7ANzPj7KNgsgCU/l5z8xcyIe6LNae+iKdT5rjnXcXGOwyW/PKYt0N6+7N5QlA==
-  dependencies:
-    "@types/node" "*"
-
 "@types/mapbox-gl@^1.9.1":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-1.9.1.tgz#78b62f8a1ead78bc525a4c1db84bb71fa0fcc579"
@@ -21155,16 +21148,6 @@ lz-string@^1.4.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/lz-string/-/lz-string-1.4.4.tgz#c0d8eaf36059f705796e1e344811cf4c498d3a26"
   integrity sha1-wNjq82BZ9wV5bh40SBHPTEmNOiY=
-
-lzma-native@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/lzma-native/-/lzma-native-6.0.0.tgz#e49d57023c81c4e2a1cbe5ebcf223618457ce31d"
-  integrity sha512-rf5f4opPymsPHotgY2d0cUP3kbVxERSxWDGEbi2gnbnxuWGokFrBaQ02Oe9pssIwsgp0r0PnbSNg7VPY3AYe7w==
-  dependencies:
-    node-addon-api "^1.6.0"
-    node-pre-gyp "^0.11.0"
-    readable-stream "^2.3.5"
-    rimraf "^2.7.1"
 
 macos-release@^1.0.0:
   version "1.1.0"

@@ -590,14 +590,6 @@
         ],
       },
       {
-        groupSlug: 'lzma-native',
-        groupName: 'lzma-native related packages',
-        packageNames: [
-          'lzma-native',
-          '@types/lzma-native',
-        ],
-      },
-      {
         groupSlug: 'mapbox-gl',
         groupName: 'mapbox-gl related packages',
         packageNames: [

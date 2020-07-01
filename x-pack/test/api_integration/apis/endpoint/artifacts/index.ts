@@ -9,16 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest } from '../../fleet/agents/services';
 
-const exceptionListBody = {
-  list_id: 'endpoint_list',
-  _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-  tags: ['user added string for a tag', 'malware'],
-  type: 'endpoint',
-  description: 'This is a sample agnostic endpoint type exception',
-  name: 'Sample Endpoint Exception List',
-  namespace_type: 'agnostic',
-};
-
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -52,7 +42,13 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           type: 'PERMANENT',
           metadata: {
-            local: {},
+            local: {
+              elastic: {
+                agent: {
+                  version: '7.0.0',
+                },
+              },
+            },
             user_provided: {},
           },
         })
@@ -64,7 +60,7 @@ export default function (providerContext: FtrProviderContext) {
     after(() => esArchiver.unload('endpoint/artifacts/api_feature'));
 
     it('should fail to find artifact with invalid hash', async () => {
-      const { body } = await supertestWithoutAuth
+      await supertestWithoutAuth
         .get('/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/abcd')
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -73,9 +69,9 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should download an artifact with correct hash', async () => {
-      const { body } = await supertestWithoutAuth
+      await supertestWithoutAuth
         .get(
-          '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
+          '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d'
         )
         .set('kbn-xsrf', 'xxx')
         .set('authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -84,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should fail on invalid api key', async () => {
-      const { body } = await supertestWithoutAuth
+      await supertestWithoutAuth
         .get(
           '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/1825fb19fcc6dc391cae0bc4a2e96dd7f728a0c3ae9e1469251ada67f9e1b975'
         )

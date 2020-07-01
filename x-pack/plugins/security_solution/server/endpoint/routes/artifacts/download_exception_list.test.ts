@@ -22,7 +22,6 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 import { ExceptionsCache } from '../../lib/artifacts/cache';
-import { compressExceptionList } from '../../lib/artifacts/lists';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -114,7 +113,7 @@ describe('test alerts route', () => {
     );
   });
 
-  it('should serve the compressed artifact to download', async () => {
+  it('should serve the artifact to download', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       path: `/api/endpoint/artifacts/download/${mockArtifactName}/123456`,
       method: 'get',
@@ -125,7 +124,6 @@ describe('test alerts route', () => {
     });
 
     // Mock the SavedObjectsClient get response for fetching the artifact
-    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
     const mockArtifact = {
       id: '2468',
       type: 'test',
@@ -134,9 +132,9 @@ describe('test alerts route', () => {
         identifier: mockArtifactName,
         schemaVersion: '1.0.0',
         sha256: '123456',
-        encoding: 'xz',
+        encoding: 'application/json',
         created: Date.now(),
-        body: mockCompressedArtifact,
+        body: Buffer.from(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
         size: 100,
       },
     };
@@ -162,14 +160,14 @@ describe('test alerts route', () => {
     );
 
     const expectedHeaders = {
-      'content-encoding': 'xz',
-      'content-disposition': `attachment; filename=${mockArtifactName}.xz`,
+      'content-encoding': 'application/json',
+      'content-disposition': `attachment; filename=${mockArtifactName}.json`,
     };
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]?.headers).toEqual(expectedHeaders);
-    const compressedArtifact = mockResponse.ok.mock.calls[0][0]?.body;
-    expect(compressedArtifact).toEqual(mockCompressedArtifact);
+    const artifact = mockResponse.ok.mock.calls[0][0]?.body;
+    expect(artifact).toEqual(Buffer.from(mockArtifact.attributes.body, 'base64').toString());
   });
 
   it('should handle fetching a non-existent artifact', async () => {
@@ -217,9 +215,9 @@ describe('test alerts route', () => {
     });
 
     // Add to the download cache
-    const mockCompressedArtifact = await compressExceptionList(expectedEndpointExceptions);
+    const mockArtifact = expectedEndpointExceptions;
     const cacheKey = `${mockArtifactName}-${mockSha}`;
-    cache.set(cacheKey, mockCompressedArtifact.toString('binary'));
+    cache.set(cacheKey, JSON.stringify(mockArtifact));
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')
