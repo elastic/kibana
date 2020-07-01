@@ -186,16 +186,20 @@ const ColorPicker = ({
 
   const handleColor: EuiColorPickerProps['onChange'] = (newColor, output) => {
     setColor(newColor, output);
-    if (output.isValid) {
+
+    if (output.isValid || newColor === '') {
       const newYConfigs = [...(layer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
       if (existingIndex !== -1) {
-        newYConfigs[existingIndex].color = newColor;
+        if (newColor === '') {
+          delete newYConfigs[existingIndex].color;
+        } else {
+          newYConfigs[existingIndex].color = newColor;
+        }
       } else {
         newYConfigs.push({
           forAccessor: accessor,
           color: newColor,
-          axisMode: 'auto',
         });
       }
       setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));

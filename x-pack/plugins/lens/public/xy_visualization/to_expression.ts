@@ -188,8 +188,8 @@ export const buildExpression = (
                               function: 'lens_xy_yConfig',
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
-                                axisMode: [yConfig.axisMode],
-                                color: [yConfig.color],
+                                axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+                                color: yConfig.color ? [yConfig.color] : [],
                               },
                             },
                           ],
