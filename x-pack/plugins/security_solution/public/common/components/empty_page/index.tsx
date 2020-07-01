@@ -64,6 +64,7 @@ export const EmptyPage = React.memo<EmptyPageProps>(
             <EuiFlexItem grow={false}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
+                data-test-subj="empty-page-tertiary-action"
                 fill={actionTertiaryFill}
                 onClick={actionTertiaryOnClick}
                 href={actionTertiaryUrl}
