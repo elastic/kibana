@@ -211,7 +211,7 @@ async function mapToHostResultList(
   }
 }
 
-export async function enrichHostMetadata(
+async function enrichHostMetadata(
   hostMetadata: HostMetadata,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostInfo> {
