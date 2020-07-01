@@ -34,7 +34,6 @@ const mapping = [
 // eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   const mockJira = {
@@ -81,8 +80,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     describe('Jira - Action Creation', () => {
       it('should return 200 when creating a jira action successfully', async () => {

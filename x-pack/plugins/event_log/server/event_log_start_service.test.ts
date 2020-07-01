@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'src/core/server';
+import { savedObjectsClientMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
-import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 
 jest.mock('./event_log_client');
 
@@ -26,13 +27,8 @@ describe('EventLogClientService', () => {
 
       eventLogStartService.getClient(request);
 
-      expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request);
-
-      const [{ value: savedObjectsClient }] = savedObjectsService.getScopedClient.mock.results;
-
-      expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
-        esContext,
-        savedObjectsClient,
+      expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
+        includedHiddenTypes: ['action', 'alert'],
       });
     });
   });

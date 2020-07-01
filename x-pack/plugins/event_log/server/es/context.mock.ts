@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
+
 import { EsContext } from './context';
 import { namesMock } from './names.mock';
 import { IClusterClientAdapter } from './cluster_client_adapter';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
 
 const createContextMock = () => {

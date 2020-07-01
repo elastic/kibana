@@ -16,7 +16,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
@@ -29,8 +28,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     it('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest

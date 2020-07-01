@@ -34,7 +34,6 @@ const mapping = [
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   const mockServiceNow = {
@@ -80,8 +79,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     describe('ServiceNow - Action Creation', () => {
       it('should return 200 when creating a servicenow action successfully', async () => {

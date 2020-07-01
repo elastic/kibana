@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LegacyClusterClient, Logger } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { createEsContext } from './context';
-import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 jest.mock('../lib/../../../../package.json', () => ({
   version: '1.2.3',
 }));
