@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './tags_service';
+export * from './tag_attachments_client';
 export * from './tag_attachments_service';
