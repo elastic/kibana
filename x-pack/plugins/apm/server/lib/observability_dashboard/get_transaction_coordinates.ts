@@ -41,7 +41,6 @@ export async function getTransactionCoordinates({
             field: '@timestamp',
             fixed_interval: bucketSize,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
           },
         },
       },
