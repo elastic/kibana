@@ -5,7 +5,14 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
@@ -14,9 +21,11 @@ import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsId } from '../../../../common/analytics';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
+const FAILED = 'failed';
 
 export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
+  const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [currentProgress, setCurrentProgress] = useState<
     | {
         currentPhase: number;
@@ -44,6 +53,12 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
 
         if (jobStats !== undefined) {
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
+
+          if (jobStats.state === FAILED) {
+            clearInterval(interval);
+            setFailedJobMessage(jobStats.failure_reason || `Analytics job ${jobId} has failed.`);
+          }
+
           setCurrentProgress(progressStats);
           if (
             progressStats.currentPhase === progressStats.totalPhases &&
@@ -73,6 +88,25 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
   return (
     <>
       <EuiSpacer />
+      {failedJobMessage !== undefined && (
+        <>
+          <EuiCallOut
+            data-test-subj="analyticsWizardProgressCallout"
+            title={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutTitle',
+              {
+                defaultMessage: 'Job failed',
+              }
+            )}
+            color={'danger'}
+            iconType={'alert'}
+            size="s"
+          >
+            <p>{failedJobMessage}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiText size="m">
         <strong>
           {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressTitle', {
