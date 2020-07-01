@@ -340,6 +340,7 @@ describe('#start', () => {
 describe('#stop', () => {
   it('stops both legacy and new clients', async () => {
     await elasticsearchService.setup(deps);
+    await elasticsearchService.start();
     await elasticsearchService.stop();
 
     expect(mockLegacyClusterClientInstance.close).toHaveBeenCalledTimes(1);

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { stringify } from 'querystring';
 import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
@@ -59,7 +60,5 @@ const convertQueryString = (qs: string | Record<string, any> | undefined): strin
   if (qs === undefined || typeof qs === 'string') {
     return qs ?? '';
   }
-  return Object.entries(qs)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('&');
+  return stringify(qs);
 };

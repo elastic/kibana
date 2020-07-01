@@ -62,40 +62,62 @@ describe('parseClientOptions', () => {
       expect(parseClientOptions(createConfig({ keepAlive: false }), false).agent).toBeUndefined();
     });
 
-    it('`sniff` options', () => {
+    it('`sniffOnStart` options', () => {
       expect(
         parseClientOptions(
           createConfig({
             sniffOnStart: true,
-            sniffOnConnectionFault: false,
-            sniffInterval: false,
           }),
           false
-        )
-      ).toEqual(
-        expect.objectContaining({
-          sniffOnStart: true,
-          sniffOnConnectionFault: false,
-          sniffInterval: false,
-        })
-      );
+        ).sniffOnStart
+      ).toEqual(true);
 
       expect(
         parseClientOptions(
           createConfig({
             sniffOnStart: false,
+          }),
+          false
+        ).sniffOnStart
+      ).toEqual(false);
+    });
+    it('`sniffOnConnectionFault` options', () => {
+      expect(
+        parseClientOptions(
+          createConfig({
             sniffOnConnectionFault: true,
+          }),
+          false
+        ).sniffOnConnectionFault
+      ).toEqual(true);
+
+      expect(
+        parseClientOptions(
+          createConfig({
+            sniffOnConnectionFault: false,
+          }),
+          false
+        ).sniffOnConnectionFault
+      ).toEqual(false);
+    });
+    it('`sniffInterval` options', () => {
+      expect(
+        parseClientOptions(
+          createConfig({
+            sniffInterval: false,
+          }),
+          false
+        ).sniffInterval
+      ).toEqual(false);
+
+      expect(
+        parseClientOptions(
+          createConfig({
             sniffInterval: duration(100, 'ms'),
           }),
           false
-        )
-      ).toEqual(
-        expect.objectContaining({
-          sniffOnStart: false,
-          sniffOnConnectionFault: true,
-          sniffInterval: 100,
-        })
-      );
+        ).sniffInterval
+      ).toEqual(100);
     });
 
     it('`hosts` option', () => {
@@ -267,79 +289,85 @@ describe('parseClientOptions', () => {
       ).toEqual(['content-of-ca-path']);
     });
 
-    it('handles the `verificationMode` option', () => {
-      expect(
-        parseClientOptions(
-          createConfig({
-            ssl: {
-              verificationMode: 'none',
-            },
-          }),
-          false
-        ).ssl
-      ).toMatchInlineSnapshot(`
+    describe('verificationMode', () => {
+      it('handles `none` value', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              ssl: {
+                verificationMode: 'none',
+              },
+            }),
+            false
+          ).ssl
+        ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
           "rejectUnauthorized": false,
         }
       `);
-
-      expect(
-        parseClientOptions(
-          createConfig({
-            ssl: {
-              verificationMode: 'certificate',
-            },
-          }),
-          false
-        ).ssl
-      ).toMatchInlineSnapshot(`
+      });
+      it('handles `certificate` value', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              ssl: {
+                verificationMode: 'certificate',
+              },
+            }),
+            false
+          ).ssl
+        ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
           "checkServerIdentity": [Function],
           "rejectUnauthorized": true,
         }
       `);
-
-      expect(
-        parseClientOptions(
-          createConfig({
-            ssl: {
-              verificationMode: 'full',
-            },
-          }),
-          false
-        ).ssl
-      ).toMatchInlineSnapshot(`
+      });
+      it('handles `full` value', () => {
+        expect(
+          parseClientOptions(
+            createConfig({
+              ssl: {
+                verificationMode: 'full',
+              },
+            }),
+            false
+          ).ssl
+        ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
           "rejectUnauthorized": true,
         }
       `);
-
-      expect(
-        () =>
-          parseClientOptions(
-            createConfig({
-              ssl: {
-                verificationMode: 'unknown' as any,
-              },
-            }),
-            false
-          ).ssl
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
-
-      expect(
-        () =>
-          parseClientOptions(
-            createConfig({
-              ssl: {
-                verificationMode: undefined as any,
-              },
-            }),
-            false
-          ).ssl
-      ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
+      });
+      it('throws for invalid values', () => {
+        expect(
+          () =>
+            parseClientOptions(
+              createConfig({
+                ssl: {
+                  verificationMode: 'unknown' as any,
+                },
+              }),
+              false
+            ).ssl
+        ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
+      });
+      it('throws for undefined values', () => {
+        expect(
+          () =>
+            parseClientOptions(
+              createConfig({
+                ssl: {
+                  verificationMode: undefined as any,
+                },
+              }),
+              false
+            ).ssl
+        ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
+      });
     });
 
     describe('`certificate`, `key` and `passphrase`', () => {

@@ -47,6 +47,7 @@ export class ElasticsearchService
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
   private kibanaVersion: string;
+  private getAuthHeaders?: GetAuthHeaders;
 
   private createLegacyCustomClient?: (
     type: string,
@@ -72,8 +73,9 @@ export class ElasticsearchService
     this.log.debug('Setting up elasticsearch service');
 
     const config = await this.config$.pipe(first()).toPromise();
-    this.client = this.createClusterClient('data', config, deps.http.getAuthHeaders);
-    this.legacyClient = this.createLegacyClusterClient('data', config, deps.http.getAuthHeaders);
+
+    this.getAuthHeaders = deps.http.getAuthHeaders;
+    this.legacyClient = this.createLegacyClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       callWithInternalUser: this.legacyClient.callAsInternalUser,
@@ -85,11 +87,7 @@ export class ElasticsearchService
 
     this.createLegacyCustomClient = (type, clientConfig = {}) => {
       const finalConfig = merge({}, config, clientConfig);
-      return this.createLegacyClusterClient(type, finalConfig, deps.http.getAuthHeaders);
-    };
-    this.createCustomClient = (type, clientConfig = {}) => {
-      const finalConfig = merge({}, config, clientConfig);
-      return this.createClusterClient(type, finalConfig, deps.http.getAuthHeaders);
+      return this.createLegacyClusterClient(type, finalConfig);
     };
 
     return {
@@ -103,23 +101,25 @@ export class ElasticsearchService
     };
   }
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (
-      !this.client ||
-      !this.createCustomClient ||
-      !this.legacyClient ||
-      !this.createLegacyCustomClient
-    ) {
+    if (!this.legacyClient || !this.createLegacyCustomClient) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
-    } else {
-      return {
-        client: this.client,
-        createClient: this.createCustomClient,
-        legacy: {
-          client: this.legacyClient,
-          createClient: this.createLegacyCustomClient,
-        },
-      };
     }
+
+    const config = await this.config$.pipe(first()).toPromise();
+    this.client = this.createClusterClient('data', config);
+    this.createCustomClient = (type, clientConfig = {}) => {
+      const finalConfig = merge({}, config, clientConfig);
+      return this.createClusterClient(type, finalConfig);
+    };
+
+    return {
+      client: this.client,
+      createClient: this.createCustomClient,
+      legacy: {
+        client: this.legacyClient,
+        createClient: this.createLegacyCustomClient,
+      },
+    };
   }
 
   public async stop() {
@@ -133,27 +133,19 @@ export class ElasticsearchService
     }
   }
 
-  private createClusterClient(
-    type: string,
-    config: ElasticsearchClientConfig,
-    getAuthHeaders?: GetAuthHeaders
-  ) {
+  private createClusterClient(type: string, config: ElasticsearchClientConfig) {
     return new ClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
-      getAuthHeaders
+      this.getAuthHeaders
     );
   }
 
-  private createLegacyClusterClient(
-    type: string,
-    config: LegacyElasticsearchClientConfig,
-    getAuthHeaders?: GetAuthHeaders
-  ) {
+  private createLegacyClusterClient(type: string, config: LegacyElasticsearchClientConfig) {
     return new LegacyClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
-      getAuthHeaders
+      this.getAuthHeaders
     );
   }
 }
