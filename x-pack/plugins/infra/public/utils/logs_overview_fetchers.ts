@@ -83,37 +83,8 @@ async function fetchLogsOverview(
           index: logParams.index,
           body: {
             size: 0,
-            query: {
-              range: {
-                [logParams.timestampField]: {
-                  gt: params.startTime,
-                  lte: params.endTime,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
-            aggs: {
-              stats: {
-                terms: {
-                  field: 'event.dataset',
-                  size: 4,
-                },
-              },
-              series: {
-                date_histogram: {
-                  field: logParams.timestampField,
-                  fixed_interval: params.bucketSize,
-                },
-                aggs: {
-                  dataset: {
-                    terms: {
-                      field: 'event.dataset',
-                      size: 4,
-                    },
-                  },
-                },
-              },
-            },
+            query: buildLogOverviewQuery(logParams, params),
+            aggs: buildLogOverviewAggregations(logParams, params),
           },
         },
       })
@@ -128,6 +99,43 @@ async function fetchLogsOverview(
         (error) => reject(error)
       );
   });
+}
+
+function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
+  return {
+    range: {
+      [logParams.timestampField]: {
+        gt: params.startTime,
+        lte: params.endTime,
+        format: 'strict_date_optional_time',
+      },
+    },
+  };
+}
+
+function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataParams) {
+  return {
+    stats: {
+      terms: {
+        field: 'event.dataset',
+        size: 4,
+      },
+    },
+    series: {
+      date_histogram: {
+        field: logParams.timestampField,
+        fixed_interval: params.bucketSize,
+      },
+      aggs: {
+        dataset: {
+          terms: {
+            field: 'event.dataset',
+            size: 4,
+          },
+        },
+      },
+    },
+  };
 }
 
 function processLogsOverviewAggregations(aggregations: {
