@@ -26,7 +26,7 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
@@ -39,7 +39,7 @@ const delay = async (durationMs: number) =>
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const deps = {
-  http: httpServiceMock.createSetupContract(),
+  http: httpServiceMock.createInternalSetupContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
@@ -55,7 +55,7 @@ configService.atPath.mockReturnValue(
 
 let env: Env;
 let coreContext: CoreContext;
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 

@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
-import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
   stateToAlertMessage,
-} from './messages';
+} from '../common/messages';
+import { AlertStates } from './types';
+import { evaluateAlert } from './lib/evaluate_alert';
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function (options: AlertExecutorOptions) {
@@ -36,7 +36,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults));
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${group}::${alertId}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>

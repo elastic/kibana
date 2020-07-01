@@ -12,6 +12,7 @@ import {
 } from './__mocks__/es_results';
 import { buildBulkBody } from './build_bulk_body';
 import { SignalHit } from './types';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -91,38 +92,7 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
-          exceptions_list: [
-            {
-              field: 'source.ip',
-              values_operator: 'included',
-              values_type: 'exists',
-            },
-            {
-              field: 'host.name',
-              values_operator: 'excluded',
-              values_type: 'match',
-              values: [
-                {
-                  name: 'rock01',
-                },
-              ],
-              and: [
-                {
-                  field: 'host.id',
-                  values_operator: 'included',
-                  values_type: 'match_all',
-                  values: [
-                    {
-                      name: '123',
-                    },
-                    {
-                      name: '678',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          exceptions_list: getListArrayMock(),
         },
       },
     };
@@ -218,38 +188,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
           threat: [],
-          exceptions_list: [
-            {
-              field: 'source.ip',
-              values_operator: 'included',
-              values_type: 'exists',
-            },
-            {
-              field: 'host.name',
-              values_operator: 'excluded',
-              values_type: 'match',
-              values: [
-                {
-                  name: 'rock01',
-                },
-              ],
-              and: [
-                {
-                  field: 'host.id',
-                  values_operator: 'included',
-                  values_type: 'match_all',
-                  values: [
-                    {
-                      name: '123',
-                    },
-                    {
-                      name: '678',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          exceptions_list: getListArrayMock(),
         },
       },
     };
@@ -343,38 +282,7 @@ describe('buildBulkBody', () => {
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           throttle: 'no_actions',
-          exceptions_list: [
-            {
-              field: 'source.ip',
-              values_operator: 'included',
-              values_type: 'exists',
-            },
-            {
-              field: 'host.name',
-              values_operator: 'excluded',
-              values_type: 'match',
-              values: [
-                {
-                  name: 'rock01',
-                },
-              ],
-              and: [
-                {
-                  field: 'host.id',
-                  values_operator: 'included',
-                  values_type: 'match_all',
-                  values: [
-                    {
-                      name: '123',
-                    },
-                    {
-                      name: '678',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          exceptions_list: getListArrayMock(),
         },
       },
     };
@@ -461,38 +369,7 @@ describe('buildBulkBody', () => {
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           throttle: 'no_actions',
-          exceptions_list: [
-            {
-              field: 'source.ip',
-              values_operator: 'included',
-              values_type: 'exists',
-            },
-            {
-              field: 'host.name',
-              values_operator: 'excluded',
-              values_type: 'match',
-              values: [
-                {
-                  name: 'rock01',
-                },
-              ],
-              and: [
-                {
-                  field: 'host.id',
-                  values_operator: 'included',
-                  values_type: 'match_all',
-                  values: [
-                    {
-                      name: '123',
-                    },
-                    {
-                      name: '678',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
+          exceptions_list: getListArrayMock(),
         },
       },
     };

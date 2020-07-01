@@ -13,10 +13,10 @@ export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: TaskManagerStartContract
 ) {
-  return usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector<AlertsUsage>({
     type: 'alerts',
     isReady: () => true,
-    fetch: async (): Promise<AlertsUsage> => {
+    fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task

@@ -15,7 +15,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * Navigates to the Endpoint Policy List
      */
     async navigateToPolicyList() {
-      await pageObjects.common.navigateToApp('securitySolution', { hash: '/management/policy' });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        '/policy'
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -42,7 +45,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * ensures that the Policy Page is the currently display view
      */
     async ensureIsOnPolicyPage() {
-      await testSubjects.existOrFail('policyTable');
+      await testSubjects.existOrFail('policyListPage');
     },
 
     /**
@@ -51,9 +54,10 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * @param policyId
      */
     async navigateToPolicyDetails(policyId: string) {
-      await pageObjects.common.navigateToApp('securitySolution', {
-        hash: `/management/policy/${policyId}`,
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolutionManagement',
+        `/policy/${policyId}`
+      );
       await pageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -80,6 +84,34 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();
+    },
+
+    /**
+     * Finds and returns the Create New policy Policy button displayed on the List page
+     */
+    async findHeaderCreateNewButton() {
+      // The Create button is initially disabled because we need to first make a call to Ingest
+      // to retrieve the package version, so that the redirect works as expected. So, we wait
+      // for that to occur here a well.
+      await testSubjects.waitForEnabled('headerCreateNewPolicyButton');
+      return await testSubjects.find('headerCreateNewPolicyButton');
+    },
+
+    /**
+     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * custom configuaration component
+     * @param onEditPage
+     */
+    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    },
+
+    /**
+     * Finds and returns the onboarding button displayed in empty List pages
+     */
+    async findOnboardingStartButton() {
+      await testSubjects.waitForEnabled('onboardingStartButton');
+      return await testSubjects.find('onboardingStartButton');
     },
   };
 }

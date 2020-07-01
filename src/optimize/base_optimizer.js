@@ -266,13 +266,6 @@ export default class BaseOptimizer {
       optimization: {
         splitChunks: {
           cacheGroups: {
-            commons: {
-              name: 'commons',
-              chunks: (chunk) =>
-                chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
-              minChunks: 2,
-              reuseExistingChunk: true,
-            },
             light_theme: {
               name: 'light_theme',
               test: (m) =>

@@ -204,7 +204,7 @@ export const AlertIndex = memo(() => {
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
-        return row.file.malware_classification.score;
+        return row.file.Ext.malware_classification.score;
       }
       return null;
     },

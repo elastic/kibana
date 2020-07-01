@@ -104,15 +104,15 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
 const getEuiIconColor = (theme: any, suggestionType: QuerySuggestionTypes): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme.eui.euiColorVis7;
+      return theme?.eui.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme.eui.euiColorVis0;
+      return theme?.eui.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme.eui.euiColorVis1;
+      return theme?.eui.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme.eui.euiColorVis2;
+      return theme?.eui.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme.eui.euiColorMediumShade;
+      return theme?.eui.euiColorMediumShade;
   }
 };

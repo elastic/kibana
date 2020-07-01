@@ -70,3 +70,6 @@ export const APM_FEATURE = {
     },
   },
 };
+
+export const APM_SERVICE_MAPS_FEATURE_NAME = 'APM service maps';
+export const APM_SERVICE_MAPS_LICENSE_TYPE = 'platinum';

@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { deleteMetadataStream } from './data_stream_helper';
+import { deleteMetadataMirrorStream, deleteMetadataStream } from './data_stream_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -30,6 +30,40 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
+      });
+    });
+
+    describe('POST /api/endpoint/metadata when metadata mirror index contains unenrolled host', () => {
+      before(async () => {
+        await esArchiver.load('endpoint/metadata/unenroll_feature/metadata', { useCreate: true });
+        await esArchiver.load('endpoint/metadata/unenroll_feature/metadata_mirror', {
+          useCreate: true,
+        });
+      });
+
+      after(async () => {
+        await deleteMetadataStream(getService);
+        await deleteMetadataMirrorStream(getService);
+      });
+
+      it('metadata api should return only enrolled host', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/metadata')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200);
+        expect(body.total).to.eql(1);
+        expect(body.hosts.length).to.eql(1);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('metadata api should return 400 when an unenrolled host is retrieved', async () => {
+        const { body } = await supertest
+          .get('/api/endpoint/metadata/1fdca33f-799f-49f4-939c-ea4383c77671')
+          .send()
+          .expect(400);
+        expect(body.message).to.eql('the requested endpoint is unenrolled');
       });
     });
 
@@ -160,18 +194,18 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('metadata api should return page based on host.os.variant filter.', async () => {
+      it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
         const variantValue = 'Windows Pro';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.os.variant:${variantValue}`,
+            filter: `host.os.Ext.variant:${variantValue}`,
           })
           .expect(200);
         expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
-          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.variant)
+          body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.Ext.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
         expect(body.hosts.length).to.eql(2);
@@ -204,15 +238,14 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `not endpoint.policy.applied.status:success`,
+            filter: `not Endpoint.policy.applied.status:success`,
           })
           .expect(200);
         const statuses: Set<string> = new Set(
           body.hosts.map(
-            (hostInfo: Record<string, any>) => hostInfo.metadata.endpoint.policy.applied.status
+            (hostInfo: Record<string, any>) => hostInfo.metadata.Endpoint.policy.applied.status
           )
         );
-
         expect(statuses.size).to.eql(1);
         expect(Array.from(statuses)).to.eql(['failure']);
       });

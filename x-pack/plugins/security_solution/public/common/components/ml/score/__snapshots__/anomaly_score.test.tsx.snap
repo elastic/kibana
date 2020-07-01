@@ -82,7 +82,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     <EuiPopover
       anchorPosition="downCenter"
       button={
-        <ForwardRef(Styled(EuiIcon))
+        <Icon
           type="iInCircle"
         />
       }
@@ -105,14 +105,14 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiSpacer
                   size="m"
                 />
-                <ForwardRef(Styled(EuiText))>
+                <LargeScore>
                   17
-                </ForwardRef(Styled(EuiText))>
+                </LargeScore>
               </React.Fragment>,
               "title": "Max Anomaly Score",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -125,14 +125,79 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <ForwardRef
-                    href="ml#/explorer?_g=(ml:(jobIds:!(job-1)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'1970-01-01T00:00:00.000Z',mode:absolute,to:'3000-01-01T00:00:00.000Z'))&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(),mlSelectLimit:(display:'10',val:10),mlShowCharts:!t)"
-                    target="_blank"
-                  >
-                    View in Machine Learning
-                  </ForwardRef>
+                  <ExplorerLink
+                    endDate={32503680000000}
+                    linkName="View in Machine Learning"
+                    score={
+                      Object {
+                        "detectorIndex": 0,
+                        "entityName": "process.name",
+                        "entityValue": "du",
+                        "influencers": Array [
+                          Object {
+                            "host.name": "zeek-iowa",
+                          },
+                          Object {
+                            "process.name": "du",
+                          },
+                          Object {
+                            "user.name": "root",
+                          },
+                        ],
+                        "jobId": "job-1",
+                        "rowId": "1561157194802_0",
+                        "severity": 16.193669439507826,
+                        "source": Object {
+                          "actual": Array [
+                            1,
+                          ],
+                          "bucket_span": 900,
+                          "by_field_name": "process.name",
+                          "by_field_value": "du",
+                          "detector_index": 0,
+                          "function": "rare",
+                          "function_description": "rare",
+                          "influencers": Array [
+                            Object {
+                              "influencer_field_name": "user.name",
+                              "influencer_field_values": Array [
+                                "root",
+                              ],
+                            },
+                            Object {
+                              "influencer_field_name": "process.name",
+                              "influencer_field_values": Array [
+                                "du",
+                              ],
+                            },
+                            Object {
+                              "influencer_field_name": "host.name",
+                              "influencer_field_values": Array [
+                                "zeek-iowa",
+                              ],
+                            },
+                          ],
+                          "initial_record_score": 16.193669439507826,
+                          "is_interim": false,
+                          "job_id": "job-1",
+                          "multi_bucket_impact": 0,
+                          "partition_field_name": "host.name",
+                          "partition_field_value": "zeek-iowa",
+                          "probability": 0.024041164411288146,
+                          "record_score": 16.193669439507826,
+                          "result_type": "record",
+                          "timestamp": 1560664800000,
+                          "typical": Array [
+                            0.024041164411288146,
+                          ],
+                        },
+                        "time": 1560664800000,
+                      }
+                    }
+                    startDate={0}
+                  />
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": <React.Fragment>
                 <EuiSpacer
                   size="m"
@@ -141,7 +206,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
               </React.Fragment>,
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -156,19 +221,19 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 <EuiFlexItem
                   grow={false}
                 >
-                  <ForwardRef
+                  <EuiLink
                     data-test-subj="anomaly-description-narrow-range-link"
                     onClick={[Function]}
                     target="_blank"
                   >
                     Narrow to this date range
-                  </ForwardRef>
+                  </EuiLink>
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Detected",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -178,11 +243,11 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   process.name: "du"
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Anomalous Entity",
             },
             Object {
-              "description": <ForwardRef
+              "description": <EuiFlexGroup
                 direction="column"
                 gutterSize="none"
                 responsive={false}
@@ -202,7 +267,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                 >
                   user.name: "root"
                 </EuiFlexItem>
-              </ForwardRef>,
+              </EuiFlexGroup>,
               "title": "Influenced By",
             },
           ]

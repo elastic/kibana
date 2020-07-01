@@ -13,7 +13,7 @@ import { ExceptionsViewer } from './';
 import { ExceptionListType } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useExceptionList, useApi } from '../../../../../public/lists_plugin_deps';
-import { getExceptionListMock } from '../mocks';
+import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');
@@ -96,7 +96,7 @@ describe('ExceptionsViewer', () => {
   it('it renders empty prompt if no exception items exist', () => {
     (useExceptionList as jest.Mock).mockReturnValue([
       false,
-      [getExceptionListMock()],
+      [getExceptionListSchemaMock()],
       [],
       {
         page: 1,

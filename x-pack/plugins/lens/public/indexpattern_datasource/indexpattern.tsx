@@ -125,6 +125,7 @@ export function getIndexPatternDatasource({
         state,
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        storage,
       });
     },
 
@@ -207,6 +208,7 @@ export function getIndexPatternDatasource({
                 setState,
                 savedObjectsClient,
                 onError: onIndexPatternLoadError,
+                storage,
               });
             }}
             data={data}
@@ -290,6 +292,7 @@ export function getIndexPatternDatasource({
               layerId: props.layerId,
               onError: onIndexPatternLoadError,
               replaceIfPossible: true,
+              storage,
             });
           }}
           {...props}

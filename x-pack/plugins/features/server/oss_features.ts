@@ -294,16 +294,16 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 1600,
       icon: 'indexPatternApp',
       app: ['kibana'],
-      catalogue: ['index_patterns'],
+      catalogue: ['indexPatterns'],
       management: {
-        kibana: ['index_patterns'],
+        kibana: ['indexPatterns'],
       },
       privileges: {
         all: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: ['index-pattern'],
@@ -313,9 +313,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         },
         read: {
           app: ['kibana'],
-          catalogue: ['index_patterns'],
+          catalogue: ['indexPatterns'],
           management: {
-            kibana: ['index_patterns'],
+            kibana: ['indexPatterns'],
           },
           savedObject: {
             all: [],

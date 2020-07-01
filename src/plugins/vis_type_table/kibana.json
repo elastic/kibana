@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data"
+    "data",
+    "kibanaLegacy"
   ]
 }

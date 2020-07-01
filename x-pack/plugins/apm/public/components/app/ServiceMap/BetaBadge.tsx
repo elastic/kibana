@@ -5,15 +5,14 @@
  */
 
 import { EuiBetaBadge } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 
 const BetaBadgeContainer = styled.div`
-  right: ${theme.gutterTypes.gutterMedium};
+  right: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
   position: absolute;
-  top: ${theme.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 

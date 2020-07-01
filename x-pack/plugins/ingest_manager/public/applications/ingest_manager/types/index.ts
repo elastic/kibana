@@ -81,7 +81,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  RegistryDatasource,
+  RegistryConfigTemplate,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -99,3 +99,5 @@ export {
   InstallationStatus,
   Installable,
 } from '../../../../common';
+
+export * from './intra_app_route_state';

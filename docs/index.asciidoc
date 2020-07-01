@@ -11,11 +11,7 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 
 :docker-repo:    docker.elastic.co/kibana/kibana
 :docker-image:   docker.elastic.co/kibana/kibana:{version}
-:repo:           https://github.com/elastic/kibana/
-:issue:          {repo}issues/
-:pull:           {repo}pull/
-:commit:         {repo}commit/
-:blob:           {repo}blob/{branch}/
+:blob:           {kib-repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
 include::{docs-root}/shared/attributes.asciidoc[]

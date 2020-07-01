@@ -219,7 +219,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager.agentService,
+      registerIngestCallback: plugins.ingestManager.registerExternalCallback,
     });
+
     return {};
   }
 

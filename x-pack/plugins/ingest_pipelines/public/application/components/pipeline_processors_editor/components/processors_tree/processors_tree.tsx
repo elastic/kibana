@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, keyCodes } from '@elastic/eui';
 import { List, WindowScroller } from 'react-virtualized';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
+import { selectorToDataTestSubject } from '../../utils';
 
 import './processors_tree.scss';
 import { AddProcessorButton } from '../add_processor_button';
@@ -96,7 +97,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} justifyContent="flexStart" gutterSize="none">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem data-test-subj={selectorToDataTestSubject(baseSelector)} grow={false}>
             <AddProcessorButton
               onClick={() => {
                 onAction({ type: 'addProcessor', payload: { target: baseSelector } });

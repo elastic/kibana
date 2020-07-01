@@ -33,15 +33,21 @@ import { IAggConfigs } from '../aggs';
 import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import {
+  calculateBounds,
   Filter,
-  Query,
-  serializeFieldFormat,
-  TimeRange,
+  getTime,
   IIndexPattern,
   isRangeFilter,
+  Query,
+  TimeRange,
 } from '../../../common';
-import { FilterManager, calculateBounds, getTime } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import { FilterManager } from '../../query';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
@@ -227,7 +233,11 @@ const handleCourierRequest = async ({
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
+    () =>
+      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
+        queryFilter: filterManager,
+        deserializeFieldFormat: getFieldFormats().deserialize,
+      }),
     { returnsFormattedValues: true }
   );
 
@@ -314,7 +324,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
         }
         return cleanedColumn;
       }),

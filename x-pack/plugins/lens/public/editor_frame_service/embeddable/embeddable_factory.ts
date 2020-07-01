@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Capabilities,
-  HttpSetup,
-  RecursiveReadonly,
-  SavedObjectsClientContract,
-} from 'kibana/public';
+import { Capabilities, HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   IndexPatternsContract,
   IndexPattern,

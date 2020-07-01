@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  // @ts-ignore hasn't been converted to TypeScript yet
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +26,6 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-// @ts-ignore converting /libs/constants to TS breaks CI
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';

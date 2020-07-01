@@ -10,7 +10,6 @@ import { HealthCheck } from './health_check';
 
 import { act } from 'react-dom/test-utils';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
-import '@testing-library/jest-dom/extend-expect';
 
 const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
 

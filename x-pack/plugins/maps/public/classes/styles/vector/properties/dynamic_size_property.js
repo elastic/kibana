@@ -12,7 +12,7 @@ import {
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
 } from '../symbol_utils';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
 import _ from 'lodash';
 import React from 'react';
 
@@ -60,7 +60,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
           minValue: rangeFieldMeta.min,
           maxValue: rangeFieldMeta.max,
           fallback: 0,
-          lookupFunction: 'get',
+          lookupFunction: MB_LOOKUP_FUNCTION.GET,
           fieldName: targetName,
         }),
         rangeFieldMeta.min,
@@ -109,7 +109,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize, minValue, maxValue }) {
-    const lookup = this.supportsMbFeatureState() ? 'feature-state' : 'get';
+    const lookup = this.supportsMbFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
 
     const stops =
       minValue === maxValue ? [maxValue, maxSize] : [minValue, minSize, maxValue, maxSize];

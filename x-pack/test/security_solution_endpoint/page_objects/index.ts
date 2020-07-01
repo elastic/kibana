@@ -9,6 +9,7 @@ import { EndpointPageProvider } from './endpoint_page';
 import { EndpointAlertsPageProvider } from './endpoint_alerts_page';
 import { EndpointPolicyPageProvider } from './policy_page';
 import { EndpointPageUtils } from './page_utils';
+import { IngestManagerCreateDatasource } from './ingest_manager_create_datasource_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -16,4 +17,5 @@ export const pageObjects = {
   policy: EndpointPolicyPageProvider,
   endpointPageUtils: EndpointPageUtils,
   endpointAlerts: EndpointAlertsPageProvider,
+  ingestManagerCreateDatasource: IngestManagerCreateDatasource,
 };

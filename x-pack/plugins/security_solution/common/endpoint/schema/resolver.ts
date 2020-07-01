@@ -71,3 +71,19 @@ export const validateChildren = {
     legacyEndpointID: schema.maybe(schema.string()),
   }),
 };
+
+/**
+ * Used to validate GET requests for 'entities'
+ */
+export const validateEntities = {
+  query: schema.object({
+    /**
+     * Return the process entities related to the document w/ the matching `_id`.
+     */
+    _id: schema.string(),
+    /**
+     * Indices to search in.
+     */
+    indices: schema.arrayOf(schema.string()),
+  }),
+};

@@ -32,7 +32,7 @@ export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getSt
     },
     getDisplayName: () =>
       i18n.translate('xpack.ml.actions.editSwimlaneTitle', {
-        defaultMessage: 'Edit swimlane',
+        defaultMessage: 'Edit swim lane',
       }),
     execute: async ({ embeddable }: EditSwimlanePanelContext) => {
       if (!embeddable) {

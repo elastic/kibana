@@ -14,14 +14,14 @@ describe('duration formatters', () => {
       expect(asDuration(1)).toEqual('1 μs');
       expect(asDuration(toMicroseconds(1, 'milliseconds'))).toEqual('1,000 μs');
       expect(asDuration(toMicroseconds(1000, 'milliseconds'))).toEqual(
-        '1,000.0 ms'
+        '1,000 ms'
       );
       expect(asDuration(toMicroseconds(10000, 'milliseconds'))).toEqual(
-        '10,000.0 ms'
+        '10,000 ms'
       );
-      expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20.0 s');
-      expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('10.0 min');
-      expect(asDuration(toMicroseconds(1, 'hours'))).toEqual('60.0 min');
+      expect(asDuration(toMicroseconds(20, 'seconds'))).toEqual('20 s');
+      expect(asDuration(toMicroseconds(10, 'minutes'))).toEqual('10 min');
+      expect(asDuration(toMicroseconds(1, 'hours'))).toEqual('60 min');
       expect(asDuration(toMicroseconds(1.5, 'hours'))).toEqual('1.5 h');
     });
 
@@ -41,7 +41,7 @@ describe('duration formatters', () => {
 
   describe('asMilliseconds', () => {
     it('converts to formatted decimal milliseconds', () => {
-      expect(asMillisecondDuration(0)).toEqual('0.0 ms');
+      expect(asMillisecondDuration(0)).toEqual('0 ms');
     });
   });
 });
