@@ -56,7 +56,16 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
 
           if (jobStats.state === FAILED) {
             clearInterval(interval);
-            setFailedJobMessage(jobStats.failure_reason || `Analytics job ${jobId} has failed.`);
+            setFailedJobMessage(
+              jobStats.failure_reason ||
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutMessage',
+                  {
+                    defaultMessage: 'Analytics job {jobId} has failed.',
+                    values: { jobId },
+                  }
+                )
+            );
           }
 
           setCurrentProgress(progressStats);
