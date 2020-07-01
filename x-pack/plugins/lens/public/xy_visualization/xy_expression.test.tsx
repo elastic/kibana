@@ -1499,6 +1499,7 @@ describe('xy_expression', () => {
         { ...sampleLayer, accessors: ['a'] },
         { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
         { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'] },
       ]);
 
       const component = shallow(
@@ -1515,8 +1516,12 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
-      expect(component.find(AreaSeries).prop('fit')).toEqual({ type: Fit.Carry });
       expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
+      // stacked area series doesn't get the fit prop
+      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
     });
 
     test('it should apply None fitting function if not specified', () => {

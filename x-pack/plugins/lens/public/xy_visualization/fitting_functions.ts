@@ -12,64 +12,64 @@ export type FittingFunction = typeof fittingFunctionDefinitions[number]['id'];
 export const fittingFunctionDefinitions = [
   {
     id: 'None',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.None', {
-      defaultMessage: 'none',
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.none', {
+      defaultMessage: 'hidden',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.None', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.none', {
       defaultMessage: 'Do not fill gaps',
     }),
   },
   {
     id: 'Zero',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Zero', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.zero', {
       defaultMessage: 'zero',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Zero', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.zero', {
       defaultMessage: 'Fill gaps with zeros',
     }),
   },
   {
     id: 'Linear',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Linear', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.linear', {
       defaultMessage: 'linear',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Linear', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.linear', {
       defaultMessage: 'Interpolate linearly between nearest values',
     }),
   },
   {
     id: 'Average',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Average', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.average', {
       defaultMessage: 'average',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Average', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.average', {
       defaultMessage: 'Fill gaps with the average of the nearest values',
     }),
   },
   {
     id: 'Nearest',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Nearest', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.nearest', {
       defaultMessage: 'nearest',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Nearest', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.nearest', {
       defaultMessage: 'Fill gaps with the nearest existing value',
     }),
   },
   {
     id: 'Carry',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Carry', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.carry', {
       defaultMessage: 'carry',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Carry', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.carry', {
       defaultMessage: 'Repeat last value till next value',
     }),
   },
   {
     id: 'Lookahead',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.Lookahead', {
+    title: i18n.translate('xpack.lens.fittingFunctionsTitle.lookahead', {
       defaultMessage: 'lookahead',
     }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.Lookahead', {
+    description: i18n.translate('xpack.lens.fittingFunctionsDescription.lookahead', {
       defaultMessage: 'Repeat next value till next value',
     }),
   },
