@@ -18,7 +18,8 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { QuerySetup } from '../../query/query_service';
+import { TimeRange, TimeRangeBounds } from '../../../common';
+import { GetInternalStartServicesFn } from '../../types';
 
 import { getCountMetricAgg } from './metrics/count';
 import { getAvgMetricAgg } from './metrics/avg';
@@ -54,18 +55,16 @@ import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
 import { getBucketMinMetricAgg } from './metrics/bucket_min';
 import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 
-import { GetInternalStartServicesFn } from '../../types';
-
 export interface AggTypesDependencies {
-  uiSettings: IUiSettingsClient;
-  query: QuerySetup;
+  calculateBounds: (timeRange: TimeRange) => TimeRangeBounds;
   getInternalStartServices: GetInternalStartServicesFn;
+  uiSettings: IUiSettingsClient;
 }
 
 export const getAggTypes = ({
-  uiSettings,
-  query,
+  calculateBounds,
   getInternalStartServices,
+  uiSettings,
 }: AggTypesDependencies) => ({
   metrics: [
     getCountMetricAgg({ getInternalStartServices }),
@@ -91,7 +90,7 @@ export const getAggTypes = ({
     getGeoCentroidMetricAgg({ getInternalStartServices }),
   ],
   buckets: [
-    getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
+    getDateHistogramBucketAgg({ calculateBounds, uiSettings, getInternalStartServices }),
     getHistogramBucketAgg({ uiSettings, getInternalStartServices }),
     getRangeBucketAgg({ getInternalStartServices }),
     getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),

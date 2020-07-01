@@ -39,7 +39,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
       {
         id: 'test-logs-foo',
         enabled: true,
-        dataset: 'foo',
+        dataset: { name: 'foo', type: 'logs' },
         vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
@@ -52,7 +52,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
       {
         id: 'test-logs-bar',
         enabled: true,
-        dataset: 'bar',
+        dataset: { name: 'bar', type: 'logs' },
         vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },
@@ -101,23 +101,41 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
   });
 
   it('returns agent inputs', () => {
-    expect(storedDatasourcesToAgentInputs([{ ...mockDatasource, inputs: [mockInput] }])).toEqual([
+    expect(
+      storedDatasourcesToAgentInputs([
+        {
+          ...mockDatasource,
+          package: {
+            name: 'mock-package',
+            title: 'Mock package',
+            version: '0.0.0',
+          },
+          inputs: [mockInput],
+        },
+      ])
+    ).toEqual([
       {
         id: 'some-uuid',
         name: 'mock-datasource',
         type: 'test-logs',
         dataset: { namespace: 'default' },
         use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock-package',
+            version: '0.0.0',
+          },
+        },
         streams: [
           {
             id: 'test-logs-foo',
-            dataset: { name: 'foo' },
+            dataset: { name: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
           },
           {
             id: 'test-logs-bar',
-            dataset: { name: 'bar' },
+            dataset: { name: 'bar', type: 'logs' },
           },
         ],
       },
@@ -147,7 +165,7 @@ describe('Ingest Manager - storedDatasourcesToAgentInputs', () => {
         streams: [
           {
             id: 'test-logs-foo',
-            dataset: { name: 'foo' },
+            dataset: { name: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
           },

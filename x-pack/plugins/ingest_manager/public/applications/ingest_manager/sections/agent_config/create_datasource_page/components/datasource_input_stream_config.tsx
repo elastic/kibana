@@ -60,7 +60,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
-                  {packageInputStream.title || packageInputStream.dataset}
+                  {packageInputStream.title}
                 </EuiTextColor>
               </EuiFlexItem>
               {hasErrors ? (

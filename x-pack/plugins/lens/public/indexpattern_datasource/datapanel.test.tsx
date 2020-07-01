@@ -9,19 +9,19 @@ import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldItem } from './field_item';
+import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
   existingFields: {},
   currentIndexPatternId: '1',
-  showEmptyFields: false,
   layers: {
     first: {
       indexPatternId: '1',
@@ -204,12 +204,15 @@ const initialState: IndexPatternPrivateState = {
       ],
     },
   },
+  isFirstExistenceFetch: false,
 };
 
 const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
-  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0];
+  let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
+    showNoDataPopover: () => void;
+  };
   let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
@@ -229,8 +232,7 @@ describe('IndexPattern Data Panel', () => {
       },
       query: { query: '', language: 'lucene' },
       filters: [],
-      showEmptyFields: false,
-      onToggleEmptyFields: jest.fn(),
+      showNoDataPopover: jest.fn(),
     };
   });
 
@@ -303,7 +305,7 @@ describe('IndexPattern Data Panel', () => {
         state: {
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
             a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },
@@ -534,117 +536,11 @@ describe('IndexPattern Data Panel', () => {
     });
   });
 
-  describe('while showing empty fields', () => {
-    it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'client',
-        'memory',
-        'source',
-        'timestamp',
-      ]);
-    });
-
-    it('should filter down by name', () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
-
-      act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
-        } as ChangeEvent<HTMLInputElement>);
-      });
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'memory',
-      ]);
-    });
-
-    it('should filter down by type', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
-
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
-
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'bytes',
-        'memory',
-      ]);
-    });
-
-    it('should toggle type if clicked again', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
-
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
-
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'client',
-        'memory',
-        'source',
-        'timestamp',
-      ]);
-    });
-
-    it('should filter down by type and by name', () => {
-      const wrapper = mountWithIntl(
-        <InnerIndexPatternDataPanel {...defaultProps} showEmptyFields={true} />
-      );
-
-      act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
-        } as ChangeEvent<HTMLInputElement>);
-      });
-
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
-
-      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
-
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'memory',
-      ]);
-    });
-  });
-
-  describe('filtering out empty fields', () => {
-    let emptyFieldsTestProps: typeof defaultProps;
-
+  describe('displaying field list', () => {
+    let props: Parameters<typeof InnerIndexPatternDataPanel>[0];
     beforeEach(() => {
-      emptyFieldsTestProps = {
+      props = {
         ...defaultProps,
-        indexPatterns: {
-          ...defaultProps.indexPatterns,
-          '1': {
-            ...defaultProps.indexPatterns['1'],
-            fields: defaultProps.indexPatterns['1'].fields.map((field) => ({
-              ...field,
-              exists: field.type === 'number',
-            })),
-          },
-        },
-        onToggleEmptyFields: jest.fn(),
-      };
-    });
-
-    it('should list all supported fields in the pattern sorted alphabetically', async () => {
-      const props = {
-        ...emptyFieldsTestProps,
         existingFields: {
           idx1: {
             bytes: true,
@@ -652,41 +548,145 @@ describe('IndexPattern Data Panel', () => {
           },
         },
       };
-      const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
+    });
+    it('should list all supported fields in the pattern sorted alphabetically in groups', async () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+      expect(wrapper.find(FieldItem).first().prop('field').name).toEqual('Records');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['bytes', 'memory']);
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['client', 'source', 'timestamp']);
+    });
+
+    it('should display NoFieldsCallout when all fields are empty', async () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
+      );
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual([]);
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+          .find(FieldItem)
+          .map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['bytes', 'client', 'memory', 'source', 'timestamp']);
+    });
+
+    it('should display spinner for available fields accordion if existing fields are not loaded yet', async () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...defaultProps} />);
+      expect(
+        wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]').find(EuiLoadingSpinner)
+          .length
+      ).toEqual(1);
+      wrapper.setProps({ existingFields: { idx1: {} } });
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+    });
+
+    it('should filter down by name', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+      act(() => {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'me' },
+        } as ChangeEvent<HTMLInputElement>);
+      });
+
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
+        'memory',
+        'timestamp',
+      ]);
+    });
+
+    it('should filter down by type', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'bytes',
         'memory',
       ]);
     });
 
-    it('should filter down by name', () => {
-      const wrapper = shallowWithIntl(
-        <InnerIndexPatternDataPanel {...emptyFieldsTestProps} showEmptyFields={true} />
-      );
+    it('should display no fields in groups when filtered by type Record', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
+
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+        'Records',
+      ]);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+    });
+
+    it('should toggle type if clicked again', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
+        'Records',
+        'bytes',
+        'memory',
+        'client',
+        'source',
+        'timestamp',
+      ]);
+    });
+
+    it('should filter down by type and by name', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
       act(() => {
         wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
-          target: { value: 'mem' },
+          target: { value: 'me' },
         } as ChangeEvent<HTMLInputElement>);
       });
+
+      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+
+      wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'memory',
       ]);
-    });
-
-    it('should allow removing the filter for data', () => {
-      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...emptyFieldsTestProps} />);
-
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
-
-      wrapper.find('[data-test-subj="lnsEmptyFilter"]').first().prop('onChange')!(
-        {} as ChangeEvent
-      );
-
-      expect(emptyFieldsTestProps.onToggleEmptyFields).toHaveBeenCalled();
     });
   });
 });
