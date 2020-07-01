@@ -14,11 +14,15 @@ import {
   EsDataTypeGeoPointRange,
   EsDataTypeRange,
   EsDataTypeRangeTerm,
+  EsDataTypeSingle,
+  EsDataTypeUnion,
   Type,
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,
   esDataTypeRange,
   esDataTypeRangeTerm,
+  esDataTypeSingle,
+  esDataTypeUnion,
   operator_type as operatorType,
   type,
 } from './schemas';
@@ -308,6 +312,52 @@ describe('Common schemas', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeupvalue"']);
+      expect(message.schema).toEqual({});
+    });
+  });
+
+  describe('esDataTypeSingle', () => {
+    test('it will work with single type', () => {
+      const payload: EsDataTypeSingle = { boolean: 'true' };
+      const decoded = esDataTypeSingle.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it will not work with a madeup value', () => {
+      const payload: EsDataTypeSingle & { madeupValue: 'madeup' } = {
+        boolean: 'true',
+        madeupValue: 'madeup',
+      };
+      const decoded = esDataTypeSingle.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeupValue"']);
+      expect(message.schema).toEqual({});
+    });
+  });
+
+  describe('esDataTypeUnion', () => {
+    test('it will work with a regular union', () => {
+      const payload: EsDataTypeUnion = { boolean: 'true' };
+      const decoded = esDataTypeUnion.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it will not work with a madeup value', () => {
+      const payload: EsDataTypeUnion & { madeupValue: 'madeupValue' } = {
+        boolean: 'true',
+        madeupValue: 'madeupValue',
+      };
+      const decoded = esDataTypeUnion.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeupValue"']);
       expect(message.schema).toEqual({});
     });
   });
