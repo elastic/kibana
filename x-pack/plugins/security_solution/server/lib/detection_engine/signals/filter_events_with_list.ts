@@ -8,6 +8,7 @@ import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
+import { BuildRuleMessage } from './rule_messages';
 import {
   entriesList,
   EntryList,
@@ -19,6 +20,7 @@ interface FilterEventsAgainstList {
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
   eventSearchResult: SignalSearchResponse;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 export const filterEventsAgainstList = async ({
@@ -26,9 +28,12 @@ export const filterEventsAgainstList = async ({
   exceptionsList,
   logger,
   eventSearchResult,
+  buildRuleMessage,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
+    logger.debug(buildRuleMessage(`exceptionsList: ${JSON.stringify(exceptionsList, null, 2)}`));
     if (exceptionsList == null || exceptionsList.length === 0) {
+      logger.debug(buildRuleMessage('about to return original search result'));
       return eventSearchResult;
     }
 
@@ -86,7 +91,7 @@ export const filterEventsAgainstList = async ({
               return false;
             });
             const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
-            logger.debug(`Lists filtered out ${diff} events`);
+            logger.debug(buildRuleMessage(`Lists filtered out ${diff} events`));
             return filteredEvents;
           });
 
