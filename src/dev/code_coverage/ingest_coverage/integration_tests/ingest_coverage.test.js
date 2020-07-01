@@ -48,7 +48,7 @@ describe('Ingesting coverage', () => {
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';
-    const siteUrlRegex = /staticSiteUrl:\s*(.+,)/;
+    const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
 
     beforeAll(async () => {
       const opts = [...verboseArgs, resolved];
@@ -69,7 +69,6 @@ describe('Ingesting coverage', () => {
       expect(folderStructure.test(actualUrl)).ok();
     });
   });
-
   describe(`vcsInfo`, () => {
     let stdOutWithVcsInfo = '';
     describe(`without a commit msg in the vcs info file`, () => {
@@ -85,6 +84,7 @@ describe('Ingesting coverage', () => {
         const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
         stdOutWithVcsInfo = stdout;
       });
+
       it(`should be an obj w/o a commit msg`, () => {
         const commitMsgRE = /"commitMsg"/;
         expect(commitMsgRE.test(stdOutWithVcsInfo)).to.not.be.ok();
@@ -153,10 +153,12 @@ describe('Ingesting coverage', () => {
     });
 
     it(`should not occur when going to the totals index`, () => {
-      expect(teamAssignRE.test(shouldNotHavePipelineOut)).to.not.be.ok();
+      const actual = teamAssignRE.test(shouldNotHavePipelineOut);
+      expect(actual).to.not.be.ok();
     });
     it(`should indeed occur when going to the coverage index`, () => {
-      expect(teamAssignRE.test(shouldIndeedHavePipelineOut)).to.be.ok();
+      const actual = /ingest-pipe=>team_assignment/.test(shouldIndeedHavePipelineOut)
+      expect(actual).to.be.ok();
     });
-  });
+  });;
 });

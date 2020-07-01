@@ -32,17 +32,33 @@ describe(`Transform fn`, () => {
     });
   });
   describe(`coveredFilePath`, () => {
-    it(`should remove the jenkins workspace path`, () => {
-      const obj = {
-        staticSiteUrl:
-          '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js',
-        COVERAGE_INGESTION_KIBANA_ROOT:
-          '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
-      };
-      expect(coveredFilePath(obj)).to.have.property(
-        'coveredFilePath',
-        'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
-      );
+    describe(`in the code-coverage job`, () => {
+      it(`should remove the jenkins workspace path`, () => {
+        const obj = {
+          staticSiteUrl:
+            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js',
+          COVERAGE_INGESTION_KIBANA_ROOT:
+            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
+        };
+        expect(coveredFilePath(obj)).to.have.property(
+          'coveredFilePath',
+          'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
+        );
+      });
+    });
+    describe(`in the qa research job`, () => {
+      it(`should remove the jenkins workspace path`, () => {
+        const obj = {
+          staticSiteUrl:
+            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js',
+          COVERAGE_INGESTION_KIBANA_ROOT:
+            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana',
+        };
+        expect(coveredFilePath(obj)).to.have.property(
+          'coveredFilePath',
+          'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
+        );
+      });
     });
   });
   describe(`prokPrevious`, () => {
