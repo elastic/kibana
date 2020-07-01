@@ -206,11 +206,12 @@ export class LegacyClusterClient implements ILegacyClusterClient {
       this.callAsInternalUser,
       this.callAsCurrentUser,
       filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist),
-      this.getScopedScopedAuditor(request)
+      this.getScopedAuditor(request)
     );
   }
 
-  private getScopedScopedAuditor(request?: ScopeableRequest) {
+  private getScopedAuditor(request?: ScopeableRequest) {
+    // TODO: support alternative credential owners from outside of Request context in #39430
     if (request && isRealRequest(request)) {
       const kibanaRequest =
         request instanceof KibanaRequest ? request : KibanaRequest.from(request);
