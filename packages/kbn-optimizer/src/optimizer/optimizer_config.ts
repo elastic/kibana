@@ -148,7 +148,9 @@ export class OptimizerConfig {
       throw new TypeError('worker count must be a number');
     }
 
-    const themes = parseThemeTags(options.themes || process.env.KBN_OPTIMIZER_THEME);
+    const themeTags = parseThemeTags(
+      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEME)
+    );
 
     return {
       watch,
@@ -161,7 +163,7 @@ export class OptimizerConfig {
       pluginPaths,
       inspectWorkers,
       includeCoreBundle,
-      themeTags: themes,
+      themeTags,
     };
   }
 
