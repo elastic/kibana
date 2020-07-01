@@ -7,6 +7,7 @@
 import Boom from 'boom';
 import { pluck, mapValues, remove, omit, isUndefined } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
@@ -316,7 +317,9 @@ export function ensureFieldIsSafeForQuery(field: string, value: string): boolean
 }
 
 function hasAnyAlertingPrivileges(
-  privileges?: FeatureKibanaPrivileges | SubFeaturePrivilegeConfig
+  privileges?:
+    | RecursiveReadonly<FeatureKibanaPrivileges>
+    | RecursiveReadonly<SubFeaturePrivilegeConfig>
 ): boolean {
   return (
     ((privileges?.alerting?.all?.length ?? 0) || (privileges?.alerting?.read?.length ?? 0)) > 0

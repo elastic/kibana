@@ -27,7 +27,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     const getAlertingPrivilege = (
       operations: string[],
-      privilegedTypes: string[],
+      privilegedTypes: readonly string[],
       consumer: string
     ) =>
       privilegedTypes.flatMap((type) =>
