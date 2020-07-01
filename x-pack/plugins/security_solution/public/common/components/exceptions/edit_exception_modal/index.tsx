@@ -26,7 +26,7 @@ import {
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
-import { ExceptionBuilder } from '../../exception_builder';
+import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -80,6 +80,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
+  // TODO: need to fetch the index patterns and pass them down to the component
 
   const onError = useCallback(
     (error) => {
@@ -99,6 +100,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       onSuccess,
       onError,
     }
+  );
+
+  // TODO: needs to store the whole object because we need to keep track of deteled items
+  // not just newly created ones
+  const handleBuilderOnChange = useCallback(
+    ({ exceptionItems }) => {
+      setExceptionItemsToAdd(exceptionItems);
+    },
+    [setExceptionItemsToAdd]
   );
 
   const onCommentChange = useCallback(
@@ -160,12 +170,17 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
         <ModalBodySection className="builder-section">
           <ExceptionBuilder
-            exceptionItems={[exceptionItem]}
-            listId={exceptionItem.list_id}
+            exceptionListItems={[exceptionItem]}
             listType={exceptionListType}
+            listId={exceptionItem.list_id}
+            listNamespaceType={exceptionItem.namespace_type}
+            ruleName={ruleName}
+            isLoading={false}
+            isOrDisabled={false}
+            isAndDisabled={false}
             dataTestSubj="edit-exception-modal-builder"
             idAria="edit-exception-modal-builder"
-            onChange={setExceptionItemsToAdd}
+            onChange={handleBuilderOnChange}
           />
 
           <EuiSpacer />

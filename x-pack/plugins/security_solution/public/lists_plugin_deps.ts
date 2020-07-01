@@ -46,5 +46,4 @@ export {
   entriesList,
   // TODO: is this the right type for comments?
   Comment,
-  CommentsArray,
 } from '../../lists/common/schemas';

@@ -10,7 +10,6 @@ import { capitalize, union } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 
-import uuid from 'uuid';
 import * as i18n from './translations';
 import {
   FormattedEntry,
@@ -354,6 +353,7 @@ export const filterExceptionItems = (
     },
     []
   );
+};
 
 export const enrichExceptionItemsWithComments = (
   exceptionItems: ExceptionListItemSchema[],

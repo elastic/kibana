@@ -318,7 +318,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addEndpointException',
-      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
       dataTestSubj: 'add-endpoint-exception-menu-item',
       ariaLabel: 'Add Endpoint Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
@@ -339,7 +339,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addException',
-      isActionDisabled: !canUserCRUD || !hasIndexWrite,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
       dataTestSubj: 'add-exception-menu-item',
       ariaLabel: 'Add Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>,

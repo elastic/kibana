@@ -32,11 +32,10 @@ import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
-import { useRule } from '../../../../../alerts/containers/detection_engine/rules';
-import { ExceptionBuilder } from '../../exception_builder';
-import { ExceptionItem } from '../../exception_builder/types';
+import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -104,6 +103,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
+  const { loading: isSignalIndexLoading, signalIndexExists, signalIndexName } = useSignalIndex();
 
   const onError = useCallback(
     (error: Error) => {
@@ -125,6 +125,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
   );
 
+  const handleBuilderOnChange = useCallback(
+    ({ exceptionItems }) => {
+      setExceptionItemsToAdd(exceptionItems);
+    },
+    [setExceptionItemsToAdd]
+  );
+
+  // TODO: we can use useMemo here instead
   useEffect(() => {
     if (alertData !== undefined && exceptionListType === 'endpoint') {
       setExceptionItemsToAdd(defaultEndpointExceptionItems(exceptionListType, ruleId, alertData)); // TODO: ruleId isnt correct here
@@ -209,47 +217,56 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         {fetchOrCreateListError === false && isLoadingExceptionList === true && (
           <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
-        {fetchOrCreateListError === false && !isLoadingExceptionList && ruleExceptionList && (
-          <>
-            <ModalBodySection className="builder-section">
-              <ExceptionBuilder
-                exceptionItems={exceptionItemsToAdd}
-                listId={ruleExceptionList.list_id}
-                listType={exceptionListType}
-                dataTestSubj="alert-exception-builder"
-                idAria="alert-exception-builder"
-                onChange={setExceptionItemsToAdd}
-              />
+        {fetchOrCreateListError === false &&
+          !isSignalIndexLoading &&
+          !isLoadingExceptionList &&
+          ruleExceptionList && (
+            <>
+              <ModalBodySection className="builder-section">
+                <ExceptionBuilder
+                  exceptionListItems={exceptionItemsToAdd}
+                  listType={exceptionListType}
+                  listId={ruleExceptionList.list_id}
+                  listNamespaceType={ruleExceptionList.namespace_type}
+                  ruleName={ruleName}
+                  indexPatternConfig={[signalIndexName]}
+                  isLoading={false}
+                  isOrDisabled={false}
+                  isAndDisabled={false}
+                  dataTestSubj="alert-exception-builder"
+                  idAria="alert-exception-builder"
+                  onChange={handleBuilderOnChange}
+                />
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              {exceptionListType === 'endpoint' && (
-                <>
-                  <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
-                  <EuiSpacer />
-                </>
-              )}
+                {exceptionListType === 'endpoint' && (
+                  <>
+                    <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
+                    <EuiSpacer />
+                  </>
+                )}
 
-              <AddExceptionComments
-                newCommentValue={comment}
-                newCommentOnChange={onCommentChange}
-              />
-            </ModalBodySection>
-            <EuiHorizontalRule />
-            {alertData !== undefined && (
-              <ModalBodySection>
-                <EuiFormRow>
-                  <EuiCheckbox
-                    id="close-alert-on-add-add-exception-checkbox"
-                    label="Close this alert"
-                    checked={shouldCloseAlert}
-                    onChange={onCloseAlertCheckboxChange}
-                  />
-                </EuiFormRow>
+                <AddExceptionComments
+                  newCommentValue={comment}
+                  newCommentOnChange={onCommentChange}
+                />
               </ModalBodySection>
-            )}
-          </>
-        )}
+              <EuiHorizontalRule />
+              {alertData !== undefined && (
+                <ModalBodySection>
+                  <EuiFormRow>
+                    <EuiCheckbox
+                      id="close-alert-on-add-add-exception-checkbox"
+                      label="Close this alert"
+                      checked={shouldCloseAlert}
+                      onChange={onCloseAlertCheckboxChange}
+                    />
+                  </EuiFormRow>
+                </ModalBodySection>
+              )}
+            </>
+          )}
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
