@@ -14,16 +14,17 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/component
 /**
  * TIMELINE BODY
  */
+export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
 
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .securitySolutionTimeline__body {
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
     overflow: hidden;
   }
 `;
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
-  className: `securitySolutionTimeline__body ${className}`,
+  className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
 }))<{ bodyHeight?: number; visible: boolean }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;

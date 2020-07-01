@@ -19,6 +19,7 @@ import { allowTopN } from './helpers';
 import * as i18n from './translations';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
+import { SELECTOR_TIMELINE_BODY_CLASS_NAME } from '../../../timelines/components/timeline/styles';
 
 interface Props {
   draggableId?: DraggableId;
@@ -184,7 +185,6 @@ DraggableWrapperHoverContentComponent.displayName = 'DraggableWrapperHoverConten
 
 export const DraggableWrapperHoverContent = React.memo(DraggableWrapperHoverContentComponent);
 
-const SELECTOR_TIMELINE_CLASS_NAME = 'securitySolutionTimeline__body';
 export const useGetTimelineId = function (
   elem: React.MutableRefObject<Element | null>,
   getTimelineId: boolean = false
@@ -199,7 +199,7 @@ export const useGetTimelineId = function (
         if (
           myElem != null &&
           myElem.classList != null &&
-          myElem.classList.contains(SELECTOR_TIMELINE_CLASS_NAME) &&
+          myElem.classList.contains(SELECTOR_TIMELINE_BODY_CLASS_NAME) &&
           myElem.hasAttribute('data-timeline-id')
         ) {
           setTimelineId(myElem.getAttribute('data-timeline-id'));

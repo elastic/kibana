@@ -104,7 +104,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       timelineId === TimelineId.active
         ? getManageTimelineById(TimelineId.active)
         : { indexToAdd: null },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [getManageTimelineById, timelineId]
   );
 
