@@ -234,7 +234,7 @@ describe('url state', () => {
     cy.get(KQL_INPUT).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
-  it('sets and reads the url state for timeline by id', () => {
+  it.skip('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimeline();
     executeTimelineKQL('host.name: *');
