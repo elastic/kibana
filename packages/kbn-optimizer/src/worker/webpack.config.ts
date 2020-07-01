@@ -195,7 +195,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          `src/legacy/ui/public/styles/_styling_constants_${theme}.scss`
+                          `src/legacy/ui/public/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },

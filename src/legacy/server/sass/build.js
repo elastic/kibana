@@ -36,14 +36,8 @@ const copyFile = promisify(fs.copyFile);
 const mkdirAsync = promisify(fs.mkdir);
 
 const UI_ASSETS_DIR = resolve(__dirname, '../../../core/server/core_app/assets');
-const LIGHT_GLOBALS_PATH = resolve(
-  __dirname,
-  '../../../legacy/ui/public/styles/_styling_constants_v7light'
-);
-const DARK_GLOBALS_PATH = resolve(
-  __dirname,
-  '../../../legacy/ui/public/styles/_styling_constants_v7dark'
-);
+const LIGHT_GLOBALS_PATH = resolve(__dirname, '../../../legacy/ui/public/styles/_globals_v7light');
+const DARK_GLOBALS_PATH = resolve(__dirname, '../../../legacy/ui/public/styles/_globals_v7dark');
 
 const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
   const relativePath = relative(root, path);
