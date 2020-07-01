@@ -1006,9 +1006,9 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Generates an Ingest `datasource` that includes the Endpoint Policy data
+   * Generates an Ingest `package config` that includes the Endpoint Policy data
    */
-  public generatePolicyDatasource(): PolicyData {
+  public generatePolicyPackageConfig(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
