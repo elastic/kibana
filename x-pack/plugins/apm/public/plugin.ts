@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 import { ConfigSchema } from '.';
 import { ObservabilityPluginSetup } from '../../observability/public';
 import {
@@ -42,7 +43,6 @@ import {
   fetchLandingPageData,
   hasData,
 } from './services/rest/observability_dashboard';
-import { getTheme } from './utils/get_theme';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -79,9 +79,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
-      const theme = getTheme({
-        isDarkMode: core.uiSettings.get('theme:darkMode'),
-      });
       plugins.observability.dashboard.register({
         appName: 'apm',
         fetchData: async (params) => {
