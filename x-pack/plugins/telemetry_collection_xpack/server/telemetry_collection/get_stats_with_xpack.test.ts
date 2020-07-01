@@ -49,6 +49,7 @@ const getContext = () => ({
 });
 
 const mockUsageCollection = (kibanaUsage = kibana) => ({
+  getFilteredCollectorSet: (...args: any[]) => mockUsageCollection(kibanaUsage),
   bulkFetch: () => kibanaUsage,
   toObject: (data: any) => data,
 });
