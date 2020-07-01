@@ -35,19 +35,8 @@ export function DynamicIconForm({
     });
   };
 
-  const getField = () => {
-    const fieldName = styleProperty.getFieldName();
-    if (!fieldName) {
-      return null;
-    }
-
-    return fields.find((field) => {
-      return field.name === fieldName;
-    });
-  };
-
   function renderIconMapSelect() {
-    const field = getField();
+    const field = styleProperty.getField();
     if (!field) {
       return null;
     }
@@ -60,7 +49,7 @@ export function DynamicIconForm({
         onChange={onIconMapChange}
         isDarkMode={isDarkMode}
         symbolOptions={symbolOptions}
-        isCustomOnly={!field.supportsAutoDomain}
+        isCustomOnly={!field.supportsAutoDomain()}
       />
     );
   }
