@@ -8,7 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
+import {
+  AgentConfig,
+  PackageInfo,
+  GetAgentConfigsResponseItem,
+  PackageConfig,
+} from '../../../types';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
 export const StepSelectConfig: React.FunctionComponent<{
@@ -24,14 +29,19 @@ export const StepSelectConfig: React.FunctionComponent<{
   const [selectedConfigError, setSelectedConfigError] = useState<Error>();
 
   // Fetch package info
-  const { data: packageInfoData, error: packageInfoError } = useGetPackageInfoByKey(pkgkey);
+  const {
+    data: packageInfoData,
+    error: packageInfoError,
+    isLoading: packageInfoLoading,
+  } = useGetPackageInfoByKey(pkgkey);
+  const isRestrictedPackage = packageInfoData?.response.config_templates?.[0]?.multiple === false;
 
   // Fetch agent configs info
   const {
     data: agentConfigsData,
     error: agentConfigsError,
     isLoading: isAgentConfigsLoading,
-  } = useGetAgentConfigs();
+  } = useGetAgentConfigs({ full: true });
   const agentConfigs = agentConfigsData?.items || [];
   const agentConfigsById = agentConfigs.reduce(
     (acc: { [key: string]: GetAgentConfigsResponseItem }, config) => {
@@ -107,12 +117,18 @@ export const StepSelectConfig: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isAgentConfigsLoading}
-          options={agentConfigs.map(({ id, name, description }) => {
+          isLoading={isAgentConfigsLoading || packageInfoLoading}
+          options={agentConfigs.map(({ id, name, package_configs: packageConfigs }) => {
+            const alreadyHasRestrictedPackage =
+              isRestrictedPackage &&
+              (packageConfigs as PackageConfig[])
+                .map((packageConfig) => packageConfig.package?.name || '')
+                .includes(packageInfoData!.response.name);
             return {
               label: name,
               key: id,
               checked: selectedConfigId === id ? 'on' : undefined,
+              disabled: alreadyHasRestrictedPackage,
               'data-test-subj': 'agentConfigItem',
             };
           })}
