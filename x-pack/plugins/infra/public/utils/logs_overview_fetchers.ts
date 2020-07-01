@@ -11,6 +11,7 @@ import {
   HasData,
   FetchDataParams,
 } from '../../../observability/public';
+import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 
 interface StatsAggregation {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -47,12 +48,19 @@ export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [, startPlugins] = await getStartServices();
+    const [core, startPlugins] = await getStartServices();
     const { data } = startPlugins;
 
-    // FIXME figure out how to get these from the sourceConfiguration
+    const sourceConfiguration = await callFetchLogSourceConfigurationAPI(
+      'default',
+      core.http.fetch
+    );
+
     const { stats, series } = await fetchLogsOverview(
-      { index: 'filebeat-*', timestampField: '@timestamp' },
+      {
+        index: sourceConfiguration.data.configuration.logAlias,
+        timestampField: sourceConfiguration.data.configuration.fields.timestamp,
+      },
       params,
       data
     );
