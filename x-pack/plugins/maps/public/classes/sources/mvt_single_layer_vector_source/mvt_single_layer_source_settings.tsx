@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Fragment, Component, ChangeEvent } from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
@@ -79,22 +79,31 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     const fieldEditor =
       this.props.showFields && this.state.currentLayerName !== '' ? (
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
-            {
-              defaultMessage: 'Fields',
-            }
-          )}
-          helpText={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsHelpMessage',
-            {
-              defaultMessage:
-                'Fields which are available in the `{layer}` layer. These can be used for tooltips and dynamic styling.',
-              values: {
-                layer: this.state.currentLayerName,
-              },
-            }
-          )}
+          label={
+            <EuiToolTip
+              anchorClassName="eui-alignMiddle"
+              content={i18n.translate(
+                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsHelpMessage',
+                {
+                  defaultMessage:
+                    'Fields which are available in the `{layer}` layer. These can be used for tooltips and dynamic styling.',
+                  values: {
+                    layer: this.state.currentLayerName,
+                  },
+                }
+              )}
+            >
+              <span>
+                {i18n.translate(
+                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
+                  {
+                    defaultMessage: 'Fields',
+                  }
+                )}{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
+          }
         >
           <MVTFieldConfigEditor
             fields={this.state.currentFields.slice()}
@@ -106,6 +115,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     return (
       <Fragment>
         <EuiFormRow
+          display="columnCompressed"
           label={i18n.translate(
             'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameMessage',
             {
@@ -117,43 +127,49 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
             value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
             isInvalid={this.state.currentLayerName === ''}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
-            {
-              defaultMessage: 'Available levels',
-            }
-          )}
-          helpText={i18n.translate(
-            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
-            {
-              defaultMessage:
-                'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
-            }
-          )}
-        >
-          <ValidatedDualRange
-            label=""
-            formRowDisplay="columnCompressed"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            value={[this.state.currentMinSourceZoom, this.state.currentMaxSourceZoom]}
-            showInput="inputWithPopover"
-            showRange
-            showLabels
-            onChange={this._handleZoomRangeChange}
-            allowEmptyRange={false}
             compressed
-            prepend={i18n.translate(
-              'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
-              {
-                defaultMessage: 'Zoom',
-              }
-            )}
           />
         </EuiFormRow>
+
+        <ValidatedDualRange
+          label={
+            <EuiToolTip
+              anchorClassName="eui-alignMiddle"
+              content={i18n.translate(
+                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
+                {
+                  defaultMessage:
+                    'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
+                }
+              )}
+            >
+              <span>
+                {i18n.translate(
+                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
+                  {
+                    defaultMessage: 'Available levels',
+                  }
+                )}{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
+          }
+          formRowDisplay="columnCompressed"
+          value={[this.state.currentMinSourceZoom, this.state.currentMaxSourceZoom]}
+          min={MIN_ZOOM}
+          max={MAX_ZOOM}
+          onChange={this._handleZoomRangeChange}
+          allowEmptyRange={false}
+          showInput="inputWithPopover"
+          compressed
+          showLabels
+          prepend={i18n.translate(
+            'xpack.maps.source.MVTSingleLayerVectorSourceEditor.dataZoomRangeMessage',
+            {
+              defaultMessage: 'Zoom',
+            }
+          )}
+        />
         {fieldEditor}
       </Fragment>
     );

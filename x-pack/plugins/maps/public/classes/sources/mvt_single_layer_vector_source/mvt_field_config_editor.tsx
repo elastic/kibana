@@ -118,7 +118,18 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
       this._fieldChange(newFields);
     };
 
-    const addButton = (
+    return (
+      <EuiSuperSelect
+        options={FIELD_TYPE_OPTIONS}
+        valueOfSelected={mvtFieldConfig.type}
+        onChange={(value) => onChange(value)}
+        compressed
+      />
+    );
+  }
+
+  _renderFieldButtonDelete(index: number) {
+    return (
       <EuiButtonIcon
         iconType="trash"
         color="danger"
@@ -131,14 +142,6 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         aria-label={i18n.translate('xpack.maps.mvtSource.trashButtonAriaLabel', {
           defaultMessage: 'Remove field',
         })}
-      />
-    );
-    return (
-      <EuiSuperSelect
-        options={FIELD_TYPE_OPTIONS}
-        valueOfSelected={mvtFieldConfig.type}
-        onChange={(value) => onChange(value)}
-        append={addButton}
       />
     );
   }
@@ -167,6 +170,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
           defaultMessage: 'Field name',
         })}
         isInvalid={emptyName || hasDupes}
+        compressed
       />
     );
   }
@@ -174,10 +178,14 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
   _renderFieldConfig() {
     return this.state.currentFields.map((mvtFieldConfig: MVTFieldDescriptor, index: number) => {
       return (
-        <EuiFlexGroup key={index} gutterSize="xs">
-          <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
-          <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiFlexGroup key={index} gutterSize="xs" alignItems="center">
+            <EuiFlexItem>{this._renderFieldNameInput(mvtFieldConfig, index)}</EuiFlexItem>
+            <EuiFlexItem>{this._renderFieldTypeDropDown(mvtFieldConfig, index)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{this._renderFieldButtonDelete(index)}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size={'xs'} />
+        </>
       );
     });
   }
@@ -186,7 +194,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     return (
       <Fragment>
         {this._renderFieldConfig()}
-        <EuiSpacer size={'xs'} />
+        <EuiSpacer size={'s'} />
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={this._addField} size="xs" iconType="plusInCircleFilled">
