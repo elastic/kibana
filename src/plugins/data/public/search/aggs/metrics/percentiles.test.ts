@@ -67,7 +67,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
           },
         },
       ],
-      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry }
     );
   });
 

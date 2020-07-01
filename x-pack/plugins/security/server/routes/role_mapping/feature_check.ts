@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, IClusterClient } from 'src/core/server';
+import { Logger, ILegacyClusterClient } from 'src/core/server';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
@@ -73,7 +73,7 @@ export function defineRoleMappingFeatureCheckRoute({
   );
 }
 
-async function getEnabledRoleMappingsFeatures(clusterClient: IClusterClient, logger: Logger) {
+async function getEnabledRoleMappingsFeatures(clusterClient: ILegacyClusterClient, logger: Logger) {
   logger.debug(`Retrieving role mappings features`);
 
   const nodeScriptSettingsPromise: Promise<NodeSettingsResponse> = clusterClient

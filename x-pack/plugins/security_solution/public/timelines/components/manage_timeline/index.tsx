@@ -9,11 +9,14 @@ import { noop } from 'lodash/fp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager';
 import { TimelineRowAction } from '../timeline/body/actions';
+import { SubsetTimelineModel } from '../../store/timeline/model';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
+import { timelineDefaults as timelineDefaultModel } from '../../store/timeline/defaults';
 
 interface ManageTimelineInit {
   documentType?: string;
+  defaultModel?: SubsetTimelineModel;
   footerText?: string;
   id: string;
   indexToAdd?: string[] | null;
@@ -25,6 +28,7 @@ interface ManageTimelineInit {
 
 interface ManageTimeline {
   documentType: string;
+  defaultModel: SubsetTimelineModel;
   filterManager?: FilterManager;
   footerText: string;
   id: string;
@@ -66,6 +70,7 @@ type ActionManageTimeline =
 
 export const timelineDefaults = {
   indexToAdd: null,
+  defaultModel: timelineDefaultModel,
   loadingText: i18n.LOADING_EVENTS,
   footerText: i18nF.TOTAL_COUNT_OF_EVENTS,
   documentType: i18nF.TOTAL_COUNT_OF_EVENTS,

@@ -9,11 +9,11 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CapabilitiesStart,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
@@ -52,13 +52,13 @@ import { registerKibanaSettings } from './lib/register_settings';
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     ml?: {
-      mlClient: IScopedClusterClient;
+      mlClient: ILegacyScopedClusterClient;
     };
   }
 }
 
 export interface MlPluginSetup extends SharedServices {
-  mlClient: ICustomClusterClient;
+  mlClient: ILegacyCustomClusterClient;
 }
 export type MlPluginStart = void;
 
