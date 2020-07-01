@@ -22,7 +22,7 @@ import { ExpressionFunctionDefinition } from '../../../../../plugins/expressions
 import { getIndexPatterns } from '../../services';
 import { IndexPatternSpec } from '../../../common/index_patterns';
 
-const name = 'indexPattern';
+const name = 'indexPatternLoad';
 
 type Input = null;
 type Output = Promise<{ type: 'index_pattern'; value: IndexPatternSpec }>;
