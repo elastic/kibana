@@ -120,9 +120,14 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
       };
     }
     case 'updateExceptionToEdit': {
+      const exception = action.exception;
+      const exceptionListToEdit = [state.endpointList, state.detectionsList].find((list) => {
+        return list !== null && exception.list_id === list.list_id;
+      });
       return {
         ...state,
         exceptionToEdit: action.exception,
+        exceptionListTypeToEdit: exceptionListToEdit ? exceptionListToEdit.type : null,
       };
     }
     case 'updateModalOpen': {

@@ -132,13 +132,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setExceptionItemsToAdd]
   );
 
-  // TODO: we can use useMemo here instead
-  useEffect(() => {
-    if (alertData !== undefined && exceptionListType === 'endpoint') {
-      setExceptionItemsToAdd(defaultEndpointExceptionItems(exceptionListType, ruleId, alertData)); // TODO: ruleId isnt correct here
-    }
-  }, [alertData, exceptionListType, ruleId, setExceptionItemsToAdd]);
-
   const onFetchOrCreateExceptionListError = useCallback(
     (error: Error) => {
       setFetchOrCreateListError(true);
@@ -151,6 +144,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     exceptionListType,
     onError: onFetchOrCreateExceptionListError,
   });
+
+  // TODO: we can use useMemo here instead
+  useEffect(() => {
+    if (alertData !== undefined && exceptionListType === 'endpoint' && ruleExceptionList) {
+      setExceptionItemsToAdd(
+        defaultEndpointExceptionItems(
+          exceptionListType,
+          ruleExceptionList.list_id,
+          ruleName,
+          alertData
+        )
+      );
+    }
+  }, [alertData, exceptionListType, ruleExceptionList, ruleName, setExceptionItemsToAdd]);
 
   const onCommentChange = useCallback(
     (value: string) => {

@@ -255,17 +255,17 @@ const ExceptionsViewerComponent = ({
 
   return (
     <>
-      {currentModal === 'editModal' && exceptionToEdit !== null && (
-        <EditExceptionModal
-          ruleName={ruleName}
-          exceptionListType={
-            exceptionToEdit.list_id === endpointList.list_id ? 'endpoint' : 'detection'
-          }
-          exceptionItem={exceptionToEdit}
-          onCancel={onCloseExceptionModal}
-          onConfirm={onCloseExceptionModal}
-        />
-      )}
+      {currentModal === 'editModal' &&
+        exceptionToEdit !== null &&
+        exceptionListTypeToEdit !== null && (
+          <EditExceptionModal
+            ruleName={ruleName}
+            exceptionListType={exceptionListTypeToEdit}
+            exceptionItem={exceptionToEdit}
+            onCancel={onCloseExceptionModal}
+            onConfirm={onCloseExceptionModal}
+          />
+        )}
       {currentModal === 'addModal' && exceptionListTypeToEdit !== null && (
         <AddExceptionModal
           ruleName={ruleName}

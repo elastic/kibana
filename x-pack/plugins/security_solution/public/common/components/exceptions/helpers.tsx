@@ -440,20 +440,22 @@ export const getMappedNonEcsValue = ({
 // TODO: should we use match or match_any for these default values?
 // TODO: check autocomplete or editing of text in builder
 export const defaultEndpointExceptionItems = (
-  listType: string,
+  listType: 'detection' | 'endpoint',
   listId: string,
+  ruleName: string,
   alertData: TimelineNonEcsData[]
-): ExceptionListItemSchema[] => {
+): CreateExceptionListItemBuilderSchema[] => {
   const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
   const [signatureSigner] =
     getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.signer' }) ?? [];
   const [signatureTrusted] =
     getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.trusted' }) ?? [];
   const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? [];
+  const namespaceType = 'agnostic';
 
   return [
     {
-      ...createExceptionItem({ listType, listId }),
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
           field: 'file.path',
@@ -464,7 +466,7 @@ export const defaultEndpointExceptionItems = (
       ],
     },
     {
-      ...createExceptionItem({ listType, listId }),
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
           field: 'file.code_signature.signer',
@@ -481,7 +483,7 @@ export const defaultEndpointExceptionItems = (
       ],
     },
     {
-      ...createExceptionItem({ listType, listId }),
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
           field: 'file.hash.sha1',
@@ -492,7 +494,7 @@ export const defaultEndpointExceptionItems = (
       ],
     },
     {
-      ...createExceptionItem({ listType, listId }),
+      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
           field: 'event.category',
