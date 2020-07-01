@@ -205,7 +205,7 @@ PUT _ingest/pipeline/team_assignment
                 else if (path.indexOf('x-pack/plugins/es_ui_shared/') == 0) ctx.team = 'es-ui';
                 else if (path.indexOf('x-pack/plugins/event_log/') == 0) ctx.team = 'kibana-alerting-services';
                 else if (path.indexOf('x-pack/plugins/features/') == 0) ctx.team = 'kibana-platform';
-                else if (path.indexOf('x-pack/plugins/file_upload') == 0) ctx.team = 'ml-ui';
+                else if (path.indexOf('x-pack/plugins/file_upload') == 0) ctx.team = 'kibana-gis';
                 else if (path.indexOf('x-pack/plugins/global_search') == 0) ctx.team = 'kibana-platform';
                 
                 else if (path.indexOf('x-pack/plugins/graph/') == 0) ctx.team = 'kibana-app';
