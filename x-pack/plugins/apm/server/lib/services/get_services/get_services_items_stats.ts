@@ -6,12 +6,11 @@
 
 import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import {
-  PROCESSOR_EVENT,
   TRANSACTION_DURATION,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
-import { mergeProjection } from '../../../../common/projections/util/merge_projection';
+import { mergeProjection } from '../../../projections/util/merge_projection';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ServicesItemsSetup,
@@ -32,22 +31,15 @@ export const getTransactionDurationAverages = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const response = await client.search(
     mergeProjection(projection, {
       size: 0,
-      index: indices['apm_oss.transactionIndices'],
+      apm: {
+        types: [ProcessorEvent.transaction],
+      },
       body: {
-        query: {
-          bool: {
-            filter: projection.body.query.bool.filter.concat({
-              term: {
-                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-              },
-            }),
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -83,32 +75,18 @@ export const getAgentNames = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      index: [
-        indices['apm_oss.metricsIndices'],
-        indices['apm_oss.errorIndices'],
-        indices['apm_oss.transactionIndices'],
-      ],
+      apm: {
+        types: [
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+          ProcessorEvent.transaction,
+        ],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: [
-                    ProcessorEvent.metric,
-                    ProcessorEvent.error,
-                    ProcessorEvent.transaction,
-                  ],
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -149,24 +127,14 @@ export const getTransactionRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      index: indices['apm_oss.transactionIndices'],
+      apm: {
+        types: [ProcessorEvent.transaction],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                term: {
-                  [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {
@@ -200,22 +168,20 @@ export const getErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      index: indices['apm_oss.errorIndices'],
+      apm: {
+        types: [ProcessorEvent.error],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                term: {
-                  [PROCESSOR_EVENT]: ProcessorEvent.error,
-                },
-              },
-            ],
+        aggs: {
+          services: {
+            terms: {
+              ...projection.body.aggs.services.terms,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
           },
         },
       },
@@ -243,32 +209,18 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client, indices } = setup;
+  const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      index: [
-        indices['apm_oss.metricsIndices'],
-        indices['apm_oss.errorIndices'],
-        indices['apm_oss.transactionIndices'],
-      ],
+      apm: {
+        types: [
+          ProcessorEvent.metric,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+        ],
+      },
       body: {
         size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...projection.body.query.bool.filter,
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: [
-                    ProcessorEvent.transaction,
-                    ProcessorEvent.error,
-                    ProcessorEvent.metric,
-                  ],
-                },
-              },
-            ],
-          },
-        },
         aggs: {
           services: {
             terms: {

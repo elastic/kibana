@@ -10,6 +10,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+import { APMUIDocumentType } from '../../../helpers/get_es_client/document_types';
 
 export async function getExistingEnvironmentsForService({
   serviceName,
@@ -18,14 +19,16 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { internalClient, indices } = setup;
+  const { internalClient } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: indices.apmAgentConfigurationIndex,
+    apm: {
+      types: [APMUIDocumentType.agentConfiguration],
+    },
     body: {
       size: 0,
       query: { bool },

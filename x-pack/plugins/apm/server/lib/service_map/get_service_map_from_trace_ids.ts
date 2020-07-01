@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { find, uniq } from 'lodash';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRACE_ID,
@@ -29,23 +29,17 @@ export async function getServiceMapFromTraceIds({
   serviceName?: string;
   environment?: string;
 }) {
-  const { indices, client } = setup;
+  const { client } = setup;
 
   const serviceMapParams = {
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      types: [ProcessorEvent.transaction, ProcessorEvent.span],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            {
-              terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction'],
-              },
-            },
             {
               terms: {
                 [TRACE_ID]: traceIds,

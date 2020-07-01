@@ -2,6 +2,11 @@
 
 exports[`agent configuration queries findExactConfiguration find configuration by service.environment 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -26,12 +31,16 @@ Object {
       },
     },
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`agent configuration queries findExactConfiguration find configuration by service.name 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -56,12 +65,16 @@ Object {
       },
     },
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`agent configuration queries findExactConfiguration find configuration by service.name and service.environment 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -80,12 +93,18 @@ Object {
       },
     },
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
@@ -99,15 +118,6 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
             "term": Object {
               "service.name": "foo",
             },
@@ -117,16 +127,16 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;
 
 exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
@@ -150,12 +160,18 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`agent configuration queries getServiceNames fetches service names 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "services": Object {
@@ -165,40 +181,29 @@ Object {
         },
       },
     },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-        ],
-      },
-    },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;
 
 exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
 Object {
-  "index": "myIndex",
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "size": 200,
 }
 `;
 
 exports[`agent configuration queries searchConfigurations fetches filtered configurations with an environment 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -250,12 +255,16 @@ Object {
       },
     },
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`agent configuration queries searchConfigurations fetches filtered configurations without an environment 1`] = `
 Object {
+  "apm": Object {
+    "types": Array [
+      "agentConfiguration",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -297,6 +306,5 @@ Object {
       },
     },
   },
-  "index": "myIndex",
 }
 `;

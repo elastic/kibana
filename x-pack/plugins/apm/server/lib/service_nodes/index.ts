@@ -9,8 +9,8 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 import {
   METRIC_PROCESS_CPU_PERCENT,

@@ -5,7 +5,6 @@
  */
 
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -27,16 +26,17 @@ export async function getTransaction({
   traceId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, client, indices } = setup;
+  const { start, end, client } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 1,
       query: {
         bool: {
           filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
             { range: rangeFilter(start, end) },

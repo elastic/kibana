@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../../common/processor_event';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
@@ -34,11 +34,10 @@ export function timeseriesFetcher({
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, client } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES,
@@ -54,7 +53,9 @@ export function timeseriesFetcher({
   }
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },

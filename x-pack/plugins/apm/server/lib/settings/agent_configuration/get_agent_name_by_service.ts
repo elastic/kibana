@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 
 export async function getAgentNameByService({
@@ -18,25 +16,22 @@ export async function getAgentNameByService({
   serviceName: string;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      types: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
-            },
-            { term: { [SERVICE_NAME]: serviceName } },
-          ],
+          filter: [{ term: { [SERVICE_NAME]: serviceName } }],
         },
       },
       aggs: {

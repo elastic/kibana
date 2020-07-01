@@ -6,15 +6,13 @@
 import { merge, isPlainObject, cloneDeep } from 'lodash';
 import { DeepPartial } from 'utility-types';
 import { AggregationInputMap } from '../../../../typings/elasticsearch/aggregations';
-import {
-  ESSearchRequest,
-  ESSearchBody,
-} from '../../../../typings/elasticsearch';
+import { ESSearchBody } from '../../../../typings/elasticsearch';
 import { Projection } from '../../typings';
+import { APMESSearchRequest } from '../../../lib/helpers/get_es_client/document_types';
 
 type PlainObject = Record<string | number | symbol, any>;
 
-type SourceProjection = Omit<DeepPartial<ESSearchRequest>, 'body'> & {
+type SourceProjection = Omit<DeepPartial<APMESSearchRequest>, 'body'> & {
   body: Omit<DeepPartial<ESSearchBody>, 'aggs'> & {
     aggs?: AggregationInputMap;
   };

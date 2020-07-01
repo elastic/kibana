@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
@@ -16,6 +17,7 @@ import {
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
+  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 
 export const getBreakdownField = (breakdown: string) => {
@@ -50,11 +52,11 @@ export const getPageLoadDistBreakdown = async (
   });
 
   const params = mergeProjection(projection, {
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         breakdowns: {
           terms: {
@@ -64,7 +66,7 @@ export const getPageLoadDistBreakdown = async (
           aggs: {
             page_dist: {
               percentile_ranks: {
-                field: 'transaction.duration.us',
+                field: TRANSACTION_DURATION,
                 values: stepValues,
                 keyed: false,
               },

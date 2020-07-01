@@ -6,10 +6,7 @@
 
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import {
-  SERVICE_NAME,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getServiceCount({
@@ -17,30 +14,21 @@ export async function getServiceCount({
 }: {
   setup: Setup & SetupTimeRange;
 }) {
-  const { client, indices, start, end } = setup;
+  const { client, start, end } = setup;
 
   const params = {
-    index: [
-      indices['apm_oss.transactionIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.metricsIndices'],
-    ],
+    apm: {
+      types: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: rangeFilter(start, end) },
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [
-                  ProcessorEvent.error,
-                  ProcessorEvent.transaction,
-                  ProcessorEvent.metric,
-                ],
-              },
-            },
-          ],
+          filter: [{ range: rangeFilter(start, end) }],
         },
       },
       aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },

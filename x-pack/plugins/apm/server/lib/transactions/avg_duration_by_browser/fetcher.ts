@@ -7,7 +7,6 @@
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
@@ -22,12 +21,11 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
-  const { end, client, indices, start, uiFiltersES } = options.setup;
+  const { end, client, start, uiFiltersES } = options.setup;
   const { serviceName } = options;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
@@ -35,7 +33,9 @@ export function fetcher(options: Options) {
   ];
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },

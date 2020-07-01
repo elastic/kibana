@@ -14,8 +14,8 @@ import {
   CONTAINER_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { getServiceNodesProjection } from '../../../common/projections/service_nodes';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { getServiceNodesProjection } from '../../projections/service_nodes';
 
 export async function getServiceNodeMetadata({
   serviceName,

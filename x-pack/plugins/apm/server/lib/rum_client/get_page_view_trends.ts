@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,

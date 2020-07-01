@@ -4,37 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
 export async function getServiceNames({ setup }: { setup: Setup }) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const params = {
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      types: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
-            },
-          ],
-        },
-      },
       aggs: {
         services: {
           terms: {

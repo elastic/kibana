@@ -7,22 +7,24 @@
 /* eslint-disable no-console */
 import {
   IndexDocumentParams,
-  SearchParams,
   IndicesCreateParams,
   DeleteDocumentResponse,
   DeleteDocumentParams,
 } from 'elasticsearch';
-import { cloneDeep, isString, merge } from 'lodash';
+import { unique, defaultsDeep } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import chalk from 'chalk';
+import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
+import { ESSearchResponse, ESFilter } from '../../../../typings/elasticsearch';
+import { pickKeys } from '../../../../common/utils/pick_keys';
+import { APMRequestHandlerContext } from '../../../routes/typings';
+import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../typings/elasticsearch';
-import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRequestHandlerContext } from '../../routes/typings';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+  APMESSearchRequest,
+  documentTypeSettings,
+  APMDocumentType,
+} from './document_types';
+import { addFilterForLegacyData } from './add_filter_for_legacy_data';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
@@ -39,64 +41,18 @@ interface IndexPrivilegesParams {
   }>;
 }
 
-export function isApmIndex(
-  apmIndices: string[],
-  indexParam: SearchParams['index']
-) {
-  if (isString(indexParam)) {
-    return apmIndices.includes(indexParam);
-  } else if (Array.isArray(indexParam)) {
-    // return false if at least one of the indices is not an APM index
-    return indexParam.every((index) => apmIndices.includes(index));
-  }
-  return false;
-}
-
-function addFilterForLegacyData(
-  apmIndices: string[],
-  params: ESSearchRequest,
-  { includeLegacyData = false } = {}
-): SearchParams {
-  // search across all data (including data)
-  if (includeLegacyData || !isApmIndex(apmIndices, params.index)) {
-    return params;
-  }
-
-  const nextParams = merge(
-    {
-      body: {
-        query: {
-          bool: {
-            filter: [],
-          },
-        },
-      },
-    },
-    cloneDeep(params)
-  );
-
-  // add filter for omitting pre-7.x data
-  nextParams.body.query.bool.filter.push({
-    range: { [OBSERVER_VERSION_MAJOR]: { gte: 7 } },
-  });
-
-  return nextParams;
-}
-
 // add additional params for search (aka: read) requests
-function getParamsForSearchRequest({
-  context,
+function getParamsForSearchRequest<T extends APMESSearchRequest>({
   params,
   indices,
   includeFrozen,
   includeLegacyData,
 }: {
-  context: APMRequestHandlerContext;
-  params: ESSearchRequest;
+  params: T;
   indices: ApmIndicesConfig;
   includeFrozen: boolean;
   includeLegacyData?: boolean;
-}) {
+}): ESSearchRequestOf<T> {
   // Get indices for legacy data filter (only those which apply)
   const apmIndices = Object.values(
     pickKeys(
@@ -109,11 +65,69 @@ function getParamsForSearchRequest({
       'apm_oss.metricsIndices'
     )
   );
+
+  const { apm, ...esParams } = params;
+
+  const relevantDocumentTypeSettings = pickKeys(
+    documentTypeSettings,
+    ...apm.types
+  );
+
+  const nextParams: Omit<APMESSearchRequest, 'apm'> & {
+    body: {
+      query: {
+        bool: {
+          filter: ESFilter[];
+        };
+      };
+    };
+  } = defaultsDeep(esParams, {
+    body: {
+      query: {
+        bool: {
+          filter: params.body?.query?.bool?.filter ?? ([] as ESFilter[]),
+        },
+      },
+    },
+    index: unique(
+      Object.values(relevantDocumentTypeSettings).map(
+        (setting) => indices[setting.apmIndicesName]
+      )
+    ),
+  });
+
+  const processorEvents: string[] = [];
+
+  (Object.keys(relevantDocumentTypeSettings) as APMDocumentType[]).forEach(
+    (documentType) => {
+      const setting = relevantDocumentTypeSettings[documentType];
+      if (setting.type === 'processor_event') {
+        processorEvents.push(documentType);
+      }
+    }
+  );
+
+  if (processorEvents.length) {
+    nextParams.body.query.bool.filter.push({
+      terms: {
+        [PROCESSOR_EVENT]: processorEvents,
+      },
+    });
+  }
+
   return {
-    ...addFilterForLegacyData(apmIndices, params, { includeLegacyData }), // filter out pre-7.0 data
+    // filter out pre-7.0 data
+    ...addFilterForLegacyData(apmIndices, nextParams, {
+      includeLegacyData,
+    }),
     ignore_throttled: !includeFrozen, // whether to query frozen indices or not
-  };
+  } as ESSearchRequestOf<T>;
 }
+
+type ESSearchRequestOf<T extends APMESSearchRequest> = Omit<T, 'apm'> & {
+  index: string[];
+  ignore_throttled: boolean;
+};
 
 interface APMOptions {
   includeLegacyData: boolean;
@@ -189,13 +203,14 @@ export function getESClient(
   return {
     search: async <
       TDocument = unknown,
-      TSearchRequest extends ESSearchRequest = {}
+      TSearchRequest extends APMESSearchRequest = APMESSearchRequest
     >(
       params: TSearchRequest,
       apmOptions?: APMOptions
-    ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
+    ): Promise<
+      ESSearchResponse<TDocument, ESSearchRequestOf<TSearchRequest>>
+    > => {
       const nextParams = await getParamsForSearchRequest({
-        context,
         params,
         indices,
         includeFrozen,

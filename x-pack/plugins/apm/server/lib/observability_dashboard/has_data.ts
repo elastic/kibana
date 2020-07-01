@@ -3,17 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 
 export async function hasData({ setup }: { setup: Setup }) {
-  const { client, indices } = setup;
+  const { client } = setup;
   try {
     const params = {
-      index: [
-        indices['apm_oss.transactionIndices'],
-        indices['apm_oss.errorIndices'],
-        indices['apm_oss.metricsIndices'],
-      ],
+      apm: {
+        types: [ProcessorEvent.transaction],
+      },
       terminateAfter: 1,
       size: 0,
     };

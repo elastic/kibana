@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isNumber } from 'lodash';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -24,12 +24,9 @@ export async function getDerivedServiceAnnotations({
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client, indices } = setup;
+  const { start, end, client } = setup;
 
-  const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [SERVICE_NAME]: serviceName } },
-  ];
+  const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
 
   const environmentFilter = getEnvironmentUiFilterES(environment);
 
@@ -40,7 +37,9 @@ export async function getDerivedServiceAnnotations({
   const versions =
     (
       await client.search({
-        index: indices['apm_oss.transactionIndices'],
+        apm: {
+          types: [ProcessorEvent.transaction],
+        },
         body: {
           size: 0,
           query: {
@@ -65,7 +64,9 @@ export async function getDerivedServiceAnnotations({
   const annotations = await Promise.all(
     versions.map(async (version) => {
       const response = await client.search({
-        index: indices['apm_oss.transactionIndices'],
+        apm: {
+          types: [ProcessorEvent.transaction],
+        },
         body: {
           size: 0,
           query: {

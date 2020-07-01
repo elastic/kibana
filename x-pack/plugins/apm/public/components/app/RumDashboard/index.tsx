@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
 
 export function RumOverview() {

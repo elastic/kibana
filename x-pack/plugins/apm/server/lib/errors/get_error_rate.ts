@@ -5,7 +5,6 @@
  */
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -26,7 +25,7 @@ export async function getErrorRate({
   groupId?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, client } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -42,20 +41,20 @@ export async function getErrorRate({
 
   const getTransactionBucketAggregation = async () => {
     const resp = await client.search({
-      index: indices['apm_oss.transactionIndices'],
+      apm: {
+        types: [ProcessorEvent.transaction],
+      },
       body: {
         size: 0,
         query: {
           bool: {
-            filter: [
-              ...filter,
-              { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            ],
+            filter,
           },
         },
         aggs,
       },
     });
+
     return {
       totalHits: resp.hits.total.value,
       responseTimeBuckets: resp.aggregations?.response_times.buckets,
@@ -66,16 +65,14 @@ export async function getErrorRate({
       ? [{ term: { [ERROR_GROUP_ID]: groupId } }]
       : [];
     const resp = await client.search({
-      index: indices['apm_oss.errorIndices'],
+      apm: {
+        types: [ProcessorEvent.error],
+      },
       body: {
         size: 0,
         query: {
           bool: {
-            filter: [
-              ...filter,
-              ...groupIdFilter,
-              { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-            ],
+            filter: [...filter, ...groupIdFilter],
           },
         },
         aggs,

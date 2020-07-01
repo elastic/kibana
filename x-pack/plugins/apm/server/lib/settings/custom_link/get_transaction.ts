@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
@@ -18,7 +17,7 @@ export async function getTransaction({
   setup: Setup;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const esFilters = Object.entries(filters)
     // loops through the filters splitting the value by comma and removing white spaces
@@ -32,15 +31,14 @@ export async function getTransaction({
 
   const params = {
     terminateAfter: 1,
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     size: 1,
     body: {
       query: {
         bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            ...esFilters,
-          ],
+          filter: esFilters,
         },
       },
     },

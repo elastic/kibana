@@ -9,8 +9,8 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getServicesProjection } from '../../../common/projections/services';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getServicesProjection } from '../../projections/services';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { transformServiceMapResponses } from './transform_service_map_responses';

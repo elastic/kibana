@@ -4,27 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  OBSERVER_VERSION_MAJOR,
-  PROCESSOR_EVENT,
-} from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
-          ],
+          filter: [{ range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }],
         },
       },
     },

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
@@ -15,17 +15,18 @@ export async function getServiceTransactionTypes(
   serviceName: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, indices } = setup;
+  const { start, end, client } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
             { range: rangeFilter(start, end) },
           ],
         },

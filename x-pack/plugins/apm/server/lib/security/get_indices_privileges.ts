@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Setup } from '../helpers/setup_request';
-import { IndexPrivileges } from '../helpers/es_client';
+import { IndexPrivileges } from '../helpers/get_es_client';
 
 export async function getIndicesPrivileges({
   setup,

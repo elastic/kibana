@@ -5,7 +5,6 @@
  */
 
 import { Unionize, Overwrite } from 'utility-types';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   Setup,
   SetupTimeRange,
@@ -14,9 +13,10 @@ import {
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-import { getMetricsProjection } from '../../../common/projections/metrics';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getMetricsProjection } from '../../projections/metrics';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+import { APMESSearchRequest } from '../helpers/get_es_client/document_types';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -28,7 +28,7 @@ type MetricsAggregationMap = Unionize<{
 type Aggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = Overwrite<
-  ESSearchRequest,
+  APMESSearchRequest,
   {
     body: {
       aggs: {

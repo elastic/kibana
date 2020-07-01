@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ESFilter } from '../../../typings/elasticsearch';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -72,19 +72,17 @@ export async function getServiceMapServiceNodeInfo({
 }
 
 async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   const response = await client.search({
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      types: [ProcessorEvent.error],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: filter.concat({
-            term: {
-              [PROCESSOR_EVENT]: 'error',
-            },
-          }),
+          filter,
         },
       },
       track_total_hits: true,
@@ -107,19 +105,17 @@ async function getTransactionMetrics({
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
 }> {
-  const { indices, client } = setup;
+  const { client } = setup;
 
   const response = await client.search({
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 1,
       query: {
         bool: {
-          filter: filter.concat({
-            term: {
-              [PROCESSOR_EVENT]: 'transaction',
-            },
-          }),
+          filter,
         },
       },
       track_total_hits: true,
@@ -146,20 +142,17 @@ async function getCpuMetrics({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
-  const { indices, client } = setup;
+  const { client } = setup;
 
   const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      types: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'metric',
-              },
-            },
             {
               exists: {
                 field: METRIC_SYSTEM_CPU_PERCENT,
@@ -187,18 +180,15 @@ async function getMemoryMetrics({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
-  const { client, indices } = setup;
+  const { client } = setup;
   const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      types: [ProcessorEvent.metric],
+    },
     body: {
       query: {
         bool: {
           filter: filter.concat([
-            {
-              term: {
-                [PROCESSOR_EVENT]: 'metric',
-              },
-            },
             {
               exists: {
                 field: METRIC_SYSTEM_FREE_MEMORY,

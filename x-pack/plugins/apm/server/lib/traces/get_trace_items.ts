@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
   PARENT_ID,
   TRANSACTION_DURATION,
@@ -28,19 +28,20 @@ export async function getTraceItems(
   traceId: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, config, indices } = setup;
+  const { start, end, client, config } = setup;
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
   const errorResponsePromise = client.search({
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      types: [ProcessorEvent.error],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) },
           ],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
@@ -60,17 +61,15 @@ export async function getTraceItems(
   });
 
   const traceResponsePromise = client.search({
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      types: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
             { range: rangeFilter(start, end) },
           ],
           should: {
@@ -91,7 +90,6 @@ export async function getTraceItems(
     // explicit intermediary types to avoid TS "excessively deep" error
     PromiseValueType<typeof errorResponsePromise>,
     PromiseValueType<typeof traceResponsePromise>
-    // @ts-ignore
   ] = await Promise.all([errorResponsePromise, traceResponsePromise]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;

@@ -19,8 +19,8 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { getErrorGroupsProjection } from '../../../common/projections/errors';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getErrorGroupsProjection } from '../../projections/errors';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<

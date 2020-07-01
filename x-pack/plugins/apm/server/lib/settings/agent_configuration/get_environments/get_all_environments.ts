@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../../common/processor_event';
 import { Setup } from '../../../helpers/setup_request';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -19,7 +19,7 @@ export async function getAllEnvironments({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { client } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -27,21 +27,18 @@ export async function getAllEnvironments({
     : [];
 
   const params = {
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      types: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
-            },
-            ...serviceNameFilter,
-          ],
+          filter: serviceNameFilter,
         },
       },
       aggs: {

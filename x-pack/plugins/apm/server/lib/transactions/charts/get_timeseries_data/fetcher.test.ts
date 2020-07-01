@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ESResponse, timeseriesFetcher } from './fetcher';
 import { APMConfig } from '../../../../../server';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 describe('timeseriesFetcher', () => {
   let res: ESResponse;
@@ -54,15 +54,7 @@ describe('timeseriesFetcher', () => {
 
   it('should restrict results to only transaction documents', () => {
     const query = clientSpy.mock.calls[0][0];
-    expect(query.body.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        {
-          term: {
-            [PROCESSOR_EVENT]: 'transaction',
-          },
-        } as any,
-      ])
-    );
+    expect(query.apm.types).toEqual([ProcessorEvent.transaction]);
   });
 
   it('should return correct response', () => {

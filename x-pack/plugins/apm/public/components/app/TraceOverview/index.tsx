@@ -11,7 +11,7 @@ import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../common/projections';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;

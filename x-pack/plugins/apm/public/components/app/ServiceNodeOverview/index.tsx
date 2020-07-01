@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';

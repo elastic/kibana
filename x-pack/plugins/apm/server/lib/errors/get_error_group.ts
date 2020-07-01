@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
@@ -32,17 +32,18 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, client } = setup;
 
   const params = {
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      types: [ProcessorEvent.error],
+    },
     body: {
       size: 1,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
             ...uiFiltersES,

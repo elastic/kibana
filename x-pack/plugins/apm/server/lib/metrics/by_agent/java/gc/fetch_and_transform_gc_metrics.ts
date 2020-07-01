@@ -18,8 +18,8 @@ import {
 } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
-import { getMetricsProjection } from '../../../../../../common/projections/metrics';
-import { mergeProjection } from '../../../../../../common/projections/util/merge_projection';
+import { getMetricsProjection } from '../../../../../projections/metrics';
+import { mergeProjection } from '../../../../../projections/util/merge_projection';
 import {
   AGENT_NAME,
   LABEL_NAME,

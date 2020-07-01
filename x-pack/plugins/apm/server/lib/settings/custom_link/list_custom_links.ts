@@ -11,6 +11,7 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { fromESFormat } from './helper';
 import { filterOptionsRt } from './custom_link_types';
+import { APMUIDocumentType } from '../../helpers/get_es_client/document_types';
 
 export async function listCustomLinks({
   setup,
@@ -19,7 +20,7 @@ export async function listCustomLinks({
   setup: Setup;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }): Promise<CustomLink[]> {
-  const { internalClient, indices } = setup;
+  const { internalClient } = setup;
   const esFilters = Object.entries(filters).map(([key, value]) => {
     return {
       bool: {
@@ -33,7 +34,9 @@ export async function listCustomLinks({
   });
 
   const params = {
-    index: indices.apmCustomLinkIndex,
+    apm: {
+      types: [APMUIDocumentType.customLink],
+    },
     size: 500,
     body: {
       query: {

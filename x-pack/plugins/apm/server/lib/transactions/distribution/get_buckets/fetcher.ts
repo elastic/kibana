@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../../common/processor_event';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_DURATION,
@@ -32,17 +32,18 @@ export async function bucketFetcher(
   bucketSize: number,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, client } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
             { range: rangeFilter(start, end) },

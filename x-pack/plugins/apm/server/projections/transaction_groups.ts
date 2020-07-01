@@ -8,10 +8,11 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
-import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import {
+  TRANSACTION_NAME,
+  PARENT_ID,
+} from '../../common/elasticsearch_fieldnames';
 import { Options } from '../../server/lib/transaction_groups/fetcher';
 import { getTransactionsProjection } from './transactions';
 import { mergeProjection } from './util/merge_projection';

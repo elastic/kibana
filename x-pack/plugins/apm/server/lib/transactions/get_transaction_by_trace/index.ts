@@ -5,7 +5,6 @@
  */
 
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
   PARENT_ID,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -17,9 +16,11 @@ export async function getRootTransactionByTraceId(
   traceId: string,
   setup: Setup
 ) {
-  const { client, indices } = setup;
+  const { client } = setup;
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      types: [ProcessorEvent.transaction],
+    },
     body: {
       size: 1,
       query: {
@@ -35,10 +36,7 @@ export async function getRootTransactionByTraceId(
               },
             },
           ],
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-          ],
+          filter: [{ term: { [TRACE_ID]: traceId } }],
         },
       },
     },

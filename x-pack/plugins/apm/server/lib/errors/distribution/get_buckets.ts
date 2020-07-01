@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
@@ -28,9 +28,8 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, client } = setup;
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES,
@@ -41,7 +40,9 @@ export async function getBuckets({
   }
 
   const params = {
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      types: [ProcessorEvent.error],
+    },
     body: {
       size: 0,
       query: {

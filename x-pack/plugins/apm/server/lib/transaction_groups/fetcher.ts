@@ -6,13 +6,12 @@
 import { flatten, findIndex, isEqual, take, sortBy } from 'lodash';
 import { ValuesType, Unionize } from 'utility-types';
 import moment from 'moment';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -22,6 +21,7 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { getSamples, getAvg, getSum, getPercentiles } from './get_metrics';
+import { APMESSearchRequest } from '../helpers/get_es_client/document_types';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -39,7 +39,7 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = ESSearchRequest & {
+export type TransactionGroupRequestBase = APMESSearchRequest & {
   body: {
     aggs: {
       transaction_groups: Unionize<

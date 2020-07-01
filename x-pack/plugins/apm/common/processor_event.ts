@@ -8,4 +8,12 @@ export enum ProcessorEvent {
   transaction = 'transaction',
   error = 'error',
   metric = 'metric',
+  span = 'span',
+  onboarding = 'onboarding',
+  sourcemap = 'sourcemap',
 }
+
+export type UIProcessorEvent =
+  | ProcessorEvent.transaction
+  | ProcessorEvent.error
+  | ProcessorEvent.metric;

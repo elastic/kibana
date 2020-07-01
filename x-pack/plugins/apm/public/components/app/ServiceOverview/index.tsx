@@ -15,7 +15,7 @@ import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { PROJECTION } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 

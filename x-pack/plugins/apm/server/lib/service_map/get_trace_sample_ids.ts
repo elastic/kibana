@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq, take, sortBy } from 'lodash';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRACE_ID,
@@ -26,18 +26,13 @@ export async function getTraceSampleIds({
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client, indices, config } = setup;
+  const { start, end, client, config } = setup;
 
   const rangeQuery = { range: rangeFilter(start, end) };
 
   const query = {
     bool: {
       filter: [
-        {
-          term: {
-            [PROCESSOR_EVENT]: 'span',
-          },
-        },
         {
           exists: {
             field: SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -67,7 +62,9 @@ export async function getTraceSampleIds({
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
-    index: [indices['apm_oss.spanIndices']],
+    apm: {
+      types: [ProcessorEvent.span],
+    },
     body: {
       size: 0,
       query,

@@ -13,10 +13,10 @@ import {
   ApmIndicesConfig,
 } from '../settings/apm_indices/get_apm_indices';
 import { ESFilter } from '../../../typings/elasticsearch';
-import { ESClient } from './es_client';
+import { ESClient } from './get_es_client';
 import { getUiFiltersES } from './convert_ui_filters/get_ui_filters_es';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { getESClient } from './es_client';
+import { getESClient } from './get_es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
 
 function decodeUiFilters(uiFiltersEncoded?: string) {
