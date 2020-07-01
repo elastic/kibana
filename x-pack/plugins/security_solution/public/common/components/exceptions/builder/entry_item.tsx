@@ -147,7 +147,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
 
     if (isFirst) {
       return (
-        <EuiFormRow label={i18n.FIELD} data-test-subj="exceptionBuilderEntryFieldFormRow">
+        <EuiFormRow label={i18n.OPERATOR} data-test-subj="exceptionBuilderEntryFieldFormRow">
           {comboBox}
         </EuiFormRow>
       );
