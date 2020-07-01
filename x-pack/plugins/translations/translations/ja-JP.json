@@ -8315,7 +8315,7 @@
     "xpack.ingestManager.enrollmentTokensList.secretTitle": "シークレット",
     "xpack.ingestManager.epm.browseAllButtonText": "すべての統合を参照",
     "xpack.ingestManager.epm.illustrationAltText": "Elastic統合の例",
-    "xpack.ingestManager.epm.packageDetailsNav.datasourcesLinkText": "データソース",
+    "xpack.ingestManager.epm.packageDetailsNav.packageConfigsLinkText": "データソース",
     "xpack.ingestManager.epm.packageDetailsNav.overviewLinkText": "概要",
     "xpack.ingestManager.epm.packageDetailsNav.settingsLinkText": "設定",
     "xpack.ingestManager.epm.pageSubtitle": "一般的なアプリやサービスの統合を参照する",
