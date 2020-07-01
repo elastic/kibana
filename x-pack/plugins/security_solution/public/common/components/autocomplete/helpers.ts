@@ -30,7 +30,11 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export function validateParams(params: string, type: string) {
+export function validateParams(params: string | undefined, type: string) {
+  if (params == null) {
+    return false;
+  }
+
   switch (type) {
     case 'date':
       const moment = dateMath.parse(params);

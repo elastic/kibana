@@ -102,7 +102,7 @@ describe('AutocompleteFieldListsComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it correctly displays selected field', () => {
+  test('it correctly displays selected list', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent

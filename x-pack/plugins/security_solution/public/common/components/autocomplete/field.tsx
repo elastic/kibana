@@ -14,9 +14,9 @@ interface OperatorProps {
   placeholder: string;
   selectedField: IFieldType | undefined;
   indexPattern: IIndexPattern | undefined;
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  isClearable?: boolean;
+  isLoading: boolean;
+  isDisabled: boolean;
+  isClearable: boolean;
   fieldInputWidth?: number;
   onChange: (a: IFieldType[]) => void;
 }

@@ -8,12 +8,11 @@ import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { Entry, EntriesArray } from '../../../../../public/lists_plugin_deps';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AndOrBadge } from '../../and_or_badge';
 import { EntryItemComponent } from './entry_item';
 import { getFormattedBuilderEntries } from '../helpers';
-import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem } from '../types';
+import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -45,8 +44,8 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     onDeleteExceptionItem,
     onExceptionItemChange,
   }) => {
-    const handleEntryChange = (entry: Entry, entryIndex: number): void => {
-      const updatedEntries: EntriesArray = [
+    const handleEntryChange = (entry: BuilderEntry, entryIndex: number): void => {
+      const updatedEntries: BuilderEntry[] = [
         ...exceptionItem.entries.slice(0, entryIndex),
         { ...entry },
         ...exceptionItem.entries.slice(entryIndex + 1),
@@ -59,7 +58,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     };
 
     const handleDeleteEntry = (entryIndex: number): void => {
-      const updatedEntries: EntriesArray = [
+      const updatedEntries: BuilderEntry[] = [
         ...exceptionItem.entries.slice(0, entryIndex),
         ...exceptionItem.entries.slice(entryIndex + 1),
       ];

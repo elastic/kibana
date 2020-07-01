@@ -13,6 +13,7 @@ export interface GetGenericComboBoxPropsReturn {
   labels: string[];
   selectedComboOptions: EuiComboBoxOptionOption[];
 }
+
 export interface OperatorOption {
   message: string;
   value: string;

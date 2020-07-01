@@ -15,7 +15,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|BuilderButtonOptions', module)
+storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   .add('init button', () => {
     return (
       <BuilderButtonOptions

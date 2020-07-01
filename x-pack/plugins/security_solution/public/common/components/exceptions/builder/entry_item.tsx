@@ -8,17 +8,18 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
-import * as i18n from '../translations';
 import { OperatorComponent } from '../../autocomplete/operator';
 import { isOperator } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import { AutocompleteFieldMatchComponent } from '../../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../../autocomplete/field_value_match_any';
 import { AutocompleteFieldExistsComponent } from '../../autocomplete/field_value_exists';
-import { FormattedBuilderEntry } from '../types';
+import { FormattedBuilderEntry, BuilderEntry } from '../types';
 import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_lists';
-import { Entry, ListSchema, OperatorTypeEnum } from '../../../../lists_plugin_deps';
+import { ListSchema, OperatorTypeEnum } from '../../../../lists_plugin_deps';
 import { getValueFromOperator } from '../helpers';
+import { getEmptyValue } from '../../empty_value';
+import * as i18n from '../translations';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -26,7 +27,7 @@ interface EntryItemProps {
   indexPattern: IIndexPattern;
   isLoading: boolean;
   showLabel: boolean;
-  onChange: (arg: Entry, i: number) => void;
+  onChange: (arg: BuilderEntry, i: number) => void;
 }
 
 export const EntryItemComponent: React.FC<EntryItemProps> = ({
@@ -44,7 +45,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
           field: newField.name,
           type: OperatorTypeEnum.MATCH,
           operator: isOperator.operator,
-          value: '',
+          value: undefined,
         },
         entryIndex
       );
@@ -64,7 +65,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
     (newField: string): void => {
       onChange(
         {
-          field: entry.field != null ? entry.field.name : '',
+          field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.MATCH,
           operator: isOperator.operator,
           value: newField,
@@ -79,7 +80,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
     (newField: string[]): void => {
       onChange(
         {
-          field: entry.field != null ? entry.field.name : '',
+          field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.MATCH_ANY,
           operator: isOperator.operator,
           value: newField,
@@ -94,7 +95,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
     (newField: ListSchema): void => {
       onChange(
         {
-          field: entry.field != null ? entry.field.name : '',
+          field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.LIST,
           operator: isOperator.operator,
           list: { id: newField.id, type: newField.type },
@@ -113,6 +114,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         selectedField={entry.field}
         isLoading={isLoading}
         isClearable={false}
+        isDisabled={indexPattern == null}
         onChange={handleFieldChange}
         data-test-subj="filterFieldSuggestionList"
       />
@@ -157,7 +159,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
   const getFieldValueComboBox = (type: OperatorTypeEnum): JSX.Element => {
     switch (type) {
       case OperatorTypeEnum.MATCH:
-        const value: string = typeof entry.value === 'string' ? entry.value : '';
+        const value = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldMatchComponent
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
@@ -187,7 +189,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
           />
         );
       case OperatorTypeEnum.LIST:
-        const id: string = typeof entry.value === 'string' ? entry.value : '';
+        const id = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldListsComponent
             selectedField={entry.field}
@@ -202,7 +204,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.EXISTS:
         return (
           <AutocompleteFieldExistsComponent
-            placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
+            placeholder={getEmptyValue()}
             data-test-subj="filterFieldSuggestionList"
           />
         );

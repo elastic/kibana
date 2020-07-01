@@ -7,9 +7,12 @@ import { ReactNode } from 'react';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { OperatorOption } from '../autocomplete/types';
 import {
-  EntriesArray,
+  EntryNested,
+  Entry,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  OperatorTypeEnum,
+  OperatorEnum,
 } from '../../../lists_plugin_deps';
 
 export interface FormattedEntry {
@@ -59,14 +62,34 @@ export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
   nested?: FormattedBuilderEntryBase[];
 }
 
+export interface EmptyEntry {
+  field: string | undefined;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
+  value: string | string[] | undefined;
+}
+
+export interface EmptyListEntry {
+  field: string | undefined;
+  operator: OperatorEnum;
+  type: OperatorTypeEnum.LIST;
+  list: { id: string | undefined; type: string | undefined };
+}
+
+export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested;
+
+export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
+  entries: BuilderEntry[];
+};
+
 export type CreateExceptionListItemBuilderSchema = Omit<
   CreateExceptionListItemSchema,
   'meta' | 'entries'
 > & {
   meta: { temporaryUuid: string };
-  entries: EntriesArray;
+  entries: BuilderEntry[];
 };
 
 export type ExceptionsBuilderExceptionItem =
-  | ExceptionListItemSchema
+  | ExceptionListItemBuilderSchema
   | CreateExceptionListItemBuilderSchema;

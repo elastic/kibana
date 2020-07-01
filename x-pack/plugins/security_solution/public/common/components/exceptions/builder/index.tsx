@@ -19,7 +19,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
-import { getNewExceptionItem } from '../helpers';
+import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { Loader } from '../../loader';
 
@@ -78,7 +78,7 @@ export const ExceptionBuilder = ({
 
   // Bubble up changes to parent
   useEffect(() => {
-    onChange({ exceptionItems: exceptions, exceptionsToDelete });
+    onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
   }, [onChange, exceptionsToDelete, exceptions]);
 
   const checkAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {

@@ -16,8 +16,10 @@ import {
   getTagsInclude,
   getDescriptionListContent,
   getFormattedComments,
+  filterExceptionItems,
+  getNewExceptionItem,
 } from './helpers';
-import { FormattedEntry, DescriptionListItem } from './types';
+import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
   isOperator,
   isNotOperator,
@@ -28,7 +30,7 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from '../autocomplete/operators';
-import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+import { OperatorTypeEnum, OperatorEnum } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   getEntryExistsMock,
@@ -405,6 +407,38 @@ describe('Exception helpers', () => {
       const wrapper = mount<React.ReactElement>(result[0].children as React.ReactElement);
 
       expect(wrapper.text()).toEqual('some old comment');
+    });
+  });
+
+  describe('#filterExceptionItems', () => {
+    test('it removes empty entry items', () => {
+      const { entries, ...rest } = getExceptionListItemSchemaMock();
+      const mockEmptyException: EmptyEntry = {
+        field: 'host.name',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: undefined,
+      };
+      const exceptions = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
+    });
+
+    test('it removes `temporaryId` from items', () => {
+      const { meta, ...rest } = getNewExceptionItem({
+        listType: 'detection',
+        listId: '123',
+        namespaceType: 'single',
+        ruleName: 'rule name',
+      });
+      const exceptions = filterExceptionItems([{ ...rest, meta }]);
+
+      expect(exceptions).toEqual([{ ...rest, meta: {} }]);
     });
   });
 });

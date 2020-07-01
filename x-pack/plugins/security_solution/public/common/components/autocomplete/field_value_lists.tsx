@@ -14,7 +14,7 @@ import { getGenericComboBoxProps } from './helpers';
 interface AutocompleteFieldListsProps {
   placeholder: string;
   selectedField: IFieldType | undefined;
-  selectedValue: string;
+  selectedValue: string | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;

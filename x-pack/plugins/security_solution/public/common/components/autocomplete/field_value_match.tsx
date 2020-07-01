@@ -17,7 +17,7 @@ import * as i18n from './translations';
 interface AutocompleteFieldMatchProps {
   placeholder: string;
   selectedField: IFieldType | undefined;
-  selectedValue: string;
+  selectedValue: string | undefined;
   indexPattern: IIndexPattern | undefined;
   isLoading: boolean;
   isDisabled: boolean;

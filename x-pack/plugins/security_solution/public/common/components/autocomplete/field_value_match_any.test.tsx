@@ -115,7 +115,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it correctly displays selected field', () => {
+  test('it correctly displays selected value', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchAnyComponent
