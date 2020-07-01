@@ -16,7 +16,7 @@ describe('manifest_manager', () => {
       expect(manifestWrapper!.diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-a0b2886af05849e1e7e7b05bd6e38ea2e2de6566bfb5f4bdbdeda8236de0ff5c',
+            'endpoint-exceptionlist-linux-1.0.0-d34a1f6659bd86fc2023d7477aa2e5d2055c9c0fb0a0f10fae76bf8b94bebe49',
           type: 'add',
         },
       ]);
