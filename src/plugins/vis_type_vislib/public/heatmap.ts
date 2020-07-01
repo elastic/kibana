@@ -50,7 +50,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
     defaultMessage: 'Shade cells within a matrix',
   }),
   getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+    return [VIS_EVENT_TO_TRIGGER.filter];
   },
   visualization: createVislibVisController(deps),
   visConfig: {
