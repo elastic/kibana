@@ -5,7 +5,7 @@
  */
 
 import { registerLayerWizard } from './layer_wizard_registry';
-import { uploadLayerWizardConfig } from '../sources/client_file_source';
+import { uploadLayerWizardConfig } from './file_upload_wizard';
 // @ts-ignore
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
 // @ts-ignore

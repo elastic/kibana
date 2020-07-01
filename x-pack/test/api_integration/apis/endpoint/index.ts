@@ -17,7 +17,6 @@ export default function endpointAPIIntegrationTests({
     });
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./policy'));
   });
 }

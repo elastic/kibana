@@ -121,6 +121,7 @@ export const signalRulesAlertType = ({
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
+      logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
@@ -163,9 +164,11 @@ export const signalRulesAlertType = ({
           }
 
           const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
-          const summaryJobs = await ml
-            .jobServiceProvider(scopedMlCallCluster)
-            .jobsSummary([machineLearningJobId]);
+          // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
+          // currently unused by the jobsSummary function.
+          const summaryJobs = await (
+            await ml.jobServiceProvider(scopedMlCallCluster, ({} as unknown) as KibanaRequest)
+          ).jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
           if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
@@ -183,7 +186,7 @@ export const signalRulesAlertType = ({
           const anomalyResults = await findMlSignals({
             ml,
             callCluster: scopedMlCallCluster,
-            // This is needed to satisfy the ML Services API, but can be empty as it is
+            // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
             // currently unused by the mlAnomalySearch function.
             request: ({} as unknown) as KibanaRequest,
             jobId: machineLearningJobId,
@@ -235,6 +238,8 @@ export const signalRulesAlertType = ({
           });
 
           result = await searchAfterAndBulkCreate({
+            gap,
+            previousStartedAt,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
@@ -256,6 +261,7 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
             throttle,
+            buildRuleMessage,
           });
         }
 
