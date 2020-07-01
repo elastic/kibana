@@ -280,7 +280,6 @@ describe('when on the hosts page', () => {
       agentId = hostDetails.metadata.elastic.agent.id;
 
       coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
-      coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
 
       reactTestingLibrary.act(() => {
         history.push({
@@ -431,30 +430,6 @@ describe('when on the hosts page', () => {
       });
 
       it('should navigate to Ingest without full page refresh', () => {
-        expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
-      });
-    });
-
-    it('should include the link to logs', async () => {
-      const renderResult = render();
-      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-      expect(linkToLogs).not.toBeNull();
-      expect(linkToLogs.textContent).toEqual('Endpoint Logs');
-      expect(linkToLogs.getAttribute('href')).toEqual(
-        "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
-      );
-    });
-
-    describe('when link to logs is clicked', () => {
-      beforeEach(async () => {
-        const renderResult = render();
-        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-        reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(linkToLogs);
-        });
-      });
-
-      it('should navigate to logs without full page refresh', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
