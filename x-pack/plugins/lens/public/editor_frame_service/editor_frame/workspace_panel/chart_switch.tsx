@@ -11,7 +11,7 @@ import {
   EuiPopoverTitle,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +71,8 @@ function VisualizationSummary(props: Props) {
     </>
   );
 }
+
+import './chart_switch.scss';
 
 export function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
@@ -198,20 +200,18 @@ export function ChartSwitch(props: Props) {
       ownFocus
       initialFocus=".lnsChartSwitch__popoverPanel"
       panelClassName="lnsChartSwitch__popoverPanel"
-      anchorClassName="eui-textTruncate"
       panelPaddingSize="s"
       button={
-        <EuiButtonEmpty
+        <EuiButton
           className="lnsChartSwitch__triggerButton"
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
-          flush="left"
           iconSide="right"
           iconType="arrowDown"
           color="text"
         >
           <VisualizationSummary {...props} />
-        </EuiButtonEmpty>
+        </EuiButton>
       }
       isOpen={flyoutOpen}
       closePopover={() => setFlyoutOpen(false)}
