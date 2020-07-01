@@ -20,7 +20,9 @@ export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
 }
 
-export class Plugin implements PluginClass<ObservabilityPluginSetup> {
+export type ObservabilityPluginStart = void;
+
+export class Plugin implements PluginClass<ObservabilityPluginSetup, ObservabilityPluginStart> {
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {

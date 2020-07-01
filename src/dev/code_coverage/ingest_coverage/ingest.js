@@ -19,40 +19,77 @@
 
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
-import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
-import { errMsg, redact } from './ingest_helpers';
-import { noop } from './utils';
+import { RESEARCH_CI_JOB_NAME, TEAM_ASSIGNMENT_PIPELINE_NAME } from './constants';
+import { errMsg, redact, whichIndex } from './ingest_helpers';
+import { pretty, green } from './utils';
 import { right, left } from './either';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
+
 const client = new Client({ node });
-const pipeline = process.env.PIPELINE_NAME || 'team_assignment';
-const redacted = redact(node);
+const redactedEsHostUrl = redact(node);
+const parse = JSON.parse.bind(null);
+const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
 export const ingest = (log) => async (body) => {
-  const index = body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
-  const maybeWithPipeline = maybeTeamAssign(index, body);
-  const withIndex = { index, body: maybeWithPipeline };
-  const dontSend = noop;
+  const isTotal = !!body.isTotal;
+  const index = whichIndex(isResearchJob)(isTotal);
+  const isACoverageIndex = isTotal ? false : true;
 
-  log.verbose(withIndex);
+  const stringified = pretty(body);
+  const pipeline = TEAM_ASSIGNMENT_PIPELINE_NAME;
 
-  process.env.NODE_ENV === 'integration_test'
-    ? left(null)
-    : right(withIndex).fold(dontSend, async function doSend(finalPayload) {
-        await send(index, redacted, finalPayload);
-      });
+  const finalPayload = isACoverageIndex
+    ? { index, body: stringified, pipeline }
+    : { index, body: stringified };
+
+  const justLog = dontSendButLog(log);
+  const doSendToIndex = doSend(index);
+  const doSendRedacted = doSendToIndex(redactedEsHostUrl)(log)(client);
+
+  eitherSendOrNot(finalPayload).fold(justLog, doSendRedacted);
 };
 
-async function send(idx, redacted, requestBody) {
+function doSend(index) {
+  return (redactedEsHostUrl) => (log) => (client) => async (payload) => {
+    const logF = logSend(true)(redactedEsHostUrl)(log);
+    await send(logF, index, redactedEsHostUrl, client, payload);
+  };
+}
+
+function dontSendButLog(log) {
+  return (payload) => {
+    logSend(false)(null)(log)(payload);
+  };
+}
+
+async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
   try {
     await client.index(requestBody);
+    logF(requestBody);
   } catch (e) {
-    throw createFailError(errMsg(idx, redacted, requestBody, e));
+    const { body } = requestBody;
+    const parsed = parse(body);
+    throw createFailError(errMsg(idx, redactedEsHostUrl, parsed, e));
   }
 }
 
-export function maybeTeamAssign(index, body) {
-  const payload = index === TOTALS_INDEX ? body : { ...body, pipeline };
-  return payload;
+const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
+  const { index, body } = payload;
+  return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
+${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
+\t### Index: ${green(index)}
+\t### payload.body: ${body}
+${process.env.NODE_ENV === 'integration_test' ? `ingest-pipe=>${payload.pipeline}` : ''}
+`;
+};
+
+function logSend(actuallySent) {
+  return (redactedEsHostUrl) => (log) => (payload) => {
+    log.verbose(sendMsg(actuallySent, redactedEsHostUrl, payload));
+  };
+}
+
+function eitherSendOrNot(payload) {
+  return process.env.NODE_ENV === 'integration_test' ? left(payload) : right(payload);
 }

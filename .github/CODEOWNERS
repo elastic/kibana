@@ -132,6 +132,7 @@
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
+/vars/*Coverage.groovy @elastic/kibana-qa
 /test/functional/services/common @elastic/kibana-qa
 /test/functional/services/lib @elastic/kibana-qa
 /test/functional/services/remote @elastic/kibana-qa
