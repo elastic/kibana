@@ -43,7 +43,7 @@ export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
           data-test-subj={dataTestSubj}
           description={description}
           isActive={isOpen}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={isEnabled ? () => setIsOpen(!isOpen) : undefined}
           value={value}
         />
       }
