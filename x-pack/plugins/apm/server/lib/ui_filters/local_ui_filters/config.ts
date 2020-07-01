@@ -16,6 +16,7 @@ import {
   USER_AGENT_DEVICE,
   USER_AGENT_OS,
   CLIENT_GEO_COUNTRY_ISO_CODE,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 
 const filtersByName = {
@@ -84,6 +85,12 @@ const filtersByName = {
       defaultMessage: 'OS',
     }),
     fieldName: USER_AGENT_OS,
+  },
+  serviceName: {
+    title: i18n.translate('xpack.apm.localFilters.titles.serviceName', {
+      defaultMessage: 'Service name',
+    }),
+    fieldName: SERVICE_NAME,
   },
 };
 
