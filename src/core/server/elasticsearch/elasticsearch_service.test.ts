@@ -249,6 +249,94 @@ describe('#setup', () => {
   });
 });
 
+describe('#start', () => {
+  it('throws if called before `setup`', async () => {
+    expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
+      `[Error: ElasticsearchService needs to be setup before calling start]`
+    );
+  });
+
+  it('returns elasticsearch client as a part of the contract', async () => {
+    await elasticsearchService.setup(deps);
+    const startContract = await elasticsearchService.start();
+    const client = startContract.client;
+
+    expect(client.asInternalUser).toHaveBeenCalledTimes(0);
+    client.asInternalUser();
+    expect(mockClusterClientInstance.asInternalUser).toHaveBeenCalledTimes(1);
+  });
+
+  describe('#createClient', () => {
+    it('allows to specify config properties', async () => {
+      await elasticsearchService.setup(deps);
+      const startContract = await elasticsearchService.start();
+
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = { logQueries: true };
+      const clusterClient = startContract.createClient('custom-type', customConfig);
+
+      expect(clusterClient).toBe(mockClusterClientInstance);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockClusterClient).toHaveBeenCalledWith(
+        expect.objectContaining(customConfig),
+        expect.objectContaining({ context: ['elasticsearch', 'custom-type'] }),
+        expect.any(Function)
+      );
+    });
+    it('creates a new client on each call', async () => {
+      await elasticsearchService.setup(deps);
+      const startContract = await elasticsearchService.start();
+
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = { logQueries: true };
+
+      startContract.createClient('custom-type', customConfig);
+      startContract.createClient('another-type', customConfig);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(2);
+    });
+
+    it('falls back to elasticsearch default config values if property not specified', async () => {
+      await elasticsearchService.setup(deps);
+      const startContract = await elasticsearchService.start();
+
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = {
+        hosts: ['http://8.8.8.8'],
+        logQueries: true,
+        ssl: { certificate: 'certificate-value' },
+      };
+
+      startContract.createClient('some-custom-type', customConfig);
+      const config = MockClusterClient.mock.calls[0][0];
+
+      expect(config).toMatchInlineSnapshot(`
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
+    });
+  });
+});
+
 describe('#stop', () => {
   it('stops both legacy and new clients', async () => {
     await elasticsearchService.setup(deps);
