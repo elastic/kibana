@@ -34,12 +34,14 @@ interface LogParams {
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
+const SOURCE_ID = 'default';
+
 export function getLogsHasDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
 ): HasData {
   return async () => {
     const [core] = await getStartServices();
-    const sourceStatus = await callFetchLogSourceStatusAPI('default', core.http.fetch);
+    const sourceStatus = await callFetchLogSourceStatusAPI(SOURCE_ID, core.http.fetch);
     return sourceStatus.data.logIndexNames.length > 0;
   };
 }
@@ -52,7 +54,7 @@ export function getLogsOverviewDataFetcher(
     const { data } = startPlugins;
 
     const sourceConfiguration = await callFetchLogSourceConfigurationAPI(
-      'default',
+      SOURCE_ID,
       core.http.fetch
     );
 
