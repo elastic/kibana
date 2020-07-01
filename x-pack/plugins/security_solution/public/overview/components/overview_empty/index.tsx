@@ -12,6 +12,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useHostIngestUrl } from '../../../management/pages/endpoint_hosts/view/hooks';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { useIngestEnabledCheck } from '../../../common/hooks/endpoint/ingest_enabled';
 
 const OverviewEmptyComponent: React.FC = () => {
   const { http, docLinks } = useKibana().services;
@@ -20,8 +21,9 @@ const OverviewEmptyComponent: React.FC = () => {
     'integrations?category=security'
   );
   const handleOnClick = useNavigateToAppEventHandler(ingestAppId, { path: ingestPath });
+  const isIngestEnabled = useIngestEnabledCheck();
 
-  return (
+  return isIngestEnabled === true ? (
     <EmptyPage
       actionPrimaryIcon="gear"
       actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
@@ -35,6 +37,19 @@ const OverviewEmptyComponent: React.FC = () => {
       actionTertiaryUrl={ingestUrl}
       actionTertiaryOnClick={handleOnClick}
       actionTertiaryFill={true}
+      data-test-subj="empty-page"
+      message={i18nCommon.EMPTY_MESSAGE}
+      title={i18nCommon.EMPTY_TITLE}
+    />
+  ) : (
+    <EmptyPage
+      actionPrimaryIcon="gear"
+      actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
+      actionPrimaryUrl={`${basePath}${ADD_DATA_PATH}`}
+      actionSecondaryIcon="popout"
+      actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
+      actionSecondaryTarget="_blank"
+      actionSecondaryUrl={docLinks.links.siem.gettingStarted}
       data-test-subj="empty-page"
       message={i18nCommon.EMPTY_MESSAGE}
       title={i18nCommon.EMPTY_TITLE}
