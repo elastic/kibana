@@ -17,7 +17,6 @@ import {
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
 import {
-  INDEX_PATTERN_ELASTICSEARCH,
   INDEX_ALERTS,
   ALERT_CLUSTER_HEALTH,
   ALERT_ACTION_TYPE_LOG,
@@ -47,6 +46,13 @@ export class ClusterHealthAlert extends BaseAlert {
   public label = 'Cluster health';
   public isLegacy = true;
 
+  protected actionVariables = [
+    { name: 'state', description: 'The current state of the alert.' },
+    { name: 'clusterHealth', description: 'The health of the cluster.' },
+    { name: 'clusterName', description: 'The name of the cluster to which the nodes belong.' },
+    { name: 'action', description: 'The recommended action to take based on this alert firing.' },
+  ];
+
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
@@ -58,10 +64,6 @@ export class ClusterHealthAlert extends BaseAlert {
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
     }
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const legacyAlerts = await fetchLegacyAlerts(
       callCluster,
       clusters,
@@ -69,7 +71,6 @@ export class ClusterHealthAlert extends BaseAlert {
       WATCH_NAME,
       this.config.ui.max_bucket_size
     );
-
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       accum.push({
         instanceKey: `${legacyAlert.metadata.cluster_uuid}`,

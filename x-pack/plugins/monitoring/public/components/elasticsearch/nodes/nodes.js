@@ -28,11 +28,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ELASTICSEARCH_SYSTEM_ID, ALERT_CPU_USAGE } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsBadge } from '../../../alerts/badge';
-import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -220,24 +219,13 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
       render: (value, node) => {
-        const style = {};
-        if (alerts && alerts[ALERT_CPU_USAGE]) {
-          for (const { state } of alerts[ALERT_CPU_USAGE].states) {
-            if (state.nodeId === node.resolver) {
-              style.color = `${CommonAlertSeverityColorMap[state.ui.severity]}`;
-            }
-          }
-        }
-
         return (
-          <div style={style}>
-            <MetricCell
-              isOnline={node.isOnline}
-              metric={value}
-              isPercent={true}
-              data-test-subj="cpuUsage"
-            />
-          </div>
+          <MetricCell
+            isOnline={node.isOnline}
+            metric={value}
+            isPercent={true}
+            data-test-subj="cpuUsage"
+          />
         );
       },
     });

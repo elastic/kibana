@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Alert } from '../../alerts/common';
-import { AlertSeverity, AlertParamType } from './enums';
+import { AlertParamType } from './enums';
 
 export interface CommonBaseAlert {
   type: string;
@@ -12,12 +12,6 @@ export interface CommonBaseAlert {
   paramDetails: CommonAlertParamDetails;
   rawAlert: Alert;
   isLegacy: boolean;
-}
-
-export interface CommonActionDefaultParameters {
-  [alertTypeId: string]: {
-    [actionTypeId: string]: any;
-  };
 }
 
 export interface CommonAlertStatus {
@@ -39,12 +33,6 @@ export interface CommonAlertFilter {}
 export interface CommonAlertCpuUsageFilter extends CommonAlertFilter {
   nodeUuid: string;
 }
-
-export const CommonAlertSeverityColorMap = {
-  [AlertSeverity.Danger]: '#BD271E',
-  [AlertSeverity.Warning]: '#F5A700',
-  [AlertSeverity.Success]: '#017D73',
-};
 
 export interface CommonAlertParamDetail {
   label: string;

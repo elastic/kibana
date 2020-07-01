@@ -28,12 +28,6 @@ export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats'; // similar to KIBANA
  * @type {string}
  */
 export const KIBANA_SETTINGS_TYPE = 'kibana_settings';
-/**
- * The type name used within the Monitoring index to publish Kibana usage stats.
- * NOTE: this string shows as-is in the stats API as a field name for the kibana usage stats
- * @type {string}
- */
-export const KIBANA_USAGE_TYPE = 'kibana';
 
 /*
  * Key for the localStorage service
@@ -282,10 +276,5 @@ export const ALERT_ACTION_TYPE_LOG = '.server-log';
  * The number of alerts that have been migrated
  */
 export const NUMBER_OF_MIGRATED_ALERTS = 2;
-
-/**
- * The advanced settings config name for the email address
- */
-export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alert:email';
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];

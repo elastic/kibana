@@ -20,10 +20,6 @@ import {
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
-import {
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  KIBANA_CLUSTER_ALERTS_ENABLED,
-} from '../common/constants';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
 import { createLegacyAlertTypes } from './alerts/legacy_alert';
@@ -95,7 +91,6 @@ export class MonitoringPlugin
 
         pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
-        this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
@@ -131,28 +126,6 @@ export class MonitoringPlugin
       JSON.stringify(refreshInterval)
     );
     uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
-  }
-
-  private overrideAlertingEmailDefaults({ core: coreContext }: MonitoringPluginDependencies) {
-    const { uiSettings } = coreContext;
-    if (
-      KIBANA_CLUSTER_ALERTS_ENABLED &&
-      !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)
-    ) {
-      uiSettings.overrideLocalDefault(
-        MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-        JSON.stringify({
-          name: i18n.translate('xpack.monitoring.alertingEmailAddress.name', {
-            defaultMessage: 'Alerting email address',
-          }),
-          value: '',
-          description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
-            defaultMessage: `The default email address to receive alerts from Stack Monitoring`,
-          }),
-          category: ['monitoring'],
-        })
-      );
-    }
   }
 
   private getExternalConfig() {

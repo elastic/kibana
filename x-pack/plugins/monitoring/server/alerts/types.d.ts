@@ -3,27 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UiSettingsServiceStart, ILegacyCustomClusterClient, Logger } from 'kibana/server';
-import { AlertClusterHealthType, AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { MonitoringConfig } from '../config';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 
 export interface AlertEnableAction {
   id: string;
   config: { [key: string]: any };
-}
-
-export interface AlertLicense {
-  status: string;
-  type: string;
-  expiryDateMS: number;
-  clusterUuid: string;
-  ccs: string;
-}
-
-export interface AlertClusterHealth {
-  health: AlertClusterHealthType;
-  clusterUuid: string;
-  ccs: string | null;
 }
 
 export interface AlertInstanceState {
@@ -36,22 +20,10 @@ export interface AlertState {
   ui: AlertUiState;
 }
 
-export interface AlertClusterHealthState extends AlertState {
-  health: AlertClusterHealthType;
-}
-
 export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
   nodeId: string;
   nodeName: string;
-}
-
-export interface AlertNodesChangedState extends AlertState {
-  node: AlertClusterStatsNode;
-}
-
-export interface AlertVersionMismatchState extends AlertState {
-  versions: AlertVersions;
 }
 
 export interface AlertUiState {
@@ -89,26 +61,9 @@ export interface AlertMessageDocLinkToken extends AlertMessageToken {
   partialUrl: string;
 }
 
-export interface AlertLicenseUiState extends AlertUiState {
-  expirationTime: number;
-}
-
 export interface AlertCluster {
   clusterUuid: string;
   clusterName: string;
-}
-
-export interface AlertParams {
-  dateFormat: string;
-  timezone: string;
-}
-
-export interface AlertCreationParameters {
-  getUiSettingsService: () => Promise<UiSettingsServiceStart>;
-  monitoringCluster: ILegacyCustomClusterClient;
-  getLogger: (...scopes: string[]) => Logger;
-  config: MonitoringConfig;
-  kibanaUrl: string;
 }
 
 export interface AlertCpuUsageNodeStats {
@@ -122,19 +77,6 @@ export interface AlertCpuUsageNodeStats {
   ccs: string | null;
 }
 
-export interface AlertClusterStatsNodes {
-  clusterUuid: string;
-  recentNodes: AlertClusterStatsNode[];
-  priorNodes: AlertClusterStatsNode[];
-  ccs: string | null;
-}
-
-export interface AlertClusterStatsNode {
-  nodeUuid: string;
-  nodeEphemeralId: string;
-  nodeName: string;
-}
-
 export interface AlertData {
   instanceKey: string;
   clusterUuid: string;
@@ -142,12 +84,6 @@ export interface AlertData {
   shouldFire: boolean;
   severity: AlertSeverity;
   meta: any;
-}
-
-export interface AlertVersions {
-  clusterUuid: string;
-  ccs: string | null;
-  versions: string[];
 }
 
 export interface LegacyAlert {
