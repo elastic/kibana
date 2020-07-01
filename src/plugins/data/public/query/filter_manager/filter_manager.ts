@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
@@ -65,7 +65,7 @@ export class FilterManager {
       }
 
       // matching filter in globalState, update global and don't add from appState
-      _.assign(match.meta, filter.meta);
+      _.assignIn(match.meta, filter.meta);
     });
 
     return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);

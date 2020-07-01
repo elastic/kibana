@@ -19,7 +19,7 @@
 
 import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '../../../../../kibana_react/public';
 import { IFieldType } from '../../..';

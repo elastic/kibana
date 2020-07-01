@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash3';
+import { noop } from 'lodash';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';

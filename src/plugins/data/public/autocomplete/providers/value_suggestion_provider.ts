@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { memoize } from 'lodash3';
+import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
 

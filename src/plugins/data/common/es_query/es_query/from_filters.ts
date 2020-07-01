@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isUndefined } from 'lodash3';
+import { isUndefined } from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';

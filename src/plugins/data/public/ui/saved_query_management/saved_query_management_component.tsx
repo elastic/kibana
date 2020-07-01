@@ -34,7 +34,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, Fragment, useRef } from 'react';
-import { sortBy } from 'lodash3';
+import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
 

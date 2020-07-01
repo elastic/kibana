@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEmpty } from 'lodash3';
+import { isEmpty } from 'lodash';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { indexPatterns, IndexPatternAttributes } from '../..';
 

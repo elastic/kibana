@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { has } from 'lodash3';
+import { has } from 'lodash';
 import {
   FieldFormatsRegistry,
   FieldFormatInstanceType,

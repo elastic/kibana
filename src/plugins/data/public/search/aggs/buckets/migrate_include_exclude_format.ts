@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject } from 'lodash3';
+import { isString, isObject } from 'lodash';
 import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import { IAggConfig } from '../agg_config';
 
@@ -52,7 +52,7 @@ export const migrateIncludeExcludeFormat = {
         output.params[this.name] = parsedValue;
       }
     } else if (isObject(value)) {
-      output.params[this.name] = value.pattern;
+      output.params[this.name] = (value as any).pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }

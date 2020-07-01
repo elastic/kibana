@@ -19,7 +19,7 @@
 
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import _ from 'lodash3';
+import _ from 'lodash';
 import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';

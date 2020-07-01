@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';

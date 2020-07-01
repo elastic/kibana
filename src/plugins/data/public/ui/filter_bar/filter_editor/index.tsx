@@ -34,7 +34,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {

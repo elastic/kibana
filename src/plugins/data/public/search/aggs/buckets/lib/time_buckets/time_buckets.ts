@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash3';
+import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import { parseInterval } from '../../../../../../common';
@@ -113,7 +113,7 @@ export class TimeBuckets {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments: Moment[] = sortBy(bounds, Number);
+    const moments: Moment[] = sortBy(bounds, Number) as Moment[];
 
     const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {

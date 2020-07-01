@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { filter, find } from 'lodash3';
+import { filter, find } from 'lodash';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
 import { Filter } from '../../es_query';
 

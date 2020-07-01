@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { keys, partition } from 'lodash3';
+import { keys, partition } from 'lodash';
 import { Filter, isRangeFilter, RangeFilter } from '../../../../common';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {

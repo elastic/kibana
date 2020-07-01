@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import { TabbedResponseWriterOptions } from './types';

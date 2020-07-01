@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { debounce, compact, isEqual } from 'lodash3';
+import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { identity } from 'lodash3';
+import { identity } from 'lodash';
 import { FieldFormat, IFieldFormatsRegistry } from '.';
 
 export const fieldFormatsMock: IFieldFormatsRegistry = {

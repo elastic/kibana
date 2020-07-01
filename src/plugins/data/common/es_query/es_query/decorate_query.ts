@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extend, defaults } from 'lodash3';
+import { extend, defaults } from 'lodash';
 import { getTimeZoneFromSettings } from '../utils';
 import { DslQuery, isEsQueryString } from './es_query_dsl';
 

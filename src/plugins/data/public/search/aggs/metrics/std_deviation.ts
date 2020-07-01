@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -116,7 +116,7 @@ export const getStdDeviationMetricAgg = ({
       },
 
       getValue(agg, bucket) {
-        return get(bucket[agg.parentId], agg.valProp());
+        return get(bucket[agg.parentId], agg.valProp() as any);
       },
     },
     {

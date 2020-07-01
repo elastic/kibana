@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { escape, isFunction } from 'lodash3';
+import { escape, isFunction } from 'lodash';
 import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 

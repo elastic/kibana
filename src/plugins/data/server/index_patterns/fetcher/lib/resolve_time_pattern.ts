@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { chain } from 'lodash3';
+import { chain } from 'lodash';
 import moment from 'moment';
 
 import { LegacyAPICaller } from 'kibana/server';
@@ -46,7 +46,7 @@ export async function resolveTimePattern(callCluster: LegacyAPICaller, timePatte
       []
     )
     .sortBy((indexName: string) => indexName)
-    .uniq(true)
+    .sortedUniq()
     .map((indexName) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
@@ -65,7 +65,7 @@ export async function resolveTimePattern(callCluster: LegacyAPICaller, timePatte
         isMatch: indexName === parsed.format(timePattern),
       };
     })
-    .sortByOrder(['valid', 'order'], ['desc', 'desc'])
+    .orderBy(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {

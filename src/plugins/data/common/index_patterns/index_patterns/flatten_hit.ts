@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
@@ -77,7 +77,7 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
 
     // unwrap computed fields
     _.forOwn(hit.fields, function (val, key: any) {
-      if (key[0] === '_' && !_.contains(metaFields, key)) return;
+      if (key[0] === '_' && !_.includes(metaFields, key)) return;
       flattened[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
     });
 

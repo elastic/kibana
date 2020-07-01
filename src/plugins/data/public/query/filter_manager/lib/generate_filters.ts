@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import {
   IFieldType,
   IIndexPattern,
@@ -53,7 +53,7 @@ function getExistingFilter(
     if (isScriptedPhraseFilter(filter)) {
       return filter.meta.field === fieldName && filter.script!.script.params.value === value;
     }
-  });
+  }) as any;
 }
 
 function updateExistingFilter(existingFilter: Filter, negate: boolean) {
