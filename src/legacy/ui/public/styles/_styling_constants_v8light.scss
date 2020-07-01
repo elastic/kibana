@@ -5,13 +5,3 @@
 @import '@elastic/eui/src/themes/eui-amsterdam/global_styling/index';
 
 @import './mixins';
-
-// FOR TESTING ONLY, REMOVE BEFORE MERGE
-body::before {
-  display: block;
-  content: "THIS IS THE AMSTERDAM LIGHT THEME";
-  color: $euiColorPrimary;
-  font-weight: $euiFontWeightBold;
-  background-color: $euiColorEmptyShade;
-  padding: $euiSize;
-}

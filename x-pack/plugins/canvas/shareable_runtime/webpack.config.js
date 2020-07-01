@@ -188,7 +188,10 @@ module.exports = {
               prependData(loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+                  path.resolve(
+                    KIBANA_ROOT,
+                    'src/legacy/ui/public/styles/_styling_constants_v7light.scss'
+                  )
                 )};\n`;
               },
               webpackImporter: false,

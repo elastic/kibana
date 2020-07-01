@@ -436,7 +436,7 @@ We are still to develop a proper process to accept any contributed translations.
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
 
-Any JavaScript (or TypeScript) file that imports SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`styling_constants_[theme].scss` file](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants_k7_light.scss). However, any Legacy (file path includes `/legacy`) files will not.
+Any JavaScript (or TypeScript) file that imports SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`styling_constants_[theme].scss` file](https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/styles/_styling_constants_v7light.scss). However, any Legacy (file path includes `/legacy`) files will not.
 
 **Example:**
 
