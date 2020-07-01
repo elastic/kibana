@@ -38,7 +38,7 @@ export const visualizeAppStateStub: VisualizeAppState = {
       {
         id: '1',
         enabled: true,
-        // @ts-ignore
+        // @ts-expect-error
         type: 'avg',
         schema: 'metric',
         params: { field: 'total_quantity', customLabel: 'average items' },

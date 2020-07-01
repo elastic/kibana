@@ -37,7 +37,7 @@ describe('useEditorUpdates', () => {
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.visualizations.convertFromSerializedVis.mockImplementation(() => ({
       visState: visualizeAppStateStub.vis,
     }));
@@ -105,9 +105,9 @@ describe('useEditorUpdates', () => {
       to: 'now',
     };
     mockFilters = ['mockFilters'];
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.data.query.timefilter.timefilter.getTime.mockImplementation(() => timeRange);
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.data.query.filterManager.getFilters.mockImplementation(() => mockFilters);
   });
 
@@ -210,7 +210,7 @@ describe('useEditorUpdates', () => {
           undefined
         )
       );
-      // @ts-ignore
+      // @ts-expect-error
       const listener = appState.subscribe.mock.calls[0][0];
 
       act(() => {
@@ -233,7 +233,7 @@ describe('useEditorUpdates', () => {
           undefined
         )
       );
-      // @ts-ignore
+      // @ts-expect-error
       const listener = appState.subscribe.mock.calls[0][0];
       const newAppState = {
         ...visualizeAppStateStub,
@@ -262,7 +262,7 @@ describe('useEditorUpdates', () => {
 
     describe('handle linked search changes', () => {
       test('should update saved search id in saved instance', () => {
-        // @ts-ignore
+        // @ts-expect-error
         savedVisInstance.savedSearch = {
           id: 'saved_search_id',
         };
@@ -277,7 +277,7 @@ describe('useEditorUpdates', () => {
             undefined
           )
         );
-        // @ts-ignore
+        // @ts-expect-error
         const listener = appState.subscribe.mock.calls[0][0];
 
         act(() => {
@@ -292,11 +292,11 @@ describe('useEditorUpdates', () => {
       });
 
       test('should remove saved search id from vis instance', () => {
-        // @ts-ignore
+        // @ts-expect-error
         savedVisInstance.savedVis = {
           savedSearchId: 'saved_search_id',
         };
-        // @ts-ignore
+        // @ts-expect-error
         savedVisInstance.savedSearch = {
           id: 'saved_search_id',
         };
@@ -312,7 +312,7 @@ describe('useEditorUpdates', () => {
             undefined
           )
         );
-        // @ts-ignore
+        // @ts-expect-error
         const listener = appState.subscribe.mock.calls[0][0];
 
         act(() => {

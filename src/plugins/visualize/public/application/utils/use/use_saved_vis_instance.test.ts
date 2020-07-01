@@ -204,7 +204,7 @@ describe('useSavedVisInstance', () => {
       );
 
       // mock editor ref
-      // @ts-ignore
+      // @ts-expect-error
       result.current.visEditorRef.current = 'div';
 
       expect(mockGetVisualizationInstance).toHaveBeenCalledWith(mockServices, savedVisId);
