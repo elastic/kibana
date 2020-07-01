@@ -111,7 +111,7 @@ export class ReportingStore {
         meta: {
           // We are copying these values out of payload because these fields are indexed and can be aggregated on
           // for tracking stats, while payload contents are not.
-          objectType: payload.type,
+          objectType: payload.objectType,
           layout: payload.layout ? payload.layout.id : 'none',
         },
         payload: report.payload,
