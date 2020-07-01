@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   CoreSetup,
   CoreStart,
   SavedObjectsServiceStart,
   Logger,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';

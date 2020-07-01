@@ -39,7 +39,6 @@ import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON, SERVER_APP_ID } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
-import { registerAlertRoutes } from './endpoint/alerts/routes';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
@@ -120,7 +119,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
-    registerAlertRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
 
     plugins.features.registerFeature({

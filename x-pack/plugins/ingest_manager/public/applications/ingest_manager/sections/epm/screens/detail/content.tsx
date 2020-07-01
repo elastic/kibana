@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
@@ -73,17 +72,11 @@ export function ContentPanel(props: ContentPanelProps) {
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
-  const { assets, requirement, panel } = props;
+  const { assets, panel } = props;
   switch (panel) {
     case 'overview':
       return (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <Requirements requirements={requirement} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xl" />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>
