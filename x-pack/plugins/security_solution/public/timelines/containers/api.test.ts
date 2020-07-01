@@ -174,6 +174,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -187,11 +188,6 @@ describe('persistTimeline', () => {
         timeline: initialDraftTimeline,
         version,
       });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
     });
 
     test('it should create a draft timeline if given status is draft and timelineId is null', () => {
@@ -336,6 +332,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -345,10 +342,6 @@ describe('persistTimeline', () => {
         },
       });
       api.persistTimeline({ timelineId, timeline: importTimeline, version });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
     });
 
     test('it should update timeline', () => {
@@ -476,6 +469,7 @@ describe('persistTimeline', () => {
 
     beforeAll(() => {
       jest.resetAllMocks();
+      jest.resetModules();
 
       (KibanaServices.get as jest.Mock).mockReturnValue({
         http: {
@@ -485,10 +479,6 @@ describe('persistTimeline', () => {
         },
       });
       api.persistTimeline({ timelineId, timeline: inputTimeline, version });
-    });
-
-    afterAll(() => {
-      jest.resetAllMocks();
     });
 
     test('it should update timeline', () => {
@@ -515,6 +505,7 @@ describe('importTimelines', () => {
 
   beforeAll(() => {
     jest.resetAllMocks();
+    jest.resetModules();
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
@@ -522,11 +513,6 @@ describe('importTimelines', () => {
       },
     });
     api.importTimelines(fileToImport);
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
   });
 
   test('should pass correct args to KibanaServices - url', () => {
@@ -551,6 +537,7 @@ describe('exportSelectedTimeline', () => {
 
   beforeAll(() => {
     jest.resetAllMocks();
+    jest.resetModules();
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
@@ -562,11 +549,6 @@ describe('exportSelectedTimeline', () => {
       ids,
       signal: {} as AbortSignal,
     });
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
   });
 
   test('should pass correct args to KibanaServices', () => {
@@ -585,6 +567,7 @@ describe('getDraftTimeline', () => {
 
   beforeAll(() => {
     jest.resetAllMocks();
+    jest.resetModules();
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
@@ -592,11 +575,6 @@ describe('getDraftTimeline', () => {
       },
     });
     api.getDraftTimeline(timelineType);
-  });
-
-  afterAll(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
   });
 
   test('should pass correct args to KibanaServices', () => {
@@ -611,17 +589,13 @@ describe('cleanDraftTimeline', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
 
     (KibanaServices.get as jest.Mock).mockReturnValue({
       http: {
         post: postMock,
       },
     });
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
   });
 
   test('should pass correct args to KibanaServices - timeline', () => {
