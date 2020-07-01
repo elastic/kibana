@@ -23,6 +23,6 @@ hook(['child_process'], function (exports, name) {
   return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
 });
 
-hook(['lodash'], function(exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
+hook(['lodash', 'lodash/fp'], function (exports) {
+  return require(`./patches/lodash`)(exports); // eslint-disable-line import/no-dynamic-require
 });

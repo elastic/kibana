@@ -19,6 +19,7 @@
 
 require('../../src/setup_node_env');
 const _ = require('elasticsearch/node_modules/lodash'); // our fork has been patched already, using a non-patched version
+const _fp = require('elasticsearch/node_modules/lodash'); // our fork has been patched already, using a non-patched version
 const test = require('tape');
 
 Object.prototype.sourceURL = '\u2028\u2029\n;global.whoops=true'; // eslint-disable-line no-extend-native
@@ -27,33 +28,33 @@ test.onFinish(() => {
   delete Object.prototype.sourceURL;
 });
 
-test('test setup ok', t => {
+test('test setup ok', (t) => {
   t.equal({}.sourceURL, '\u2028\u2029\n;global.whoops=true');
   t.end();
 });
 
-test(`_.template('<%= foo %>')`, t => {
+test(`_.template('<%= foo %>')`, (t) => {
   const output = _.template('<%= foo %>')({ foo: 'bar' });
   t.equal(output, 'bar');
   t.equal(global.whoops, undefined);
   t.end();
 });
 
-test(`_.template('<%= foo %>', {})`, t => {
+test(`_.template('<%= foo %>', {})`, (t) => {
   const output = _.template('<%= foo %>', Object.freeze({}))({ foo: 'bar' });
   t.equal(output, 'bar');
   t.equal(global.whoops, undefined);
   t.end();
 });
 
-test(`_.template('<%= data.foo %>', { variable: 'data' })`, t => {
+test(`_.template('<%= data.foo %>', { variable: 'data' })`, (t) => {
   const output = _.template('<%= data.foo %>', Object.freeze({ variable: 'data' }))({ foo: 'bar' });
   t.equal(output, 'bar');
   t.equal(global.whoops, undefined);
   t.end();
 });
 
-test(`_.template('<%= foo %>', { sourceURL: '/foo/bar' })`, t => {
+test(`_.template('<%= foo %>', { sourceURL: '/foo/bar' })`, (t) => {
   // throwing errors in the template and parsing the stack, which is a string, is super ugly, but all I know to do
   const template = _.template('<% throw new Error() %>', Object.freeze({ sourceURL: '/foo/bar' }));
   t.plan(2);
@@ -66,7 +67,7 @@ test(`_.template('<%= foo %>', { sourceURL: '/foo/bar' })`, t => {
   }
 });
 
-test(`_.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true' })`, t => {
+test(`_.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true' })`, (t) => {
   // throwing errors in the template and parsing the stack, which is a string, is super ugly, but all I know to do
   const template = _.template(
     '<% throw new Error() %>',
@@ -80,6 +81,23 @@ test(`_.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true
     t.equal(path, 'global.whoops=true');
     t.equal(global.whoops, undefined);
   }
+});
+
+test(`_.template used as an iteratee call(`, (t) => {
+  const templateStrArr = ['<%= data.foo %>', 'example <%= data.foo %>'];
+  const output = _.map(templateStrArr, _.template);
+
+  t.equal(output[0]({ data: { foo: 'bar' } }), 'bar');
+  t.equal(output[1]({ data: { foo: 'bar' } }), 'example bar');
+  t.equal(global.whoops, undefined);
+  t.end();
+});
+
+test(`_fp.template('<%= foo %>')`, (t) => {
+  const output = _fp.template('<%= foo %>')({ foo: 'bar' });
+  t.equal(output, 'bar');
+  t.equal(global.whoops, undefined);
+  t.end();
 });
 
 function parsePathFromStack(stack) {
