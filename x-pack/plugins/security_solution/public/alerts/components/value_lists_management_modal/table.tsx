@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiBasicTable, EuiBasicTableProps, EuiText, EuiPanel } from '@elastic/eui';
 
 import { ListSchema } from '../../../../../lists/common/schemas/response';
+import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
 
 type TableProps = EuiBasicTableProps<ListSchema>;
@@ -29,17 +30,22 @@ const buildColumns = (
   {
     field: 'name',
     name: i18n.COLUMN_FILE_NAME,
-    truncateText: false,
+    truncateText: true,
   },
   {
     field: 'created_at',
     name: i18n.COLUMN_UPLOAD_DATE,
-    truncateText: false,
+    /* eslint-disable-next-line react/display-name */
+    render: (value: ListSchema['created_at']) => (
+      <FormattedDate value={value} fieldName="created_at" />
+    ),
+    width: '30%',
   },
   {
     field: 'created_by',
     name: i18n.COLUMN_CREATED_BY,
-    truncateText: false,
+    truncateText: true,
+    width: '15%',
   },
   {
     name: i18n.COLUMN_ACTIONS,
