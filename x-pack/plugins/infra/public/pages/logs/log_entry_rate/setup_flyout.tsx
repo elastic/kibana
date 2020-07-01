@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
@@ -47,6 +47,11 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
     viewResults,
   } = useLogEntryRateSetup();
 
+  const viewResultsAndClose = useCallback(() => {
+    viewResults();
+    onClose();
+  }, [viewResults, onClose]);
+
   const steps = useMemo(
     () => [
       createInitialConfigurationStep({
@@ -66,8 +71,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
         isConfigurationValid: validationErrors.length <= 0 && !isValidating,
         setUp,
         setupStatus,
-        viewResults,
-        onClose,
+        viewResults: viewResultsAndClose,
       }),
     ],
     [
@@ -83,8 +87,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
       startTime,
       validatedIndices,
       validationErrors,
-      viewResults,
-      onClose,
+      viewResultsAndClose,
     ]
   );
 
