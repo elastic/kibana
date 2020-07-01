@@ -15,7 +15,7 @@ import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
 import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
-import { getWhatIsGoingOnLabel } from './translations';
+import { I18LABELS } from './translations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export function RumDashboard() {
@@ -32,7 +32,7 @@ export function RumDashboard() {
   return (
     <>
       <EuiTitle>
-        <h2>{getWhatIsGoingOnLabel(environmentLabel)}</h2>
+        <h2>{I18LABELS.getWhatIsGoingOn(environmentLabel)}</h2>
       </EuiTitle>
       <EuiSpacer />
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -41,7 +41,7 @@ export function RumDashboard() {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={1} data-cy={`client-metrics`}>
                 <EuiTitle size="xs">
-                  <h3>Page load times</h3>
+                  <h3>{I18LABELS.pageLoadTimes}</h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <ClientMetrics />

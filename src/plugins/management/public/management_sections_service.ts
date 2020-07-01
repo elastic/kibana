@@ -21,7 +21,12 @@ import { ReactElement } from 'react';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { managementSections } from './components/management_sections';
 
-import { ManagementSectionId, SectionsServiceSetup, SectionsServiceStart } from './types';
+import {
+  ManagementSectionId,
+  SectionsServiceSetup,
+  SectionsServiceStart,
+  SectionsServiceStartDeps,
+} from './types';
 
 export class ManagementSectionsService {
   private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
@@ -55,7 +60,18 @@ export class ManagementSectionsService {
     };
   }
 
-  start(): SectionsServiceStart {
+  start({ capabilities }: SectionsServiceStartDeps): SectionsServiceStart {
+    this.getAllSections().forEach((section) => {
+      if (capabilities.management.hasOwnProperty(section.id)) {
+        const sectionCapabilities = capabilities.management[section.id];
+        section.apps.forEach((app) => {
+          if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
+            app.disable();
+          }
+        });
+      }
+    });
+
     return {
       getSection: this.getSection,
       getAllSections: this.getAllSections,

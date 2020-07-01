@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from 'boom';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -46,7 +46,7 @@ interface Results {
   };
 }
 
-export function jobsProvider(callAsCurrentUser: APICaller) {
+export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(callAsCurrentUser);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(callAsCurrentUser);

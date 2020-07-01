@@ -23,6 +23,8 @@ export const openAddFilterPopover = () => {
 };
 
 export const fillAddFilterForm = ({ key, value }: SearchBarFilter) => {
+  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('exist');
+  cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('be.visible');
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).type(key);
   cy.get(ADD_FILTER_FORM_FIELD_INPUT).click();
   cy.get(ADD_FILTER_FORM_FIELD_OPTION(key)).click({ force: true });

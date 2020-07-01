@@ -23,6 +23,7 @@
 |  Function | Description |
 |  --- | --- |
 |  [getDefaultSearchParams(config)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
+|  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |

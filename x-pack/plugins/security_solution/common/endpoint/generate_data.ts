@@ -50,6 +50,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows 10',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Pro',
     },
@@ -58,6 +60,8 @@ const Windows: OSFields[] = [
     name: 'windows 10.0',
     full: 'Windows Server 2016',
     version: '10.0',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -66,6 +70,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.2',
     full: 'Windows Server 2012',
     version: '6.2',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server',
     },
@@ -74,6 +80,8 @@ const Windows: OSFields[] = [
     name: 'windows 6.3',
     full: 'Windows Server 2012R2',
     version: '6.3',
+    platform: 'Windows',
+    family: 'Windows',
     Ext: {
       variant: 'Windows Server Release 2',
     },
@@ -344,6 +352,7 @@ export class EndpointDocGenerator {
   }
 
   private createHostData(): HostInfo {
+    const hostName = this.randomHostname();
     return {
       agent: {
         version: this.randomVersion(),
@@ -357,7 +366,9 @@ export class EndpointDocGenerator {
       },
       host: {
         id: this.seededUUIDv4(),
-        hostname: this.randomHostname(),
+        hostname: hostName,
+        name: hostName,
+        architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
         os: this.randomChoice(OS),
@@ -1057,9 +1068,7 @@ export class EndpointDocGenerator {
       ecs: {
         version: '1.4.0',
       },
-      host: {
-        id: this.commonInfo.host.id,
-      },
+      host: this.commonInfo.host,
       Endpoint: {
         policy: {
           applied: {
