@@ -81,7 +81,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  RegistryDatasource,
+  RegistryConfigTemplate,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,

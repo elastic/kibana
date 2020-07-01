@@ -57,6 +57,9 @@ describe('POST /api/reporting/generate', () => {
         },
       },
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',
