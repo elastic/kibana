@@ -148,6 +148,7 @@ export function initTimelionApp(app, deps) {
 
     $scope.state = _.cloneDeep(stateContainer.getState());
     $scope.expression = _.clone($scope.state.sheet[$scope.state.selected]);
+    $scope.updatedSheets = [];
 
     const savedVisualizations = deps.plugins.visualizations.savedVisualizationsLoader;
     const timezone = getTimezone(deps.core.uiSettings);
@@ -348,9 +349,14 @@ export function initTimelionApp(app, deps) {
       };
 
       const unsubscribeStateUpdates = stateContainer.subscribe((state) => {
-        $scope.state = _.cloneDeep(state);
-        $scope.opts.state = $scope.state;
+        const clonedState = _.cloneDeep(state);
+        $scope.updatedSheets.forEach((updatedSheet) => {
+          clonedState.sheet[updatedSheet.id] = updatedSheet.expression;
+        });
+        $scope.state = clonedState;
+        $scope.opts.state = clonedState;
         $scope.expression = _.clone($scope.state.sheet[$scope.state.selected]);
+        $scope.search();
       });
 
       timefilter.getFetch$().subscribe($scope.search);
@@ -438,7 +444,17 @@ export function initTimelionApp(app, deps) {
       const state = stateContainer.getState();
       const newSheet = _.clone(state.sheet);
       newSheet[state.selected] = newExpression;
-      stateContainer.transitions.set('sheet', newSheet);
+      const updatedSheet = $scope.updatedSheets.find(
+        (updatedSheet) => updatedSheet.id === state.selected
+      );
+      if (updatedSheet) {
+        updatedSheet.expression = newExpression;
+      } else {
+        $scope.updatedSheets.push({
+          id: state.selected,
+          expression: newExpression,
+        });
+      }
     });
 
     $scope.toggle = function (property) {
@@ -446,7 +462,22 @@ export function initTimelionApp(app, deps) {
     };
 
     $scope.changeInterval = function (interval) {
-      stateContainer.transitions.set('interval', interval);
+      $scope.currentInterval = interval;
+    };
+
+    $scope.updateChart = function () {
+      const state = stateContainer.getState();
+      const newSheet = _.clone(state.sheet);
+      if ($scope.updatedSheets.length) {
+        $scope.updatedSheets.forEach((updatedSheet) => {
+          newSheet[updatedSheet.id] = updatedSheet.expression;
+        });
+        $scope.updatedSheets = [];
+      }
+      stateContainer.transitions.updateState({
+        interval: $scope.currentInterval ? $scope.currentInterval : state.interval,
+        sheet: newSheet,
+      });
     };
 
     $scope.newSheet = function () {
@@ -456,15 +487,17 @@ export function initTimelionApp(app, deps) {
     $scope.removeSheet = function (removedIndex) {
       const state = stateContainer.getState();
       const newSheet = state.sheet.filter((el, index) => index !== removedIndex);
-      stateContainer.transitions.set('sheet', newSheet);
-      $scope.search();
+      $scope.updatedSheets = $scope.updatedSheets.filter((el) => el.id !== removedIndex);
+      stateContainer.transitions.updateState({
+        sheet: newSheet,
+        selected: removedIndex ? removedIndex - 1 : removedIndex,
+      });
     };
 
     $scope.newCell = function () {
       const state = stateContainer.getState();
       const newSheet = [...state.sheet, defaultExpression];
       stateContainer.transitions.updateState({ sheet: newSheet, selected: newSheet.length - 1 });
-      $scope.safeSearch();
     };
 
     $scope.setActiveCell = function (cell) {

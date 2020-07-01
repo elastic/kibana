@@ -39,14 +39,14 @@
       <!-- Search. -->
       <form
         role="form"
-        ng-submit="search()"
+        ng-submit="updateChart()"
         class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
       >
         <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
           <timelion-expression-input
             sheet="expression"
             rows="1"
-            update-chart="search()"
+            update-chart="updateChart()"
             should-popover-suggestions="true"
           ></timelion-expression-input>
         </div>
