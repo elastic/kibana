@@ -121,7 +121,7 @@ export const DashboardPage = ({ routeParams }: Props) => {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          {appEmptySections.length && (
+          {!!appEmptySections.length && (
             <EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiFlexGrid columns={2} gutterSize="s">

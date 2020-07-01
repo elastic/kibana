@@ -31,7 +31,14 @@ export const EmptySection = ({ section }: Props) => {
       actions={
         <>
           {section.linkTitle && (
-            <EuiButton size="s" color="primary" fill href={section.href} target={section.target}>
+            <EuiButton
+              size="s"
+              color="primary"
+              fill
+              href={section.href}
+              target={section.target}
+              data-test-subj={`empty-${section.id}`}
+            >
               {section.linkTitle}
             </EuiButton>
           )}
