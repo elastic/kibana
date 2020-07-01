@@ -455,9 +455,6 @@ export class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onInputBlur = () => {
-    if (this.state.isSuggestionsVisible) {
-      this.setState({ isSuggestionsVisible: false, index: null });
-    }
     this.handleBlurHeight();
     if (this.props.onChangeQueryInputFocus) {
       this.props.onChangeQueryInputFocus(false);
@@ -512,7 +509,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
       if (this.inputRef) {
         // For some reason the type guard above does not make the compiler happy
-        // @ts-ignore
+        // @ts-expect-error
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
       this.setState({
