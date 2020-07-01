@@ -5,7 +5,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiBetaBadge, EuiEmptyPrompt, EuiLink, EuiPanel, EuiTitle, EuiButton } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiPanel,
+  EuiTitle,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getEndpointListPath } from '../../../management/common/routing';
@@ -24,6 +31,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
 
   return (
     <EuiPanel>
+      <EuiButtonIcon onClick={onDismiss} iconType="cross" />
       <EuiEmptyPrompt
         data-test-subj="endpoint-prompt-banner"
         style={EMPTY_PROMPT_STYLE}
@@ -65,12 +73,6 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
                 }}
               />
             </p>
-            <EuiButton onClick={onDismiss}>
-              <FormattedMessage
-                id="xpack.securitySolution.overview.endpointNotice.dismiss"
-                defaultMessage="Dismiss"
-              />
-            </EuiButton>
           </>
         }
       />
