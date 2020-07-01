@@ -19,7 +19,6 @@ describe('Ingest Manager - validateDatasource()', () => {
     description: 'description',
     type: 'mock',
     categories: [],
-    requirement: { kibana: { versions: '' }, elasticsearch: { versions: '' } },
     format_version: '',
     download: '',
     path: '',

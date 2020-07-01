@@ -1446,11 +1446,6 @@
                         "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
                         "type": "integration",
                         "categories": ["logs", "metrics"],
-                        "requirement": {
-                          "kibana": {
-                            "versions": ">6.7.0"
-                          }
-                        },
                         "icons": [
                           {
                             "src": "/package/coredns-1.0.1/img/icon.png",
@@ -1728,11 +1723,6 @@
                           "security"
                         ],
                         "release": "beta",
-                        "requirement": {
-                          "kibana": {
-                            "versions": ">7.4.0"
-                          }
-                        },
                         "icons": [
                           {
                             "src": "/package/endpoint/0.3.0/img/logo-endpoint-64-color.svg",
@@ -3905,35 +3895,6 @@
               "type": "string"
             }
           },
-          "requirement": {
-            "oneOf": [
-              {
-                "properties": {
-                  "kibana": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "properties": {
-                  "elasticsearch": {
-                    "type": "object",
-                    "properties": {
-                      "versions": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                }
-              }
-            ],
-            "type": "object"
-          },
           "screenshots": {
             "type": "array",
             "items": {
@@ -4026,7 +3987,6 @@
           "description",
           "type",
           "categories",
-          "requirement",
           "assets",
           "format_version",
           "download",

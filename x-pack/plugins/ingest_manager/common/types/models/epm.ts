@@ -53,7 +53,6 @@ export interface RegistryPackage {
   description: string;
   type: string;
   categories: string[];
-  requirement: RequirementsByServiceName;
   screenshots?: RegistryImage[];
   icons?: RegistryImage[];
   assets?: string[];
