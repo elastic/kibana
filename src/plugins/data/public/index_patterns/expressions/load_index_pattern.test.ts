@@ -17,7 +17,23 @@
  * under the License.
  */
 
-import type { PluginInitializerContext } from '../../../../../src/core/server';
-import { CoreLoggingPlugin } from './plugin';
+import { indexPatternLoad } from './load_index_pattern';
 
-export const plugin = (init: PluginInitializerContext) => new CoreLoggingPlugin(init);
+jest.mock('../../services', () => ({
+  getIndexPatterns: () => ({
+    get: (id: string) => ({
+      toSpec: () => ({
+        title: 'value',
+      }),
+    }),
+  }),
+}));
+
+describe('indexPattern expression function', () => {
+  test('returns serialized index pattern', async () => {
+    const indexPatternDefinition = indexPatternLoad();
+    const result = await indexPatternDefinition.fn(null, { id: '1' }, {} as any);
+    expect(result.type).toEqual('index_pattern');
+    expect(result.value.title).toEqual('value');
+  });
+});
