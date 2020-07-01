@@ -41,7 +41,7 @@ export const StepSelectConfig: React.FunctionComponent<{
     data: agentConfigsData,
     error: agentConfigsError,
     isLoading: isAgentConfigsLoading,
-  } = useGetAgentConfigs({ full: true });
+  } = useGetAgentConfigs({ full: true, perPage: 1000 });
   const agentConfigs = agentConfigsData?.items || [];
   const agentConfigsById = agentConfigs.reduce(
     (acc: { [key: string]: GetAgentConfigsResponseItem }, config) => {
