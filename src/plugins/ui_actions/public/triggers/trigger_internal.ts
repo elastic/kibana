@@ -22,7 +22,9 @@ import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
-import { TriggerId, TriggerContextMapping } from '../types';
+import { TriggerId, TriggerContextMapping, BaseContext } from '../types';
+
+export type ActionContextTuple = [Action, BaseContext];
 
 /**
  * Internal representation of a trigger kept for consumption only internally
@@ -37,34 +39,46 @@ export class TriggerInternal<T extends TriggerId> {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
-    if (!actions.length) {
+    const actionsWithContexts: ActionContextTuple[] = actions.map((action) => [action, context]);
+
+    // TODO: make this recursive
+    const triggerReactions = this.service.getTriggerReactions(triggerId);
+    for (const reaction of triggerReactions) {
+      if (await reaction.isCompatible(context)) {
+        const reactionContext = await reaction.originContextToDestContext(context);
+        const reactionActions = await this.service.getTriggerCompatibleActions(
+          reaction.destTrigger,
+          reactionContext
+        );
+        const reactionActionsWithContext = reactionActions.map((reactionAction) => [
+          reactionAction,
+          reactionContext,
+        ]);
+        actionsWithContexts.push(...(reactionActionsWithContext as ActionContextTuple[]));
+      }
+    }
+
+    if (!actionsWithContexts.length) {
       throw new Error(
         `No compatible actions found to execute for trigger [triggerId = ${triggerId}].`
       );
     }
 
-    if (actions.length === 1) {
-      await this.executeSingleAction(actions[0], context);
+    if (actionsWithContexts.length === 1) {
+      await this.executeSingleAction(actionsWithContexts[0]);
       return;
     }
 
-    await this.executeMultipleActions(actions, context);
+    await this.executeMultipleActions(actionsWithContexts);
   }
 
-  private async executeSingleAction(
-    action: Action<TriggerContextMapping[T]>,
-    context: TriggerContextMapping[T]
-  ) {
+  private async executeSingleAction([action, context]: ActionContextTuple) {
     await action.execute(context);
   }
 
-  private async executeMultipleActions(
-    actions: Array<Action<TriggerContextMapping[T]>>,
-    context: TriggerContextMapping[T]
-  ) {
+  private async executeMultipleActions(actionsWithContext: ActionContextTuple[]) {
     const panel = await buildContextMenuForActions({
-      actions,
-      actionContext: context,
+      actionsWithContext,
       title: this.trigger.title,
       closeMenu: () => session.close(),
     });

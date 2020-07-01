@@ -11,9 +11,8 @@ import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldow
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
   TriggerContextMapping,
+  TriggerId,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
@@ -55,11 +54,13 @@ enum Routes {
 
 export function createFlyoutManageDrilldowns({
   actionFactories: allActionFactories,
+  getTriggersForActionFactory,
   storage,
   toastService,
   docsLink,
 }: {
   actionFactories: ActionFactory[];
+  getTriggersForActionFactory: (actionFactoryId: string) => TriggerId[];
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
@@ -72,18 +73,7 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
-    const selectedTriggers: Array<keyof TriggerContextMapping> = React.useMemo(
-      () => [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER],
-      []
-    );
-
-    const factoryContext: object = React.useMemo(
-      () => ({
-        ...props.context,
-        triggers: selectedTriggers,
-      }),
-      [props.context, selectedTriggers]
-    );
+    const factoryContext: object = props.context ?? {};
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -161,7 +151,7 @@ export function createFlyoutManageDrilldowns({
             onClose={props.onClose}
             mode={route === Routes.Create ? 'create' : 'edit'}
             onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-            onSubmit={({ actionConfig, actionFactory, name }) => {
+            onSubmit={({ actionConfig, actionFactory, name, selectedTrigger }) => {
               if (route === Routes.Create) {
                 createDrilldown(
                   {
@@ -169,7 +159,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTriggers
+                  [selectedTrigger]
                 );
               } else {
                 editDrilldown(
@@ -179,7 +169,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTriggers
+                  [selectedTrigger]
                 );
               }
 
@@ -200,6 +190,7 @@ export function createFlyoutManageDrilldowns({
             }}
             actionFactoryContext={factoryContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
+            getTriggersForActionFactory={getTriggersForActionFactory}
           />
         );
 

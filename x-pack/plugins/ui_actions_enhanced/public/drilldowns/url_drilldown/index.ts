@@ -7,3 +7,12 @@
 export * from './types';
 export * from './components';
 export { compile } from './url_template';
+export { UrlDrilldownDefinition } from './url_drilldown';
+export {
+  UrlDrilldownTriggerRegistry,
+  UrlDrilldownTriggerDefinition,
+} from './url_drilldown_trigger_registry';
+export {
+  UrlDrilldownContextProviderRegistry,
+  UrlDrilldownContextProvider,
+} from './url_drilldown_context_provider_registry';

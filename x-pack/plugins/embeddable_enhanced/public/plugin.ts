@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { SavedObjectAttributes } from 'kibana/public';
 import {
+  defaultEmbeddableFactoryProvider,
+  EmbeddableContext,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
@@ -14,8 +16,6 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   IEmbeddable,
-  defaultEmbeddableFactoryProvider,
-  EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
   ViewMode,
 } from '../../../../src/plugins/embeddable/public';
@@ -25,14 +25,17 @@ import {
   EmbeddableWithDynamicActions,
 } from './embeddables/embeddable_action_storage';
 import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '../../ui_actions_enhanced/public';
-import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
-import { EmbeddableToUrlDrilldownDefinition } from './drilldowns';
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
+import { ACTION_PANEL_NOTIFICATIONS, PanelNotificationsAction } from './actions';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import {
+  embeddableUrlDrilldownContextProvider,
+  embeddableUrlDrilldownSelectRangeTrigger,
+  embeddableUrlDrilldownValueClickTrigger,
+} from './embeddables';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -67,21 +70,16 @@ export class EmbeddableEnhancedPlugin
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.setCustomEmbeddableFactoryProvider(plugins);
 
-    const start = createStartServicesGetter(core.getStartServices);
-    const getDataActionsHelpers = () => {
-      return start().plugins.data.actions;
-    };
-
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
-    plugins.uiActionsEnhanced.registerDrilldown(
-      new EmbeddableToUrlDrilldownDefinition({
-        getGlobalScope: () => ({
-          kibanaUrl: window.location.origin + core.http.basePath.get(),
-        }),
-        getDataActionsHelpers,
-      })
+
+    plugins.uiActionsEnhanced.urlDrilldown.registerContextProvider(
+      embeddableUrlDrilldownContextProvider
+    );
+    plugins.uiActionsEnhanced.urlDrilldown.registerTrigger(embeddableUrlDrilldownValueClickTrigger);
+    plugins.uiActionsEnhanced.urlDrilldown.registerTrigger(
+      embeddableUrlDrilldownSelectRangeTrigger
     );
 
     return {};

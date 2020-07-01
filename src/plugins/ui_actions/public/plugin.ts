@@ -29,6 +29,7 @@ export type UiActionsSetup = Pick<
   | 'registerAction'
   | 'registerTrigger'
   | 'unregisterAction'
+  | 'registerTriggerReaction'
 >;
 
 export type UiActionsStart = PublicMethodsOf<UiActionsService>;

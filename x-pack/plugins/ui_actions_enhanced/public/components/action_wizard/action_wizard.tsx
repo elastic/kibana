@@ -19,6 +19,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory } from '../../dynamic_actions';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerId,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 export interface ActionWizardProps {
   /**
@@ -52,6 +57,11 @@ export interface ActionWizardProps {
    * Context will be passed into ActionFactory's methods
    */
   context: object;
+
+  selectedTrigger?: TriggerId;
+  onSelectedTriggerChange: (triggerId?: TriggerId) => void;
+
+  getTriggersForActionFactory: (actionFactoryId: string) => TriggerId[];
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -61,6 +71,9 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onConfigChange,
   config,
   context,
+  selectedTrigger,
+  onSelectedTriggerChange,
+  getTriggersForActionFactory,
 }) => {
   // auto pick action factory if there is only 1 available
   if (
@@ -71,7 +84,24 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
     onActionFactoryChange(actionFactories[0]);
   }
 
+  // auto pick selected trigger if there is only 1 available
+  if (currentActionFactory && !selectedTrigger) {
+    const triggers = getTriggersForActionFactory(currentActionFactory.id);
+    if (triggers.length === 1) {
+      onSelectedTriggerChange(triggers[0]);
+    }
+  }
+
   if (currentActionFactory && config) {
+    if (!selectedTrigger) {
+      return (
+        <TriggerPicker
+          triggers={getTriggersForActionFactory(currentActionFactory.id)}
+          onTriggerSelected={onSelectedTriggerChange}
+        />
+      );
+    }
+
     return (
       <SelectedActionFactory
         actionFactory={currentActionFactory}
@@ -79,7 +109,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         onDeselect={() => {
           onActionFactoryChange(undefined);
         }}
-        context={context}
+        context={{ ...context, selectedTrigger }}
         config={config}
         onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
@@ -219,6 +249,45 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               )}
             </EuiKeyPadMenuItem>
           </EuiToolTip>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+// TODO: move it out of hre
+const triggerToName: { [key: string]: string } = {
+  [VALUE_CLICK_TRIGGER]: 'Value click',
+  [SELECT_RANGE_TRIGGER]: 'Range select',
+};
+
+const TriggerPicker: React.FC<{
+  triggers: TriggerId[];
+  onTriggerSelected: (trigger: TriggerId) => void;
+}> = ({ triggers, onTriggerSelected }) => {
+  if (triggers.length === 0) {
+    // this is not user facing, as it would be impossible to get into this state
+    // just leaving for dev purposes for troubleshooting
+    return <div>No triggers to pick from</div>;
+  }
+
+  // The below style is applied to fix Firefox rendering bug.
+  // See: https://github.com/elastic/kibana/pull/61219/#pullrequestreview-402903330
+  const firefoxBugFix = {
+    willChange: 'opacity',
+  };
+
+  return (
+    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
+      {triggers.map((trigger) => (
+        <EuiFlexItem grow={false} key={trigger}>
+          <EuiKeyPadMenuItem
+            label={triggerToName[trigger] ?? trigger.split('_').join(' ').toLowerCase()}
+            className="auaActionWizard__actionFactoryItem"
+            onClick={() => onTriggerSelected(trigger)}
+          >
+            <></>
+          </EuiKeyPadMenuItem>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

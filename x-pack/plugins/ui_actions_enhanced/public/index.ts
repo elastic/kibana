@@ -37,4 +37,6 @@ export {
   UrlDrilldownGlobalScope as UiActionsEnhancedUrlDrilldownGlobalScope,
   UrlDrilldownScope as UiActionsEnhancedUrlDrilldownScope,
   compile as uiActionsEnhancedUrlDrilldownCompile,
+  UrlDrilldownContextProvider as UiActionsEnhancedUrlDrilldownContextProvider,
+  UrlDrilldownTriggerDefinition as UiActionsEnhancedUrlDrilldownTriggerDefinition,
 } from './drilldowns';

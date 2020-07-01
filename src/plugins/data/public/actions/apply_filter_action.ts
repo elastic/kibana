@@ -19,19 +19,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
-import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import {
+  ActionByType,
+  ApplyFilterTriggerContext,
+  createAction,
+  IncompatibleActionError,
+} from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 
-export interface ApplyGlobalFilterActionContext {
-  filters: Filter[];
-  timeFieldName?: string;
-}
-
-async function isCompatible(context: ApplyGlobalFilterActionContext) {
+async function isCompatible(context: ApplyFilterTriggerContext) {
   return context.filters !== undefined;
 }
 
@@ -49,7 +49,7 @@ export function createFilterAction(
       });
     },
     isCompatible,
-    execute: async ({ filters, timeFieldName }: ApplyGlobalFilterActionContext) => {
+    execute: async ({ filters, timeFieldName }: ApplyFilterTriggerContext) => {
       if (!filters) {
         throw new Error('Applying a filter requires a filter');
       }

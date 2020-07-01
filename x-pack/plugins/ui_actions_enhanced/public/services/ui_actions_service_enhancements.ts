@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryRegistry } from '../types';
+import { ActionFactoriesToTriggersRegistry, ActionFactoryRegistry } from '../types';
 import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
+import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -16,11 +17,13 @@ export interface UiActionsServiceEnhancementsParams {
 
 export class UiActionsServiceEnhancements {
   protected readonly actionFactories: ActionFactoryRegistry;
+  protected readonly actionFactoriesToTriggers: ActionFactoriesToTriggersRegistry;
   protected readonly getLicenseInfo: () => ILicense;
 
   constructor({ actionFactories = new Map(), getLicenseInfo }: UiActionsServiceEnhancementsParams) {
     this.actionFactories = actionFactories;
     this.getLicenseInfo = getLicenseInfo;
+    this.actionFactoriesToTriggers = new Map();
   }
 
   /**
@@ -44,6 +47,7 @@ export class UiActionsServiceEnhancements {
     );
 
     this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
+    this.actionFactoriesToTriggers.set(actionFactory.id, []);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
@@ -68,20 +72,24 @@ export class UiActionsServiceEnhancements {
    */
   public readonly registerDrilldown = <
     Config extends object = object,
-    ExecutionContext extends object = object
-  >({
-    id: factoryId,
-    order,
-    CollectConfig,
-    createConfig,
-    isConfigValid,
-    getDisplayName,
-    euiIcon,
-    execute,
-    getHref,
-    minimalLicense,
-  }: DrilldownDefinition<Config, ExecutionContext>): void => {
-    const actionFactory: ActionFactoryDefinition<Config, object, ExecutionContext> = {
+    ExecutionContext extends object = object,
+    T extends TriggerId = TriggerId
+  >(
+    {
+      id: factoryId,
+      order,
+      CollectConfig,
+      createConfig,
+      isConfigValid,
+      getDisplayName,
+      euiIcon,
+      execute,
+      getHref,
+      minimalLicense,
+    }: DrilldownDefinition<Config, TriggerContextMapping[T]>,
+    supportedTriggers: T[] = []
+  ): void => {
+    const actionFactory: ActionFactoryDefinition<Config, object, TriggerContextMapping[T]> = {
       id: factoryId,
       minimalLicense,
       order,
@@ -99,8 +107,27 @@ export class UiActionsServiceEnhancements {
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
       }),
-    } as ActionFactoryDefinition<Config, object, ExecutionContext>;
+    } as ActionFactoryDefinition<Config, object, TriggerContextMapping[T]>;
 
     this.registerActionFactory(actionFactory);
+    supportedTriggers.forEach((trigger) =>
+      this.addTriggerActionFactory(trigger, this.getActionFactory(actionFactory.id))
+    );
   };
+
+  public readonly addTriggerActionFactory = <T extends TriggerId>(
+    triggerId: T,
+    actionFactory: ActionFactory<object, object, TriggerContextMapping[T]>
+  ): void => {
+    if (!this.actionFactoriesToTriggers.has(actionFactory.id)) {
+      throw new Error(`ActionFactory [actionFactory.id = ${actionFactory.id}] is not registered`);
+    }
+    this.actionFactoriesToTriggers.set(actionFactory.id, [
+      ...this.actionFactoriesToTriggers.get(actionFactory.id)!.filter((t) => t !== triggerId),
+      triggerId,
+    ]);
+  };
+
+  public readonly getTriggersForActionFactory = (actionFactoryId: string) =>
+    Array.from(this.actionFactoriesToTriggers.get(actionFactoryId) ?? []);
 }

@@ -16,6 +16,7 @@ import {
 } from './actions';
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -61,6 +62,6 @@ export class DashboardDrilldownsService {
       start,
       getDashboardUrlGenerator,
     });
-    uiActions.registerDrilldown(dashboardToDashboardDrilldown);
+    uiActions.registerDrilldown(dashboardToDashboardDrilldown, [APPLY_FILTER_TRIGGER]);
   }
 }

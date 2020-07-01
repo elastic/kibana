@@ -29,6 +29,18 @@ import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 
+export interface TriggerReaction<
+  OriginTrigger extends TriggerId = TriggerId,
+  DestTrigger extends TriggerId = TriggerId
+> {
+  originTrigger: OriginTrigger;
+  destTrigger: DestTrigger;
+  originContextToDestContext(
+    context: TriggerContextMapping[OriginTrigger]
+  ): Promise<TriggerContextMapping[DestTrigger]>;
+  isCompatible(context: TriggerContextMapping[OriginTrigger]): Promise<boolean>;
+}
+
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
@@ -43,6 +55,7 @@ export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
+  protected readonly triggerReactions = new Map<TriggerId, TriggerReaction[]>();
 
   constructor({
     triggers = new Map(),
@@ -63,7 +76,25 @@ export class UiActionsService {
 
     this.triggers.set(trigger.id, triggerInternal);
     this.triggerToActions.set(trigger.id, []);
+    this.triggerReactions.set(trigger.id, []);
   };
+
+  public readonly registerTriggerReaction = (triggerReaction: TriggerReaction) => {
+    if (!this.triggers.has(triggerReaction.originTrigger)) {
+      throw new Error(`Trigger [trigger.id = ${triggerReaction.originTrigger}] not registered.`);
+    }
+    if (!this.triggers.has(triggerReaction.destTrigger)) {
+      throw new Error(`Trigger [trigger.id = ${triggerReaction.destTrigger}] not registered.`);
+    }
+
+    this.triggerReactions.set(triggerReaction.originTrigger, [
+      ...this.triggerReactions.get(triggerReaction.originTrigger)!,
+      triggerReaction,
+    ]);
+  };
+
+  public readonly getTriggerReactions = (triggerId: TriggerId) =>
+    Array.from(this.triggerReactions.get(triggerId) ?? []);
 
   public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
     const trigger = this.triggers.get(triggerId);

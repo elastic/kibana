@@ -23,6 +23,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action } from '../actions';
+import { ActionContextTuple } from '../triggers';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -32,19 +33,16 @@ export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
  */
 export async function buildContextMenuForActions<Context extends object>({
-  actions,
-  actionContext,
+  actionsWithContext,
   title = defaultTitle,
   closeMenu,
 }: {
-  actions: Array<Action<Context>>;
-  actionContext: Context;
+  actionsWithContext: ActionContextTuple[];
   title?: string;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelDescriptor> {
   const menuItems = await buildEuiContextMenuPanelItems<Context>({
-    actions,
-    actionContext,
+    actionsWithContext,
     closeMenu,
   });
 
@@ -59,16 +57,14 @@ export async function buildContextMenuForActions<Context extends object>({
  * Transform an array of Actions into the shape needed to build an EUIContextMenu
  */
 async function buildEuiContextMenuPanelItems<Context extends object>({
-  actions,
-  actionContext,
+  actionsWithContext,
   closeMenu,
 }: {
-  actions: Array<Action<Context>>;
-  actionContext: Context;
+  actionsWithContext: ActionContextTuple[];
   closeMenu: () => void;
 }) {
-  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
-  const promises = actions.map(async (action, index) => {
+  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actionsWithContext.length);
+  const promises = actionsWithContext.map(async ([action, actionContext], index) => {
     const isCompatible = await action.isCompatible(actionContext);
     if (!isCompatible) {
       return;

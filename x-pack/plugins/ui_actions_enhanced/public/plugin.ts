@@ -33,8 +33,16 @@ import {
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginStart } from '../../licensing/public';
-import { createFlyoutManageDrilldowns } from './drilldowns';
+import {
+  createFlyoutManageDrilldowns,
+  UrlDrilldownContextProviderRegistry,
+  UrlDrilldownDefinition,
+  UrlDrilldownTriggerRegistry,
+  UrlDrilldownService,
+} from './drilldowns';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { UrlDrilldownTriggerDefinition } from './drilldowns/url_drilldown/url_drilldown_trigger_registry';
+import { UrlDrilldownContextProvider } from './drilldowns/url_drilldown/url_drilldown_context_provider_registry';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -49,7 +57,12 @@ interface StartDependencies {
 
 export interface SetupContract
   extends UiActionsSetup,
-    Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
+    Pick<
+      UiActionsServiceEnhancements,
+      'registerDrilldown' | 'addTriggerActionFactory' | 'getTriggersForActionFactory'
+    > {
+  urlDrilldown: UrlDrilldownService;
+}
 
 export interface StartContract
   extends UiActionsStart,
@@ -83,9 +96,37 @@ export class AdvancedUiActionsPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
+    const urlDrilldownTriggerRegistry = new UrlDrilldownTriggerRegistry();
+    const urlDrilldownContextProviderRegistry = new UrlDrilldownContextProviderRegistry();
+    const urlDrilldownDefinition = new UrlDrilldownDefinition({
+      getGlobalScope: () => ({
+        kibanaUrl: window.location.origin + core.http.basePath.get(),
+      }),
+      triggerRegistry: urlDrilldownTriggerRegistry,
+      contextProviderRegistry: urlDrilldownContextProviderRegistry,
+    });
+
+    this.enhancements.registerDrilldown(urlDrilldownDefinition);
+
     return {
       ...uiActions,
       ...this.enhancements,
+      urlDrilldown: {
+        registerTrigger: (urlDrilldownTrigger: UrlDrilldownTriggerDefinition) => {
+          urlDrilldownTriggerRegistry.registerTriggerDefinition(urlDrilldownTrigger);
+          this.enhancements.addTriggerActionFactory(
+            urlDrilldownTrigger.triggerId,
+            this.enhancements.getActionFactory(urlDrilldownDefinition.id)
+          );
+        },
+        registerContextProvider<InjectedContext extends object>(
+          urlDrilldownContextProvider: UrlDrilldownContextProvider<InjectedContext>
+        ) {
+          urlDrilldownContextProviderRegistry.registerContextDefinition(
+            urlDrilldownContextProvider as UrlDrilldownContextProvider
+          );
+        },
+      },
     };
   }
 
@@ -116,6 +157,7 @@ export class AdvancedUiActionsPublicPlugin
       ...this.enhancements,
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
         actionFactories: this.enhancements.getActionFactories(),
+        getTriggersForActionFactory: this.enhancements.getTriggersForActionFactory,
         storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,

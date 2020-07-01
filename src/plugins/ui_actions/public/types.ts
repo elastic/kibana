@@ -35,14 +35,17 @@ export type TriggerId = keyof TriggerContextMapping;
 export type BaseContext = object;
 export type TriggerContext = BaseContext;
 
+export interface ApplyFilterTriggerContext<E extends IEmbeddable = IEmbeddable> {
+  embeddable?: IEmbeddable;
+  filters: Filter[];
+  timeFieldName?: string;
+}
+
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
   [SELECT_RANGE_TRIGGER]: RangeSelectTriggerContext;
   [VALUE_CLICK_TRIGGER]: ValueClickTriggerContext;
-  [APPLY_FILTER_TRIGGER]: {
-    embeddable: IEmbeddable;
-    filters: Filter[];
-  };
+  [APPLY_FILTER_TRIGGER]: ApplyFilterTriggerContext;
 }
 
 const DEFAULT_ACTION = '';

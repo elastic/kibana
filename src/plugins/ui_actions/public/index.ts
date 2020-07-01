@@ -44,5 +44,11 @@ export {
   APPLY_FILTER_TRIGGER,
   applyFilterTrigger,
 } from './triggers';
-export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
+export {
+  TriggerContextMapping,
+  TriggerId,
+  ActionContextMapping,
+  ActionType,
+  ApplyFilterTriggerContext,
+} from './types';
 export { ActionByType } from './actions';

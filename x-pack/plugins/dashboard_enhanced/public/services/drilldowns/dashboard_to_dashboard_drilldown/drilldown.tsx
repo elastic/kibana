@@ -7,27 +7,30 @@
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public';
-import { ActionContext, Config } from './types';
+import { Config } from './types';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 import {
-  isRangeSelectTriggerContext,
-  isValueClickTriggerContext,
-} from '../../../../../../../src/plugins/embeddable/public';
+  esFilters,
+  isFilters,
+  isQuery,
+  isTimeRange,
+} from '../../../../../../../src/plugins/data/public';
+
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StartDependencies } from '../../../plugin';
+import { ApplyFilterTriggerContext } from '../../../../../../../src/plugins/ui_actions/public';
 
 export interface Params {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
   getDashboardUrlGenerator: () => DashboardUrlGenerator;
 }
 
-export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, ActionContext<VisualizeEmbeddableContract>> {
+export type ActionContext = ApplyFilterTriggerContext;
+
+export class DashboardToDashboardDrilldown implements Drilldown<Config, ActionContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -55,17 +58,11 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
-  public readonly getHref = async (
-    config: Config,
-    context: ActionContext<VisualizeEmbeddableContract>
-  ): Promise<string> => {
+  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
     return this.getDestinationUrl(config, context);
   };
 
-  public readonly execute = async (
-    config: Config,
-    context: ActionContext<VisualizeEmbeddableContract>
-  ) => {
+  public readonly execute = async (config: Config, context: ActionContext) => {
     const dashboardPath = await this.getDestinationUrl(config, context);
     const dashboardHash = dashboardPath.split('#')[1];
 
@@ -74,19 +71,13 @@ export class DashboardToDashboardDrilldown
     });
   };
 
-  private getDestinationUrl = async (
-    config: Config,
-    context: ActionContext<VisualizeEmbeddableContract>
-  ): Promise<string> => {
-    const {
-      createFiltersFromRangeSelectAction,
-      createFiltersFromValueClickAction,
-    } = this.params.start().plugins.data.actions;
-    const {
-      timeRange: currentTimeRange,
-      query,
-      filters: currentFilters,
-    } = context.embeddable!.getInput();
+  private getDestinationUrl = async (config: Config, context: ActionContext): Promise<string> => {
+    const embeddableInput = context.embeddable!.getInput();
+    const currentFilters = isFilters(embeddableInput.filters) ? embeddableInput.filters : [];
+    const currentTimeRange = isTimeRange(embeddableInput.timeRange)
+      ? embeddableInput.timeRange
+      : undefined;
+    const currentQuery = isQuery(embeddableInput.query) ? embeddableInput.query : undefined;
 
     // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
     // otherwise preserve only pinned
@@ -99,37 +90,11 @@ export class DashboardToDashboardDrilldown
     // if undefined is passed, then destination dashboard will figure out time range itself
     // for brush event this time range would be overwritten
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
-    let filtersFromEvent = await (async () => {
-      try {
-        if (isRangeSelectTriggerContext(context))
-          return await createFiltersFromRangeSelectAction(context.data);
-        if (isValueClickTriggerContext(context))
-          return await createFiltersFromValueClickAction(context.data);
 
-        // eslint-disable-next-line no-console
-        console.warn(
-          `
-          DashboardToDashboard drilldown: can't extract filters from action.
-          Is it not supported action?`,
-          context
-        );
-
-        return [];
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `
-          DashboardToDashboard drilldown: error extracting filters from action.
-          Continuing without applying filters from event`,
-          e
-        );
-        return [];
-      }
-    })();
-
-    if (context.data.timeFieldName) {
+    let filtersFromEvent = context.filters;
+    if (context.timeFieldName) {
       const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-        context.data.timeFieldName,
+        context.timeFieldName,
         filtersFromEvent
       );
       filtersFromEvent = restOfFilters;
@@ -140,7 +105,7 @@ export class DashboardToDashboardDrilldown
 
     return this.params.getDashboardUrlGenerator().createUrl({
       dashboardId: config.dashboardId,
-      query: config.useCurrentFilters ? query : undefined,
+      query: config.useCurrentFilters ? currentQuery : undefined,
       timeRange,
       filters: [...existingFilters, ...filtersFromEvent],
     });

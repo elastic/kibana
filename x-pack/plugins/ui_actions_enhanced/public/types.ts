@@ -6,6 +6,7 @@
 
 import { KibanaReactOverlays } from '../../../../src/plugins/kibana_react/public';
 import { ActionFactory } from './dynamic_actions';
+import { TriggerId } from '../../../../src/plugins/ui_actions/public';
 
 export interface CommonlyUsedRange {
   from: string;
@@ -16,3 +17,4 @@ export interface CommonlyUsedRange {
 export type OpenModal = KibanaReactOverlays['openModal'];
 
 export type ActionFactoryRegistry = Map<string, ActionFactory>;
+export type ActionFactoriesToTriggersRegistry = Map<string, TriggerId[]>;

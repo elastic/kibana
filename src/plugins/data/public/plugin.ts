@@ -20,14 +20,14 @@
 import './index.scss';
 
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   PackageInfo,
+  Plugin,
+  PluginInitializerContext,
 } from 'src/core/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
+import { createStartServicesGetter, IStorageWrapper, Storage } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -55,31 +55,24 @@ import {
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
 import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
+  ApplyFilterTriggerContext,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
 } from '../../ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
-  createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
+  createFiltersFromValueClickAction,
 } from './actions';
-import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
-import {
-  selectRangeAction,
-  SelectRangeActionContext,
-  ACTION_SELECT_RANGE,
-} from './actions/select_range_action';
-import {
-  valueClickAction,
-  ACTION_VALUE_CLICK,
-  ValueClickActionContext,
-} from './actions/value_click_action';
+import { ACTION_SELECT_RANGE, SelectRangeActionContext } from './actions/select_range_action';
+import { ACTION_VALUE_CLICK, ValueClickActionContext } from './actions/value_click_action';
+import { ValueClickTriggerContext, RangeSelectTriggerContext } from '../../embeddable/public';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
-    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
+    [ACTION_GLOBAL_APPLY_FILTER]: ApplyFilterTriggerContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
     [ACTION_VALUE_CLICK]: ValueClickActionContext;
   }
@@ -126,19 +119,60 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       storage: this.storage,
     });
 
-    uiActions.registerAction(
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
-      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
+    // uiActions.addTriggerAction(
+    //   SELECT_RANGE_TRIGGER,
+    //   selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
+    // );
+    //
+    // uiActions.addTriggerAction(
+    //   VALUE_CLICK_TRIGGER,
+    //   valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
+    // );
 
-    uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
-      valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
+    uiActions.registerTriggerReaction({
+      originTrigger: VALUE_CLICK_TRIGGER,
+      destTrigger: APPLY_FILTER_TRIGGER,
+      isCompatible: async (context: ValueClickTriggerContext) => {
+        const filters = await createFiltersFromValueClickAction(context.data);
+        if (filters.length > 0) return true;
+        return false;
+      },
+      originContextToDestContext: async (
+        context: ValueClickTriggerContext
+      ): Promise<ApplyFilterTriggerContext> => {
+        const filters = await createFiltersFromValueClickAction(context.data);
+        return {
+          embeddable: context.embeddable,
+          filters,
+          timeFieldName: context.data.timeFieldName,
+        };
+      },
+    });
+
+    uiActions.registerTriggerReaction({
+      originTrigger: SELECT_RANGE_TRIGGER,
+      destTrigger: APPLY_FILTER_TRIGGER,
+      isCompatible: async (context: RangeSelectTriggerContext) => {
+        const filters = await createFiltersFromRangeSelectAction(context.data);
+        if (filters.length > 0) return true;
+        return false;
+      },
+      originContextToDestContext: async (
+        context: RangeSelectTriggerContext
+      ): Promise<ApplyFilterTriggerContext> => {
+        const filters = await createFiltersFromRangeSelectAction(context.data);
+        return {
+          embeddable: context.embeddable,
+          filters,
+          timeFieldName: context.data.timeFieldName,
+        };
+      },
+    });
 
     return {
       autocomplete: this.autocomplete.setup(core),
