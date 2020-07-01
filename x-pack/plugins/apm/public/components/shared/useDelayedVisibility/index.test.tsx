@@ -11,7 +11,8 @@ import {
 } from '@testing-library/react-hooks';
 import { useDelayedVisibility } from '.';
 
-describe('useFetcher', () => {
+// Failing: See https://github.com/elastic/kibana/issues/66389
+describe.skip('useFetcher', () => {
   let hook: RenderHookResult<any, any>;
 
   beforeEach(() => {
