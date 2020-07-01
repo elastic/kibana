@@ -60,10 +60,7 @@ export function getSavedObjectFormat({
       visualization: visualization.getPersistableState(state.visualization.state),
       query: framePublicAPI.query,
       filters: framePublicAPI.filters,
-      globalPalette: {
-        activePaletteId: framePublicAPI.globalPalette.colorFunction.id,
-        state: framePublicAPI.globalPalette.state,
-      },
+      globalPalette: state.globalPalette,
     },
   };
 }

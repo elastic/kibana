@@ -59,7 +59,7 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
     getColor,
     ...buildStatelessExpressionIntegration('kibana_palette', getColor),
     getPreviewPalette: () => {
-      return colors.seedColors;
+      return colors.seedColors.slice(0, 10);
     },
   };
 }

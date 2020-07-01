@@ -54,7 +54,7 @@ export function createColorPalette(num?: any): string[] {
     throw new TypeError('ColorPaletteUtilService expects a number');
   }
 
-  const colors = [...seedColors];
+  const colors = seedColors;
   const seedLength = seedColors.length;
 
   _.times(num - seedLength, function (i) {
