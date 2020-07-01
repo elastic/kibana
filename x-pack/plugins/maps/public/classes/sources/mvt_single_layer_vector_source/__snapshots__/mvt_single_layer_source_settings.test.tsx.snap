@@ -118,7 +118,19 @@ exports[`should render with fields 1`] = `
     label={
       <EuiToolTip
         anchorClassName="eui-alignMiddle"
-        content="Fields which are available in the \`foobar\` layer. These can be used for tooltips and dynamic styling."
+        content={
+          <React.Fragment>
+            Fields which are available in 
+            <React.Fragment>
+              <b>
+                foobar
+              </b>
+              .
+               
+            </React.Fragment>
+            These can be used for tooltips and dynamic styling.
+          </React.Fragment>
+        }
         delay="regular"
         position="top"
       >
