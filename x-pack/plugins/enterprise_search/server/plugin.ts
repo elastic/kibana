@@ -18,6 +18,7 @@ import {
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { UICapabilities } from 'ui/capabilities';
 import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 import { checkAccess } from './lib/check_access';
 import { registerEnginesRoute } from './routes/app_search/engines';
@@ -28,6 +29,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface ServerConfigType {
@@ -55,9 +57,23 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public async setup(
     { capabilities, http, savedObjects, getStartServices }: CoreSetup,
-    { usageCollection, security }: PluginsSetup
+    { usageCollection, security, features }: PluginsSetup
   ) {
     const config = await this.config.pipe(first()).toPromise();
+
+    /**
+     * Register space/feature control
+     */
+    features.registerFeature({
+      id: 'enterprise_search',
+      name: 'Enterprise Search',
+      order: 0,
+      icon: 'logoEnterpriseSearch',
+      navLinkId: 'app_search', // TODO: We need to get this working with multiple plugins :(
+      app: ['enterprise_search', 'app_search', 'workplace_search'],
+      catalogue: ['enterprise_search', 'app_search', 'workplace_search'],
+      privileges: null,
+    });
 
     /**
      * Register user access to the Enterprise Search plugins
