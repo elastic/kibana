@@ -1604,5 +1604,12 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadTemplate.searchPlaceholder', {
         defaultMessage: 'Find template',
       }),
+    getCreatingTemplateLabel: (templateName: string) =>
+      i18n.translate('xpack.canvas.workpadTemplate.creatingTemplateLabel', {
+        defaultMessage: `Creating from template '{templateName}'`,
+        values: {
+          templateName,
+        },
+      }),
   },
 };

@@ -45,6 +45,7 @@ describe('editor_frame state management', () => {
         palettes: {
           default: createMockColorFunction(),
         },
+        showNoDataPopover: jest.fn(),
       };
     });
 

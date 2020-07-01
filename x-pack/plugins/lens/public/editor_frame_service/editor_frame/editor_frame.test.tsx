@@ -60,6 +60,7 @@ function getDefaultProps() {
     palettes: {
       default: createMockColorFunction(),
     },
+    showNoDataPopover: jest.fn(),
   };
 }
 

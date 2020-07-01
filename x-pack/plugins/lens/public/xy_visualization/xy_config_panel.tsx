@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,9 +14,14 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPopover,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { State, SeriesType, visualizationTypes } from './types';
-import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
+import {
+  VisualizationLayerWidgetProps,
+  VisualizationToolbarProps,
+  VisualizationDimensionEditorProps,
+} from '../types';
+import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { PalettePicker } from '../editor_frame_service/palettes/palette_picker';
@@ -107,5 +111,74 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+}
+const idPrefix = htmlIdGenerator()();
+
+export function DimensionEditor({
+  state,
+  setState,
+  layerId,
+  accessor,
+}: VisualizationDimensionEditorProps<State>) {
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  const axisMode =
+    (layer.yConfig &&
+      layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
+    'auto';
+  return (
+    <EuiFormRow
+      display="columnCompressed"
+      label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+        defaultMessage: 'Axis side',
+      })}
+    >
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Axis side',
+        })}
+        name="axisSide"
+        buttonSize="compressed"
+        className="eui-displayInlineBlock"
+        options={[
+          {
+            id: `${idPrefix}auto`,
+            label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
+              defaultMessage: 'Auto',
+            }),
+          },
+          {
+            id: `${idPrefix}left`,
+            label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
+              defaultMessage: 'Left',
+            }),
+          },
+          {
+            id: `${idPrefix}right`,
+            label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
+              defaultMessage: 'Right',
+            }),
+          },
+        ]}
+        idSelected={`${idPrefix}${axisMode}`}
+        onChange={(id) => {
+          const newMode = id.replace(idPrefix, '') as YAxisMode;
+          const newYAxisConfigs = [...(layer.yConfig || [])];
+          const existingIndex = newYAxisConfigs.findIndex(
+            (yAxisConfig) => yAxisConfig.forAccessor === accessor
+          );
+          if (existingIndex !== -1) {
+            newYAxisConfigs[existingIndex].axisMode = newMode;
+          } else {
+            newYAxisConfigs.push({
+              forAccessor: accessor,
+              axisMode: newMode,
+            });
+          }
+          setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+        }}
+      />
+    </EuiFormRow>
   );
 }

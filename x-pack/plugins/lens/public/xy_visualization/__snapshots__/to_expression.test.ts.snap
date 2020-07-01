@@ -38,6 +38,7 @@ Object {
                   "xScaleType": Array [
                     "linear",
                   ],
+                  "yConfig": Array [],
                   "yScaleType": Array [
                     "linear",
                   ],

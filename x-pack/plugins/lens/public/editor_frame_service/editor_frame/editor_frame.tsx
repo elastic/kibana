@@ -50,6 +50,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
   }) => void;
+  showNoDataPopover: () => void;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -277,6 +278,7 @@ export function EditorFrame(props: EditorFrameProps) {
             query={props.query}
             dateRange={props.dateRange}
             filters={props.filters}
+            showNoDataPopover={props.showNoDataPopover}
           />
         }
         configPanel={

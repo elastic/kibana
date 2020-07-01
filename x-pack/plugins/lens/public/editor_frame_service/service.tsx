@@ -111,7 +111,10 @@ export class EditorFrameService {
       ]);
 
       return {
-        mount: (element, { doc, onError, dateRange, query, filters, savedQuery, onChange }) => {
+        mount: (
+          element,
+          { doc, onError, dateRange, query, filters, savedQuery, onChange, showNoDataPopover }
+        ) => {
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
@@ -137,6 +140,7 @@ export class EditorFrameService {
                 filters={filters}
                 savedQuery={savedQuery}
                 onChange={onChange}
+                showNoDataPopover={showNoDataPopover}
               />
             </I18nProvider>,
             domElement
