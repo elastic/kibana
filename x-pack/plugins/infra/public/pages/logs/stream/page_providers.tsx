@@ -104,10 +104,10 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
 };
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const { logIndicesExist } = useLogSourceContext();
+  const { sourceStatus } = useLogSourceContext();
 
   // The providers assume the source is loaded, so short-circuit them otherwise
-  if (!logIndicesExist) {
+  if (!sourceStatus?.logIndicesExist) {
     return <>{children}</>;
   }
 
