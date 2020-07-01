@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CollectorOptions } from 'kibana/server';
+import { UsageCollectionCollectorOptions } from 'kibana/server';
 import { BehaviorSubject } from 'rxjs';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 import { CollectorSet } from '../../core/server/usage_collection/collector_set';
@@ -30,7 +30,7 @@ interface Usage {
   locale: string;
 }
 
-function createCollector(): CollectorOptions<Usage> {
+function createCollector(): UsageCollectionCollectorOptions<Usage> {
   return {
     type: 'from_fn_collector',
     isReady: () => true,
@@ -48,7 +48,7 @@ function createCollector(): CollectorOptions<Usage> {
 }
 
 export function defineCollectorFromVariable() {
-  const fromVarCollector: CollectorOptions<Usage> = {
+  const fromVarCollector: UsageCollectionCollectorOptions<Usage> = {
     type: 'from_variable_collector',
     isReady: () => true,
     fetch(): Usage {

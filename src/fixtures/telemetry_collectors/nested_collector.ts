@@ -17,7 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { UsageCollector } from 'kibana/server';
+import { UsageCollectionUsageCollector } from 'kibana/server';
 import { loggerMock } from '../../core/server/logging/logger.mock';
 import { CollectorSet } from '../../core/server/usage_collection/collector_set';
 
@@ -31,7 +31,7 @@ interface Usage {
 }
 
 export class NestedInside {
-  collector?: UsageCollector<Usage, Usage>;
+  collector?: UsageCollectionUsageCollector<Usage, Usage>;
   createMyCollector() {
     this.collector = collectorSet.makeUsageCollector<Usage>({
       type: 'my_nested_collector',

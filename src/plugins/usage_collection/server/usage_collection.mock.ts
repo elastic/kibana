@@ -19,7 +19,7 @@
 
 import { usageCollectionServiceMock } from '../../../core/server/mocks';
 
-export { CollectorOptions } from '../../../core/server';
+export { UsageCollectionCollectorOptions as CollectorOptions } from '../../../core/server';
 export const createUsageCollectionSetupMock = () => {
   return usageCollectionServiceMock.createSetupContract();
 };

@@ -58,6 +58,11 @@ export interface UsageCollectionCollectorSet {
   bulkFetchUsage: (
     callCluster: LegacyAPICaller
   ) => Promise<Array<{ type: string; result: unknown }>>;
+  /** @internal */
+  bulkFetch: (
+    callCluster: LegacyAPICaller,
+    collectors?: Array<Collector<any, any>>
+  ) => Promise<Array<{ type: string; result: unknown }>>;
   /**
    * @internal
    * Converts an array of fetched stats results into key/object

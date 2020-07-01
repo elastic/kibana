@@ -2681,6 +2681,11 @@ export interface UsageCollectionCollectorSet {
     // @internal (undocumented)
     areAllCollectorsReady: (collectorSet?: UsageCollectionCollectorSet) => Promise<boolean>;
     // @internal (undocumented)
+    bulkFetch: (callCluster: LegacyAPICaller, collectors?: Array<UsageCollectionCollector<any, any>>) => Promise<Array<{
+        type: string;
+        result: unknown;
+    }>>;
+    // @internal (undocumented)
     bulkFetchUsage: (callCluster: LegacyAPICaller) => Promise<Array<{
         type: string;
         result: unknown;
