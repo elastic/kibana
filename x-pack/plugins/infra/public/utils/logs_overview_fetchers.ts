@@ -12,6 +12,19 @@ import {
   FetchDataParams,
 } from '../../../observability/public';
 
+interface StatsAggregation {
+  buckets: Array<{ key: string; doc_count: number }>;
+}
+
+interface SeriesAggregation {
+  buckets: Array<{
+    key_as_string: string;
+    key: number;
+    doc_count: number;
+    dataset: StatsAggregation;
+  }>;
+}
+
 interface LogParams {
   index: string;
   timestampField: string;
@@ -105,66 +118,51 @@ async function fetchLogsOverview(
         },
       })
       .subscribe(
-        () => {
-          resolve({
-            stats: {
-              nginx: {
-                type: 'number',
-                label: 'nginx',
-                value: 345341,
-              },
-              'elasticsearch.audit': {
-                type: 'number',
-                label: 'elasticsearch.audit',
-                value: 164929,
-              },
-              'haproxy.log': {
-                type: 'number',
-                label: 'haproxy.log',
-                value: 51101,
-              },
-            },
-
-            // Note: My understanding is that these series coordinates will be
-            // combined into objects that look like:
-            // { x: timestamp, y: value, g: label (e.g. nginx) }
-            // so they fit the stacked bar chart API
-            // https://elastic.github.io/elastic-charts/?path=/story/bar-chart--stacked-with-axis-and-legend
-            series: {
-              nginx: {
-                label: 'nginx',
-                coordinates: [
-                  { x: 1593000000000, y: 10014 },
-                  { x: 1593000900000, y: 12827 },
-                  { x: 1593001800000, y: 2946 },
-                  { x: 1593002700000, y: 14298 },
-                  { x: 1593003600000, y: 4096 },
-                ],
-              },
-              'elasticsearch.audit': {
-                label: 'elasticsearch.audit',
-                coordinates: [
-                  { x: 1593000000000, y: 5676 },
-                  { x: 1593000900000, y: 6783 },
-                  { x: 1593001800000, y: 2394 },
-                  { x: 1593002700000, y: 4554 },
-                  { x: 1593003600000, y: 5659 },
-                ],
-              },
-              'haproxy.log': {
-                label: 'haproxy.log',
-                coordinates: [
-                  { x: 1593000000000, y: 9085 },
-                  { x: 1593000900000, y: 9002 },
-                  { x: 1593001800000, y: 3940 },
-                  { x: 1593002700000, y: 5451 },
-                  { x: 1593003600000, y: 9133 },
-                ],
-              },
-            },
-          });
+        (response) => {
+          if (response.rawResponse.aggregations) {
+            resolve(processLogsOverviewAggregations(response.rawResponse.aggregations));
+          } else {
+            resolve({ stats: {}, series: {} });
+          }
         },
         (error) => reject(error)
       );
   });
+}
+
+function processLogsOverviewAggregations(aggregations: {
+  stats: StatsAggregation;
+  series: SeriesAggregation;
+}): StatsAndSeries {
+  const processedStats = aggregations.stats.buckets.reduce<StatsAndSeries['stats']>(
+    (result, bucket) => {
+      result[bucket.key] = {
+        type: 'number',
+        label: bucket.key,
+        value: bucket.doc_count,
+      };
+
+      return result;
+    },
+    {}
+  );
+
+  const processedSeries = aggregations.series.buckets.reduce<StatsAndSeries['series']>(
+    (result, bucket) => {
+      const x = bucket.key; // the timestamp of the bucket
+      bucket.dataset.buckets.forEach((b) => {
+        const label = b.key;
+        result[label] = result[label] || { label, coordinates: [] };
+        result[label].coordinates.push({ x, y: b.doc_count });
+      });
+
+      return result;
+    },
+    {}
+  );
+
+  return {
+    stats: processedStats,
+    series: processedSeries,
+  };
 }
