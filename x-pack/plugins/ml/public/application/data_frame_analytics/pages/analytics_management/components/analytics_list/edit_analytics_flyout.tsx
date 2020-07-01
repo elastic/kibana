@@ -25,20 +25,29 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { memoryInputValidator } from '../../../../../../../common/util/validators';
 import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 interface EditAnalyticsJobFlyoutProps {
   closeFlyout: () => void;
   item: DataFrameAnalyticsListRow;
 }
 
+let mmLValidator: any;
+
 export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyout, item }) => {
   const [allowLazyStart, setAllowLazyStart] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [modelMemoryLimit, setModelMemoryLimit] = useState<string>('');
-  const [mmlValidationError, setMmlValidationError] = useState<any>('');
+  const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
+
+  const {
+    services: { notifications },
+  } = useMlKibana();
+  const { refresh } = useRefreshAnalyticsList();
 
   const { id: jobId, config } = item;
   const { state } = item.stats;
@@ -46,10 +55,10 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   const updateButtonDisabled =
     allowLazyStart === '' && description === '' && modelMemoryLimit === '';
 
-  // TODO: only create this function once
-  const mmLValidator = memoryInputValidator();
-
   useEffect(() => {
+    if (mmLValidator === undefined) {
+      mmLValidator = memoryInputValidator();
+    }
     // validate mml and create validation message
     if (modelMemoryLimit !== '') {
       const validationResult = mmLValidator(modelMemoryLimit);
@@ -63,6 +72,8 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
       } else {
         setMmlValidationError(undefined);
       }
+    } else {
+      setMmlValidationError(undefined);
     }
   }, [modelMemoryLimit]);
 
@@ -76,12 +87,26 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
 
     try {
       await ml.dataFrameAnalytics.updateDataFrameAnalytics(jobId, updateConfig);
-      // TODO: show some success toast
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutSuccessMessage', {
+          defaultMessage: 'Analytics job {jobId} has been updated.',
+          values: { jobId },
+        })
+      );
+      refresh();
       closeFlyout();
     } catch (e) {
-      // TODO: show error callouts
       // eslint-disable-next-line
-      console.log('--- ERROR ---', JSON.stringify(e, null, 2)); // remove
+      console.error(e);
+
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
+          defaultMessage: 'Could not save changes to {jobId}',
+          values: {
+            jobId,
+          },
+        })
+      );
     }
   };
 
