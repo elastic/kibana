@@ -40,8 +40,9 @@ export default function ({ getService }) {
       it('should list all the index templates with the expected parameters', async () => {
         const { body: allTemplates } = await getAllTemplates().expect(200);
 
-        // Composable templates
-        expect(allTemplates.templates).to.eql([]);
+        // Composable templates may have been created by other apps, e.g. Ingest Manager,
+        // so we don't make any assertion about these contents.
+        expect(Array.isArray(allTemplates.templates)).to.eql(true);
 
         // Legacy templates
         const legacyTemplate = allTemplates.legacyTemplates.find(
