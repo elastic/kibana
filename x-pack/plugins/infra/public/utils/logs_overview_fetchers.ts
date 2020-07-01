@@ -5,9 +5,11 @@
  */
 
 import { InfraClientCoreSetup } from '../types';
-import { LogsFetchDataResponse } from '../../../observability/public';
+import { FetchData, LogsFetchDataResponse, HasData } from '../../../observability/public';
 
-export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
+export function getLogsHasDataFetcher(
+  getStartServices: InfraClientCoreSetup['getStartServices']
+): HasData {
   return async () => {
     // if you need the data plugin, this is how you get it
     // const [, startPlugins] = await getStartServices();
@@ -22,9 +24,8 @@ export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['ge
 
 export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
-) {
-  return async (): Promise<LogsFetchDataResponse> => {
-    // if you need the data plugin, this is how you get it
+): FetchData<LogsFetchDataResponse> {
+  return async () => {
     // const [, startPlugins] = await getStartServices();
     // const { data } = startPlugins;
 
