@@ -47,11 +47,12 @@ export const fetchLandingPageData = async (
           'xpack.apm.observabilityDashboard.stats.transactions',
           { defaultMessage: 'Transactions' }
         ),
-        value: !!transactionCoordinates.length
-          ? mean(
-              transactionCoordinates.map((coordinates) => coordinates.y || 0)
-            )
-          : 0,
+        value:
+          mean(
+            transactionCoordinates
+              .map(({ y }) => y)
+              .filter((y) => y && isFinite(y))
+          ) || 0,
         color: theme.euiColorVis1,
       },
     },
