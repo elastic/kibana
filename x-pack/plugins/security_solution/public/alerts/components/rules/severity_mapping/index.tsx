@@ -15,7 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
@@ -46,13 +46,29 @@ export const SeverityField = ({
   dataTestSubj,
   field,
   idAria,
-  indices,
+  indices, // TODO: To be used with autocomplete fields once https://github.com/elastic/kibana/pull/67013 is merged
   options,
 }: SeverityFieldProps) => {
-  // const isInvalid = field.errors.length > 0 && form.isSubmitted;
-  // const errorMessage = field.errors.length ? (field.errors[0].message as string) : null;
   const [isSeverityMappingChecked, setIsSeverityMappingChecked] = useState(false);
-  // const [severityField, setSeverityField] = useState<string | undefined>();
+
+  const updateSeverityMapping = useCallback(
+    (index: number, severity: string, mappingField: string, event) => {
+      field.setValue({
+        value: field.value.value,
+        mapping: [
+          ...field.value.mapping.slice(0, index),
+          {
+            ...field.value.mapping[index],
+            [mappingField]: event.target.value,
+            operator: 'equals',
+            severity,
+          },
+          ...field.value.mapping.slice(index + 1),
+        ],
+      });
+    },
+    [field]
+  );
 
   const severityLabel = useMemo(() => {
     return (
@@ -159,18 +175,23 @@ export const SeverityField = ({
                   <EuiFlexItem key={option.value}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem>
-                        <CommonUseField
-                          path={`severity[${index}].mapping`}
-                          componentProps={{
-                            'data-test-subj': 'detectionEngineStepAboutRuleRiskScore111',
-                            idAria: 'detectionEngineStepAboutRuleRiskScore111',
-                            isDisabled: false,
-                          }}
+                        <EuiFieldText
+                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
+                          idAria={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
+                          isDisabled={false}
+                          onChange={updateSeverityMapping.bind(null, index, option.value, 'field')}
+                          value={field.value.mapping?.[index]?.field ?? ''}
                         />
                       </EuiFlexItem>
 
                       <EuiFlexItem>
-                        <EuiFieldText onChange={() => {}} />
+                        <EuiFieldText
+                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
+                          idAria={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
+                          isDisabled={false}
+                          onChange={updateSeverityMapping.bind(null, index, option.value, 'value')}
+                          value={field.value.mapping?.[index]?.value ?? ''}
+                        />
                       </EuiFlexItem>
                       <EuiFlexItemIconColumn grow={false}>
                         <EuiIcon type={'sortRight'} />

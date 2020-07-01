@@ -89,9 +89,9 @@ describe('rule helpers', () => {
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
-        riskScore: 21,
-        ruleNameOverride: '',
-        severity: { value: 'low' },
+        riskScore: { value: 21, mapping: [] },
+        ruleNameOverride: 'message',
+        severity: { value: 'low', mapping: [] },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -110,7 +110,7 @@ describe('rule helpers', () => {
             ],
           },
         ],
-        timestampOverride: '',
+        timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
       const ruleActionsStepData = {

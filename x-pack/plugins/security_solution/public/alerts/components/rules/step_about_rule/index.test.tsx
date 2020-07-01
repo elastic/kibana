@@ -174,8 +174,8 @@ describe('StepAboutRuleComponent', () => {
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: 50,
-      severity: { value: 'low' },
+      riskScore: { value: 50, mapping: [] },
+      severity: { value: 'low', mapping: [] },
       tags: [],
       threat: [
         {
@@ -232,8 +232,8 @@ describe('StepAboutRuleComponent', () => {
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: 80,
-      severity: { value: 'low' },
+      riskScore: { value: 80, mapping: [] },
+      severity: { value: 'low', mapping: [] },
       tags: [],
       threat: [
         {

@@ -15,7 +15,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
@@ -41,10 +41,23 @@ interface RiskScoreFieldProps {
 }
 
 export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskScoreFieldProps) => {
-  // const isInvalid = field.errors.length > 0 && form.isSubmitted;
-  // const errorMessage = field.errors.length ? (field.errors[0].message as string) : null;
   const [isRiskScoreMappingSelected, setIsRiskScoreMappingSelected] = useState(false);
-  // const [riskScoreField, setRiskScoreField] = useState<string | undefined>();
+
+  const updateRiskScoreMapping = useCallback(
+    (event) => {
+      field.setValue({
+        value: field.value.value,
+        mapping: [
+          {
+            field: event.target.value,
+            operator: 'equals',
+            value: '',
+          },
+        ],
+      });
+    },
+    [field]
+  );
 
   const severityLabel = useMemo(() => {
     return (
@@ -97,7 +110,7 @@ export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskSco
           describedByIds={idAria ? [idAria] : undefined}
         >
           <CommonUseField
-            path="riskScore"
+            path="riskScore.value"
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleRiskScore',
               'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
@@ -150,8 +163,11 @@ export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskSco
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem>
                       <EuiFieldText
-                        onChange={(e) => {}}
-                        aria-label="Use aria labels when no actual label is in use"
+                        data-test-subj={`detectionEngineStepAboutRuleRiskScoreMappingValue`}
+                        idAria={`detectionEngineStepAboutRuleRiskScoreMappingValue`}
+                        isDisabled={false}
+                        onChange={updateRiskScoreMapping.bind(null)}
+                        value={field.value.mapping?.[0]?.field ?? ''}
                       />
                     </EuiFlexItem>
                     <EuiFlexItemIconColumn grow={false}>

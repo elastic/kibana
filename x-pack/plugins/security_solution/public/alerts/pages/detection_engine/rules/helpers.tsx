@@ -116,14 +116,13 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
   const { name, description, note } = determineDetailsValue(rule, detailsView);
   const {
-    // TODO: Update types mapping
-    // author,
-    // building_block_type: buildingBlockType,
-    // license,
-    // risk_score_mapping: riskScoreMapping,
-    // rule_name_override: ruleNameOverride,
-    // severity_mapping: severityMapping,
-    // timestamp_override: timestampOverride,
+    author,
+    building_block_type: buildingBlockType,
+    license,
+    risk_score_mapping: riskScoreMapping,
+    rule_name_override: ruleNameOverride,
+    severity_mapping: severityMapping,
+    timestamp_override: timestampOverride,
     references,
     severity,
     false_positives: falsePositives,
@@ -132,21 +131,26 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     threat,
   } = rule;
 
-  // TODO: Update types mapping
   return {
     isNew: false,
-    author: [],
-    isBuildingBlock: false,
-    license: 'Elastic License',
-    ruleNameOverride: '',
-    timestampOverride: '',
+    author,
+    isBuildingBlock: buildingBlockType !== undefined,
+    license,
+    ruleNameOverride,
+    timestampOverride,
     name,
     description,
     note: note!,
     references,
-    severity: { value: severity },
+    severity: {
+      value: severity,
+      mapping: severityMapping,
+    },
     tags,
-    riskScore,
+    riskScore: {
+      value: riskScore,
+      mapping: riskScoreMapping,
+    },
     falsePositives,
     threat: threat as IMitreEnterpriseAttack[],
   };

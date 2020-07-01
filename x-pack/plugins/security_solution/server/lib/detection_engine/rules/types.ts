@@ -176,7 +176,7 @@ export interface CreateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
-  falsePositives: FalsePositives;
+  falsePositives: FalsePositives; // TODO: Why isn't this FalsePositivesOrUndefined?
   from: From;
   query: QueryOrUndefined;
   language: LanguageOrUndefined;

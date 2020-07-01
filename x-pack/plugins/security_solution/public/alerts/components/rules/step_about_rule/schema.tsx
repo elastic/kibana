@@ -112,8 +112,13 @@ export const schema: FormSchema = {
     },
   },
   riskScore: {
-    type: FIELD_TYPES.RANGE,
-    serializer: (input: string) => Number(input),
+    value: {
+      type: FIELD_TYPES.RANGE,
+      serializer: (input: string) => Number(input),
+    },
+    mapping: {
+      type: FIELD_TYPES.TEXT,
+    },
   },
   references: {
     label: i18n.translate(

@@ -342,14 +342,15 @@ describe('helpers', () => {
         author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
-        isBuildingBlock: false,
         license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        ruleNameOverride: '',
-        severity: { value: 'low' },
+        risk_score_mapping: [],
+        rule_name_override: '',
+        severity: 'low',
+        severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -368,7 +369,7 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestampOverride: '',
+        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -385,14 +386,15 @@ describe('helpers', () => {
         author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
-        isBuildingBlock: false,
         license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        ruleNameOverride: '',
-        severity: { value: 'low' },
+        risk_score_mapping: [],
+        rule_name_override: '',
+        severity: 'low',
+        severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -411,7 +413,7 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestampOverride: '',
+        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -427,13 +429,14 @@ describe('helpers', () => {
         author: ['Elastic'],
         description: '24/7',
         false_positives: ['test'],
-        isBuildingBlock: false,
         license: 'Elastic License',
         name: 'Query with rule-id',
         references: ['www.test.co'],
         risk_score: 21,
-        ruleNameOverride: '',
-        severity: { value: 'low' },
+        risk_score_mapping: [],
+        rule_name_override: '',
+        severity: 'low',
+        severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -452,7 +455,7 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestampOverride: '',
+        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -497,7 +500,6 @@ describe('helpers', () => {
       const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
       const expected = {
         author: ['Elastic'],
-        isBuildingBlock: false,
         license: 'Elastic License',
         description: '24/7',
         false_positives: ['test'],
@@ -505,8 +507,10 @@ describe('helpers', () => {
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
         risk_score: 21,
-        ruleNameOverride: '',
-        severity: { value: 'low' },
+        risk_score_mapping: [],
+        rule_name_override: '',
+        severity: 'low',
+        severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -515,7 +519,7 @@ describe('helpers', () => {
             technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
           },
         ],
-        timestampOverride: '',
+        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
