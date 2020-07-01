@@ -5,16 +5,10 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiComboBox, EuiTextArea, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
-import {
-  AddMessageVariables,
-  onSelectMessageVariable,
-  onChangeWithMessageVariable,
-  onClickWithMessageVariable,
-} from '../../add_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 

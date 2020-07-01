@@ -8,7 +8,6 @@ import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { WebhookActionParams } from '../types';
-import { AddMessageVariables, onSelectMessageVariable } from '../../add_message_variables';
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
   actionParams,
@@ -31,13 +30,6 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
         isInvalid={errors.body.length > 0 && body !== undefined}
         fullWidth
         error={errors.body}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('body', variable)}
-            paramsProperty="body"
-          />
-        }
       >
         <EuiCodeEditor
           mode="json"
