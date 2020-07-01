@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { mlLog } from '../../client/log';
 import {
   MlCapabilities,
   adminMlCapabilities,
@@ -58,10 +59,12 @@ export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabi
     return async (capabilities: MlCapabilitiesKey[]) => {
       try {
         mlCapabilities = await resolveMlCapabilities(request);
-        if (mlCapabilities === null) {
-          throw Error();
-        }
       } catch (e) {
+        mlLog.warn('Unable to perform ML capabilities check');
+        throw Error(e);
+      }
+
+      if (mlCapabilities === null) {
         throw Error('ML capabilities have not been initialized');
       }
 
