@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import Theme from '@elastic/eui/dist/eui_theme_light.json';
+import LightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
-export let euiLightVars: typeof Theme;
-export let euiDarkVars: typeof Theme;
+export type Theme = typeof LightTheme;
+
+export let euiLightVars: Theme;
+export let euiDarkVars: Theme;
 if (globals.__kbnThemeVersion__ === 'v7') {
   euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
@@ -34,7 +36,7 @@ if (globals.__kbnThemeVersion__ === 'v7') {
 /**
  * EUI Theme vars that automatically adjust to light/dark theme
  */
-export let euiThemeVars: typeof Theme;
+export let euiThemeVars: Theme;
 if (globals.__kbnDarkTheme__) {
   euiThemeVars = euiDarkVars;
 } else {
