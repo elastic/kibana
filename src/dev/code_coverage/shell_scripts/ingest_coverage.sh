@@ -3,11 +3,14 @@
 echo "### Ingesting Code Coverage"
 echo ""
 
+COVERAGE_JOB_NAME=$1
+export COVERAGE_JOB_NAME
+echo "### debug COVERAGE_JOB_NAME: ${COVERAGE_JOB_NAME}"
 
-BUILD_ID=$1
+BUILD_ID=$2
 export BUILD_ID
 
-CI_RUN_URL=$2
+CI_RUN_URL=$3
 export CI_RUN_URL
 echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 
@@ -16,6 +19,9 @@ export ES_HOST
 
 STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
+
+DELAY=100
+export DELAY
 
 for x in jest functional; do
   echo "### Ingesting coverage for ${x}"

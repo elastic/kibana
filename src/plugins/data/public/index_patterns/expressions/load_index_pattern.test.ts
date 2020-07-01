@@ -17,21 +17,23 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { maybeTeamAssign } from '../ingest';
-import { COVERAGE_INDEX, TOTALS_INDEX } from '../constants';
+import { indexPatternLoad } from './load_index_pattern';
 
-describe(`Ingest fns`, () => {
-  describe(`maybeTeamAssign fn`, () => {
-    describe(`against the coverage index`, () => {
-      it(`should have the pipeline prop`, () => {
-        expect(maybeTeamAssign(COVERAGE_INDEX, {})).to.have.property('pipeline');
-      });
-    });
-    describe(`against the totals index`, () => {
-      it(`should not have the pipeline prop`, () => {
-        expect(maybeTeamAssign(TOTALS_INDEX, {})).not.to.have.property('pipeline');
-      });
-    });
+jest.mock('../../services', () => ({
+  getIndexPatterns: () => ({
+    get: (id: string) => ({
+      toSpec: () => ({
+        title: 'value',
+      }),
+    }),
+  }),
+}));
+
+describe('indexPattern expression function', () => {
+  test('returns serialized index pattern', async () => {
+    const indexPatternDefinition = indexPatternLoad();
+    const result = await indexPatternDefinition.fn(null, { id: '1' }, {} as any);
+    expect(result.type).toEqual('index_pattern');
+    expect(result.value.title).toEqual('value');
   });
 });
