@@ -8,7 +8,7 @@ import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { WebhookActionParams } from '../types';
-import { AddMessageVariables } from '../../add_message_variables';
+import { AddMessageVariables, onSelectMessageVariable } from '../../add_message_variables';
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
   actionParams,
@@ -18,9 +18,6 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
   errors,
 }) => {
   const { body } = actionParams;
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, !body ? `{{${variable}}}` : ` {{${variable}}}`, index);
-  };
   return (
     <Fragment>
       <EuiFormRow
