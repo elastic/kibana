@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraClientCoreSetup } from '../types';
-import { FetchData, LogsFetchDataResponse, HasData } from '../../../observability/public';
+import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import {
+  FetchData,
+  LogsFetchDataResponse,
+  HasData,
+  FetchDataParams,
+} from '../../../observability/public';
+
+interface LogParams {
+  index: string;
+  timestampField: string;
+}
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
@@ -31,7 +41,12 @@ export function getLogsOverviewDataFetcher(
     const [, startPlugins] = await getStartServices();
     const { data } = startPlugins;
 
-    const { stats, series } = await fetchLogsOverview();
+    // FIXME figure out how to get these from the sourceConfiguration
+    const { stats, series } = await fetchLogsOverview(
+      { index: 'filebeat-*', timestampField: '@timestamp' },
+      params,
+      data
+    );
 
     return {
       title: 'Log rate',
@@ -42,7 +57,11 @@ export function getLogsOverviewDataFetcher(
   };
 }
 
-async function fetchLogsOverview(): Promise<StatsAndSeries> {
+async function fetchLogsOverview(
+  logParams: LogParams,
+  params: FetchDataParams,
+  dataPlugin: InfraClientStartDeps['data']
+): Promise<StatsAndSeries> {
   return Promise.resolve({
     stats: {
       nginx: {
