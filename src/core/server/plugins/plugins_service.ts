@@ -245,9 +245,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: ${JSON.stringify(
-            pluginEnablement.missingDependencies
-          )}`
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: [${pluginEnablement.missingDependencies.join(
+            ', '
+          )}]`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
