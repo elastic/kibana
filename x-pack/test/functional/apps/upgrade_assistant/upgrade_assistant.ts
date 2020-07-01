@@ -11,7 +11,7 @@ export default function upgradeAssistantFunctionalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['upgradeAssistant']);
+  const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const security = getService('security');
 
   describe('Upgrade Checkup', function () {
@@ -35,6 +35,7 @@ export default function upgradeAssistantFunctionalTests({
 
     it('allows user to toggle deprecation logging', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
+      await PageObjects.common.sleep(50000);
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
