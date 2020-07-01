@@ -83,6 +83,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
             unenrolledAgentIds,
           }
         );
+
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams

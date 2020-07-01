@@ -30,10 +30,6 @@ export async function deleteMetadataStream(getService: (serviceName: 'es') => Cl
   await deleteDataStream(getService, metadataIndexPattern);
 }
 
-export async function deleteMetadataMirrorStream(getService: (serviceName: 'es') => Client) {
-  await deleteDataStream(getService, metadataMirrorIndexPattern);
-}
-
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, eventsIndexPattern);
 }
