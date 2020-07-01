@@ -249,7 +249,7 @@ export const getEnvironments = async ({
       index: [
         indices['apm_oss.metricsIndices'],
         indices['apm_oss.errorIndices'],
-        indices['apm_oss.metricsIndices'],
+        indices['apm_oss.transactionIndices'],
       ],
       body: {
         size: 0,
