@@ -34,7 +34,7 @@ export const fittingFunctionDefinitions = [
       defaultMessage: 'linear',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.linear', {
-      defaultMessage: 'Interpolate linearly between nearest values',
+      defaultMessage: 'Interpolate linearly between values',
     }),
   },
   {
@@ -52,7 +52,7 @@ export const fittingFunctionDefinitions = [
       defaultMessage: 'nearest',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.nearest', {
-      defaultMessage: 'Fill gaps with the nearest existing value',
+      defaultMessage: 'Fill gaps with the nearest value',
     }),
   },
   {
@@ -61,7 +61,7 @@ export const fittingFunctionDefinitions = [
       defaultMessage: 'carry',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.carry', {
-      defaultMessage: 'Repeat last value till next value',
+      defaultMessage: 'Fill gaps with last value',
     }),
   },
   {
@@ -70,7 +70,7 @@ export const fittingFunctionDefinitions = [
       defaultMessage: 'lookahead',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.lookahead', {
-      defaultMessage: 'Repeat next value till next value',
+      defaultMessage: 'Fill gaps with next value',
     }),
   },
 ] as const;
