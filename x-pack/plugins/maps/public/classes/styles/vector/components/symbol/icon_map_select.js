@@ -8,8 +8,8 @@ import React from 'react';
 
 import { StyleMapSelect } from '../style_map_select';
 import { i18n } from '@kbn/i18n';
-import { getIconPaletteOptions } from '../../symbol_utils';
 import { IconStops } from './icon_stops';
+import { getIconPaletteOptions } from '../../symbol_utils';
 
 export function IconMapSelect({
   customIconStops,
@@ -19,6 +19,7 @@ export function IconMapSelect({
   styleProperty,
   symbolOptions,
   useCustomIconMap,
+  isCustomOnly,
 }) {
   function onMapSelectChange({ customMapStops, selectedMapId, useCustomMap }) {
     onChange({
@@ -41,20 +42,18 @@ export function IconMapSelect({
     );
   }
 
-  const field = styleProperty.getField();
-  const defaultOptions = field.supportsAutoDomain() ? getIconPaletteOptions(isDarkMode) : [];
-
   return (
     <StyleMapSelect
       onChange={onMapSelectChange}
       customOptionLabel={i18n.translate('xpack.maps.styles.icon.customMapLabel', {
         defaultMessage: 'Custom icon palette',
       })}
-      options={defaultOptions}
+      options={getIconPaletteOptions(isDarkMode)}
       customMapStops={customIconStops}
-      useCustomMap={field.supportsAutoDomain() ? useCustomIconMap : true}
+      useCustomMap={useCustomIconMap}
       selectedMapId={iconPaletteId}
       renderCustomStopsInput={renderCustomIconStopsInput}
+      isCustomOnly={isCustomOnly}
     />
   );
 }
