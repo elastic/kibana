@@ -26,21 +26,40 @@ export const configureClient = (
   { logger, scoped = false }: { logger: Logger; scoped?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
-  const client = new Client(clientOptions);
 
+  const client = new Client(clientOptions);
+  addLogging(client, logger, config.logQueries);
+
+  return client;
+};
+
+const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (err, event) => {
     if (err) {
       logger.error(`${err.name}: ${err.message}`);
-    } else if (config.logQueries) {
+    } else if (logQueries) {
       const params = event.meta.request.params;
+
+      // definition is wrong, `params.querystring` can be either a string or an object
+      const querystring = convertQueryString(params.querystring);
+
       logger.debug(
-        `${event.statusCode}\n${params.method} ${params.path}\n${params.querystring?.trim() ?? ''}`,
+        `${event.statusCode}\n${params.method} ${params.path}${
+          querystring ? `\n${querystring}` : ''
+        }`,
         {
           tags: ['query'],
         }
       );
     }
   });
+};
 
-  return client;
+const convertQueryString = (qs: string | Record<string, any> | undefined): string => {
+  if (qs === undefined || typeof qs === 'string') {
+    return qs ?? '';
+  }
+  return Object.entries(qs)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&');
 };
