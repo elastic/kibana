@@ -59,8 +59,24 @@ export interface ClientFacade {
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
   };
   autoscaling: {
+    deleteAutoscalingPolicy<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.AutoscalingDeleteAutoscalingPolicy,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     getAutoscalingDecision<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.AutoscalingGetAutoscalingDecision,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    getAutoscalingPolicy<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.AutoscalingGetAutoscalingPolicy,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    putAutoscalingPolicy<
+      TResponse = Record<string, any>,
+      TRequestBody extends RequestBody = Record<string, any>,
+      TContext = unknown
+    >(
+      params?: RequestParams.AutoscalingPutAutoscalingPolicy<TRequestBody>,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
   };
@@ -265,6 +281,14 @@ export interface ClientFacade {
       params?: RequestParams.ClusterDeleteComponentTemplate,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    deleteVotingConfigExclusions<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.ClusterDeleteVotingConfigExclusions,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    existsComponentTemplate<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.ClusterExistsComponentTemplate,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     getComponentTemplate<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.ClusterGetComponentTemplate,
       options?: TransportRequestOptions
@@ -279,6 +303,10 @@ export interface ClientFacade {
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     pendingTasks<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.ClusterPendingTasks,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    postVotingConfigExclusions<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.ClusterPostVotingConfigExclusions,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     putComponentTemplate<
@@ -551,6 +579,10 @@ export interface ClientFacade {
       params?: RequestParams.IndicesDeleteDataStream,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    deleteIndexTemplate<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.IndicesDeleteIndexTemplate,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     deleteTemplate<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.IndicesDeleteTemplate,
       options?: TransportRequestOptions
@@ -561,6 +593,10 @@ export interface ClientFacade {
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     existsAlias<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.IndicesExistsAlias,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    existsIndexTemplate<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.IndicesExistsIndexTemplate,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     existsTemplate<TResponse = Record<string, any>, TContext = unknown>(
@@ -603,6 +639,10 @@ export interface ClientFacade {
       params?: RequestParams.IndicesGetFieldMapping,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    getIndexTemplate<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.IndicesGetIndexTemplate,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     getMapping<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.IndicesGetMapping,
       options?: TransportRequestOptions
@@ -629,6 +669,14 @@ export interface ClientFacade {
       TContext = unknown
     >(
       params?: RequestParams.IndicesPutAlias<TRequestBody>,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    putIndexTemplate<
+      TResponse = Record<string, any>,
+      TRequestBody extends RequestBody = Record<string, any>,
+      TContext = unknown
+    >(
+      params?: RequestParams.IndicesPutIndexTemplate<TRequestBody>,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     putMapping<
@@ -689,6 +737,14 @@ export interface ClientFacade {
       TContext = unknown
     >(
       params?: RequestParams.IndicesShrink<TRequestBody>,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    simulateIndexTemplate<
+      TResponse = Record<string, any>,
+      TRequestBody extends RequestBody = Record<string, any>,
+      TContext = unknown
+    >(
+      params?: RequestParams.IndicesSimulateIndexTemplate<TRequestBody>,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     split<
@@ -839,8 +895,12 @@ export interface ClientFacade {
       params?: RequestParams.MlDeleteDatafeed,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-    deleteExpiredData<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.MlDeleteExpiredData,
+    deleteExpiredData<
+      TResponse = Record<string, any>,
+      TRequestBody extends RequestBody = Record<string, any>,
+      TContext = unknown
+    >(
+      params?: RequestParams.MlDeleteExpiredData<TRequestBody>,
       options?: TransportRequestOptions
     ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
     deleteFilter<TResponse = Record<string, any>, TContext = unknown>(
@@ -1350,6 +1410,28 @@ export interface ClientFacade {
     params?: RequestParams.SearchTemplate<TRequestBody>,
     options?: TransportRequestOptions
   ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+  searchableSnapshots: {
+    clearCache<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.SearchableSnapshotsClearCache,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    mount<
+      TResponse = Record<string, any>,
+      TRequestBody extends RequestBody = Record<string, any>,
+      TContext = unknown
+    >(
+      params?: RequestParams.SearchableSnapshotsMount<TRequestBody>,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    repositoryStats<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.SearchableSnapshotsRepositoryStats,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    stats<TResponse = Record<string, any>, TContext = unknown>(
+      params?: RequestParams.SearchableSnapshotsStats,
+      options?: TransportRequestOptions
+    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+  };
   security: {
     authenticate<TResponse = Record<string, any>, TContext = unknown>(
       params?: RequestParams.SecurityAuthenticate,

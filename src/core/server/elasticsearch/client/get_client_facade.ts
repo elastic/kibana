@@ -59,8 +59,14 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
       submit: (params, options) => client.asyncSearch.submit(params, addHeaders(options)),
     },
     autoscaling: {
+      deleteAutoscalingPolicy: (params, options) =>
+        client.autoscaling.deleteAutoscalingPolicy(params, addHeaders(options)),
       getAutoscalingDecision: (params, options) =>
         client.autoscaling.getAutoscalingDecision(params, addHeaders(options)),
+      getAutoscalingPolicy: (params, options) =>
+        client.autoscaling.getAutoscalingPolicy(params, addHeaders(options)),
+      putAutoscalingPolicy: (params, options) =>
+        client.autoscaling.putAutoscalingPolicy(params, addHeaders(options)),
     },
     bulk: (params, options) => client.bulk(params, addHeaders(options)),
     cat: {
@@ -117,11 +123,17 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
         client.cluster.allocationExplain(params, addHeaders(options)),
       deleteComponentTemplate: (params, options) =>
         client.cluster.deleteComponentTemplate(params, addHeaders(options)),
+      deleteVotingConfigExclusions: (params, options) =>
+        client.cluster.deleteVotingConfigExclusions(params, addHeaders(options)),
+      existsComponentTemplate: (params, options) =>
+        client.cluster.existsComponentTemplate(params, addHeaders(options)),
       getComponentTemplate: (params, options) =>
         client.cluster.getComponentTemplate(params, addHeaders(options)),
       getSettings: (params, options) => client.cluster.getSettings(params, addHeaders(options)),
       health: (params, options) => client.cluster.health(params, addHeaders(options)),
       pendingTasks: (params, options) => client.cluster.pendingTasks(params, addHeaders(options)),
+      postVotingConfigExclusions: (params, options) =>
+        client.cluster.postVotingConfigExclusions(params, addHeaders(options)),
       putComponentTemplate: (params, options) =>
         client.cluster.putComponentTemplate(params, addHeaders(options)),
       putSettings: (params, options) => client.cluster.putSettings(params, addHeaders(options)),
@@ -185,10 +197,14 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
       deleteAlias: (params, options) => client.indices.deleteAlias(params, addHeaders(options)),
       deleteDataStream: (params, options) =>
         client.indices.deleteDataStream(params, addHeaders(options)),
+      deleteIndexTemplate: (params, options) =>
+        client.indices.deleteIndexTemplate(params, addHeaders(options)),
       deleteTemplate: (params, options) =>
         client.indices.deleteTemplate(params, addHeaders(options)),
       exists: (params, options) => client.indices.exists(params, addHeaders(options)),
       existsAlias: (params, options) => client.indices.existsAlias(params, addHeaders(options)),
+      existsIndexTemplate: (params, options) =>
+        client.indices.existsIndexTemplate(params, addHeaders(options)),
       existsTemplate: (params, options) =>
         client.indices.existsTemplate(params, addHeaders(options)),
       existsType: (params, options) => client.indices.existsType(params, addHeaders(options)),
@@ -202,12 +218,16 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
         client.indices.getDataStreams(params, addHeaders(options)),
       getFieldMapping: (params, options) =>
         client.indices.getFieldMapping(params, addHeaders(options)),
+      getIndexTemplate: (params, options) =>
+        client.indices.getIndexTemplate(params, addHeaders(options)),
       getMapping: (params, options) => client.indices.getMapping(params, addHeaders(options)),
       getSettings: (params, options) => client.indices.getSettings(params, addHeaders(options)),
       getTemplate: (params, options) => client.indices.getTemplate(params, addHeaders(options)),
       getUpgrade: (params, options) => client.indices.getUpgrade(params, addHeaders(options)),
       open: (params, options) => client.indices.open(params, addHeaders(options)),
       putAlias: (params, options) => client.indices.putAlias(params, addHeaders(options)),
+      putIndexTemplate: (params, options) =>
+        client.indices.putIndexTemplate(params, addHeaders(options)),
       putMapping: (params, options) => client.indices.putMapping(params, addHeaders(options)),
       putSettings: (params, options) => client.indices.putSettings(params, addHeaders(options)),
       putTemplate: (params, options) => client.indices.putTemplate(params, addHeaders(options)),
@@ -219,6 +239,8 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
       segments: (params, options) => client.indices.segments(params, addHeaders(options)),
       shardStores: (params, options) => client.indices.shardStores(params, addHeaders(options)),
       shrink: (params, options) => client.indices.shrink(params, addHeaders(options)),
+      simulateIndexTemplate: (params, options) =>
+        client.indices.simulateIndexTemplate(params, addHeaders(options)),
       split: (params, options) => client.indices.split(params, addHeaders(options)),
       stats: (params, options) => client.indices.stats(params, addHeaders(options)),
       unfreeze: (params, options) => client.indices.unfreeze(params, addHeaders(options)),
@@ -376,6 +398,14 @@ export const getClientFacade = (client: Client, headers: Headers = {}): ClientFa
     search: (params, options) => client.search(params, addHeaders(options)),
     searchShards: (params, options) => client.searchShards(params, addHeaders(options)),
     searchTemplate: (params, options) => client.searchTemplate(params, addHeaders(options)),
+    searchableSnapshots: {
+      clearCache: (params, options) =>
+        client.searchableSnapshots.clearCache(params, addHeaders(options)),
+      mount: (params, options) => client.searchableSnapshots.mount(params, addHeaders(options)),
+      repositoryStats: (params, options) =>
+        client.searchableSnapshots.repositoryStats(params, addHeaders(options)),
+      stats: (params, options) => client.searchableSnapshots.stats(params, addHeaders(options)),
+    },
     security: {
       authenticate: (params, options) => client.security.authenticate(params, addHeaders(options)),
       changePassword: (params, options) =>

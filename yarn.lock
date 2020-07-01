@@ -2169,6 +2169,17 @@
     utility-types "^3.10.0"
     uuid "^3.3.2"
 
+"@elastic/elasticsearch@7.8.0":
+  version "7.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.8.0.tgz#3f9ee54fe8ef79874ebd231db03825fa500a7111"
+  integrity sha512-rUOTNN1At0KoN0Fcjd6+J7efghuURnoMTB/od9EMK6Mcdebi6N3z5ulShTsKRn6OanS9Eq3l/OmheQY1Y+WLcg==
+  dependencies:
+    debug "^4.1.1"
+    decompress-response "^4.2.0"
+    ms "^2.1.1"
+    pump "^3.0.0"
+    secure-json-parse "^2.1.0"
+
 "@elastic/elasticsearch@^7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.4.0.tgz#57f4066acf25e9d4e9b4f6376088433aae6f25d4"
@@ -2180,17 +2191,6 @@
     ms "^2.1.1"
     once "^1.4.0"
     pump "^3.0.0"
-
-"@elastic/elasticsearch@^7.7.1":
-  version "7.7.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.7.1.tgz#ad95145fcd779206d101560cb90cdeb3041d2984"
-  integrity sha512-OzCitXAMQ4pC6EwtPCO0KBygjDFcBMBrJ6pBguYuZxtMbRLOPjcS1Er31N0+J6mp2Q8pU0HGm1FAGfGe6FJReQ==
-  dependencies:
-    debug "^4.1.1"
-    decompress-response "^4.2.0"
-    ms "^2.1.1"
-    pump "^3.0.0"
-    secure-json-parse "^2.1.0"
 
 "@elastic/ems-client@7.9.3":
   version "7.9.3"
