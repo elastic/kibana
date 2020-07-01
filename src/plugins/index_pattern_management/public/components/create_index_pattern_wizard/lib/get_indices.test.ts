@@ -19,33 +19,50 @@
 
 import { getIndices } from './get_indices';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyApiCaller } from '../../../../../data/public/search/legacy';
+// import { LegacyApiCaller } from '../../../../../data/public/search/legacy';
+import { httpServiceMock } from '../../../../../../core/public/mocks';
 
 export const successfulResponse = {
-  hits: {
-    total: 1,
-    max_score: 0.0,
-    hits: [],
-  },
-  aggregations: {
-    indices: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: '1',
-          doc_count: 1,
-        },
-        {
-          key: '2',
-          doc_count: 1,
-        },
-      ],
+  indices: [
+    {
+      name: 'remoteCluster1:bar-01',
+      attributes: ['open'],
     },
-  },
+    /*
+    {
+      name: 'foo-000001',
+      attributes: ['open', 'hidden'],
+      data_stream: 'foo',
+    },
+
+    {
+      name: 'foo_closed',
+      attributes: ['closed'],
+    },
+
+    {
+      name: 'freeze-index',
+      aliases: ['f-alias'],
+      attributes: ['open', 'frozen'],
+    },
+    */
+  ],
+  aliases: [
+    {
+      name: 'f-alias',
+      indices: ['freeze-index', 'my-index'],
+    },
+  ],
+  data_streams: [
+    {
+      name: 'foo',
+      backing_indices: ['foo-000001'],
+      timestamp_field: '@timestamp',
+    },
+  ],
 };
 
+/*
 export const exceptionResponse = {
   body: {
     error: {
@@ -78,7 +95,7 @@ export const errorResponse = {
   statusCode: 400,
   error: 'Bad Request',
 };
-
+*/
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
@@ -87,6 +104,7 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   isBeta: false,
 });
 
+/*
 function esClientFactory(search: (params: any) => any): LegacyApiCaller {
   return {
     search,
@@ -96,72 +114,89 @@ function esClientFactory(search: (params: any) => any): LegacyApiCaller {
     }),
   };
 }
+*/
 
-const es = esClientFactory(() => successfulResponse);
+// const es = esClientFactory(() => successfulResponse);
+
+const http = httpServiceMock.createStartContract();
+http.get.mockResolvedValue(successfulResponse);
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
-    const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
-    expect(result.length).toBe(2);
-    expect(result[0].name).toBe('1');
-    expect(result[1].name).toBe('2');
+    const result = await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
+    expect(result.length).toBe(3);
+    expect(result[0].name).toBe('f-alias');
+    expect(result[1].name).toBe('foo');
   });
 
   it('should ignore ccs query-all', async () => {
-    expect((await getIndices(es, mockIndexPatternCreationType, '*:', 10)).length).toBe(0);
+    expect((await getIndices(http, mockIndexPatternCreationType, '*:', false)).length).toBe(0);
   });
 
   it('should ignore a single comma', async () => {
-    expect((await getIndices(es, mockIndexPatternCreationType, ',', 10)).length).toBe(0);
-    expect((await getIndices(es, mockIndexPatternCreationType, ',*', 10)).length).toBe(0);
-    expect((await getIndices(es, mockIndexPatternCreationType, ',foobar', 10)).length).toBe(0);
+    expect((await getIndices(http, mockIndexPatternCreationType, ',', false)).length).toBe(0);
+    expect((await getIndices(http, mockIndexPatternCreationType, ',*', false)).length).toBe(0);
+    expect((await getIndices(http, mockIndexPatternCreationType, ',foobar', false)).length).toBe(0);
   });
 
   it('should trim the input', async () => {
     let index;
+    // http.get.mockImplementation
+    http.get.mockResolvedValue((params: { index: string }) => {
+      index = params.index;
+    });
+    /*
+
     const esClient = esClientFactory(
       jest.fn().mockImplementation((params) => {
         index = params.index;
       })
     );
+    */
 
-    await getIndices(esClient, mockIndexPatternCreationType, 'kibana          ', 1);
+    await getIndices(http, mockIndexPatternCreationType, 'kibana          ', false);
     expect(index).toBe('kibana');
   });
 
   it('should use the limit', async () => {
     let limit;
+    /*
     const esClient = esClientFactory(
       jest.fn().mockImplementation((params) => {
         limit = params.body.aggs.indices.terms.size;
       })
     );
-    await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 10);
+    */
+    await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
     expect(limit).toBe(10);
   });
 
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
-      const esClient = esClientFactory(() => errorResponse);
-      const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
+      // const esClient = esClientFactory(() => errorResponse);
+      const result = await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
       expect(result.length).toBe(0);
     });
 
     it('should throw exceptions', async () => {
+      /*
       const esClient = esClientFactory(() => {
         throw new Error('Fail');
       });
+      */
 
       await expect(
-        getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1)
+        getIndices(http, mockIndexPatternCreationType, 'kibana', false)
       ).rejects.toThrow();
     });
 
     it('should handle index_not_found_exception errors gracefully', async () => {
+      /*
       const esClient = esClientFactory(
         () => new Promise((resolve, reject) => reject(exceptionResponse))
       );
-      const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
+      */
+      const result = await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
       expect(result.length).toBe(0);
     });
   });

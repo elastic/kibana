@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export interface MatchedIndex {
+export interface MatchedItem {
   name: string;
   tags: Tag[];
+  item:
+    | ResolveIndexResponseItemIndex
+    | ResolveIndexResponseItemAlias
+    | ResolveIndexResponseItemDataStream;
 }
 
 export interface ResolveIndexResponse {

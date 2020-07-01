@@ -43,6 +43,7 @@ interface StepTimeFieldProps {
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
+  selectedTimeField?: string;
 }
 
 interface StepTimeFieldState {
@@ -69,7 +70,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  state = {
+  state: StepTimeFieldState = {
     error: '',
     timeFields: [],
     selectedTimeField: undefined,
@@ -86,6 +87,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     super(props);
     this.state.indexPatternType = props.indexPatternCreationType.getIndexPatternType() || '';
     this.state.indexPatternName = props.indexPatternCreationType.getIndexPatternName();
+    this.state.selectedTimeField = props.selectedTimeField;
   }
 
   mounted = false;

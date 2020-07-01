@@ -39,10 +39,10 @@ import { Pager } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
-import { MatchedIndex, Tag } from '../../../../types';
+import { MatchedItem, Tag } from '../../../../types';
 
 interface IndicesListProps {
-  indices: MatchedIndex[];
+  indices: MatchedItem[];
   query: string;
 }
 

@@ -21,7 +21,7 @@ import { get, sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-import { MatchedIndex, ResolveIndexResponse } from '../types';
+import { MatchedItem, ResolveIndexResponse } from '../types';
 
 const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('indexPatternManagement.aliasLabel', {
@@ -32,8 +32,8 @@ export async function getIndices(
   http: HttpStart,
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
-  limit: number
-): Promise<MatchedIndex[]> {
+  showAllIndices: boolean
+): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -55,11 +55,10 @@ export async function getIndices(
   }
 
   try {
+    const query = showAllIndices ? { expand_wildcards: 'all' } : undefined;
     const response = await http.get<ResolveIndexResponse>(
-      `/api/index-pattern-management/resolve_index/*`,
-      {
-        // prependBasePath: false,
-      }
+      `/api/index-pattern-management/resolve_index/${pattern}`,
+      { query }
     );
     return responseToItemArray(response, indexPatternCreationType);
   } catch (err) {
@@ -76,17 +75,25 @@ export async function getIndices(
 const responseToItemArray = (
   response: ResolveIndexResponse,
   indexPatternCreationType: IndexPatternCreationConfig
-): MatchedIndex[] => {
-  const source: MatchedIndex[] = [];
+): MatchedItem[] => {
+  const source: MatchedItem[] = [];
 
   response.indices.forEach((index) => {
-    source.push({ name: index.name, tags: indexPatternCreationType.getIndexTags(index.name) });
+    source.push({
+      name: index.name,
+      tags: indexPatternCreationType.getIndexTags(index.name),
+      item: index,
+    });
   });
   response.aliases.forEach((alias) => {
-    source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }] });
+    source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }], item: alias });
   });
   response.data_streams.forEach((dataStream) => {
-    source.push({ name: dataStream.name, tags: [{ key: 'data_stream', name: dataStreamLabel }] });
+    source.push({
+      name: dataStream.name,
+      tags: [{ key: 'data_stream', name: dataStreamLabel }],
+      item: dataStream,
+    });
   });
 
   return sortBy(source, 'name');

@@ -33,12 +33,27 @@ export class IndexPatternManagementPlugin implements Plugin<void, void> {
           params: schema.object({
             query: schema.string(),
           }),
+          query: schema.object({
+            expand_wildcards: schema.maybe(
+              schema.oneOf([
+                schema.literal('all'),
+                schema.literal('open'),
+                schema.literal('closed'),
+                schema.literal('hidden'),
+                schema.literal('none'),
+              ])
+            ),
+          }),
         },
       },
       async (context, req, res) => {
+        const query = req.query.expand_wildcards
+          ? { expand_wildcards: req.query.expand_wildcards }
+          : null;
         const result = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'transport.request',
-          { method: 'GET', path: `/_resolve/index/${req.params.query}` }
+          // todo make sense of paraams vs query string
+          { method: 'GET', path: `/_resolve/index/${encodeURIComponent(req.params.query)}`, query }
         );
         return res.ok({ body: result });
       }

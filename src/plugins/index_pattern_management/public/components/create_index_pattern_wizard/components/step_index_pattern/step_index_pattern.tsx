@@ -26,7 +26,6 @@ import {
   IndexPatternAttributes,
   UI_SETTINGS,
 } from '../../../../../../../plugins/data/public';
-import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
   containsIllegalCharacters,
@@ -40,20 +39,20 @@ import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedIndex } from '../../types';
+import { MatchedItem, ResolveIndexResponseItemDataStream } from '../../types';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
-  allIndices: MatchedIndex[];
+  allIndices: MatchedItem[];
   isIncludingSystemIndices: boolean;
   indexPatternCreationType: IndexPatternCreationConfig;
-  goToNextStep: (query: string) => void;
+  goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
 }
 
 interface StepIndexPatternState {
-  partialMatchedIndices: MatchedIndex[];
-  exactMatchedIndices: MatchedIndex[];
+  partialMatchedIndices: MatchedItem[];
+  exactMatchedIndices: MatchedItem[];
   isLoadingIndices: boolean;
   existingIndexPatterns: string[];
   indexPatternExists: boolean;
@@ -128,7 +127,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices(this.context.services.http, indexPatternCreationType, query, MAX_SEARCH_SIZE)
+        getIndices(
+          this.context.services.http,
+          indexPatternCreationType,
+          query,
+          this.props.isIncludingSystemIndices
+        )
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -143,9 +147,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         this.context.services.http,
         indexPatternCreationType,
         `${query}*`,
-        MAX_SEARCH_SIZE
+        this.props.isIncludingSystemIndices
       ),
-      getIndices(this.context.services.http, indexPatternCreationType, query, MAX_SEARCH_SIZE),
+      getIndices(
+        this.context.services.http,
+        indexPatternCreationType,
+        query,
+        this.props.isIncludingSystemIndices
+      ),
     ]);
 
     // If the search changed, discard this state
@@ -192,9 +201,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderStatusMessage(matchedIndices: {
-    allIndices: MatchedIndex[];
-    exactMatchedIndices: MatchedIndex[];
-    partialMatchedIndices: MatchedIndex[];
+    allIndices: MatchedItem[];
+    exactMatchedIndices: MatchedItem[];
+    partialMatchedIndices: MatchedItem[];
   }) {
     const { indexPatternCreationType, isIncludingSystemIndices } = this.props;
     const { query, isLoadingIndices, indexPatternExists } = this.state;
@@ -217,8 +226,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     visibleIndices,
     allIndices,
   }: {
-    visibleIndices: MatchedIndex[];
-    allIndices: MatchedIndex[];
+    visibleIndices: MatchedItem[];
+    allIndices: MatchedItem[];
   }) {
     const { query, isLoadingIndices, indexPatternExists } = this.state;
 
@@ -258,7 +267,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
   }
 
-  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedIndex[] }) {
+  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
     const { goToNextStep, indexPatternCreationType } = this.props;
     const {
       query,
@@ -298,6 +307,37 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const isInputInvalid = showingIndexPatternQueryErrors && containsErrors && errors.length > 0;
     const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
+    // todo define next step OR create index pattern.
+    // look at matched indices
+    // if all are data streams with same time field then create index pattern
+    const {
+      allMatchingDataStreams: uniformDataStreams,
+      timeFieldName: matchingTimestamp,
+    } = indices.reduce(
+      (
+        {
+          allMatchingDataStreams,
+          timeFieldName,
+        }: { allMatchingDataStreams: boolean; timeFieldName?: string },
+        matchedItem
+      ) => {
+        const dataStreamItem = matchedItem.item as ResolveIndexResponseItemDataStream;
+        const dataStreamTimestampField = dataStreamItem.timestamp_field;
+        const isDataStream = !!dataStreamItem.timestamp_field;
+        const timestampFieldMatches =
+          timeFieldName === undefined || timeFieldName === dataStreamTimestampField;
+
+        return {
+          allMatchingDataStreams: allMatchingDataStreams && isDataStream && timestampFieldMatches,
+          timeFieldName: dataStreamTimestampField || timeFieldName,
+        };
+      },
+      {
+        allMatchingDataStreams: true,
+        timeFieldName: undefined,
+      }
+    );
+
     return (
       <Header
         data-test-subj="createIndexPatternStep1Header"
@@ -306,7 +346,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={goToNextStep}
+        goToNextStep={() => goToNextStep(query, uniformDataStreams ? matchingTimestamp : undefined)}
+        // goToNextStep={nextStepOrCreate}
         isNextStepDisabled={isNextStepDisabled}
       />
     );

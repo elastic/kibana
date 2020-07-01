@@ -22,13 +22,13 @@ import React from 'react';
 import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MatchedIndex } from '../../../../types';
+import { MatchedItem } from '../../../../types';
 
 interface StatusMessageProps {
   matchedIndices: {
-    allIndices: MatchedIndex[];
-    exactMatchedIndices: MatchedIndex[];
-    partialMatchedIndices: MatchedIndex[];
+    allIndices: MatchedItem[];
+    exactMatchedIndices: MatchedItem[];
+    partialMatchedIndices: MatchedItem[];
   };
   isIncludingSystemIndices: boolean;
   query: string;

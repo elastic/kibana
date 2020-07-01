@@ -30,22 +30,23 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
+
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';
 import { IndexPatternManagmentContextValue } from '../../types';
-import { MatchedIndex } from './types';
+import { MatchedItem } from './types';
 
 interface CreateIndexPatternWizardState {
   step: number;
   indexPattern: string;
-  allIndices: MatchedIndex[];
+  allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
   isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
+  selectedTimeField?: string;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -80,7 +81,7 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   catchAndWarn = async (
-    asyncFn: Promise<MatchedIndex[]>,
+    asyncFn: Promise<MatchedItem[]>,
     errorValue: [] | string[],
     errorMsg: ReactElement
   ) => {
@@ -129,22 +130,27 @@ export class CreateIndexPatternWizard extends Component<
           this.context.services.http,
           this.state.indexPatternCreationType,
           `*`,
-          MAX_SEARCH_SIZE
+          this.state.isIncludingSystemIndices
         ),
         [],
         indicesFailMsg
       )
-    ).then((allIndices: MatchedIndex[]) =>
+    ).then((allIndices: MatchedItem[]) =>
       this.setState({ allIndices, isInitiallyLoadingIndices: false })
     );
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, 1),
+      getIndices(
+        this.context.services.http,
+        this.state.indexPatternCreationType,
+        `*:*`,
+        this.state.isIncludingSystemIndices
+      ),
       ['a'],
       clustersFailMsg
-    ).then((remoteIndices: string[] | MatchedIndex[]) =>
+    ).then((remoteIndices: string[] | MatchedItem[]) =>
       this.setState({ remoteClustersExist: !!remoteIndices.length })
     );
   };
@@ -184,7 +190,7 @@ export class CreateIndexPatternWizard extends Component<
       if (isConfirmed) {
         return history.push(`/patterns/${indexPatternId}`);
       } else {
-        return false;
+        return;
       }
     }
 
@@ -196,8 +202,8 @@ export class CreateIndexPatternWizard extends Component<
     history.push(`/patterns/${createdId}`);
   };
 
-  goToTimeFieldStep = (indexPattern: string) => {
-    this.setState({ step: 2, indexPattern });
+  goToTimeFieldStep = (indexPattern: string, selectedTimeField?: string) => {
+    this.setState({ step: 2, indexPattern, selectedTimeField });
   };
 
   goToIndexPatternStep = () => {
@@ -239,7 +245,7 @@ export class CreateIndexPatternWizard extends Component<
       return <LoadingState />;
     }
 
-    const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
+    const hasDataIndices = allIndices.some(({ name }: MatchedItem) => !name.startsWith('.'));
     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
       return (
         <EmptyState
@@ -271,6 +277,7 @@ export class CreateIndexPatternWizard extends Component<
           goToPreviousStep={this.goToIndexPatternStep}
           createIndexPattern={this.createIndexPattern}
           indexPatternCreationType={this.state.indexPatternCreationType}
+          selectedTimeField={this.state.selectedTimeField}
         />
       );
     }
