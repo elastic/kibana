@@ -28,10 +28,9 @@ import {
   PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
+import { IAggConfigs, TimeRange, Query } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
-import { getQueryLog, IAggConfigs, TimeRange, Query } from '../../../../../plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -119,13 +118,7 @@ function DefaultEditorSideBar({
           // For filters aggs we need to store each filter to the query log
           // so that it is made available in the autocomplete.
           agg.params.filters.forEach((filter: FilterValue) => {
-            const persistedLog = getQueryLog(
-              services.uiSettings,
-              new Storage(window.localStorage),
-              'vis_default_editor',
-              filter.input.language
-            );
-            persistedLog.add(filter.input.query);
+            services.data.query.addFilterToQueryLog('vis_default_editor', filter);
           });
         }
         return agg.serialize();
@@ -152,7 +145,7 @@ function DefaultEditorSideBar({
     isDirty,
     eventEmitter,
     embeddableHandler,
-    services.uiSettings,
+    services.data.query,
   ]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
