@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { Coordinates } from '../../../../observability/public/typings/fetch_data_response';
+import { Coordinates } from '../../../../observability/public';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ProcessorEvent } from '../../../common/processor_event';

@@ -121,6 +121,7 @@ export const signalRulesAlertType = ({
       });
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
+      logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
@@ -235,6 +236,8 @@ export const signalRulesAlertType = ({
           });
 
           result = await searchAfterAndBulkCreate({
+            gap,
+            previousStartedAt,
             listClient,
             exceptionsList: exceptionItems ?? [],
             ruleParams: params,
@@ -256,6 +259,7 @@ export const signalRulesAlertType = ({
             refresh,
             tags,
             throttle,
+            buildRuleMessage,
           });
         }
 
