@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, Logger } from 'kibana/server';
+import { LegacyAPICaller, Logger } from 'kibana/server';
 import * as t from 'io-ts';
 import { Client } from 'elasticsearch';
 import Boom from 'boom';
@@ -40,7 +40,7 @@ interface IndexDocumentResponse {
 
 export function createAnnotationsClient(params: {
   index: string;
-  apiCaller: APICaller;
+  apiCaller: LegacyAPICaller;
   logger: Logger;
   license?: ILicense;
 }) {
