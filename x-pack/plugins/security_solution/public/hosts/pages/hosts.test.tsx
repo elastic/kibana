@@ -16,6 +16,7 @@ import {
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
 import { SiemNavigation } from '../../common/components/navigation';
@@ -154,7 +155,13 @@ describe('Hosts - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    const myStore = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

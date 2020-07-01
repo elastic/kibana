@@ -165,6 +165,7 @@ describe('persistTimeline', () => {
         },
       },
     };
+
     const version = null;
     const fetchMock = jest.fn();
     const postMock = jest.fn();
@@ -180,7 +181,11 @@ describe('persistTimeline', () => {
           patch: patchMock.mockReturnValue(mockPatchTimelineResponse),
         },
       });
-      api.persistTimeline({ timelineId, timeline: initialDraftTimeline, version });
+      api.persistTimeline({
+        timelineId,
+        timeline: initialDraftTimeline,
+        version,
+      });
     });
 
     afterAll(() => {

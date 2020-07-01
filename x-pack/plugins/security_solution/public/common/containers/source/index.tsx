@@ -102,7 +102,7 @@ export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null
     browserFields: EMPTY_BROWSER_FIELDS,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
-    indicesExist: undefined,
+    indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
     loading: false,
   });
 

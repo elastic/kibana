@@ -32,23 +32,16 @@ export async function getPageLoadDistribution({
         bool: projection.body.query.bool,
       },
       aggs: {
-        durationMinMax: {
+        minDuration: {
           min: {
             field: 'transaction.duration.us',
             missing: 0,
           },
         },
-        durationPercentiles: {
+        durPercentiles: {
           percentiles: {
             field: 'transaction.duration.us',
             percents: [50, 75, 90, 95, 99],
-            script: {
-              lang: 'painless',
-              source: "doc['transaction.duration.us'].value / params.timeUnit",
-              params: {
-                timeUnit: 1000,
-              },
-            },
           },
         },
       },
@@ -66,31 +59,32 @@ export async function getPageLoadDistribution({
     return null;
   }
 
-  const minDuration = (aggregations?.durationMinMax.value ?? 0) / 1000;
+  const minDuration = aggregations?.minDuration.value ?? 0;
 
   const minPerc = minPercentile ? +minPercentile : minDuration;
 
-  const maxPercentileQuery =
-    aggregations?.durationPercentiles.values['99.0'] ?? 100;
+  const maxPercQuery = aggregations?.durPercentiles.values['99.0'] ?? 10000;
 
-  const maxPerc = maxPercentile ? +maxPercentile : maxPercentileQuery;
+  const maxPerc = maxPercentile ? +maxPercentile : maxPercQuery;
 
   const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
   return {
     pageLoadDistribution: pageDist,
-    percentiles: aggregations?.durationPercentiles.values,
+    percentiles: aggregations?.durPercentiles.values,
+    minDuration: minPerc,
+    maxDuration: maxPerc,
   };
 }
 
 const getPercentilesDistribution = async (
   setup: Setup & SetupTimeRange & SetupUIFilters,
-  minPercentiles: number,
-  maxPercentile: number
+  minDuration: number,
+  maxDuration: number
 ) => {
-  const stepValue = (maxPercentile - minPercentiles) / 50;
+  const stepValue = (maxDuration - minDuration) / 50;
   const stepValues = [];
-  for (let i = 1; i < 50; i++) {
-    stepValues.push((stepValue * i + minPercentiles).toFixed(2));
+  for (let i = 1; i < 51; i++) {
+    stepValues.push((stepValue * i + minDuration).toFixed(2));
   }
 
   const projection = getRumOverviewProjection({
@@ -109,13 +103,6 @@ const getPercentilesDistribution = async (
             field: 'transaction.duration.us',
             values: stepValues,
             keyed: false,
-            script: {
-              lang: 'painless',
-              source: "doc['transaction.duration.us'].value / params.timeUnit",
-              params: {
-                timeUnit: 1000,
-              },
-            },
           },
         },
       },
@@ -126,14 +113,11 @@ const getPercentilesDistribution = async (
 
   const { aggregations } = await client.search(params);
 
-  const pageDist = (aggregations?.loadDistribution.values ?? []) as Array<{
-    key: number;
-    value: number;
-  }>;
+  const pageDist = aggregations?.loadDistribution.values ?? [];
 
   return pageDist.map(({ key, value }, index: number, arr) => {
     return {
-      x: key,
+      x: Math.round(key / 1000),
       y: index === 0 ? value : value - arr[index - 1].value,
     };
   });
