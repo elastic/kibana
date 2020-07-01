@@ -15,6 +15,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  SeriesColorAccessorFn,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -25,7 +26,6 @@ import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './ty
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
-import { SeriesColorAccessorFn } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -1314,7 +1314,7 @@ describe('xy_expression', () => {
       (instance.find(LineSeries).at(0).prop('color') as SeriesColorAccessorFn)({
         yAccessor: 'b',
         seriesKeys: ['Bar'],
-        splitAccessors: ['c'],
+        splitAccessors: new Map<string, string>(),
         key: 'abc',
         specId: 'abc',
       });
