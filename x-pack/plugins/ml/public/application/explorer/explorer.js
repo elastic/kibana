@@ -335,36 +335,37 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
-
-            <EuiAccordion
-              id={this.htmlIdGen()}
-              buttonContent={
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.explorer.annotationsTitle"
-                      defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
-                      values={{ count: annotationsData.length }}
+            <EuiPanel>
+              <EuiAccordion
+                id={this.htmlIdGen()}
+                buttonContent={
+                  <EuiTitle className="panel-title">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.ml.explorer.annotationsTitle"
+                        defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
+                        values={{ count: annotationsData.length }}
+                      />
+                    </h2>
+                  </EuiTitle>
+                }
+              >
+                {annotationsData.length > 0 && (
+                  <>
+                    <AnnotationsTable
+                      jobIds={selectedJobIds}
+                      annotations={annotationsData}
+                      aggregations={aggregations}
+                      drillDown={true}
+                      numberBadge={false}
                     />
-                  </h2>
-                </EuiTitle>
-              }
-            >
-              {annotationsData.length > 0 && (
-                <>
-                  <AnnotationsTable
-                    jobIds={selectedJobIds}
-                    annotations={annotationsData}
-                    aggregations={aggregations}
-                    drillDown={true}
-                    numberBadge={false}
-                  />
-                  <AnnotationFlyout />
-                  <EuiSpacer size="l" />
-                </>
-              )}
-            </EuiAccordion>
-
+                    <AnnotationFlyout />
+                    <EuiSpacer size="l" />
+                  </>
+                )}
+              </EuiAccordion>
+            </EuiPanel>
+            <EuiSpacer size="m" />
             <EuiPanel>
               <EuiTitle className="panel-title">
                 <h2>
