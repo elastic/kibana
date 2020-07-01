@@ -39,7 +39,11 @@ export const parseKID = (str: string) => {
   if (str.length < 8) throw new Error('KID string too short.');
   if (str.length > 2048) throw new Error('KID stirng too long.');
 
-  const [protocol, space, plugin, service, ...path] = str.split(/\/\:/);
+  const parts = str.split(/[\/\:]/);
+
+  if (parts.length < 5) throw new Error('Invalid number of parts in KID.');
+
+  const [protocol, space, plugin, service, ...path] = parts;
 
   if (protocol !== 'kid') throw new Error('Expected KID protocol to be "kid".');
 
