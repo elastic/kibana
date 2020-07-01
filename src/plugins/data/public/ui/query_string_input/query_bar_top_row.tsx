@@ -40,6 +40,7 @@ import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
+import { NoDataPopover } from './no_data_popover';
 
 interface Props {
   query?: Query;
@@ -63,6 +64,7 @@ interface Props {
   customSubmitButton?: any;
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
+  indicateNoData?: boolean;
 }
 
 export function QueryBarTopRow(props: Props) {
@@ -230,10 +232,12 @@ export function QueryBarTopRow(props: Props) {
     }
 
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        {renderDatePicker()}
-        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-      </EuiFlexGroup>
+      <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      </NoDataPopover>
     );
   }
 
