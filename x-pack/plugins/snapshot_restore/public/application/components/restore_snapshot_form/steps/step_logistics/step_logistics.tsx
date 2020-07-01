@@ -176,7 +176,10 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       </EuiFlexGroup>
 
       {snapshotDataStreams.length ? (
-        <DataStreamsGlobalStateCallOut dataStreamsCount={snapshotDataStreams.length} />
+        <>
+          <EuiSpacer size="m" />
+          <DataStreamsGlobalStateCallOut dataStreamsCount={snapshotDataStreams.length} />
+        </>
       ) : undefined}
 
       <EuiSpacer size="l" />

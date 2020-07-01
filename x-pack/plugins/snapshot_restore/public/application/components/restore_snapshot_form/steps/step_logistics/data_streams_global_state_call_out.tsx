@@ -15,7 +15,8 @@ const i18nTexts = {
   callout: {
     title: (count: number) =>
       i18n.translate('xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.title', {
-        defaultMessage: 'This snapshot contains data {count, plural, one {stream} other {streams}}',
+        defaultMessage:
+          'This snapshot contains {count, plural, one {a data stream} other {data streams}}',
         values: { count },
       }),
     body: () => (
