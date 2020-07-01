@@ -29,20 +29,20 @@ export class TimelionPlugin implements Plugin {
       mappings: {
         properties: {
           description: { type: 'text' },
-          hits: { type: 'integer' },
+          hits: { type: 'integer', index: false },
           kibanaSavedObjectMeta: {
             properties: {
-              searchSourceJSON: { type: 'text' },
+              searchSourceJSON: { type: 'text', index: false },
             },
           },
-          timelion_chart_height: { type: 'integer' },
-          timelion_columns: { type: 'integer' },
-          timelion_interval: { type: 'keyword' },
-          timelion_other_interval: { type: 'keyword' },
-          timelion_rows: { type: 'integer' },
-          timelion_sheet: { type: 'text' },
+          timelion_chart_height: { type: 'integer', index: false },
+          timelion_columns: { type: 'integer', index: false },
+          timelion_interval: { type: 'keyword', index: false },
+          timelion_other_interval: { type: 'keyword', index: false },
+          timelion_rows: { type: 'integer', index: false },
+          timelion_sheet: { type: 'text', index: false },
           title: { type: 'text' },
-          version: { type: 'integer' },
+          version: { type: 'integer', index: false },
         },
       },
     });

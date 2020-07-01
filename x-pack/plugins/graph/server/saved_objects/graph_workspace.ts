@@ -20,23 +20,28 @@ export const graphWorkspace: SavedObjectsType = {
         properties: {
           searchSourceJSON: {
             type: 'text',
+            index: false,
           },
         },
       },
       numLinks: {
         type: 'integer',
+        index: false,
       },
       numVertices: {
         type: 'integer',
+        index: false,
       },
       title: {
         type: 'text',
       },
       version: {
         type: 'integer',
+        index: false,
       },
       wsState: {
         type: 'text',
+        index: false,
       },
     },
   },
