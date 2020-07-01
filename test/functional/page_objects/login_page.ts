@@ -19,10 +19,11 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function LoginPageProvider({ getService }: FtrProviderContext) {
+export function LoginPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
+  const { common } = getPageObjects(['common']);
 
   const regularLogin = async (user: string, pwd: string) => {
     await testSubjects.setValue('loginUsername', user);
@@ -60,21 +61,16 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
 
     async logoutLogin(user: string, pwd: string) {
       await this.logout();
-      await this.sleep(3002);
+      await common.sleep(3002);
       await this.login(user, pwd);
     }
 
     async logout() {
       await testSubjects.click('userMenuButton');
-      await this.sleep(500);
+      await common.sleep(500);
       await testSubjects.click('logoutLink');
       log.debug('### found and clicked log out--------------------------');
-      await this.sleep(8002);
-    }
-    async sleep(sleepMilliseconds) {
-      log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await delay(sleepMilliseconds);
-      log.debug(`... sleep(${sleepMilliseconds}) end`);
+      await common.sleep(8002);
     }
   }
 
