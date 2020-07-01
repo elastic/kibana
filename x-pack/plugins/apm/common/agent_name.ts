@@ -30,10 +30,12 @@ export function isAgentName(agentName: string): agentName is AgentName {
   return AGENT_NAMES.includes(agentName as AgentName);
 }
 
+export const RUM_AGENTS = ['js-base', 'rum-js'];
+
 export function isRumAgentName(
   agentName: string | undefined
 ): agentName is 'js-base' | 'rum-js' {
-  return agentName === 'js-base' || agentName === 'rum-js';
+  return RUM_AGENTS.includes(agentName);
 }
 
 export function isJavaAgentName(

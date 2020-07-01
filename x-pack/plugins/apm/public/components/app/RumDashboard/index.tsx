@@ -18,6 +18,7 @@ import { RumDashboard } from './RumDashboard';
 import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
+import { RUM_AGENTS } from '../../../../common/agent_name';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -45,7 +46,7 @@ export function RumOverview() {
             query: {
               start,
               end,
-              uiFilters: JSON.stringify({ agentName: ['rum-js'] }),
+              uiFilters: JSON.stringify({ agentName: RUM_AGENTS }),
             },
           },
         });
