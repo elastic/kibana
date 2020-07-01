@@ -196,7 +196,7 @@ export const ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: number) =>
+export const ENTER_AVAILABILITY_THRESHOLD_VALUE = (value: string) =>
   i18n.translate('xpack.uptime.alerts.monitorStatus.availability.threshold.value', {
     defaultMessage: '< {value}% of checks',
     description:

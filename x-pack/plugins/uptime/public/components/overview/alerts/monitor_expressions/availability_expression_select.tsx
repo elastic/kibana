@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
@@ -12,6 +12,7 @@ import { AlertFieldNumber } from '../alert_field_number';
 import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
 
 interface Props {
+  alertParams: { [param: string]: any };
   setAlertParams: (key: string, value: any) => void;
 }
 
@@ -42,21 +43,40 @@ const TimeRangeOptions: TimeRangeOption[] = [
   },
 ];
 
+const DEFAULT_RANGE = 30;
 const DEFAULT_TIMERANGE_UNIT = 'd';
+const DEFAULT_THRESHOLD = '99';
+const DEFAULT_IS_ENABLED = true;
 
-export const AvailabilityExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
-  const [range, setRange] = useState<number>(30);
-  const [rangeUnit, setRangeUnit] = useState<string>('d');
-  const [threshold, setThreshold] = useState<number>(0.99);
-  const [isEnabled, setIsEnabled] = useState<boolean>(false);
+const isThresholdInvalid = (value: string): boolean => {
+  const n = Number(value);
+  return isNaN(n) || n <= 0 || n > 100;
+};
+
+export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, setAlertParams }) => {
+  const [range, setRange] = useState<number>(alertParams?.availability?.range ?? DEFAULT_RANGE);
+  const [rangeUnit, setRangeUnit] = useState<string>(
+    alertParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
+  );
+  const [threshold, setThreshold] = useState<string>(
+    alertParams?.availability?.threshold ?? DEFAULT_THRESHOLD
+  );
+  const [isEnabled, setIsEnabled] = useState<boolean>(
+    alertParams?.shouldCheckAvailability ?? DEFAULT_IS_ENABLED
+  );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<TimeRangeOption[]>(
     TimeRangeOptions.map((opt) =>
       opt.key === DEFAULT_TIMERANGE_UNIT ? { ...opt, checked: 'on' } : opt
     )
   );
 
+  const thresholdIsInvalid = isThresholdInvalid(threshold);
+
   useEffect(() => {
-    if (isEnabled) {
+    if (thresholdIsInvalid) {
+      setAlertParams('availability', undefined);
+      setAlertParams('shouldCheckAvailability', false);
+    } else if (isEnabled) {
       setAlertParams('shouldCheckAvailability', true);
       setAlertParams('availability', {
         range,
@@ -66,7 +86,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ setAlertParams }
     } else {
       setAlertParams('shouldCheckAvailability', false);
     }
-  }, [isEnabled, range, rangeUnit, setAlertParams, threshold]);
+  }, [isEnabled, range, rangeUnit, setAlertParams, threshold, thresholdIsInvalid]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -82,18 +102,19 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ setAlertParams }
         <AlertExpressionPopover
           aria-label={labels.ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL}
           content={
-            <AlertFieldNumber
-              aria-label={labels.ENTER_AVAILABILITY_THRESHOLD_INPUT_ARIA_LABEL}
-              data-test-subj="xpack.uptime.alerts.monitorStatus.availability.threshold.input"
-              disabled={false}
-              fieldValue={threshold}
-              setFieldValue={setThreshold}
+            <EuiFieldText
+              isInvalid={isThresholdInvalid(threshold)}
+              value={threshold}
+              onChange={(e) => {
+                setThreshold(e.target.value);
+              }}
             />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.availability.threshold"
           description={labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION}
           id="threshold"
           isEnabled={isEnabled}
+          isInvalid={thresholdIsInvalid}
           value={labels.ENTER_AVAILABILITY_THRESHOLD_VALUE(threshold)}
         />
       </EuiFlexItem>

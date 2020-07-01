@@ -16,6 +16,7 @@ import { TimeUnitSelectable, TimeRangeOption } from './time_unit_selectable';
 interface Props {
   defaultTimerangeCount?: number;
   defaultTimerangeUnit?: string;
+  isEnabled?: boolean;
   setAlertParams: (key: string, value: any) => void;
 }
 
@@ -51,6 +52,7 @@ const TimeRangeOptions: TimeRangeOption[] = [
 export const TimeExpressionSelect: React.FC<Props> = ({
   defaultTimerangeCount,
   defaultTimerangeUnit,
+  isEnabled,
   setAlertParams,
 }) => {
   const [numUnits, setNumUnits] = useState<number>(defaultTimerangeCount ?? 15);
@@ -62,10 +64,17 @@ export const TimeExpressionSelect: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-    setAlertParams('timerangeUnit', timerangeUnit);
-    setAlertParams('timerangeCount', numUnits);
-  }, [numUnits, timerangeUnitOptions, setAlertParams]);
+    // should only skip if `isEnabled` is explicitly set to false
+    if (isEnabled !== false) {
+      const timerangeUnit =
+        timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
+      setAlertParams('timerangeUnit', timerangeUnit);
+      setAlertParams('timerangeCount', numUnits);
+    } else {
+      setAlertParams('timerangeUnit', undefined);
+      setAlertParams('timerangeCount', undefined);
+    }
+  }, [isEnabled, numUnits, timerangeUnitOptions, setAlertParams]);
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -84,6 +93,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
           description={labels.ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION}
           id="timerange"
+          isEnabled={isEnabled}
           value={labels.ENTER_NUMBER_OF_TIME_UNITS_VALUE(numUnits)}
         />
       </EuiFlexItem>
@@ -106,6 +116,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
           description=""
           id="timerange-unit"
+          isEnabled={isEnabled}
           value={
             timerangeUnitOptions.find(({ checked }) => checked === 'on')?.label.toLowerCase() ?? ''
           }

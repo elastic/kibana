@@ -10,6 +10,7 @@ import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
 
 interface Props {
+  isEnabled?: boolean;
   defaultNumTimes?: number;
   hasFilters: boolean;
   setAlertParams: (key: string, value: any) => void;
@@ -18,13 +19,19 @@ interface Props {
 export const DownNoExpressionSelect: React.FC<Props> = ({
   defaultNumTimes,
   hasFilters,
+  isEnabled,
   setAlertParams,
 }) => {
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
 
   useEffect(() => {
-    setAlertParams('numTimes', numTimes);
-  }, [numTimes, setAlertParams]);
+    // should only skip if `isEnabled` is explicitly set to false
+    if (isEnabled !== false) {
+      setAlertParams('numTimes', numTimes);
+    } else {
+      setAlertParams('numTimes', undefined);
+    }
+  }, [isEnabled, numTimes, setAlertParams]);
 
   return (
     <AlertExpressionPopover
@@ -41,6 +48,7 @@ export const DownNoExpressionSelect: React.FC<Props> = ({
       data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
       description={hasFilters ? labels.MATCHING_MONITORS_DOWN : labels.ANY_MONITOR_DOWN}
       id="ping-count"
+      isEnabled={isEnabled}
       value={`${numTimes} times`}
     />
   );

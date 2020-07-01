@@ -56,6 +56,12 @@ export const alertFilterLabels = {
   }),
 };
 
+export const statusExpLabels = {
+  ENABLED_CHECKBOX: i18n.translate('xpack.uptime.alerts.monitorStatus.statusEnabledCheck.label', {
+    defaultMessage: 'Status check enabled',
+  }),
+};
+
 export const timeExpLabels = {
   OPEN_TIME_POPOVER: i18n.translate(
     'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
