@@ -209,7 +209,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       if (overwrite) {
         resolutions[`${type}:${id}`] = {
           retry: true,
-          options: { overwrite: true, ...(destinationId && { idToOverwrite: destinationId }) },
+          options: { overwrite: true, ...(destinationId && { destinationId }) },
         };
       }
       this.setState({ conflictingRecord: undefined });

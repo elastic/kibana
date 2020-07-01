@@ -110,7 +110,7 @@ describe('resolveImportErrors', () => {
     });
     getConflictResolutions.mockReturnValueOnce({
       'a:1': { retry: true, options: { overwrite: true } },
-      'a:2': { retry: true, options: { overwrite: true, idToOverwrite: 'x' } },
+      'a:2': { retry: true, options: { overwrite: true, destinationId: 'x' } },
       'a:3': { retry: false },
     });
     const result = await resolveImportErrors({
@@ -148,8 +148,8 @@ describe('resolveImportErrors', () => {
             "type": "a",
           },
           Object {
+            "destinationId": "x",
             "id": "2",
-            "idToOverwrite": "x",
             "overwrite": true,
             "replaceReferences": Array [],
             "type": "a",

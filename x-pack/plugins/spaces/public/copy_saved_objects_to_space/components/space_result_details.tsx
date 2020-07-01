@@ -63,8 +63,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
             if (!checked) {
               props.onRetriesChange(filtered);
             } else {
-              const idToOverwrite = conflict!.error.destinationId;
-              const retry = { type, id, overwrite: true, ...(idToOverwrite && { idToOverwrite }) };
+              const destinationId = conflict!.error.destinationId;
+              const retry = { type, id, overwrite: true, ...(destinationId && { destinationId }) };
               props.onRetriesChange([...filtered, retry]);
             }
           },

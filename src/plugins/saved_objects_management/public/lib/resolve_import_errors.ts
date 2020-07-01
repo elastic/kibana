@@ -31,7 +31,7 @@ export type ConflictResolution =
   | { retry: false } // skip
   | {
       retry: true;
-      options: { overwrite: false } | { overwrite: true; idToOverwrite?: string };
+      options: { overwrite: false } | { overwrite: true; destinationId?: string };
     };
 
 const RESOLVABLE_ERRORS = ['conflict', 'ambiguous_conflict', 'missing_references'];
@@ -164,7 +164,7 @@ export async function resolveImportErrors({
           retry: true,
           options: {
             overwrite: true,
-            ...(destinationId && { idToOverwrite: destinationId }),
+            ...(destinationId && { destinationId }),
           },
         })
       );
