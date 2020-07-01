@@ -74,10 +74,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
         const dependencies = { config, security, request, log: this.logger };
 
-        const hasAppSearchAccess = await checkAccess({
-          enterpriseSearchPath: 'as',
-          ...dependencies,
-        });
+        const { hasAppSearchAccess } = await checkAccess(dependencies);
         // TODO: hasWorkplaceSearchAccess
 
         return {

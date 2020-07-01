@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('node-fetch');
-const fetchMock = require('node-fetch') as jest.Mock;
-const { Response } = jest.requireActual('node-fetch');
-
-import { loggingSystemMock } from 'src/core/server/mocks';
+jest.mock('./enterprise_search_config_api', () => ({
+  callEnterpriseSearchConfigAPI: jest.fn(),
+}));
+import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
 import { checkAccess } from './check_access';
 
 describe('checkAccess', () => {
-  const mockConfig = {
-    host: 'http://localhost:3002',
-    accessCheckTimeout: 200,
-  };
   const mockSecurity = {
     authz: {
       mode: {
@@ -29,27 +24,24 @@ describe('checkAccess', () => {
       }),
     },
   };
-  const mockRequest = {
-    url: { path: '/app/kibana' },
-    headers: { authorization: '==someAuth' },
-  };
   const mockDependencies = {
-    enterpriseSearchPath: 'as',
-    config: mockConfig,
+    request: {},
+    config: { host: 'http://localhost:3002' },
     security: mockSecurity,
-    request: mockRequest,
-    log: loggingSystemMock.create().get(),
   } as any;
 
   describe('when security is disabled', () => {
-    it('should always show the plugin', async () => {
+    it('should allow all access', async () => {
       const security = undefined;
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual(true);
+      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+        hasAppSearchAccess: true,
+        hasWorkplaceSearchAccess: true,
+      });
     });
   });
 
   describe('when the user is a superuser', () => {
-    it('should always show the plugin', async () => {
+    it('should allow all access', async () => {
       const security = {
         ...mockSecurity,
         authz: {
@@ -62,67 +54,9 @@ describe('checkAccess', () => {
           actions: { ui: { get: () => {} } },
         },
       };
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual(true);
-    });
-  });
-
-  describe('when the user is a non-superuser', () => {
-    describe('when enterpriseSearch.host is not set in kibana.yml', () => {
-      it('should hide the plugin', async () => {
-        const config = { host: undefined };
-        expect(await checkAccess({ ...mockDependencies, config })).toEqual(false);
-      });
-    });
-
-    describe('when enterpriseSearch.host is called via http', () => {
-      describe('when the response returns OK', () => {
-        it('should show the plugin', async () => {
-          fetchMock.mockImplementationOnce((url: string) => {
-            expect(url).toEqual('http://localhost:3002/as');
-            return Promise.resolve(new Response('{}'));
-          });
-
-          expect(await checkAccess({ ...mockDependencies })).toEqual(true);
-        });
-      });
-
-      describe('when the user is redirected to /login', () => {
-        it('should hide the plugin', async () => {
-          fetchMock.mockImplementationOnce((url: string) => {
-            expect(url).toEqual('http://localhost:3002/as');
-            return Promise.resolve(new Response('{}', { url: '/login' }));
-          });
-          expect(await checkAccess({ ...mockDependencies })).toEqual(false);
-        });
-      });
-
-      describe('when the server responds with any error', () => {
-        it('should hide the plugin', async () => {
-          fetchMock.mockImplementationOnce((url: string) => {
-            expect(url).toEqual('http://localhost:3002/as');
-            return Promise.reject('Failed');
-          });
-          expect(await checkAccess({ ...mockDependencies })).toEqual(false);
-          expect(mockDependencies.log.error).toHaveBeenCalledWith(
-            'Could not perform access check to Enterprise Search: Failed'
-          );
-        });
-      });
-
-      describe('when the call times out', () => {
-        it('should hide the plugin', async () => {
-          jest.useFakeTimers();
-
-          fetchMock.mockImplementationOnce(async () => {
-            jest.advanceTimersByTime(250);
-            return Promise.reject({ name: 'AbortError' });
-          });
-
-          expect(await checkAccess({ ...mockDependencies })).toEqual(false);
-          expect(mockDependencies.log.warn).toHaveBeenCalledWith(
-            "Exceeded timeout while checking http://localhost:3002 for user access. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses."
-          );
-        });
+      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+        hasAppSearchAccess: true,
+        hasWorkplaceSearchAccess: true,
       });
     });
 
@@ -134,7 +68,45 @@ describe('checkAccess', () => {
           checkPrivilegesWithRequest: undefined,
         },
       };
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual(false);
+      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      });
+    });
+  });
+
+  describe('when the user is a non-superuser', () => {
+    describe('when enterpriseSearch.host is not set in kibana.yml', () => {
+      it('should deny all access', async () => {
+        const config = { host: undefined };
+        expect(await checkAccess({ ...mockDependencies, config })).toEqual({
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: false,
+        });
+      });
+    });
+
+    describe('when enterpriseSearch.host is set in kibana.yml', () => {
+      it('should make a http call and return the access response', async () => {
+        (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
+          access: {
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: true,
+          },
+        }));
+        expect(await checkAccess(mockDependencies)).toEqual({
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: true,
+        });
+      });
+
+      it('falls back to no access if no http response', async () => {
+        (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
+        expect(await checkAccess(mockDependencies)).toEqual({
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: false,
+        });
+      });
     });
   });
 });
