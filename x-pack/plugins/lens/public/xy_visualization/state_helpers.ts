@@ -24,3 +24,12 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 
   return (definition.icon as EuiIconType) || 'empty';
 }
+
+export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
+  if (layer.splitAccessor) {
+    return null;
+  }
+  return (
+    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+  );
+};

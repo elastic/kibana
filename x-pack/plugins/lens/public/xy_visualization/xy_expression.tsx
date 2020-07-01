@@ -34,14 +34,13 @@ import {
   LensFilterEvent,
   LensBrushEvent,
 } from '../types';
-import { XYArgs, SeriesType, visualizationTypes } from './types';
+import { LayerConfig, YConfig, XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart } from './state_helpers';
+import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { getAxesConfiguration } from './axes_configuration';
-import { getColor } from './color_configuration';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -431,7 +430,7 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
-            color: () => getColor(layer, accessor),
+            color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,

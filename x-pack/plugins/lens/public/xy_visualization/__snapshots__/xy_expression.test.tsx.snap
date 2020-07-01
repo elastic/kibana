@@ -35,6 +35,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -73,6 +74,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -148,6 +150,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -186,6 +189,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -261,6 +265,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -299,6 +304,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -374,6 +380,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -412,6 +419,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -487,6 +495,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -529,6 +538,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -608,6 +618,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -650,6 +661,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -729,6 +741,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title="a"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {
@@ -771,6 +784,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     yScaleType="linear"
   />
   <Connect(SpecInstance)
+    color={[Function]}
     data={
       Array [
         Object {

@@ -19,9 +19,8 @@ import {
 } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
-import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { getColor } from './color_configuration';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -204,7 +203,7 @@ const ColorPicker = ({
     return <DisabledColorPicker />;
   }
 
-  const color = getColor(layer, accessor);
+  const color = getSeriesColor(layer, accessor);
   const toggleIsPopoverOpen = (shouldBeOpen = !isPopoverOpen) => {
     setIsPopoverOpen(shouldBeOpen);
   };
