@@ -87,7 +87,7 @@ export class PhraseFilterManager extends FilterManager {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
       return _.get(kbnFilter, 'query.bool.should')
-        .map((kbnQueryFilter: any) => {
+        .map((kbnQueryFilter: PhraseFilter) => {
           return this.getValueFromFilter(kbnQueryFilter);
         })
         .filter((value: any) => {

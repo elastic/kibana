@@ -18,7 +18,7 @@
  */
 
 import { difference, get, set } from 'lodash';
-// @ts-ignore
+// @ts-expect-error
 import { getTransform } from '../../../../legacy/deprecation/index';
 import { unset } from '../../../../legacy/utils';
 import { getFlattenedObject } from '../../../utils';

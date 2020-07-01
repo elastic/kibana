@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
+import { identity } from 'lodash3';
 
 import { SerializedFieldFormat } from '../../../../../expressions/common/types';
 import { FieldFormat } from '../../../../common';

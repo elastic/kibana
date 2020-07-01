@@ -629,6 +629,14 @@
         ],
       },
       {
+        groupSlug: 'mock-fs',
+        groupName: 'mock-fs related packages',
+        packageNames: [
+          'mock-fs',
+          '@types/mock-fs',
+        ],
+      },
+      {
         groupSlug: 'moment',
         groupName: 'moment related packages',
         packagePatterns: [

@@ -29,7 +29,6 @@ import {
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
-// @ts-ignore: implicit any for JS file
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
