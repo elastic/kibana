@@ -36,14 +36,10 @@ export function getLogsHasDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
 ): HasData {
   return async () => {
-    // if you need the data plugin, this is how you get it
-    // const [, startPlugins] = await getStartServices();
-    // const { data } = startPlugins;
+    const [, startPlugins] = await getStartServices();
+    const { data } = startPlugins;
 
-    // if you need a core dep, we need to pass in more than just getStartServices
-
-    // perform query
-    return true;
+    return await hasLogsOverview('filebeat-*', data);
   };
 }
 
@@ -68,6 +64,30 @@ export function getLogsOverviewDataFetcher(
       series,
     };
   };
+}
+
+async function hasLogsOverview(
+  index: string,
+  dataPlugin: InfraClientStartDeps['data']
+): Promise<boolean> {
+  const esSearcher = dataPlugin.search.getSearchStrategy('es');
+  return new Promise((resolve, reject) => {
+    esSearcher
+      .search({
+        params: {
+          index,
+          body: {
+            size: 0,
+          },
+        },
+      })
+      .subscribe(
+        (response) => {
+          resolve(response.rawResponse.hits.total > 0);
+        },
+        (error) => reject(error)
+      );
+  });
 }
 
 async function fetchLogsOverview(
