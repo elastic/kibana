@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function LoginPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function LoginPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
-  const { common } = getPageObjects(['common']);
 
   const regularLogin = async (user: string, pwd: string) => {
     await testSubjects.setValue('loginUsername', user);
@@ -61,16 +61,21 @@ export function LoginPageProvider({ getService, getPageObjects }: FtrProviderCon
 
     async logoutLogin(user: string, pwd: string) {
       await this.logout();
-      await common.sleep(3002);
+      await this.sleep(3002);
       await this.login(user, pwd);
     }
 
     async logout() {
       await testSubjects.click('userMenuButton');
-      await common.sleep(500);
+      await this.sleep(500);
       await testSubjects.click('logoutLink');
       log.debug('### found and clicked log out--------------------------');
-      await common.sleep(8002);
+      await this.sleep(8002);
+    }
+    async sleep(sleepMilliseconds: number) {
+      log.debug(`... sleep(${sleepMilliseconds}) start`);
+      await delay(sleepMilliseconds);
+      log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
   }
 
