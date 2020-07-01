@@ -101,7 +101,7 @@ export class ReportingStore {
   }
 
   private async saveReport(report: Report) {
-    const payload = report.payload as { objectType: string; layout: LayoutInstance };
+    const payload = report.payload as { type: string; layout: LayoutInstance };
 
     const indexParams = {
       index: report._index,
@@ -111,7 +111,7 @@ export class ReportingStore {
         meta: {
           // We are copying these values out of payload because these fields are indexed and can be aggregated on
           // for tracking stats, while payload contents are not.
-          objectType: payload.objectType,
+          objectType: payload.type,
           layout: payload.layout ? payload.layout.id : 'none',
         },
         payload: report.payload,
