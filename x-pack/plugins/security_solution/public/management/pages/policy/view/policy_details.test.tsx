@@ -13,6 +13,8 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../../com
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
