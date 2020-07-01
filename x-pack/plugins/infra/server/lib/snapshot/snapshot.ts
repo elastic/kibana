@@ -110,15 +110,22 @@ const requestGroupedNodes = async (
   >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
 };
 
+const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
+  const { metrics } = options;
+  if (metrics.every((m) => m.type === 'logRate')) {
+    return options.sourceConfiguration.logAlias;
+  }
+  if (metrics.some((m) => m.type === 'logRate')) {
+    return `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`;
+  }
+  return options.sourceConfiguration.metricAlias;
+};
+
 const requestNodeMetrics = async (
   client: ESSearchClient,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
-  const index =
-    options.metric.type === 'logRate'
-      ? `${options.sourceConfiguration.logAlias}`
-      : `${options.sourceConfiguration.metricAlias}`;
-
+  const index = calculateIndexPatterBasedOnMetrics(options);
   const query = {
     allowNoIndices: true,
     index,
@@ -179,7 +186,7 @@ const mergeNodeBuckets = (
   return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
-      metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
+      metrics: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };
   });
 };
