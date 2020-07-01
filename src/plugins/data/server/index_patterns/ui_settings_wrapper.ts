@@ -17,7 +17,27 @@
  * under the License.
  */
 
-export * from '../../../common/index_patterns/index_patterns';
-export * from './redirect_no_index_pattern';
-export * from './on_unsupported_time_pattern';
-export * from './index_patterns_api_client';
+import { IUiSettingsClient } from 'src/core/server';
+import { UiSettingsCommon } from '../../common/index_patterns';
+
+export class UiSettingsServerToCommon implements UiSettingsCommon {
+  private uiSettings: IUiSettingsClient;
+  constructor(uiSettings: IUiSettingsClient) {
+    this.uiSettings = uiSettings;
+  }
+  get(key: string) {
+    return this.uiSettings.get(key);
+  }
+
+  getAll() {
+    return this.uiSettings.getAll();
+  }
+
+  set(key: string, value: any) {
+    return this.uiSettings.set(key, value);
+  }
+
+  remove(key: string) {
+    return this.uiSettings.remove(key);
+  }
+}
