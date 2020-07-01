@@ -508,46 +508,6 @@ export class IndexPatternsFetcher {
     }): Promise<IndexPatternFieldDescriptor[]>;
 }
 
-// Warning: (ae-missing-release-tag) "IRequestTypesMap" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export interface IRequestTypesMap {
-    // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [key: string]: IKibanaSearchRequest;
-    // Warning: (ae-forgotten-export) The symbol "ES_SEARCH_STRATEGY" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "IEsSearchRequest" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [ES_SEARCH_STRATEGY]: IEsSearchRequest;
-}
-
-// Warning: (ae-missing-release-tag) "IResponseTypesMap" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export interface IResponseTypesMap {
-    // Warning: (ae-forgotten-export) The symbol "IKibanaSearchResponse" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [key: string]: IKibanaSearchResponse;
-    // Warning: (ae-forgotten-export) The symbol "IEsSearchResponse" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    [ES_SEARCH_STRATEGY]: IEsSearchResponse;
-}
-
-// Warning: (ae-forgotten-export) The symbol "RequestHandlerContext" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ISearch<T extends TStrategyTypes> = (context: RequestHandlerContext, request: IRequestTypesMap[T], options?: ISearchOptions) => Promise<IResponseTypesMap[T]>;
-
-// Warning: (ae-missing-release-tag) "ISearchCancel" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type ISearchCancel<T extends TStrategyTypes> = (context: RequestHandlerContext, id: string) => Promise<void>;
-
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -559,26 +519,33 @@ export interface ISearchOptions {
 //
 // @public (undocumented)
 export interface ISearchSetup {
-    // Warning: (ae-forgotten-export) The symbol "TRegisterSearchStrategy" needs to be exported by the entry point index.d.ts
-    registerSearchStrategy: TRegisterSearchStrategy;
+    registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export interface ISearchStart {
-    // Warning: (ae-forgotten-export) The symbol "TGetSearchStrategy" needs to be exported by the entry point index.d.ts
-    getSearchStrategy: TGetSearchStrategy;
+    getSearchStrategy: (name: string) => ISearchStrategy;
+    // Warning: (ae-forgotten-export) The symbol "RequestHandlerContext" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IKibanaSearchResponse" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    search: (context: RequestHandlerContext, request: IKibanaSearchRequest, options: any) => Promise<IKibanaSearchResponse>;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ISearchStrategy<T extends TStrategyTypes> {
+export interface ISearchStrategy {
     // (undocumented)
-    cancel?: ISearchCancel<T>;
+    cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "IEsSearchRequest" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IEsSearchResponse" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    search: ISearch<T>;
+    search: (context: RequestHandlerContext, request: IEsSearchRequest, options?: ISearchOptions) => Promise<IEsSearchResponse>;
 }
 
 // @public (undocumented)
@@ -756,11 +723,6 @@ export interface TimeRange {
     // (undocumented)
     to: string;
 }
-
-// Warning: (ae-missing-release-tag) "TStrategyTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export type TStrategyTypes = typeof ES_SEARCH_STRATEGY | string;
 
 // Warning: (ae-missing-release-tag) "UI_SETTINGS" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
