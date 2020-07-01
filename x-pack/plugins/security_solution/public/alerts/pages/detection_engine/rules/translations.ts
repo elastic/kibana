@@ -21,7 +21,7 @@ export const IMPORT_RULE = i18n.translate(
 );
 
 export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.uploadValueListsButton',
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
   {
     defaultMessage: 'Upload value lists',
   }
