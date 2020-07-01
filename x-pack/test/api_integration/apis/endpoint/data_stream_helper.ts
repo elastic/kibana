@@ -10,7 +10,6 @@ import {
   eventsIndexPattern,
   alertsIndexPattern,
   policyIndexPattern,
-  metadataMirrorIndexPattern,
 } from '../../../../plugins/security_solution/common/endpoint/constants';
 
 export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
