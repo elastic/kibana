@@ -59,8 +59,7 @@ export class ManifestTask {
         taskType: ManifestTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          // TODO: change this to '60s' before merging
-          interval: '5s',
+          interval: '60s',
         },
         state: {},
         params: { version: ManifestTaskConstants.VERSION },
