@@ -14,7 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('saved object mappings', () => {
-    it(`should not exceed ${MAPPING_BUFFER_LIMIT}, if you see this test failing you should re-evaluate the number of saved object mappings`, async () => {
+    it(`should not exceed ${MAPPING_BUFFER_LIMIT}, if you see this test failing you should re-evaluate the number of saved object mappings. (see https://github.com/elastic/kibana/issues/43673)`, async () => {
       const { body } = await es.fieldCaps({
         index: '.kibana',
         fields: '*',
