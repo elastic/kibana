@@ -6,12 +6,15 @@
 
 import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
 import { usePersistRule } from '../../../../../alerts/containers/detection_engine/rules';
 
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import {
+  getRulesUrl,
+  getDetectionEngineUrl,
+} from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
@@ -35,6 +38,7 @@ import {
 } from '../types';
 import { formatRule } from './helpers';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../../app/types';
 
 const stepsRuleOrder = [
   RuleStep.defineRule,
@@ -117,6 +121,7 @@ const CreateRulePageComponent: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [stepsData.current['define-rule'].data]
   );
+  const history = useHistory();
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
@@ -269,20 +274,27 @@ const CreateRulePageComponent: React.FC = () => {
   if (isSaved) {
     const ruleName = (stepsData.current[RuleStep.aboutRule].data as AboutStepRule).name;
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+    history.replace(getRulesUrl());
+    return null;
   }
 
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    history.replace(getDetectionEngineUrl());
+    return null;
   } else if (userHasNoPermissions(canUserCRUD)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+    history.replace(getRulesUrl());
+    return null;
   }
 
   return (
     <>
       <WrapperPage restrictWidth>
         <DetectionEngineHeaderPage
-          backOptions={{ href: '#detections/rules', text: i18n.BACK_TO_RULES }}
+          backOptions={{
+            href: getRulesUrl(),
+            text: i18n.BACK_TO_RULES,
+            pageId: SecurityPageName.alerts,
+          }}
           border
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
@@ -423,7 +435,7 @@ const CreateRulePageComponent: React.FC = () => {
         </MyEuiPanel>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute pageName={SecurityPageName.alerts} />
     </>
   );
 };

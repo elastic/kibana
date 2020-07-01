@@ -89,10 +89,10 @@ export function defineSAMLRoutes({
     {
       path: '/api/security/saml/callback',
       validate: {
-        body: schema.object({
-          SAMLResponse: schema.string(),
-          RelayState: schema.maybe(schema.string()),
-        }),
+        body: schema.object(
+          { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
+          { unknowns: 'ignore' }
+        ),
       },
       options: { authRequired: false, xsrfRequired: false },
     },
@@ -101,7 +101,11 @@ export function defineSAMLRoutes({
         // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
         const authenticationResult = await authc.login(request, {
           provider: { type: SAMLAuthenticationProvider.type },
-          value: { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: request.body.SAMLResponse },
+          value: {
+            type: SAMLLogin.LoginWithSAMLResponse,
+            samlResponse: request.body.SAMLResponse,
+            relayState: request.body.RelayState,
+          },
         });
 
         if (authenticationResult.redirected()) {

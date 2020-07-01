@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Columns } from '../../paginated_table';
 import { AnomaliesByHost, Anomaly, NarrowDateRange } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
@@ -18,7 +18,7 @@ import { HostDetailsLink } from '../../links';
 import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
-import { createExplorerLink } from '../links/create_explorer_link';
+import { ExplorerLink } from '../links/create_explorer_link';
 import { HostsType } from '../../../../hosts/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
@@ -55,12 +55,12 @@ export const getAnomaliesHostTableColumns = (
     field: 'anomaly.jobId',
     sortable: true,
     render: (jobId, anomaliesByHost) => (
-      <EuiLink
-        href={`${createExplorerLink(anomaliesByHost.anomaly, startDate, endDate)}`}
-        target="_blank"
-      >
-        {jobId}
-      </EuiLink>
+      <ExplorerLink
+        score={anomaliesByHost.anomaly}
+        startDate={startDate}
+        endDate={endDate}
+        linkName={jobId}
+      />
     ),
   },
   {

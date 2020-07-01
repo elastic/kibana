@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { mlLog } from '../../client/log';
 
-export function upgradeCheckProvider(callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']) {
+export function upgradeCheckProvider(
+  callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser']
+) {
   async function isUpgradeInProgress(): Promise<boolean> {
     let upgradeInProgress = false;
     try {

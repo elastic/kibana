@@ -12,7 +12,7 @@ import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 
@@ -56,7 +56,7 @@ const services = {
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   getScopedSavedObjectsClient: () => savedObjectsClientMock.create(),
@@ -67,7 +67,7 @@ const actionExecutorInitializerParams = {
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   actionTypeRegistry,
-  logger: loggingServiceMock.create().get(),
+  logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   getBasePath: jest.fn().mockReturnValue(undefined),
   getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),

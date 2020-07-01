@@ -6,28 +6,28 @@ Array [
     "color": "#6092c0",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <ForwardRef(styled.span)>
+    "text": <styled.span>
       Avg.
-      <ForwardRef(styled.span)>
+      <styled.span>
         468 ms
-      </ForwardRef(styled.span)>
-    </ForwardRef(styled.span)>,
+      </styled.span>
+    </styled.span>,
   },
   Object {
     "color": "#d6bf57",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <ForwardRef(styled.span)>
+    "text": <styled.span>
       95th percentile
-    </ForwardRef(styled.span)>,
+    </styled.span>,
   },
   Object {
     "color": "#da8b45",
     "disabled": undefined,
     "onClick": [Function],
-    "text": <ForwardRef(styled.span)>
+    "text": <styled.span>
       99th percentile
-    </ForwardRef(styled.span)>,
+    </styled.span>,
   },
 ]
 `;

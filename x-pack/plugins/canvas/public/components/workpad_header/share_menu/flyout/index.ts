@@ -11,7 +11,6 @@ import {
   getRenderedWorkpad,
   getRenderedWorkpadExpressions,
 } from '../../../../state/selectors/workpad';
-// @ts-ignore Untyped local
 import {
   downloadRenderedWorkpad,
   downloadRuntime,

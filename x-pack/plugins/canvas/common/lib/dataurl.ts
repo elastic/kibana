@@ -6,7 +6,7 @@
 
 import { fromByteArray } from 'base64-js';
 
-// @ts-ignore @types/mime doesn't resolve mime/lite for some reason.
+// @ts-expect-error @types/mime doesn't resolve mime/lite for some reason.
 import mime from 'mime/lite';
 
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;

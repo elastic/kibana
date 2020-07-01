@@ -49,13 +49,13 @@ describe('getVisualizationInstance', () => {
       data: {},
     };
     savedVisMock = {};
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.savedVisualizations.get.mockImplementation(() => savedVisMock);
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.visualizations.convertToSerializedVis.mockImplementation(() => serializedVisMock);
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.visualizations.createVis.mockImplementation(() => visMock);
-    // @ts-ignore
+    // @ts-expect-error
     mockServices.createVisEmbeddableFromObject.mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));

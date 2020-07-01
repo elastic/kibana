@@ -25,7 +25,7 @@ import {
   duplicateRulesAction,
 } from '../../../pages/detection_engine/rules/all/actions';
 import { GenericDownloader } from '../../../../common/components/generic_downloader';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -56,7 +56,7 @@ const RuleActionsOverflowComponent = ({
   const [, dispatchToaster] = useStateToaster();
 
   const onRuleDeletedCallback = useCallback(() => {
-    history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules`);
+    history.push(getRulesUrl());
   }, [history]);
 
   const actions = useMemo(

@@ -15,6 +15,7 @@ export {
   UseExceptionListSuccess,
 } from '../../lists/public';
 export {
+  CommentsArray,
   ExceptionListSchema,
   ExceptionListItemSchema,
   Entry,
@@ -27,4 +28,5 @@ export {
   OperatorTypeEnum,
   entriesNested,
   entriesExists,
+  entriesList,
 } from '../../lists/common/schemas';

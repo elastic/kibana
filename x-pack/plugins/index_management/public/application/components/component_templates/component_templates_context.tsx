@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksSetup, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, DocLinksStart, NotificationsSetup } from 'src/core/public';
 
 import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
 
@@ -15,7 +15,7 @@ interface Props {
   httpClient: HttpSetup;
   apiBasePath: string;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
-  docLinks: DocLinksSetup;
+  docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
 }
 

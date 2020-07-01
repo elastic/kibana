@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import uuid from 'uuid';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -33,7 +34,6 @@ import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -59,20 +59,21 @@ export const getTopNavConfig = (
   {
     application,
     chrome,
-    dashboard,
+    embeddable,
     history,
     share,
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
     i18n: { Context: I18nContext },
+    featureFlagConfig,
   }: VisualizeServices
 ) => {
   /**
    * Called when the user clicks "Save" button.
    */
   async function doSave(saveOptions: SavedObjectSaveOpts) {
-    const firstSave = !Boolean(savedVis.id);
+    const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
       title: savedVis.title,
@@ -103,11 +104,9 @@ export const getTopNavConfig = (
           history.replace(appPath);
           setActiveUrl(appPath);
 
-          if (originatingApp === 'dashboards') {
-            const savedVisId = firstSave || savedVis.copyOnSave ? id : '';
-            dashboard.addEmbeddableToDashboard({
-              embeddableId: savedVisId,
-              embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+          if (newlyCreated && embeddable) {
+            embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
+              state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
             });
           } else {
             application.navigateToApp(originatingApp);
@@ -236,6 +235,19 @@ export const getTopNavConfig = (
                 return response;
               };
 
+              const createVisReference = () => {
+                if (!originatingApp) {
+                  return;
+                }
+                const input = {
+                  ...vis.serialize(),
+                  id: uuid.v4(),
+                };
+                embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
+                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
+                });
+              };
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis}
@@ -245,7 +257,11 @@ export const getTopNavConfig = (
                   originatingApp={originatingApp}
                 />
               );
-              showSaveModal(saveModal, I18nContext);
+              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+                createVisReference();
+              } else {
+                showSaveModal(saveModal, I18nContext);
+              }
             },
           },
         ]

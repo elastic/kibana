@@ -326,7 +326,6 @@ describe('ReindexActions', () => {
         });
 
         it('fails after 10 attempts to lock', async () => {
-          jest.setTimeout(20000); // increase the timeout
           client.get.mockResolvedValue({
             type: REINDEX_OP_TYPE,
             id: consumerType,
@@ -339,10 +338,7 @@ describe('ReindexActions', () => {
             actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
           ).rejects.toThrow('Could not acquire lock for ML jobs');
           expect(client.update).toHaveBeenCalledTimes(10);
-
-          // Restore default timeout.
-          jest.setTimeout(5000);
-        });
+        }, 20000);
       });
     });
   });

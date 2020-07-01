@@ -81,6 +81,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   });
 
   const onEditorFlyoutOpen = useCallback(() => {
+    setIsTestingPipeline(false);
     setIsRequestVisible(false);
   }, [setIsRequestVisible]);
 

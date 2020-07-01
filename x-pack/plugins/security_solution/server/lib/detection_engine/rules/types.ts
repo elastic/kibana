@@ -14,7 +14,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { ListsDefaultArraySchema } from '../../../../common/detection_engine/schemas/types/lists_default_array';
 import {
   FalsePositives,
   From,
@@ -62,7 +61,6 @@ import {
   ThreatOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
-  ListAndOrUndefined,
   PerPageOrUndefined,
   PageOrUndefined,
   SortFieldOrUndefined,
@@ -80,6 +78,7 @@ import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
+import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -194,7 +193,7 @@ export interface CreateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: Version;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -230,7 +229,7 @@ export interface UpdateRulesOptions {
   references: References;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListsDefaultArraySchema;
+  exceptionsList: ListArray;
   actions: RuleAlertAction[];
 }
 
@@ -264,7 +263,7 @@ export interface PatchRulesOptions {
   references: ReferencesOrUndefined;
   note: NoteOrUndefined;
   version: VersionOrUndefined;
-  exceptionsList: ListAndOrUndefined;
+  exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert | null;
 }

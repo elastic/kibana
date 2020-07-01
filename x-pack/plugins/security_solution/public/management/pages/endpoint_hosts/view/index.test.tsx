@@ -20,6 +20,8 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -34,10 +36,64 @@ describe('when on the hosts page', () => {
     render = () => mockedContext.render(<HostList />);
   });
 
-  it('should show a table', async () => {
+  it('should NOT display timeline', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('hostListTable');
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
+  });
+
+  it('should show the empty state when there are no hosts or polices', async () => {
+    const renderResult = render();
+    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
+  });
+
+  describe('when there are policies, but no hosts', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const hostListData = mockHostResultList({ total: 0 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(hostListData));
+        const hostAction: AppAction = {
+          type: 'serverReturnedHostList',
+          payload: hostListData,
+        };
+        store.dispatch(hostAction);
+
+        jest.clearAllMocks();
+
+        const policyListData = mockPolicyResultList({ total: 3 });
+        coreStart.http.get.mockReturnValue(Promise.resolve(policyListData));
+        const policyAction: AppAction = {
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyListData.items,
+          },
+        };
+        store.dispatch(policyAction);
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show the no hosts empty state', async () => {
+      const renderResult = render();
+      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
+      expect(emptyEndpointsTable).not.toBeNull();
+    });
+
+    it('should display the onboarding steps', async () => {
+      const renderResult = render();
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+
+    it('should show policy selection', async () => {
+      const renderResult = render();
+      const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
+      expect(onboardingPolicySelect).not.toBeNull();
+    });
   });
 
   describe('when there is no selected host in the url', () => {
@@ -156,6 +212,7 @@ describe('when on the hosts page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
+    let agentId: string;
     const dispatchServerReturnedHostPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
@@ -175,6 +232,9 @@ describe('when on the hosts page', () => {
           status: overallStatus,
         };
         policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        downloadModelAction.status = overallStatus;
       }
 
       if (
@@ -217,8 +277,9 @@ describe('when on the hosts page', () => {
         },
       };
 
+      agentId = hostDetails.metadata.elastic.agent.id;
+
       coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
-      coreStart.application.getUrlForApp.mockReturnValue('/app/logs');
 
       reactTestingLibrary.act(() => {
         history.push({
@@ -249,7 +310,7 @@ describe('when on the hosts page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `#/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -265,7 +326,7 @@ describe('when on the hosts page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `/management/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+        `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
       );
     });
 
@@ -274,7 +335,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '#/management/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -347,31 +408,33 @@ describe('when on the hosts page', () => {
       ).not.toBeNull();
     });
 
-    it('should include the link to logs', async () => {
+    it('should include the link to reassignment in Ingest', async () => {
+      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
       const renderResult = render();
-      const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
-      expect(linkToLogs).not.toBeNull();
-      expect(linkToLogs.textContent).toEqual('Endpoint Logs');
-      expect(linkToLogs.getAttribute('href')).toEqual(
-        "/app/logs/stream?logFilter=(expression:'host.id:1',kind:kuery)"
+      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      expect(linkToReassign).not.toBeNull();
+      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.getAttribute('href')).toEqual(
+        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
     });
 
-    describe('when link to logs is clicked', () => {
+    describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
+        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
         const renderResult = render();
-        const linkToLogs = await renderResult.findByTestId('hostDetailsLinkToLogs');
+        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
-          reactTestingLibrary.fireEvent.click(linkToLogs);
+          reactTestingLibrary.fireEvent.click(linkToReassign);
         });
       });
 
-      it('should navigate to logs without full page refresh', () => {
+      it('should navigate to Ingest without full page refresh', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
 
-    describe.skip('when showing host Policy Response panel', () => {
+    describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
@@ -486,7 +549,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '#/management/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
 

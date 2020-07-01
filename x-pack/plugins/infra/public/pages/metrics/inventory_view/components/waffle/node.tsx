@@ -152,8 +152,8 @@ const ValueInner = euiStyled.button`
   border: none;
   &:focus {
     outline: none !important;
-    border: ${(params) => params.theme.eui.euiFocusRingSize} solid
-      ${(params) => params.theme.eui.euiFocusRingColor};
+    border: ${(params) => params.theme?.eui.euiFocusRingSize} solid
+      ${(params) => params.theme?.eui.euiFocusRingColor};
     box-shadow: none;
   }
 `;

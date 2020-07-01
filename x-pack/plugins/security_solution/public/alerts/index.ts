@@ -7,7 +7,7 @@
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
 import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
-import { getAlertsRoutes } from './routes';
+import { AlertsRoutes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
 
 const ALERTS_TIMELINE_IDS: TimelineIdLiteral[] = [
@@ -20,7 +20,7 @@ export class Alerts {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      routes: getAlertsRoutes(),
+      SubPluginRoutes: AlertsRoutes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, ALERTS_TIMELINE_IDS),
       },

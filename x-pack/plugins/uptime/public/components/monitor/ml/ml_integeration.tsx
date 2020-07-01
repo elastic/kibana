@@ -8,7 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
-  hasMLFeatureAvailable,
+  hasMLFeatureSelector,
   hasMLJobSelector,
   isMLJobDeletedSelector,
   isMLJobDeletingSelector,
@@ -35,7 +35,7 @@ export const MLIntegrationComponent = () => {
 
   const dispatch = useDispatch();
 
-  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+  const isMLAvailable = useSelector(hasMLFeatureSelector);
 
   const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId: monitorId as string }));
   const isMLJobDeleting = useSelector(isMLJobDeletingSelector);

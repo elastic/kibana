@@ -17,7 +17,8 @@ import { getEntriesArrayMock, getEntryMatchMock, getEntryNestedMock } from './en
 // it checks against every item in that union. Since entries consist of 5
 // different entry types, it returns 5 of these. To make more readable,
 // extracted here.
-const returnedSchemaError = `"Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "list", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "exists" |} | {| entries: Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "list", value: DefaultStringArray |} | {| field: string, operator: "excluded" | "included", type: "exists" |})>, field: string, type: "nested" |})>"`;
+const returnedSchemaError =
+  '"Array<({| field: string, operator: "excluded" | "included", type: "match", value: string |} | {| field: string, operator: "excluded" | "included", type: "match_any", value: DefaultStringArray |} | {| field: string, list: {| id: string, type: "ip" | "keyword" |}, operator: "excluded" | "included", type: "list" |} | {| field: string, operator: "excluded" | "included", type: "exists" |} | {| entries: Array<{| field: string, operator: "excluded" | "included", type: "match", value: string |}>, field: string, type: "nested" |})>"';
 
 describe('default_entries_array', () => {
   test('it should validate an empty array', () => {

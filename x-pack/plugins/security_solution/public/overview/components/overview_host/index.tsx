@@ -5,23 +5,23 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, OverviewHostQuery } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$ } from '../../../common/lib/kibana';
-import { getHostsUrl } from '../../../common/components/link_to';
+import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
+import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { inputsModel } from '../../../common/store/inputs';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { navTabs } from '../../../app/home/home_navigations';
+import { SecurityPageName } from '../../../app/types';
+import { LinkButton } from '../../../common/components/links';
 
 export interface OwnProps {
   startDate: number;
@@ -49,18 +49,30 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   startDate,
   setQuery,
 }) => {
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
+  const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const urlSearch = useGetUrlSearch(navTabs.hosts);
+
+  const goToHost = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: getHostsUrl(urlSearch),
+      });
+    },
+    [navigateToApp, urlSearch]
+  );
+
   const hostPageButton = useMemo(
     () => (
-      <EuiButton href={getHostsUrl(urlSearch)}>
+      <LinkButton onClick={goToHost} href={formatUrl(getHostsUrl())}>
         <FormattedMessage
           id="xpack.securitySolution.overview.hostsAction"
           defaultMessage="View hosts"
         />
-      </EuiButton>
+      </LinkButton>
     ),
-    [urlSearch]
+    [goToHost, formatUrl]
   );
   return (
     <EuiFlexItem>

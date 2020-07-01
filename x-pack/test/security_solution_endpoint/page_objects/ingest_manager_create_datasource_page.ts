@@ -6,13 +6,14 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function IngestManagerCreateDatasource({ getService }: FtrProviderContext) {
+export function IngestManagerCreateDatasource({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const pageObjects = getPageObjects(['common']);
 
   return {
     /**
-     * Validates that the page shown is the Datasource Craete Page
+     * Validates that the page shown is the Datasource Create Page
      */
     async ensureOnCreatePageOrFail() {
       await testSubjects.existOrFail('createDataSource_header');
@@ -74,6 +75,23 @@ export function IngestManagerCreateDatasource({ getService }: FtrProviderContext
      */
     async waitForSaveSuccessNotification() {
       await testSubjects.existOrFail('datasourceCreateSuccessToast');
+    },
+
+    /**
+     * Validates that the page shown is the Datasource Edit Page
+     */
+    async ensureOnEditPageOrFail() {
+      await testSubjects.existOrFail('editDataSource_header');
+    },
+
+    /**
+     * Navigates to the Ingest Agent configuration Edit Datasource page
+     */
+    async navigateToAgentConfigEditDatasource(agentConfigId: string, datasourceId: string) {
+      await pageObjects.common.navigateToApp('ingestManager', {
+        hash: `/configs/${agentConfigId}/edit-datasource/${datasourceId}`,
+      });
+      await this.ensureOnEditPageOrFail();
     },
   };
 }

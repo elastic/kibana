@@ -12,6 +12,8 @@ import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_li
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { AppAction } from '../../../../common/store/actions';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -21,6 +23,12 @@ describe('when on the policies page', () => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store } = mockedContext);
     render = () => mockedContext.render(<PolicyList />);
+  });
+
+  it('should NOT display timeline', async () => {
+    const renderResult = render();
+    const timelineFlyout = await renderResult.queryByTestId('flyoutOverlay');
+    expect(timelineFlyout).toBeNull();
   });
 
   it('should show the empty state', async () => {
@@ -39,7 +47,7 @@ describe('when on the policies page', () => {
     let firstPolicyID: string;
     beforeEach(() => {
       reactTestingLibrary.act(() => {
-        history.push('/management/policy');
+        history.push('/policy');
         reactTestingLibrary.act(() => {
           const policyListData = mockPolicyResultList({ total: 3 });
           firstPolicyID = policyListData.items[0].id;

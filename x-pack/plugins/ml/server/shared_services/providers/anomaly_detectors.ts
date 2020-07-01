@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
-    callAsCurrentUser: APICaller
+    callAsCurrentUser: LegacyAPICaller
   ): {
     jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
   };
@@ -18,7 +18,7 @@ export interface AnomalyDetectorsProvider {
 
 export function getAnomalyDetectorsProvider(isFullLicense: LicenseCheck): AnomalyDetectorsProvider {
   return {
-    anomalyDetectorsProvider(callAsCurrentUser: APICaller) {
+    anomalyDetectorsProvider(callAsCurrentUser: LegacyAPICaller) {
       return {
         jobs(jobId?: string) {
           isFullLicense();

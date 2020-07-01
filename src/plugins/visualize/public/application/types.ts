@@ -27,7 +27,13 @@ import {
   VisualizeEmbeddableContract,
   VisSavedObject,
 } from 'src/plugins/visualizations/public';
-import { CoreStart, PluginInitializerContext, ChromeStart, ToastsStart } from 'kibana/public';
+import {
+  CoreStart,
+  PluginInitializerContext,
+  ChromeStart,
+  ToastsStart,
+  ScopedHistory,
+} from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
   Storage,
@@ -35,14 +41,16 @@ import {
   ReduxLikeStateContainer,
 } from 'src/plugins/kibana_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { ConfigSchema } from '../../config';
 
 export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];
-  uiState: Record<string, unknown>;
+  uiState: PersistedState;
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
@@ -84,22 +92,26 @@ export interface EditorRenderProps {
 }
 
 export interface VisualizeServices extends CoreStart {
+  embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  kibanaLegacy: KibanaLegacyStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
-  dashboard: DashboardStart;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
-  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   share?: SharePluginStart;
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
+  savedObjectsPublic: SavedObjectsStart;
+  savedVisualizations: VisualizationsStart['savedVisualizationsLoader'];
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
-  savedObjectsPublic: SavedObjectsStart;
+  restorePreviousUrl: () => void;
+  scopedHistory: ScopedHistory;
+  featureFlagConfig: ConfigSchema;
 }
 
 export interface SavedVisInstance {

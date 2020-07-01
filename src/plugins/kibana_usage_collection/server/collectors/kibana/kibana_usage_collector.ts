@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_STATS_TYPE, KIBANA_USAGE_TYPE } from '../../../common/constants';
+import { KIBANA_STATS_TYPE } from '../../../common/constants';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 export function getKibanaUsageCollector(
@@ -29,7 +29,7 @@ export function getKibanaUsageCollector(
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
   return usageCollection.makeUsageCollector({
-    type: KIBANA_USAGE_TYPE,
+    type: 'kibana',
     isReady: () => true,
     async fetch(callCluster) {
       const {

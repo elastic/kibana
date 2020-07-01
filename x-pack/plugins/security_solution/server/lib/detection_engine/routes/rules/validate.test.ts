@@ -14,6 +14,7 @@ import { FindResult } from '../../../../../../alerts/server';
 import { BulkError } from '../utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const ruleOutput: RulesSchema = {
   actions: [],
@@ -68,38 +69,7 @@ export const ruleOutput: RulesSchema = {
       },
     },
   ],
-  exceptions_list: [
-    {
-      field: 'source.ip',
-      values_operator: 'included',
-      values_type: 'exists',
-    },
-    {
-      field: 'host.name',
-      values_operator: 'excluded',
-      values_type: 'match',
-      values: [
-        {
-          name: 'rock01',
-        },
-      ],
-      and: [
-        {
-          field: 'host.id',
-          values_operator: 'included',
-          values_type: 'match_all',
-          values: [
-            {
-              name: '123',
-            },
-            {
-              name: '678',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  exceptions_list: getListArrayMock(),
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   meta: {
     someMeta: 'someField',

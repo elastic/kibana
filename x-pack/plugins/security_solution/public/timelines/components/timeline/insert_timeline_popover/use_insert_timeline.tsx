@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { CursorPosition } from '../../../../common/components/markdown_editor';
@@ -16,8 +17,10 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
     end: 0,
   });
   const handleOnTimelineChange = useCallback(
-    (title: string, id: string | null) => {
-      const builtLink = `${basePath}/app/security#/timelines?timeline=(id:'${id}',isOpen:!t)`;
+    (title: string, id: string | null, graphEventId?: string) => {
+      const builtLink = `${basePath}/app/security/timelines?timeline=(id:'${id}'${
+        !isEmpty(graphEventId) ? `,graphEventId:'${graphEventId}'` : ''
+      },isOpen:!t)`;
       const currentValue = form.getFormData()[fieldName];
       const newValue: string = [
         currentValue.slice(0, cursorPosition.start),
@@ -28,16 +31,12 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
       ].join('');
       form.setFieldValue(fieldName, newValue);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form]
+    [basePath, cursorPosition, fieldName, form]
   );
-  const handleCursorChange = useCallback(
-    (cp: CursorPosition) => {
-      setCursorPosition(cp);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cursorPosition]
-  );
+  const handleCursorChange = useCallback((cp: CursorPosition) => {
+    setCursorPosition(cp);
+  }, []);
+
   return {
     cursorPosition,
     handleCursorChange,

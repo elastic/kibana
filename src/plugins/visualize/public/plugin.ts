@@ -40,16 +40,16 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { VisualizeServices } from './application/types';
-import { DashboardStart } from '../../dashboard/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
+import { EmbeddableStart } from '../../embeddable/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
-  dashboard: DashboardStart;
+  embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
 }
@@ -58,6 +58,10 @@ export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
+}
+
+export interface FeatureFlagConfig {
+  showNewVisualizeFlow: boolean;
 }
 
 export class VisualizePlugin
@@ -73,7 +77,13 @@ export class VisualizePlugin
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
   ) {
-    const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl,
+      restorePreviousUrl,
+    } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/visualize'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
@@ -126,6 +136,12 @@ export class VisualizePlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        /**
+         * current implementation uses 2 history objects:
+         * 1. the hash history (used for the react hash router)
+         * 2. and the scoped history (used for url tracking)
+         * this should be replaced to use only scoped history after moving legacy apps to browser routing
+         */
         const history = createHashHistory();
 
         const services: VisualizeServices = {
@@ -135,6 +151,7 @@ export class VisualizePlugin
             history,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
           }),
+          kibanaLegacy: pluginsStart.kibanaLegacy,
           pluginInitializerContext: this.initializerContext,
           chrome: coreStart.chrome,
           data: pluginsStart.data,
@@ -145,11 +162,14 @@ export class VisualizePlugin
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
+          embeddable: pluginsStart.embeddable,
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
-          dashboard: pluginsStart.dashboard,
           savedObjectsPublic: pluginsStart.savedObjects,
+          scopedHistory: params.history,
+          restorePreviousUrl,
+          featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
         };
 
         params.element.classList.add('visAppWrapper');

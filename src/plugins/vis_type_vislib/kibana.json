@@ -3,6 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
   "optionalPlugins": ["visTypeXy"]
 }

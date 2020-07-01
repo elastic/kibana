@@ -20,13 +20,10 @@
 import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { parse } from 'query-string';
 import { EventEmitter } from 'events';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 
-import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public';
-import { removeQueryParam } from '../../../../kibana_utils/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   useChromeVisibility,
@@ -69,14 +66,10 @@ export const VisualizeEditor = () => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const originatingAppValue = parse(services.history.location.search)[
-      EMBEDDABLE_ORIGINATING_APP_PARAM
-    ] as string | undefined;
-    if (originatingAppValue) {
-      removeQueryParam(services.history, EMBEDDABLE_ORIGINATING_APP_PARAM);
-    }
-    setOriginatingApp(originatingAppValue);
-  }, [services.history]);
+    const { originatingApp: value } =
+      services.embeddable.getStateTransfer(services.scopedHistory).getIncomingEditorState() || {};
+    setOriginatingApp(value);
+  }, [services]);
 
   useEffect(() => {
     // clean up all registered listeners if any is left

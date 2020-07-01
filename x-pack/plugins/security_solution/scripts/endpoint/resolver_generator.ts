@@ -95,19 +95,25 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'events-endpoint-1',
+      default: 'logs-endpoint.events.process-default',
+      type: 'string',
+    },
+    alertIndex: {
+      alias: 'ai',
+      describe: 'index to store alerts in',
+      default: 'logs-endpoint.alerts-default',
       type: 'string',
     },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint.metadata-default-1',
+      default: 'metrics-endpoint.metadata-default',
       type: 'string',
     },
     policyIndex: {
       alias: 'pi',
       describe: 'index to store host policy in',
-      default: 'metrics-endpoint.policy-default-1',
+      default: 'metrics-endpoint.policy-default',
       type: 'string',
     },
     ancestors: {
@@ -192,7 +198,10 @@ async function main() {
 
   const client = new Client(clientOptions);
   if (argv.delete) {
-    await deleteIndices([argv.eventIndex, argv.metadataIndex, argv.policyIndex], client);
+    await deleteIndices(
+      [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
+      client
+    );
   }
 
   let seed = argv.seed;
@@ -209,6 +218,7 @@ async function main() {
     argv.metadataIndex,
     argv.policyIndex,
     argv.eventIndex,
+    argv.alertIndex,
     argv.alertsPerHost,
     {
       ancestors: argv.ancestors,

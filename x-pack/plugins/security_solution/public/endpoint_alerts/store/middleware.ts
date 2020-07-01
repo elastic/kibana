@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eventsIndexPattern } from '../../../common/endpoint/constants';
+import { alertsIndexPattern } from '../../../common/endpoint/constants';
 import { IIndexPattern } from '../../../../../../src/plugins/data/public';
 import {
   AlertResultList,
@@ -49,10 +49,10 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: eventsIndexPattern,
+      pattern: alertsIndexPattern,
     });
     const indexPattern: IIndexPattern = {
-      title: eventsIndexPattern,
+      title: alertsIndexPattern,
       fields,
     };
 
