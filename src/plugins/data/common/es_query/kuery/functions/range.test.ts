@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
 import { IIndexPattern } from '../../../index_patterns';

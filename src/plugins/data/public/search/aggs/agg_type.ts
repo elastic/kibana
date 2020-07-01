@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { constant, noop, identity } from 'lodash3';
+import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { has } from 'lodash3';
+import { has } from 'lodash';
 
 export interface DslRangeQuery {
   range: {

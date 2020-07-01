@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash3';
+import { set } from 'lodash';
 import { FormattedData } from '../../../../../plugins/inspector/public';
 import { FormatFactory } from '../../../common/field_formats/utils';
 import { TabbedTable } from '../tabify';

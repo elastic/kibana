@@ -18,7 +18,7 @@
  */
 
 /* eslint import/no-duplicates: 0 */
-import { cloneDeep, omit } from 'lodash3';
+import { cloneDeep, omit } from 'lodash';
 import sinon from 'sinon';
 
 import * as shouldReadFieldFromDocValuesNS from './should_read_field_from_doc_values';

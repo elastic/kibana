@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, map } from 'lodash3';
+import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter, SharedGlobalConfig } from 'kibana/server';
 

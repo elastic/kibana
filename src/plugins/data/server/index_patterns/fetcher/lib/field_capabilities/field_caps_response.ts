@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash3';
+import { uniq } from 'lodash';
 import { castEsToKbnFieldTypeName } from '../../../../../common';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 import { FieldDescriptor } from '../../../fetcher';

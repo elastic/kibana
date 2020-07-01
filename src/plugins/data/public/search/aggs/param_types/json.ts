@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
@@ -49,7 +49,7 @@ export class JsonParamType extends BaseParamType {
             return _(a)
               .keys()
               .union(_.keys(b))
-              .transform(function (dest, key) {
+              .transform(function (dest: any, key) {
                 const val = compare(a[key], b[key]);
                 if (val !== undefined) dest[key] = val;
               }, {})

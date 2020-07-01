@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { noop, map, omit, isNull } from 'lodash3';
+import { noop, map, omitBy, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -101,7 +101,7 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
             let ranges = aggConfig.params.ranges[ipRangeType];
 
             if (ipRangeType === IP_RANGE_TYPES.FROM_TO) {
-              ranges = map(ranges, (range: any) => omit(range, isNull));
+              ranges = map(ranges, (range: any) => omitBy(range, isNull));
             }
 
             output.params.ranges = ranges;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';

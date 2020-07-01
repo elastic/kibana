@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import { Filter, isExistsFilter, FILTERS } from '../../../../../common';
 
 export const mapExists = (filter: Filter) => {

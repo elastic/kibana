@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEmpty } from 'lodash3';
+import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';

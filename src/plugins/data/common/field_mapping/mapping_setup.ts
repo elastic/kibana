@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mapValues, isString } from 'lodash3';
+import { mapValues, isString } from 'lodash';
 import { FieldMappingSpec, MappingObject } from './types';
 
 // import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin
@@ -28,7 +28,7 @@ type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';
 
 /** @public */
 export const expandShorthand = (sh: Record<string, ShorthandFieldMapObject>): MappingObject => {
-  return mapValues<Record<string, ShorthandFieldMapObject>>(sh, (val: ShorthandFieldMapObject) => {
+  return mapValues(sh, (val: ShorthandFieldMapObject) => {
     const fieldMap = isString(val) ? { type: val } : val;
     const json: FieldMappingSpec = {
       type: ES_FIELD_TYPES.TEXT,

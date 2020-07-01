@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash3';
+import { get, omit } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
 import { IIndexPattern } from '../../index_patterns';

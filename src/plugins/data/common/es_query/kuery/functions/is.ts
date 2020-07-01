@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, isUndefined } from 'lodash3';
+import { get, isUndefined } from 'lodash';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
@@ -97,7 +97,7 @@ export function toElasticsearchQuery(
     });
   }
 
-  const isExistsQuery = valueArg.type === 'wildcard' && value === '*';
+  const isExistsQuery = valueArg.type === 'wildcard' && (value as any) === '*';
   const isAllFieldsQuery =
     (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
     (fields && indexPattern && fields.length === indexPattern.fields.length);
@@ -135,7 +135,7 @@ export function toElasticsearchQuery(
           ...accumulator,
           {
             script: {
-              ...getPhraseScript(field, value),
+              ...getPhraseScript(field, value as any),
             },
           },
         ];

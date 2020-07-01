@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { startCase } from 'lodash3';
+import { startCase } from 'lodash';
 import { IMetricAggConfig } from '../metric_agg_type';
 
 export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {

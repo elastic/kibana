@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { compact } from 'lodash3';
+import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { get, isEqual } from 'lodash3';
+import { get, isEqual } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 

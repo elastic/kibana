@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { repeat } from 'lodash3';
+import { repeat } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 const endOfInputText = i18n.translate('data.common.kql.errors.endOfInputText', {

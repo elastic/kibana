@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { filter } from 'lodash3';
+import { filter } from 'lodash';
 import { Filter, compareFilters, COMPARE_ALL_OPTIONS } from '../../../../common';
 
 const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;

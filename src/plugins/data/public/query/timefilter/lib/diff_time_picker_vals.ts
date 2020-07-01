@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash3';
+import _ from 'lodash';
 
 import { RefreshInterval } from '../../../../common';
 import { InputTimeRange } from '../types';

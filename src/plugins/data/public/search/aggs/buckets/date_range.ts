@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash3';
+import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'src/core/public';

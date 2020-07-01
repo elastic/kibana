@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEmpty } from 'lodash3';
+import { isEmpty } from 'lodash';
 import { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 

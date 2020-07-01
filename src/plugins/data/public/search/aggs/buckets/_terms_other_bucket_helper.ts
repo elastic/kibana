@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash3';
+import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';

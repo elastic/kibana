@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { size, transform, cloneDeep } from 'lodash3';
+import { size, transform, cloneDeep } from 'lodash';
 import { IUiSettingsClient } from 'src/core/public';
 
 import { createFilterFilters } from './create_filter/filters';
@@ -90,7 +90,7 @@ export const getFiltersBucketAgg = ({
 
             const outFilters = transform(
               inFilters,
-              function (filters, filter) {
+              function (filters: any, filter) {
                 const input = cloneDeep(filter.input);
 
                 if (!input) {

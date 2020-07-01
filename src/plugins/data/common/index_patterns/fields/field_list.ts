@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { findIndex } from 'lodash3';
+import { findIndex } from 'lodash';
 import { IIndexPattern } from '../../types';
 import { IFieldType } from '../../../common';
 import { Field } from './field';
