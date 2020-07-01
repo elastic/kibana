@@ -60,7 +60,7 @@ const FIELD_TYPE_OPTIONS = [
   },
 ].map(makeOption);
 
-export interface Props {
+interface Props {
   fields: MVTFieldDescriptor[];
   onChange: (fields: MVTFieldDescriptor[]) => void;
 }
@@ -155,13 +155,9 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
     };
 
     const emptyName = mvtFieldConfig.name === '';
-    let hasDupes = false;
-    for (let i = 0; i < this.state.currentFields.length; i++) {
-      if (i !== index && mvtFieldConfig.name === this.state.currentFields[i].name) {
-        hasDupes = true;
-        break;
-      }
-    }
+    const hasDupes =
+      this.state.currentFields.filter((field) => field.name === mvtFieldConfig.name).length > 1;
+
     return (
       <EuiFieldText
         value={mvtFieldConfig.name}

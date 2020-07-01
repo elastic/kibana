@@ -14,21 +14,21 @@ import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kiba
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
-export type MVTSettings = {
+type MVTSettings = {
   layerName: string;
   fields: MVTFieldDescriptor[];
   minSourceZoom: number;
   maxSourceZoom: number;
 };
 
-export interface State {
+interface State {
   currentLayerName: string;
   currentMinSourceZoom: number;
   currentMaxSourceZoom: number;
   currentFields: MVTFieldDescriptor[];
 }
 
-export interface Props {
+interface Props {
   handleChange: (args: MVTSettings) => void;
   layerName: string;
   fields: MVTFieldDescriptor[];

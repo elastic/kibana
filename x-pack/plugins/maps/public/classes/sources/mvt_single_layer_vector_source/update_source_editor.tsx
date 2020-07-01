@@ -15,7 +15,7 @@ import { MVTSettings, MVTSingleLayerSourceSettings } from './mvt_single_layer_so
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
-export interface Props {
+interface Props {
   tooltipFields: MVTField[];
   onChange: (...args: OnSourceChangeArgs[]) => void;
   source: MVTSingleLayerVectorSource;
