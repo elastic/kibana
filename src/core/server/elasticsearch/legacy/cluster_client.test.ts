@@ -453,14 +453,6 @@ describe('#asScoped', () => {
     );
   });
 
-  test("doesn't create Auditor for a fake request", async () => {
-    const getAuthHeaders = jest.fn();
-    clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
-    clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
-
-    expect(getAuthHeaders).not.toHaveBeenCalled();
-  });
-
   test('filters a fake request headers', async () => {
     clusterClient = new LegacyClusterClient(
       mockEsConfig,
@@ -476,6 +468,40 @@ describe('#asScoped', () => {
       { one: '1', two: '2' },
       undefined
     );
+  });
+
+  describe('Auditor', () => {
+    it('creates Auditor for KibanaRequest', async () => {
+      const auditor = auditTrailServiceMock.createAuditor();
+      const auditorFactory = auditTrailServiceMock.createAuditorFactory();
+      auditorFactory.asScoped.mockReturnValue(auditor);
+      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, () => auditorFactory);
+      clusterClient.asScoped(httpServerMock.createKibanaRequest());
+
+      expect(MockScopedClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockScopedClusterClient).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.any(Function),
+        {},
+        auditor
+      );
+    });
+
+    it("doesn't create Auditor for a fake request", async () => {
+      const getAuthHeaders = jest.fn();
+      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
+      clusterClient.asScoped({ headers: { one: '1', two: '2', three: '3' } });
+
+      expect(getAuthHeaders).not.toHaveBeenCalled();
+    });
+
+    it("doesn't create Auditor when no request passed", async () => {
+      const getAuthHeaders = jest.fn();
+      clusterClient = new LegacyClusterClient(mockEsConfig, mockLogger, getAuthHeaders);
+      clusterClient.asScoped();
+
+      expect(getAuthHeaders).not.toHaveBeenCalled();
+    });
   });
 });
 

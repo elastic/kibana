@@ -18,6 +18,7 @@
  */
 
 import { AuditTrailSetup, AuditTrailStart, Auditor } from './types';
+import { AuditTrailService } from './audit_trail_service';
 
 const createSetupContractMock = () => {
   const mocked: jest.Mocked<AuditTrailSetup> = {
@@ -42,7 +43,14 @@ const createStartContractMock = () => {
   return mocked;
 };
 
+const createServiceMock = (): jest.Mocked<PublicMethodsOf<AuditTrailService>> => ({
+  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
+  start: jest.fn().mockResolvedValue(createStartContractMock()),
+  stop: jest.fn(),
+});
+
 export const auditTrailServiceMock = {
+  create: createServiceMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
   createAuditorFactory: createStartContractMock,

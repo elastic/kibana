@@ -31,6 +31,7 @@ const defaultAuditorFactory: AuditorFactory = {
     };
   },
 };
+
 export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrailStart> {
   private readonly log: Logger;
   private auditor: AuditorFactory = defaultAuditorFactory;
