@@ -81,9 +81,16 @@ export class TagsPlugin
 
     savedObjects.registerType({
       name: 'tag_attachment',
-      hidden: true,
+      hidden: false,
       namespaceType: 'single',
       mappings: tagAttachmentMappings,
+      management: {
+        importableAndExportable: true,
+        icon: 'merge',
+        getTitle: (savedObject) =>
+          savedObject.attributes.tagId + ' : ' + savedObject.attributes.kid,
+        defaultSearchField: 'tagId',
+      },
     });
 
     const router = http.createRouter();

@@ -17,7 +17,7 @@ export const createAttachment = ({ router }: RouteParams) => {
         body: schema.object({
           attachment: schema.object({
             tagId: schema.string(),
-            kri: schema.string(),
+            kid: schema.string(),
           }),
         }),
       },

@@ -12,10 +12,10 @@ export const validateTagId = (id: string) => {
   if (id.length > 256) throw Boom.badRequest('ID is too long.');
 };
 
-export const validateKRI = (kri: string) => {
-  if (typeof kri !== 'string') throw Boom.badRequest('KRI must be a string');
-  if (kri.length < 5) throw Boom.badRequest('KRI is too short.');
-  if (kri.length > 10e3) throw Boom.badRequest('KRI is too long.');
+export const validateKID = (kid: string) => {
+  if (typeof kid !== 'string') throw Boom.badRequest('KID must be a string');
+  if (kid.length < 5) throw Boom.badRequest('KID is too short.');
+  if (kid.length > 10e3) throw Boom.badRequest('KID is too long.');
 };
 
 export const validateTagTitle = (title: string) => {

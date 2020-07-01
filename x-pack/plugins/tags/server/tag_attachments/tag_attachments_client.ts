@@ -13,7 +13,7 @@ import {
   TagAttachmentClientCreateParams,
   TagAttachmentClientCreateResult,
 } from '../../common';
-import { validateTagId, validateKRI } from '../util/validators';
+import { validateTagId, validateKID } from '../util/validators';
 
 export type TagAttachmentSavedObject = SavedObject<RawTagAttachment>;
 
@@ -40,10 +40,10 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
   public async create({
     attachment,
   }: TagAttachmentClientCreateParams): Promise<TagAttachmentClientCreateResult> {
-    const { tagId, kri } = attachment;
+    const { tagId, kid } = attachment;
 
     validateTagId(tagId);
-    validateKRI(kri);
+    validateKID(kid);
 
     const { savedObjectsClient, user } = this.params;
     const at = new Date().toISOString();
@@ -51,7 +51,7 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
 
     const rawAttachment: RawTagAttachment = {
       tagId,
-      kri,
+      kid,
       createdAt: at,
       createdBy: username,
     };

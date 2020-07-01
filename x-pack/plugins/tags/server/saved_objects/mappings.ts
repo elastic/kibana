@@ -69,7 +69,7 @@ export const tagAttachmentMappings = {
     tagId: {
       type: 'keyword',
     },
-    kri: {
+    kid: {
       type: 'keyword',
     },
     createdBy: {

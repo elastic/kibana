@@ -5,12 +5,12 @@
  */
 
 /**
- * Represents a tag attachemnt to KRI (Kibana Resource Identifier) as stored in
+ * Represents a tag attachemnt to KID (Kibana ID) as stored in
  * Saved Object client.
  */
 export interface RawTagAttachment {
   tagId: string;
-  kri: string;
+  kid: string;
   createdBy: string | null;
   createdAt: string;
 }
@@ -21,7 +21,7 @@ export interface RawTagAttachmentWithId extends RawTagAttachment {
 }
 
 export interface TagAttachmentClientCreateParams {
-  attachment: Pick<RawTagAttachment, 'tagId' | 'kri'>;
+  attachment: Pick<RawTagAttachment, 'tagId' | 'kid'>;
 }
 
 export interface TagAttachmentClientCreateResult {
