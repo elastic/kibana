@@ -95,7 +95,9 @@ exports[`tests loading base.yml: base.yml 1`] = `
     "timestamp_field": "@timestamp"
   },
   "_meta": {
-    "package_name": "nginx",
+    "package": {
+      "name": "nginx"
+    },
     "managed_by": "ingest-manager"
   }
 }
@@ -196,7 +198,9 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     "timestamp_field": "@timestamp"
   },
   "_meta": {
-    "package_name": "coredns",
+    "package": {
+      "name": "coredns"
+    },
     "managed_by": "ingest-manager"
   }
 }
@@ -1681,7 +1685,9 @@ exports[`tests loading system.yml: system.yml 1`] = `
     "timestamp_field": "@timestamp"
   },
   "_meta": {
-    "package_name": "system",
+    "package": {
+      "name": "system"
+    },
     "managed_by": "ingest-manager"
   }
 }

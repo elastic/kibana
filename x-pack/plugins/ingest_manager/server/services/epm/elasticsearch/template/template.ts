@@ -306,7 +306,9 @@ function getBaseTemplate(
       timestamp_field: '@timestamp',
     },
     _meta: {
-      package_name: packageName,
+      package: {
+        name: packageName,
+      },
       managed_by: 'ingest-manager',
     },
   };
