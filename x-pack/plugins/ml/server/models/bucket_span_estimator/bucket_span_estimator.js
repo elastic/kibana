@@ -12,13 +12,10 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-export function estimateBucketSpanFactory(
-  callAsCurrentUser,
-  callAsInternalUser,
-  isSecurityDisabled
-) {
-  const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
+export function estimateBucketSpanFactory(mlClusterClient, isSecurityDisabled) {
+  const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
+  const PolledDataChecker = polledDataCheckerFactory(mlClusterClient);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(mlClusterClient);
 
   class BucketSpanEstimator {
     constructor(

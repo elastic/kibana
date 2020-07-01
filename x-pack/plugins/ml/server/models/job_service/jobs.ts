@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from 'boom';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -46,14 +46,16 @@ interface Results {
   };
 }
 
-export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(callAsCurrentUser);
-  const { getAuditMessagesSummary } = jobAuditMessagesProvider(callAsCurrentUser);
-  const { getLatestBucketTimestampByJob } = resultsServiceProvider(callAsCurrentUser);
-  const calMngr = new CalendarManager(callAsCurrentUser);
+export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
+
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClusterClient);
+  const { getAuditMessagesSummary } = jobAuditMessagesProvider(mlClusterClient);
+  const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClusterClient);
+  const calMngr = new CalendarManager(mlClusterClient);
 
   async function forceDeleteJob(jobId: string) {
-    return callAsCurrentUser('ml.deleteJob', { jobId, force: true });
+    return callAsInternalUser('ml.deleteJob', { jobId, force: true });
   }
 
   async function deleteJobs(jobIds: string[]) {
@@ -97,7 +99,7 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
     const results: Results = {};
     for (const jobId of jobIds) {
       try {
-        await callAsCurrentUser('ml.closeJob', { jobId });
+        await callAsInternalUser('ml.closeJob', { jobId });
         results[jobId] = { closed: true };
       } catch (error) {
         if (isRequestTimeout(error)) {
@@ -113,7 +115,7 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
           // if the job has failed we want to attempt a force close.
           // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
           try {
-            await callAsCurrentUser('ml.closeJob', { jobId, force: true });
+            await callAsInternalUser('ml.closeJob', { jobId, force: true });
             results[jobId] = { closed: true };
           } catch (error2) {
             if (isRequestTimeout(error)) {
@@ -136,12 +138,12 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const dfResult = await callAsCurrentUser('ml.stopDatafeed', { datafeedId, force: true });
+    const dfResult = await callAsInternalUser('ml.stopDatafeed', { datafeedId, force: true });
     if (!dfResult || dfResult.stopped !== true) {
       return { success: false };
     }
 
-    await callAsCurrentUser('ml.closeJob', { jobId, force: true });
+    await callAsInternalUser('ml.closeJob', { jobId, force: true });
 
     return { success: true };
   }
@@ -257,13 +259,13 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
       Promise<{ [id: string]: number | undefined }>
     ] = [
       jobIds.length > 0
-        ? callAsCurrentUser<MlJobsResponse>('ml.jobs', { jobId: jobIds }) // move length check in  side call
-        : callAsCurrentUser<MlJobsResponse>('ml.jobs'),
+        ? (callAsInternalUser('ml.jobs', { jobId: jobIds }) as Promise<MlJobsResponse>) // move length check in  side call
+        : (callAsInternalUser('ml.jobs') as Promise<MlJobsResponse>),
       jobIds.length > 0
-        ? callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', { jobId: jobIds })
-        : callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats'),
-      callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds'),
-      callAsCurrentUser<MlDatafeedsStatsResponse>('ml.datafeedStats'),
+        ? (callAsInternalUser('ml.jobStats', { jobId: jobIds }) as Promise<MlJobsStatsResponse>)
+        : (callAsInternalUser('ml.jobStats') as Promise<MlJobsStatsResponse>),
+      callAsInternalUser('ml.datafeeds') as Promise<MlDatafeedsResponse>,
+      callAsInternalUser('ml.datafeedStats') as Promise<MlDatafeedsStatsResponse>,
       calMngr.getAllCalendars(),
       getLatestBucketTimestampByJob(),
     ];
@@ -402,7 +404,7 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
-      const { jobs } = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
+      const { jobs } = (await callAsInternalUser('ml.jobs')) as MlJobsResponse;
       jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
     }
     return { jobIds };
@@ -413,9 +415,9 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   // e.g. *_low_request_rate_ecs
   async function jobsExist(jobIds: string[] = []) {
     // Get the list of job IDs.
-    const jobsInfo = await callAsCurrentUser<MlJobsResponse>('ml.jobs', {
+    const jobsInfo = (await callAsInternalUser('ml.jobs', {
       jobId: jobIds,
-    });
+    })) as MlJobsResponse;
 
     const results: { [id: string]: boolean } = {};
     if (jobsInfo.count > 0) {
@@ -438,8 +440,8 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   }
 
   async function getAllJobAndGroupIds() {
-    const { getAllGroups } = groupsProvider(callAsCurrentUser);
-    const jobs = await callAsCurrentUser<MlJobsResponse>('ml.jobs');
+    const { getAllGroups } = groupsProvider(mlClusterClient);
+    const jobs = (await callAsInternalUser('ml.jobs')) as MlJobsResponse;
     const jobIds = jobs.jobs.map((job) => job.job_id);
     const groups = await getAllGroups();
     const groupIds = groups.map((group) => group.id);
@@ -453,7 +455,7 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   async function getLookBackProgress(jobId: string, start: number, end: number) {
     const datafeedId = `datafeed-${jobId}`;
     const [jobStats, isRunning] = await Promise.all([
-      callAsCurrentUser<MlJobsStatsResponse>('ml.jobStats', { jobId: [jobId] }),
+      callAsInternalUser('ml.jobStats', { jobId: [jobId] }) as Promise<MlJobsStatsResponse>,
       isDatafeedRunning(datafeedId),
     ]);
 
@@ -472,9 +474,9 @@ export function jobsProvider(callAsCurrentUser: LegacyAPICaller) {
   }
 
   async function isDatafeedRunning(datafeedId: string) {
-    const stats = await callAsCurrentUser<MlDatafeedsStatsResponse>('ml.datafeedStats', {
+    const stats = (await callAsInternalUser('ml.datafeedStats', {
       datafeedId: [datafeedId],
-    });
+    })) as MlDatafeedsStatsResponse;
     if (stats.datafeeds.length) {
       const state = stats.datafeeds[0].state;
       return (

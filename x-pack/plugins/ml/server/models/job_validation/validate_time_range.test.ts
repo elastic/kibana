@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -21,11 +21,15 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const callWithRequestFactory = (resp: any): LegacyAPICaller => {
-  return (path: string) => {
+const callWithRequestFactory = (resp: any): ILegacyScopedClusterClient => {
+  const callAs = (path: string) => {
     return new Promise((resolve) => {
       resolve(resp[path]);
     }) as Promise<any>;
+  };
+  return {
+    callAsCurrentUser: callAs,
+    callAsInternalUser: callAs,
   };
 };
 

@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 describe('ML - data recognizer', () => {
-  const dr = new DataRecognizer(
-    jest.fn() as LegacyAPICaller,
-    ({
-      find: jest.fn(),
-      bulkCreate: jest.fn(),
-    } as never) as SavedObjectsClientContract
-  );
+  const dr = new DataRecognizer({ callAsCurrentUser: jest.fn(), callAsInternalUser: jest.fn() }, ({
+    find: jest.fn(),
+    bulkCreate: jest.fn(),
+  } as never) as SavedObjectsClientContract);
 
   describe('jobOverrides', () => {
     it('should apply job overrides correctly', () => {

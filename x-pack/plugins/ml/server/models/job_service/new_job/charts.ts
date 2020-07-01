@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { newJobLineChartProvider } from './line_chart';
 import { newJobPopulationChartProvider } from './population_chart';
-import { callWithRequestType } from '../../../../common/types/kibana';
 
-export function newJobChartsProvider(callWithRequest: callWithRequestType) {
-  const { newJobLineChart } = newJobLineChartProvider(callWithRequest);
-  const { newJobPopulationChart } = newJobPopulationChartProvider(callWithRequest);
+export function newJobChartsProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { newJobLineChart } = newJobLineChartProvider(mlClusterClient);
+  const { newJobPopulationChart } = newJobPopulationChartProvider(mlClusterClient);
 
   return {
     newJobLineChart,

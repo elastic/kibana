@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { PLUGIN_ID } from '../constants/app';
 
 export const userMlCapabilities = {
   canAccessML: false,
@@ -69,16 +70,28 @@ export function getDefaultCapabilities(): MlCapabilities {
 export function getPluginPrivileges() {
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilities = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+
+  const priv = {
+    app: [PLUGIN_ID, 'kibana'],
+    excludeFromBasePrivileges: true,
+    catalogue: [PLUGIN_ID],
+    savedObject: {
+      all: [],
+      read: [],
+    },
+  };
 
   return {
-    user: {
-      ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
-    },
     admin: {
-      ui: allMlCapabilities,
-      api: allMlCapabilities.map((k) => `ml:${k}`),
+      ...priv,
+      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: allMlCapabilitiesKeys,
+    },
+    user: {
+      ...priv,
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: userMlCapabilitiesKeys,
     },
   };
 }

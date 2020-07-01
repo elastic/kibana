@@ -14,13 +14,13 @@ import {
 import { fieldsServiceProvider } from '../models/fields_service';
 
 function getCardinalityOfFields(context: RequestHandlerContext, payload: any) {
-  const fs = fieldsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const fs = fieldsServiceProvider(context.ml!.mlClient);
   const { index, fieldNames, query, timeFieldName, earliestMs, latestMs } = payload;
   return fs.getCardinalityOfFields(index, fieldNames, query, timeFieldName, earliestMs, latestMs);
 }
 
 function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
-  const fs = fieldsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const fs = fieldsServiceProvider(context.ml!.mlClient);
   const { index, timeFieldName, query } = payload;
   return fs.getTimeFieldRange(index, timeFieldName, query);
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestType } from '../../../common/types/kibana';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { JobMessage } from '../../../common/types/audit_message';
 
@@ -23,7 +23,7 @@ interface BoolQuery {
   bool: { [key: string]: any };
 }
 
-export function analyticsAuditMessagesProvider(callWithRequest: callWithRequestType) {
+export function analyticsAuditMessagesProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   // search for audit messages,
   // analyticsId is optional. without it, all analytics will be listed.
   async function getAnalyticsAuditMessages(analyticsId: string) {
@@ -69,7 +69,7 @@ export function analyticsAuditMessagesProvider(callWithRequest: callWithRequestT
     }
 
     try {
-      const resp = await callWithRequest('search', {
+      const resp = await callAsCurrentUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,

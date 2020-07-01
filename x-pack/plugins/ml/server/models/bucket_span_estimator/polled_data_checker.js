@@ -12,7 +12,7 @@
 
 import _ from 'lodash';
 
-export function polledDataCheckerFactory(callAsCurrentUser) {
+export function polledDataCheckerFactory({ callAsCurrentUser }) {
   class PolledDataChecker {
     constructor(index, timeField, duration, query) {
       this.index = index;

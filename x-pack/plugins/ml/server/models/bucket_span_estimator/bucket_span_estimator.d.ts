@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 export interface BucketSpanEstimatorData {
@@ -21,7 +21,6 @@ export interface BucketSpanEstimatorData {
 }
 
 export function estimateBucketSpanFactory(
-  callAsCurrentUser: LegacyAPICaller,
-  callAsInternalUser: LegacyAPICaller,
+  { callAsCurrentUser, callAsInternalUser }: ILegacyScopedClusterClient,
   isSecurityDisabled: boolean
 ): (config: BucketSpanEstimatorData) => Promise<any>;

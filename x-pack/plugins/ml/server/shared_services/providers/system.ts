@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
@@ -18,7 +18,7 @@ import { SharedServicesChecks } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
-    callAsCurrentUser: LegacyAPICaller,
+    mlClusterClient: ILegacyScopedClusterClient,
     request: KibanaRequest
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
@@ -35,8 +35,9 @@ export function getMlSystemProvider(
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
+    mlSystemProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
       // const hasMlCapabilities = getHasMlCapabilities(request);
+      const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
       return {
         async mlCapabilities() {
           isMinimumLicense();
@@ -52,7 +53,7 @@ export function getMlSystemProvider(
           }
 
           const { getCapabilities } = capabilitiesProvider(
-            callAsCurrentUser,
+            mlClusterClient,
             mlCapabilities,
             mlLicense,
             isMlEnabledInSpace
@@ -62,7 +63,7 @@ export function getMlSystemProvider(
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();
 
-          const info = await callAsCurrentUser('ml.info');
+          const info = await callAsInternalUser('ml.info');
           const cloudId = cloud && cloud.cloudId;
           return {
             ...info,

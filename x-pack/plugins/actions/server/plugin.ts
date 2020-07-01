@@ -310,6 +310,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getScopedCallCluster(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
+      getScopedClusterClient(clusterClient: ILegacyClusterClient) {
+        return clusterClient.asScoped(request);
+      },
     });
   }
 
