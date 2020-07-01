@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { MetricsFetchDataResponse, FetchData } from '../typings';
 
 export const fetchMetricsData: FetchData<MetricsFetchDataResponse> = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(response);
-    }, 1500);
-  });
+  return Promise.resolve(response);
 };
 
 const response: MetricsFetchDataResponse = {
-  title: i18n.translate('metrics.observabilityDashboard.title', {
-    defaultMessage: 'Metrics',
-  }),
+  title: 'Metrics',
   appLink: '/app/apm',
   stats: {
     hosts: { label: 'Hosts', value: 11, type: 'number' },
@@ -118,6 +111,29 @@ const response: MetricsFetchDataResponse = {
           y: 290262,
         },
       ],
+    },
+  },
+};
+
+export const emptyResponse: MetricsFetchDataResponse = {
+  title: 'Metrics',
+  appLink: '/app/apm',
+  stats: {
+    hosts: { label: 'Hosts', value: 0, type: 'number' },
+    cpu: { label: 'CPU usage', value: 0, type: 'percent' },
+    memory: { label: 'Memory Usage', value: 0, type: 'percent' },
+    disk: { label: 'Disk Usage', value: 0, type: 'percent' },
+    inboundTraffic: { label: 'Inbount traffic', value: 0, type: 'bytesPerSecond' },
+    outboundTraffic: { label: 'Outbount traffic', value: 0, type: 'bytesPerSecond' },
+  },
+  series: {
+    outboundTraffic: {
+      label: 'Outbount traffic',
+      coordinates: [],
+    },
+    inboundTraffic: {
+      label: 'Inbound traffic',
+      coordinates: [],
     },
   },
 };

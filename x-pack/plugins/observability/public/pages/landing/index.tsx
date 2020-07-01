@@ -31,21 +31,6 @@ export const LandingPage = () => {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
-  useEffect(() => {
-    core.chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb.observability', {
-          defaultMessage: 'Observability',
-        }),
-      },
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb.gettingStarted', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ]);
-  }, [core]);
-
   return (
     <WithHeaderLayout
       restrictWidth={1200}

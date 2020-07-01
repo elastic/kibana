@@ -5,9 +5,10 @@
  */
 import React from 'react';
 import * as t from 'io-ts';
+import { i18n } from '@kbn/i18n';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
-import { DashboardPage } from '../pages/dashboard';
+import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -26,16 +27,30 @@ export const routes = {
       return <HomePage />;
     },
     params: {},
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.home.breadcrumb', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ],
   },
   '/landing': {
     handler: () => {
       return <LandingPage />;
     },
     params: {},
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.landing.breadcrumb', {
+          defaultMessage: 'Getting started',
+        }),
+      },
+    ],
   },
-  '/dashboard': {
+  '/overview': {
     handler: ({ query }: any) => {
-      return <DashboardPage routeParams={{ query }} />;
+      return <OverviewPage routeParams={{ query }} />;
     },
     params: {
       query: t.partial({
@@ -45,5 +60,12 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
+    breadcrumb: [
+      {
+        text: i18n.translate('xpack.observability.overview.breadcrumb', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ],
   },
 };

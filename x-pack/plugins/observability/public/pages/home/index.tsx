@@ -16,7 +16,7 @@ export const HomePage = () => {
   const hasSomeData = values.length ? values.some((hasData) => hasData) : null;
 
   if (hasSomeData === true) {
-    history.push({ pathname: '/dashboard' });
+    history.push({ pathname: '/overview' });
   }
   if (hasSomeData === false) {
     history.push({ pathname: '/landing' });

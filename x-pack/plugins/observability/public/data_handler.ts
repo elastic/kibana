@@ -17,6 +17,10 @@ export function registerDataHandler<T extends ObservabilityApp>({
   dataHandlers[appName] = { fetchData, hasData };
 }
 
+export function unregisterDataHandler<T extends ObservabilityApp>({ appName }: { appName: T }) {
+  delete dataHandlers[appName];
+}
+
 export function getDataHandler<T extends ObservabilityApp>(appName: T) {
   const dataHandler = dataHandlers[appName];
   if (dataHandler) {

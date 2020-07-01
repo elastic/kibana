@@ -29,10 +29,10 @@ import { emptySections } from './emptySection';
 import { Resources } from '../../components/app/resources';
 
 interface Props {
-  routeParams: RouteParams<'/dashboard'>;
+  routeParams: RouteParams<'/overview'>;
 }
 
-export const DashboardPage = ({ routeParams }: Props) => {
+export const OverviewPage = ({ routeParams }: Props) => {
   const result = useFetcher(() => fetchHasData(), []);
   const hasData = result.data;
 

@@ -4,21 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { LogsFetchDataResponse, FetchData } from '../typings';
+import { FetchData, LogsFetchDataResponse } from '../typings';
 
 export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(response);
-    }, 1000);
-  });
+  return Promise.resolve(response);
 };
 
 const response: LogsFetchDataResponse = {
-  title: i18n.translate('xpack.logs.observabilityDashboard.title', {
-    defaultMessage: 'Logs',
-  }),
+  title: 'Logs',
   appLink: '/app/logs',
   stats: {
     unknown: { label: 'Unknown', value: 73777, type: 'number' },
@@ -148,6 +141,22 @@ const response: LogsFetchDataResponse = {
           y: 0,
         },
       ],
+    },
+  },
+};
+
+export const emptyResponse: LogsFetchDataResponse = {
+  title: 'Logs',
+  appLink: '/app/logs',
+  stats: {
+    unknown: { label: 'Unknown', value: 0, type: 'number' },
+    'kibana.log': { label: 'Kibana.log', value: 0, type: 'number' },
+    'nginx.access': { label: 'Nginx.access', value: 0, type: 'number' },
+  },
+  series: {
+    unknown: {
+      label: 'Unknwon',
+      coordinates: [],
     },
   },
 };

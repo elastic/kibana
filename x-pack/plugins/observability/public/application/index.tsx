@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createHashHistory } from 'history';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import { EuiThemeProvider } from '../../../../legacy/common/eui_styled_components';
 import { PluginContext } from '../context/plugin_context';
 import { useUrlParams } from '../hooks/use_url_params';
 import { routes } from '../routes';
+import { usePluginContext } from '../hooks/use_plugin_context';
 
 const App = () => {
   return (
@@ -21,6 +23,18 @@ const App = () => {
           const path = key as keyof typeof routes;
           const route = routes[path];
           const Wrapper = () => {
+            const { core } = usePluginContext();
+            useEffect(() => {
+              core.chrome.setBreadcrumbs([
+                {
+                  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
+                    defaultMessage: 'Observability',
+                  }),
+                },
+                ...route.breadcrumb,
+              ]);
+            }, [core]);
+
             const { query, path: pathParams } = useUrlParams(route.params);
             return route.handler({ query, path: pathParams });
           };
