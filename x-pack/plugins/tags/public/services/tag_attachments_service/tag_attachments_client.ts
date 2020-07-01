@@ -11,6 +11,7 @@ import {
   TagAttachmentClientCreateResult,
   TagAttachmentClientGetResourceTagsParams,
   TagAttachmentClientGetResourceTagsResult,
+  TagAttachmentClientDeleteParams,
 } from '../../../common';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
@@ -29,6 +30,10 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     return await this.params.http.post<TagAttachmentClientCreateResult>(`${this.path}/attachment`, {
       body: JSON.stringify(params),
     });
+  }
+
+  public async del({ tagId, kid }: TagAttachmentClientDeleteParams): Promise<void> {
+    return await this.params.http.delete(`${this.path}/tag/${tagId}/attachment/${btoa(kid)}`);
   }
 
   public async getAttachedTags({

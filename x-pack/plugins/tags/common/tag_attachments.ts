@@ -30,6 +30,11 @@ export interface TagAttachmentClientCreateResult {
   attachments: RawTagAttachmentWithId[];
 }
 
+export interface TagAttachmentClientDeleteParams {
+  tagId: string;
+  kid: string;
+}
+
 export interface TagAttachmentClientGetResourceTagsParams {
   kid: string;
 }
@@ -44,6 +49,7 @@ export interface TagAttachmentClientGetResourceTagsResult {
  */
 export interface ITagAttachmentsClient {
   create(params: TagAttachmentClientCreateParams): Promise<TagAttachmentClientCreateResult>;
+  del(params: TagAttachmentClientDeleteParams): Promise<void>;
   getAttachedTags(
     params: TagAttachmentClientGetResourceTagsParams
   ): Promise<TagAttachmentClientGetResourceTagsResult>;

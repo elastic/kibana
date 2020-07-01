@@ -9,22 +9,24 @@ import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
 
-export const getResourceTags = ({ router }: RouteParams) => {
-  router.get(
+export const deleteAttachment = ({ router }: RouteParams) => {
+  router.delete(
     {
-      path: `${TAGS_API_PATH}/resource/{kid}/tags`,
+      path: `${TAGS_API_PATH}/tag/{tagId}/attachment/{kid}`,
       validate: {
         params: schema.object({
+          tagId: schema.string(),
           kid: schema.string(),
         }),
       },
     },
     assertTagsContext(async ({ tags }, req, res) => {
-      const { kid } = req.params;
-      const body = await tags.attachmentsClient.getAttachedTags({
+      const { tagId, kid } = req.params;
+      await tags.attachmentsClient.del({
+        tagId,
         kid: Buffer.from(kid, 'base64').toString('utf8'),
       });
-      return res.ok({ body });
+      return res.ok();
     })
   );
 };

@@ -15,6 +15,7 @@ import {
   TagAttachmentClientCreateResult,
   TagAttachmentClientGetResourceTagsParams,
   TagAttachmentClientGetResourceTagsResult,
+  TagAttachmentClientDeleteParams,
 } from '../../common';
 import { validateTagId, validateKID } from '../util/validators';
 import { TagsClient } from '../tags';
@@ -81,6 +82,16 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     const results = await Promise.all(attachments.map(this.createAttachment));
 
     return { attachments: results };
+  }
+
+  public async del({ tagId, kid }: TagAttachmentClientDeleteParams): Promise<void> {
+    validateTagId(tagId);
+    validateKID(kid);
+
+    const id = this.getId(tagId, kid);
+    const { savedObjectsClient } = this.params;
+
+    await savedObjectsClient.delete(this.type, id);
   }
 
   public async getAttachedTags({
