@@ -9,7 +9,10 @@ import _ from 'lodash';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
-import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../explorer/explorer_constants';
+import {
+  ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIM_LANE_DEFAULT_PAGE_SIZE,
+} from '../../explorer/explorer_constants';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -488,7 +491,7 @@ export function resultsServiceProvider(mlApiServices) {
       latestMs,
       interval,
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
-      perPage = 10,
+      perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
       influencersFilterQuery
     ) {

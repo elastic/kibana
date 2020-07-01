@@ -135,6 +135,19 @@ export class AnomalyTimelineService {
     return overallSwimlaneData;
   }
 
+  /**
+   * Fetches view by swim lane data.
+   *
+   * @param fieldValues
+   * @param bounds
+   * @param selectedJobs
+   * @param viewBySwimlaneFieldName
+   * @param swimlaneLimit
+   * @param perPage
+   * @param fromPage
+   * @param swimlaneContainerWidth
+   * @param influencersFilterQuery
+   */
   public async loadViewBySwimlane(
     fieldValues: string[],
     bounds: { earliest: number; latest: number },
