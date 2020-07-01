@@ -118,7 +118,7 @@ export const buildExpression = (
         arguments: {
           xTitle: [xTitle],
           yTitle: [yTitle],
-          palette: [frame.globalPalette.colorFunction.toExpression(frame.globalPalette.state)],
+          palette: [frame.globalPalette.activePalette.toExpression(frame.globalPalette.state)],
           legend: [
             {
               type: 'expression',

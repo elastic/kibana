@@ -17,7 +17,7 @@ import {
   euiPaletteWarm,
 } from '@elastic/eui';
 import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
-import { ColorFunctionDefinition, SeriesLayer } from '../../types';
+import { PaletteDefinition, SeriesLayer } from '../../types';
 import { PaletteSetupPlugins } from './service';
 import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions';
 import { lightenColor } from './lighten_color';
@@ -43,7 +43,7 @@ function buildRoundRobinCategoricalWithMappedColors(
     id,
     getColor,
     ...buildStatelessExpressionIntegration(id, getColor),
-    getPreviewPalette: () => colors(10),
+    getPreview: () => ({ colors: colors(10) }),
   };
 }
 
@@ -58,19 +58,17 @@ function buildSyncedKibanaPalette(colors: ChartsPluginSetup['colors']) {
     id: 'kibana_palette',
     getColor,
     ...buildStatelessExpressionIntegration('kibana_palette', getColor),
-    getPreviewPalette: () => {
-      return colors.seedColors.slice(0, 10);
-    },
+    getPreview: () => ({ colors: colors.seedColors.slice(0, 10) }),
   };
 }
 
 export interface LensPalette {
-  getColor: ColorFunctionDefinition['getColor'];
+  getColor: PaletteDefinition['getColor'];
 }
 
 function buildStatelessExpressionIntegration(
   id: string,
-  getColor: ColorFunctionDefinition['getColor']
+  getColor: PaletteDefinition['getColor']
 ): {
   toExpression: () => Ast;
   expressionFunctionDefinition: ExpressionFunctionDefinition<
@@ -110,7 +108,7 @@ function buildStatelessExpressionIntegration(
 }
 
 // These definitions will be rolled up into the implementation of the lens_palette expression function definition in the service
-type SerializableColorFunctionDefinition = ColorFunctionDefinition & {
+type SerializableColorFunctionDefinition = PaletteDefinition & {
   expressionFunctionDefinition: ExpressionFunctionDefinition<string, unknown, unknown, unknown>;
 };
 

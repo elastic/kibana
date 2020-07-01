@@ -25,7 +25,7 @@ export interface Document {
     filters: Filter[];
     globalPalette?: {
       activePaletteId: string;
-      state: unknown;
+      state?: unknown;
     };
   };
 }

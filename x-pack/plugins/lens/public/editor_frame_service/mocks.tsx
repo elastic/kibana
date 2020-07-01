@@ -17,7 +17,7 @@ import {
   FramePublicAPI,
   Datasource,
   Visualization,
-  ColorFunctionDefinition,
+  PaletteDefinition,
 } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
@@ -103,9 +103,9 @@ export function createMockDatasource(id: string): DatasourceMock {
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
-export function createMockColorFunction(): jest.Mocked<ColorFunctionDefinition> {
+export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
   return {
-    getPreviewPalette: jest.fn(() => ['#ff0000', '#00ff00']),
+    getPreview: jest.fn(() => ({ colors: ['#ff0000', '#00ff00'] })),
     title: 'Mock Palette',
     id: 'default',
     renderEditor: jest.fn(),
@@ -124,7 +124,7 @@ export function createMockColorFunction(): jest.Mocked<ColorFunctionDefinition> 
 }
 
 export function createMockFramePublicAPI(): FrameMock {
-  const palette = createMockColorFunction();
+  const palette = createMockPaletteDefinition();
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
@@ -135,11 +135,11 @@ export function createMockFramePublicAPI(): FrameMock {
     globalPalette: {
       state: {},
       setState: jest.fn(),
-      availableColorFunctions: {
+      availablePalettes: {
         default: palette,
       },
-      colorFunction: palette,
-      setColorFunction: jest.fn(),
+      activePalette: palette,
+      setActivePalette: jest.fn(),
     },
   };
 }

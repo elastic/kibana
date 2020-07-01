@@ -7,7 +7,7 @@
 import { getInitialState, reducer } from './state_management';
 import { EditorFrameProps } from './index';
 import { Datasource, Visualization } from '../../types';
-import { createExpressionRendererMock, createMockColorFunction } from '../mocks';
+import { createExpressionRendererMock, createMockPaletteDefinition } from '../mocks';
 import { coreMock } from 'src/core/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
@@ -43,7 +43,7 @@ describe('editor_frame state management', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         palettes: {
-          default: createMockColorFunction(),
+          default: createMockPaletteDefinition(),
         },
         showNoDataPopover: jest.fn(),
       };

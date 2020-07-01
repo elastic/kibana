@@ -451,7 +451,7 @@ export function XYChart({
             )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
-            color: ({ yAccessor, splitAccessors, seriesKeys }) => {
+            color: ({ yAccessor, seriesKeys }) => {
               const seriesLayers: SeriesLayer[] = [
                 {
                   name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],

@@ -5,13 +5,14 @@
  */
 
 import React from 'react';
-import { SeriesIdentifier, Settings } from '@elastic/charts';
-import { shallow } from 'enzyme';
+import { Partition, SeriesIdentifier, Settings } from '@elastic/charts';
+import { shallow, mount } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
-import { createMockColorFunction } from '../editor_frame_service/mocks';
+import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
+import { ShapeTreeNode } from '@elastic/charts/dist/chart_types/partition_chart/layout/types/viewmodel_types';
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -52,7 +53,7 @@ describe('PieVisualization component', () => {
       nestedLegend: false,
       percentDecimals: 3,
       hideLabels: false,
-      palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
+      palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
     };
 
     function getDefaultArgs() {
@@ -82,6 +83,79 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, hideLabels: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it calls the color function with the right series layers', () => {
+      const component = shallow(
+        <PieComponent
+          args={args}
+          {...getDefaultArgs()}
+          data={{
+            ...data,
+            tables: {
+              first: {
+                ...data.tables.first,
+                rows: [
+                  { a: 'empty', b: 'first', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'first', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'second', c: 1, d: 'Row 1' },
+                  { a: 'css', b: 'third', c: 1, d: 'Row 1' },
+                  { a: 'gz', b: 'first', c: 1, d: 'Row 1' },
+                ],
+              },
+            },
+          }}
+        />
+      );
+
+      component
+        .find(Partition)
+        .prop('layers')[1]
+        .shape.fillColor({
+          dataName: 'third',
+          depth: 2,
+          parent: {
+            children: [
+              ['first', {}],
+              ['second', {}],
+              ['third', {}],
+            ],
+            depth: 1,
+            sortIndex: 0,
+            value: 200,
+            dataName: 'css',
+            parent: {
+              children: [
+                ['empty', {}],
+                ['css', {}],
+                ['gz', {}],
+              ],
+              depth: 0,
+              sortIndex: 0,
+              value: 500,
+            },
+            sortIndex: 1,
+          },
+          value: 41,
+          sortIndex: 2,
+        } as ShapeTreeNode);
+
+      expect(args.palette.getColor).toHaveBeenCalledWith([
+        {
+          name: 'css',
+          maxDepth: 2,
+          rankAtDepth: 1,
+          totalSeries: 5,
+          totalSeriesAtDepth: 3,
+        },
+        {
+          name: 'third',
+          maxDepth: 2,
+          rankAtDepth: 2,
+          totalSeries: 5,
+          totalSeriesAtDepth: 3,
+        },
+      ]);
     });
 
     test('it hides legend with 2 groups for treemap', () => {

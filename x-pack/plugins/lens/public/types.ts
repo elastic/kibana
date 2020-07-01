@@ -60,7 +60,7 @@ export interface EditorFrameSetup {
   registerVisualization: <T, P>(
     visualization: Visualization<T, P> | Promise<Visualization<T, P>>
   ) => void;
-  palettes: Record<string, ColorFunctionDefinition>;
+  palettes: Record<string, PaletteDefinition>;
 }
 
 export interface EditorFrameStart {
@@ -390,26 +390,78 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
+/**
+ * Information about a series in a chart used to determine its color.
+ * Series layers can be nested, this means each series layer can have an ancestor.
+ */
 export interface SeriesLayer {
+  /**
+   * Name of the series (can be used for lookup-based coloring)
+   */
   name: string;
+  /**
+   * Rank of the series compared to siblings with the same ancestor
+   */
   rankAtDepth: number;
+  /**
+   * Total number of series with the same ancestor
+   */
   totalSeriesAtDepth: number;
+  /**
+   * Overall number of series in the current chart
+   */
   totalSeries: number;
+  /**
+   * Max nesting depth of the series tree
+   */
   maxDepth: number;
 }
 
-export interface ColorFunctionDefinition<T = unknown> {
+/**
+ * Definition of a global palette.
+ *
+ * A palette controls the appearance of Lens charts on an editor level.
+ * The palette wont get reset when switching charts.
+ *
+ * A palette can hold internal state (e.g. for customizations) and also includes
+ * an editor component to edit the internal state.
+ */
+export interface PaletteDefinition<T = unknown> {
+  /**
+   * Unique id of the palette (this will be persisted along with the visualization state)
+   */
   id: string;
+  /**
+   * User facing title (should be i18n-ized)
+   */
   title: string;
-
+  /**
+   * Serialize the currently selected palette and its internal state into an expression function.
+   * This function should be used to pass the palette to the expression function applying color and other styles
+   * @param state The internal state of the palette
+   */
   toExpression: (state?: T) => Ast;
+  /**
+   * Color a series according to the internal rules of the palette.
+   * @param series The current series along with its ancestors.
+   * @param state  The internal state of the palette
+   */
   getColor: (series: SeriesLayer[], state?: T) => string | null;
-
+  /**
+   * Renders the UI for editing the internal state of the palette.
+   * Not each palette has to feature an internal state, so this is an optional property.
+   * @param domElement The dom element to the render the editor UI into
+   * @param props Current state and state setter to issue updates
+   */
   renderEditor?: (
     domElement: Element,
     props: { state?: T; setState: (updater: (oldState: T) => T) => void }
   ) => void;
-  getPreviewPalette: () => string[];
+  /**
+   * Render a preview of the palette to be shown in a picker component.
+   * This is an array of color will be passed to an EuiColorPalettePicker component.
+   */
+  getPreview: (state?: T) => { colors: string[] };
 }
 
 export interface FramePublicAPI {
@@ -419,12 +471,32 @@ export interface FramePublicAPI {
   query: Query;
   filters: Filter[];
 
+  /**
+   * The currently chosen global palette (currently only providing a color scheme)
+   */
   globalPalette: {
-    colorFunction: ColorFunctionDefinition;
+    /**
+     * Currently selected palette
+     */
+    activePalette: PaletteDefinition;
+    /**
+     * Internal state of the current palette
+     */
     state: unknown;
-    setColorFunction: (id: string) => void;
+    /**
+     * Change selected palette
+     * @param id a key of the `availablePalettes` object
+     */
+    setActivePalette: (id: string) => void;
+    /**
+     * Update internal state of the current palette. This is normally called by the editor component of the palette
+     * @param updater state updater function to be able to dispatch multiple updates before they are committed
+     */
     setState: (updater: (state: unknown) => unknown) => void;
-    availableColorFunctions: Record<string, ColorFunctionDefinition>;
+    /**
+     * A map of all available palettes (keys being the ids).
+     */
+    availablePalettes: Record<string, PaletteDefinition>;
   };
 
   // Adds a new layer. This has a side effect of updating the datasource state

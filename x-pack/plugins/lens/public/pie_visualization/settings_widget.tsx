@@ -244,6 +244,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           panelStyle={{
             width: 400,
           }}
+          anchorPosition="downRight"
           button={
             <EuiButtonEmpty
               iconType="arrowDown"

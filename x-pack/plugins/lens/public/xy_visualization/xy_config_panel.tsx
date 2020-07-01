@@ -102,6 +102,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               <EuiIcon type="gear" />
             </EuiButtonEmpty>
           }
+          anchorPosition="downRight"
           isOpen={open}
           closePopover={() => {
             setOpen(false);

@@ -43,7 +43,7 @@ function expressionHelper(
           legendDisplay: [layer.legendDisplay],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
-          palette: [frame.globalPalette.colorFunction.toExpression(frame.globalPalette.state)],
+          palette: [frame.globalPalette.activePalette.toExpression(frame.globalPalette.state)],
         },
       },
     ],

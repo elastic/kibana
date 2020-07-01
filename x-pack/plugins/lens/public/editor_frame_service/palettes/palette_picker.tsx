@@ -13,23 +13,21 @@ export function PalettePicker({ frame }: { frame: FramePublicAPI }) {
   return (
     <>
       <EuiColorPalettePicker
-        palettes={Object.entries(frame.globalPalette.availableColorFunctions).map(
-          ([id, palette]) => {
-            return {
-              value: id,
-              title: palette.title,
-              type: 'fixed',
-              palette: palette.getPreviewPalette(),
-            };
-          }
-        )}
-        onChange={frame.globalPalette.setColorFunction}
-        valueOfSelected={frame.globalPalette.colorFunction.id || 'default'}
+        palettes={Object.entries(frame.globalPalette.availablePalettes).map(([id, palette]) => {
+          return {
+            value: id,
+            title: palette.title,
+            type: 'fixed',
+            palette: palette.getPreview(frame.globalPalette.state).colors,
+          };
+        })}
+        onChange={frame.globalPalette.setActivePalette}
+        valueOfSelected={frame.globalPalette.activePalette.id || 'default'}
         selectionDisplay={'palette'}
       />
-      {frame.globalPalette.colorFunction.renderEditor && (
+      {frame.globalPalette.activePalette.renderEditor && (
         <NativeRenderer
-          render={frame.globalPalette.colorFunction.renderEditor}
+          render={frame.globalPalette.activePalette.renderEditor}
           nativeProps={{
             state: frame.globalPalette.state,
             setState: frame.globalPalette.setState,

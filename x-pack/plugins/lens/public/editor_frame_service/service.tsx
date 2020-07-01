@@ -20,7 +20,7 @@ import {
   EditorFrameSetup,
   EditorFrameInstance,
   EditorFrameStart,
-  ColorFunctionDefinition,
+  PaletteDefinition,
 } from '../types';
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
@@ -62,7 +62,7 @@ export class EditorFrameService {
 
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
-  private palettes: Record<string, ColorFunctionDefinition> = {};
+  private palettes: Record<string, PaletteDefinition> = {};
 
   public setup(
     core: CoreSetup<EditorFrameStartPlugins>,

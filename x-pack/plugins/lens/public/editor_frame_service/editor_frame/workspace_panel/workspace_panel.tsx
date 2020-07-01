@@ -137,7 +137,7 @@ export function InnerWorkspacePanel({
     framePublicAPI.dateRange,
     framePublicAPI.query,
     framePublicAPI.filters,
-    framePublicAPI.globalPalette.colorFunction.id,
+    framePublicAPI.globalPalette.activePalette.id,
     framePublicAPI.globalPalette.state,
   ]);
 

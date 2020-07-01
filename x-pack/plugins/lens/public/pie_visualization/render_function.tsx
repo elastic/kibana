@@ -94,7 +94,7 @@ export function PieComponent(
 
   const totalSeriesCount = uniq(
     firstTable.rows.map((row) => {
-      columnGroups.map(({ col: { id: columnId } }) => row[columnId]).join(',');
+      return columnGroups.map(({ col: { id: columnId } }) => row[columnId]).join(',');
     })
   ).length;
 
@@ -111,13 +111,7 @@ export function PieComponent(
         }
         return String(d);
       },
-      fillLabel:
-        isDarkMode &&
-        shape === 'treemap' &&
-        layerIndex < columnGroups.length - 1 &&
-        categoryDisplay !== 'hide'
-          ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
-          : fillLabel,
+      fillLabel,
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];

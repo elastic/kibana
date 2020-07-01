@@ -24,7 +24,7 @@ import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { createMockColorFunction } from '../editor_frame_service/mocks';
+import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -208,7 +208,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
-  palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
+  palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
   layers,
 });
 
@@ -1294,6 +1294,37 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledWith('I');
     });
 
+    it('calls the color function with the right series layers', () => {
+      const { data, args } = sampleArgs();
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      instance.find(LineSeries).at(0).prop('color')({
+        yAccessor: 'b',
+        seriesKeys: ['Bar'],
+      });
+      expect(args.palette.getColor).toHaveBeenCalledWith([
+        {
+          name: 'Bar',
+          rankAtDepth: 3,
+          totalSeries: 4,
+          totalSeriesAtDepth: 4,
+          maxDepth: 1,
+        },
+      ]);
+    });
+
     test('it should remove invalid rows', () => {
       const data: LensMultiTable = {
         type: 'lens_multitable',
@@ -1329,7 +1360,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
-        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1399,7 +1430,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
-        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',
@@ -1456,7 +1487,7 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
-        palette: { getColor: createMockColorFunction().getColor, type: 'lens_palette' },
+        palette: { getColor: createMockPaletteDefinition().getColor, type: 'lens_palette' },
         layers: [
           {
             layerId: 'first',

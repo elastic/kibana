@@ -17,7 +17,7 @@ import {
   createMockDatasource,
   createExpressionRendererMock,
   DatasourceMock,
-  createMockColorFunction,
+  createMockPaletteDefinition,
 } from '../mocks';
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
@@ -25,6 +25,7 @@ import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { WorkspacePanel } from './workspace_panel';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -58,7 +59,7 @@ function getDefaultProps() {
       expressions: expressionsPluginMock.createStartContract(),
     },
     palettes: {
-      default: createMockColorFunction(),
+      default: createMockPaletteDefinition(),
     },
     showNoDataPopover: jest.fn(),
   };
@@ -267,15 +268,82 @@ describe('editor_frame', () => {
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         globalPalette: {
-          availableColorFunctions: {
+          availablePalettes: {
             default: expect.anything(),
           },
           state: undefined,
           setState: expect.any(Function),
-          colorFunction: expect.objectContaining({ id: 'default' }),
-          setColorFunction: expect.any(Function),
+          activePalette: expect.objectContaining({ id: 'default' }),
+          setActivePalette: expect.any(Function),
         },
       });
+    });
+
+    it('should update palette on api call', async () => {
+      const mockPalette = { ...createMockPaletteDefinition(), id: 'mock' };
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            palettes={{
+              default: createMockPaletteDefinition(),
+              mock: mockPalette,
+            }}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource2"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      act(() => {
+        mockVisualization.initialize.mock.calls[0][0].globalPalette.setActivePalette('mock');
+      });
+
+      instance.update();
+
+      expect(
+        instance.find(WorkspacePanel).prop('framePublicAPI').globalPalette.activePalette.id
+      ).toEqual('mock');
+    });
+
+    it('should update palette state on api call', async () => {
+      const toolbarMock = jest.fn();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: { ...mockVisualization, renderToolbar: toolbarMock },
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource2"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      const newState = {};
+      act(() => {
+        mockVisualization.initialize.mock.calls[0][0].globalPalette.setState(() => newState);
+      });
+
+      instance.update();
+
+      expect(instance.find(WorkspacePanel).prop('framePublicAPI').globalPalette.state).toBe(
+        newState
+      );
     });
 
     it('should add new layer on active datasource on frame api call', async () => {
