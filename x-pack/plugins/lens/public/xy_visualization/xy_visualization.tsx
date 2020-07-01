@@ -11,13 +11,13 @@ import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
-import { LayerContextMenu, XyToolbar } from './xy_config_panel';
+import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { toExpression, toPreviewExpression } from './to_expression';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
 import chartMixedSVG from '../assets/chart_mixed_xy.svg';
 import { isHorizontalChart } from './state_helpers';
+import { toExpression, toPreviewExpression } from './to_expression';
 
 const defaultIcon = chartBarStackedSVG;
 const defaultSeriesType = 'bar_stacked';
@@ -187,6 +187,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',
+          enableDimensionEditor: true,
         },
         {
           groupId: 'breakdown',
@@ -239,6 +240,10 @@ export const xyVisualization: Visualization<State, PersistableState> = {
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
 
+    if (newLayer.yConfig) {
+      newLayer.yConfig = newLayer.yConfig.filter(({ forAccessor }) => forAccessor !== columnId);
+    }
+
     return {
       ...prevState,
       layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
@@ -263,6 +268,15 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     render(
       <I18nProvider>
         <XyToolbar {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <DimensionEditor {...props} />
       </I18nProvider>,
       domElement
     );
