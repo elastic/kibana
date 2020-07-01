@@ -239,7 +239,7 @@ const ColorPicker = ({
             <EuiFieldText
               compressed={true}
               type="text"
-              onFocus={() => toggleIsPopoverOpen(true)}
+              onFocus={(ev) => toggleIsPopoverOpen(true)}
               icon={{
                 type: color ? 'stopFilled' : 'stopSlash',
                 style: { color: color || 'inherit' },
