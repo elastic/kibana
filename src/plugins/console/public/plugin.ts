@@ -42,7 +42,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    return devTools.register({
+    devTools.register({
       id: 'console',
       order: 1,
       title: i18n.translate('console.consoleDisplayName', {
