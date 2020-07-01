@@ -55,22 +55,22 @@ describe('manifest', () => {
       expect(manifest1.toEndpointFormat()).toStrictEqual({
         artifacts: {
           'endpoint-exceptionlist-linux-1.0.0': {
-            sha256: '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
             size: 268,
             url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
           'endpoint-exceptionlist-macos-1.0.0': {
-            sha256: '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
             size: 268,
             url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
           'endpoint-exceptionlist-windows-1.0.0': {
-            sha256: '222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+            sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
             size: 268,
             url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           },
         },
         manifest_version: 'abcd',
@@ -82,9 +82,9 @@ describe('manifest', () => {
       expect(manifest1.toSavedObject()).toStrictEqual({
         created: now.getTime(),
         ids: [
-          'endpoint-exceptionlist-linux-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
-          'endpoint-exceptionlist-macos-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
-          'endpoint-exceptionlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+          'endpoint-exceptionlist-linux-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+          'endpoint-exceptionlist-macos-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+          'endpoint-exceptionlist-windows-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
         ],
       });
     });
@@ -94,12 +94,12 @@ describe('manifest', () => {
       expect(diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+            'endpoint-exceptionlist-linux-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-1.0.0-03114bf3dc2258f0def5beaf675242b68b428c96eefab5f6c5533f0d8e4deb0b',
+            'endpoint-exceptionlist-linux-1.0.0-69328f83418f4957470640ed6cc605be6abb5fe80e0e388fd74f9764ad7ed5d1',
           type: 'add',
         },
       ]);
@@ -115,15 +115,15 @@ describe('manifest', () => {
       const entries = manifest1.getEntries();
       const keys = Object.keys(entries);
       expect(keys).toEqual([
-        'endpoint-exceptionlist-linux-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
-        'endpoint-exceptionlist-macos-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
-        'endpoint-exceptionlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466',
+        'endpoint-exceptionlist-linux-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+        'endpoint-exceptionlist-macos-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+        'endpoint-exceptionlist-windows-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
       ]);
     });
 
     test('Manifest returns true if contains artifact', async () => {
       const found = manifest1.contains(
-        'endpoint-exceptionlist-macos-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+        'endpoint-exceptionlist-macos-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
       );
       expect(found).toEqual(true);
     });
@@ -132,17 +132,17 @@ describe('manifest', () => {
       const manifest = Manifest.fromArtifacts(artifacts, '1.0.0', 'v0');
       expect(
         manifest.contains(
-          'endpoint-exceptionlist-linux-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+          'endpoint-exceptionlist-linux-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
         )
       ).toEqual(true);
       expect(
         manifest.contains(
-          'endpoint-exceptionlist-macos-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+          'endpoint-exceptionlist-macos-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
         )
       ).toEqual(true);
       expect(
         manifest.contains(
-          'endpoint-exceptionlist-windows-1.0.0-222c07e7741e5d8371958fadc5636141bfa330926886b54b233e6a4ecac86466'
+          'endpoint-exceptionlist-windows-1.0.0-70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
         )
       ).toEqual(true);
     });
