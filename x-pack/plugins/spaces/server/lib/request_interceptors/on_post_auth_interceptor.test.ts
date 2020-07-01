@@ -21,7 +21,6 @@ import {
   coreMock,
 } from '../../../../../../src/core/server/mocks';
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
-import { PluginsSetup } from '../../plugin';
 import { SpacesService } from '../../spaces_service';
 import { SpacesAuditLogger } from '../audit_logger';
 import { convertSavedObjectToSpace } from '../../routes/lib';
@@ -29,6 +28,7 @@ import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_intercept
 import { Feature } from '../../../../features/server';
 import { spacesConfig } from '../__fixtures__';
 import { securityMock } from '../../../../security/server/mocks';
+import { featuresPluginMock } from '../../../../features/server/mocks';
 
 // FLAKY: https://github.com/elastic/kibana/issues/55953
 describe.skip('onPostAuthInterceptor', () => {
@@ -123,31 +123,29 @@ describe.skip('onPostAuthInterceptor', () => {
 
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
-    const featuresPlugin = {
-      getFeatures: () =>
-        [
-          {
-            id: 'feature-1',
-            name: 'feature 1',
-            app: ['app-1'],
-          },
-          {
-            id: 'feature-2',
-            name: 'feature 2',
-            app: ['app-2'],
-          },
-          {
-            id: 'feature-4',
-            name: 'feature 4',
-            app: ['app-1', 'app-4'],
-          },
-          {
-            id: 'feature-5',
-            name: 'feature 4',
-            app: ['kibana'],
-          },
-        ] as Feature[],
-    } as PluginsSetup['features'];
+    const featuresPlugin = featuresPluginMock.createSetup();
+    featuresPlugin.getFeatures.mockReturnValue(([
+      {
+        id: 'feature-1',
+        name: 'feature 1',
+        app: ['app-1'],
+      },
+      {
+        id: 'feature-2',
+        name: 'feature 2',
+        app: ['app-2'],
+      },
+      {
+        id: 'feature-4',
+        name: 'feature 4',
+        app: ['app-1', 'app-4'],
+      },
+      {
+        id: 'feature-5',
+        name: 'feature 4',
+        app: ['kibana'],
+      },
+    ] as unknown) as Feature[]);
 
     const mockRepository = jest.fn().mockImplementation(() => {
       return {

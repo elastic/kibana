@@ -31,7 +31,6 @@ export {
   UiComponentInstance,
   url,
   createGetterSetter,
-  defaultFeedbackMessage,
 } from '../common';
 export * from './core';
 export * from '../common/errors';

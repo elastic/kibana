@@ -79,6 +79,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      isFirstExistenceFetch: false,
       existingFields: {
         'my-fake-index-pattern': {
           timestamp: true,
@@ -1257,6 +1258,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',
