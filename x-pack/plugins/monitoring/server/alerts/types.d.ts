@@ -40,10 +40,6 @@ export interface AlertClusterHealthState extends AlertState {
   health: AlertClusterHealthType;
 }
 
-export interface AlertLicenseState extends AlertState {
-  expiredCheckDateMS: number;
-}
-
 export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
   nodeId: string;
@@ -86,7 +82,7 @@ export interface AlertMessageLinkToken extends AlertMessageToken {
 export interface AlertMessageTimeToken extends AlertMessageToken {
   isRelative: boolean;
   isAbsolute: boolean;
-  timestamp: number;
+  timestamp: string | number;
 }
 
 export interface AlertMessageDocLinkToken extends AlertMessageToken {
@@ -148,17 +144,28 @@ export interface AlertData {
   meta: any;
 }
 
-export interface LegacyAlert {
-  prefix: string;
-  message: string;
-  metadata: {
-    severity: number;
-    cluster_uuid: string;
-  };
-}
-
 export interface AlertVersions {
   clusterUuid: string;
   ccs: string | null;
   versions: string[];
+}
+
+export interface LegacyAlert {
+  prefix: string;
+  message: string;
+  metadata: LegacyAlertMetadata;
+  nodes?: LegacyAlertNodesChangedList;
+}
+
+export interface LegacyAlertMetadata {
+  severity: number;
+  cluster_uuid: string;
+  time: string;
+  link: string;
+}
+
+export interface LegacyAlertNodesChangedList {
+  removed: { [nodeName: string]: string };
+  added: { [nodeName: string]: string };
+  restarted: { [nodeName: string]: string };
 }

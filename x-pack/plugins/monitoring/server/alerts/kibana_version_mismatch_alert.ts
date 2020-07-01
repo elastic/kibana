@@ -11,9 +11,8 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertVersionMismatchState,
   AlertInstanceState,
-  AlertVersions,
+  LegacyAlert,
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -21,13 +20,11 @@ import {
   ALERT_KIBANA_VERSION_MISMATCH,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
-  INDEX_PATTERN_KIBANA,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 const WATCH_NAME = 'kibana_version_mismatch';
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.resolved', {
@@ -55,73 +52,43 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    const logger = this.getLogger(this.type);
     let alertIndexPattern = INDEX_ALERTS;
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
     }
-    let kibanaIndexPattern = INDEX_PATTERN_KIBANA;
-    if (availableCcs) {
-      kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
-    }
-    const [kibanaVersions, legacyAlerts] = await Promise.all([
-      await fetchKibanaVersions(
-        callCluster,
-        clusters,
-        kibanaIndexPattern,
-        this.config.ui.max_bucket_size
-      ),
-      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
-    ]);
+    const legacyAlerts = await fetchLegacyAlerts(
+      callCluster,
+      clusters,
+      alertIndexPattern,
+      WATCH_NAME,
+      this.config.ui.max_bucket_size
+    );
+
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const versions = kibanaVersions.find(
-        ({ clusterUuid }) => clusterUuid === legacyAlert.metadata.cluster_uuid
-      );
-      if (!versions) {
-        // This is potentially bad
-        logger.warn(
-          `Unable to map legacy alert status to kibana version for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
-        );
-        return accum;
-      }
-
-      const shouldFire = versions.versions.length > 0;
       const severity = AlertSeverity.Warning;
-
       accum.push({
-        instanceKey: `${versions.clusterUuid}`,
-        clusterUuid: versions.clusterUuid,
-        shouldFire,
+        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
+        clusterUuid: legacyAlert.metadata.cluster_uuid,
+        shouldFire: true,
         severity,
-        meta: versions,
-        ccs: versions.ccs,
+        meta: legacyAlert,
+        ccs: null,
       });
       return accum;
     }, []);
   }
 
-  protected getDefaultAlertState(
-    cluster: AlertCluster,
-    item: AlertData
-  ): AlertVersionMismatchState {
-    const versions = item.meta as AlertVersions;
-    return {
-      cluster,
-      ccs: null,
-      versions,
-      ui: {
-        isFiring: false,
-        message: null,
-        severity: AlertSeverity.Success,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
-      },
-    };
+  private getVersions(legacyAlert: LegacyAlert) {
+    const prefixStr = 'Versions: ';
+    return legacyAlert.message.slice(
+      legacyAlert.message.indexOf(prefixStr) + prefixStr.length,
+      legacyAlert.message.length - 1
+    );
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const versions = item.meta as AlertVersions;
+    const legacyAlert = item.meta as LegacyAlert;
+    const versions = this.getVersions(legacyAlert);
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.resolvedMessage', {
@@ -131,9 +98,9 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
     }
 
     const text = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage', {
-      defaultMessage: `There are different versions of Kibana ({versions}) running in this cluster.`,
+      defaultMessage: `There are different versions of Kibana {versions} running in this cluster.`,
       values: {
-        versions: versions.versions.join(','),
+        versions,
       },
     });
 
@@ -152,7 +119,8 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       return;
     }
     const alertState = instanceState.alertStates[0];
-    const versions = item.meta as AlertVersions;
+    const legacyAlert = item.meta as LegacyAlert;
+    const versions = this.getVersions(legacyAlert);
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
@@ -162,7 +130,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       instance.scheduleActions('default', {
         state: FIRING,
         clusterName: cluster.clusterName,
-        versionList: versions.versions.join(','),
+        versionList: versions,
       });
     }
   }

@@ -11,9 +11,8 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertVersionMismatchState,
   AlertInstanceState,
-  AlertVersions,
+  LegacyAlert,
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
 import {
@@ -21,13 +20,11 @@ import {
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
-  INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
 import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 const WATCH_NAME = 'elasticsearch_version_mismatch';
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.resolved', {
@@ -55,73 +52,45 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    const logger = this.getLogger(this.type);
     let alertIndexPattern = INDEX_ALERTS;
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
     }
-    let elasticsearchIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
-    if (availableCcs) {
-      elasticsearchIndexPattern = getCcsIndexPattern(elasticsearchIndexPattern, availableCcs);
-    }
-    const [elasticsearchVersions, legacyAlerts] = await Promise.all([
-      await fetchElasticsearchVersions(
-        callCluster,
-        clusters,
-        elasticsearchIndexPattern,
-        this.config.ui.max_bucket_size
-      ),
-      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
-    ]);
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const versions = elasticsearchVersions.find(
-        ({ clusterUuid }) => clusterUuid === legacyAlert.metadata.cluster_uuid
-      );
-      if (!versions) {
-        // This is potentially bad
-        logger.warn(
-          `Unable to map legacy alert status to elasticsearch version for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
-        );
-        return accum;
-      }
 
-      const shouldFire = versions.versions.length > 0;
+    const legacyAlerts = await fetchLegacyAlerts(
+      callCluster,
+      clusters,
+      alertIndexPattern,
+      WATCH_NAME,
+      this.config.ui.max_bucket_size
+    );
+
+    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       const severity = AlertSeverity.Warning;
 
       accum.push({
-        instanceKey: `${versions.clusterUuid}`,
-        clusterUuid: versions.clusterUuid,
-        shouldFire,
+        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
+        clusterUuid: legacyAlert.metadata.cluster_uuid,
+        shouldFire: true,
         severity,
-        meta: versions,
-        ccs: versions.ccs,
+        meta: legacyAlert,
+        ccs: null,
       });
       return accum;
     }, []);
   }
 
-  protected getDefaultAlertState(
-    cluster: AlertCluster,
-    item: AlertData
-  ): AlertVersionMismatchState {
-    const versions = item.meta as AlertVersions;
-    return {
-      cluster,
-      ccs: null,
-      versions,
-      ui: {
-        isFiring: false,
-        message: null,
-        severity: AlertSeverity.Success,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
-      },
-    };
+  private getVersions(legacyAlert: LegacyAlert) {
+    const prefixStr = 'Versions: ';
+    return legacyAlert.message.slice(
+      legacyAlert.message.indexOf(prefixStr) + prefixStr.length,
+      legacyAlert.message.length - 1
+    );
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const versions = item.meta as AlertVersions;
+    const legacyAlert = item.meta as LegacyAlert;
+    const versions = this.getVersions(legacyAlert);
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate(
@@ -136,9 +105,9 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
     const text = i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.ui.firingMessage',
       {
-        defaultMessage: `There are different versions of Elasticsearch ({versions}) running in this cluster.`,
+        defaultMessage: `There are different versions of Elasticsearch {versions} running in this cluster.`,
         values: {
-          versions: versions.versions.join(','),
+          versions,
         },
       }
     );
@@ -158,7 +127,8 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       return;
     }
     const alertState = instanceState.alertStates[0];
-    const versions = item.meta as AlertVersions;
+    const legacyAlert = item.meta as LegacyAlert;
+    const versions = this.getVersions(legacyAlert);
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
@@ -168,7 +138,7 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       instance.scheduleActions('default', {
         state: FIRING,
         clusterName: cluster.clusterName,
-        versionList: versions.versions.join(','),
+        versionList: versions,
       });
     }
   }

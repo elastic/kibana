@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { LegacyAlert, AlertCluster } from '../../alerts/types';
+import { LegacyAlert, AlertCluster, LegacyAlertMetadata } from '../../alerts/types';
 
 export async function fetchLegacyAlerts(
   callCluster: any,
   clusters: AlertCluster[],
   index: string,
-  watchName: string
+  watchName: string,
+  size: number
 ): Promise<LegacyAlert[]> {
   const params = {
     index,
     filterPath: [
       'hits.hits._source.prefix',
       'hits.hits._source.message',
-      'hits.hits._source.metadata.severity',
-      'hits.hits._source.metadata.cluster_uuid',
+      'hits.hits._source.nodes',
+      'hits.hits._source.metadata.*',
     ],
     body: {
-      size: 1,
+      size,
       sort: [
         {
           timestamp: {
@@ -64,6 +65,9 @@ export async function fetchLegacyAlerts(
           ],
         },
       },
+      collapse: {
+        field: 'metadata.cluster_uuid',
+      },
     },
   };
 
@@ -72,7 +76,8 @@ export async function fetchLegacyAlerts(
     const legacyAlert: LegacyAlert = {
       prefix: get(hit, '_source.prefix'),
       message: get(hit, '_source.message'),
-      metadata: get(hit, '_source.metadata'),
+      nodes: get(hit, '_source.nodes'),
+      metadata: get(hit, '_source.metadata') as LegacyAlertMetadata,
     };
     return legacyAlert;
   });

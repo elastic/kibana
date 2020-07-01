@@ -11,24 +11,21 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertClusterStatsNode,
-  AlertNodesChangedState,
   AlertInstanceState,
-  AlertClusterStatsNodes,
+  LegacyAlert,
+  LegacyAlertNodesChangedList,
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_ALERTS,
-  INDEX_PATTERN_ELASTICSEARCH,
   ALERT_NODES_CHANGED,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertSeverity } from '../../common/enums';
-import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 const WATCH_NAME = 'elasticsearch_nodes';
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.nodesChanged.resolved', {
@@ -37,12 +34,6 @@ const RESOLVED = i18n.translate('xpack.monitoring.alerts.nodesChanged.resolved',
 const FIRING = i18n.translate('xpack.monitoring.alerts.nodesChanged.firing', {
   defaultMessage: 'firing',
 });
-
-interface AlertNodesChangedStates {
-  removed: AlertClusterStatsNode[];
-  added: AlertClusterStatsNode[];
-  restarted: AlertClusterStatsNode[];
-}
 
 export class NodesChangedAlert extends BaseAlert {
   public type = ALERT_NODES_CHANGED;
@@ -57,28 +48,8 @@ export class NodesChangedAlert extends BaseAlert {
     { name: 'restarted', description: 'The list of nodes restarted in the cluster.' },
   ];
 
-  private getNodeStates(nodes: AlertClusterStatsNodes): AlertNodesChangedStates {
-    const removed = nodes.priorNodes.filter(
-      (priorNode) =>
-        !nodes.recentNodes.find((recentNode) => priorNode.nodeUuid === recentNode.nodeUuid)
-    );
-    const added = nodes.recentNodes.filter(
-      (recentNode) =>
-        !nodes.priorNodes.find((priorNode) => priorNode.nodeUuid === recentNode.nodeUuid)
-    );
-    const restarted = nodes.recentNodes.filter(
-      (recentNode) =>
-        nodes.priorNodes.find((priorNode) => priorNode.nodeUuid === recentNode.nodeUuid) &&
-        !nodes.priorNodes.find(
-          (priorNode) => priorNode.nodeEphemeralId === recentNode.nodeEphemeralId
-        )
-    );
-
-    return {
-      removed,
-      added,
-      restarted,
-    };
+  private getNodeStates(legacyAlert: LegacyAlert): LegacyAlertNodesChangedList | undefined {
+    return legacyAlert.nodes;
   }
 
   protected async fetchData(
@@ -88,68 +59,33 @@ export class NodesChangedAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    const logger = this.getLogger(this.type);
     let alertIndexPattern = INDEX_ALERTS;
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
     }
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const [nodesFromClusterStats, legacyAlerts] = await Promise.all([
-      await fetchNodesFromClusterStats(callCluster, clusters, esIndexPattern),
-      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
-    ]);
+    const legacyAlerts = await fetchLegacyAlerts(
+      callCluster,
+      clusters,
+      alertIndexPattern,
+      WATCH_NAME,
+      this.config.ui.max_bucket_size
+    );
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const nodes = nodesFromClusterStats.find(
-        (nodeFromClusterStats) =>
-          nodeFromClusterStats.clusterUuid === legacyAlert.metadata.cluster_uuid
-      );
-      if (!nodes) {
-        // This is potentially bad
-        logger.warn(
-          `Unable to map legacy alert status to node for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
-        );
-        return accum;
-      }
-
-      const { removed, added, restarted } = this.getNodeStates(nodes);
-      const shouldFire = removed.length > 0 || added.length > 0 || restarted.length > 0;
-      const severity = AlertSeverity.Warning;
-
       accum.push({
-        instanceKey: `${nodes.clusterUuid}`,
-        clusterUuid: nodes.clusterUuid,
-        shouldFire,
-        severity,
-        meta: nodes,
-        ccs: nodes.ccs,
+        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
+        clusterUuid: legacyAlert.metadata.cluster_uuid,
+        shouldFire: true,
+        severity: mapLegacySeverity(legacyAlert.metadata.severity),
+        meta: legacyAlert,
+        ccs: null,
       });
       return accum;
     }, []);
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertNodesChangedState {
-    const node = item.meta as AlertClusterStatsNode;
-    return {
-      cluster,
-      ccs: null,
-      node,
-      ui: {
-        isFiring: false,
-        message: null,
-        severity: AlertSeverity.Success,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
-      },
-    };
-  }
-
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const nodes = item.meta as AlertClusterStatsNodes;
-    const { removed, added, restarted } = this.getNodeStates(nodes);
+    const legacyAlert = item.meta as LegacyAlert;
+    const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.resolvedMessage', {
@@ -159,29 +95,29 @@ export class NodesChangedAlert extends BaseAlert {
     }
 
     const addedText =
-      added.length > 0
+      Object.values(states.added).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.addedFiringMessage', {
             defaultMessage: `Elasticsearch nodes '{added}' added to this cluster.`,
             values: {
-              added: added.map((node) => node.nodeName).join(','),
+              added: Object.values(states.added).join(','),
             },
           })
         : '';
     const removedText =
-      removed.length > 0
+      Object.values(states.removed).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.removedFiringMessage', {
             defaultMessage: `Elasticsearch nodes '{removed}' removed from this cluster.`,
             values: {
-              removed: removed.map((node) => node.nodeName).join(','),
+              removed: Object.values(states.removed).join(','),
             },
           })
         : '';
     const restartedText =
-      restarted.length > 0
+      Object.values(states.restarted).length > 0
         ? i18n.translate('xpack.monitoring.alerts.nodesChanged.ui.restartedFiringMessage', {
             defaultMessage: `Elasticsearch nodes '{restarted}' restarted in this cluster.`,
             values: {
-              restarted: restarted.map((node) => node.nodeName).join(','),
+              restarted: Object.values(states.restarted).join(','),
             },
           })
         : '';
@@ -201,20 +137,20 @@ export class NodesChangedAlert extends BaseAlert {
       return;
     }
     const alertState = instanceState.alertStates[0];
-    const nodes = item.meta as AlertClusterStatsNodes;
+    const legacyAlert = item.meta as LegacyAlert;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,
         clusterName: cluster.clusterName,
       });
     } else {
-      const { removed, added, restarted } = this.getNodeStates(nodes);
+      const states = this.getNodeStates(legacyAlert) || { added: {}, removed: {}, restarted: {} };
       instance.scheduleActions('default', {
         state: FIRING,
         clusterName: cluster.clusterName,
-        added: added.map((node) => node.nodeName).join(','),
-        removed: removed.map((node) => node.nodeName).join(','),
-        restarted: restarted.map((node) => node.nodeName).join(','),
+        added: Object.values(states.added).join(','),
+        removed: Object.values(states.removed).join(','),
+        restarted: Object.values(states.restarted).join(','),
       });
     }
   }

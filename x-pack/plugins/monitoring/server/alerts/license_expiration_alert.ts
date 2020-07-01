@@ -14,25 +14,22 @@ import {
   AlertMessage,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  AlertLicense,
-  AlertLicenseState,
   AlertInstanceState,
+  LegacyAlert,
 } from './types';
-import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_ALERTS,
-  INDEX_PATTERN_ELASTICSEARCH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_ACTION_TYPE_EMAIL,
   ALERT_ACTION_TYPE_LOG,
   FORMAT_DURATION_TEMPLATE_SHORT,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { fetchLicenses } from '../lib/alerts/fetch_licenses';
-import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
+import { AlertMessageTokenType } from '../../common/enums';
 import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.licenseExpiration.resolved', {
   defaultMessage: 'resolved',
@@ -40,8 +37,6 @@ const RESOLVED = i18n.translate('xpack.monitoring.alerts.licenseExpiration.resol
 const FIRING = i18n.translate('xpack.monitoring.alerts.licenseExpiration.firing', {
   defaultMessage: 'firing',
 });
-
-const EXPIRES_DAYS = [60, 30, 14, 7];
 
 const WATCH_NAME = 'xpack_license_expiration';
 
@@ -57,19 +52,6 @@ export class LicenseExpirationAlert extends BaseAlert {
     { name: 'versionList', description: 'The list of unique versions.' },
   ];
 
-  protected dateFormat: string = '';
-  protected emailAddress: string = '';
-
-  protected async execute(options: AlertExecutorOptions): Promise<any> {
-    await super.execute(options);
-
-    const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
-      options.services.savedObjectsClient
-    );
-    this.dateFormat = await uiSettings.get<string>('dateFormat');
-    this.emailAddress = await fetchDefaultEmailAddress(uiSettings);
-  }
-
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
@@ -77,85 +59,32 @@ export class LicenseExpirationAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    const logger = this.getLogger(this.type);
     let alertIndexPattern = INDEX_ALERTS;
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
     }
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
-    const size = this.config.ui.max_bucket_size;
-    const [licenses, legacyAlerts] = await Promise.all([
-      await fetchLicenses(callCluster, clusters, esIndexPattern, size),
-      await fetchLegacyAlerts(callCluster, clusters, alertIndexPattern, WATCH_NAME),
-    ]);
+    const legacyAlerts = await fetchLegacyAlerts(
+      callCluster,
+      clusters,
+      alertIndexPattern,
+      WATCH_NAME,
+      this.config.ui.max_bucket_size
+    );
     return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const license = licenses.find(
-        (_license) => _license.clusterUuid === legacyAlert.metadata.cluster_uuid
-      );
-      if (!license) {
-        // This is potentially bad
-        logger.warn(
-          `Unable to map legacy alert status to license for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
-        );
-        return accum;
-      }
-
-      const $expiry = moment.utc(license.expiryDateMS);
-      let isExpired = false;
-      let severity = AlertSeverity.Success;
-
-      if (license.status !== 'active') {
-        isExpired = true;
-        severity = AlertSeverity.Danger;
-      } else if (license.expiryDateMS) {
-        for (let i = EXPIRES_DAYS.length - 1; i >= 0; i--) {
-          if (license.type === 'trial' && i < 2) {
-            break;
-          }
-
-          const $fromNow = moment.utc().add(EXPIRES_DAYS[i], 'days');
-          if ($fromNow.isAfter($expiry)) {
-            isExpired = true;
-            severity = i > 1 ? AlertSeverity.Warning : AlertSeverity.Danger;
-            break;
-          }
-        }
-      }
-
       accum.push({
-        instanceKey: `${license.clusterUuid}`,
-        clusterUuid: license.clusterUuid,
-        shouldFire: isExpired,
-        severity,
-        meta: license,
-        ccs: license.ccs,
+        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
+        clusterUuid: legacyAlert.metadata.cluster_uuid,
+        shouldFire: true,
+        severity: mapLegacySeverity(legacyAlert.metadata.severity),
+        meta: legacyAlert,
+        ccs: null,
       });
       return accum;
     }, []);
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertLicenseState {
-    const license = item.meta as AlertLicense;
-    return {
-      cluster,
-      ccs: null,
-      expiredCheckDateMS: license.expiryDateMS,
-      ui: {
-        isFiring: false,
-        message: null,
-        severity: AlertSeverity.Success,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
-      },
-    };
-  }
-
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const license = item.meta as AlertLicense;
+    const legacyAlert = item.meta as LegacyAlert;
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage', {
@@ -173,14 +102,14 @@ export class LicenseExpirationAlert extends BaseAlert {
           type: AlertMessageTokenType.Time,
           isRelative: true,
           isAbsolute: false,
-          timestamp: license.expiryDateMS,
+          timestamp: legacyAlert.metadata.time,
         } as AlertMessageTimeToken,
         {
           startToken: '#absolute',
           type: AlertMessageTokenType.Time,
           isAbsolute: true,
           isRelative: false,
-          timestamp: license.expiryDateMS,
+          timestamp: legacyAlert.metadata.time,
         } as AlertMessageTimeToken,
         {
           startToken: '#start_link',
@@ -202,8 +131,8 @@ export class LicenseExpirationAlert extends BaseAlert {
       return;
     }
     const alertState = instanceState.alertStates[0];
-    const license = item.meta;
-    const $expiry = moment.utc(license.expiryDateMS);
+    const legacyAlert = item.meta as LegacyAlert;
+    const $expiry = moment(legacyAlert.metadata.time);
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: RESOLVED,

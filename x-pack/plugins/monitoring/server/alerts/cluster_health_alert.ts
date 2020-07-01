@@ -12,11 +12,10 @@ import {
   AlertState,
   AlertMessage,
   AlertMessageLinkToken,
-  AlertClusterHealth,
-  AlertClusterHealthState,
   AlertInstanceState,
+  LegacyAlert,
 } from './types';
-import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_ALERTS,
@@ -25,10 +24,9 @@ import {
   ALERT_ACTION_TYPE_EMAIL,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
-import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
-import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
+import { AlertMessageTokenType, AlertClusterHealthType } from '../../common/enums';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
 import { CommonAlertParams } from '../../common/types';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterStatus.redMessage', {
@@ -49,17 +47,6 @@ export class ClusterHealthAlert extends BaseAlert {
   public label = 'Cluster health';
   public isLegacy = true;
 
-  protected emailAddress: string = '';
-
-  protected async execute(options: AlertExecutorOptions): Promise<any> {
-    await super.execute(options);
-
-    const uiSettings = (await this.getUiSettingsService()).asScopedToClient(
-      options.services.savedObjectsClient
-    );
-    this.emailAddress = await fetchDefaultEmailAddress(uiSettings);
-  }
-
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
@@ -67,7 +54,6 @@ export class ClusterHealthAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    const logger = this.getLogger(this.type);
     let alertIndexPattern = INDEX_ALERTS;
     if (availableCcs) {
       alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
@@ -76,65 +62,38 @@ export class ClusterHealthAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const size = this.config.ui.max_bucket_size;
-    const [clustersHealth, legacyAlerts] = await Promise.all([
-      await fetchClusterHealth(callCluster, clusters, esIndexPattern, size),
-      await fetchLegacyAlerts(
-        callCluster,
-        clusters,
-        alertIndexPattern,
-        WATCH_NAME,
-        this.config.ui.max_bucket_size
-      ),
-    ]);
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const clusterHealth = clustersHealth.find(
-        (health) => health.clusterUuid === legacyAlert.metadata.cluster_uuid
-      );
-      if (!clusterHealth) {
-        // This is potentially bad
-        logger.warn(
-          `Unable to map legacy alert status to health check for ${legacyAlert.metadata.cluster_uuid}. No alert will show in the UI but it is assumed the alert has been resolved.`
-        );
-        return accum;
-      }
-      const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
-      const severity =
-        clusterHealth.health === AlertClusterHealthType.Red
-          ? AlertSeverity.Danger
-          : AlertSeverity.Warning;
+    const legacyAlerts = await fetchLegacyAlerts(
+      callCluster,
+      clusters,
+      alertIndexPattern,
+      WATCH_NAME,
+      this.config.ui.max_bucket_size
+    );
 
+    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
       accum.push({
-        instanceKey: `${clusterHealth.clusterUuid}`,
-        clusterUuid: clusterHealth.clusterUuid,
-        shouldFire,
-        severity,
-        meta: clusterHealth,
-        ccs: clusterHealth.ccs,
+        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
+        clusterUuid: legacyAlert.metadata.cluster_uuid,
+        shouldFire: true,
+        severity: mapLegacySeverity(legacyAlert.metadata.severity),
+        meta: legacyAlert,
+        ccs: null,
       });
       return accum;
     }, []);
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertClusterHealthState {
-    const clusterHealth = item.meta as AlertClusterHealth;
-    return {
-      cluster,
-      health: clusterHealth.health,
-      ccs: clusterHealth.ccs,
-      ui: {
-        isFiring: false,
-        message: null,
-        severity: AlertSeverity.Danger,
-        resolvedMS: 0,
-        triggeredMS: 0,
-        lastCheckedMS: 0,
-      },
-    };
+  private getHealth(legacyAlert: LegacyAlert) {
+    const prefixStr = 'Elasticsearch cluster status is ';
+    return legacyAlert.prefix.slice(
+      legacyAlert.prefix.indexOf(prefixStr) + prefixStr.length,
+      legacyAlert.prefix.length - 1
+    ) as AlertClusterHealthType;
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const clusterHealth = item.meta as AlertClusterHealth;
+    const legacyAlert = item.meta as LegacyAlert;
+    const health = this.getHealth(legacyAlert);
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.clusterStatus.ui.resolvedMessage', {
@@ -147,7 +106,7 @@ export class ClusterHealthAlert extends BaseAlert {
       text: i18n.translate('xpack.monitoring.alerts.clusterStatus.ui.firingMessage', {
         defaultMessage: `Elasticsearch cluster health is {health}.`,
         values: {
-          health: clusterHealth.health,
+          health,
         },
       }),
       nextSteps: [
@@ -156,9 +115,7 @@ export class ClusterHealthAlert extends BaseAlert {
             defaultMessage: `{message}. #start_linkView now#end_link`,
             values: {
               message:
-                clusterHealth.health === AlertClusterHealthType.Red
-                  ? RED_STATUS_MESSAGE
-                  : YELLOW_STATUS_MESSAGE,
+                health === AlertClusterHealthType.Red ? RED_STATUS_MESSAGE : YELLOW_STATUS_MESSAGE,
             },
           }),
           tokens: [
@@ -184,17 +141,18 @@ export class ClusterHealthAlert extends BaseAlert {
       return;
     }
     const alertState = instanceState.alertStates[0];
-    const clusterHealth = item.meta;
+    const legacyAlert = item.meta as LegacyAlert;
+    const health = this.getHealth(legacyAlert);
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: 'resolved',
-        clusterHealth: clusterHealth.health,
+        clusterHealth: health,
         clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
         state: 'firing',
-        clusterHealth: clusterHealth.health,
+        clusterHealth: health,
         clusterName: cluster.clusterName,
         action: 'Allocate missing primary and replica shards.',
       });
