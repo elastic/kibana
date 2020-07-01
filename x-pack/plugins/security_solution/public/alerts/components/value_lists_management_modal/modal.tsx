@@ -39,7 +39,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   showModal,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(5);
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
@@ -114,7 +114,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     pageIndex,
     pageSize,
     totalItemCount: lists.result?.total ?? 0,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions: [5, 10, 20],
     hidePerPageOptions: false,
   };
 
