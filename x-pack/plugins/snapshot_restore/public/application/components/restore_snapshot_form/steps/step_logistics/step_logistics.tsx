@@ -199,7 +199,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamsAndIndicesDescription"
-            defaultMessage="Creates new data streams and indices if they don’t exist. Re-opens existing indices, including backing indices for a data stream,
+            defaultMessage="Creates new data streams and indices if they don’t exist. Opens existing indices, including backing indices for a data stream,
               if they are closed and have the same number of shards as the snapshot index."
           />
         }
@@ -400,7 +400,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      {/* Rename indices */}
+      {/* Rename data streams and indices */}
       <EuiDescribedFormGroup
         title={
           <EuiTitle size="s">
@@ -415,7 +415,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.renameDataStreamsAndIndicesDescription"
-            defaultMessage="Renames data streams and indices on restore."
+            defaultMessage="Renames data streams and indices on restore. Ensure that a matching index template exists for renamed data streams."
           />
         }
         fullWidth
