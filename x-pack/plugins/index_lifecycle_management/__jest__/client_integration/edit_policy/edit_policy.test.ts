@@ -7,11 +7,10 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers/setup_environment';
-
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
-import { DELETE_PHASE_POLICY } from './constants';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import { DELETE_PHASE_POLICY, NEW_SNAPSHOT_POLICY_NAME, SNAPSHOT_POLICY_NAME } from './constants';
 
 window.scrollTo = jest.fn();
 
@@ -25,6 +24,10 @@ describe('<EditPolicy />', () => {
   describe('delete phase', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([DELETE_PHASE_POLICY]);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([
+        SNAPSHOT_POLICY_NAME,
+        NEW_SNAPSHOT_POLICY_NAME,
+      ]);
 
       await act(async () => {
         testBed = await setup();
@@ -35,16 +38,18 @@ describe('<EditPolicy />', () => {
     });
 
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
-      expect(testBed.find('waitForSnapshotField').props().value).toEqual(
-        DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy
-      );
+      expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
+        {
+          label: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
+          value: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
+        },
+      ]);
     });
 
     test('wait for snapshot field should correctly update snapshot policy name', async () => {
       const { actions } = testBed;
 
-      const newPolicyName = 'my_new_snapshot_policy';
-      actions.setWaitForSnapshotPolicy(newPolicyName);
+      await actions.setWaitForSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
       await actions.savePolicy();
 
       const expected = {
@@ -56,7 +61,7 @@ describe('<EditPolicy />', () => {
             actions: {
               ...DELETE_PHASE_POLICY.policy.phases.delete.actions,
               wait_for_snapshot: {
-                policy: newPolicyName,
+                policy: NEW_SNAPSHOT_POLICY_NAME,
               },
             },
           },

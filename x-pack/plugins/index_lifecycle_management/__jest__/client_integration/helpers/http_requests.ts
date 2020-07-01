@@ -27,7 +27,16 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadSnapshotPolicies = (response: any = []) => {
+    server.respondWith('GET', `${API_BASE_PATH}/snapshot_policies`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadPolicies,
+    setLoadSnapshotPolicies,
   };
 };

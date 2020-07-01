@@ -12,7 +12,7 @@ import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@ela
 import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../../constants';
 import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
-import { SnapshotPolicies } from '../snapshot_policies/snapshot_policies';
+import { SnapshotPolicies } from '../snapshot_policies';
 
 export class DeletePhase extends PureComponent {
   static propTypes = {
@@ -114,7 +114,7 @@ export class DeletePhase extends PureComponent {
                 <Fragment>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotLabel"
-                    defaultMessage="Snapshot policy"
+                    defaultMessage="Snapshot policy name"
                   />
                   <OptionalLabel />
                 </Fragment>
@@ -122,7 +122,7 @@ export class DeletePhase extends PureComponent {
             >
               <SnapshotPolicies
                 value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
-                onChange={(e) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, e.target.value)}
+                onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

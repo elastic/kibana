@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiSelect, EuiCallOut } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
-import { SectionError } from '../../../../../../../../../src/plugins/es_ui_shared/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { SnapshotPoliciesProps } from './';
+
 import { useLoadSnapshotPolicies } from '../../../../services/api';
 
 export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = ({
@@ -18,64 +24,116 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
   onChange,
 }) => {
   const { error, isLoading, data, sendRequest } = useLoadSnapshotPolicies();
-  if (error) {
-    return (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.loadingSnapshotPoliciesErrorMessage"
-            defaultMessage="Error loading snapshot policies"
-          />
-        }
-        error={error}
-        actions={
-          <EuiButton
-            onClick={() => sendRequest()}
-            color="danger"
-            iconType="refresh"
-            data-test-subj="reloadSnapshotPoliciesButton"
-          >
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadSnapshotPoliciesButtonLabel"
-              defaultMessage="Reload snapshot policies"
-            />
-          </EuiButton>
-        }
-      />
-    );
-  }
 
-  if (data.length === 0) {
-    return (
-      <EuiCallOut
-        style={{ maxWidth: 400 }}
-        title={
+  const policies = data.map((name: string) => ({
+    label: name,
+    value: name,
+  }));
+
+  const onComboChange = (options: EuiComboBoxOptionOption[]) => {
+    if (options.length > 0) {
+      onChange(options[0].label);
+    } else {
+      onChange('');
+    }
+  };
+
+  const onCreateOption = (newValue: string) => {
+    onChange(newValue);
+  };
+
+  let renderCallout;
+  if (error) {
+    renderCallout = (
+      <Fragment>
+        <EuiSpacer size="m" />
+
+        <EuiCallOut
+          size="s"
+          iconType="help"
+          color="warning"
+          title={
+            <Fragment>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedTitle"
+                defaultMessage="Couldn't load existing policies."
+              />
+
+              <EuiButtonIcon size="s" color="warning" onClick={sendRequest} iconType="refresh" />
+            </Fragment>
+          }
+        >
           <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.snapshotPoliciesMissingLabel"
-            defaultMessage="No snapshot policies found"
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedMessage"
+            defaultMessage="You still can type in a policy name."
           />
-        }
-        color="warning"
-      >
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.snapshotPoliciesMissingDescription"
-          defaultMessage="You haven't created any snapshot policies yet."
-        />
-      </EuiCallOut>
+        </EuiCallOut>
+      </Fragment>
+    );
+  } else if (data.length === 0) {
+    renderCallout = (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          size="s"
+          iconType="help"
+          color="warning"
+          title={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedTitle"
+              defaultMessage="No policies"
+            />
+          }
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage"
+            defaultMessage="You haven't created any snapshot policies yet. You still can type in a policy name."
+          />
+        </EuiCallOut>
+      </Fragment>
+    );
+  } else if (value && !data.includes(value)) {
+    renderCallout = (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          size="s"
+          iconType="help"
+          color="warning"
+          title={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyTitle"
+              defaultMessage="Your input doesn't match any existing snapshot policies."
+            />
+          }
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
+            defaultMessage="You can still save this value."
+          />
+        </EuiCallOut>
+      </Fragment>
     );
   }
 
   return (
-    <EuiSelect
-      options={data.map((name: string) => ({
-        value: name,
-        text: name,
-      }))}
-      isLoading={isLoading}
-      hasNoInitialSelection={true}
-      value={value}
-      onChange={(e) => onChange(e)}
-      data-test-subj="snapshotPolicySelect"
-    />
+    <Fragment>
+      <EuiComboBox
+        data-test-subj="snapshotPolicyCombobox"
+        options={policies}
+        singleSelection={{ asPlainText: true }}
+        isLoading={isLoading}
+        onCreateOption={onCreateOption}
+        selectedOptions={[
+          {
+            label: value,
+            value,
+          },
+        ]}
+        onChange={onComboChange}
+        noSuggestions={!!(error || data.length === 0)}
+      />
+      {renderCallout}
+    </Fragment>
   );
 };

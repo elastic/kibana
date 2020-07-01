@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { SnapshotPolicies } from './snapshot_policies';
+
 export interface SnapshotPoliciesProps {
   value: string;
-  onChange: () => void;
+  onChange: (value: string) => void;
 }

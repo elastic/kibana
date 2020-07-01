@@ -30,7 +30,7 @@ export function sendPost(path: string, payload: any): any {
   return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, query: any): any {
+export function sendGet(path: string, query?: any): any {
   return _httpClient.get(getFullPath(path), { query });
 }
 
