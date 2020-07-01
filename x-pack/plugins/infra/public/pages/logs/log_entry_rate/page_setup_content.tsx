@@ -30,7 +30,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
       <LogAnalysisSetupPageHeader>
         <FormattedMessage
           id="xpack.infra.logs.logEntryRate.setupTitle"
-          defaultMessage="Setup log anomaly analysis"
+          defaultMessage="Set up log anomaly analysis"
         />
       </LogAnalysisSetupPageHeader>
       <LogAnalysisSetupPageContent>
@@ -38,7 +38,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
           <p>
             <FormattedMessage
               id="xpack.infra.logs.logEntryRate.setupDescription"
-              defaultMessage="To show log anomalies, machine learning jobs need to be set up"
+              defaultMessage="To enable log anomalies, set up a machine learning job"
             />
           </p>
         </EuiText>

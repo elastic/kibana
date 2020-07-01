@@ -30,7 +30,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCat
       <LogAnalysisSetupPageHeader>
         <FormattedMessage
           id="xpack.infra.logs.logEntryCategories.setupTitle"
-          defaultMessage="Setup log category analysis"
+          defaultMessage="Set up log category analysis"
         />
       </LogAnalysisSetupPageHeader>
       <LogAnalysisSetupPageContent>
@@ -38,7 +38,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCat
           <p>
             <FormattedMessage
               id="xpack.infra.logs.logEntryCategories.setupDescription"
-              defaultMessage="To show log categories, machine learning jobs need to be set up."
+              defaultMessage="To enable log categories, set up a machine learning job."
             />
           </p>
         </EuiText>
