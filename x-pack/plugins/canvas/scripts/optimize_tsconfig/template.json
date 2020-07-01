@@ -1,0 +1,12 @@
+{
+  "include": [
+    "**/typings/**/*",
+    "plugins/canvas/**/*"
+  ],
+  "exclude": [
+    "test/**/*",
+    "**/__fixtures__/**/*",
+    "plugins/security_solution/cypress/**/*",
+    "**/typespec_tests.ts"
+  ]
+}
