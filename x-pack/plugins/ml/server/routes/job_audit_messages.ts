@@ -39,9 +39,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getJobAuditMessages } = jobAuditMessagesProvider(context.ml!.mlClient);
         const { jobId } = request.params;
         const { from } = request.query;
         const resp = await getJobAuditMessages(jobId, from);
@@ -76,9 +74,7 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getJobAuditMessages } = jobAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getJobAuditMessages } = jobAuditMessagesProvider(context.ml!.mlClient);
         const { from } = request.query;
         const resp = await getJobAuditMessages(undefined, from);
 

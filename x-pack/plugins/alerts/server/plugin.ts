@@ -276,6 +276,9 @@ export class AlertingPlugin {
       getScopedCallCluster(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
+      getScopedClusterClient(clusterClient: ILegacyClusterClient) {
+        return clusterClient.asScoped(request);
+      },
     });
   }
 

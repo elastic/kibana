@@ -62,7 +62,7 @@ export function systemRoutes(
       try {
         let upgradeInProgress = false;
         try {
-          const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
+          const info = await context.ml!.mlClient.callAsInternalUser('ml.info');
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = info.upgrade_mode === true;
@@ -90,7 +90,7 @@ export function systemRoutes(
           });
         } else {
           const body = request.body;
-          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
+          const resp = await context.ml!.mlClient.callAsInternalUser('ml.privilegeCheck', { body });
           resp.upgradeInProgress = upgradeInProgress;
           return response.ok({
             body: resp,
@@ -128,7 +128,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          context.ml!.mlClient.callAsCurrentUser,
+          context.ml!.mlClient,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -179,7 +179,7 @@ export function systemRoutes(
             'cluster:monitor/xpack/ml/datafeeds/stats/get',
           ];
           const body = { cluster: requiredPrivileges };
-          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
+          const resp = await context.ml!.mlClient.callAsInternalUser('ml.privilegeCheck', { body });
 
           if (resp.has_all_requested) {
             return response.ok({
@@ -214,7 +214,7 @@ export function systemRoutes(
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
-        const info = await context.ml!.mlClient.callAsCurrentUser('ml.info');
+        const info = await context.ml!.mlClient.callAsInternalUser('ml.info');
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...info, cloudId },

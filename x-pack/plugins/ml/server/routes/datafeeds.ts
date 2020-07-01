@@ -34,7 +34,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds');
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeeds');
 
         return response.ok({
           body: resp,
@@ -67,7 +67,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeeds', { datafeedId });
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeeds', { datafeedId });
 
         return response.ok({
           body: resp,
@@ -95,7 +95,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats');
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeedStats');
 
         return response.ok({
           body: resp,
@@ -128,7 +128,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedStats', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeedStats', {
           datafeedId,
         });
 
@@ -165,7 +165,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.addDatafeed', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.addDatafeed', {
           datafeedId,
           body: request.body,
         });
@@ -203,7 +203,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.updateDatafeed', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.updateDatafeed', {
           datafeedId,
           body: request.body,
         });
@@ -248,7 +248,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
           options.force = force;
         }
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.deleteDatafeed', options);
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.deleteDatafeed', options);
 
         return response.ok({
           body: resp,
@@ -285,7 +285,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         const datafeedId = request.params.datafeedId;
         const { start, end } = request.body;
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.startDatafeed', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.startDatafeed', {
           datafeedId,
           start,
           end,
@@ -323,7 +323,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       try {
         const datafeedId = request.params.datafeedId;
 
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.stopDatafeed', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.stopDatafeed', {
           datafeedId,
         });
 
@@ -358,7 +358,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await context.ml!.mlClient.callAsCurrentUser('ml.datafeedPreview', {
+        const resp = await context.ml!.mlClient.callAsInternalUser('ml.datafeedPreview', {
           datafeedId,
         });
 

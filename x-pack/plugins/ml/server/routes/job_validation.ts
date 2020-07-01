@@ -32,7 +32,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
   ) {
     const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
-    return calculateModelMemoryLimitProvider(context.ml!.mlClient.callAsCurrentUser)(
+    return calculateModelMemoryLimitProvider(context.ml!.mlClient)(
       analysisConfig as AnalysisConfig,
       indexPattern,
       query,
@@ -65,8 +65,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(
-          context.ml!.mlClient.callAsCurrentUser,
-          context.ml!.mlClient.callAsInternalUser,
+          context.ml!.mlClient,
           mlLicense.isSecurityEnabled() === false
         )(request.body)
           // this catch gets triggered when the estimation code runs without error
@@ -147,10 +146,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const resp = await validateCardinality(
-          context.ml!.mlClient.callAsCurrentUser,
-          request.body
-        );
+        const resp = await validateCardinality(context.ml!.mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -184,10 +180,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       try {
         // version corresponds to the version used in documentation links.
         const resp = await validateJob(
-          context.ml!.mlClient.callAsCurrentUser,
+          context.ml!.mlClient,
           request.body,
           version,
-          context.ml!.mlClient.callAsInternalUser,
           mlLicense.isSecurityEnabled() === false
         );
 

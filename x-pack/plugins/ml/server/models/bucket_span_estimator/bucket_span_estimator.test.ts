@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
@@ -17,7 +17,8 @@ import { estimateBucketSpanFactory, BucketSpanEstimatorData } from './bucket_spa
 // sufficient permissions should be returned, the second time insufficient
 // permissions.
 const permissions = [false, true];
-const callWithRequest: LegacyAPICaller = (method: string) => {
+
+const callAsCurrentUser = (method: string) => {
   return new Promise((resolve) => {
     if (method === 'ml.privilegeCheck') {
       resolve({
@@ -34,10 +35,15 @@ const callWithRequest: LegacyAPICaller = (method: string) => {
   }) as Promise<any>;
 };
 
-const callWithInternalUser: LegacyAPICaller = () => {
+const callAsInternalUser = () => {
   return new Promise((resolve) => {
     resolve({});
   }) as Promise<any>;
+};
+
+const mlClusterClient: ILegacyScopedClusterClient = {
+  callAsCurrentUser,
+  callAsInternalUser,
 };
 
 // mock configuration to be passed to the estimator
@@ -59,17 +65,13 @@ const formConfig: BucketSpanEstimatorData = {
 describe('ML - BucketSpanEstimator', () => {
   it('call factory', () => {
     expect(function () {
-      estimateBucketSpanFactory(callWithRequest, callWithInternalUser, false);
+      estimateBucketSpanFactory(mlClusterClient, false);
     }).not.toThrow('Not initialized.');
   });
 
   it('call factory and estimator with security disabled', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(
-        callWithRequest,
-        callWithInternalUser,
-        true
-      );
+      const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient, true);
 
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
@@ -81,11 +83,7 @@ describe('ML - BucketSpanEstimator', () => {
 
   it('call factory and estimator with security enabled.', (done) => {
     expect(function () {
-      const estimateBucketSpan = estimateBucketSpanFactory(
-        callWithRequest,
-        callWithInternalUser,
-        false
-      );
+      const estimateBucketSpan = estimateBucketSpanFactory(mlClusterClient, false);
       estimateBucketSpan(formConfig).catch((catchData) => {
         expect(catchData).toBe('Unable to retrieve cluster setting search.max_buckets');
 
