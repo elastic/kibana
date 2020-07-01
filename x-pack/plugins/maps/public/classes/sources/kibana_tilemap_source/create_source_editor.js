@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 
 import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
@@ -19,21 +19,23 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
   }
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.source.kbnTMS.kbnTMS.urlLabel', {
-        defaultMessage: 'Tilemap url',
-      })}
-      helpText={
-        tilemap.url
-          ? null
-          : i18n.translate('xpack.maps.source.kbnTMS.noLayerAvailableHelptext', {
-              defaultMessage:
-                'No tilemap layer is available. Ask your system administrator to set "map.tilemap.url" in kibana.yml.',
-            })
-      }
-    >
-      <EuiFieldText readOnly value={tilemap.url} />
-    </EuiFormRow>
+    <EuiPanel>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.kbnTMS.kbnTMS.urlLabel', {
+          defaultMessage: 'Tilemap url',
+        })}
+        helpText={
+          tilemap.url
+            ? null
+            : i18n.translate('xpack.maps.source.kbnTMS.noLayerAvailableHelptext', {
+                defaultMessage:
+                  'No tilemap layer is available. Ask your system administrator to set "map.tilemap.url" in kibana.yml.',
+              })
+        }
+      >
+        <EuiFieldText readOnly value={tilemap.url} />
+      </EuiFormRow>
+    </EuiPanel>
   );
 }
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
@@ -13,7 +13,7 @@ import { calculateScrollMath } from './calculate_scroll_math';
 import { getSearchAfterScroll } from './get_search_after_scroll';
 
 interface ScrollToStartPageOptions {
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   filter: Filter;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;

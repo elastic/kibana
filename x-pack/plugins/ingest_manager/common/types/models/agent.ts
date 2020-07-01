@@ -90,8 +90,10 @@ export interface Agent extends AgentBase {
   current_error_events: AgentEvent[];
   access_api_key?: string;
   status?: string;
+  packages: string[];
 }
 
 export interface AgentSOAttributes extends AgentBase {
   current_error_events?: string;
+  packages?: string[];
 }

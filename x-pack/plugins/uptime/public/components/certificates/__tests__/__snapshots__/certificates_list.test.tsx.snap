@@ -51,20 +51,55 @@ exports[`CertificateList shallow renders expected elements for valid props 1`] =
     }
   }
 >
-  <CertificateList
-    onChange={[MockFunction]}
-    page={
+  <ContextProvider
+    value={
       Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
         "index": 0,
-        "size": 10,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
-    sort={
-      Object {
-        "direction": "asc",
-        "field": "not_after",
+  >
+    <CertificateList
+      onChange={[MockFunction]}
+      page={
+        Object {
+          "index": 0,
+          "size": 10,
+        }
       }
-    }
-  />
+      sort={
+        Object {
+          "direction": "asc",
+          "field": "not_after",
+        }
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

@@ -29,6 +29,7 @@ export interface VisualizationListItem {
   description?: string;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   typeTitle: string;
+  image?: string;
 }
 
 export interface VisualizationsAppExtension {
