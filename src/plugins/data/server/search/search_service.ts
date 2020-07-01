@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup } from '../../../../core/server';
+import {
+  Plugin,
+  PluginInitializerContext,
+  CoreSetup,
+  RequestHandlerContext,
+} from '../../../../core/server';
 import {
   ISearchSetup,
   ISearchStart,
@@ -29,6 +34,7 @@ import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { searchSavedObjectType } from '../saved_objects';
 import { DataPluginStart } from '../plugin';
+import { IEsSearchRequest } from '../../common';
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: TSearchStrategiesMap = {};
@@ -38,18 +44,31 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
     core.savedObjects.registerType(searchSavedObjectType);
 
-    this.registerSearchStrategy(
-      ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
-    );
+    core.getStartServices().then(([coreStart]) => {
+      this.registerSearchStrategy(
+        ES_SEARCH_STRATEGY,
+        esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
+      );
+    });
 
     registerSearchRoute(core);
 
     return { registerSearchStrategy: this.registerSearchStrategy };
   }
 
+  private search(context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) {
+    return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
+      context,
+      searchRequest,
+      { signal: options.signal }
+    );
+  }
+
   public start(): ISearchStart {
-    return { getSearchStrategy: this.getSearchStrategy };
+    return {
+      getSearchStrategy: this.getSearchStrategy,
+      search: this.search,
+    };
   }
 
   public stop() {}

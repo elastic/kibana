@@ -8,7 +8,11 @@ import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../src/core/server';
+import {
+  LegacyAPICaller,
+  SharedGlobalConfig,
+  RequestHandlerContext,
+} from '../../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
   ISearch,
@@ -32,12 +36,12 @@ export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>
 ): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
   const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
-    context,
+    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
     options
   ) => {
     const config = await config$.pipe(first()).toPromise();
-    const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+    const caller = context.core.elasticsearch.legacy.client.asScoped(request).callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 

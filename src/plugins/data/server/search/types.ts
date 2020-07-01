@@ -35,6 +35,11 @@ export interface ISearchStart {
    * already-registered ES search strategy, it can use this function to accomplish that.
    */
   getSearchStrategy: TGetSearchStrategy;
+  search: (
+    context: RequestHandlerContext,
+    request: IKibanaSearchRequest,
+    options: any
+  ) => Promise<IKibanaSearchResponse>;
 }
 
 export interface ISearchOptions {
