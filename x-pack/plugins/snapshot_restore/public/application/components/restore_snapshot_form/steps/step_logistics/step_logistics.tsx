@@ -185,16 +185,16 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesTitle"
-                defaultMessage="Indices and data streams"
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamsAndIndicesTitle"
+                defaultMessage="Data streams and indices"
               />
             </h3>
           </EuiTitle>
         }
         description={
           <FormattedMessage
-            id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesDescription"
-            defaultMessage="Creates new indices and data streams if they don’t exist. Restores existing indices
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamsAndIndicesDescription"
+            defaultMessage="Creates new data streams and indices if they don’t exist. Re-opens existing indices, including backing indices for a data stream,
               if they are closed and have the same number of shards as the snapshot index."
           />
         }
@@ -205,8 +205,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <EuiSwitch
               label={
                 <FormattedMessage
-                  id="xpack.snapshotRestore.restoreForm.stepLogistics.allIndicesLabel"
-                  defaultMessage="All indices and data streams, including system indices"
+                  id="xpack.snapshotRestore.restoreForm.stepLogistics.allDataStreamsAndIndicesLabel"
+                  defaultMessage="All data streams and indices, including system indices"
                 />
               }
               checked={isAllIndicesAndDataStreams}
@@ -235,8 +235,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       <EuiFlexGroup justifyContent="spaceBetween">
                         <EuiFlexItem grow={false}>
                           <FormattedMessage
-                            id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesLabel"
-                            defaultMessage="Select indices and data streams"
+                            id="xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesLabel"
+                            defaultMessage="Select data streams and indices"
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
@@ -269,8 +269,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             }}
                           >
                             <FormattedMessage
-                              id="xpack.snapshotRestore.restoreForm.stepLogistics.indicesToggleListLink"
-                              defaultMessage="Select indices and data streams"
+                              id="xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamsAndIndicesToggleListLink"
+                              defaultMessage="Select data streams and indices"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -280,8 +280,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   helpText={
                     selectIndicesMode === 'list' ? (
                       <FormattedMessage
-                        id="xpack.snapshotRestore.restoreForm.stepLogistics.selectIndicesHelpText"
-                        defaultMessage="{count} {count, plural, one {index or data stream} other {indices or data streams}} will be restored. {selectOrDeselectAllLink}"
+                        id="xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesHelpText"
+                        defaultMessage="{count} {count, plural, one {data stream or index} other {data streams and indices}} will be restored. {selectOrDeselectAllLink}"
                         values={{
                           count: restoreIndices && restoreIndices.length,
                           selectOrDeselectAllLink:
@@ -424,16 +424,16 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesTitle"
-                defaultMessage="Rename indices and data streams"
+                id="xpack.snapshotRestore.restoreForm.stepLogistics.renameDataStreamsAndIndicesTitle"
+                defaultMessage="Rename data streams and indices"
               />
             </h3>
           </EuiTitle>
         }
         description={
           <FormattedMessage
-            id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesDescription"
-            defaultMessage="Renames indices and data streams on restore."
+            id="xpack.snapshotRestore.restoreForm.stepLogistics.renameDataStreamsAndIndicesDescription"
+            defaultMessage="Renames data streams and indices on restore."
           />
         }
         fullWidth
@@ -443,8 +443,8 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <EuiSwitch
               label={
                 <FormattedMessage
-                  id="xpack.snapshotRestore.restoreForm.stepLogistics.renameIndicesLabel"
-                  defaultMessage="Rename indices and data streams"
+                  id="xpack.snapshotRestore.restoreForm.stepLogistics.renameDataStreamsAndIndicesLabel"
+                  defaultMessage="Rename data streams and indices"
                 />
               }
               checked={isRenamingIndices}
@@ -583,7 +583,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
             defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and data streams."
+              templates with the same name. Also restores persistent settings."
           />
         }
         fullWidth

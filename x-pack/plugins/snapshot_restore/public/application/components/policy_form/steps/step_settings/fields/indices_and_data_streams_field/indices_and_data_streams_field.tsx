@@ -97,8 +97,8 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
     <EuiSwitch
       label={
         <FormattedMessage
-          id="xpack.snapshotRestore.policyForm.stepSettings.allIndicesLabel"
-          defaultMessage="All indices and data streams, including system indices"
+          id="xpack.snapshotRestore.policyForm.stepSettings.allDataStreamsAndIndicesLabel"
+          defaultMessage="All data streams and indices, including system indices"
         />
       }
       checked={isAllIndices}
@@ -136,16 +136,16 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepSettings.indicesTitle"
-              defaultMessage="Indices and data streams"
+              id="xpack.snapshotRestore.policyForm.stepSettings.dataStreamsAndIndicesTitle"
+              defaultMessage="Data streams and indices"
             />
           </h3>
         </EuiTitle>
       }
       description={
         <FormattedMessage
-          id="xpack.snapshotRestore.policyForm.stepSettings.indicesDescription"
-          defaultMessage="Indices and data streams to back up."
+          id="xpack.snapshotRestore.policyForm.stepSettings.dataStreamsAndIndicesDescription"
+          defaultMessage="Data streams and indices to back up."
         />
       }
       fullWidth
@@ -180,7 +180,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                       <EuiFlexItem grow={false}>
                         <FormattedMessage
                           id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesLabel"
-                          defaultMessage="Select indices or data streams"
+                          defaultMessage="Select indices and data streams"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>

@@ -73,8 +73,8 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>

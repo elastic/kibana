@@ -72,10 +72,6 @@ class DocumentationLinksService {
   public getCronUrl() {
     return `${this.esDocBasePath}trigger-schedule.html#schedule-cron`;
   }
-
-  public getCreateIndexTemplateForDataStream() {
-    return `${this.esDocBasePath}set-up-a-data-stream.html#create-a-data-stream-template`;
-  }
 }
 
 export const documentationLinksService = new DocumentationLinksService();

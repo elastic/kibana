@@ -148,8 +148,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
@@ -187,8 +187,8 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
           <EuiDescriptionList textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialLabel"
-                defaultMessage="Allow partial shards"
+                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.partialIndicesLabel"
+                defaultMessage="Allow partial indices"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
