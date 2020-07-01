@@ -77,7 +77,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%' }} data-test-subj="mlAnomalySwimlaneEmbeddableWrapper">
       <SwimlaneContainer
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}
