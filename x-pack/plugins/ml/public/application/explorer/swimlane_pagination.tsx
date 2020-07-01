@@ -72,7 +72,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
         <EuiPopover
           button={
             <EuiButtonEmpty
-              size="s"
+              size="xs"
               color="text"
               iconType="arrowDown"
               iconSide="right"
