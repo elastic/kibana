@@ -133,98 +133,83 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            ...worker.themeTags.map((theme) => {
-              const darkMode = theme.includes('dark');
-
-              return {
-                resourceQuery: `?${theme}`,
-                use: [
-                  {
-                    loader: 'style-loader',
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
+              use: [
+                {
+                  loader: 'style-loader',
+                },
+                {
+                  loader: 'css-loader',
+                  options: {
+                    sourceMap: !worker.dist,
                   },
-                  {
-                    loader: 'css-loader',
-                    options: {
-                      sourceMap: !worker.dist,
+                },
+                {
+                  loader: 'postcss-loader',
+                  options: {
+                    sourceMap: !worker.dist,
+                    config: {
+                      path: require.resolve('./postcss.config'),
                     },
                   },
-                  {
-                    loader: 'postcss-loader',
-                    options: {
-                      sourceMap: !worker.dist,
-                      config: {
-                        path: require.resolve('./postcss.config'),
-                      },
-                    },
-                  },
-                  {
-                    loader: 'resolve-url-loader',
-                    options: {
-                      join: (_: string, __: any) => (uri: string, base?: string) => {
-                        // apply only to legacy platform styles
-                        if (!base || !parseDirPath(base).dirs.includes('legacy')) {
-                          return null;
-                        }
-
-                        if (uri.startsWith('ui/assets')) {
-                          return Path.resolve(
-                            worker.repoRoot,
-                            'src/core/server/core_app/',
-                            uri.replace('ui/', '')
-                          );
-                        }
-
-                        // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                        if (uri.startsWith('ui/')) {
-                          return Path.resolve(
-                            worker.repoRoot,
-                            'src/legacy/ui/public',
-                            uri.replace('ui/', '')
-                          );
-                        }
-
+                },
+                {
+                  loader: 'resolve-url-loader',
+                  options: {
+                    join: (_: string, __: any) => (uri: string, base?: string) => {
+                      // apply only to legacy platform styles
+                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
                         return null;
-                      },
-                    },
-                  },
-                  {
-                    loader: 'sass-loader',
-                    options: {
-                      // must always be enabled as long as we're using the `resolve-url-loader` to
-                      // rewrite `ui/*` urls. They're dropped by subsequent loaders though
-                      sourceMap: true,
-                      prependData(loaderContext: webpack.loader.LoaderContext) {
-                        return `@import ${stringifyRequest(
-                          loaderContext,
-                          Path.resolve(
-                            worker.repoRoot,
-                            `src/legacy/ui/public/styles/_styling_constants_${theme}.scss`
-                          )
-                        )};\n`;
-                      },
-                      webpackImporter: false,
-                      implementation: require('node-sass'),
-                      sassOptions: {
-                        outputStyle: 'nested',
-                        includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: !darkMode
-                          ? undefined
-                          : (url: string) => {
-                              if (url.includes('eui_colors_light')) {
-                                return {
-                                  file: url.replace('eui_colors_light', 'eui_colors_dark'),
-                                };
-                              }
+                      }
 
-                              return { file: url };
-                            },
-                      },
+                      if (uri.startsWith('ui/assets')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/core/server/core_app/',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
+                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
+                      if (uri.startsWith('ui/')) {
+                        return Path.resolve(
+                          worker.repoRoot,
+                          'src/legacy/ui/public',
+                          uri.replace('ui/', '')
+                        );
+                      }
+
+                      return null;
                     },
                   },
-                ],
-              };
-            }),
+                },
+                {
+                  loader: 'sass-loader',
+                  options: {
+                    // must always be enabled as long as we're using the `resolve-url-loader` to
+                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
+                    sourceMap: true,
+                    prependData(loaderContext: webpack.loader.LoaderContext) {
+                      return `@import ${stringifyRequest(
+                        loaderContext,
+                        Path.resolve(
+                          worker.repoRoot,
+                          `src/legacy/ui/public/styles/_styling_constants_${theme}.scss`
+                        )
+                      )};\n`;
+                    },
+                    webpackImporter: false,
+                    implementation: require('node-sass'),
+                    sassOptions: {
+                      outputStyle: 'nested',
+                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                    },
+                  },
+                },
+              ],
+            })),
             {
               loader: require.resolve('./theme_loader'),
               options: {
