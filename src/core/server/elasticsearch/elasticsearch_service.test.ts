@@ -31,7 +31,6 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
-import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>
@@ -76,7 +75,7 @@ describe('#setup', () => {
   });
 
   it('returns elasticsearch client as a part of the contract', async () => {
-    const mockClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClientInstance = elasticsearchServiceMock.createLegacyClusterClient();
     MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
 
     const setupContract = await elasticsearchService.setup(deps);
@@ -210,7 +209,7 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
-    const clusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const clusterClientInstance = elasticsearchServiceMock.createLegacyClusterClient();
     MockClusterClient.mockImplementationOnce(() => clusterClientInstance);
 
     clusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
@@ -226,7 +225,7 @@ describe('#setup', () => {
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
-    const mockClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClientInstance = elasticsearchServiceMock.createLegacyClusterClient();
     MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
 
     mockClusterClientInstance.callAsInternalUser.mockRejectedValue(new Error());
@@ -256,7 +255,7 @@ describe('#stop', () => {
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(2);
-    const mockClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
+    const mockClusterClientInstance = elasticsearchServiceMock.createLegacyCustomClusterClient();
 
     MockClusterClient.mockImplementationOnce(() => mockClusterClientInstance);
 
