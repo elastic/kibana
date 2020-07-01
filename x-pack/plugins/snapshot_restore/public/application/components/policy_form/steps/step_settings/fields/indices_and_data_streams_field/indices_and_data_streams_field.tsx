@@ -150,7 +150,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.dataStreamsAndIndicesDescription"
-          defaultMessage="To back up indices and data streams, manually select them or define index patterns to dynamically capture them."
+          defaultMessage="To back up indices and data streams, manually select them or define index patterns to dynamically match them."
         />
       }
       fullWidth
