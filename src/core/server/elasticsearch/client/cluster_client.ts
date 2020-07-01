@@ -101,7 +101,7 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
     if (!isRealRequest(request)) {
-      return request?.headers ?? {};
+      return filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
     const authHeaders = this.getAuthHeaders(request);
     const headers = ensureRawRequest(request).headers;
