@@ -37,12 +37,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
-          const chunk = event.chunk.toString('utf8');
-          log.warning(
-            `worker`,
-            event.stream,
-            chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
-          );
+          log.warning(`worker`, event.stream, event.line);
         }
 
         if (event?.type === 'bundle not cached') {
