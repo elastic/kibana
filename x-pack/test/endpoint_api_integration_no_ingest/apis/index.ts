@@ -10,6 +10,5 @@ export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProvide
   describe('Endpoint plugin', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./metadata'));
-    loadTestFile(require.resolve('./alerts'));
   });
 }
