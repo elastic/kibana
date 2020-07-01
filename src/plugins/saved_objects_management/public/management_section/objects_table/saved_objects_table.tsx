@@ -75,6 +75,7 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { JsonFlyout } from './components/json_flyout';
 
 interface ExportAllOption {
   id: string;
@@ -109,6 +110,7 @@ export interface SavedObjectsTableState {
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
+  isShowingJSON: boolean;
   relationshipObject?: SavedObjectWithMetadata;
   isShowingDeleteConfirmModal: boolean;
   isShowingExportAllOptionsModal: boolean;
@@ -139,6 +141,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
+      isShowingJSON: false,
       relationshipObject: undefined,
       isShowingDeleteConfirmModal: false,
       isShowingExportAllOptionsModal: false,
@@ -305,9 +308,23 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
+  onShowJSON = (object: SavedObjectWithMetadata) => {
+    this.setState({
+      isShowingJSON: true,
+      relationshipObject: object,
+    });
+  };
+
   onHideRelationships = () => {
     this.setState({
       isShowingRelationships: false,
+      relationshipObject: undefined,
+    });
+  };
+
+  onHideJSON = () => {
+    this.setState({
+      isShowingJSON: false,
       relationshipObject: undefined,
     });
   };
@@ -490,6 +507,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.onHideRelationships}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
+      />
+    );
+  }
+
+  renderJSON() {
+    if (!this.state.isShowingJSON) {
+      return null;
+    }
+
+    return (
+      <JsonFlyout
+        basePath={this.props.http.basePath}
+        savedObject={this.state.relationshipObject!}
+        close={this.onHideJSON}
+        savedObjectsClient={this.props.savedObjectsClient}
       />
     );
   }
@@ -726,6 +758,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       <EuiPageContent horizontalPosition="center">
         {this.renderFlyout()}
         {this.renderRelationships()}
+        {this.renderJSON()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         <Header
@@ -755,6 +788,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
+            onShowJSON={this.onShowJSON}
             canGoInApp={this.props.canGoInApp}
           />
         </RedirectAppLinks>

@@ -65,6 +65,7 @@ export interface TableProps {
   onTableChange: (table: any) => void;
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
+  onShowJSON: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
 }
 
@@ -143,6 +144,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       onTableChange,
       goInspectObject,
       onShowRelationships,
+      onShowJSON,
       basePath,
       actionRegistry,
     } = this.props;
@@ -260,6 +262,14 @@ export class Table extends PureComponent<TableProps, TableState> {
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
+          },
+          {
+            name: 'Raw JSON',
+            description: 'View saved object raw JSON',
+            type: 'icon',
+            icon: 'editorCodeBlock',
+            onClick: (object) => onShowJSON(object),
+            'data-test-subj': 'savedObjectsTableAction-preview',
           },
           ...actionRegistry.getAll().map((action) => {
             return {
