@@ -15,6 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
+  mockIndexPattern,
 } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
@@ -190,6 +191,8 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              indexPattern={mockIndexPattern}
+              indexToAdd={null}
               timelineId={TimelineId.hostsPageExternalAlerts}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
@@ -280,6 +283,8 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              indexPattern={mockIndexPattern}
+              indexToAdd={null}
               timelineId={TimelineId.active}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
@@ -359,6 +364,8 @@ describe('StatefulTopN', () => {
           <StatefulTopN
             browserFields={mockBrowserFields}
             field={field}
+            indexPattern={mockIndexPattern}
+            indexToAdd={null}
             timelineId={TimelineId.alertsPage}
             toggleTopN={jest.fn()}
             onFilterAdded={jest.fn()}

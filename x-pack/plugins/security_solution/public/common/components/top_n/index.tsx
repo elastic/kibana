@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { GlobalTime } from '../../containers/global_time';
-import { BrowserFields, useWithSource } from '../../containers/source';
+import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/public';
+import {
+  esQuery,
+  Filter,
+  Query,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -20,7 +25,6 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 
 const EMPTY_FILTERS: Filter[] = [];
@@ -61,9 +65,16 @@ const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRang
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
+//  * `indexToAdd`, which enables the alerts index to be appended to
+//    the `indexPattern` returned by `useWithSource`, may only be populated when
+//    this component is rendered in the context of the active timeline. This
+//    behavior enables the 'All events' view by appending the alerts index
+//    to the index pattern.
 interface OwnProps {
   browserFields: BrowserFields;
   field: string;
+  indexPattern: IIndexPattern;
+  indexToAdd: string[] | null;
   timelineId: string | null;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -81,6 +92,8 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
+  indexPattern,
+  indexToAdd,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -92,26 +105,9 @@ const StatefulTopNComponent: React.FC<Props> = ({
 }) => {
   const kibana = useKibana();
 
-  //  Regarding data from useManageTimeline:
-  //  * `indexToAdd`, which enables the alerts index to be appended to
-  //    the `indexPattern` returned by `useWithSource`, may only be populated when
-  //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the alerts index
-  //    to the index pattern.
-  const { getManageTimelineById } = useManageTimeline();
-  const { indexToAdd } = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? getManageTimelineById(TimelineId.active)
-        : { indexToAdd: null },
-    [getManageTimelineById, timelineId]
-  );
-
   const options = getOptions(
     timelineId === TimelineId.active ? activeTimelineEventType : undefined
   );
-
-  const { indexPattern } = useWithSource('default', indexToAdd);
 
   return (
     <GlobalTime>

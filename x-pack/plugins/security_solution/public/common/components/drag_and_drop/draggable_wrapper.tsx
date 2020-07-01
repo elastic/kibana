@@ -102,15 +102,28 @@ export const getStyle = (
 export const DraggableWrapper = React.memo<Props>(
   ({ dataProvider, onFilterAdded, render, truncate }) => {
     const draggableRef = useRef<HTMLDivElement | null>(null);
+    const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
     const [showTopN, setShowTopN] = useState<boolean>(false);
-    const toggleTopN = useCallback(() => {
-      setShowTopN(!showTopN);
-    }, [setShowTopN, showTopN]);
     const [goGetTimelineId, setGoGetTimelineId] = useState(false);
     const timelineId = useGetTimelineId(draggableRef, goGetTimelineId);
     const [providerRegistered, setProviderRegistered] = useState(false);
 
     const dispatch = useDispatch();
+
+    const handleClosePopOverTrigger = useCallback(
+      () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
+      []
+    );
+
+    const toggleTopN = useCallback(() => {
+      setShowTopN((prevShowTopN) => {
+        const newShopTopN = !prevShowTopN;
+        if (newShopTopN === false) {
+          handleClosePopOverTrigger();
+        }
+        return newShopTopN;
+      });
+    }, [handleClosePopOverTrigger]);
 
     const registerProvider = useCallback(() => {
       if (!providerRegistered) {
@@ -128,13 +141,13 @@ export const DraggableWrapper = React.memo<Props>(
       () => () => {
         unRegisterProvider();
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+      [unRegisterProvider]
     );
 
     const hoverContent = useMemo(
       () => (
         <DraggableWrapperHoverContent
+          closePopOver={handleClosePopOverTrigger}
           draggableId={getDraggableId(dataProvider.id)}
           field={dataProvider.queryMatch.field}
           goGetTimelineId={setGoGetTimelineId}
@@ -149,7 +162,7 @@ export const DraggableWrapper = React.memo<Props>(
           }
         />
       ),
-      [dataProvider, onFilterAdded, showTopN, timelineId, toggleTopN]
+      [dataProvider, handleClosePopOverTrigger, onFilterAdded, showTopN, timelineId, toggleTopN]
     );
 
     const renderContent = useCallback(
@@ -221,7 +234,12 @@ export const DraggableWrapper = React.memo<Props>(
     );
 
     return (
-      <WithHoverActions alwaysShow={showTopN} hoverContent={hoverContent} render={renderContent} />
+      <WithHoverActions
+        alwaysShow={showTopN}
+        closePopOverTrigger={closePopOverTrigger}
+        hoverContent={hoverContent}
+        render={renderContent}
+      />
     );
   },
   (prevProps, nextProps) =>
