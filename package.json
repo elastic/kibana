@@ -14,7 +14,7 @@
     "branches",
     "branching"
   ],
-  "version": "5.4.6",
+  "version": "5.4.7",
   "main": "./dist/runAsModule.js",
   "types": "dist/runAsModule.d.ts",
   "bin": {
