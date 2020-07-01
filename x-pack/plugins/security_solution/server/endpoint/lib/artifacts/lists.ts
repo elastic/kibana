@@ -134,7 +134,7 @@ function translateEntry(
     case 'match': {
       const e = (entry as unknown) as EntryMatch;
       translatedEntry = {
-        field: e.field,
+        field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
         operator: e.operator,
         type: e.field.endsWith('.text') ? 'exact_caseless' : 'exact_cased',
         value: e.value,
@@ -145,7 +145,7 @@ function translateEntry(
       {
         const e = (entry as unknown) as EntryMatchAny;
         translatedEntry = {
-          field: e.field,
+          field: e.field.endsWith('.text') ? e.field.substring(0, e.field.length - 5) : e.field,
           operator: e.operator,
           type: e.field.endsWith('.text') ? 'exact_caseless_any' : 'exact_cased_any',
           value: e.value,
