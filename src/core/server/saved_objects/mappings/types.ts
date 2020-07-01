@@ -133,6 +133,7 @@ export interface SavedObjectsCoreFieldMapping {
   type: string;
   null_value?: number | boolean | string;
   index?: boolean;
+  doc_value?: boolean;
   enabled?: boolean;
   fields?: {
     [subfield: string]: {
