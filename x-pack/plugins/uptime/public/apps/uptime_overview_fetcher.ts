@@ -5,7 +5,7 @@
  */
 
 import { fetchPingHistogram, fetchSnapshotCount } from '../state/api';
-import { UptimeFetchDataResponse } from '../../../observability/public/typings/fetch_data_response';
+import { UptimeFetchDataResponse } from '../../../observability/public';
 
 export async function fetchUptimeOverviewData({
   startTime,
