@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, IScopedClusterClient } from 'kibana/server';
+import { LegacyAPICaller, ILegacyScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { metadataMirrorIndexPattern } from '../../../../../common/endpoint/constants';
 import { EndpointStatus } from '../../../../../common/endpoint/types';
@@ -23,7 +23,7 @@ interface HitSource {
 }
 
 export async function findUnenrolledHostByHostId(
-  client: IScopedClusterClient,
+  client: ILegacyScopedClusterClient,
   hostId: string
 ): Promise<HostId | undefined> {
   const queryParams = {
@@ -63,7 +63,9 @@ export async function findUnenrolledHostByHostId(
   }
 }
 
-export async function findAllUnenrolledHostIds(client: IScopedClusterClient): Promise<HostId[]> {
+export async function findAllUnenrolledHostIds(
+  client: ILegacyScopedClusterClient
+): Promise<HostId[]> {
   const queryParams = {
     index: metadataMirrorIndexPattern,
     scroll: KEEPALIVE,
@@ -90,7 +92,7 @@ export async function findAllUnenrolledHostIds(client: IScopedClusterClient): Pr
 
 export async function fetchAllUnenrolledHostIdsWithScroll(
   response: SearchResponse<HostId>,
-  client: APICaller,
+  client: LegacyAPICaller,
   hits: HostId[] = []
 ): Promise<HostId[]> {
   let newHits = response.hits?.hits || [];

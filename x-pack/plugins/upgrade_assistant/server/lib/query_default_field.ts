@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import Boom from 'boom';
 import { get } from 'lodash';
 
@@ -20,7 +20,7 @@ import { MappingProperties } from './reindexing/types';
  * @param otherFields - Other fields that should be included in the generated default_field that do not match `fieldTypes`
  */
 export const addDefaultField = async (
-  clusterClient: IScopedClusterClient,
+  clusterClient: ILegacyScopedClusterClient,
   indexName: string,
   fieldTypes: ReadonlySet<string>,
   otherFields: ReadonlySet<string> = new Set()
