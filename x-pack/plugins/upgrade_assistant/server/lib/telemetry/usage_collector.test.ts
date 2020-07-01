@@ -21,7 +21,7 @@ describe('Upgrade Assistant Usage Collector', () => {
   let clusterClient: ILegacyClusterClient;
 
   beforeEach(() => {
-    clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    clusterClient = elasticsearchServiceMock.createClusterClient();
     (clusterClient.callAsInternalUser as jest.Mock).mockResolvedValue({
       persistent: {},
       transient: {

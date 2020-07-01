@@ -32,7 +32,7 @@ describe('test policy response handler', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
 
   beforeEach(() => {
-    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
     endpointAppContextService = new EndpointAppContextService();

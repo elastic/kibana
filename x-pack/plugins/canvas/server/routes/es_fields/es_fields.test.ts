@@ -15,9 +15,7 @@ import {
 
 const mockRouteContext = ({
   core: {
-    elasticsearch: {
-      legacy: { client: elasticsearchServiceMock.createLegacyScopedClusterClient() },
-    },
+    elasticsearch: { legacy: { client: elasticsearchServiceMock.createScopedClusterClient() } },
   },
 } as unknown) as RequestHandlerContext;
 

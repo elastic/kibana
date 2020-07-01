@@ -56,7 +56,7 @@ describe('Change password', () => {
       provider: { type: 'basic', name: 'basic' },
     });
 
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient = routeParamsMock.clusterClient;
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 

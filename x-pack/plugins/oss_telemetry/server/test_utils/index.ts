@@ -49,7 +49,7 @@ const defaultMockTaskDocs = [getMockTaskInstance()];
 export const getMockEs = async (
   mockCallWithInternal: LegacyAPICaller = getMockCallWithInternal()
 ) => {
-  const client = elasticsearchServiceMock.createLegacyClusterClient();
+  const client = elasticsearchServiceMock.createClusterClient();
   (client.callAsInternalUser as any) = mockCallWithInternal;
   return client;
 };

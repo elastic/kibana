@@ -18,7 +18,7 @@ describe('Tokens', () => {
   let tokens: Tokens;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createClusterClient();
 
     const tokensOptions = {
       client: mockClusterClient,

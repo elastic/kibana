@@ -25,7 +25,7 @@ import { KibanaRequest } from 'kibana/server';
 
 const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
-const scopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const executionEnqueuer = jest.fn();
 const request = {} as KibanaRequest;

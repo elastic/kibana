@@ -18,7 +18,7 @@ let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
   logger = loggingSystemMock.createLogger();
-  clusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  clusterClient = elasticsearchServiceMock.createClusterClient();
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     clusterClientPromise: Promise.resolve(clusterClient),

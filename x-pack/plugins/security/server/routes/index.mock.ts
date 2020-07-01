@@ -21,7 +21,7 @@ export const routeDefinitionParamsMock = {
     basePath: httpServiceMock.createBasePath(),
     csp: httpServiceMock.createSetupContract().csp,
     logger: loggingSystemMock.create().get(),
-    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
+    clusterClient: elasticsearchServiceMock.createClusterClient(),
     config: createConfig(ConfigSchema.validate(config), loggingSystemMock.create().get(), {
       isTLSEnabled: false,
     }),

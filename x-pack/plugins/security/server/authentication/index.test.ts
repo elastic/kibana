@@ -69,7 +69,7 @@ describe('setupAuthentication()', () => {
         loggingSystemMock.create().get(),
         { isTLSEnabled: false }
       ),
-      clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
       loggers: loggingSystemMock.create(),
       getFeatureUsageService: jest
@@ -77,7 +77,7 @@ describe('setupAuthentication()', () => {
         .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
     };
 
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSetupAuthenticationParams.clusterClient.asScoped.mockReturnValue(
       (mockScopedClusterClient as unknown) as jest.Mocked<LegacyScopedClusterClient>
     );

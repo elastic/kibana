@@ -59,10 +59,10 @@ describe('test endpoint route', () => {
     } as unknown) as SearchResponse<HostId>);
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
+    mockClusterClient = elasticsearchServiceMock.createClusterClient() as jest.Mocked<
       ILegacyClusterClient
     >;
-    mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();

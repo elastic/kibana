@@ -37,7 +37,7 @@ const createServicesMock = () => {
       savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
     }
   > = {
-    callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
+    callCluster: elasticsearchServiceMock.createScopedClusterClient().callAsCurrentUser,
     getScopedCallCluster: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
   };

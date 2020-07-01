@@ -28,7 +28,7 @@ describe('ADD remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, payload }: TestOptions
   ) => {
     test(description, async () => {
-      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
+      const elasticsearchMock = elasticsearchServiceMock.createClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
@@ -40,10 +40,10 @@ describe('ADD remote clusters', () => {
         },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
       elasticsearchServiceMock
-        .createLegacyClusterClient()
+        .createClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {

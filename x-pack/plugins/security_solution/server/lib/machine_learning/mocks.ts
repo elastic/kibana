@@ -7,7 +7,7 @@
 import { MlPluginSetup } from '../../../../ml/server';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
-const createMockClient = () => elasticsearchServiceMock.createLegacyClusterClient();
+const createMockClient = () => elasticsearchServiceMock.createClusterClient();
 const createMockMlSystemProvider = () =>
   jest.fn(() => ({
     mlCapabilities: jest.fn(),

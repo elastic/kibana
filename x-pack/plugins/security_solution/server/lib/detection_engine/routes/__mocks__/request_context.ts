@@ -16,7 +16,7 @@ import { siemMock } from '../../../../mocks';
 
 const createMockClients = () => ({
   alertsClient: alertsClientMock.create(),
-  clusterClient: elasticsearchServiceMock.createLegacyScopedClusterClient(),
+  clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   licensing: { license: licensingMock.createLicenseMock() },
   savedObjectsClient: savedObjectsClientMock.create(),
   appClient: siemMock.createClient(),

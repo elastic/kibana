@@ -14,7 +14,7 @@ import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 describe('getUpgradeAssistantStatus', () => {
   let deprecationsResponse: DeprecationAPIResponse;
 
-  const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+  const dataClient = elasticsearchServiceMock.createScopedClusterClient();
   (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path, index }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;

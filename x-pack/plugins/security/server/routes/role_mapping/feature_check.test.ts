@@ -76,7 +76,7 @@ describe('GET role mappings feature check', () => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       mockRouteDefinitionParams.clusterClient.callAsInternalUser.mockImplementation(
         internalUserClusterClientImpl

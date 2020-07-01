@@ -24,8 +24,8 @@ describe('API Keys', () => {
   let mockLicense: jest.Mocked<SecurityLicense>;
 
   beforeEach(() => {
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient.asScoped.mockReturnValue(
       (mockScopedClusterClient as unknown) as jest.Mocked<ILegacyScopedClusterClient>
     );

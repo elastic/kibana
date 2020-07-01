@@ -129,8 +129,8 @@ export const elasticsearchServiceMock = {
   createSetup: createSetupContractMock,
   createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
-  createLegacyClusterClient: legacyClientMock.createClusterClient,
-  createLegacyCustomClusterClient: legacyClientMock.createCustomClusterClient,
-  createLegacyScopedClusterClient: legacyClientMock.createScopedClusterClient,
-  createLegacyElasticsearchClient: legacyClientMock.createElasticsearchClient,
+  createClusterClient: legacyClientMock.createClusterClient,
+  createCustomClusterClient: legacyClientMock.createCustomClusterClient,
+  createScopedClusterClient: legacyClientMock.createScopedClusterClient,
+  createElasticsearchClient: legacyClientMock.createElasticsearchClient,
 };
