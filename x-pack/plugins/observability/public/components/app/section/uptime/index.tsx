@@ -18,7 +18,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import d3 from 'd3';
+import moment from 'moment';
 import React, { Fragment, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
@@ -46,14 +46,8 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
     }
   }, [startTime, endTime, bucketSize]);
 
-  const xCoordinates = data
-    ? Object.values(data.series).flatMap((serie) =>
-        serie.coordinates.map((coordinate) => coordinate.x)
-      )
-    : [0];
-
-  const min = d3.min(xCoordinates);
-  const max = d3.max(xCoordinates);
+  const min = moment.utc(startTime).valueOf();
+  const max = moment.utc(endTime).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

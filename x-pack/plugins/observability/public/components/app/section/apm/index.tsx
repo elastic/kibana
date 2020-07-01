@@ -18,7 +18,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import d3 from 'd3';
+import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
@@ -48,12 +48,8 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const transactionSeries = data?.series.transactions;
 
-  const xCoordinates = transactionSeries
-    ? transactionSeries.coordinates.map((coordinate) => coordinate.x)
-    : [0];
-
-  const min = d3.min(xCoordinates);
-  const max = d3.max(xCoordinates);
+  const min = moment.utc(startTime).valueOf();
+  const max = moment.utc(endTime).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
