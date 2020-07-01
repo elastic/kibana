@@ -40,6 +40,7 @@ import { parseInterval } from '../../../../../src/plugins/data/common';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { getAxesConfiguration } from './axes_configuration';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -215,22 +216,18 @@ export function XYChart({
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
-  // use default number formatter for y axis and use formatting hint if there is just a single y column
-  let yAxisFormatter = formatFactory({ id: 'number' });
-  if (filteredLayers.length === 1 && filteredLayers[0].accessors.length === 1) {
-    const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
-      ({ id }) => id === filteredLayers[0].accessors[0]
-    );
-    if (firstYAxisColumn && firstYAxisColumn.formatHint) {
-      yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
-    }
-  }
-
   const chartHasMoreThanOneSeries =
     filteredLayers.length > 1 ||
     filteredLayers.some((layer) => layer.accessors.length > 1) ||
     filteredLayers.some((layer) => layer.splitAccessor);
   const shouldRotate = isHorizontalChart(filteredLayers);
+
+  const yAxesConfiguration = getAxesConfiguration(
+    filteredLayers,
+    data.tables,
+    formatFactory,
+    shouldRotate
+  );
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
@@ -282,6 +279,9 @@ export function XYChart({
         showLegendExtra={false}
         theme={chartTheme}
         baseTheme={chartBaseTheme}
+        tooltip={{
+          headerFormatter: (d) => xAxisFormatter.convert(d.value),
+        }}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
         onBrushEnd={({ x }) => {
@@ -371,18 +371,30 @@ export function XYChart({
         tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
-      <Axis
-        id="y"
-        position={shouldRotate ? Position.Bottom : Position.Left}
-        title={args.yTitle}
-        showGridLines={false}
-        hide={filteredLayers[0].hide}
-        tickFormat={(d) => yAxisFormatter.convert(d)}
-      />
+      {yAxesConfiguration.map((axis, index) => (
+        <Axis
+          key={axis.groupId}
+          id={axis.groupId}
+          groupId={axis.groupId}
+          position={axis.position}
+          title={
+            axis.series
+              .map(
+                (series) =>
+                  data.tables[series.layer].columns.find((column) => column.id === series.accessor)
+                    ?.name
+              )
+              .filter((name) => Boolean(name))[0] || args.yTitle
+          }
+          showGridLines={false}
+          hide={filteredLayers[0].hide}
+          tickFormat={(d) => axis.formatter.convert(d)}
+        />
+      ))}
 
-      {filteredLayers.map(
-        (
-          {
+      {filteredLayers.flatMap((layer, layerIndex) =>
+        layer.accessors.map((accessor, accessorIndex) => {
+          const {
             splitAccessor,
             seriesType,
             accessors,
@@ -392,9 +404,7 @@ export function XYChart({
             yScaleType,
             xScaleType,
             isHistogram,
-          },
-          index
-        ) => {
+          } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -410,19 +420,22 @@ export function XYChart({
               !(
                 splitAccessor &&
                 typeof row[splitAccessor] === 'undefined' &&
-                accessors.every((accessor) => typeof row[accessor] === 'undefined')
+                typeof row[accessor] === 'undefined'
               )
           );
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
-            id: splitAccessor || accessors.join(','),
+            id: `${splitAccessor}-${accessor}`,
             xAccessor,
-            yAccessors: accessors,
+            yAccessors: [accessor],
             data: rows,
             xScaleType,
             yScaleType,
+            groupId: yAxesConfiguration.find((axisConfiguration) =>
+              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
@@ -454,6 +467,8 @@ export function XYChart({
             },
           };
 
+          const index = `${layerIndex}-${accessorIndex}`;
+
           switch (seriesType) {
             case 'line':
               return <LineSeries key={index} {...seriesProps} />;
@@ -465,7 +480,7 @@ export function XYChart({
             default:
               return <AreaSeries key={index} {...seriesProps} />;
           }
-        }
+        })
       )}
     </Chart>
   );
