@@ -89,7 +89,7 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    if (this.props.supportsAutoDomain && !this.props.useCustomColorMap) {
+    if (!this.props.useCustomColorMap) {
       return null;
     }
 
@@ -128,11 +128,11 @@ export class ColorMapSelect extends Component {
         inputDisplay: this.props.customOptionLabel,
         'data-test-subj': `colorMapSelectOption_${CUSTOM_COLOR_MAP}`,
       },
-      ...(this.props.supportsAutoDomain ? this.props.colorMapOptions : []),
+      ...this.props.colorMapOptions,
     ];
 
     let valueOfSelected;
-    if (this.props.useCustomColorMap || !this.props.supportsAutoDomain) {
+    if (this.props.useCustomColorMap) {
       valueOfSelected = CUSTOM_COLOR_MAP;
     } else {
       valueOfSelected = this.props.colorMapOptions.find(
@@ -151,7 +151,7 @@ export class ColorMapSelect extends Component {
         {toggle}
         <EuiFlexItem>
           <EuiSuperSelect
-            disabled={!this.props.supportsAutoDomain}
+            disabled={colorMapOptionsWithCustom.length <= 1}
             compressed
             options={colorMapOptionsWithCustom}
             onChange={this._onColorMapSelect}

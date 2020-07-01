@@ -90,8 +90,7 @@ export function DynamicColorForm({
     if (styleProperty.isOrdinal()) {
       return (
         <ColorMapSelect
-          supportsAutoDomain={field.supportsAutoDomain}
-          colorMapOptions={COLOR_GRADIENTS}
+          colorMapOptions={field.supportsAutoDomain ? COLOR_GRADIENTS : []}
           customOptionLabel={i18n.translate('xpack.maps.style.customColorRampLabel', {
             defaultMessage: 'Custom color ramp',
           })}
@@ -111,8 +110,7 @@ export function DynamicColorForm({
     } else if (styleProperty.isCategorical()) {
       return (
         <ColorMapSelect
-          supportsAutoDomain={field.supportsAutoDomain}
-          colorMapOptions={COLOR_PALETTES}
+          colorMapOptions={field.supportsAutoDomain ? COLOR_PALETTES : []}
           customOptionLabel={i18n.translate('xpack.maps.style.customColorPaletteLabel', {
             defaultMessage: 'Custom color palette',
           })}

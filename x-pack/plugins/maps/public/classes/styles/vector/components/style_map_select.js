@@ -81,6 +81,7 @@ export class StyleMapSelect extends Component {
     return (
       <Fragment>
         <EuiSuperSelect
+          disabled={mapOptionsWithCustom.length <= 1}
           options={mapOptionsWithCustom}
           onChange={this._onMapSelect}
           valueOfSelected={valueOfSelected}
