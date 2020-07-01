@@ -125,15 +125,19 @@ export const DashboardPage = ({ routeParams }: Props) => {
             <EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiFlexGrid columns={2} gutterSize="s">
-                {appEmptySections
-                  .filter(({ id }) => hasData && !hasData[id])
-                  .map((app) => {
-                    return (
-                      <EuiFlexItem key={app.id}>
-                        <EmptySection section={app} />
-                      </EuiFlexItem>
-                    );
-                  })}
+                {appEmptySections.map((app) => {
+                  return (
+                    <EuiFlexItem
+                      key={app.id}
+                      style={{
+                        border: `1px dashed ${theme.eui.euiBorderColor}`,
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <EmptySection section={app} />
+                    </EuiFlexItem>
+                  );
+                })}
               </EuiFlexGrid>
             </EuiFlexItem>
           )}

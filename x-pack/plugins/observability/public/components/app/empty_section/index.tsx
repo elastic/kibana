@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useContext } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { ThemeContext } from 'styled-components';
-import { EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import React from 'react';
 import { ISection } from '../../../typings/section';
 
 interface Props {
@@ -15,14 +12,9 @@ interface Props {
 }
 
 export const EmptySection = ({ section }: Props) => {
-  const theme = useContext(ThemeContext);
   return (
     <EuiEmptyPrompt
-      style={{
-        border: `1px dashed ${theme.eui.euiBorderColor}`,
-        borderRadius: '4px',
-        maxWidth: 'none',
-      }}
+      style={{ maxWidth: 'none' }}
       iconType={section.icon}
       iconColor="default"
       title={<h2>{section.title}</h2>}
