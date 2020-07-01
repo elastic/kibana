@@ -4,8 +4,6 @@
 
 // Note that fonts are loaded directly by src/legacy/ui/ui_render/views/chrome.pug
 
-@import '@elastic/eui/src/global_styling/functions/index';
-@import '@elastic/eui/src/global_styling/variables/index';
-@import '@elastic/eui/src/global_styling/mixins/index';
+@import '@elastic/eui/src/global_styling/index';
 
 @import './mixins';
