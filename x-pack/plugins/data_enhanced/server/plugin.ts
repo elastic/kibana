@@ -15,11 +15,11 @@ import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './search';
 import {
-  BackgroundSessionService,
+  SessionService,
   backgroundSession,
   registerBackgroundSessionGetRoute,
   registerBackgroundSessionSaveRoute,
-} from './background_session';
+} from './session';
 import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {
@@ -28,13 +28,13 @@ interface SetupDependencies {
 }
 
 export interface DataEnhancedStart {
-  backgroundSession: BackgroundSessionService;
+  backgroundSession: SessionService;
 }
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, DataEnhancedStart, SetupDependencies> {
   private readonly logger: Logger;
-  private backgroundSessionService!: BackgroundSessionService;
+  private sessionService!: SessionService;
   private security?: SecurityPluginSetup;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -51,7 +51,7 @@ export class EnhancedDataServerPlugin
     this.security = deps.security;
     core.savedObjects.registerType(backgroundSession);
     core.http.registerRouteHandlerContext<'backgroundSession'>('backgroundSession', () => {
-      return this.backgroundSessionService;
+      return this.sessionService;
     });
     const router = core.http.createRouter();
     registerBackgroundSessionGetRoute(router);
@@ -61,7 +61,7 @@ export class EnhancedDataServerPlugin
   public start(core: CoreStart) {
     const internalApiCaller = core.elasticsearch.legacy.client.callAsInternalUser;
     const updateExpirationHandler = updateExpirationProvider(internalApiCaller);
-    this.backgroundSessionService = new BackgroundSessionService(
+    this.sessionService = new SessionService(
       core.savedObjects,
       this.security!,
       updateExpirationHandler,
@@ -69,7 +69,7 @@ export class EnhancedDataServerPlugin
     );
 
     return {
-      backgroundSession: this.backgroundSessionService,
+      backgroundSession: this.sessionService,
     };
   }
 

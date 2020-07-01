@@ -6,16 +6,13 @@
 
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
-import { BackgroundSessionService } from './background_session_service';
+import { SessionService } from './session_service';
 import { securityMock } from '../../../security/server/mocks';
-import {
-  BACKGROUND_SESSION_STORE_DAYS,
-  BackgroundSessionStatus,
-} from '../../common/background_session';
+import { BACKGROUND_SESSION_STORE_DAYS, SavedSessionStatus } from '../../common/background_session';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { KibanaRequest, SavedObjectsClient } from 'kibana/server';
 
-describe('Background session service', () => {
+describe('Session service', () => {
   const mockCoreStart = coreMock.createStart();
   const loggingMock = {
     debug: () => {},
@@ -33,7 +30,7 @@ describe('Background session service', () => {
     b: 2,
   };
   const MOCK_KEY_HASH = '30edf736e498037598b1d4e7151f3d01';
-  let bgService: BackgroundSessionService;
+  let bgService: SessionService;
 
   const mockScopedClient = () => {
     const mockRequest = {} as KibanaRequest;
@@ -94,7 +91,7 @@ describe('Background session service', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockApiCaller.mockClear();
-    bgService = new BackgroundSessionService(
+    bgService = new SessionService(
       mockCoreStart.savedObjects,
       securityMockSetup,
       updateExpirationMock,
@@ -250,7 +247,7 @@ describe('Background session service', () => {
           .toISOString(),
         idMapping: {},
         sessionId: MOCK_SESSION_ID,
-        status: BackgroundSessionStatus.Running,
+        status: SavedSessionStatus.Running,
       };
       const expectedSoOptions = {
         id: MOCK_SESSION_ID,

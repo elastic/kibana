@@ -6,7 +6,7 @@
 
 import { SavedObjectAttributes } from '../../../../../src/core/types';
 
-export enum BackgroundSessionStatus {
+export enum SavedSessionStatus {
   Running,
   Done,
   Error,
@@ -14,12 +14,12 @@ export enum BackgroundSessionStatus {
   Canceled,
 }
 
-export interface BackgroundSessionSavedObjectAttributes extends SavedObjectAttributes {
+export interface SessionSavedObjectAttributes extends SavedObjectAttributes {
   sessionId: string;
   creation: string;
   expiration: string;
   idMapping: { [key: string]: string };
-  status: BackgroundSessionStatus;
+  status: SavedSessionStatus;
 }
 
 export const BACKGROUND_SESSION_STORE_DAYS = 5;

@@ -6,7 +6,7 @@
 
 export { EnhancedSearchParams, IEnhancedEsSearchRequest } from './search';
 export {
-  BackgroundSessionStatus,
-  BackgroundSessionSavedObjectAttributes,
+  SavedSessionStatus,
+  SessionSavedObjectAttributes,
   BACKGROUND_SESSION_STORE_DAYS,
 } from './background_session';

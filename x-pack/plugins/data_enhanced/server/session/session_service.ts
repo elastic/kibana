@@ -17,8 +17,8 @@ import {
 } from '../../../../../src/core/server';
 import {
   BACKGROUND_SESSION_STORE_DAYS,
-  BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionStatus,
+  SessionSavedObjectAttributes,
+  SavedSessionStatus,
 } from '../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { SessionInfo, SessionKeys } from './types';
@@ -28,7 +28,7 @@ const INMEM_TRACKING_TIMEOUT_SEC = 60;
 const INMEM_TRACKING_INTERVAL = 2000;
 const MAX_UPDATE_RETRIES = 3;
 
-export class BackgroundSessionService {
+export class SessionService {
   private readonly idMapping!: Map<string, SessionInfo>;
   private readonly monitorInterval!: NodeJS.Timeout;
   private readonly internalSavedObjectsClient!: SavedObjectsClientContract;
@@ -50,7 +50,7 @@ export class BackgroundSessionService {
   }
 
   private async monitorMappedId(
-    activeMappingObjects: Array<SavedObject<BackgroundSessionSavedObjectAttributes>> | undefined,
+    activeMappingObjects: Array<SavedObject<SessionSavedObjectAttributes>> | undefined,
     sessionId: string
   ) {
     const curTime = moment();
@@ -65,7 +65,7 @@ export class BackgroundSessionService {
     }
     const sessionSavedObject = activeMappingObjects
       ? await activeMappingObjects.find(
-          (r: SavedObject<BackgroundSessionSavedObjectAttributes>) =>
+          (r: SavedObject<SessionSavedObjectAttributes>) =>
             r.attributes && r.attributes.sessionId && r.attributes.sessionId === sessionId
         )
       : undefined;
@@ -86,14 +86,12 @@ export class BackgroundSessionService {
 
   private async monitorMappedIds() {
     if (!this.idMapping.size) return;
-    this.logger.debug(`Fetching ${this.idMapping.size} background sessions`);
-    let activeMappingObjects:
-      | SavedObjectsBulkResponse<BackgroundSessionSavedObjectAttributes>
-      | undefined;
+    this.logger.debug(`Fetching ${this.idMapping.size} sessions`);
+    let activeMappingObjects: SavedObjectsBulkResponse<SessionSavedObjectAttributes> | undefined;
     try {
       activeMappingObjects = await this.getAllMappedSavedObjects();
     } catch (e) {
-      this.logger.debug(`Error fetching background sessions. ${e}`);
+      this.logger.debug(`Error fetching sessions. ${e}`);
     }
 
     const promises = [];
@@ -105,7 +103,7 @@ export class BackgroundSessionService {
   }
 
   /**
-   * Gets all {@link BackgroundSessionSavedObjectAttributes | Background Searches} that
+   * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
    *
    * As most searches do not get send to background, expect the amount of returned objects
@@ -122,13 +120,13 @@ export class BackgroundSessionService {
         type: BACKGROUND_SESSION_TYPE,
       };
     });
-    return await this.internalSavedObjectsClient.bulkGet<BackgroundSessionSavedObjectAttributes>(
+    return await this.internalSavedObjectsClient.bulkGet<SessionSavedObjectAttributes>(
       activeMappingIds
     );
   }
 
   private async getSavedObject(savedObjectClient: SavedObjectsClientContract, sessionId: string) {
-    return await savedObjectClient.get<BackgroundSessionSavedObjectAttributes>(
+    return await savedObjectClient.get<SessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       sessionId
     );
@@ -138,14 +136,14 @@ export class BackgroundSessionService {
     savedObjectClient: SavedObjectsClientContract,
     sessionId: string
   ) {
-    return await savedObjectClient.create<BackgroundSessionSavedObjectAttributes>(
+    return await savedObjectClient.create<SessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       {
         sessionId,
         creation: moment().toISOString(),
         expiration: moment().add(BACKGROUND_SESSION_STORE_DAYS, 'd').toISOString(),
         idMapping: {},
-        status: BackgroundSessionStatus.Running,
+        status: SavedSessionStatus.Running,
       },
       {
         id: sessionId,
@@ -155,7 +153,7 @@ export class BackgroundSessionService {
   }
 
   private async updateBackgroundSession(
-    sessionSavedObject: SavedObject<BackgroundSessionSavedObjectAttributes>,
+    sessionSavedObject: SavedObject<SessionSavedObjectAttributes>,
     sessionInfo: SessionInfo
   ) {
     try {

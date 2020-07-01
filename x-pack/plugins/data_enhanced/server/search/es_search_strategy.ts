@@ -20,7 +20,6 @@ import {
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
-import { BackgroundSessionService } from '../background_session';
 
 export interface AsyncSearchResponse<T> {
   id: string;

@@ -5,11 +5,11 @@
  */
 
 import { Moment } from 'moment';
-import { BackgroundSessionService } from './background_session_service';
+import { SessionService } from './session_service';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
-    backgroundSession?: BackgroundSessionService;
+    backgroundSession?: SessionService;
   }
 }
 export interface SessionInfo {

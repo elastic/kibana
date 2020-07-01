@@ -12,7 +12,7 @@ import {
   SavedObject,
   RequestHandlerContext,
 } from 'kibana/server';
-import { BackgroundSessionSavedObjectAttributes } from '../../../common/background_session';
+import { SessionSavedObjectAttributes } from '../../../common/background_session';
 import { BackgroundSessionParams } from './types';
 
 const paramSchema = schema.object({
@@ -35,7 +35,7 @@ export function registerBackgroundSessionSaveRoute(router: IRouter): void {
       const { sessionId } = request.params;
 
       try {
-        const savedObject: SavedObject<BackgroundSessionSavedObjectAttributes> = await context.backgroundSession!.store(
+        const savedObject: SavedObject<SessionSavedObjectAttributes> = await context.backgroundSession!.store(
           request,
           sessionId
         );
