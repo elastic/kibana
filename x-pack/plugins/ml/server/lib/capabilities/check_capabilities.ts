@@ -15,6 +15,11 @@ import {
 } from '../../../common/types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import { MlLicense } from '../../../common/license';
+import {
+  InsufficientMLCapabilities,
+  UnknownMLCapabilitiesError,
+  MLPrivilegesUninitialized,
+} from './errors';
 
 export function capabilitiesProvider(
   callAsCurrentUser: LegacyAPICaller,
@@ -60,16 +65,16 @@ export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabi
       try {
         mlCapabilities = await resolveMlCapabilities(request);
       } catch (e) {
-        mlLog.warn('Unable to perform ML capabilities check');
-        throw Error(e);
+        mlLog.error(e);
+        throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
       }
 
       if (mlCapabilities === null) {
-        throw Error('ML capabilities have not been initialized');
+        throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
       }
 
       if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
-        throw Error('Insufficient privileges to access feature');
+        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
       }
     };
   };
