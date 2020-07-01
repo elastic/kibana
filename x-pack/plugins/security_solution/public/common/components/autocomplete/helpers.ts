@@ -31,8 +31,9 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
 };
 
 export function validateParams(params: string | undefined, type: string) {
-  if (params == null) {
-    return false;
+  // Box would show error state if empty otherwise
+  if (params == null || params === '') {
+    return true;
   }
 
   switch (type) {
