@@ -14,6 +14,9 @@ export const DELETE_PHASE_POLICY = {
       hot: {
         min_age: '0ms',
         actions: {
+          set_priority: {
+            priority: null,
+          },
           rollover: {
             max_size: '50gb',
           },

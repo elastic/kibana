@@ -44,6 +44,8 @@ import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
   setFieldFormats,
@@ -80,6 +82,7 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -168,9 +171,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);

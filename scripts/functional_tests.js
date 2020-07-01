@@ -25,4 +25,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
   require.resolve('../test/examples/config.js'),
+  require.resolve('../test/new_visualize_flow/config.js'),
 ]);

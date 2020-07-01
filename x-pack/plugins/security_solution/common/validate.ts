@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
+import { fold, Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 import { exactCheck } from './exact_check';
@@ -23,3 +23,13 @@ export const validate = <T extends t.Mixed>(
   const right = (output: T): [T | null, string | null] => [output, null];
   return pipe(checked, fold(left, right));
 };
+
+export const validateEither = <T extends t.Mixed, A extends unknown>(
+  schema: T,
+  obj: A
+): Either<string, A> =>
+  pipe(
+    obj,
+    (a) => schema.validate(a, t.getDefaultContext(schema.asDecoder())),
+    mapLeft((errors) => formatErrors(errors).join(','))
+  );

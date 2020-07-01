@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ObservabilityApp } from '../../../typings/common';
+
 interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
   label: string;
@@ -20,6 +22,26 @@ interface Series {
   label: string;
   coordinates: Coordinates[];
   color?: string;
+}
+
+export interface FetchDataParams {
+  // The start timestamp in milliseconds of the queried time interval
+  startTime: string;
+  // The end timestamp in milliseconds of the queried time interval
+  endTime: string;
+  // The aggregation bucket size in milliseconds if applicable to the data source
+  bucketSize: string;
+}
+
+export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
+  fetchDataParams: FetchDataParams
+) => Promise<T>;
+
+export type HasData = () => Promise<boolean>;
+
+export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+  fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
+  hasData: HasData;
 }
 
 export interface FetchDataResponse {
