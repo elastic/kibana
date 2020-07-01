@@ -111,7 +111,13 @@ export function PieComponent(
         }
         return String(d);
       },
-      fillLabel,
+      fillLabel:
+        isDarkMode &&
+        shape === 'treemap' &&
+        layerIndex < columnGroups.length - 1 &&
+        categoryDisplay !== 'hide'
+          ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
+          : fillLabel,
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];

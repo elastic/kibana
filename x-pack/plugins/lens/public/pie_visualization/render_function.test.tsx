@@ -5,14 +5,20 @@
  */
 
 import React from 'react';
-import { Partition, SeriesIdentifier, Settings } from '@elastic/charts';
-import { shallow, mount } from 'enzyme';
+import {
+  Partition,
+  SeriesIdentifier,
+  Settings,
+  NodeColorAccessor,
+  ShapeTreeNode,
+} from '@elastic/charts';
+import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
-import { ShapeTreeNode } from '@elastic/charts/dist/chart_types/partition_chart/layout/types/viewmodel_types';
+import {} from '@elastic/charts';
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -108,37 +114,33 @@ describe('PieVisualization component', () => {
         />
       );
 
-      component
-        .find(Partition)
-        .prop('layers')[1]
-        .shape.fillColor({
-          dataName: 'third',
-          depth: 2,
+      (component.find(Partition).prop('layers')![1].shape!.fillColor as NodeColorAccessor)(({
+        dataName: 'third',
+        depth: 2,
+        parent: {
+          children: [
+            ['first', {}],
+            ['second', {}],
+            ['third', {}],
+          ],
+          depth: 1,
+          value: 200,
+          dataName: 'css',
           parent: {
             children: [
-              ['first', {}],
-              ['second', {}],
-              ['third', {}],
+              ['empty', {}],
+              ['css', {}],
+              ['gz', {}],
             ],
-            depth: 1,
+            depth: 0,
             sortIndex: 0,
-            value: 200,
-            dataName: 'css',
-            parent: {
-              children: [
-                ['empty', {}],
-                ['css', {}],
-                ['gz', {}],
-              ],
-              depth: 0,
-              sortIndex: 0,
-              value: 500,
-            },
-            sortIndex: 1,
+            value: 500,
           },
-          value: 41,
-          sortIndex: 2,
-        } as ShapeTreeNode);
+          sortIndex: 1,
+        },
+        value: 41,
+        sortIndex: 2,
+      } as unknown) as ShapeTreeNode);
 
       expect(args.palette.getColor).toHaveBeenCalledWith([
         {

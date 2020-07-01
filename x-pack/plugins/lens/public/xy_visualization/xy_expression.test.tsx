@@ -25,6 +25,7 @@ import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './ty
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
+import { SeriesColorAccessorFn } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
@@ -1310,9 +1311,12 @@ describe('xy_expression', () => {
         />
       );
 
-      instance.find(LineSeries).at(0).prop('color')({
+      (instance.find(LineSeries).at(0).prop('color') as SeriesColorAccessorFn)({
         yAccessor: 'b',
         seriesKeys: ['Bar'],
+        splitAccessors: ['c'],
+        key: 'abc',
+        specId: 'abc',
       });
       expect(args.palette.getColor).toHaveBeenCalledWith([
         {
