@@ -25,6 +25,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
   return (
     <EuiPanel>
       <EuiEmptyPrompt
+        data-test-subj="endpoint-prompt-banner"
         style={EMPTY_PROMPT_STYLE}
         iconType="logoSecurity"
         title={
