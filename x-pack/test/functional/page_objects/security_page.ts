@@ -47,10 +47,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     // Tre': I wonder if the following wait, looking for login form is correct, when it is saml?  We shall see :)
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout(
-      isSaml ? 'form.auth0-lock-widget' : '.login-form',
+      'wait for login page',
       config.get('timeouts.waitFor') * 5,
       async () => {
-        return await testSubjects.exists('loginForm');
+        return await find.existsByDisplayedByCssSelector('.login-form');
       }
     );
   }

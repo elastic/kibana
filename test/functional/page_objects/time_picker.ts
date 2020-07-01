@@ -307,34 +307,6 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await this.setAbsoluteRange(fromTime, toTime);
     }
-
-    async setRelativeTime(count, unit) {
-      await testSubjects.click('superDatePickerRelativeTab');
-      await PageObjects.common.sleep(51);
-      await testSubjects.click('superDatePickerRelativeDateInputNumber');
-      await PageObjects.common.sleep(51);
-      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).clearValue();
-      await (await testSubjects.find('superDatePickerRelativeDateInputNumber')).type(count);
-      await PageObjects.common.sleep(52);
-      await testSubjects.click('superDatePickerRelativeDateInputUnitSelector');
-      await PageObjects.common.sleep(53);
-      await find.clickByCssSelector(
-        `select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`
-      );
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
-    }
-
-    async setFromRelativeTime(count, unit) {
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
-      await PageObjects.common.sleep(50);
-      await this.setRelativeTime(count, unit);
-    }
-
-    async setToRelativeTime(count, unit) {
-      await testSubjects.click('superDatePickerendDatePopoverButton');
-      await PageObjects.common.sleep(54);
-      await this.setRelativeTime(count, unit);
-    }
   }
 
   return new TimePicker();
