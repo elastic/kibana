@@ -20,7 +20,6 @@ interface IReturn {
   publicUrl?: string;
   access?: IAccess;
 }
-type TTimeout = ReturnType<typeof setTimeout>;
 
 /**
  * Calls an internal Enterprise Search API endpoint which returns
@@ -36,14 +35,20 @@ export const callEnterpriseSearchConfigAPI = async ({
 }: IParams): Promise<IReturn> => {
   if (!config.host) return {};
 
-  let timeout: TTimeout;
-  try {
-    // Timeout if the remote call to Enterprise Search takes too long
-    const controller = new AbortController();
-    timeout = setTimeout(() => {
-      controller.abort();
-    }, config.accessCheckTimeout);
+  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.`;
+  const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
+  const CONNECTION_ERROR = 'Could not perform access check to Enterprise Search';
 
+  const warningTimeout = setTimeout(() => {
+    log.warn(TIMEOUT_WARNING);
+  }, config.accessCheckTimeoutWarning);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, config.accessCheckTimeout);
+
+  try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
     const response = await fetch(enterpriseSearchUrl, {
       headers: { Authorization: request.headers.authorization as string },
@@ -60,15 +65,14 @@ export const callEnterpriseSearchConfigAPI = async ({
     };
   } catch (err) {
     if (err.name === 'AbortError') {
-      const message = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
-      log.warn(message);
+      log.warn(TIMEOUT_MESSAGE);
     } else {
-      const message = `Could not perform access check to Enterprise Search: ${err.toString()}`;
-      log.error(message);
+      log.error(`${CONNECTION_ERROR}: ${err.toString()}`);
       if (err instanceof Error) log.debug(err.stack as string);
     }
     return {};
   } finally {
-    clearTimeout(timeout! as TTimeout);
+    clearTimeout(warningTimeout);
+    clearTimeout(timeout);
   }
 };

@@ -34,6 +34,7 @@ export interface ServerConfigType {
   host?: string;
   enabled: boolean;
   accessCheckTimeout: number;
+  accessCheckTimeoutWarning: number;
 }
 
 export interface IRouteDependencies {

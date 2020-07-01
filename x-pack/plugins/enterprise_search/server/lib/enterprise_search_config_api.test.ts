@@ -16,6 +16,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   const mockConfig = {
     host: 'http://localhost:3002',
     accessCheckTimeout: 200,
+    accessCheckTimeoutWarning: 100,
   };
   const mockRequest = {
     url: { path: '/app/kibana' },
@@ -90,11 +91,18 @@ describe('callEnterpriseSearchConfigAPI', () => {
   it('handles timeouts', async () => {
     jest.useFakeTimers();
 
+    // Warning
+    callEnterpriseSearchConfigAPI(mockDependencies);
+    jest.advanceTimersByTime(150);
+    expect(mockDependencies.log.warn).toHaveBeenCalledWith(
+      'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.'
+    );
+
+    // Timeout
     fetchMock.mockImplementationOnce(async () => {
       jest.advanceTimersByTime(250);
       return Promise.reject({ name: 'AbortError' });
     });
-
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       "Exceeded 200ms timeout while checking http://localhost:3002. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses."
