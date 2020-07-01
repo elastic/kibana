@@ -12,6 +12,8 @@ import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_li
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { AppAction } from '../../../../common/store/actions';
 
+jest.mock('../../../../common/components/link_to');
+
 describe('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
