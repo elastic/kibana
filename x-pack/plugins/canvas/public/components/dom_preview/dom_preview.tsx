@@ -70,7 +70,7 @@ export class DomPreview extends PureComponent<Props> {
       return;
     }
 
-    const thumb = this._original.cloneNode(true);
+    const thumb = this._original.cloneNode(true) as HTMLDivElement;
     thumb.id += '-thumb';
 
     const originalStyle = window.getComputedStyle(this._original, null);
