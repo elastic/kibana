@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 
-import { isDataStreamBackingIndex } from '../../../../../../common/lib';
+import { indicesToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
 import { documentationLinksService } from '../../../../services/documentation';
@@ -34,6 +34,8 @@ import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../shared';
 import { StepProps } from '../index';
 
 import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_out';
+
+import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
@@ -279,58 +281,35 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                   }
                   helpText={
                     selectIndicesMode === 'list' ? (
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.restoreForm.stepLogistics.selectDataStreamsAndIndicesHelpText"
-                        defaultMessage="{count} {count, plural, one {data stream or index} other {data streams and indices}} will be restored. {selectOrDeselectAllLink}"
-                        values={{
-                          count: restoreIndices && restoreIndices.length,
-                          selectOrDeselectAllLink:
-                            restoreIndices && restoreIndices.length > 0 ? (
-                              <EuiLink
-                                onClick={() => {
-                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesAndDataStreamsOptions.forEach(
-                                    (option: EuiSelectableOption) => {
-                                      option.checked = undefined;
-                                    }
-                                  );
-                                  updateRestoreSettings({ indices: [] });
-                                  setCachedRestoreSettings({
-                                    ...cachedRestoreSettings,
-                                    indices: [],
-                                  });
-                                }}
-                              >
-                                <FormattedMessage
-                                  id="xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink"
-                                  defaultMessage="Deselect all"
-                                />
-                              </EuiLink>
-                            ) : (
-                              <EuiLink
-                                onClick={() => {
-                                  // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                  indicesAndDataStreamsOptions.forEach(
-                                    (option: EuiSelectableOption) => {
-                                      option.checked = 'on';
-                                    }
-                                  );
-                                  updateRestoreSettings({
-                                    indices: [...snapshotIndicesAndDataStreams],
-                                  });
-                                  setCachedRestoreSettings({
-                                    ...cachedRestoreSettings,
-                                    indices: [...snapshotIndicesAndDataStreams],
-                                  });
-                                }}
-                              >
-                                <FormattedMessage
-                                  id="xpack.snapshotRestore.restoreForm.stepLogistics.selectAllIndicesLink"
-                                  defaultMessage="Select all"
-                                />
-                              </EuiLink>
-                            ),
+                      <DataStreamsAndIndicesListHelpText
+                        onSelectionChange={(selection) => {
+                          if (selection === 'all') {
+                            // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                            indicesAndDataStreamsOptions.forEach((option: EuiSelectableOption) => {
+                              option.checked = 'on';
+                            });
+                            updateRestoreSettings({
+                              indices: [...snapshotIndicesAndDataStreams],
+                            });
+                            setCachedRestoreSettings({
+                              ...cachedRestoreSettings,
+                              indices: [...snapshotIndicesAndDataStreams],
+                            });
+                          } else {
+                            // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                            indicesAndDataStreamsOptions.forEach((option: EuiSelectableOption) => {
+                              option.checked = undefined;
+                            });
+                            updateRestoreSettings({ indices: [] });
+                            setCachedRestoreSettings({
+                              ...cachedRestoreSettings,
+                              indices: [],
+                            });
+                          }
                         }}
+                        selectedIndicesAndDataStreams={indicesToArray(restoreIndices)}
+                        indices={snapshotIndices}
+                        dataStreams={snapshotDataStreams}
                       />
                     ) : null
                   }

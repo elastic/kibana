@@ -115,7 +115,9 @@ describe('<PolicyAdd />', () => {
           // Deselect all indices from list
           find('deselectIndicesLink').simulate('click');
 
-          expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
+          expect(form.getErrorsMessages()).toEqual([
+            'You must select at least one data stream or index.',
+          ]);
         });
 
         test('should correctly indicate data streams with a badge', async () => {

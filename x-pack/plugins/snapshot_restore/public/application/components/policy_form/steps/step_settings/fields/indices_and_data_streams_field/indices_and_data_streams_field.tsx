@@ -31,6 +31,8 @@ import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../../../shar
 
 import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
+import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
+
 interface Props {
   isManagedPolicy: boolean;
   policy: SlmPolicyPayload;
@@ -63,16 +65,19 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
     !config.indices || (Array.isArray(config.indices) && config.indices.length === 0)
   );
 
-  const [indicesSelection, setIndicesSelection] = useState<string[]>(() =>
-    Array.isArray(config.indices) && !isAllIndices
-      ? indicesAndDataStreams.filter((i) => (config.indices! as string[]).includes(i))
-      : [...indicesAndDataStreams]
+  const [indicesAndDataStreamsSelection, setIndicesAndDataStreamsSelection] = useState<string[]>(
+    () =>
+      Array.isArray(config.indices) && !isAllIndices
+        ? indicesAndDataStreams.filter((i) => (config.indices! as string[]).includes(i))
+        : [...indicesAndDataStreams]
   );
 
   // States for choosing all indices, or a subset, including caching previously chosen subset list
-  const [indicesOptions, setIndicesOptions] = useState<EuiSelectableOption[]>(() =>
+  const [indicesAndDataStreamsOptions, setIndicesAndDataStreamsOptions] = useState<
+    EuiSelectableOption[]
+  >(() =>
     mapSelectionToIndicesOptions({
-      selection: indicesSelection,
+      selection: indicesAndDataStreamsSelection,
       dataStreams,
       indices,
       allSelected: isAllIndices || typeof config.indices === 'string',
@@ -108,13 +113,13 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
         const isChecked = e.target.checked;
         setIsAllIndices(isChecked);
         if (isChecked) {
-          setIndicesSelection(indicesAndDataStreams);
-          setIndicesOptions(
+          setIndicesAndDataStreamsSelection(indicesAndDataStreams);
+          setIndicesAndDataStreamsOptions(
             mapSelectionToIndicesOptions({
               allSelected: isAllIndices || typeof config.indices === 'string',
               dataStreams,
               indices,
-              selection: indicesSelection,
+              selection: indicesAndDataStreamsSelection,
             })
           );
           onUpdate({ indices: undefined });
@@ -123,7 +128,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
             indices:
               selectIndicesMode === 'custom'
                 ? indexPatterns.join(',')
-                : [...(indicesSelection || [])],
+                : [...(indicesAndDataStreamsSelection || [])],
           });
         }
       }}
@@ -145,7 +150,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.dataStreamsAndIndicesDescription"
-          defaultMessage="Data streams and indices to back up."
+          defaultMessage="To back up indices and data streams, manually select them or define index patterns to dynamically capture them."
         />
       }
       fullWidth
@@ -210,12 +215,12 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                           data-test-subj="selectIndicesLink"
                           onClick={() => {
                             setSelectIndicesMode('list');
-                            onUpdate({ indices: indicesSelection });
+                            onUpdate({ indices: indicesAndDataStreamsSelection });
                           }}
                         >
                           <FormattedMessage
-                            id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleListLink"
-                            defaultMessage="Select indices"
+                            id="xpack.snapshotRestore.policyForm.stepSettings.dataStreamsAndIndicesToggleListLink"
+                            defaultMessage="Select data streams and indices"
                           />
                         </EuiLink>
                       </EuiFlexItem>
@@ -224,47 +229,27 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                 }
                 helpText={
                   selectIndicesMode === 'list' ? (
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyForm.stepSettings.selectIndicesHelpText"
-                      defaultMessage="{count} {count, plural, one {index} other {indices}} will be backed up. {selectOrDeselectAllLink}"
-                      values={{
-                        count: config.indices && config.indices.length,
-                        selectOrDeselectAllLink:
-                          config.indices && config.indices.length > 0 ? (
-                            <EuiLink
-                              data-test-subj="deselectIndicesLink"
-                              onClick={() => {
-                                // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                indicesOptions.forEach((option: EuiSelectableOption) => {
-                                  option.checked = undefined;
-                                });
-                                onUpdate({ indices: [] });
-                                setIndicesSelection([]);
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepSettings.deselectAllIndicesLink"
-                                defaultMessage="Deselect all"
-                              />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink
-                              onClick={() => {
-                                // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
-                                indicesOptions.forEach((option: EuiSelectableOption) => {
-                                  option.checked = 'on';
-                                });
-                                onUpdate({ indices: [...indices] });
-                                setIndicesSelection([...indices]);
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepSettings.selectAllIndicesLink"
-                                defaultMessage="Select all"
-                              />
-                            </EuiLink>
-                          ),
+                    <DataStreamsAndIndicesListHelpText
+                      onSelectionChange={(selection) => {
+                        if (selection === 'all') {
+                          // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                          indicesAndDataStreamsOptions.forEach((option: EuiSelectableOption) => {
+                            option.checked = 'on';
+                          });
+                          onUpdate({ indices: [...indicesAndDataStreams] });
+                          setIndicesAndDataStreamsSelection([...indicesAndDataStreams]);
+                        } else {
+                          // TODO: Change this to setIndicesOptions() when https://github.com/elastic/eui/issues/2071 is fixed
+                          indicesAndDataStreamsOptions.forEach((option: EuiSelectableOption) => {
+                            option.checked = undefined;
+                          });
+                          onUpdate({ indices: [] });
+                          setIndicesAndDataStreamsSelection([]);
+                        }
                       }}
+                      selectedIndicesAndDataStreams={indicesAndDataStreamsSelection}
+                      indices={indices}
+                      dataStreams={dataStreams}
                     />
                   ) : null
                 }
@@ -275,7 +260,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                   <EuiSelectable
                     allowExclusions={false}
                     data-test-subj="indicesAndDataStreamsList"
-                    options={indicesOptions}
+                    options={indicesAndDataStreamsOptions}
                     onChange={(options) => {
                       const newSelectedIndices: string[] = [];
                       options.forEach(({ label, checked }) => {
@@ -283,9 +268,9 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                           newSelectedIndices.push(label);
                         }
                       });
-                      setIndicesOptions(options);
+                      setIndicesAndDataStreamsOptions(options);
                       onUpdate({ indices: newSelectedIndices });
-                      setIndicesSelection(newSelectedIndices);
+                      setIndicesAndDataStreamsSelection(newSelectedIndices);
                     }}
                     searchable
                     height={300}
