@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ContextErrorMessage } from './context_error_message';
 
-import type { PluginInitializerContext } from '../../../../../src/core/server';
-import { CoreLoggingPlugin } from './plugin';
-
-export const plugin = (init: PluginInitializerContext) => new CoreLoggingPlugin(init);
+export function createContextErrorMessageDirective(reactDirective: any) {
+  return reactDirective(ContextErrorMessage, [
+    ['status', { watchDepth: 'reference' }],
+    ['reason', { watchDepth: 'reference' }],
+  ]);
+}
