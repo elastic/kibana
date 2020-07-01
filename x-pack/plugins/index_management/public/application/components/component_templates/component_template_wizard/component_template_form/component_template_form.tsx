@@ -154,7 +154,7 @@ export const ComponentTemplateForm = ({
     return componentTemplate;
   };
 
-  const onSaveTemplate = useCallback(
+  const onSaveComponentTemplate = useCallback(
     async (wizardData: WizardContent) => {
       const componentTemplate = buildComponentTemplateObject(defaultValue)(wizardData);
 
@@ -173,7 +173,7 @@ export const ComponentTemplateForm = ({
   return (
     <FormWizard<WizardContent>
       defaultValue={wizardDefaultValue}
-      onSave={onSaveTemplate}
+      onSave={onSaveComponentTemplate}
       isEditing={isEditing}
       isSaving={isSaving}
       apiError={apiError}

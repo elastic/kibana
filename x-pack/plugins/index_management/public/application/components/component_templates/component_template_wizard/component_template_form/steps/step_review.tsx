@@ -174,9 +174,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
   };
 
   return (
-    <div data-test-subj="stepSummary">
+    <div data-test-subj="stepReview">
       <EuiTitle>
-        <h2 data-test-subj="stepTitle">
+        <h2 data-test-subj="title">
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
             defaultMessage="Review details for '{templateName}'"
@@ -188,7 +188,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
       <EuiSpacer size="l" />
 
       <EuiTabbedContent
-        data-test-subj="summaryTabContent"
+        data-test-subj="content"
         tabs={[
           {
             id: 'summary',
