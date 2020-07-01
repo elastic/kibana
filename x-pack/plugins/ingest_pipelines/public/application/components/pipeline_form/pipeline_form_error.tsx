@@ -34,6 +34,37 @@ interface ErrorAttributesObject {
   };
 }
 
+const i18nTexts = {
+  title: i18n.translate('xpack.ingestPipelines.form.savePipelineError', {
+    defaultMessage: 'Unable to create pipeline',
+  }),
+  errors: {
+    processor: (processorType: string) =>
+      i18n.translate('xpack.ingestPipelines.form.savePipelineError.processorLabel', {
+        defaultMessage: '{type} processor',
+        values: { type: processorType },
+      }),
+    showErrors: (hiddenErrorsCount: number) =>
+      i18n.translate('xpack.ingestPipelines.form.savePipelineError.showAllButton', {
+        defaultMessage:
+          'Show {hiddenErrorsCount, plural, one {# more error} other {# more errors}}',
+        values: {
+          hiddenErrorsCount,
+        },
+      }),
+    hideErrors: (hiddenErrorsCount: number) =>
+      i18n.translate('xpack.ingestPipelines.form.savePip10mbelineError.showFewerButton', {
+        defaultMessage: 'Hide {hiddenErrorsCount, plural, one {# error} other {# errors}}',
+        values: {
+          hiddenErrorsCount,
+        },
+      }),
+    unknownError: i18n.translate('xpack.ingestPipelines.form.unknownError', {
+      defaultMessage: 'An unknown error occurred.',
+    }),
+  },
+};
+
 const flattenErrorsTree = (node: ErrorNode): PipelineError[] => {
   const result: PipelineError[] = [];
   const recurse = (_node: ErrorNode) => {
@@ -68,42 +99,41 @@ const toKnownError = (error: unknown): PipelineErrors => {
     return { errors: [{ reason: (error as any).message }] };
   }
 
-  return { errors: [{ reason: 'An unknown error occurred.' }] };
+  return { errors: [{ reason: i18nTexts.errors.unknownError }] };
 };
 
-const title = i18n.translate('xpack.ingestPipelines.form.savePipelineError', {
-  defaultMessage: 'Unable to create pipeline',
-});
+const numberOfErrorsToDisplay = 5;
 
 export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => {
   const { services } = useKibana();
   const [isShowingAllErrors, setIsShowingAllErrors] = useState<boolean>(false);
   const safeErrorResult = toKnownError(error);
-  const hasMoreErrors = safeErrorResult.errors.length > 5;
-  const hiddenErrorsCount = safeErrorResult.errors.length - 5;
-  const results = isShowingAllErrors ? safeErrorResult.errors : safeErrorResult.errors.slice(0, 5);
+  const hasMoreErrors = safeErrorResult.errors.length > numberOfErrorsToDisplay;
+  const hiddenErrorsCount = safeErrorResult.errors.length - numberOfErrorsToDisplay;
+  const results = isShowingAllErrors
+    ? safeErrorResult.errors
+    : safeErrorResult.errors.slice(0, numberOfErrorsToDisplay);
 
   const renderErrorListItem = ({ processorType, reason }: PipelineError) => {
     return (
       <>
-        {processorType
-          ? i18n.translate('xpack.ingestPipelines.form.savePipelineError.processorLabel', {
-              defaultMessage: '{type} processor',
-              values: { type: processorType },
-            })
-          : undefined}
-        &nbsp;
+        {processorType ? <>{i18nTexts.errors.processor(processorType) + ':'}&nbsp;</> : undefined}
         {reason}
       </>
     );
   };
 
   useEffect(() => {
-    services.notifications.toasts.addDanger({ title });
+    services.notifications.toasts.addDanger({ title: i18nTexts.title });
   }, [services, error]);
   return (
     <>
-      <EuiCallOut title={title} color="danger" iconType="alert" data-test-subj="savePipelineError">
+      <EuiCallOut
+        title={i18nTexts.title}
+        color="danger"
+        iconType="alert"
+        data-test-subj="savePipelineError"
+      >
         {results.length > 1 ? (
           <ul>
             {results.map((e, idx) => (
@@ -130,15 +160,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   iconSide="right"
                   iconType="arrowUp"
                 >
-                  {i18n.translate(
-                    'xpack.ingestPipelines.form.savePip10mbelineError.showFewerButton',
-                    {
-                      defaultMessage: 'Hide {count, plural, one {# error} other {# errors}}',
-                      values: {
-                        count: hiddenErrorsCount,
-                      },
-                    }
-                  )}
+                  {i18nTexts.errors.hideErrors(hiddenErrorsCount)}
                 </EuiButtonEmpty>
               ) : (
                 <EuiButtonEmpty
@@ -148,12 +170,7 @@ export const PipelineFormError: React.FunctionComponent<Props> = ({ error }) => 
                   iconSide="right"
                   iconType="arrowDown"
                 >
-                  {i18n.translate('xpack.ingestPipelines.form.savePipelineError.showAllButton', {
-                    defaultMessage: 'Show {count, plural, one {# error} other {# errors}}',
-                    values: {
-                      count: hiddenErrorsCount,
-                    },
-                  })}
+                  {i18nTexts.errors.showErrors(hiddenErrorsCount)}
                 </EuiButtonEmpty>
               )}
             </EuiFlexItem>
