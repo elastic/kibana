@@ -11,14 +11,13 @@ import {
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
-} from '../../types';
-import {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
-} from '../../../common';
+  GetRestrictedPackagesResponse,
+} from '../../types';
 import {
   getCategories,
   getPackages,
@@ -26,6 +25,7 @@ import {
   getPackageInfo,
   installPackage,
   removeInstallation,
+  getRestrictedPackages,
 } from '../../services/epm/packages';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
@@ -55,6 +55,25 @@ export const getListHandler: RequestHandler<
       category: request.query.category,
     });
     const body: GetPackagesResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getRestrictedListHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getRestrictedPackages({ savedObjectsClient });
+    const body: GetRestrictedPackagesResponse = {
       response: res,
       success: true,
     };

@@ -10,6 +10,7 @@ import { epmRouteService } from '../../services';
 import {
   GetCategoriesResponse,
   GetPackagesResponse,
+  GetRestrictedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
@@ -27,6 +28,13 @@ export const useGetPackages = (query: HttpFetchQuery = {}) => {
     path: epmRouteService.getListPath(),
     method: 'get',
     query,
+  });
+};
+
+export const useGetRestrictedPackages = () => {
+  return useRequest<GetRestrictedPackagesResponse>({
+    path: epmRouteService.getListRestrictedPath(),
+    method: 'get',
   });
 };
 

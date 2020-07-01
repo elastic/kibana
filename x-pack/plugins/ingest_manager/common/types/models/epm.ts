@@ -79,6 +79,7 @@ export interface RegistryConfigTemplate {
   title: string;
   description: string;
   inputs: RegistryInput[];
+  multiple?: boolean;
 }
 
 export interface RegistryInput {

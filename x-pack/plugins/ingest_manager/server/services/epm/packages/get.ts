@@ -49,6 +49,30 @@ export async function getPackages(
   return packageList;
 }
 
+// Get package names for packages which cannot have more than one package config on an agent config
+// Assume packages only export one config template for now
+export async function getRestrictedPackages(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<string[]> {
+  const { savedObjectsClient } = options;
+  const allPackages = await getPackages({ savedObjectsClient });
+  const installedPackages = allPackages.filter(
+    (pkg) => (pkg.status = InstallationStatus.installed)
+  );
+  const installedPackagesInfo = await Promise.all(
+    installedPackages.map(async (pkgInstall) => {
+      return getPackageInfo({
+        savedObjectsClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+    })
+  );
+  return installedPackagesInfo
+    .filter((pkgInfo) => pkgInfo.config_templates?.[0]?.multiple === false)
+    .map((pkgInfo) => pkgInfo.name);
+}
+
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,

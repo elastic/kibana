@@ -27,6 +27,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIST_PATTERN;
   },
 
+  getListRestrictedPath: () => {
+    return EPM_API_ROUTES.RESTRICTED_LIST_PATTERN;
+  },
+
   getInfoPath: (pkgkey: string) => {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
   },
