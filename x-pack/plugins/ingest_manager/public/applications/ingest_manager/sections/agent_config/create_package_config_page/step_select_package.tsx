@@ -8,8 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AgentConfig, PackageInfo } from '../../../types';
-import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../hooks';
+import { AgentConfig, PackageInfo, PackageConfig, GetPackagesResponse } from '../../../types';
+import {
+  useGetOneAgentConfig,
+  useGetPackages,
+  useGetRestrictedPackages,
+  sendGetPackageInfoByKey,
+} from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 export const StepSelectPackage: React.FunctionComponent<{
@@ -28,12 +33,27 @@ export const StepSelectPackage: React.FunctionComponent<{
   const { data: agentConfigData, error: agentConfigError } = useGetOneAgentConfig(agentConfigId);
 
   // Fetch packages info
+  // Filter out restricted packages already part of selected agent config
+  const [packages, setPackages] = useState<GetPackagesResponse['response']>([]);
   const {
     data: packagesData,
     error: packagesError,
     isLoading: isPackagesLoading,
   } = useGetPackages();
-  const packages = packagesData?.response || [];
+  const {
+    data: restrictedPackagesData,
+    isLoading: isRestrictedPackagesLoading,
+  } = useGetRestrictedPackages();
+  useEffect(() => {
+    if (packagesData?.response && restrictedPackagesData?.response && agentConfigData?.item) {
+      const allPackages = packagesData.response;
+      const restrictedPackages = restrictedPackagesData.response;
+      const usedRestrictedPackages = (agentConfigData.item.package_configs as PackageConfig[])
+        .map((packageConfig) => packageConfig.package?.name || '')
+        .filter((pkgName) => restrictedPackages.includes(pkgName));
+      setPackages(allPackages.filter((pkg) => !usedRestrictedPackages.includes(pkg.name)));
+    }
+  }, [packagesData, restrictedPackagesData, agentConfigData]);
 
   // Update parent agent config state
   useEffect(() => {
@@ -101,7 +121,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isPackagesLoading}
+          isLoading={isPackagesLoading || isRestrictedPackagesLoading}
           options={packages.map(({ title, name, version, icons }) => {
             const pkgkey = `${name}-${version}`;
             return {
