@@ -9,8 +9,8 @@ import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
 
-export const deleteTag = ({ router }: RouteParams) => {
-  router.delete(
+export const readTag = ({ router }: RouteParams) => {
+  router.get(
     {
       path: `${TAGS_API_PATH}/tag/{id}`,
       validate: {
@@ -20,9 +20,8 @@ export const deleteTag = ({ router }: RouteParams) => {
       },
     },
     assertTagsContext(async ({ tags }, req, res) => {
-      const { id } = req.params;
-      await tags.tagsClient.del({ id });
-      return res.ok();
+      const body = await tags.tagsClient.read(req.params);
+      return res.ok({ body });
     })
   );
 };

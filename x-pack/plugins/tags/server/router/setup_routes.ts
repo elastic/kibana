@@ -5,6 +5,8 @@
  */
 
 import { createTag } from './routes/create_tag';
+import { readTag } from './routes/read_tag';
+import { updateTag } from './routes/update_tag';
 import { getAllTags } from './routes/get_all_tags';
 import { deleteTag } from './routes/delete_tag';
 import { createAttachment } from './routes/create_attachment';
@@ -12,7 +14,9 @@ import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
   createTag(params);
-  getAllTags(params);
+  readTag(params);
+  updateTag(params);
   deleteTag(params);
+  getAllTags(params);
   createAttachment(params);
 };
