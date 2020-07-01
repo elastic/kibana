@@ -95,7 +95,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedUri(configObject.url);
+    configurationUtilities.ensureWhitelistedUri(url.hostname);
   } catch (whitelistError) {
     return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
       defaultMessage: 'error configuring webhook action: {message}',
