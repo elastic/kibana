@@ -62,61 +62,109 @@ async function fetchLogsOverview(
   params: FetchDataParams,
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
-  return Promise.resolve({
-    stats: {
-      nginx: {
-        type: 'number',
-        label: 'nginx',
-        value: 345341,
-      },
-      'elasticsearch.audit': {
-        type: 'number',
-        label: 'elasticsearch.audit',
-        value: 164929,
-      },
-      'haproxy.log': {
-        type: 'number',
-        label: 'haproxy.log',
-        value: 51101,
-      },
-    },
+  const esSearcher = dataPlugin.search.getSearchStrategy('es');
+  return new Promise((resolve, reject) => {
+    esSearcher
+      .search({
+        params: {
+          index: logParams.index,
+          body: {
+            size: 0,
+            query: {
+              range: {
+                [logParams.timestampField]: {
+                  gt: params.startTime,
+                  lte: params.endTime,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            aggs: {
+              stats: {
+                terms: {
+                  field: 'event.dataset',
+                  size: 4,
+                },
+              },
+              series: {
+                date_histogram: {
+                  field: logParams.timestampField,
+                  fixed_interval: params.bucketSize,
+                },
+                aggs: {
+                  dataset: {
+                    terms: {
+                      field: 'event.dataset',
+                      size: 4,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+      .subscribe(
+        () => {
+          resolve({
+            stats: {
+              nginx: {
+                type: 'number',
+                label: 'nginx',
+                value: 345341,
+              },
+              'elasticsearch.audit': {
+                type: 'number',
+                label: 'elasticsearch.audit',
+                value: 164929,
+              },
+              'haproxy.log': {
+                type: 'number',
+                label: 'haproxy.log',
+                value: 51101,
+              },
+            },
 
-    // Note: My understanding is that these series coordinates will be
-    // combined into objects that look like:
-    // { x: timestamp, y: value, g: label (e.g. nginx) }
-    // so they fit the stacked bar chart API
-    // https://elastic.github.io/elastic-charts/?path=/story/bar-chart--stacked-with-axis-and-legend
-    series: {
-      nginx: {
-        label: 'nginx',
-        coordinates: [
-          { x: 1593000000000, y: 10014 },
-          { x: 1593000900000, y: 12827 },
-          { x: 1593001800000, y: 2946 },
-          { x: 1593002700000, y: 14298 },
-          { x: 1593003600000, y: 4096 },
-        ],
-      },
-      'elasticsearch.audit': {
-        label: 'elasticsearch.audit',
-        coordinates: [
-          { x: 1593000000000, y: 5676 },
-          { x: 1593000900000, y: 6783 },
-          { x: 1593001800000, y: 2394 },
-          { x: 1593002700000, y: 4554 },
-          { x: 1593003600000, y: 5659 },
-        ],
-      },
-      'haproxy.log': {
-        label: 'haproxy.log',
-        coordinates: [
-          { x: 1593000000000, y: 9085 },
-          { x: 1593000900000, y: 9002 },
-          { x: 1593001800000, y: 3940 },
-          { x: 1593002700000, y: 5451 },
-          { x: 1593003600000, y: 9133 },
-        ],
-      },
-    },
+            // Note: My understanding is that these series coordinates will be
+            // combined into objects that look like:
+            // { x: timestamp, y: value, g: label (e.g. nginx) }
+            // so they fit the stacked bar chart API
+            // https://elastic.github.io/elastic-charts/?path=/story/bar-chart--stacked-with-axis-and-legend
+            series: {
+              nginx: {
+                label: 'nginx',
+                coordinates: [
+                  { x: 1593000000000, y: 10014 },
+                  { x: 1593000900000, y: 12827 },
+                  { x: 1593001800000, y: 2946 },
+                  { x: 1593002700000, y: 14298 },
+                  { x: 1593003600000, y: 4096 },
+                ],
+              },
+              'elasticsearch.audit': {
+                label: 'elasticsearch.audit',
+                coordinates: [
+                  { x: 1593000000000, y: 5676 },
+                  { x: 1593000900000, y: 6783 },
+                  { x: 1593001800000, y: 2394 },
+                  { x: 1593002700000, y: 4554 },
+                  { x: 1593003600000, y: 5659 },
+                ],
+              },
+              'haproxy.log': {
+                label: 'haproxy.log',
+                coordinates: [
+                  { x: 1593000000000, y: 9085 },
+                  { x: 1593000900000, y: 9002 },
+                  { x: 1593001800000, y: 3940 },
+                  { x: 1593002700000, y: 5451 },
+                  { x: 1593003600000, y: 9133 },
+                ],
+              },
+            },
+          });
+        },
+        (error) => reject(error)
+      );
   });
 }
