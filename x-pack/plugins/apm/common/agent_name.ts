@@ -33,9 +33,9 @@ export function isAgentName(agentName: string): agentName is AgentName {
 export const RUM_AGENTS = ['js-base', 'rum-js'];
 
 export function isRumAgentName(
-  agentName: string | undefined
+  agentName?: string
 ): agentName is 'js-base' | 'rum-js' {
-  return RUM_AGENTS.includes(agentName);
+  return RUM_AGENTS.includes(agentName!);
 }
 
 export function isJavaAgentName(
