@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
@@ -12,13 +12,10 @@ import {
   htmlIdGenerator,
   EuiForm,
   EuiColorPicker,
-  EuiCallOut,
+  EuiToolTip,
   EuiInputPopover,
   EuiFieldText,
-  EuiSpacer,
-  EuiIcon,
   EuiFormControlLayout,
-  EuiColorPickerSwatch,
 } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
@@ -97,9 +94,16 @@ export function DimensionEditor({
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
 
-  const color = getColor(layer, accessor);
   return (
     <EuiForm>
+      <EuiFormRow
+        display="columnCompressed"
+        label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+          defaultMessage: 'Series Color',
+        })}
+      >
+        <ColorPicker state={state} layerId={layerId} accessor={accessor} setState={setState} />
+      </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
@@ -152,50 +156,112 @@ export function DimensionEditor({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-          defaultMessage: 'Series Color',
-        })}
-      >
-        <>
-          <EuiColorPicker
-            disabled={!!layer.splitAccessor}
-            onChange={(newColor) => {
-              const newYConfigs = [...(layer.yConfig || [])];
-              const existingIndex = newYConfigs.findIndex(
-                (yConfig) => yConfig.forAccessor === accessor
-              );
-              if (existingIndex !== -1) {
-                newYConfigs[existingIndex].color = newColor;
-              } else {
-                newYConfigs.push({
-                  forAccessor: accessor,
-                  color: newColor,
-                  axisMode: 'auto',
-                });
-              }
-              setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
-            }}
-            color={color}
-            secondaryInputDisplay="top"
-            compressed={true}
-            button={<EuiColorPickerSwatch color={color} aria-label="Select a new color" />}
-          />
-          {!!layer.splitAccessor && !color && (
-            <div>default color is displayed, you cannot edit series with split accessor</div>
-          )}
-          {!layer.splitAccessor && !color && <div>default color is displayed</div>}
-          {!layer.splitAccessor && color && <div>custom color is displayed</div>}
-        </>
-      </EuiFormRow>
-      {!!layer.splitAccessor && (
-        <EuiFormRow>
-          <EuiCallOut size="s" color="danger">
-            You cannot apply color on layer with break down by.
-          </EuiCallOut>
-        </EuiFormRow>
-      )}
     </EuiForm>
   );
 }
+
+const tooltipContent = {
+  auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
+    defaultMessage: 'Lens automatically picks colors for you unless you specify a custom color.',
+  }),
+  custom: i18n.translate('xpack.lens.configPanel.color.tooltip.custom', {
+    defaultMessage: 'Clear the custom color to return to “Auto” mode.',
+  }),
+  disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
+    defaultMessage:
+      'Individual series cannot be custom colored when the layer includes a “Split by.“',
+  }),
+};
+
+const autoMessage = i18n.translate('xpack.lens.configPanel.color.auto', {
+  defaultMessage: 'Auto',
+});
+
+const DisabledColorPicker = () => (
+  <EuiToolTip position="top" content={tooltipContent.disabled} delay="long">
+    <EuiFieldText
+      compressed={true}
+      type="text"
+      disabled={true}
+      icon={{
+        type: 'stopSlash',
+      }}
+      className="euiFieldText"
+      value=""
+      placeholder={autoMessage}
+      aria-label="color picker disabled"
+    />
+  </EuiToolTip>
+);
+
+const ColorPicker = ({
+  state,
+  setState,
+  layerId,
+  accessor,
+}: VisualizationDimensionEditorProps<State>) => {
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (layer.splitAccessor) {
+    return <DisabledColorPicker />;
+  }
+
+  const color = getColor(layer, accessor);
+  const toggleIsPopoverOpen = (shouldBeOpen = !isPopoverOpen) => {
+    setIsPopoverOpen(shouldBeOpen);
+  };
+
+  const handleColor = (newColor = '') => {
+    const newYConfigs = [...(layer.yConfig || [])];
+    const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
+    if (existingIndex !== -1) {
+      newYConfigs[existingIndex].color = newColor;
+    } else {
+      newYConfigs.push({
+        forAccessor: accessor,
+        color: newColor,
+        axisMode: 'auto',
+      });
+    }
+    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+  };
+
+  return (
+    <EuiToolTip
+      position="top"
+      content={color ? tooltipContent.custom : tooltipContent.auto}
+      delay="long"
+    >
+      <EuiInputPopover
+        input={
+          <EuiFormControlLayout
+            className="lnsConfigPanel__colorLayout"
+            clear={color ? { onClick: () => handleColor() } : undefined}
+            icon={{ type: 'arrowDown', side: 'right' }}
+          >
+            <EuiFieldText
+              compressed={true}
+              type="text"
+              onFocus={() => toggleIsPopoverOpen(true)}
+              icon={{
+                type: color ? 'stopFilled' : 'stopSlash',
+                style: { color: color || 'inherit' },
+              }}
+              className="lnsConfigPanel__colorTextField"
+              value={color?.toUpperCase() || ''}
+              placeholder={autoMessage}
+              aria-label="Use aria labels when no actual label is in use"
+            />
+          </EuiFormControlLayout>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => toggleIsPopoverOpen(false)}
+        display="inlineBlock"
+      >
+        <EuiColorPicker display="inline" onChange={handleColor} color={color} />
+      </EuiInputPopover>
+    </EuiToolTip>
+  );
+};
