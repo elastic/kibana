@@ -14,6 +14,7 @@ import {
   CustomConfigurePackageConfigProps,
 } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath } from '../../../../common/routing';
+import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 
 /**
  * Exports Endpoint-specific package config instructions
@@ -59,7 +60,7 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
                   <LinkToApp
                     data-test-subj="editLinkToPolicyDetails"
                     asButton={true}
-                    appId="securitySolution:management"
+                    appId={MANAGEMENT_APP_ID}
                     className="editLinkToPolicyDetails"
                     appPath={policyUrl}
                     // Cannot use formalUrl here since the code is called in Ingest, which does not use redux

@@ -46,6 +46,7 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { MANAGEMENT_APP_ID } from '../../../common/constants';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -153,9 +154,9 @@ export const PolicyList = React.memo(() => {
         endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
       }`,
       state: {
-        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
-        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onSaveNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
       },
     }
   );
