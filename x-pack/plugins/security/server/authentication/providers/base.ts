@@ -8,7 +8,7 @@ import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  IClusterClient,
+  ILegacyClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
 import { deepFreeze } from '../../../../../../src/core/server';
@@ -24,7 +24,7 @@ export interface AuthenticationProviderOptions {
   name: string;
   getServerBaseURL: () => string;
   basePath: HttpServiceSetup['basePath'];
-  client: IClusterClient;
+  client: ILegacyClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {

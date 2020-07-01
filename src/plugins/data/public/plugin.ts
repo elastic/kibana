@@ -44,6 +44,8 @@ import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
+  IndexPatternsApiClient,
+  UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
   setFieldFormats,
@@ -80,6 +82,8 @@ import {
   ACTION_VALUE_CLICK,
   ValueClickActionContext,
 } from './actions/value_click_action';
+import { SavedObjectsClientPublicToCommon } from './index_patterns';
+import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -124,6 +128,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     };
 
     expressions.registerFunction(esaggs);
+    expressions.registerFunction(indexPatternLoad);
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -150,7 +155,6 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
         expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
-        query: queryService,
       }),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -169,9 +173,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
+      uiSettings: new UiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new IndexPatternsApiClient(http),
       fieldFormats,
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
@@ -192,10 +196,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, {
-      indexPatterns,
-      fieldFormats,
-    });
+    const search = this.searchService.start(core, { indexPatterns });
     setSearchService(search);
 
     uiActions.addTriggerAction(

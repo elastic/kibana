@@ -4,20 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import React, { useCallback, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup } from '@elastic/eui';
+import React, { useCallback, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSavedView } from '../../hooks/use_saved_view';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { SavedViewCreateModal } from './create_modal';
-import { SavedViewListFlyout } from './view_list_flyout';
+import { SavedViewUpdateModal } from './update_modal';
+import { SavedViewManageViewsFlyout } from './manage_views_flyout';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { SavedView } from '../../containers/saved_view/saved_view';
+import { SavedViewListModal } from './view_list_modal';
 
 interface Props<ViewState> {
-  viewType: string;
   viewState: ViewState;
-  defaultViewState: ViewState;
-  onViewChange(viewState: ViewState): void;
 }
 
 export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
@@ -26,35 +34,78 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
     views,
     saveView,
     loading,
+    updateView,
     deletedId,
     deleteView,
+    defaultViewId,
+    makeDefault,
+    sourceIsLoading,
     find,
     errorOnFind,
     errorOnCreate,
-    createdId,
-  } = useSavedView(props.defaultViewState, props.viewType);
+    createdView,
+    updatedView,
+    currentView,
+    setCurrentView,
+  } = useContext(SavedView.Context);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewListModalOpen, setViewListModalOpen] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
+  const [isSavedViewMenuOpen, setIsSavedViewMenuOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const hideSavedViewMenu = useCallback(() => {
+    setIsSavedViewMenuOpen(false);
+  }, [setIsSavedViewMenuOpen]);
+  const openViewListModal = useCallback(() => {
+    hideSavedViewMenu();
+    find();
+    setViewListModalOpen(true);
+  }, [setViewListModalOpen, find, hideSavedViewMenu]);
+  const closeViewListModal = useCallback(() => {
+    setViewListModalOpen(false);
+  }, [setViewListModalOpen]);
   const openSaveModal = useCallback(() => {
+    hideSavedViewMenu();
     setIsInvalid(false);
     setCreateModalOpen(true);
-  }, []);
+  }, [hideSavedViewMenu]);
+  const openUpdateModal = useCallback(() => {
+    hideSavedViewMenu();
+    setIsInvalid(false);
+    setUpdateModalOpen(true);
+  }, [hideSavedViewMenu]);
   const closeModal = useCallback(() => setModalOpen(false), []);
   const closeCreateModal = useCallback(() => setCreateModalOpen(false), []);
+  const closeUpdateModal = useCallback(() => setUpdateModalOpen(false), []);
   const loadViews = useCallback(() => {
+    hideSavedViewMenu();
     find();
     setModalOpen(true);
-  }, [find]);
+  }, [find, hideSavedViewMenu]);
+  const showSavedViewMenu = useCallback(() => {
+    setIsSavedViewMenuOpen(true);
+  }, [setIsSavedViewMenuOpen]);
   const save = useCallback(
     (name: string, hasTime: boolean = false) => {
       const currentState = {
         ...props.viewState,
         ...(!hasTime ? { time: undefined } : {}),
       };
-      saveView({ name, ...currentState });
+      saveView({ ...currentState, name });
     },
     [props.viewState, saveView]
+  );
+
+  const update = useCallback(
+    (name: string, hasTime: boolean = false) => {
+      const currentState = {
+        ...props.viewState,
+        ...(!hasTime ? { time: undefined } : {}),
+      };
+      updateView(currentView.id, { ...currentState, name });
+    },
+    [props.viewState, updateView, currentView]
   );
 
   useEffect(() => {
@@ -64,11 +115,20 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   }, [errorOnCreate]);
 
   useEffect(() => {
-    if (createdId !== undefined) {
+    if (updatedView !== undefined) {
+      setCurrentView(updatedView);
       // INFO: Close the modal after the view is created.
+      closeUpdateModal();
+    }
+  }, [updatedView, setCurrentView, closeUpdateModal]);
+
+  useEffect(() => {
+    if (createdView !== undefined) {
+      // INFO: Close the modal after the view is created.
+      setCurrentView(createdView);
       closeCreateModal();
     }
-  }, [createdId, closeCreateModal]);
+  }, [createdView, setCurrentView, closeCreateModal]);
 
   useEffect(() => {
     if (deletedId !== undefined) {
@@ -88,30 +148,110 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
   return (
     <>
       <EuiFlexGroup>
-        <EuiButtonEmpty iconType="save" onClick={openSaveModal} data-test-subj="openSaveViewModal">
-          <FormattedMessage
-            defaultMessage="Save"
-            id="xpack.infra.waffle.savedViews.saveViewLabel"
-          />
-        </EuiButtonEmpty>
-        <EuiButtonEmpty iconType="importAction" onClick={loadViews} data-test-subj="loadViews">
-          <FormattedMessage
-            defaultMessage="Load"
-            id="xpack.infra.waffle.savedViews.loadViewsLabel"
-          />
-        </EuiButtonEmpty>
+        <EuiPopover
+          button={
+            <EuiFlexGroup gutterSize={'s'} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  aria-label={i18n.translate('xpack.infra.savedView.changeView', {
+                    defaultMessage: 'Change view',
+                  })}
+                  onClick={showSavedViewMenu}
+                  iconType="globe"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiDescriptionList onClick={showSavedViewMenu}>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      defaultMessage="Current view"
+                      id="xpack.infra.savedView.currentView"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {currentView
+                      ? currentView.name
+                      : i18n.translate('xpack.infra.savedView.unknownView', {
+                          defaultMessage: 'Unknown',
+                        })}
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          isOpen={isSavedViewMenuOpen}
+          closePopover={hideSavedViewMenu}
+          anchorPosition="upCenter"
+        >
+          <EuiListGroup flush={true}>
+            <EuiListGroupItem
+              iconType={'indexSettings'}
+              onClick={loadViews}
+              label={i18n.translate('xpack.infra.savedView.manageViews', {
+                defaultMessage: 'Manage views',
+              })}
+            />
+
+            <EuiListGroupItem
+              iconType={'refresh'}
+              onClick={openUpdateModal}
+              disabled={!currentView || currentView.id === '0'}
+              label={i18n.translate('xpack.infra.savedView.updateView', {
+                defaultMessage: 'Update view',
+              })}
+            />
+
+            <EuiListGroupItem
+              iconType={'importAction'}
+              onClick={openViewListModal}
+              label={i18n.translate('xpack.infra.savedView.loadView', {
+                defaultMessage: 'Load view',
+              })}
+            />
+
+            <EuiListGroupItem
+              iconType={'save'}
+              onClick={openSaveModal}
+              label={i18n.translate('xpack.infra.savedView.saveNewView', {
+                defaultMessage: 'Save new view',
+              })}
+            />
+          </EuiListGroup>
+        </EuiPopover>
       </EuiFlexGroup>
 
       {createModalOpen && (
         <SavedViewCreateModal isInvalid={isInvalid} close={closeCreateModal} save={save} />
       )}
+
+      {updateModalOpen && (
+        <SavedViewUpdateModal
+          currentView={currentView}
+          isInvalid={isInvalid}
+          close={closeUpdateModal}
+          save={update}
+        />
+      )}
+
+      {viewListModalOpen && (
+        <SavedViewListModal<any>
+          currentView={currentView}
+          views={views}
+          close={closeViewListModal}
+          setView={setCurrentView}
+        />
+      )}
+
       {modalOpen && (
-        <SavedViewListFlyout<ViewState>
+        <SavedViewManageViewsFlyout<ViewState>
+          sourceIsLoading={sourceIsLoading}
           loading={loading}
           views={views}
+          defaultViewId={defaultViewId}
+          makeDefault={makeDefault}
           deleteView={deleteView}
           close={closeModal}
-          setView={props.onViewChange}
+          setView={setCurrentView}
         />
       )}
     </>

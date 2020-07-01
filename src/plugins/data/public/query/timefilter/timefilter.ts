@@ -21,10 +21,9 @@ import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { parseQueryString } from './lib/parse_querystring';
-import { calculateBounds, getTime } from './get_time';
+import { getForceNow } from './lib/get_force_now';
 import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { RefreshInterval, TimeRange } from '../../../common';
+import { calculateBounds, getTime, RefreshInterval, TimeRange } from '../../../common';
 import { TimeHistoryContract } from './time_history';
 import { IndexPattern } from '../../index_patterns';
 
@@ -224,16 +223,7 @@ export class Timefilter {
   }
 
   private getForceNow = () => {
-    const forceNow = parseQueryString().forceNow as string;
-    if (!forceNow) {
-      return;
-    }
-
-    const ticks = Date.parse(forceNow);
-    if (isNaN(ticks)) {
-      throw new Error(`forceNow query parameter, ${forceNow}, can't be parsed by Date.parse`);
-    }
-    return new Date(ticks);
+    return getForceNow();
   };
 }
 

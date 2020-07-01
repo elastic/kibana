@@ -13,6 +13,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
@@ -26,6 +28,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work', async () => {
+      const kibanaVersionAccessor = kibanaServer.version;
+      const kibanaVersion = await kibanaVersionAccessor.get();
       // 1. Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/ingest_manager/fleet/enrollment-api-keys`)
@@ -48,7 +52,9 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           type: 'PERMANENT',
           metadata: {
-            local: {},
+            local: {
+              elastic: { agent: { version: kibanaVersion } },
+            },
             user_provided: {},
           },
         })
