@@ -81,6 +81,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*aruba*', patternName: 'aruba' },
   { pattern: '*barracuda*', patternName: 'barracuda' },
   { pattern: '*bluecoat*', patternName: 'bluecoat' },
+  { pattern: 'arcsight-*', patternName: 'arcsight', shipper: 'arcsight' },
   // { pattern: '*cef*', patternName: 'cef' }, // Disabled because it's too vague
   { pattern: '*checkpoint*', patternName: 'checkpoint' },
   { pattern: '*cisco*', patternName: 'cisco' },
@@ -92,20 +93,29 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*infoblox*', patternName: 'infoblox' },
   { pattern: '*kaspersky*', patternName: 'kaspersky' },
   { pattern: '*mcafee*', patternName: 'mcafee' },
+  // paloaltonetworks
   { pattern: '*paloaltonetworks*', patternName: 'paloaltonetworks' },
   { pattern: 'pan-*', patternName: 'paloaltonetworks' },
   { pattern: 'pan_*', patternName: 'paloaltonetworks' },
   { pattern: 'pan.*', patternName: 'paloaltonetworks' },
+
+  // rsa
   { pattern: 'rsa.*', patternName: 'rsa' },
   { pattern: 'rsa-*', patternName: 'rsa' },
   { pattern: 'rsa_*', patternName: 'rsa' },
+
+  // snort
   { pattern: 'snort-*', patternName: 'snort' },
   { pattern: 'logstash-snort*', patternName: 'snort' },
+
   { pattern: '*sonicwall*', patternName: 'sonicwall' },
   { pattern: '*sophos*', patternName: 'sophos' },
+
+  // squid
   { pattern: 'squid-*', patternName: 'squid' },
   { pattern: 'squid_*', patternName: 'squid' },
   { pattern: 'squid.*', patternName: 'squid' },
+
   { pattern: '*symantec*', patternName: 'symantec' },
   { pattern: '*tippingpoint*', patternName: 'tippingpoint' },
   { pattern: '*trendmicro*', patternName: 'trendmicro' },
@@ -114,6 +124,7 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*zeek*', patternName: 'zeek' },
   { pattern: '*sigma_doc*', patternName: 'sigma_doc' },
   // { pattern: '*bro*', patternName: 'bro' }, // Disabled because it's too vague
+  { pattern: 'ecs-corelight*', patternName: 'ecs-corelight' },
   { pattern: '*suricata*', patternName: 'suricata' },
   // { pattern: '*fsf*', patternName: 'fsf' }, // Disabled because it's too vague
   { pattern: '*wazuh*', patternName: 'wazuh' },
