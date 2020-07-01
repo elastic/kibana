@@ -401,8 +401,8 @@ export type HostMetadata = Immutable<{
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
@@ -778,8 +778,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
