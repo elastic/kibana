@@ -19,7 +19,7 @@ import './component_templates.scss';
 interface Props {
   isLoading: boolean;
   components: ComponentTemplateListItem[];
-  listItemProps?: Omit<ComponentTemplatesListItemProps, 'component'>;
+  listItemProps: Omit<ComponentTemplatesListItemProps, 'component'>;
 }
 
 interface Filters {
@@ -28,8 +28,8 @@ interface Filters {
 
 function fuzzyMatch(searchValue: string, text: string) {
   const pattern = `.*${searchValue.split('').join('.*')}.*`;
-  const re = new RegExp(pattern);
-  return re.test(text);
+  const regex = new RegExp(pattern);
+  return regex.test(text);
 }
 
 const i18nTexts = {
@@ -68,7 +68,7 @@ const getInitialFilters = (): Filters => ({
   },
 });
 
-export const ComponentTemplates = ({ isLoading, components, listItemProps = {} }: Props) => {
+export const ComponentTemplates = ({ isLoading, components, listItemProps }: Props) => {
   const [searchValue, setSearchValue] = useState('');
 
   const [filters, setFilters] = useState(getInitialFilters);

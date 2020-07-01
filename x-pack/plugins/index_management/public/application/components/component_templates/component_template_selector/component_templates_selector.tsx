@@ -141,14 +141,10 @@ export const ComponentTemplatesSelector = ({
                 components={componentsSelected}
                 onReorder={onSelectionReorder}
                 listItemProps={{
+                  onViewDetail: (component: ComponentTemplateListItem) => {
+                    setSelectedComponent(component.name);
+                  },
                   actions: [
-                    {
-                      label: i18nTexts.icons.view,
-                      icon: 'eye',
-                      handler: (component: ComponentTemplateListItem) => {
-                        setSelectedComponent(component.name);
-                      },
-                    },
                     {
                       label: i18nTexts.icons.remove,
                       icon: 'minusInCircle',
@@ -179,14 +175,10 @@ export const ComponentTemplatesSelector = ({
           isLoading={isLoading}
           components={components ?? []}
           listItemProps={{
+            onViewDetail: (component: ComponentTemplateListItem) => {
+              setSelectedComponent(component.name);
+            },
             actions: [
-              {
-                label: i18nTexts.icons.view,
-                icon: 'eye',
-                handler: (component: ComponentTemplateListItem) => {
-                  setSelectedComponent(component.name);
-                },
-              },
               {
                 label: i18nTexts.icons.select,
                 icon: 'plusInCircle',
@@ -243,7 +235,7 @@ export const ComponentTemplatesSelector = ({
           />
         )}
         <br />
-        <EuiLink href={docUri} target="_blank">
+        <EuiLink href={docUri} target="_blank" external>
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplatesSelector.emptyPromptLearnMoreLinkText"
             defaultMessage="Learn more."

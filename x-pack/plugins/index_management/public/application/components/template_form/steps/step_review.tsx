@@ -63,6 +63,9 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       indexPatterns,
       version,
       order,
+      priority,
+      composedOf,
+      _meta,
       _kbnMeta: { isLegacy },
     } = template!;
 
@@ -93,6 +96,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
+              {/* Index patterns */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsLabel"
@@ -120,16 +124,34 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 )}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.orderLabel"
-                  defaultMessage="Order"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {order ? order : <NoneDescriptionText />}
-              </EuiDescriptionListDescription>
+              {/* Priority / Order */}
+              {isLegacy ? (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.orderLabel"
+                      defaultMessage="Order"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {order ? order : <NoneDescriptionText />}
+                  </EuiDescriptionListDescription>
+                </>
+              ) : (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.priorityLabel"
+                      defaultMessage="Priority"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {priority ? priority : <NoneDescriptionText />}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
 
+              {/* Version */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
@@ -139,11 +161,47 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {version ? version : <NoneDescriptionText />}
               </EuiDescriptionListDescription>
+
+              {/* components */}
+              {isLegacy !== true && (
+                <>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.componentsLabel"
+                      defaultMessage="Components"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    {composedOf && composedOf.length > 0 ? (
+                      composedOf.length > 1 ? (
+                        <EuiText>
+                          <ul>
+                            {composedOf.map((component: string, i: number) => {
+                              return (
+                                <li key={`${component}-${i}`}>
+                                  <EuiTitle size="xs">
+                                    <span>{component}</span>
+                                  </EuiTitle>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </EuiText>
+                      ) : (
+                        composedOf.toString()
+                      )
+                    ) : (
+                      <NoneDescriptionText />
+                    )}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
             </EuiDescriptionList>
           </EuiFlexItem>
 
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
+              {/* Index settings */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.settingsLabel"
@@ -153,6 +211,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedSettings)}
               </EuiDescriptionListDescription>
+
+              {/* Mappings */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.mappingLabel"
@@ -162,6 +222,8 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedMappings)}
               </EuiDescriptionListDescription>
+
+              {/* Aliases */}
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.aliasesLabel"
@@ -171,6 +233,21 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedAliases)}
               </EuiDescriptionListDescription>
+
+              {/* Metadata (optional) */}
+              {isLegacy !== true && _meta && (
+                <>
+                  <EuiDescriptionListTitle data-test-subj="metaTitle">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
+                      defaultMessage="Metadata"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+                  </EuiDescriptionListDescription>
+                </>
+              )}
             </EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>

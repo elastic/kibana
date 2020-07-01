@@ -3,6 +3,7 @@
   padding: $euiSizeM;
   border-bottom: $euiBorderThin;
   position: relative;
+  height: $euiSizeL * 2;
 
   &--selected {
     &::before {
@@ -15,6 +16,10 @@
       width: 100%;
       z-index: 1;
     }
+  }
+
+  &__contentIndicator {
+    flex-direction: row;
   }
 
   &__checkIcon {

@@ -14,7 +14,7 @@ import {
 
 interface Props {
   components: ComponentTemplateListItem[];
-  listItemProps?: Omit<ComponentTemplatesListItemProps, 'component'>;
+  listItemProps: Omit<ComponentTemplatesListItemProps, 'component'>;
 }
 
 export const ComponentTemplatesList = ({ components, listItemProps }: Props) => {

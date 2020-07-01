@@ -9,7 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiText,
+  EuiLink,
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
@@ -27,12 +27,14 @@ interface Action {
 export interface Props {
   component: ComponentTemplateListItem;
   isSelected?: boolean | ((component: ComponentTemplateListItem) => boolean);
+  onViewDetail: (component: ComponentTemplateListItem) => void;
   actions?: Action[];
   dragHandleProps?: { [key: string]: any };
 }
 
 export const ComponentTemplatesListItem = ({
   component,
+  onViewDetail,
   actions,
   isSelected = false,
   dragHandleProps,
@@ -58,9 +60,10 @@ export const ComponentTemplatesListItem = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiText>{component.name}</EuiText>
+              {/* <EuiText>{component.name}</EuiText> */}
+              <EuiLink onClick={() => onViewDetail(component)}>{component.name}</EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ flexDirection: 'row' }}>
+            <EuiFlexItem grow={false} className="componentTemplatesListItem__contentIndicator">
               <TemplateContentIndicator
                 settings={component.hasSettings}
                 mappings={component.hasMappings}

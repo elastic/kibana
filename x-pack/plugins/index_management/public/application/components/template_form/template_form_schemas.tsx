@@ -151,7 +151,7 @@ export const schemas: Record<string, FormSchema> = {
     },
     _meta: {
       label: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorLabel', {
-        defaultMessage: '_meta field data',
+        defaultMessage: '_meta field data (optional)',
       }),
       helpText: (
         <FormattedMessage
