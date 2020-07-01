@@ -4,7 +4,27 @@ exports[`Telemetry Collection: Get Aggregated Stats OSS-like telemetry (no licen
 Array [
   Object {
     "cluster_name": "test",
-    "cluster_stats": Object {},
+    "cluster_stats": Object {
+      "nodes": Object {
+        "usage": Object {
+          "nodes": Array [
+            Object {
+              "aggregations": Object {
+                "terms": Object {
+                  "bytes": 2,
+                },
+              },
+              "node_id": "some_node_id",
+              "rest_actions": Object {
+                "nodes_usage_action": 1,
+              },
+              "since": 1588616945163,
+              "timestamp": 1588617023177,
+            },
+          ],
+        },
+      },
+    },
     "cluster_uuid": "test",
     "collection": "local",
     "stack_stats": Object {
@@ -62,7 +82,27 @@ exports[`Telemetry Collection: Get Aggregated Stats X-Pack telemetry (license + 
 Array [
   Object {
     "cluster_name": "test",
-    "cluster_stats": Object {},
+    "cluster_stats": Object {
+      "nodes": Object {
+        "usage": Object {
+          "nodes": Array [
+            Object {
+              "aggregations": Object {
+                "terms": Object {
+                  "bytes": 2,
+                },
+              },
+              "node_id": "some_node_id",
+              "rest_actions": Object {
+                "nodes_usage_action": 1,
+              },
+              "since": 1588616945163,
+              "timestamp": 1588617023177,
+            },
+          ],
+        },
+      },
+    },
     "cluster_uuid": "test",
     "collection": "local",
     "stack_stats": Object {

@@ -5,14 +5,14 @@
  */
 
 import {
-  ValueClickTriggerContext,
-  RangeSelectTriggerContext,
+  ValueClickContext,
+  RangeSelectContext,
   IEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 
 export type ActionContext<T extends IEmbeddable = IEmbeddable> =
-  | ValueClickTriggerContext<T>
-  | RangeSelectTriggerContext<T>;
+  | ValueClickContext<T>
+  | RangeSelectContext<T>;
 
 export interface Config {
   dashboardId?: string;
