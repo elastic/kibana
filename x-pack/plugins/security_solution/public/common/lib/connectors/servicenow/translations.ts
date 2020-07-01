@@ -11,7 +11,7 @@ export * from '../translations';
 export const SERVICENOW_DESC = i18n.translate(
   'xpack.securitySolution.case.connectors.servicenow.selectMessageText',
   {
-    defaultMessage: 'Push or update SIEM case data to a new incident in ServiceNow',
+    defaultMessage: 'Push or update Security case data to a new incident in ServiceNow',
   }
 );
 

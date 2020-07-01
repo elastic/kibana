@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../shared_imports';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
@@ -16,7 +16,7 @@ const bodySchema = schema.object({
   indexes: schema.arrayOf(schema.string()),
 });
 
-function fetchFields(dataClient: IScopedClusterClient, indexes: string[]) {
+function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) {
   const params = {
     index: indexes,
     fields: ['*'],

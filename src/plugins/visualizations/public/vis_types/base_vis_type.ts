@@ -27,7 +27,6 @@ export interface BaseVisTypeOptions {
   icon?: string;
   image?: string;
   stage?: 'experimental' | 'beta' | 'production';
-  feedbackMessage?: string;
   options?: Record<string, any>;
   visualization: VisualizationControllerConstructor;
   visConfig?: Record<string, any>;
@@ -48,7 +47,7 @@ export class BaseVisType {
   icon?: string;
   image?: string;
   stage: 'experimental' | 'beta' | 'production';
-  feedbackMessage: string;
+  isExperimental: boolean;
   options: Record<string, any>;
   visualization: VisualizationControllerConstructor;
   visConfig: Record<string, any>;
@@ -87,7 +86,7 @@ export class BaseVisType {
     this.editorConfig = _.defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = _.defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage || 'production';
-    this.feedbackMessage = opts.feedbackMessage || '';
+    this.isExperimental = opts.stage === 'experimental';
     this.hidden = opts.hidden || false;
     this.requestHandler = opts.requestHandler || 'courier';
     this.responseHandler = opts.responseHandler || 'none';
@@ -95,10 +94,6 @@ export class BaseVisType {
     this.requiresSearch = this.requestHandler !== 'none';
     this.hierarchicalData = opts.hierarchicalData || false;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen || false;
-  }
-
-  shouldMarkAsExperimentalInUI() {
-    return this.stage === 'experimental';
   }
 
   public get schemas() {

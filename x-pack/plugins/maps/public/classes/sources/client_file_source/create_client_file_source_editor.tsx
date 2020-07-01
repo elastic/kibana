@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -146,15 +147,17 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   render() {
     const FileUpload = getFileUploadComponent();
     return (
-      <FileUpload
-        appName={'Maps'}
-        isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
-        onFileUpload={this._onFileUpload}
-        onFileRemove={this._onFileRemove}
-        onIndexReady={this._onIndexReady}
-        transformDetails={'geo'}
-        onIndexingComplete={this._onIndexingComplete}
-      />
+      <EuiPanel>
+        <FileUpload
+          appName={'Maps'}
+          isIndexingTriggered={this.state.indexingStage === INDEXING_STAGE.TRIGGERED}
+          onFileUpload={this._onFileUpload}
+          onFileRemove={this._onFileRemove}
+          onIndexReady={this._onIndexReady}
+          transformDetails={'geo'}
+          onIndexingComplete={this._onIndexingComplete}
+        />
+      </EuiPanel>
     );
   }
 }
