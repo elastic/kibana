@@ -42,7 +42,7 @@ export default function ({ getService }) {
 
         // Composable index templates may have been created by other apps, e.g. Ingest Manager,
         // so we don't make any assertion about these contents.
-        expect(Array.isArray(allTemplates.templates)).to.eql(true);
+        expect(allTemplates.templates).to.be.an('array');
 
         // Legacy templates
         const legacyTemplate = allTemplates.legacyTemplates.find(
