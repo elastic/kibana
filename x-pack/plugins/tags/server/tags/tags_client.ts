@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectsBulkGetObject,
+} from 'src/core/server';
 import Boom from 'boom';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -84,6 +89,20 @@ export class TagsClient implements ITagsClient {
     const savedObject: TagSavedObject = await savedObjectsClient.get(this.type, id);
 
     return { tag: this.savedObjectToTag(savedObject) };
+  }
+
+  /**
+   * Read multiple tags in once request.
+   */
+  public async readBulk({ ids }: { ids: string[] }): Promise<{ tags: RawTagWithId[] }> {
+    const { savedObjectsClient } = this.params;
+    const bulkGetObjects: SavedObjectsBulkGetObject[] = ids.map((id) => ({
+      type: this.type,
+      id,
+    }));
+    const { saved_objects } = await savedObjectsClient.bulkGet<RawTag>(bulkGetObjects);
+
+    return { tags: saved_objects.map(this.savedObjectToTag) };
   }
 
   public async update({ patch }: TagsClientUpdateParams): Promise<TagsClientUpdateResult> {

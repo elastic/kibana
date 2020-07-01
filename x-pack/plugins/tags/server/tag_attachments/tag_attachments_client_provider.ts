@@ -10,7 +10,7 @@ export class TagAttachmentsClientProvider {
   constructor(private readonly initParams: Pick<TagAttachmentsClientParams, 'logger'>) {}
 
   public readonly create = (
-    remainingParams: Pick<TagAttachmentsClientParams, 'savedObjectsClient' | 'user'>
+    remainingParams: Pick<TagAttachmentsClientParams, 'savedObjectsClient' | 'user' | 'tagsClient'>
   ): TagAttachmentsClient => {
     return new TagAttachmentsClient({ ...this.initParams, ...remainingParams });
   };

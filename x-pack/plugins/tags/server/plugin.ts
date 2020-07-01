@@ -126,7 +126,7 @@ export class TagsPlugin
         user: setupPlugins.security?.authc.getCurrentUser(request),
       };
       const tagsClient = this.tagsClientProvider!.create(params);
-      const attachmentsClient = this.attachmentsClientProvider!.create(params);
+      const attachmentsClient = this.attachmentsClientProvider!.create({ tagsClient, ...params });
       const tagsContext: TagsRequestHandlerContext = {
         tagsClient,
         attachmentsClient,

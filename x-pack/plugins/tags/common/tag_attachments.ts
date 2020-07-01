@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RawTagWithId } from './tags';
+
 /**
  * Represents a tag attachemnt to KID (Kibana ID) as stored in
  * Saved Object client.
@@ -28,6 +30,21 @@ export interface TagAttachmentClientCreateResult {
   attachment: RawTagAttachmentWithId;
 }
 
+export interface TagAttachmentClientGetResourceTagsParams {
+  kid: string;
+}
+
+export interface TagAttachmentClientGetResourceTagsResult {
+  attachments: RawTagAttachmentWithId[];
+  tags: RawTagWithId[];
+}
+
+/**
+ * CRUD + List/Find API for tag attachments.
+ */
 export interface ITagAttachmentsClient {
   create(params: TagAttachmentClientCreateParams): Promise<TagAttachmentClientCreateResult>;
+  getAttachedTags(
+    params: TagAttachmentClientGetResourceTagsParams
+  ): Promise<TagAttachmentClientGetResourceTagsResult>;
 }

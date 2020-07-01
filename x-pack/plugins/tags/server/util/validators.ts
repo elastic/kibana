@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { parseKID } from '../../common/kid';
 
 export const validateTagId = (id: string) => {
   if (typeof id !== 'string') throw Boom.badRequest('ID must be a string');
@@ -12,11 +13,7 @@ export const validateTagId = (id: string) => {
   if (id.length > 256) throw Boom.badRequest('ID is too long.');
 };
 
-export const validateKID = (kid: string) => {
-  if (typeof kid !== 'string') throw Boom.badRequest('KID must be a string');
-  if (kid.length < 5) throw Boom.badRequest('KID is too short.');
-  if (kid.length > 10e3) throw Boom.badRequest('KID is too long.');
-};
+export const validateKID = (kid: string) => parseKID(kid);
 
 export const validateTagTitle = (title: string) => {
   if (typeof title !== 'string') throw Boom.badRequest('Tag title must be a string');
