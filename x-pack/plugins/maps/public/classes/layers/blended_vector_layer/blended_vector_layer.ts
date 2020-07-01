@@ -126,7 +126,7 @@ function getClusterStyleDescriptor(
               ),
             }
           : undefined;
-      // @ts-ignore
+      // @ts-expect-error
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.DYNAMIC,
         options: {
@@ -136,7 +136,7 @@ function getClusterStyleDescriptor(
       };
     } else {
       // copy static styles to cluster style
-      // @ts-ignore
+      // @ts-expect-error
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.STATIC,
         options: { ...styleProperty.getOptions() },
@@ -218,10 +218,6 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
           values: { displayName },
         })
       : displayName;
-  }
-
-  isJoinable() {
-    return false;
   }
 
   getJoins() {

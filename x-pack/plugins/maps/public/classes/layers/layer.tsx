@@ -76,6 +76,8 @@ export interface ILayer {
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
   isPreviewLayer: () => boolean;
+  isJoinable(): boolean;
+  getJoinsDisabledReason(): string | null;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -139,13 +141,13 @@ export class AbstractLayer implements ILayer {
   }
 
   static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
-    // @ts-ignore
+    // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
-    // @ts-ignore
+    // @ts-expect-error
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
@@ -155,12 +157,12 @@ export class AbstractLayer implements ILayer {
 
     // todo: remove this
     // This should not be in AbstractLayer. It relies on knowledge of VectorLayerDescriptor
-    // @ts-ignore
+    // @ts-expect-error
     if (clonedDescriptor.joins) {
-      // @ts-ignore
+      // @ts-expect-error
       clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
-        // @ts-ignore
+        // @ts-expect-error
         joinDescriptor.right.id = uuid();
       });
     }
@@ -173,6 +175,10 @@ export class AbstractLayer implements ILayer {
 
   isJoinable(): boolean {
     return this.getSource().isJoinable();
+  }
+
+  getJoinsDisabledReason() {
+    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {
@@ -331,21 +337,21 @@ export class AbstractLayer implements ILayer {
 
   _removeStaleMbSourcesAndLayers(mbMap: unknown) {
     if (this._requiresPrevSourceCleanup(mbMap)) {
-      // @ts-ignore
+      // @ts-expect-error
       const mbStyle = mbMap.getStyle();
-      // @ts-ignore
+      // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-ignore
+        // @ts-expect-error
         if (this.ownsMbLayerId(mbLayer.id)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-ignore
+      // @ts-expect-error
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-ignore
+        // @ts-expect-error
         if (this.ownsMbSourceId(mbSourceId)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeSource(mbSourceId);
         }
       });
@@ -391,7 +397,7 @@ export class AbstractLayer implements ILayer {
     const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
-    // @ts-ignore
+    // @ts-expect-error
     return _.compact(requestTokens);
   }
 
@@ -475,7 +481,7 @@ export class AbstractLayer implements ILayer {
   }
 
   syncVisibilityWithMb(mbMap: unknown, mbLayerId: string) {
-    // @ts-ignore
+    // @ts-expect-error
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
