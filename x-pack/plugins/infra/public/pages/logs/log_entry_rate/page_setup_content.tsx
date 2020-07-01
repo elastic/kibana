@@ -44,7 +44,10 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
         </EuiText>
         <EuiSpacer />
         <EuiButton fill onClick={onOpenSetup}>
-          <FormattedMessage id="xpack.infra.logs.logEntryRate.setupCta" defaultMessage="ML Setup" />
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel"
+            defaultMessage="ML Setup"
+          />
         </EuiButton>
       </LogAnalysisSetupPageContent>
     </LogAnalysisSetupPage>
