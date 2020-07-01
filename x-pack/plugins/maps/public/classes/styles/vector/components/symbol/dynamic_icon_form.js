@@ -9,7 +9,6 @@ import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IconMapSelect } from './icon_map_select';
-import { getIconPaletteOptions } from '../../symbol_utils';
 
 export function DynamicIconForm({
   fields,
@@ -56,14 +55,12 @@ export function DynamicIconForm({
     return (
       <IconMapSelect
         {...styleOptions}
-        useCustomIconMap={
-          !field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorRamp', false)
-        }
+        useCustomIconMap={_.get(styleOptions, 'useCustomColorRamp', false)}
         styleProperty={styleProperty}
         onChange={onIconMapChange}
         isDarkMode={isDarkMode}
-        paletteOptions={field.supportsAutoDomain ? getIconPaletteOptions(isDarkMode) : []}
         symbolOptions={symbolOptions}
+        isCustomOnly={!field.supportsAutoDomain}
       />
     );
   }

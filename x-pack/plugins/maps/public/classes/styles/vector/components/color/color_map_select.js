@@ -89,7 +89,7 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    if (!this.props.useCustomColorMap) {
+    if (!this.props.isCustomOnly && !this.props.useCustomColorMap) {
       return null;
     }
 
@@ -122,6 +122,10 @@ export class ColorMapSelect extends Component {
   }
 
   _renderColorMapSelections() {
+    if (this.props.isCustomOnly) {
+      return null;
+    }
+
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
@@ -147,20 +151,22 @@ export class ColorMapSelect extends Component {
     ) : null;
 
     return (
-      <EuiFlexGroup gutterSize={'none'}>
-        {toggle}
-        <EuiFlexItem>
-          <EuiSuperSelect
-            disabled={colorMapOptionsWithCustom.length <= 1}
-            compressed
-            options={colorMapOptionsWithCustom}
-            onChange={this._onColorMapSelect}
-            valueOfSelected={valueOfSelected}
-            hasDividers={true}
-            data-test-subj={`colorMapSelect_${this.props.styleProperty.getStyleName()}`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Fragment>
+        <EuiFlexGroup gutterSize={'none'}>
+          {toggle}
+          <EuiFlexItem>
+            <EuiSuperSelect
+              compressed
+              options={colorMapOptionsWithCustom}
+              onChange={this._onColorMapSelect}
+              valueOfSelected={valueOfSelected}
+              hasDividers={true}
+              data-test-subj={`colorMapSelect_${this.props.styleProperty.getStyleName()}`}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   }
 
@@ -168,7 +174,6 @@ export class ColorMapSelect extends Component {
     return (
       <Fragment>
         {this._renderColorMapSelections()}
-        <EuiSpacer size="s" />
         {this._renderColorStopsInput()}
       </Fragment>
     );
