@@ -31,7 +31,8 @@ import {
   normalizePath,
   readFileAsync,
   writeFileAsync,
-  // @ts-ignore
+  verifyICUMessage,
+  // @ts-expect-error
 } from './utils';
 
 import { I18nConfig } from './config';
@@ -41,6 +42,7 @@ export interface IntegrateOptions {
   sourceFileName: string;
   targetFileName?: string;
   dryRun: boolean;
+  ignoreMalformed: boolean;
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
@@ -100,6 +102,23 @@ export function verifyMessages(
           options.log.warning(`Incompatible translation ignored: ${err.message}`);
         } else {
           errorMessage += `\nIncompatible translation: ${err.message}\n`;
+        }
+      }
+    }
+  }
+
+  for (const messageId of localizedMessagesIds) {
+    const defaultMessage = defaultMessagesMap.get(messageId);
+    if (defaultMessage) {
+      try {
+        const message = localizedMessagesMap.get(messageId)!;
+        verifyICUMessage(message);
+      } catch (err) {
+        if (options.ignoreMalformed) {
+          localizedMessagesMap.delete(messageId);
+          options.log.warning(`Malformed translation ignored (${messageId}): ${err}`);
+        } else {
+          errorMessage += `\nMalformed translation (${messageId}): ${err}\n`;
         }
       }
     }
