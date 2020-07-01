@@ -4,8 +4,13 @@
 
 @import '@elastic/eui/src/themes/eui-amsterdam/eui_amsterdam_colors_dark';
 
-@import '@elastic/eui/src/eui-amsterdam/global_styling/functions/index';
-@import '@elastic/eui/src/eui-amsterdam/global_styling/variables/index';
-@import '@elastic/eui/src/eui-amsterdam/global_styling/mixins/index';
+@import '@elastic/eui/src/global_styling/functions/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/functions/index';
+
+@import '@elastic/eui/src/global_styling/variables/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/variables/index';
+
+@import '@elastic/eui/src/global_styling/mixins/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/mixins/index';
 
 @import './mixins';
