@@ -225,7 +225,8 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('checks conflicts', async () => {
       const createNewCopies = (Symbol() as unknown) as boolean;
-      const options = setupOptions([], createNewCopies);
+      const retries = [createRetry()];
+      const options = setupOptions(retries, createNewCopies);
       const filteredObjects = [createObject()];
       getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
@@ -234,7 +235,7 @@ describe('#importSavedObjectsFromStream', () => {
         objects: filteredObjects,
         savedObjectsClient,
         namespace,
-        ignoreRegularConflicts: true,
+        retries,
         createNewCopies,
       };
       expect(checkConflicts).toHaveBeenCalledWith(checkConflictsParams);
@@ -299,15 +300,17 @@ describe('#importSavedObjectsFromStream', () => {
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importIdMap: new Map([
-            ['foo', {}],
-            ['bar', {}],
-          ]),
+          importIdMap: new Map([['foo', { id: 'someId' }]]),
         });
-        getMockFn(getImportIdMapForRetries).mockReturnValue(new Map([['bar', { id: 'newId' }]]));
+        getMockFn(getImportIdMapForRetries).mockReturnValue(
+          new Map([
+            ['foo', { id: 'newId' }],
+            ['bar', { id: 'anotherNewId' }],
+          ])
+        );
         const importIdMap = new Map([
-          ['foo', {}],
-          ['bar', { id: 'newId' }],
+          ['foo', { id: 'someId' }],
+          ['bar', { id: 'anotherNewId' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];
@@ -372,16 +375,18 @@ describe('#importSavedObjectsFromStream', () => {
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importIdMap: new Map([
-            ['bar', {}],
-            ['baz', {}],
-          ]),
+          importIdMap: new Map([['bar', { id: 'someId' }]]),
         });
-        getMockFn(getImportIdMapForRetries).mockReturnValue(new Map([['baz', { id: 'newId' }]]));
+        getMockFn(getImportIdMapForRetries).mockReturnValue(
+          new Map([
+            ['bar', { id: 'newId' }],
+            ['baz', { id: 'anotherNewId' }],
+          ])
+        );
         const importIdMap = new Map([
           ['foo', { id: 'randomId1' }],
-          ['bar', {}],
-          ['baz', { id: 'newId' }],
+          ['bar', { id: 'someId' }],
+          ['baz', { id: 'anotherNewId' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];

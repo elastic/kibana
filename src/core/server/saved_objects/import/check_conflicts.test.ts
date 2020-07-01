@@ -19,7 +19,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import { checkConflicts } from './check_conflicts';
@@ -73,6 +73,7 @@ describe('#checkConflicts', () => {
     objects: SavedObjectType[];
     namespace?: string;
     ignoreRegularConflicts?: boolean;
+    retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
   }): CheckConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
@@ -153,6 +154,34 @@ describe('#checkConflicts', () => {
         ],
       })
     );
+  });
+
+  it('handles retries', async () => {
+    const namespace = 'foo-namespace';
+    const retries = [
+      { id: obj2.id, type: obj2.type, overwrite: true }, // find a conflict for obj2, but ignore it because of the overwrite flag
+      { id: obj3.id, type: obj3.type, destinationId: 'some-object-id', createNewCopy: true }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
+    ] as SavedObjectsImportRetry[];
+    const params = setupParams({ objects, namespace, retries });
+    socCheckConflicts.mockResolvedValue({
+      errors: [obj2Error, { ...obj3Error, id: 'some-object-id' }, obj4Error],
+    });
+
+    const checkConflictsResult = await checkConflicts(params);
+    expect(checkConflictsResult).toEqual({
+      filteredObjects: [obj1, obj2, obj3],
+      errors: [
+        {
+          ...obj4Error,
+          title: obj4.attributes.title,
+          meta: { title: obj4.attributes.title },
+          error: { ...obj4Error.error, type: 'unknown' },
+        },
+      ],
+      importIdMap: new Map([
+        [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+      ]),
+    });
   });
 
   it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {

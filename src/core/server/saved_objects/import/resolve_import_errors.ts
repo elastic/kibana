@@ -111,12 +111,11 @@ export async function resolveSavedObjectsImportErrors({
     objects: validateReferencesResult.filteredObjects,
     savedObjectsClient,
     namespace,
-    ignoreRegularConflicts: true,
+    retries,
     createNewCopies,
   };
   const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
-  importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
   const getImportIdMapForRetriesParams = {
@@ -125,7 +124,11 @@ export async function resolveSavedObjectsImportErrors({
     createNewCopies,
   };
   const importIdMapForRetries = getImportIdMapForRetries(getImportIdMapForRetriesParams);
-  importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
+  importIdMap = new Map([
+    ...importIdMap,
+    ...importIdMapForRetries,
+    ...checkConflictsResult.importIdMap, // this importIdMap takes precedence over the others
+  ]);
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: SavedObjectsImportSuccess[] = [];
