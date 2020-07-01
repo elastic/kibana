@@ -6,9 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { sum } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FetchDataParams } from '../../../../observability/public/data_handler';
-import { ApmFetchDataResponse } from '../../../../observability/public/typings/fetch_data_response';
+import {
+  ApmFetchDataResponse,
+  FetchDataParams,
+} from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 import { Theme } from '../../utils/get_theme';
 
