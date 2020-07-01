@@ -20,7 +20,14 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig, CacheableWorkerConfig, ThemeTags, parseThemeTags } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  CacheableWorkerConfig,
+  ThemeTag,
+  ThemeTags,
+  parseThemeTags,
+} from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
