@@ -18,7 +18,7 @@ import {
   enhancedEsSearchStrategyProvider,
 } from './search';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
-import { BackgroundSessionService } from './background_session';
+import { SessionService } from './session';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -29,12 +29,12 @@ export interface DataEnhancedStartDependencies {
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export interface DataEnhancedStart {
-  backgroundSession: BackgroundSessionService;
+  sessionService: SessionService;
 }
 
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
-  private backgroundSessionService!: BackgroundSessionService;
+  private sessionService!: SessionService;
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
@@ -52,10 +52,10 @@ export class DataEnhancedPlugin
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
     setAutocompleteService(plugins.data.autocomplete);
-    this.backgroundSessionService = new BackgroundSessionService(core.http, plugins.data.search);
+    this.sessionService = new SessionService(core.http, plugins.data.search);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
-      this.backgroundSessionService,
+      this.sessionService,
       plugins.data,
       core.notifications.toasts,
       core.application,
@@ -72,7 +72,7 @@ export class DataEnhancedPlugin
     });
 
     return {
-      backgroundSession: this.backgroundSessionService,
+      sessionService: this.sessionService,
     };
   }
 }

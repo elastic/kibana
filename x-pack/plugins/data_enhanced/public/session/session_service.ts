@@ -7,7 +7,7 @@
 import { HttpStart } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-export class BackgroundSessionService {
+export class SessionService {
   constructor(
     private readonly http: HttpStart,
     private readonly search: DataPublicPluginStart['search']
