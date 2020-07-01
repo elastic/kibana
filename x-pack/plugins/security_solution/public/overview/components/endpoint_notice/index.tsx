@@ -5,22 +5,12 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiBetaBadge,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiPanel,
-  EuiTitle,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { EuiLink, EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useManagementFormatUrl } from '../../../management/components/hooks/use_management_format_url';
 import { MANAGEMENT_APP_ID } from '../../../management/common/constants';
-
-const EMPTY_PROMPT_STYLE = Object.freeze({ maxWidth: '100%' });
 
 export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) => {
   const endpointsPath = getEndpointListPath({ name: 'endpointList' });
@@ -30,53 +20,57 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
   });
 
   return (
-    <EuiPanel>
-      <EuiButtonIcon onClick={onDismiss} iconType="cross" />
-      <EuiEmptyPrompt
-        data-test-subj="endpoint-prompt-banner"
-        style={EMPTY_PROMPT_STYLE}
-        iconType="logoSecurity"
-        title={
-          <>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.securitySolution.overview.endpointNotice.betaLabel', {
-                defaultMessage: 'beta',
-              })}
+    <EuiCallOut
+      data-test-subj="endpoint-prompt-banner"
+      iconType="cheer"
+      title={
+        <>
+          <b>
+            <FormattedMessage
+              id="xpack.securitySolution.overview.endpointNotice.introducing"
+              defaultMessage="Introducing: "
             />
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="xpack.securitySolution.overview.endpointNotice.title"
-                  defaultMessage="Looks like you're not using Endpoint Security"
-                />
-              </h2>
-            </EuiTitle>
-          </>
-        }
-        titleSize="xs"
-        body={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.overview.endpointNotice.message"
-                defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment. {getStartedLink}"
-                values={{
-                  getStartedLink: (
-                    // eslint-disable-next-line @elastic/eui/href-or-on-click
-                    <EuiLink onClick={handleGetStartedClick} href={endpointsLink}>
-                      <FormattedMessage
-                        id="xpack.securitySolution.overview.endpointNotice.getStartedLinkTitle"
-                        defaultMessage="Click here to get started!"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </>
-        }
-      />
-    </EuiPanel>
+          </b>
+          <FormattedMessage
+            id="xpack.securitySolution.overview.endpointNotice.title"
+            defaultMessage="Elastic Endpoint Security Beta"
+          />
+        </>
+      }
+    >
+      <>
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.overview.endpointNotice.message"
+            defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment. For more information {blogPostLink}"
+            values={{
+              blogPostLink: (
+                // eslint-disable-next-line @elastic/eui/href-or-on-click
+                <EuiLink href={endpointsLink} external>
+                  <FormattedMessage
+                    id="xpack.securitySolution.overview.endpointNotice.getStartedLinkTitle"
+                    defaultMessage="read our announcement blog post"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
+        <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
+          <FormattedMessage
+            id="xpack.securitySolution.overview.endpointNotice.tryButton"
+            defaultMessage="Try Elastic Endpoint Security Beta"
+          />
+        </EuiButton>
+        <EuiButtonEmpty onClick={onDismiss}>
+          <FormattedMessage
+            id="xpack.securitySolution.overview.endpointNotice.dismiss"
+            defaultMessage="Dismiss message"
+          />
+        </EuiButtonEmpty>
+      </>
+    </EuiCallOut>
   );
 });
 EndpointNotice.displayName = 'EndpointNotice';

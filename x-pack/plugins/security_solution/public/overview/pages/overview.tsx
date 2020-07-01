@@ -72,11 +72,13 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          {!dismissMessage && !metadataIndexExists && (
-            <EndpointNotice onDismiss={dismissEndpointNotice} />
-          )}
-
           <WrapperPage>
+            {!dismissMessage && !metadataIndexExists && (
+              <>
+                <EndpointNotice onDismiss={dismissEndpointNotice} />
+                <EuiSpacer size="l" />
+              </>
+            )}
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
