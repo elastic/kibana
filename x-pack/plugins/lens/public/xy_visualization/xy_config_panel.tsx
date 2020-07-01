@@ -81,12 +81,8 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 
 const idPrefix = htmlIdGenerator()();
 
-export function DimensionEditor({
-  state,
-  setState,
-  layerId,
-  accessor,
-}: VisualizationDimensionEditorProps<State>) {
+export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
+  const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const axisMode =
@@ -102,7 +98,7 @@ export function DimensionEditor({
           defaultMessage: 'Series Color',
         })}
       >
-        <ColorPicker state={state} layerId={layerId} accessor={accessor} setState={setState} />
+        <ColorPicker {...props} />
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
