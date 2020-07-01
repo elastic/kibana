@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -94,6 +94,10 @@ const TopNComponent: React.FC<Props> = ({
 }) => {
   const [view, setView] = useState<EventType>(defaultView);
   const onViewSelected = useCallback((value: string) => setView(value as EventType), [setView]);
+
+  useEffect(() => {
+    setView(defaultView);
+  }, [defaultView]);
 
   const headerChildren = useMemo(
     () => (

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -22,7 +22,7 @@ import { DataProvider } from '../../../timelines/components/timeline/data_provid
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
 
-import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
+import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
@@ -101,11 +101,13 @@ export const getStyle = (
 
 export const DraggableWrapper = React.memo<Props>(
   ({ dataProvider, onFilterAdded, render, truncate }) => {
+    const draggableRef = useRef<HTMLDivElement | null>(null);
     const [showTopN, setShowTopN] = useState<boolean>(false);
     const toggleTopN = useCallback(() => {
       setShowTopN(!showTopN);
     }, [setShowTopN, showTopN]);
-
+    const [goGetTimelineId, setGoGetTimelineId] = useState(false);
+    const timelineId = useGetTimelineId(draggableRef, goGetTimelineId);
     const [providerRegistered, setProviderRegistered] = useState(false);
 
     const dispatch = useDispatch();
@@ -135,8 +137,10 @@ export const DraggableWrapper = React.memo<Props>(
         <DraggableWrapperHoverContent
           draggableId={getDraggableId(dataProvider.id)}
           field={dataProvider.queryMatch.field}
+          goGetTimelineId={setGoGetTimelineId}
           onFilterAdded={onFilterAdded}
           showTopN={showTopN}
+          timelineId={timelineId}
           toggleTopN={toggleTopN}
           value={
             typeof dataProvider.queryMatch.value !== 'number'
@@ -145,7 +149,7 @@ export const DraggableWrapper = React.memo<Props>(
           }
         />
       ),
-      [dataProvider, onFilterAdded, showTopN, toggleTopN]
+      [dataProvider, onFilterAdded, showTopN, timelineId, toggleTopN]
     );
 
     const renderContent = useCallback(
@@ -184,7 +188,10 @@ export const DraggableWrapper = React.memo<Props>(
                       <ProviderContainer
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        ref={provided.innerRef}
+                        ref={(e: HTMLDivElement) => {
+                          provided.innerRef(e);
+                          draggableRef.current = e;
+                        }}
                         data-test-subj="providerContainer"
                         isDragging={snapshot.isDragging}
                         registerProvider={registerProvider}

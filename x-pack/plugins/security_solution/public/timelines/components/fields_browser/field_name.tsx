@@ -77,8 +77,7 @@ export const FieldName = React.memo<{
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;
-  timelineId: string;
-}>(({ fieldId, highlight = '', timelineId }) => {
+}>(({ fieldId, highlight = '' }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
     setShowTopN(!showTopN);
@@ -86,14 +85,9 @@ export const FieldName = React.memo<{
 
   const hoverContent = useMemo(
     () => (
-      <DraggableWrapperHoverContent
-        field={fieldId}
-        showTopN={showTopN}
-        toggleTopN={toggleTopN}
-        timelineId={timelineId}
-      />
+      <DraggableWrapperHoverContent field={fieldId} showTopN={showTopN} toggleTopN={toggleTopN} />
     ),
-    [fieldId, showTopN, toggleTopN, timelineId]
+    [fieldId, showTopN, toggleTopN]
   );
 
   const render = useCallback(

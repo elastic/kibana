@@ -24,7 +24,6 @@ const defaultProps = {
   }),
   fieldId: timestampFieldId,
   onUpdateColumns: jest.fn(),
-  timelineId: 'timeline-id',
 };
 
 describe('FieldName', () => {

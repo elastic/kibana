@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 
 import { getAllFieldsByName, useWithSource } from '../../containers/source';
@@ -23,9 +23,10 @@ import { TimelineId } from '../../../../common/types/timeline';
 interface Props {
   draggableId?: DraggableId;
   field: string;
+  goGetTimelineId?: (args: boolean) => void;
   onFilterAdded?: () => void;
   showTopN: boolean;
-  timelineId?: string;
+  timelineId?: string | null;
   toggleTopN: () => void;
   value?: string[] | string | null;
 }
@@ -33,6 +34,7 @@ interface Props {
 const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   draggableId,
   field,
+  goGetTimelineId,
   onFilterAdded,
   showTopN,
   timelineId,
@@ -48,11 +50,10 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
   const filterManager = useMemo(
     () =>
-      timelineId === TimelineId.active ||
-      (draggableId != null && draggableId?.includes(TimelineId.active))
+      timelineId === TimelineId.active
         ? getTimelineFilterManager(TimelineId.active)
         : filterManagerBackup,
-    [draggableId, timelineId, getTimelineFilterManager, filterManagerBackup]
+    [timelineId, getTimelineFilterManager, filterManagerBackup]
   );
 
   const filterForValue = useCallback(() => {
@@ -85,6 +86,12 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field, value, filterManager, onFilterAdded]);
 
+  const handleGoGetTimelineId = useCallback(() => {
+    if (goGetTimelineId != null) {
+      goGetTimelineId(true);
+    }
+  }, [goGetTimelineId]);
+
   const { browserFields } = useWithSource();
 
   return (
@@ -97,6 +104,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-for-value"
             iconType="magnifyWithPlus"
             onClick={filterForValue}
+            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -109,6 +117,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-out-value"
             iconType="magnifyWithMinus"
             onClick={filterOutValue}
+            onMouseEnter={handleGoGetTimelineId}
           />
         </EuiToolTip>
       )}
@@ -139,6 +148,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                   data-test-subj="show-top-field"
                   iconType="visBarVertical"
                   onClick={toggleTopN}
+                  onMouseEnter={handleGoGetTimelineId}
                 />
               </EuiToolTip>
             )}
@@ -148,6 +158,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 field={field}
                 onFilterAdded={onFilterAdded}
+                timelineId={timelineId ?? null}
                 toggleTopN={toggleTopN}
                 value={value}
               />
@@ -172,3 +183,31 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 DraggableWrapperHoverContentComponent.displayName = 'DraggableWrapperHoverContentComponent';
 
 export const DraggableWrapperHoverContent = React.memo(DraggableWrapperHoverContentComponent);
+
+const SELECTOR_TIMELINE_CLASS_NAME = 'securitySolutionTimeline__body';
+export const useGetTimelineId = function (
+  elem: React.MutableRefObject<Element | null>,
+  getTimelineId: boolean = false
+) {
+  const [timelineId, setTimelineId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let startElem: Element | (Node & ParentNode) | null = elem.current;
+    if (startElem != null && getTimelineId) {
+      for (; startElem && startElem !== document; startElem = startElem.parentNode) {
+        const myElem: Element = startElem as Element;
+        if (
+          myElem != null &&
+          myElem.classList != null &&
+          myElem.classList.contains(SELECTOR_TIMELINE_CLASS_NAME) &&
+          myElem.hasAttribute('data-timeline-id')
+        ) {
+          setTimelineId(myElem.getAttribute('data-timeline-id'));
+          break;
+        }
+      }
+    }
+  }, [elem, getTimelineId]);
+
+  return timelineId;
+};

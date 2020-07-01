@@ -21,11 +21,12 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
 
 import { Props } from './top_n';
-import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
+import { StatefulTopN } from '.';
 import {
   ManageGlobalTimeline,
   timelineDefaults,
 } from '../../../timelines/components/manage_timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -94,9 +95,9 @@ const state: State = {
   timeline: {
     ...mockGlobalState.timeline,
     timelineById: {
-      [ACTIVE_TIMELINE_REDUX_ID]: {
+      [TimelineId.active]: {
         ...mockGlobalState.timeline.timelineById.test,
-        id: ACTIVE_TIMELINE_REDUX_ID,
+        id: TimelineId.active,
         dataProviders: [
           {
             id:
@@ -189,6 +190,7 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              timelineId={TimelineId.hostsPageExternalAlerts}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
               value={value}
@@ -266,9 +268,9 @@ describe('StatefulTopN', () => {
     beforeEach(() => {
       filterManager = new FilterManager(mockUiSettingsForFilterManager);
       const manageTimelineForTesting = {
-        [ACTIVE_TIMELINE_REDUX_ID]: {
+        [TimelineId.active]: {
           ...timelineDefaults,
-          id: ACTIVE_TIMELINE_REDUX_ID,
+          id: TimelineId.active,
           filterManager,
         },
       };
@@ -278,6 +280,7 @@ describe('StatefulTopN', () => {
             <StatefulTopN
               browserFields={mockBrowserFields}
               field={field}
+              timelineId={TimelineId.active}
               toggleTopN={jest.fn()}
               onFilterAdded={jest.fn()}
               value={value}
@@ -342,9 +345,9 @@ describe('StatefulTopN', () => {
     const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 
     const manageTimelineForTesting = {
-      [ACTIVE_TIMELINE_REDUX_ID]: {
+      [TimelineId.active]: {
         ...timelineDefaults,
-        id: ACTIVE_TIMELINE_REDUX_ID,
+        id: TimelineId.active,
         filterManager,
         documentType: 'alerts',
       },
@@ -356,6 +359,7 @@ describe('StatefulTopN', () => {
           <StatefulTopN
             browserFields={mockBrowserFields}
             field={field}
+            timelineId={TimelineId.alertsPage}
             toggleTopN={jest.fn()}
             onFilterAdded={jest.fn()}
             value={value}

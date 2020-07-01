@@ -65,6 +65,7 @@ const value = 'nice';
 const toggleTopN = jest.fn();
 const defaultProps = {
   field,
+  goGetTimelineId: jest.fn(),
   showTopN: false,
   timelineId,
   toggleTopN,
