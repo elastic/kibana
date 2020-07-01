@@ -438,7 +438,7 @@ describe('Exception helpers', () => {
       });
       const exceptions = filterExceptionItems([{ ...rest, meta }]);
 
-      expect(exceptions).toEqual([{ ...rest, meta: {} }]);
+      expect(exceptions).toEqual([{ ...rest, meta: undefined }]);
     });
   });
 });

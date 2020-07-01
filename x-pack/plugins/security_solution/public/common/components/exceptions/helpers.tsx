@@ -328,11 +328,12 @@ export const filterExceptionItems = (
     (acc, exception) => {
       const entries = exception.entries.filter((t) => entry.is(t) || entriesNested.is(t));
       const item = { ...exception, entries };
-      if (createExceptionListItemSchema.is(item) && item.meta != null) {
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...item, meta: {} };
-        return [...acc, itemSansMetaId];
-      } else if (exceptionListItemSchema.is(item)) {
+      if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
+      } else if (createExceptionListItemSchema.is(item) && item.meta != null) {
+        const { meta, ...rest } = item;
+        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
+        return [...acc, itemSansMetaId];
       } else {
         return acc;
       }
