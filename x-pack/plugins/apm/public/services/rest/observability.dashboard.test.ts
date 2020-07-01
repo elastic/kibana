@@ -117,5 +117,45 @@ describe('Observability dashboard data', () => {
         },
       });
     });
+    it('returns transaction stat as 0 when y is undefined', async () => {
+      callApmApiMock.mockImplementation(() =>
+        Promise.resolve({
+          serviceCount: 0,
+          transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
+        })
+      );
+      const response = await fetchLandingPageData(
+        {
+          startTime: '1',
+          endTime: '2',
+          bucketSize: '3',
+        },
+        { theme }
+      );
+      expect(response).toEqual({
+        title: 'APM',
+        appLink: '/app/apm',
+        stats: {
+          services: {
+            type: 'number',
+            label: 'Services',
+            value: 0,
+          },
+          transactions: {
+            type: 'number',
+            label: 'Transactions',
+            value: 0,
+            color: '#6092c0',
+          },
+        },
+        series: {
+          transactions: {
+            label: 'Transactions',
+            coordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
+            color: '#6092c0',
+          },
+        },
+      });
+    });
   });
 });
