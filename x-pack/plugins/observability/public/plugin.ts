@@ -12,9 +12,7 @@ import {
 } from '../../../../src/core/public';
 import { registerDataHandler } from './data_handler';
 // TODO: caue: remove it later
-import { fetchLogsData } from './mock/logs.mock';
 import { fetchMetricsData } from './mock/metrics.mock';
-import { fetchUptimeData } from './mock/uptime.mock';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -44,23 +42,8 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
     });
 
     registerDataHandler({
-      appName: 'infra_logs',
-      fetchData: fetchLogsData,
-      hasData: () =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(true);
-          }, 2000);
-        }),
-    });
-    registerDataHandler({
       appName: 'infra_metrics',
       fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
-    });
-    registerDataHandler({
-      appName: 'uptime',
-      fetchData: fetchUptimeData,
       hasData: () => Promise.resolve(true),
     });
 
