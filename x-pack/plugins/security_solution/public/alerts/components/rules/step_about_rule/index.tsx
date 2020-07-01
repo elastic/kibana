@@ -58,9 +58,11 @@ const AdvancedSettingsAccordion = styled(EuiAccordion)`
   .euiAccordion__iconWrapper {
     display: none;
   }
+
   .euiAccordion__childWrapper {
     transition-duration: 1ms; /* hack to fire Step accordion to set proper content's height */
   }
+
   &.euiAccordion-isOpen .euiButtonEmpty__content > svg {
     transform: rotate(90deg);
   }
