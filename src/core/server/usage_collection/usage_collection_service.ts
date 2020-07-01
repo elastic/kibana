@@ -59,7 +59,7 @@ export class UsageCollectionService implements CoreService<UsageCollectionSetup,
     });
   }
 
-  public async setup() {
+  public setup() {
     return {
       makeStatsCollector: this.collectorSet.makeStatsCollector,
       makeUsageCollector: this.collectorSet.makeUsageCollector,

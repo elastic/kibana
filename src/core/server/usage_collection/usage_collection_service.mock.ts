@@ -17,23 +17,29 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from './';
+import { UsageCollectionSetup, UsageCollectionService } from './';
+import { mockCoreContext } from '../core_context.mock';
 
 function createSetupContract() {
+  const usageCollectionService = new UsageCollectionService(mockCoreContext.create());
+  const setup = usageCollectionService.setup();
+
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
-    areAllCollectorsReady: jest.fn(),
-    bulkFetchUsage: jest.fn(),
-    getFilteredCollectorSet: jest.fn(),
-    makeStatsCollector: jest.fn(),
-    toApiFieldNames: jest.fn(),
-    toObject: jest.fn(),
-    makeUsageCollector: jest.fn(),
-    registerCollector: jest.fn(),
-    // @ts-expect-error-next-line jest.fn doesn't play nice with type guards
-    isUsageCollector: jest.fn(),
+    makeStatsCollector: jest.fn().mockImplementation(setup.makeStatsCollector),
+    makeUsageCollector: jest.fn().mockImplementation(setup.makeUsageCollector),
+    registerCollector: jest.fn().mockImplementation(setup.registerCollector),
+
+    areAllCollectorsReady: jest.fn().mockImplementation(setup.areAllCollectorsReady),
+    bulkFetchUsage: jest.fn().mockImplementation(setup.bulkFetchUsage),
+    toObject: jest.fn().mockImplementation(setup.toObject),
+    toApiFieldNames: jest.fn().mockImplementation(setup.toApiFieldNames),
+    getFilteredCollectorSet: jest.fn().mockImplementation(setup.getFilteredCollectorSet),
+    getCollectorByType: jest.fn().mockImplementation(setup.getCollectorByType),
+
+    // @ts-expect-error:next-line jest.fn doesn't play nice with type guards
+    isUsageCollector: jest.fn().mockImplementation(setup.isUsageCollector),
   };
 
-  usageCollectionSetupMock.areAllCollectorsReady.mockResolvedValue(true);
   return usageCollectionSetupMock;
 }
 
