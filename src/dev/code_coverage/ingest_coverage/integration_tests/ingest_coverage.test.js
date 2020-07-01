@@ -157,8 +157,8 @@ describe('Ingesting coverage', () => {
       expect(actual).to.not.be.ok();
     });
     it(`should indeed occur when going to the coverage index`, () => {
-      const actual = /ingest-pipe=>team_assignment/.test(shouldIndeedHavePipelineOut)
+      const actual = /ingest-pipe=>team_assignment/.test(shouldIndeedHavePipelineOut);
       expect(actual).to.be.ok();
     });
-  });;
+  });
 });

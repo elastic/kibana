@@ -41,9 +41,9 @@ import { createPagerFactory } from './application/angular/doc_table/lib/pager/pa
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
 import { CollapsibleSidebarProvider } from './application/angular/directives/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
+// @ts-expect-error
 import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
-// @ts-ignore
+// @ts-expect-error
 import { DebounceProviderTimeout } from './application/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {

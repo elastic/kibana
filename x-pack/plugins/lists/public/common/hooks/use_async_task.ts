@@ -33,7 +33,7 @@ export const useAsyncTask: UseAsyncTask = (task) => {
     ctrl.current.abort();
   }, []);
 
-  // @ts-ignore typings are incorrect, see: https://github.com/streamich/react-use/pull/589
+  // @ts-expect-error typings are incorrect, see: https://github.com/streamich/react-use/pull/589
   const [state, initiator] = useAsyncFn(task, [task]);
 
   const start = useCallback(

@@ -6,7 +6,7 @@
 import * as Rx from 'rxjs';
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-// @ts-ignore
+// @ts-expect-error
 import { kibanaTestUser } from '@kbn/test';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import {

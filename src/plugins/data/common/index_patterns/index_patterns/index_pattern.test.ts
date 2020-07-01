@@ -22,9 +22,9 @@ import { defaults, pluck, last, get } from 'lodash';
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
-// @ts-ignore
+// @ts-expect-error
 import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-// @ts-ignore
+// @ts-expect-error
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
 

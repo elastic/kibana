@@ -20,7 +20,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { SkipBottomButton, SkipBottomButtonProps } from './skip_bottom_button';
-// @ts-ignore
+// @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('Skip to Bottom Button', function () {

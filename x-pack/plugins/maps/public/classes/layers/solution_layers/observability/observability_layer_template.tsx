@@ -35,7 +35,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
     });
     if (!selectedMetricOption) {
       if (metricOptions.length) {
-        // @ts-ignore
+        // @ts-expect-error
         newState.metric = metricOptions[0].value;
       } else {
         newState.metric = null;

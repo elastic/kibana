@@ -224,7 +224,7 @@ export class IndexPattern implements IIndexPattern {
     this.sourceFilters = spec.sourceFilters;
 
     // ignoring this because the same thing happens elsewhere but via _.assign
-    // @ts-ignore
+    // @ts-expect-error
     this.fields = spec.fields || [];
     this.typeMeta = spec.typeMeta;
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {

@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
         index: '.kibana',
         id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
       });
-      // @ts-ignore
+      // @ts-expect-error
       enrollmentApiKeyDoc['fleet-enrollment-api-keys'].api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',

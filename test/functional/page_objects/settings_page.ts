@@ -58,7 +58,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       // check for the index pattern info flyout that covers the
       // create index pattern button on smaller screens
-      // @ts-ignore
+      // @ts-expect-error
       await retry.waitFor('index pattern info flyout', async () => {
         if (await testSubjects.exists('CreateIndexPatternPrompt')) {
           await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');

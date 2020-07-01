@@ -31,7 +31,7 @@ describe.skip('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    // @ts-ignore replacing a call to localStorage we use for monitor list size
+    // @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
     result = {
       nextPagePagination: null,

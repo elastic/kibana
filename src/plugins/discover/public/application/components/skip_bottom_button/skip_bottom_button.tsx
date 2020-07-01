@@ -32,7 +32,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
     <I18nProvider>
       <EuiSkipLink
         size="s"
-        // @ts-ignore
+        // @ts-expect-error
         onClick={(event) => {
           // prevent the anchor to reload the page on click
           event.preventDefault();

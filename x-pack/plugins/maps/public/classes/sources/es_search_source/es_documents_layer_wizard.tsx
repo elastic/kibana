@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
+// @ts-expect-error
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-// @ts-ignore
+// @ts-expect-error
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';

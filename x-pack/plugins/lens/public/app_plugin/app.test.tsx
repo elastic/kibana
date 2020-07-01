@@ -85,7 +85,7 @@ function createMockFilterManager() {
     }),
     getFilters: () => filters,
     getGlobalFilters: () => {
-      // @ts-ignore
+      // @ts-expect-error
       return filters.filter(esFilters.isFilterPinned);
     },
     removeAll: () => {

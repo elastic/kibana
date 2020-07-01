@@ -6,22 +6,22 @@
 
 import { registerLayerWizard } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from '../sources/client_file_source';
-// @ts-ignore
+// @ts-expect-error
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
-// @ts-ignore
+// @ts-expect-error
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
-// @ts-ignore
+// @ts-expect-error
 import { point2PointLayerWizardConfig } from '../sources/es_pew_pew_source';
-// @ts-ignore
+// @ts-expect-error
 import { emsBoundariesLayerWizardConfig } from '../sources/ems_file_source';
-// @ts-ignore
+// @ts-expect-error
 import { emsBaseMapLayerWizardConfig } from '../sources/ems_tms_source';
-// @ts-ignore
+// @ts-expect-error
 import { kibanaRegionMapLayerWizardConfig } from '../sources/kibana_regionmap_source';
-// @ts-ignore
+// @ts-expect-error
 import { kibanaBasemapLayerWizardConfig } from '../sources/kibana_tilemap_source';
 import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
-// @ts-ignore
+// @ts-expect-error
 import { wmsLayerWizardConfig } from '../sources/wms_source';
 import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
 import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
@@ -39,25 +39,25 @@ export function registerLayerWizards() {
   registerLayerWizard(uploadLayerWizardConfig);
   registerLayerWizard(ObservabilityLayerWizardConfig);
   registerLayerWizard(SecurityLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(esDocumentsLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(choroplethLayerWizardConfig);
   registerLayerWizard(clustersLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(heatmapLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(point2PointLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(emsBoundariesLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(emsBaseMapLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(kibanaRegionMapLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(kibanaBasemapLayerWizardConfig);
   registerLayerWizard(tmsLayerWizardConfig);
-  // @ts-ignore
+  // @ts-expect-error
   registerLayerWizard(wmsLayerWizardConfig);
 
   if (getEnableVectorTiles()) {

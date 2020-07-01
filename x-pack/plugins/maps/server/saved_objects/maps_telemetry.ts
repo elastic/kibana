@@ -16,7 +16,7 @@ export const mapsTelemetrySavedObjects: SavedObjectsType = {
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
-    // @ts-ignore Core types don't support this since it's only really valid when removing a previously registered type
+    // @ts-expect-error Core types don't support this since it's only really valid when removing a previously registered type
     type: 'object',
     enabled: false,
   },

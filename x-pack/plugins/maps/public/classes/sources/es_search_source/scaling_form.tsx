@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService } from '../../../kibana_services';
-// @ts-ignore
+// @ts-expect-error
 import { ValidatedRange } from '../../../components/validated_range';
 import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
@@ -27,7 +27,7 @@ import {
   SCALING_TYPES,
   LAYER_TYPE,
 } from '../../../../common/constants';
-// @ts-ignore
+// @ts-expect-error
 import { loadIndexSettings } from './load_index_settings';
 import { IFieldType } from '../../../../../../../src/plugins/data/public';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';

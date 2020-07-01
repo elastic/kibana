@@ -13,10 +13,10 @@ import {
   SCALING_TYPES,
 } from '../../../../common/constants';
 import { getFileUploadComponent } from '../../../kibana_services';
-// @ts-ignore
+// @ts-expect-error
 import { GeojsonFileSource } from './geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-// @ts-ignore
+// @ts-expect-error
 import { createDefaultLayerDescriptor } from '../es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 
@@ -86,18 +86,18 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
     const { indexDataResp, indexPatternResp } = indexResponses;
 
-    // @ts-ignore
+    // @ts-expect-error
     const indexCreationFailed = !(indexDataResp && indexDataResp.success);
-    // @ts-ignore
+    // @ts-expect-error
     const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
-    // @ts-ignore
+    // @ts-expect-error
     const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
     if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
       this.setState({ indexingStage: INDEXING_STAGE.ERROR });
       return;
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     const { fields, id: indexPatternId } = indexPatternResp;
     const geoField = fields.find((field: IFieldType) =>
       [ES_GEO_FIELD_TYPE.GEO_POINT as string, ES_GEO_FIELD_TYPE.GEO_SHAPE as string].includes(
@@ -112,7 +112,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         indexPatternId,
         geoField: geoField.name,
         // Only turn on bounds filter for large doc counts
-        // @ts-ignore
+        // @ts-expect-error
         filterByMapBounds: indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
         scalingType:
           geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT

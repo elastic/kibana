@@ -31,7 +31,7 @@ import {
   EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
-// @ts-ignore
+// @ts-expect-error
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Toast } from 'src/core/public';
