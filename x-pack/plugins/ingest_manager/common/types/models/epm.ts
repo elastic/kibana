@@ -253,7 +253,6 @@ export enum IngestAssetType {
 }
 
 export enum DefaultPackages {
-  base = 'base',
   system = 'system',
   endpoint = 'endpoint',
 }
