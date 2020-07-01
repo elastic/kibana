@@ -507,9 +507,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     if (this.state.selectionStart !== null && this.state.selectionEnd !== null) {
-      if (this.inputRef) {
-        // For some reason the type guard above does not make the compiler happy
-        // @ts-expect-error
+      if (this.inputRef != null) {
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
       this.setState({
