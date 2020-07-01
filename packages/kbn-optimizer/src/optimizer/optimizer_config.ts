@@ -88,7 +88,7 @@ interface Options {
    *
    * Defaults:
    *  - "*" when building the dist
-   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEME` env var
+   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEMES` env var
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
@@ -160,7 +160,7 @@ export class OptimizerConfig {
     }
 
     const themeTags = parseThemeTags(
-      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEME)
+      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEMES)
     );
 
     return {

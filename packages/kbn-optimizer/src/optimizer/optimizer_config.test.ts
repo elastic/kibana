@@ -37,7 +37,7 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 beforeEach(() => {
   delete process.env.KBN_OPTIMIZER_MAX_WORKERS;
   delete process.env.KBN_OPTIMIZER_NO_CACHE;
-  delete process.env.KBN_OPTIMIZER_THEME;
+  delete process.env.KBN_OPTIMIZER_THEMES;
   jest.clearAllMocks();
 });
 
@@ -93,8 +93,8 @@ describe('OptimizerConfig::parseOptions()', () => {
     expect(parseThemeTags).toBeCalledWith('*');
   });
 
-  it('defaults to KBN_OPTIMIZER_THEME when dist = false', () => {
-    process.env.KBN_OPTIMIZER_THEME = 'foo';
+  it('defaults to KBN_OPTIMIZER_THEMES when dist = false', () => {
+    process.env.KBN_OPTIMIZER_THEMES = 'foo';
 
     OptimizerConfig.parseOptions({
       repoRoot: REPO_ROOT,

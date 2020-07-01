@@ -35,7 +35,7 @@ export default function (this: webpack.loader.LoaderContext) {
     }
 
     const fallback = themeTags[0];
-    const message = `Styles for [${tag}] were not built by the current @kbn/optimizer config. Falling back to [${fallback}] theme to make Kibana usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEME environment variable includes [${tag}] in a comma separated list of themes you want to use. You can also set it to "*" to build all themes.`;
+    const message = `Styles for [${tag}] were not built by the current @kbn/optimizer config. Falling back to [${fallback}] theme to make Kibana usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [${tag}] in a comma separated list of themes you want to use. You can also set it to "*" to build all themes.`;
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
