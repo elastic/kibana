@@ -5,8 +5,19 @@
  */
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import Boom from 'boom';
 import { AuthenticatedUser } from '../../../security/server';
-import { RawTag, RawTagWithId, ITagsClient, TagsClientCreateParams } from '../../common';
+import {
+  RawTag,
+  RawTagWithId,
+  ITagsClient,
+  TagsClientCreateParams,
+  TagsClientDeleteParams,
+  TagsClientGetParams,
+  TagsClientGetResult,
+  TagsClientUpdateParams,
+  TagsClientUpdateResult,
+} from '../../common';
 import {
   validateTagTitle,
   validateTagDescription,
@@ -27,7 +38,7 @@ export class TagsClient implements ITagsClient {
 
   constructor(private readonly params: TagsClientParams) {}
 
-  private readonly tagSavedObjectToTag = (savedObject: TagSavedObject): RawTagWithId => {
+  private readonly savedObjectToTag = (savedObject: TagSavedObject): RawTagWithId => {
     return {
       id: savedObject.id,
       ...savedObject.attributes,
@@ -63,7 +74,68 @@ export class TagsClient implements ITagsClient {
       {}
     );
 
-    return { tag: this.tagSavedObjectToTag(savedObject) };
+    return { tag: this.savedObjectToTag(savedObject) };
+  }
+
+  public async read({ id }: TagsClientGetParams): Promise<TagsClientGetResult> {
+    validateTagId(id);
+
+    const { savedObjectsClient } = this.params;
+    const savedObject: TagSavedObject = await savedObjectsClient.get(this.type, id);
+
+    return { tag: this.savedObjectToTag(savedObject) };
+  }
+
+  public async update({ patch }: TagsClientUpdateParams): Promise<TagsClientUpdateResult> {
+    const { id, title, description, color } = patch;
+
+    validateTagId(id);
+    if (title !== undefined) validateTagTitle(title);
+    if (description !== undefined) validateTagDescription(description);
+    if (color !== undefined) validateTagColor(color);
+
+    const { savedObjectsClient, user } = this.params;
+    const at = new Date().toISOString();
+    const username = user ? user.username : null;
+
+    let needsUpdate = false;
+    const attributePatch: Partial<RawTag> = {
+      updatedAt: at,
+      updatedBy: username,
+    };
+
+    if (title !== undefined) {
+      needsUpdate = true;
+      attributePatch.title = title;
+    }
+
+    if (description !== undefined) {
+      needsUpdate = true;
+      attributePatch.description = description;
+    }
+
+    if (color !== undefined) {
+      needsUpdate = true;
+      attributePatch.color = color;
+    }
+
+    if (!needsUpdate) throw Boom.badRequest('Empty patch, nothing to update.');
+
+    const savedObjectUpdate = await savedObjectsClient.update<Partial<RawTag>>(
+      this.type,
+      id,
+      attributePatch
+    );
+
+    return { patch: savedObjectUpdate.attributes };
+  }
+
+  public async del({ id }: TagsClientDeleteParams): Promise<void> {
+    validateTagId(id);
+
+    const { savedObjectsClient } = this.params;
+
+    await savedObjectsClient.delete(this.type, id);
   }
 
   public async getAll(): Promise<{ tags: RawTagWithId[] }> {
@@ -75,15 +147,7 @@ export class TagsClient implements ITagsClient {
     });
 
     return {
-      tags: result.saved_objects.map(this.tagSavedObjectToTag),
+      tags: result.saved_objects.map(this.savedObjectToTag),
     };
-  }
-
-  public async del(id: string): Promise<void> {
-    validateTagId(id);
-
-    const { savedObjectsClient } = this.params;
-
-    await savedObjectsClient.delete(this.type, id);
   }
 }

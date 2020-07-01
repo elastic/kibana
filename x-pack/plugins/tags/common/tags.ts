@@ -29,12 +29,37 @@ export interface TagsClientCreateResult {
   tag: RawTagWithId;
 }
 
+export interface TagsClientGetParams {
+  id: string;
+}
+
+export interface TagsClientGetResult {
+  tag: RawTagWithId;
+}
+
+export interface TagsClientUpdateParams {
+  patch: Pick<RawTagWithId, 'id' | 'title' | 'description' | 'color'>;
+}
+
+export interface TagsClientUpdateResult {
+  patch: Partial<RawTag>;
+}
+
+export interface TagsClientDeleteParams {
+  id: string;
+}
+
 export interface TagsClientGetAllResult {
   tags: RawTagWithId[];
 }
 
+/**
+ * CRUD + List/Find API for tags.
+ */
 export interface ITagsClient {
   create(params: TagsClientCreateParams): Promise<TagsClientCreateResult>;
+  read(params: TagsClientGetParams): Promise<TagsClientGetResult>;
+  update(params: TagsClientUpdateParams): Promise<TagsClientUpdateResult>;
+  del(params: TagsClientDeleteParams): Promise<void>;
   getAll(): Promise<TagsClientGetAllResult>;
-  del(id: string): Promise<void>;
 }
