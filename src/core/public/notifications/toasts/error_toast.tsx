@@ -31,16 +31,19 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { OverlayStart } from '../../overlays';
+import { OverlayStart } from 'kibana/public';
 import { I18nStart } from '../../i18n';
 
 interface ErrorToastProps {
   title: string;
-  error: Error;
+  error: RequestError;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
   i18nContext: () => I18nStart['Context'];
+}
+
+interface RequestError extends Error {
+  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
 }
 
 /**
@@ -56,6 +59,17 @@ function showErrorDialog({
   i18nContext,
 }: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
   const I18nContext = i18nContext();
+  let text = '';
+
+  if (error.body?.attributes?.error?.caused_by) {
+    text += `${error.body.attributes.error.caused_by.type}\n`;
+    text += `${error.body.attributes.error.caused_by.reason}\n\n`;
+  }
+
+  if (error.stack) {
+    text += error.stack;
+  }
+
   const modal = openModal(
     mount(
       <React.Fragment>
@@ -65,11 +79,11 @@ function showErrorDialog({
           </EuiModalHeader>
           <EuiModalBody>
             <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-            {error.stack && (
+            {text && (
               <React.Fragment>
                 <EuiSpacer size="s" />
                 <EuiCodeBlock isCopyable={true} paddingSize="s">
-                  {error.stack}
+                  {text}
                 </EuiCodeBlock>
               </React.Fragment>
             )}
