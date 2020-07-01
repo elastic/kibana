@@ -226,7 +226,7 @@ module.exports = function (grunt) {
     test_package_safer_lodash_set: scriptWithGithubChecks({
       title: '@elastic/safer-lodash-set tests',
       cmd: YARN,
-      args: ['test'],
+      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({
