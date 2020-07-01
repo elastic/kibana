@@ -7,33 +7,51 @@
 import { datasourceService } from './datasource';
 import { PackageInfo } from '../types';
 
-const TEMPLATE = `
+async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
+  if (dataset === 'dataset1') {
+    return [
+      {
+        buffer: Buffer.from(`
 type: log
 metricset: ["dataset1"]
 paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
-`;
+`),
+      },
+    ];
+  }
+  return [];
+}
+
+jest.mock('./epm/packages/assets', () => {
+  return {
+    getAssetsData: mockedGetAssetsData,
+  };
+});
+
+jest.mock('./epm/registry', () => {
+  return {
+    fetchInfo: () => ({}),
+  };
+});
 
 describe('Datasource service', () => {
   describe('assignPackageStream', () => {
     it('should work with config variables from the stream', async () => {
       const inputs = await datasourceService.assignPackageStream(
         ({
-          datasources: [
+          datasets: [
             {
-              inputs: [
-                {
-                  type: 'log',
-                  streams: [
-                    {
-                      dataset: 'package.dataset1',
-                      template: TEMPLATE,
-                    },
-                  ],
-                },
-              ],
+              type: 'logs',
+              name: 'package.dataset1',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          config_templates: [
+            {
+              inputs: [{ type: 'log' }],
             },
           ],
         } as unknown) as PackageInfo,
@@ -44,7 +62,7 @@ describe('Datasource service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: 'package.dataset1',
+                dataset: { name: 'package.dataset1', type: 'logs' },
                 enabled: true,
                 vars: {
                   paths: {
@@ -64,7 +82,7 @@ describe('Datasource service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: 'package.dataset1',
+              dataset: { name: 'package.dataset1', type: 'logs' },
               enabled: true,
               vars: {
                 paths: {
@@ -85,19 +103,16 @@ describe('Datasource service', () => {
     it('should work with config variables at the input level', async () => {
       const inputs = await datasourceService.assignPackageStream(
         ({
-          datasources: [
+          datasets: [
             {
-              inputs: [
-                {
-                  type: 'log',
-                  streams: [
-                    {
-                      dataset: 'package.dataset1',
-                      template: TEMPLATE,
-                    },
-                  ],
-                },
-              ],
+              name: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          config_templates: [
+            {
+              inputs: [{ type: 'log' }],
             },
           ],
         } as unknown) as PackageInfo,
@@ -113,7 +128,7 @@ describe('Datasource service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: 'package.dataset1',
+                dataset: { name: 'package.dataset1', type: 'logs' },
                 enabled: true,
               },
             ],
@@ -133,7 +148,7 @@ describe('Datasource service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: 'package.dataset1',
+              dataset: { name: 'package.dataset1', type: 'logs' },
               enabled: true,
               agent_stream: {
                 metricset: ['dataset1'],
