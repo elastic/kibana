@@ -36,14 +36,14 @@ export const DATA_DATASETS_INDEX_PATTERNS = [
   { pattern: '*magento*', patternName: 'magento' },
   { pattern: '*shopify*', patternName: 'shopify' },
   { pattern: '*wordpress*', patternName: 'wordpress' },
-  { pattern: '*wp*', patternName: 'wordpress' }, // TODO: Too vague?
+  // { pattern: '*wp*', patternName: 'wordpress' }, // TODO: Too vague?
   { pattern: '*drupal*', patternName: 'drupal' },
   { pattern: '*joomla*', patternName: 'joomla' },
   { pattern: '*search*', patternName: 'search' }, // TODO: Too vague?
-  { pattern: '*wix*', patternName: 'wix' }, // TODO: Too vague?
+  // { pattern: '*wix*', patternName: 'wix' }, // TODO: Too vague?
   { pattern: '*sharepoint*', patternName: 'sharepoint' },
   { pattern: '*squarespace*', patternName: 'squarespace' },
-  { pattern: '*aem*', patternName: 'aem' }, // TODO: Too vague?
+  // { pattern: '*aem*', patternName: 'aem' }, // TODO: Too vague?
   { pattern: '*sitecore*', patternName: 'sitecore' },
   { pattern: '*weebly*', patternName: 'weebly' },
   { pattern: '*acquia*', patternName: 'acquia' },
