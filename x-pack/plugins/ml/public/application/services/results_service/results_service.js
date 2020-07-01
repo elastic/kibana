@@ -590,7 +590,7 @@ export function resultsServiceProvider(mlApiServices) {
                 influencerFieldValues: {
                   terms: {
                     field: 'influencer_field_value',
-                    size: maxResults || 1,
+                    size: !!maxResults ? maxResults : ANOMALY_SWIM_LANE_HARD_LIMIT,
                     order: {
                       maxAnomalyScore: 'desc',
                     },

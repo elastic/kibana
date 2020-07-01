@@ -67,3 +67,8 @@ export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', 
  * aggregations on influencers values.
  */
 export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
+
+/**
+ * Default page size fot the anomaly swim lane.
+ */
+export const SWIM_LANE_DEFAULT_PAGE_SIZE = 10;

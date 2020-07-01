@@ -21,6 +21,7 @@ import {
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../../explorer_utils';
+import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
   annotationsData: any[];
@@ -94,7 +95,7 @@ export function getExplorerDefaultState(): ExplorerState {
     viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
-    viewByPerPage: 10,
+    viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
     viewByFromPage: 1,
     swimlaneLimit: undefined,
   };

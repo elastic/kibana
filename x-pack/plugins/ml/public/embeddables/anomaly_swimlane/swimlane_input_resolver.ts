@@ -28,6 +28,7 @@ import {
 import { MlStartDependencies } from '../../plugin';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIM_LANE_DEFAULT_PAGE_SIZE,
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
@@ -52,8 +53,6 @@ function getJobsObservable(
     switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds))
   );
 }
-
-export const EMBEDDABLE_DEFAULT_PER_PAGE = 10;
 
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
@@ -102,7 +101,7 @@ export function useSwimlaneInputResolver(
         startWith(undefined),
         // no need to emit when the initial value has been set
         distinctUntilChanged(
-          (prev, curr) => prev === undefined && curr === EMBEDDABLE_DEFAULT_PER_PAGE
+          (prev, curr) => prev === undefined && curr === SWIM_LANE_DEFAULT_PAGE_SIZE
         )
       ),
       refresh.pipe(startWith(null)),
@@ -154,7 +153,7 @@ export function useSwimlaneInputResolver(
               if (overallSwimlaneData && swimlaneTypeInput === SWIMLANE_TYPE.VIEW_BY) {
                 if (perPageFromState === undefined) {
                   // set initial pagination from the input or default one
-                  setPerPage(perPageInput ?? EMBEDDABLE_DEFAULT_PER_PAGE);
+                  setPerPage(perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE);
                 }
 
                 if (viewMode === ViewMode.EDIT && perPageFromState !== perPageInput) {
@@ -171,7 +170,7 @@ export function useSwimlaneInputResolver(
                     isViewBySwimLaneData(swimlaneData)
                       ? swimlaneData.cardinality
                       : ANOMALY_SWIM_LANE_HARD_LIMIT,
-                    perPageFromState ?? perPageInput ?? EMBEDDABLE_DEFAULT_PER_PAGE,
+                    perPageFromState ?? perPageInput ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
                     fromPageInput,
                     swimlaneContainerWidth,
                     appliedFilters
@@ -224,7 +223,7 @@ export function useSwimlaneInputResolver(
   return [
     swimlaneType,
     swimlaneData,
-    perPage ?? EMBEDDABLE_DEFAULT_PER_PAGE,
+    perPage ?? SWIM_LANE_DEFAULT_PAGE_SIZE,
     setPerPage,
     timeBuckets,
     isLoading,
