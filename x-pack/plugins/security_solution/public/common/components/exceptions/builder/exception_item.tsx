@@ -111,10 +111,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
         <EuiFlexItem grow={6}>
           <EuiFlexGroup gutterSize="s" direction="column">
             {entries.map((item, index) => (
-              <EuiFlexItem
-                key={`${exceptionId}_${item.field ? item.field.name : ''}_${index}`}
-                grow={1}
-              >
+              <EuiFlexItem key={`${exceptionId}-${index}`} grow={1}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
                   <EuiFlexItem grow={1}>
                     <EntryItemComponent

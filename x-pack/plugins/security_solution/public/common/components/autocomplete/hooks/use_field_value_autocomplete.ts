@@ -70,7 +70,7 @@ export const useFieldValueAutocomplete = ({
         const newSuggestions = await services.data.autocomplete.getValueSuggestions({
           indexPattern: patterns,
           field: fieldSelected,
-          query: `${value ?? ''}`,
+          query: '',
           signal,
         });
 

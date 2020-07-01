@@ -214,18 +214,7 @@ describe('useFieldValueAutocomplete', () => {
         result.current[2],
       ];
 
-      expect(getValueSuggestionsMock).toHaveBeenNthCalledWith(1, {
-        field: getField('@tags'),
-        indexPattern: stubIndexPatternWithFields,
-        query: '',
-        signal: new AbortController().signal,
-      });
-      expect(getValueSuggestionsMock).toHaveBeenNthCalledWith(2, {
-        field: getField('@tags'),
-        indexPattern: stubIndexPatternWithFields,
-        query: 'hello',
-        signal: new AbortController().signal,
-      });
+      expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual(expectedResult);
     });
   });

@@ -242,7 +242,17 @@ export const getFormattedBuilderEntries = (
         ({ name }) => item.field != null && item.field === name
       );
       return {
-        field: selectedField,
+        field: {
+          name: 'nestedField.child',
+          type: 'nested',
+          esTypes: ['text'],
+          count: 0,
+          scripted: false,
+          searchable: true,
+          aggregatable: false,
+          readFromDocValues: false,
+          subType: { nested: { path: 'nestedField' } },
+        },
         operator: getExceptionOperatorSelect(item),
         value: getEntryValue(item),
       };

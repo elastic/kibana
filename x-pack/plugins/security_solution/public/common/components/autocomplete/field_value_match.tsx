@@ -66,7 +66,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     onChange(newValue ?? '');
   };
 
-  const onSearchChange = (searchVal: string) => {
+  const onSearchChange = (searchVal: string): void => {
     const signal = new AbortController().signal;
 
     updateSuggestions({
@@ -76,6 +76,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       signal,
     });
   };
+
+  const isValid = useMemo(
+    (): boolean => validateParams(selectedValue, selectedField ? selectedField.type : ''),
+    [selectedField, selectedValue]
+  );
 
   return (
     <EuiComboBox
@@ -89,7 +94,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       singleSelection={{ asPlainText: true }}
       onSearchChange={onSearchChange}
       onCreateOption={onChange}
-      isInvalid={!validateParams(selectedValue, selectedField ? selectedField.type : '')}
+      isInvalid={!isValid}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchComboxBox"
       fullWidth

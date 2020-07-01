@@ -53,6 +53,18 @@ describe('helpers', () => {
   });
 
   describe('#validateParams', () => {
+    test('returns true if value is undefined', () => {
+      const isValid = validateParams(undefined, 'date');
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if value is empty string', () => {
+      const isValid = validateParams('', 'date');
+
+      expect(isValid).toBeTruthy();
+    });
+
     test('returns true if type is "date" and value is valid', () => {
       const isValid = validateParams('1994-11-05T08:15:30-05:00', 'date');
 

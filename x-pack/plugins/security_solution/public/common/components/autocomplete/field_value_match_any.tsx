@@ -93,7 +93,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       onSearchChange={onSearchChange}
       onCreateOption={onCreateOption}
       isInvalid={!isValid}
-      sortMatchesBy="startsWith"
+      delimiter=", "
       data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"
       fullWidth
       async
