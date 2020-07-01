@@ -276,6 +276,7 @@ export interface IndexTemplate {
   data_stream: {
     timestamp_field: string;
   };
+  _meta: object;
 }
 
 export interface TemplateRef {
