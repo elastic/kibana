@@ -14,7 +14,7 @@ import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kiba
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
-type MVTSettings = {
+export type MVTSettings = {
   layerName: string;
   fields: MVTFieldDescriptor[];
   minSourceZoom: number;
