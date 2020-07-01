@@ -102,7 +102,7 @@ describe('buildEventTypeSignal', () => {
     const expectedEndpointExceptions = {
       exceptions_list: [
         {
-          field: 'server.domain.text',
+          field: 'server.domain',
           operator: 'included',
           type: 'exact_caseless',
           value: 'DOMAIN',
@@ -114,7 +114,7 @@ describe('buildEventTypeSignal', () => {
           value: '192.168.1.1',
         },
         {
-          field: 'host.hostname.text',
+          field: 'host.hostname',
           operator: 'included',
           type: 'exact_caseless_any',
           value: ['estc', 'kibana'],
