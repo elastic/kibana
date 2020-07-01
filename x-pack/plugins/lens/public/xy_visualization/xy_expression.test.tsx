@@ -280,6 +280,58 @@ describe('xy_expression', () => {
     let getFormatSpy: jest.Mock;
     let convertSpy: jest.Mock;
 
+    const dataWithoutFormats: LensMultiTable = {
+      type: 'lens_multitable',
+      tables: {
+        first: {
+          type: 'kibana_datatable',
+          columns: [
+            { id: 'a', name: 'a' },
+            { id: 'b', name: 'b' },
+            { id: 'c', name: 'c' },
+            { id: 'd', name: 'd' },
+          ],
+          rows: [
+            { a: 1, b: 2, c: 'I', d: 'Row 1' },
+            { a: 1, b: 5, c: 'J', d: 'Row 2' },
+          ],
+        },
+      },
+    };
+    const dataWithFormats: LensMultiTable = {
+      type: 'lens_multitable',
+      tables: {
+        first: {
+          type: 'kibana_datatable',
+          columns: [
+            { id: 'a', name: 'a' },
+            { id: 'b', name: 'b' },
+            { id: 'c', name: 'c' },
+            { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+          ],
+          rows: [
+            { a: 1, b: 2, c: 'I', d: 'Row 1' },
+            { a: 1, b: 5, c: 'J', d: 'Row 2' },
+          ],
+        },
+      },
+    };
+
+    const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
+      return shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+    };
+
     beforeEach(() => {
       convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
@@ -302,7 +354,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(LineSeries)).toHaveLength(1);
+      expect(component.find(LineSeries)).toHaveLength(2);
+      expect(component.find(LineSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(LineSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     describe('date range', () => {
@@ -559,7 +613,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     test('it renders area', () => {
@@ -577,7 +633,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(AreaSeries)).toHaveLength(1);
+      expect(component.find(AreaSeries)).toHaveLength(2);
+      expect(component.find(AreaSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(AreaSeries).at(1).prop('yAccessors')).toEqual(['b']);
     });
 
     test('it renders horizontal bar', () => {
@@ -595,7 +653,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('yAccessors')).toEqual(['a']);
+      expect(component.find(BarSeries).at(1).prop('yAccessors')).toEqual(['b']);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
@@ -705,8 +765,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
-      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
     });
 
     test('it renders stacked area', () => {
@@ -724,8 +785,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(AreaSeries)).toHaveLength(1);
-      expect(component.find(AreaSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(AreaSeries)).toHaveLength(2);
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toHaveLength(1);
     });
 
     test('it renders stacked horizontal bar', () => {
@@ -746,8 +808,9 @@ describe('xy_expression', () => {
         />
       );
       expect(component).toMatchSnapshot();
-      expect(component.find(BarSeries)).toHaveLength(1);
-      expect(component.find(BarSeries).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries)).toHaveLength(2);
+      expect(component.find(BarSeries).at(0).prop('stackAccessors')).toHaveLength(1);
+      expect(component.find(BarSeries).at(1).prop('stackAccessors')).toHaveLength(1);
       expect(component.find(Settings).prop('rotation')).toEqual(90);
     });
 
@@ -765,7 +828,8 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('timeZone')).toEqual('CEST');
+      expect(component.find(LineSeries).at(0).prop('timeZone')).toEqual('CEST');
+      expect(component.find(LineSeries).at(1).prop('timeZone')).toEqual('CEST');
     });
 
     test('it applies histogram mode to the series for single series', () => {
@@ -784,7 +848,8 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
     test('it applies histogram mode to the series for stacked series', () => {
@@ -810,7 +875,8 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(true);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(true);
     });
 
     test('it does not apply histogram mode for splitted series', () => {
@@ -830,68 +896,110 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(BarSeries).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(0).prop('enableHistogramMode')).toEqual(false);
+      expect(component.find(BarSeries).at(1).prop('enableHistogramMode')).toEqual(false);
+    });
+
+    describe('y axes', () => {
+      test('single axis if possible', () => {
+        const args = createArgsWithLayers();
+
+        const component = getRenderedComponent(dataWithoutFormats, args);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(2);
+      });
+
+      test('multiple axes because of config', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  axisMode: 'left',
+                },
+                {
+                  forAccessor: 'b',
+                  axisMode: 'right',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(3);
+        expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(
+          axes.at(1).prop('groupId')
+        );
+        expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(
+          axes.at(2).prop('groupId')
+        );
+      });
+
+      test('multiple axes because of incompatible formatters', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['c', 'd'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(3);
+        expect(component.find(LineSeries).at(0).prop('groupId')).toEqual(
+          axes.at(1).prop('groupId')
+        );
+        expect(component.find(LineSeries).at(1).prop('groupId')).toEqual(
+          axes.at(2).prop('groupId')
+        );
+      });
+
+      test('single axis despite different formatters if enforced', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['c', 'd'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  axisMode: 'left',
+                },
+                {
+                  forAccessor: 'd',
+                  axisMode: 'left',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        const axes = component.find(Axis);
+        expect(axes).toHaveLength(2);
+      });
     });
 
     describe('provides correct series naming', () => {
-      const dataWithoutFormats: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
-              { id: 'd', name: 'd' },
-            ],
-            rows: [
-              { a: 1, b: 2, c: 'I', d: 'Row 1' },
-              { a: 1, b: 5, c: 'J', d: 'Row 2' },
-            ],
-          },
-        },
-      };
-      const dataWithFormats: LensMultiTable = {
-        type: 'lens_multitable',
-        tables: {
-          first: {
-            type: 'kibana_datatable',
-            columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
-              { id: 'd', name: 'd', formatHint: { id: 'custom' } },
-            ],
-            rows: [
-              { a: 1, b: 2, c: 'I', d: 'Row 1' },
-              { a: 1, b: 5, c: 'J', d: 'Row 2' },
-            ],
-          },
-        },
-      };
-
       const nameFnArgs = {
         seriesKeys: [],
         key: '',
         specId: 'a',
         yAccessor: '',
         splitAccessors: new Map(),
-      };
-
-      const getRenderedComponent = (data: LensMultiTable, args: XYArgs) => {
-        return shallow(
-          <XYChart
-            data={data}
-            args={args}
-            formatFactory={getFormatSpy}
-            timeZone="UTC"
-            chartTheme={{}}
-            histogramBarTarget={50}
-            onClickValue={onClickValue}
-            onSelectRange={onSelectRange}
-          />
-        );
       };
 
       test('simplest xy chart without human-readable name', () => {
@@ -973,13 +1081,14 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
         // This accessor has a human-readable name
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
         // This accessor does not
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('');
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual('');
       });
 
       test('split series without formatting and single y accessor', () => {
@@ -1039,9 +1148,13 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
 
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
+          'split1 - Label A'
+        );
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
           'split1 - Label B'
         );
       });
@@ -1061,13 +1174,14 @@ describe('xy_expression', () => {
         };
 
         const component = getRenderedComponent(dataWithFormats, newArgs);
-        const nameFn = component.find(LineSeries).prop('name') as SeriesNameFn;
+        const nameFn1 = component.find(LineSeries).at(0).prop('name') as SeriesNameFn;
+        const nameFn2 = component.find(LineSeries).at(1).prop('name') as SeriesNameFn;
 
         convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
+        expect(nameFn1({ ...nameFnArgs, seriesKeys: ['split1', 'a'] }, false)).toEqual(
           'formatted1 - Label A'
         );
-        expect(nameFn({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
+        expect(nameFn2({ ...nameFnArgs, seriesKeys: ['split1', 'b'] }, false)).toEqual(
           'formatted2 - Label B'
         );
       });
@@ -1088,7 +1202,8 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+      expect(component.find(LineSeries).at(0).prop('xScaleType')).toEqual(ScaleType.Ordinal);
+      expect(component.find(LineSeries).at(1).prop('xScaleType')).toEqual(ScaleType.Ordinal);
     });
 
     test('it set the scale of the y axis according to the args prop', () => {
@@ -1106,7 +1221,8 @@ describe('xy_expression', () => {
           onSelectRange={onSelectRange}
         />
       );
-      expect(component.find(LineSeries).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+      expect(component.find(LineSeries).at(0).prop('yScaleType')).toEqual(ScaleType.Sqrt);
+      expect(component.find(LineSeries).at(1).prop('yScaleType')).toEqual(ScaleType.Sqrt);
     });
 
     test('it gets the formatter for the x axis', () => {
@@ -1126,25 +1242,6 @@ describe('xy_expression', () => {
       );
 
       expect(getFormatSpy).toHaveBeenCalledWith({ id: 'string' });
-    });
-
-    test('it gets a default formatter for y if there are multiple y accessors', () => {
-      const { data, args } = sampleArgs();
-
-      shallow(
-        <XYChart
-          data={{ ...data }}
-          args={{ ...args }}
-          formatFactory={getFormatSpy}
-          timeZone="UTC"
-          chartTheme={{}}
-          histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
-        />
-      );
-
-      expect(getFormatSpy).toHaveBeenCalledWith({ id: 'number' });
     });
 
     test('it gets the formatter for the y axis if there is only one accessor', () => {
