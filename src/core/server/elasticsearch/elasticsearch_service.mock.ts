@@ -35,7 +35,9 @@ interface MockedElasticSearchServiceSetup {
   };
 }
 
-interface MockedElasticSearchServiceStart extends MockedElasticSearchServiceSetup {
+type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
+
+interface MockedInternalElasticSearchServiceStart extends MockedElasticSearchServiceStart {
   client: jest.Mocked<IClusterClient>;
   createClient: jest.Mock<ICustomClusterClient>;
 }
@@ -56,18 +58,27 @@ const createSetupContractMock = () => {
 
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
-    client: elasticsearchClientMock.createClusterClient(),
-    createClient: jest.fn(),
     legacy: {
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
   };
-  startContract.createClient.mockReturnValue(elasticsearchClientMock.createCustomClusterClient());
   startContract.legacy.createClient.mockReturnValue(legacyClientMock.createCustomClusterClient());
   startContract.legacy.client.asScoped.mockReturnValue(
     legacyClientMock.createScopedClusterClient()
   );
+  return startContract;
+};
+
+const createInternalStartContractMock = () => {
+  const startContract: MockedInternalElasticSearchServiceStart = {
+    ...createStartContractMock(),
+    client: elasticsearchClientMock.createClusterClient(),
+    createClient: jest.fn(),
+  };
+
+  startContract.createClient.mockReturnValue(elasticsearchClientMock.createCustomClusterClient());
+
   return startContract;
 };
 
@@ -107,7 +118,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValueOnce(createStartContractMock());
+  mocked.start.mockResolvedValueOnce(createInternalStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -116,6 +127,7 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
+  createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
   createLegacyClusterClient: legacyClientMock.createClusterClient,
   createLegacyCustomClusterClient: legacyClientMock.createCustomClusterClient,

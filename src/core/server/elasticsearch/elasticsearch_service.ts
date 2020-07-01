@@ -32,7 +32,7 @@ import {
 import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
+import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 
@@ -42,13 +42,13 @@ interface SetupDeps {
 
 /** @internal */
 export class ElasticsearchService
-  implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
+  implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
   private kibanaVersion: string;
 
-  private createLegacyClient?: (
+  private createLegacyCustomClient?: (
     type: string,
     clientConfig?: Partial<LegacyElasticsearchClientConfig>
   ) => ILegacyCustomClusterClient;
@@ -83,7 +83,7 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
-    this.createLegacyClient = (type, clientConfig = {}) => {
+    this.createLegacyCustomClient = (type, clientConfig = {}) => {
       const finalConfig = merge({}, config, clientConfig);
       return this.createLegacyClusterClient(type, finalConfig, deps.http.getAuthHeaders);
     };
@@ -96,18 +96,18 @@ export class ElasticsearchService
       legacy: {
         config$: this.config$,
         client: this.legacyClient,
-        createClient: this.createLegacyClient,
+        createClient: this.createLegacyCustomClient,
       },
       esNodesCompatibility$,
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-  public async start(): Promise<ElasticsearchServiceStart> {
+  public async start(): Promise<InternalElasticsearchServiceStart> {
     if (
       !this.client ||
       !this.createCustomClient ||
       !this.legacyClient ||
-      !this.createLegacyClient
+      !this.createLegacyCustomClient
     ) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     } else {
@@ -116,7 +116,7 @@ export class ElasticsearchService
         createClient: this.createCustomClient,
         legacy: {
           client: this.legacyClient,
-          createClient: this.createLegacyClient,
+          createClient: this.createLegacyCustomClient,
         },
       };
     }

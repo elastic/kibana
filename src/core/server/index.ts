@@ -107,11 +107,6 @@ export {
   LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ClientFacade,
-  IScopedClusterClient,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
 export {

@@ -25,6 +25,7 @@ export {
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
   FakeRequest,
   ScopeableRequest,
 } from './types';
