@@ -180,7 +180,7 @@ it('uses cache on second run and exist cleanly', async () => {
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
       }),
       toArray()
