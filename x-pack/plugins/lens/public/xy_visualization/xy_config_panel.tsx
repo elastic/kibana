@@ -16,7 +16,6 @@ import {
   EuiToolTip,
   EuiFieldText,
 } from '@elastic/eui';
-import { useColorPickerState } from '@elastic/eui/lib/services';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
@@ -182,10 +181,10 @@ const ColorPicker = ({
   const layer = state.layers[index];
   const disabled = !!layer.splitAccessor;
 
-  const [color, setColor, errors] = useColorPickerState(getSeriesColor(layer, accessor));
+  const [color, setColor] = useState(getSeriesColor(layer, accessor));
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
-    setColor(text, output);
+    setColor(text);
 
     if (output.isValid || text === '') {
       const newYConfigs = [...(layer.yConfig || [])];
@@ -228,12 +227,7 @@ const ColorPicker = ({
           aria-label="Color picker disabled"
         />
       ) : (
-        <EuiColorPicker
-          compressed={true}
-          onChange={handleColor}
-          color={color}
-          isInvalid={!!errors}
-        />
+        <EuiColorPicker compressed={true} onChange={handleColor} color={color} />
       )}
     </EuiToolTip>
   );

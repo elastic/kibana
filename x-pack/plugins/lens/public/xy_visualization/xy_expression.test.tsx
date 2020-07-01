@@ -1029,11 +1029,11 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect(component.find(LineSeries).at(0).prop('color')!()).toEqual('#550000');
-        expect(component.find(LineSeries).at(1).prop('color')!()).toEqual('#FFFF00');
-        expect(component.find(LineSeries).at(2).prop('color')!()).toEqual('#FEECDF');
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
+        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
       });
-      test('color is not applied to chart when splitAccessor is defined or when not configured', () => {
+      test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
         const args = createArgsWithLayers();
         const newArgs = {
           ...args,
@@ -1057,8 +1057,8 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect(component.find(LineSeries).at(0).prop('color')!()).toEqual(null);
-        expect(component.find(LineSeries).at(1).prop('color')!()).toEqual(null);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
       });
     });
 
