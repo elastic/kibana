@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiLink, EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getEndpointListPath } from '../../../management/common/routing';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -42,18 +42,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <p>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.message"
-            defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment. For more information {blogPostLink}"
-            values={{
-              blogPostLink: (
-                // eslint-disable-next-line @elastic/eui/href-or-on-click
-                <EuiLink href={endpointsLink} external>
-                  <FormattedMessage
-                    id="xpack.securitySolution.overview.endpointNotice.getStartedLinkTitle"
-                    defaultMessage="read our announcement blog post"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
           />
         </p>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
