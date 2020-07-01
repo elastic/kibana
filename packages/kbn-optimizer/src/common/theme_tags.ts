@@ -19,7 +19,9 @@
 
 import { ascending } from './array_helpers';
 
-const tags = (...themeTags: string[]) => Object.freeze(themeTags.sort(ascending()) as ThemeTag[]);
+const tags = (...themeTags: string[]) =>
+  Object.freeze(themeTags.sort(ascending((tag) => tag)) as ThemeTag[]);
+
 const validTag = (tag: any): tag is ThemeTag => ALL_THEMES.includes(tag);
 const isArrayOfStrings = (input: unknown): input is string[] =>
   Array.isArray(input) && input.every((v) => typeof v === 'string');
