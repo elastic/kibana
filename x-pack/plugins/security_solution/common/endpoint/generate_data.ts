@@ -363,6 +363,13 @@ export class EndpointDocGenerator {
       '@timestamp': ts,
       event: {
         created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'metric',
+        category: 'host',
+        type: 'info',
+        module: 'endpoint',
+        action: 'endpoint_metadata',
+        dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
     };
