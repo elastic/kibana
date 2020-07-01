@@ -81,7 +81,7 @@ describe('createFeatureBranch', () => {
   const targetBranch = '4.x';
   const backportBranch = 'backport/4.x/commit-72f94e76';
 
-  it('should throw HandledError', async () => {
+  it(`should handle "couldn't find remote ref" error`, async () => {
     expect.assertions(1);
     const err = {
       killed: false,
@@ -91,6 +91,26 @@ describe('createFeatureBranch', () => {
       stdout:
         'HEAD is now at 72f94e7 Create "conflicting-file.txt" in master\n',
       stderr: "fatal: couldn't find remote ref 4.x\n",
+    };
+
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
+    await expect(
+      createBackportBranch({ options, targetBranch, backportBranch })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"The branch \\"4.x\\" is invalid or doesn't exist"`
+    );
+  });
+
+  it('should throw "Invalid refspec" error', async () => {
+    expect.assertions(1);
+    const err = {
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: '',
+      stdout: '',
+      stderr:
+        "fatal: Invalid refspec 'https://github.com/elastic/kibana.git'\n",
     };
 
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
