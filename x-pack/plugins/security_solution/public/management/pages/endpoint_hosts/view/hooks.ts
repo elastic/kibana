@@ -24,9 +24,7 @@ export function useHostSelector<TSelected>(selector: (state: HostState) => TSele
 /**
  * Returns an object that contains Ingest app and URL information
  */
-export const useHostIngestUrl = (
-  subpath: string
-): { url: string; appId: string; appPath: string } => {
+export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
     const appPath = `#/${subpath}`;
