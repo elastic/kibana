@@ -28,7 +28,10 @@ import {
 import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
+import {
+  ANNOTATION_MAX_LENGTH_CHARS,
+  ANNOTATION_EVENT_USER,
+} from '../../../../../common/constants/annotations';
 import {
   annotation$,
   annotationsRefreshed,
@@ -179,7 +182,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
       annotation.detector_index = detectorIndex;
     }
     // Mark the annotation created by `user` instead of automatically generated
-    annotation.event = 'user';
+    annotation.event = ANNOTATION_EVENT_USER;
 
     annotation$.next(null);
 
@@ -313,10 +316,10 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
             </EuiFormRow>
             <EuiFormRow>
               <EuiCheckbox
-                id={'xpack.ml.timeSeriesExplorer.annotationFlyout.applyToPartition'}
+                id={'xpack.ml.annotationFlyout.applyToPartition'}
                 label={
                   <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.applyToPartitionTextLabel"
+                    id="xpack.ml.annotationFlyout.applyToPartitionTextLabel"
                     defaultMessage="Apply annotation to this series"
                   />
                 }

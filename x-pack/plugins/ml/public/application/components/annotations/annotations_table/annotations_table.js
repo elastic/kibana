@@ -50,8 +50,7 @@ import {
   annotationsRefresh$,
   annotationsRefreshed,
 } from '../../../services/annotations_service';
-
-const DETECTOR_INDEX = 'detector_index';
+import { ANNOTATION_EVENT_USER, DETECTOR_INDEX } from '../../../../../common/constants/annotations';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
@@ -68,7 +67,7 @@ export class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
-      queryText: 'event:(user)',
+      queryText: `event: ${ANNOTATION_EVENT_USER}`,
       searchError: undefined,
       jobId:
         Array.isArray(this.props.jobs) &&
@@ -106,7 +105,7 @@ export class AnnotationsTable extends Component {
           fields: [
             {
               field: 'event',
-              missing: 'user',
+              missing: ANNOTATION_EVENT_USER,
             },
           ],
         })
@@ -146,6 +145,7 @@ export class AnnotationsTable extends Component {
   handleSearchChange({ query, queryText, error }) {
     if (error) {
       this.setState({ searchError: error });
+      return true;
     }
     const { _indexedClauses, clauses } = query.ast;
     if (_indexedClauses.is && 'current_series' in _indexedClauses.is) {
@@ -153,7 +153,7 @@ export class AnnotationsTable extends Component {
         (clause) => !(clause.type === 'is' && clause.flag === 'current_series')
       );
 
-      if (this.props.chartDetails?.entityData?.entities) {
+      if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
         this.props.chartDetails?.entityData?.entities.forEach(({ fieldType, fieldValue }) => {
           const field = `${fieldType}_value`;
 
@@ -528,8 +528,10 @@ export class AnnotationsTable extends Component {
     let filterOptions = [];
     if (this.props.aggregations?.event?.buckets) {
       const buckets = this.props.aggregations.event.buckets;
-      const foundUser = buckets.findIndex((d) => d.key === 'user') > -1;
-      filterOptions = foundUser ? buckets : [{ key: 'user', doc_count: 0 }, ...buckets];
+      const foundUser = buckets.findIndex((d) => d.key === ANNOTATION_EVENT_USER) > -1;
+      filterOptions = foundUser
+        ? buckets
+        : [{ key: ANNOTATION_EVENT_USER, doc_count: 0 }, ...buckets];
     }
     const filters = [
       {

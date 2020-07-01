@@ -24,6 +24,7 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { Annotation } from '../../../../common/types/annotations';
+import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -88,7 +89,7 @@ export function getFocusData(
         fields: [
           {
             field: 'event',
-            missing: 'user',
+            missing: ANNOTATION_EVENT_USER,
           },
         ],
       })

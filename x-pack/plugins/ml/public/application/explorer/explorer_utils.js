@@ -37,6 +37,7 @@ import {
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
 import { getSwimlaneContainerWidth } from './legacy_utils';
+import { ANNOTATION_EVENT_USER } from '../../../common/constants/annotations';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -551,7 +552,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         fields: [
           {
             field: 'event',
-            missing: 'user',
+            missing: ANNOTATION_EVENT_USER,
           },
         ],
       })
