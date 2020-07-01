@@ -41,12 +41,13 @@ export class InfraSnapshot {
     // when they have both been completed.
     const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, options);
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
+
     const groupedNodesPromise = requestGroupedNodes(client, optionsWithTimerange);
     const nodeMetricsPromise = requestNodeMetrics(client, optionsWithTimerange);
-
-    const groupedNodeBuckets = await groupedNodesPromise;
-    const nodeMetricBuckets = await nodeMetricsPromise;
-
+    const [groupedNodeBuckets, nodeMetricBuckets] = await Promise.all([
+      groupedNodesPromise,
+      nodeMetricsPromise,
+    ]);
     return {
       nodes: mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options),
       interval: timeRangeWithIntervalApplied.interval,
@@ -103,11 +104,12 @@ const requestGroupedNodes = async (
       },
     },
   };
-
-  return await getAllCompositeData<
-    InfraSnapshotAggregationResponse,
-    InfraSnapshotNodeGroupByBucket
-  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
+  return getAllCompositeData<InfraSnapshotAggregationResponse, InfraSnapshotNodeGroupByBucket>(
+    callClusterFactory(client),
+    query,
+    bucketSelector,
+    handleAfterKey
+  );
 };
 
 const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
@@ -161,10 +163,12 @@ const requestNodeMetrics = async (
       },
     },
   };
-  return await getAllCompositeData<
-    InfraSnapshotAggregationResponse,
-    InfraSnapshotNodeMetricsBucket
-  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
+  return getAllCompositeData<InfraSnapshotAggregationResponse, InfraSnapshotNodeMetricsBucket>(
+    callClusterFactory(client),
+    query,
+    bucketSelector,
+    handleAfterKey
+  );
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
