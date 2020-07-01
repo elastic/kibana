@@ -16,10 +16,9 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 
 describe('MonitorList component', () => {
-  let result: MonitorSummaryResult;
   let localStorageMock: any;
 
-  const getMonitorList = (timestamp?: string) => {
+  const getMonitorList = (timestamp?: string): MonitorSummaryResult => {
     return {
       nextPagePagination: null,
       prevPagePagination: null,
@@ -140,7 +139,10 @@ describe('MonitorList component', () => {
   it('renders the monitor list', () => {
     const component = renderWithRouter(
       <MonitorListComponent
-        monitorList={{ list: getMonitorList(moment().subtract(5, 'minute')), loading: false }}
+        monitorList={{
+          list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+          loading: false,
+        }}
         pageSize={10}
         setPageSize={jest.fn()}
       />
