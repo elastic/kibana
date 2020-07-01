@@ -29,7 +29,7 @@ def handleIngestion(timestamp) {
   kibanaCoverage.collectVcsInfo("### Collect VCS Info")
   kibanaCoverage.generateReports("### Merge coverage reports")
   kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(timestamp, '### Injest && Upload')
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, '### Ingest && Upload')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
