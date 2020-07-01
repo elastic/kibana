@@ -8,12 +8,9 @@ import React, { useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty } from '@elastic/eui'; // EuiToolTip
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  checkPermission,
-  // createPermissionFailureMessage,
-} from '../../../../../capabilities/check_capabilities';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { DataFrameAnalyticsListRow } from './common';
 
 import { EditAnalyticsFlyout } from './edit_analytics_flyout';
@@ -47,15 +44,18 @@ export const EditAction: FC<EditActionProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  // if (!canCreateDataFrameAnalytics) {
-  //   const content = createCapabilityFailureMessage('canCreateDataFrameAnalytics');
-
-  //   return (
-  //     <EuiToolTip position="top" content={content}>
-  //       {editButton}
-  //     </EuiToolTip>
-  //   );
-  // }
+  if (!canCreateDataFrameAnalytics) {
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.ml.dataframe.analyticsList.editActionPermissionTooltip', {
+          defaultMessage: 'You do not have permission to edit analytics jobs.',
+        })}
+      >
+        {editButton}
+      </EuiToolTip>
+    );
+  }
 
   return (
     <>
