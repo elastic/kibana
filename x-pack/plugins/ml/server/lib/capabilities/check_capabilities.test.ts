@@ -25,10 +25,10 @@ const mlIsNotEnabled = async () => false;
 
 const callWithRequestNonUpgrade = ((async () => ({
   upgrade_mode: false,
-})) as never) as LegacyAPICaller;
+})) as unknown) as LegacyAPICaller;
 const callWithRequestUpgrade = ((async () => ({
   upgrade_mode: true,
-})) as never) as LegacyAPICaller;
+})) as unknown) as LegacyAPICaller;
 
 describe('check_capabilities', () => {
   describe('getCapabilities() - right number of capabilities', () => {

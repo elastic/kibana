@@ -54,13 +54,18 @@ export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<v
 
 export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
   return (request: KibanaRequest): HasMlCapabilities => {
+    let mlCapabilities: MlCapabilities | null = null;
     return async (capabilities: MlCapabilitiesKey[]) => {
-      const mlCapabilities = await resolveMlCapabilities(request);
-      if (mlCapabilities === null) {
+      try {
+        mlCapabilities = await resolveMlCapabilities(request);
+        if (mlCapabilities === null) {
+          throw Error();
+        }
+      } catch (e) {
         throw Error('ML capabilities have not been initialized');
       }
 
-      if (capabilities.every((c) => mlCapabilities[c] === true) === false) {
+      if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
         throw Error('Insufficient privileges to access feature');
       }
     };
