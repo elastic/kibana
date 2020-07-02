@@ -137,7 +137,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 
@@ -284,7 +289,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 
@@ -362,7 +372,12 @@ describe('alert_form', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+          <AlertForm
+            alert={initialAlert}
+            dispatch={() => {}}
+            errors={{ name: [], interval: [] }}
+            operation="create"
+          />
         </AlertsContextProvider>
       );
 

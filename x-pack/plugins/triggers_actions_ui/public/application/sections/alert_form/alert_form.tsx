@@ -324,9 +324,7 @@ export const AlertForm = ({
     </>
   );
 
-  return !(alertTypeModel || alertTypeNodes.length) ? (
-    <NoAuthorizedAlertTypes operation={operation} />
-  ) : (
+  return (
     <EuiForm>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>

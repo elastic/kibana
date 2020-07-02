@@ -169,6 +169,10 @@ describe('alert_add', () => {
   it('renders alert add flyout', async () => {
     await setup();
 
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
