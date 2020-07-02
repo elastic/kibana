@@ -9,11 +9,9 @@
  * This version supports both fetching the annotations by itself (used in the jobs list) and
  * getting the annotations via props (used in Anomaly Explorer and Single Series Viewer).
  */
-
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
-
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -50,7 +48,8 @@ import {
   annotationsRefresh$,
   annotationsRefreshed,
 } from '../../../services/annotations_service';
-import { ANNOTATION_EVENT_USER, DETECTOR_INDEX } from '../../../../../common/constants/annotations';
+import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
+
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
@@ -79,11 +78,6 @@ export class AnnotationsTable extends Component {
     this.sorting = {
       sort: { field: 'timestamp', direction: 'asc' },
     };
-    this.handleSearchChange = this.handleSearchChange.bind(this);
-  }
-
-  setQueryText(queryText) {
-    this.setState({ queryText });
   }
 
   getAnnotations() {
@@ -140,57 +134,6 @@ export class AnnotationsTable extends Component {
     }
 
     return mlJobService.getJob(jobId);
-  }
-
-  handleSearchChange({ query, queryText, error }) {
-    if (error) {
-      this.setState({ searchError: error });
-      return true;
-    }
-    const { _indexedClauses, clauses } = query.ast;
-    if (_indexedClauses.is && 'current_series' in _indexedClauses.is) {
-      const tempClauses = clauses.filter(
-        (clause) => !(clause.type === 'is' && clause.flag === 'current_series')
-      );
-
-      if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
-        this.props.chartDetails?.entityData?.entities.forEach(({ fieldType, fieldValue }) => {
-          const field = `${fieldType}_value`;
-
-          if (!(field in _indexedClauses.field)) {
-            tempClauses.push({
-              field: field,
-              match: 'must',
-              operator: 'eq',
-              type: 'field',
-              value: fieldValue,
-            });
-          } else {
-            const idx = tempClauses.findIndex((clause) => clause.field === field);
-            tempClauses.splice(idx, 1);
-          }
-        });
-      }
-
-      if (this.props.detectorIndex !== undefined) {
-        if (!(DETECTOR_INDEX in _indexedClauses.field)) {
-          tempClauses.push({
-            field: DETECTOR_INDEX,
-            match: 'must',
-            operator: 'eq',
-            type: 'field',
-            value: this.props.detectorIndex.toString(),
-          });
-        } else {
-          const idx = tempClauses.findIndex((clause) => clause.field === DETECTOR_INDEX);
-          tempClauses.splice(idx, 1);
-        }
-      }
-      this.setQueryText(query.syntax.print({ clauses: tempClauses }));
-    } else {
-      this.setQueryText(queryText);
-    }
-    return true;
   }
 
   annotationsRefreshSubscription = null;
@@ -588,12 +531,10 @@ export class AnnotationsTable extends Component {
         name: i18n.translate('xpack.ml.annotationsTable.seriesOnlyFilterName', {
           defaultMessage: 'Filter to series',
         }),
-        value: this.props.chartDetails.entityData.entities[0].fieldValue,
       });
     }
     const search = {
-      query: queryText,
-      onChange: this.handleSearchChange,
+      defaultQuery: queryText,
       box: {
         incremental: true,
         schema: true,
@@ -611,21 +552,30 @@ export class AnnotationsTable extends Component {
         actions,
       },
       {
-        field: 'detector_index',
-        name: i18n.translate('xpack.ml.annotationsTable.detectorColumnName', {
-          defaultMessage: 'Detector',
-        }),
+        field: 'current_series',
+        name: 'current_series',
         width: '0px',
       }
     );
-
+    const annotationsWithMarker = annotations.map((annotation) => {
+      const allMatched = this.props.chartDetails?.entityData?.entities.every(
+        ({ fieldType, fieldValue }) => {
+          const field = `${fieldType}_value`;
+          if (!annotation[field] || annotation[field] !== fieldValue) {
+            return false;
+          }
+          return true;
+        }
+      );
+      return { ...annotation, current_series: allMatched };
+    });
     return (
       <Fragment>
         <EuiInMemoryTable
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
-          items={annotations}
+          items={annotationsWithMarker}
           columns={columns}
           pagination={{
             pageSizeOptions: [5, 10, 25],
