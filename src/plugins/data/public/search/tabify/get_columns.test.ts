@@ -161,4 +161,20 @@ describe('get columns', () => {
       'Sum of @timestamp',
     ]);
   });
+
+  test('should not fail if there is no field for date histogram agg', () => {
+    const columns = tabifyGetColumns(
+      createAggConfigs([
+        {
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {},
+        },
+        { type: 'sum', schema: 'metric', params: { field: '@timestamp' } },
+      ]).aggs,
+      false
+    );
+
+    expect(columns.map((c) => c.name)).toEqual(['', 'Sum of @timestamp']);
+  });
 });
