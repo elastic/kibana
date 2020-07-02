@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
 
-import { indicesToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
+import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
 import { RestoreSettings } from '../../../../../../common/types';
 
 import { documentationLinksService } from '../../../../services/documentation';
@@ -310,7 +310,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                             });
                           }
                         }}
-                        selectedIndicesAndDataStreams={indicesToArray(restoreIndices)}
+                        selectedIndicesAndDataStreams={csvToArray(restoreIndices)}
                         indices={snapshotIndices}
                         dataStreams={snapshotDataStreams}
                       />

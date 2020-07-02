@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const indicesToArray = (indices?: string | string[]): string[] => {
+export const csvToArray = (indices?: string | string[]): string[] => {
   return indices && Array.isArray(indices)
     ? indices
     : typeof indices === 'string'

@@ -16,5 +16,5 @@ export {
   serializeSnapshotRetention,
 } from './snapshot_serialization';
 export { deserializePolicy, serializePolicy } from './policy_serialization';
-export { indicesToArray } from './utils';
+export { csvToArray } from './utils';
 export { isDataStreamBackingIndex } from './is_data_stream_backing_index';

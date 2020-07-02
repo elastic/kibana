@@ -4,75 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
+
+import { useCollapsibleList } from './use_collapsible_list';
 
 interface Props {
   dataStreams: string[] | string | undefined;
 }
 
 export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dataStreams }) => {
-  const [isShowingFullDataStreamsList, setIsShowingFullDataStreamsList] = useState<boolean>(false);
-  const displayDataStreams = dataStreams
-    ? typeof dataStreams === 'string'
-      ? dataStreams.split(',')
-      : dataStreams
-    : undefined;
-  const hiddenDataStreams =
-    displayDataStreams && displayDataStreams.length > 10 ? displayDataStreams.length - 10 : 0;
-  return (
+  const { isShowingFullList, setIsShowingFullList, items, hiddenItemsCount } = useCollapsibleList({
+    items: dataStreams,
+  });
+
+  return items === 'all' ? (
+    <FormattedMessage
+      id="xpack.snapshotRestore.dataStreamsList.allDataStreamsValue"
+      defaultMessage="All data streams"
+    />
+  ) : (
     <>
-      {displayDataStreams ? (
+      <EuiText>
+        <ul>
+          {items.map((dataStream) => (
+            <li key={dataStream}>
+              <EuiTitle size="xs">
+                <span>{dataStream}</span>
+              </EuiTitle>
+            </li>
+          ))}
+        </ul>
+      </EuiText>
+      {hiddenItemsCount ? (
         <>
-          <EuiText>
-            <ul>
-              {(isShowingFullDataStreamsList
-                ? displayDataStreams
-                : [...displayDataStreams].splice(0, 10)
-              ).map((dataStream) => (
-                <li key={dataStream}>
-                  <EuiTitle size="xs">
-                    <span>{dataStream}</span>
-                  </EuiTitle>
-                </li>
-              ))}
-            </ul>
-          </EuiText>
-          {hiddenDataStreams ? (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiLink
-                onClick={() =>
-                  isShowingFullDataStreamsList
-                    ? setIsShowingFullDataStreamsList(false)
-                    : setIsShowingFullDataStreamsList(true)
-                }
-              >
-                {isShowingFullDataStreamsList ? (
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.dataStreamsList.dataStreamsCollapseAllLink"
-                    defaultMessage="Hide {count, plural, one {# data stream} other {# data streams}}"
-                    values={{ count: hiddenDataStreams }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.dataStreamsList.dataStreamsExpandAllLink"
-                    defaultMessage="Show {count, plural, one {# data stream} other {# data streams}}"
-                    values={{ count: hiddenDataStreams }}
-                  />
-                )}{' '}
-                <EuiIcon type={isShowingFullDataStreamsList ? 'arrowUp' : 'arrowDown'} />
-              </EuiLink>
-            </>
-          ) : null}
+          <EuiSpacer size="xs" />
+          <EuiLink
+            onClick={() =>
+              isShowingFullList ? setIsShowingFullList(false) : setIsShowingFullList(true)
+            }
+          >
+            {isShowingFullList ? (
+              <FormattedMessage
+                id="xpack.snapshotRestore.dataStreamsList.dataStreamsCollapseAllLink"
+                defaultMessage="Hide {count, plural, one {# data stream} other {# data streams}}"
+                values={{ count: hiddenItemsCount }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.snapshotRestore.dataStreamsList.dataStreamsExpandAllLink"
+                defaultMessage="Show {count, plural, one {# data stream} other {# data streams}}"
+                values={{ count: hiddenItemsCount }}
+              />
+            )}{' '}
+            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} />
+          </EuiLink>
         </>
-      ) : (
-        <FormattedMessage
-          id="xpack.snapshotRestore.dataStreamsList.allDataStreamsValue"
-          defaultMessage="All data streams"
-        />
-      )}
+      ) : null}
     </>
   );
 };

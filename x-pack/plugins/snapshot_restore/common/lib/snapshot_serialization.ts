@@ -17,7 +17,7 @@ import {
 
 import { deserializeTime, serializeTime } from './time_serialization';
 
-import { indicesToArray } from './utils';
+import { csvToArray } from './utils';
 
 export function deserializeSnapshotDetails(
   repository: string,
@@ -131,7 +131,7 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
 export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): SnapshotConfigEs {
   const { indices, ignoreUnavailable, includeGlobalState, partial, metadata } = snapshotConfig;
 
-  const indicesArray = indicesToArray(indices);
+  const indicesArray = csvToArray(indices);
 
   const snapshotConfigEs: SnapshotConfigEs = {
     indices: indicesArray,
