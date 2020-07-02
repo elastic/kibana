@@ -1,12 +1,22 @@
 .homSolutionsPanel {
   margin-top: -$euiSizeXL*2;
 
-  .homSolutionsPanel__enterpriseSearch {
-    .homSolutionsPanel__enterpriseSearchHeader {
+  .homSolutionsPanel__solutionWrapper {
+    display: flex;
+    align-items: stretch;
+
+    .homSolutionsPanel__CTA {
+      justify-content: center;
+    }
+  }
+
+
+  .homSolutionsPanel__appSearch {
+    .homSolutionsPanel__appSearchHeader {
       background-color: #017d73;
       color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__enterpriseSearchTopLeftImage {
+      .homSolutionsPanel__appSearchTopLeftImage {
         .euiImage__img {
           position: absolute;
           top: 0;
@@ -17,7 +27,7 @@
         }
       }
 
-      .homSolutionsPanel__enterpriseSearchBottomRightImage {
+      .homSolutionsPanel__appSearchBottomRightImage {
         .euiImage__img {
           position: absolute;
           right: 0;

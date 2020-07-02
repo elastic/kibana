@@ -21,27 +21,35 @@ import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createAppNavigationHandler } from '../app_navigation_handler';
+import { HOME_APP_BASE_PATH } from '../../../../common/constants';
+import { getServices } from '../../kibana_services';
 
 interface Props {
-  addBasePath: (relativeUrl: string) => string;
+  defaultRoute?: string;
 }
 
-export const ChangeHomeRoute: FunctionComponent<Props> = ({ addBasePath }) => (
-  <EuiText>
-    <p>
-      <FormattedMessage
-        id="home.changeHomeRouteText"
-        defaultMessage="Would you prefer to have an alternate home page for this Elastic space? "
-      />
-      <EuiButtonEmpty
-        iconType="home"
-        onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
-      >
+export const ChangeHomeRoute: FunctionComponent<Prop> = ({ defaultRoute }) => {
+  const { uiSettings } = getServices();
+  const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
+
+  return (
+    <EuiText>
+      <p>
         <FormattedMessage
-          id="home.changeHomeRouteLink"
-          defaultMessage="Change your home page route"
+          id="home.changeHomeRouteText"
+          defaultMessage="Would you prefer to have an alternate home page for this Elastic space? "
         />
-      </EuiButtonEmpty>
-    </p>
-  </EuiText>
-);
+        <EuiButtonEmpty iconType="home" onClick={changeDefaultRoute}>
+          <FormattedMessage
+            id="home.changeHomeRouteLink"
+            defaultMessage="Change your home page route"
+          />
+        </EuiButtonEmpty>
+      </p>
+    </EuiText>
+  );
+};
+
+ChangeHomeRoute.defaultProps = {
+  defaultRoute: HOME_APP_BASE_PATH,
+};

@@ -29,7 +29,6 @@ import {
   EuiPage,
   EuiTitle,
   EuiFlexGroup,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiPageBody,
   EuiPageHeader,
@@ -37,12 +36,12 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Welcome } from './welcome';
 import { getServices } from '../kibana_services';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -121,9 +120,8 @@ export class Home extends Component {
   findDirectoryById = (id) =>
     this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
 
-  renderDirectoryById = (id, { isBeta } = {}) => {
+  renderDirectory = (directory, { isBeta } = {}) => {
     const { addBasePath } = this.props;
-    const directory = this.findDirectoryById(id);
 
     return directory ? (
       <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
@@ -141,16 +139,15 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const {
-      username, // TODO: pass in actual username
-      addBasePath,
-      canChangeHomeRoute = true,
-    } = this.props;
+    const { addBasePath, canChangeHomeRoute = true, directories } = this.props;
+    console.log({ directories });
 
-    const isDarkMode = getServices().uiSettings.get('theme:darkMode');
-    const addDataGraphicURL = isDarkMode
-      ? addBasePath('/plugins/home/assets/add_data_graphic_dark_2x.png')
-      : addBasePath('/plugins/home/assets/add_data_graphic_light_2x.png');
+    const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
+    const ingestManager = this.findDirectoryById('ingest_manager', { isBeta: true });
+    const security = this.findDirectoryById('security');
+    const monitoring = this.findDirectoryById('monitoring');
+    const snapshotRestore = this.findDirectoryById('snapshot_restore');
+    const indexLifecycleManagement = this.findDirectoryById('index_lifecycle_management');
 
     return (
       <EuiPage restrictWidth={1200} data-test-subj="homeApp">
@@ -165,15 +162,11 @@ export class Home extends Component {
             <EuiPageHeaderSection>
               <EuiTitle size="m">
                 <h1>
-                  {username
-                    ? i18n.translate('home.pageHeaderUserTitle', {
-                        defaultMessage: 'Welcome, {username}!',
-                        values: { username },
-                      })
-                    : i18n.translate('home.pageHeaderNoUserTitle', {
-                        defaultMessage: 'Welcome to {elastic}!',
-                        values: { elastic: 'Elastic' },
-                      })}
+                  <FormattedMessage
+                    id="home.pageHeader.welcomeNoUserTitle"
+                    defaultMessage="Welcome to {ELASTIC}!"
+                    values={{ ELASTIC: 'Elastic' }}
+                  />
                 </h1>
               </EuiTitle>
             </EuiPageHeaderSection>
@@ -232,18 +225,32 @@ export class Home extends Component {
             <EuiHorizontalRule />
 
             <div className="homAddData">
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('home.addData.sectionTitle', { defaultMessage: 'Add your data' })}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={1}>
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('home.addData.sectionTitle', {
+                        defaultMessage: 'Add your data',
+                      })}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty iconType="tableDensityExpanded" size="s">
+                    <FormattedMessage
+                      id="home.addData.sampleDataButtonLabel"
+                      defaultMessage="Try our sample data"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
               <EuiSpacer />
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
-                  <EuiFlexGrid columns={2}>
-                    {this.renderDirectoryById('ml_file_data_visualizer')}
+                  <EuiFlexGroup>
+                    {this.renderDirectory(fileDataVisualizer)}
                     <EuiFlexItem>
                       <Synopsis
                         description={i18n.translate('home.addData.addIntegrationDescription', {
@@ -257,57 +264,41 @@ export class Home extends Component {
                         wrapInPanel
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem>
-                      <Synopsis
-                        description={i18n.translate('home.addData.sampleDataDescription', {
-                          defaultMessage: 'Load a prefabricated data set to try Elastic Console.',
-                        })}
-                        iconType="documents"
-                        title={i18n.translate('home.addData.sampleDataTitle', {
-                          defaultMessage: 'Add sample data',
-                        })}
-                        url="#/tutorial_directory/sampleData"
-                        wrapInPanel
-                      />
-                    </EuiFlexItem>
-                    {this.renderDirectoryById('ingest_manager', { isBeta: true })}
-                  </EuiFlexGrid>
-                </EuiFlexItem>
-                <EuiFlexItem grow={1}>
-                  <EuiImage
-                    className="homAddData__image"
-                    url={addDataGraphicURL}
-                    alt="Add data graphic"
-                  />
+                    {this.renderDirectory(ingestManager, { isBeta: true })}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
 
-            <EuiHorizontalRule />
+            {security || monitoring || snapshotRestore || indexLifecycleManagement ? (
+              <Fragment>
+                <EuiHorizontalRule />
 
-            <div className="homManageData">
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('home.manageData.sectionTitle', {
-                    defaultMessage: 'Manage your data',
-                  })}
-                </h3>
-              </EuiTitle>
+                <div className="homManageData">
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('home.manageData.sectionTitle', {
+                        defaultMessage: 'Manage your data',
+                      })}
+                    </h3>
+                  </EuiTitle>
 
-              <EuiSpacer />
+                  <EuiSpacer />
 
-              <EuiFlexGroup>
-                {this.renderDirectoryById('security')}
-                {this.renderDirectoryById('monitoring')}
-                {this.renderDirectoryById('snapshot_restore')}
-                {this.renderDirectoryById('index_lifecycle_management')}
-              </EuiFlexGroup>
-            </div>
+                  <EuiFlexGroup>
+                    {this.renderDirectory(security)}
+                    {this.renderDirectory(monitoring)}
+                    {this.renderDirectory(snapshotRestore)}
+                    {this.renderDirectory(indexLifecycleManagement)}
+                  </EuiFlexGroup>
+                </div>
+              </Fragment>
+            ) : null}
 
             {canChangeHomeRoute && (
               <Fragment>
                 <EuiHorizontalRule />
-                <ChangeHomeRoute addBasePath={addBasePath} />
+                <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />
               </Fragment>
             )}
           </div>
