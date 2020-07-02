@@ -18,7 +18,7 @@
  */
 
 require('../../src/setup_node_env');
-const _ = require('lodash');
+const fp = require('lodash/fp');
 const test = require('tape');
 
 Object.prototype.sourceURL = '\u2028\u2029\n;global.whoops=true'; // eslint-disable-line no-extend-native
@@ -32,59 +32,70 @@ test('test setup ok', (t) => {
   t.end();
 });
 
-test(`_.template('<%= foo %>')`, (t) => {
-  const output = _.template('<%= foo %>')({ foo: 'bar' });
+test(`fp.template('<%= foo %>')`, (t) => {
+  const output = fp.template('<%= foo %>')({ foo: 'bar' });
   t.equal(output, 'bar');
   t.equal(global.whoops, undefined);
   t.end();
 });
 
-test(`_.template('<%= foo %>', {})`, (t) => {
-  const output = _.template('<%= foo %>', Object.freeze({}))({ foo: 'bar' });
+test(`fp.template('<%= foo %>', {})`, (t) => {
+  // fp.template ignores the second argument, this is negligible in this situation since options is an empty object
+  const output = fp.template('<%= foo %>', Object.freeze({}))({ foo: 'bar' });
   t.equal(output, 'bar');
   t.equal(global.whoops, undefined);
   t.end();
 });
 
-test(`_.template('<%= data.foo %>', { variable: 'data' })`, (t) => {
-  const output = _.template('<%= data.foo %>', Object.freeze({ variable: 'data' }))({ foo: 'bar' });
-  t.equal(output, 'bar');
-  t.equal(global.whoops, undefined);
-  t.end();
-});
-
-test(`_.template('<%= foo %>', { sourceURL: '/foo/bar' })`, (t) => {
-  // throwing errors in the template and parsing the stack, which is a string, is super ugly, but all I know to do
-  const template = _.template('<% throw new Error() %>', Object.freeze({ sourceURL: '/foo/bar' }));
+test(`fp.template('<%= data.foo %>', { variable: 'data' })`, (t) => {
+  // fp.template ignores the second argument, this causes an error to be thrown
   t.plan(2);
   try {
-    template();
+    fp.template('<%= data.foo %>', Object.freeze({ variable: 'data' }))({ foo: 'bar' });
   } catch (err) {
-    const path = parsePathFromStack(err.stack);
-    t.equal(path, '/foo/bar');
+    t.equal(err.message, 'data is not defined');
     t.equal(global.whoops, undefined);
   }
 });
 
-test(`_.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true' })`, (t) => {
+test(`fp.template('<%= foo %>', { sourceURL: '/foo/bar' })`, (t) => {
+  // fp.template ignores the second argument, the sourceURL is ignored
   // throwing errors in the template and parsing the stack, which is a string, is super ugly, but all I know to do
-  const template = _.template(
+  // our patching to hard-code the sourceURL and use non-FP _.template does slightly alter the stack-traces but it's negligible
+  const template = fp.template('<% throw new Error() %>', Object.freeze({ sourceURL: '/foo/bar' }));
+  t.plan(3);
+  try {
+    template();
+  } catch (err) {
+    const path = parsePathFromStack(err.stack);
+    t.match(path, /^eval at <anonymous> /);
+    t.doesNotMatch(path, /\/foo\/bar/);
+    t.equal(global.whoops, undefined);
+  }
+});
+
+test(`fp.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true' })`, (t) => {
+  // fp.template ignores the second argument, the sourceURL is ignored
+  // throwing errors in the template and parsing the stack, which is a string, is super ugly, but all I know to do
+  // our patching to hard-code the sourceURL and use non-FP _.template does slightly alter the stack-traces but it's negligible
+  const template = fp.template(
     '<% throw new Error() %>',
     Object.freeze({ sourceURL: '\u2028\u2029\nglobal.whoops=true' })
   );
-  t.plan(2);
+  t.plan(3);
   try {
     template();
   } catch (err) {
     const path = parsePathFromStack(err.stack);
-    t.equal(path, 'global.whoops=true');
+    t.match(path, /^eval at <anonymous> /);
+    t.doesNotMatch(path, /\/foo\/bar/);
     t.equal(global.whoops, undefined);
   }
 });
 
-test(`_.template used as an iteratee call(`, (t) => {
+test(`fp.template used as an iteratee call(`, (t) => {
   const templateStrArr = ['<%= data.foo %>', 'example <%= data.foo %>'];
-  const output = _.map(templateStrArr, _.template);
+  const output = fp.map(fp.template)(templateStrArr);
 
   t.equal(output[0]({ data: { foo: 'bar' } }), 'bar');
   t.equal(output[1]({ data: { foo: 'bar' } }), 'example bar');

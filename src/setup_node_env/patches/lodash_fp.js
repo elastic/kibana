@@ -17,16 +17,17 @@
  * under the License.
  */
 
-var hook = require('require-in-the-middle');
+module.exports = function (fp, _) {
+  // per https://github.com/lodash/lodash/wiki/FP-Guide
+  // > Iteratee arguments are capped to avoid gotchas with variadic iteratees.
+  // this means that we can't specify thhe options in the second argument... in the proxy
+  // and just have everything work. Instead, we're going to use the non-FP _.template
+  // with just the first argument that is specified, and a hardcoded options with sourceURL of ''
+  fp.template = new Proxy(fp.template, {
+    apply: function (target, thisArg, args) {
+      return _.template(args[0], { sourceURL: '' });
+    },
+  });
 
-hook(['child_process'], function (exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
-});
-
-hook(['lodash/fp'], function (exports) {
-  return require(`./patches/lodash_fp`)(exports, require('lodash')); // eslint-disable-line import/no-dynamic-require
-});
-
-hook(['lodash'], function (exports) {
-  return require(`./patches/lodash`)(exports); // eslint-disable-line import/no-dynamic-require
-});
+  return fp;
+};

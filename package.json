@@ -106,6 +106,7 @@
       "examples/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*",
+      "test/harden",
       "x-pack/test/functional_with_es_ssl/fixtures/plugins/*",
       "x-pack/test/plugin_api_integration/plugins/*"
     ],
