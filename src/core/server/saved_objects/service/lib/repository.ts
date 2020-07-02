@@ -391,19 +391,7 @@ export class SavedObjectsRepository {
         expectedResult.rawMigratedDoc._source
       );
 
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          ...expectedResult,
-          rawMigratedDoc: {
-            ...expectedResult.rawMigratedDoc,
-            _source: {
-              ...expectedResult.rawMigratedDoc._source,
-              namespaces: savedObjectNamespaces ?? [getNamespaceString(savedObjectNamespace)],
-            },
-          },
-        },
-      };
+      return { tag: 'Right' as 'Right', value: expectedResult };
     });
 
     const bulkResponse = bulkCreateParams.length
