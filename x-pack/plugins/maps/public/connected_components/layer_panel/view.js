@@ -128,6 +128,7 @@ export class LayerPanel extends React.Component {
       <Fragment>
         <EuiPanel>
           <JoinEditor
+            layer={this.props.selectedLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
