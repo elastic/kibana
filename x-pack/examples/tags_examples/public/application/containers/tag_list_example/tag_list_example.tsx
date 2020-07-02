@@ -5,12 +5,15 @@
  */
 
 import React from 'react';
-import { Tag } from '../../../../../../plugins/tags/public';
+import { Tag, TagList } from '../../../../../../plugins/tags/public';
 
 export const TagListExample: React.FC = () => {
   return (
     <div>
       <Tag id={'8e07bc40-bc3d-11ea-ad31-378b8af727f3'} />
+      <div>
+        <TagList kid={'kid::data:ip:index_pattern/123'} />
+      </div>
     </div>
   );
 };

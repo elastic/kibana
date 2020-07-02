@@ -15,11 +15,13 @@ export interface Props {
 
 export const TagsManagementSection: React.FC<Props> = ({ services }) => {
   // React.useEffect(() => {
-  //   services.params.attachments.client.create({
-  //     attachment: {
-  //       tagId: 'ae3e17c0-bb89-11ea-8738-cdb6f2af187d',
-  //       kid: 'kid:core:saved_object/workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
-  //     },
+  //   services.params.tags.attachments.create({
+  //     attachments: [
+  //       {
+  //         tagId: 'ab565450-bc3d-11ea-ad31-378b8af727f3',
+  //         kid: 'kid::data:ip:index_pattern/123',
+  //       },
+  //     ],
   //   });
   // }, [services]);
 

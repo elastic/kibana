@@ -19,3 +19,4 @@ export {
 } from './plugin';
 
 export { Tag, TagProps } from './containers/tag';
+export { TagList, TagListProps } from './containers/tag_list';
