@@ -157,7 +157,7 @@ def buildArchives(destination) {
       ./gradlew -Dbuild.docker=true assemble --parallel
       mkdir -p ${destination}
       find distribution/archives -type f \\( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
-      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ${destination}/elasticsearch-${0}-docker-image.tar.gz'
+      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:\${0} | gzip > ${destination}/elasticsearch-\${0}-docker-image.tar.gz'
     """
   }
 }
