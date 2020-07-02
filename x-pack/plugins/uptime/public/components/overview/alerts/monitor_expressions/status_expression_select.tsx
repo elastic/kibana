@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DownNoExpressionSelect } from './down_number_select';
 import { TimeExpressionSelect } from './time_expression_select';
 import { statusExpLabels } from './translations';
@@ -22,6 +22,11 @@ export const StatusExpressionSelect: React.FC<Props> = ({
   setAlertParams,
 }) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    setAlertParams('shouldCheckStatus', isEnabled);
+  }, [isEnabled, setAlertParams]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
