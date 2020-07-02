@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
   EuiFormRow,
@@ -164,7 +165,7 @@ const tooltipContent = {
   }),
   disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
     defaultMessage:
-      'Individual series cannot be custom colored when the layer includes a “Split by.“',
+      'Individual series cannot be custom colored when the layer includes a “Break down by“',
   }),
 };
 
@@ -182,25 +183,28 @@ const ColorPicker = ({
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
-
     if (output.isValid || text === '') {
-      const newYConfigs = [...(layer.yConfig || [])];
-      const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
-      if (existingIndex !== -1) {
-        if (text === '') {
-          delete newYConfigs[existingIndex].color;
-        } else {
-          newYConfigs[existingIndex].color = output.hex;
-        }
-      } else {
-        newYConfigs.push({
-          forAccessor: accessor,
-          color: output.hex,
-        });
-      }
-      setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+      updateColorInState(text, output);
     }
   };
+
+  const updateColorInState: EuiColorPickerProps['onChange'] = debounce((text, output) => {
+    const newYConfigs = [...(layer.yConfig || [])];
+    const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
+    if (existingIndex !== -1) {
+      if (text === '') {
+        delete newYConfigs[existingIndex].color;
+      } else {
+        newYConfigs[existingIndex].color = output.hex;
+      }
+    } else {
+      newYConfigs.push({
+        forAccessor: accessor,
+        color: output.hex,
+      });
+    }
+    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+  }, 256);
 
   return (
     <EuiToolTip
