@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
+export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -32,10 +32,10 @@ export enum KibanaAssetType {
 }
 
 export enum ElasticsearchAssetType {
-  componentTemplate = 'component-template',
-  ingestPipeline = 'ingest-pipeline',
-  indexTemplate = 'index-template',
-  ilmPolicy = 'ilm-policy',
+  componentTemplate = 'component_template',
+  ingestPipeline = 'ingest_pipeline',
+  indexTemplate = 'index_template',
+  ilmPolicy = 'ilm_policy',
 }
 
 export enum AgentAssetType {
@@ -243,13 +243,10 @@ export type AssetReference = Pick<SavedObjectReference, 'id'> & {
  * Types of assets which can be installed/removed
  */
 export enum IngestAssetType {
-  DataFrameTransform = 'data-frame-transform',
-  IlmPolicy = 'ilm-policy',
-  IndexTemplate = 'index-template',
-  ComponentTemplate = 'component-template',
-  IngestPipeline = 'ingest-pipeline',
-  MlJob = 'ml-job',
-  RollupJob = 'rollup-job',
+  IlmPolicy = 'ilm_policy',
+  IndexTemplate = 'index_template',
+  ComponentTemplate = 'component_template',
+  IngestPipeline = 'ingest_pipeline',
 }
 
 export enum DefaultPackages {
@@ -276,6 +273,7 @@ export interface IndexTemplate {
   data_stream: {
     timestamp_field: string;
   };
+  _meta: object;
 }
 
 export interface TemplateRef {

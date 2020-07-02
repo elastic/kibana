@@ -60,8 +60,8 @@ export interface AgentService {
 }
 
 // Saved object services
-export { datasourceService } from './datasource';
 export { agentConfigService } from './agent_config';
+export { packageConfigService } from './package_config';
 export { outputService } from './output';
 export { settingsService };
 

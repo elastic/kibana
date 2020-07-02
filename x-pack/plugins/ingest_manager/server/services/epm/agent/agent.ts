@@ -6,9 +6,9 @@
 
 import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
-import { DatasourceConfigRecord } from '../../../../common';
+import { PackageConfigConfigRecord } from '../../../../common';
 
-export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
+export function createStream(variables: PackageConfigConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
 
   const template = Handlebars.compile(streamTemplate, { noEscape: true });
@@ -52,7 +52,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: DatasourceConfigRecord, streamTemplate: string) {
+function buildTemplateVariables(variables: PackageConfigConfigRecord, streamTemplate: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
