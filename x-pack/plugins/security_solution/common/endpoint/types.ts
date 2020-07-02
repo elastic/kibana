@@ -77,12 +77,18 @@ export interface ResolverNodeStats {
  */
 export interface ResolverChildNode extends ResolverLifecycleNode {
   /**
-   * A child node's pagination cursor can be null for a couple reasons:
-   * 1. At the time of querying it could have no children in ES, in which case it will be marked as
-   *  null because we know it does not have children during this query.
-   * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
+   * nextChild can have 3 different states:
+   *
+   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
+   * not have any more direct children. The node could have more direct children but to determine that, use the
+   * ResolverChildren node's nextChild.
+   *
+   * null: Indicates that we have received all the children of the node. There may be more descendants though.
+   *
+   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
+   * using this node's entity_id
    */
-  nextChild: string | null;
+  nextChild?: string | null;
 }
 
 /**
@@ -92,7 +98,14 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
 export interface ResolverChildren {
   childNodes: ResolverChildNode[];
   /**
-   * This is the children cursor for the origin of a tree.
+   * nextChild can have 2 different states:
+   *
+   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
+   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
+   * is complete.
+   *
+   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
+   * entity_id for the request.
    */
   nextChild: string | null;
 }
