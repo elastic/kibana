@@ -1034,6 +1034,13 @@ export class EndpointDocGenerator {
           enabled: true,
           streams: [],
           config: {
+            artifact_manifest: {
+              value: {
+                manifest_version: 'v0',
+                schema_version: '1.0.0',
+                artifacts: {},
+              },
+            },
             policy: {
               value: policyFactory(),
             },
