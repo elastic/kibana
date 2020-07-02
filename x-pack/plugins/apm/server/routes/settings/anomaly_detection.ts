@@ -50,11 +50,6 @@ export const anomalyDetectionEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/settings/anomaly-detection/environments',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    // return await getAllEnvironments({ setup });
-
-    // TODO remove dev test data:
-    const environments = await getAllEnvironments({ setup });
-    const testEnvironments = ['prod', 'dev', 'test', 'staging'];
-    return [...environments, ...testEnvironments];
+    return await getAllEnvironments({ setup });
   },
 }));

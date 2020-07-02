@@ -6,9 +6,9 @@
 
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
-// import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
+import { JobResponse } from '../../../../ml/common/types/modules';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -29,19 +29,47 @@ export async function createAnomalyDetectionJobs(
       mlCapabilities.isPlatinumOrTrialLicense
     )
   ) {
-    logger.warn('Anomaly detection integration is not availble for this user.');
+    logger.warn(
+      'Anomaly detection integration is not available for this user.'
+    );
     return [];
   }
   logger.info(
-    `Creating ML anomaly detection jobs for environments: [${environments}]...`
+    `Creating ML anomaly detection jobs for environments: [${environments}].`
   );
 
-  const result = await Promise.all(
-    environments.map((environment) => {
-      return configureAnomalyDetectionJob({ ml, environment });
-    })
+  const dataRecognizerConfigResponses = await Promise.all(
+    environments.map((environment) =>
+      configureAnomalyDetectionJob({ ml, environment })
+    )
   );
-  return result;
+  const newJobResponses = dataRecognizerConfigResponses.reduce(
+    (acc, response) => {
+      return [...acc, ...response.jobs];
+    },
+    [] as JobResponse[]
+  );
+
+  const failedJobs = newJobResponses.filter(({ success }) => !success);
+
+  if (failedJobs.length > 0) {
+    const allJobsFailed = failedJobs.length === newJobResponses.length;
+
+    logger.error('Failed to create anomaly detection ML jobs.');
+    failedJobs.forEach(({ error }) => logger.error(JSON.stringify(error)));
+
+    if (allJobsFailed) {
+      throw new Error('Failed to setup anomaly detection ML jobs.');
+    }
+    const failedJobIds = failedJobs.map(({ id }) => id);
+    throw new Error(
+      `Some anomaly detection ML jobs failed to setup: [${failedJobIds.join(
+        ', '
+      )}]`
+    );
+  }
+
+  return newJobResponses;
 }
 
 async function configureAnomalyDetectionJob({
@@ -53,47 +81,32 @@ async function configureAnomalyDetectionJob({
 }) {
   const convertedEnvironmentName = convertToMLIdentifier(environment);
   const randomToken = uuid().substr(-4);
-  const moduleId = 'apm_transaction';
-  const prefix = `apm-${convertedEnvironmentName}-${randomToken}-`;
-  const groups = ['apm', convertedEnvironmentName];
-  const indexPatternName = 'apm-*-transaction-*';
-  const query = {
-    bool: {
-      filter: [
-        { term: { 'processor.event': 'transaction' } },
-        { exists: { field: 'transaction.duration.us' } },
-        { term: { 'service.environment': environment } },
-      ],
-    },
-  };
-  const useDedicatedIndex = false;
-  const startDatafeed = true;
-  const start = undefined;
-  const end = undefined;
-  const jobOverrides = [
-    {
-      custom_settings: {
-        job_tags: {
-          'service.environment': environment,
-        },
+
+  return ml.modules.setup({
+    moduleId: 'apm_transaction',
+    prefix: `apm-${convertedEnvironmentName}-${randomToken}-`,
+    groups: ['apm', convertedEnvironmentName],
+    indexPatternName: 'apm-*-transaction-*',
+    query: {
+      bool: {
+        filter: [
+          { term: { 'processor.event': 'transaction' } },
+          { exists: { field: 'transaction.duration.us' } },
+          { term: { 'service.environment': environment } },
+        ],
       },
     },
-  ];
-  const datafeedOverrides = undefined;
-
-  return ml.modules.setupModuleItems(
-    moduleId,
-    prefix,
-    groups,
-    indexPatternName,
-    query,
-    useDedicatedIndex,
-    startDatafeed,
-    start,
-    end,
-    jobOverrides, // Typescript Error: '{ job_tags: { 'service.environment': string; }; }' has no properties in common with type 'CustomSettings'.
-    datafeedOverrides
-  );
+    startDatafeed: true,
+    jobOverrides: [
+      {
+        custom_settings: {
+          job_tags: {
+            'service.environment': environment,
+          },
+        },
+      },
+    ],
+  });
 }
 
 export function convertToMLIdentifier(value: string) {

@@ -5,7 +5,6 @@
  */
 
 import { Logger } from 'kibana/server';
-import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import { AnomalyDetectionJobByEnv } from '../../../typings/anomaly_detection';
@@ -21,32 +20,48 @@ export async function getAnomalyDetectionJobs(
   if (!ml) {
     return [];
   }
-  const mlCapabilities = await ml.mlSystem.mlCapabilities();
-  if (
-    !(
-      mlCapabilities.mlFeatureEnabledInSpace &&
-      mlCapabilities.isPlatinumOrTrialLicense
-    )
-  ) {
-    logger.warn('Anomaly detection integration is not availble for this user.');
+  try {
+    const mlCapabilities = await ml.mlSystem.mlCapabilities();
+    if (
+      !(
+        mlCapabilities.mlFeatureEnabledInSpace &&
+        mlCapabilities.isPlatinumOrTrialLicense
+      )
+    ) {
+      logger.warn(
+        'Anomaly detection integration is not availble for this user.'
+      );
+      return [];
+    }
+  } catch (error) {
+    logger.warn('Unable to get ML capabilities.');
+    logger.error(error);
     return [];
   }
-  let mlJobs: AnomalyDetectionJob[] = [];
   try {
-    mlJobs = (await ml.anomalyDetectors.jobs('apm')).jobs;
+    const { jobs } = await ml.anomalyDetectors.jobs('apm');
+    return jobs.reduce((acc, anomalyDetectionJob) => {
+      if (
+        anomalyDetectionJob.custom_settings?.job_tags?.['service.environment']
+      ) {
+        return [
+          ...acc,
+          {
+            job_id: anomalyDetectionJob.job_id,
+            'service.environment':
+              anomalyDetectionJob.custom_settings.job_tags[
+                'service.environment'
+              ],
+          },
+        ];
+      }
+      return acc;
+    }, [] as AnomalyDetectionJobByEnv[]);
   } catch (error) {
-    // if (error.statusCode === 404) {
-    //   return [];
-    // }
+    if (error.statusCode !== 404) {
+      logger.warn('Unable to get APM ML jobs.');
+      logger.error(error);
+    }
+    return [];
   }
-  // return mlJobs.map(...)
-  const exampleApmJobsByEnv: AnomalyDetectionJobByEnv[] = [
-    {
-      'service.environment': 'prod',
-      job_id: 'apm-prod-high_mean_response_time',
-    },
-    { 'service.environment': 'dev', job_id: 'apm-dev-high_mean_response_time' },
-    { 'service.environment': 'new', job_id: 'apm-new-high_mean_response_time' },
-  ];
-  return exampleApmJobsByEnv;
 }

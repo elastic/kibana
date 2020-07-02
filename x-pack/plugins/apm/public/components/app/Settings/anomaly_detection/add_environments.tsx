@@ -89,6 +89,9 @@ export const AddEnvironments = ({
           setSelected(nextSelectedOptions);
         }}
         onCreateOption={(searchValue) => {
+          if (currentEnvironments.includes(searchValue)) {
+            return;
+          }
           const newOption = {
             label: searchValue,
             value: searchValue,

@@ -115,7 +115,7 @@ function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
   const mlClient = ml.mlClient.asScoped(request).callAsCurrentUser;
   return {
     mlSystem: ml.mlSystemProvider(mlClient, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient),
+    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
     modules: ml.modulesProvider(
       mlClient,
       request,

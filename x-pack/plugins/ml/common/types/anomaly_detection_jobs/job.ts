@@ -13,6 +13,7 @@ export type BucketSpan = string;
 export interface CustomSettings {
   custom_urls?: UrlConfig[];
   created_by?: CREATED_BY_LABEL;
+  job_tags?: Record<string, string>;
 }
 
 export interface Job {
