@@ -13,7 +13,7 @@ import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { DataSourcesPanel } from './data_sources_panel';
+import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
@@ -62,8 +62,8 @@ export function ContentPanel(props: ContentPanelProps) {
           latestVersion={latestVersion}
         />
       );
-    case 'data-sources':
-      return <DataSourcesPanel name={name} version={version} />;
+    case 'usages':
+      return <PackageConfigsPanel name={name} version={version} />;
     case 'overview':
     default:
       return <OverviewPanel {...props} />;

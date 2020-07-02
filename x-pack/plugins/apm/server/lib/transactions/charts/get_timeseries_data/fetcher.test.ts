@@ -44,7 +44,6 @@ describe('timeseriesFetcher', () => {
           apmAgentConfigurationIndex: 'myIndex',
           apmCustomLinkIndex: 'myIndex',
         },
-        dynamicIndexPattern: null as any,
       },
     });
   });
