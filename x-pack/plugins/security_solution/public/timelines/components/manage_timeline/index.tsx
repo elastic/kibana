@@ -101,11 +101,10 @@ const reducerManageTimeline = (
         },
       } as ManageTimelineById;
     case 'SET_INDEX_TO_ADD':
-      const timelineIdState: ManageTimeline = state[action.id] as ManageTimeline;
       return {
         ...state,
         [action.id]: {
-          ...timelineIdState,
+          ...state[action.id],
           indexToAdd: action.payload,
         },
       } as ManageTimelineById;

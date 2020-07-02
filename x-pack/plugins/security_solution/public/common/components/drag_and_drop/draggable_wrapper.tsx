@@ -117,11 +117,11 @@ export const DraggableWrapper = React.memo<Props>(
 
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
-        const newShopTopN = !prevShowTopN;
-        if (newShopTopN === false) {
+        const newShowTopN = !prevShowTopN;
+        if (newShowTopN === false) {
           handleClosePopOverTrigger();
         }
-        return newShopTopN;
+        return newShowTopN;
       });
     }, [handleClosePopOverTrigger]);
 
