@@ -5,7 +5,6 @@
  */
 
 import { HostAction } from '../../management/pages/endpoint_hosts/store/action';
-import { AlertAction } from '../../endpoint_alerts/store/action';
 import { PolicyListAction } from '../../management/pages/policy/store/policy_list';
 import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
 
@@ -14,9 +13,4 @@ export { dragAndDropActions } from './drag_and_drop';
 export { inputsActions } from './inputs';
 import { RoutingAction } from './routing';
 
-export type AppAction =
-  | HostAction
-  | AlertAction
-  | RoutingAction
-  | PolicyListAction
-  | PolicyDetailsAction;
+export type AppAction = HostAction | RoutingAction | PolicyListAction | PolicyDetailsAction;
