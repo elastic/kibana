@@ -393,3 +393,46 @@ export function databaseDocumentIDToAbort(state: DataState): string | null {
     return null;
   }
 }
+
+/**
+ * `ResolverNodeStats` for a process (`ResolverEvent`)
+ */
+const relatedEventStatsForProcess: (
+  state: DataState
+) => (event: ResolverEvent) => ResolverNodeStats | null = createSelector(
+  relatedEventsStats,
+  (statsMap) => {
+    if (!statsMap) {
+      return () => null;
+    }
+    return (event: ResolverEvent) => {
+      const nodeStats = statsMap.get(uniquePidForProcess(event));
+      if (!nodeStats) {
+        return null;
+      }
+      return nodeStats;
+    };
+  }
+);
+
+/**
+ * The sum of all related event categories for a process.
+ */
+export const relatedEventTotalForProcess: (
+  state: DataState
+) => (event: ResolverEvent) => number | null = createSelector(
+  relatedEventStatsForProcess,
+  (statsForProcess) => {
+    return (event: ResolverEvent) => {
+      const stats = statsForProcess(event);
+      if (!stats) {
+        return null;
+      }
+      let total = 0;
+      for (const value of Object.values(stats.events.byCategory)) {
+        total += value;
+      }
+      return total;
+    };
+  }
+);
