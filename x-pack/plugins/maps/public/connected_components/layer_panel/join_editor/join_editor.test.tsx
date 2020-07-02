@@ -8,6 +8,7 @@ import React from 'react';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinEditor } from './join_editor';
 import { shallow } from 'enzyme';
+import { JoinDescriptor } from '../../../../common/descriptor_types';
 
 class MockLayer {
   private readonly _disableReason: string | null;
@@ -37,7 +38,7 @@ const defaultProps = {
           },
         ],
       },
-    },
+    } as JoinDescriptor,
   ],
   layerDisplayName: 'myLeftJoinField',
   leftJoinFields: [],

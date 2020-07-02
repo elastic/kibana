@@ -15,12 +15,11 @@ import { setJoinsForLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { IField } from '../../../classes/fields/field';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     joins: getSelectedLayerJoinDescriptors(state),
-    layer: getSelectedLayer(state),
+    layer: getSelectedLayer(state)!,
   };
 }
 
@@ -32,22 +31,5 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   };
 }
 
-interface StateProps {
-  joins: JoinDescriptor[];
-  layer: ILayer;
-}
-
-interface DispatchProps {
-  onChange: (layer: ILayer, joins: JoinDescriptor[]) => void;
-}
-
-interface OwnProps {
-  layerDisplayName: string;
-  leftJoinFields: IField[];
-}
-
-const connectedJoinEditor = connect<StateProps, DispatchProps, OwnProps>(
-  mapStateToProps,
-  mapDispatchToProps
-)(JoinEditor);
+const connectedJoinEditor = connect(mapStateToProps, mapDispatchToProps)(JoinEditor);
 export { connectedJoinEditor as JoinEditor };

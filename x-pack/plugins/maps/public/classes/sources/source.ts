@@ -81,7 +81,6 @@ export class AbstractSource implements ISource {
   destroy(): void {}
 
   cloneDescriptor(): SourceDescriptor {
-    // @ts-expect-error
     return copyPersistentState(this._descriptor);
   }
 

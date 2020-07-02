@@ -16,9 +16,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-// @ts-expect-error
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+// @ts-expect-error
 import { Join } from './resources/join';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';

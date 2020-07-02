@@ -147,7 +147,6 @@ export class AbstractLayer implements ILayer {
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
-    // @ts-expect-error
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
@@ -155,14 +154,10 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
 
-    // todo: remove this
-    // This should not be in AbstractLayer. It relies on knowledge of VectorLayerDescriptor
-    // @ts-expect-error
     if (clonedDescriptor.joins) {
       // @ts-expect-error
       clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
-        // @ts-expect-error
         joinDescriptor.right.id = uuid();
       });
     }
@@ -341,15 +336,12 @@ export class AbstractLayer implements ILayer {
       const mbStyle = mbMap.getStyle();
       // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-expect-error
         if (this.ownsMbLayerId(mbLayer.id)) {
           // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-expect-error
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-expect-error
         if (this.ownsMbSourceId(mbSourceId)) {
           // @ts-expect-error
           mbMap.removeSource(mbSourceId);
