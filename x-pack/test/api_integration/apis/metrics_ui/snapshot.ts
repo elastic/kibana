@@ -182,12 +182,14 @@ export default function ({ getService }: FtrProviderContext) {
             expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
             expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
-            expect(firstNode.metrics).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.002794444444444445,
-            });
+            expect(firstNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
           }
         });
       });
@@ -382,24 +384,28 @@ export default function ({ getService }: FtrProviderContext) {
             expect(firstNode.path[0]).to.have.property('value', 'mysql');
             expect(firstNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
-            expect(firstNode.metrics).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.002794444444444445,
-            });
-            const secondNode = nodes[1];
+            expect(firstNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
+            const secondNode = nodes[1] as any;
             expect(secondNode).to.have.property('path');
             expect(secondNode.path.length).to.equal(2);
             expect(secondNode.path[0]).to.have.property('value', 'system');
             expect(secondNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
             expect(secondNode).to.have.property('metrics');
-            expect(secondNode.metrics).to.eql({
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.002794444444444445,
-            });
+            expect(secondNode.metrics).to.eql([
+              {
+                name: 'cpu',
+                value: 0.0032,
+                max: 0.0038333333333333336,
+                avg: 0.002794444444444445,
+              },
+            ]);
           }
         });
       });
