@@ -105,6 +105,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(true);
     });
 
@@ -129,6 +131,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
 
@@ -148,6 +152,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
 
@@ -167,6 +173,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="endpoint-prompt-banner"]').exists()).toBe(false);
     });
   });
