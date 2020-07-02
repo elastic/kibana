@@ -16,7 +16,7 @@ import {
 } from './selectors';
 import { HostState } from '../types';
 import {
-  sendGetEndpointSpecificDatasources,
+  sendGetEndpointSpecificPackageConfigs,
   sendGetEndpointSecurityPackage,
 } from '../../policy/store/policy_list/services/ingest';
 
@@ -69,7 +69,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       if (hostResponse && hostResponse.hosts.length === 0) {
         const http = coreStart.http;
         try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificDatasources(
+          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackageConfigs(
             http,
             {
               query: {
