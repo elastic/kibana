@@ -7,17 +7,22 @@ import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
 
-export const kibanaRequestToMetadataListESQuery = async (
+export interface QueryBuilderOptions {
+  unenrolledAgentIds?: string[];
+}
+
+export async function kibanaRequestToMetadataListESQuery(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext,
-  index: string
+  index: string,
+  queryBuilderOptions?: QueryBuilderOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<Record<string, any>> => {
+): Promise<Record<string, any>> {
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
-      query: buildQueryBody(request),
+      query: buildQueryBody(request, queryBuilderOptions?.unenrolledAgentIds!),
       collapse: {
         field: 'host.id',
         inner_hits: {
@@ -45,7 +50,7 @@ export const kibanaRequestToMetadataListESQuery = async (
     size: pagingProperties.pageSize,
     index,
   };
-};
+}
 
 async function getPagingProperties(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,14 +73,53 @@ async function getPagingProperties(
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
+function buildQueryBody(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: KibanaRequest<any, any, any>,
+  unerolledAgentIds: string[] | undefined
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Record<string, any> {
+  const filterUnenrolledAgents = unerolledAgentIds && unerolledAgentIds.length > 0;
   if (typeof request?.body?.filter === 'string') {
-    return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
+    const kqlQuery = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
+    return {
+      bool: {
+        must: filterUnenrolledAgents
+          ? [
+              {
+                bool: {
+                  must_not: {
+                    terms: {
+                      'elastic.agent.id': unerolledAgentIds,
+                    },
+                  },
+                },
+              },
+              {
+                ...kqlQuery,
+              },
+            ]
+          : [
+              {
+                ...kqlQuery,
+              },
+            ],
+      },
+    };
   }
-  return {
-    match_all: {},
-  };
+  return filterUnenrolledAgents
+    ? {
+        bool: {
+          must_not: {
+            terms: {
+              'elastic.agent.id': unerolledAgentIds,
+            },
+          },
+        },
+      }
+    : {
+        match_all: {},
+      };
 }
 
 export function getESQueryHostMetadataByID(hostID: string, index: string) {

@@ -10,60 +10,63 @@ import cytoscape from 'cytoscape';
 import React from 'react';
 import { Cytoscape } from '../Cytoscape';
 import { iconForNode } from '../icons';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 
-storiesOf('app/ServiceMap/Cytoscape', module).add(
-  'example',
-  () => {
-    const elements: cytoscape.ElementDefinition[] = [
-      {
-        data: {
-          id: 'opbeans-python',
-          'service.name': 'opbeans-python',
-          'agent.name': 'python',
+storiesOf('app/ServiceMap/Cytoscape', module)
+  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .add(
+    'example',
+    () => {
+      const elements: cytoscape.ElementDefinition[] = [
+        {
+          data: {
+            id: 'opbeans-python',
+            'service.name': 'opbeans-python',
+            'agent.name': 'python',
+          },
         },
-      },
-      {
-        data: {
-          id: 'opbeans-node',
-          'service.name': 'opbeans-node',
-          'agent.name': 'nodejs',
+        {
+          data: {
+            id: 'opbeans-node',
+            'service.name': 'opbeans-node',
+            'agent.name': 'nodejs',
+          },
         },
-      },
-      {
-        data: {
-          id: 'opbeans-ruby',
-          'service.name': 'opbeans-ruby',
-          'agent.name': 'ruby',
+        {
+          data: {
+            id: 'opbeans-ruby',
+            'service.name': 'opbeans-ruby',
+            'agent.name': 'ruby',
+          },
         },
-      },
-      { data: { source: 'opbeans-python', target: 'opbeans-node' } },
-      {
-        data: {
-          bidirectional: true,
-          source: 'opbeans-python',
-          target: 'opbeans-ruby',
+        { data: { source: 'opbeans-python', target: 'opbeans-node' } },
+        {
+          data: {
+            bidirectional: true,
+            source: 'opbeans-python',
+            target: 'opbeans-ruby',
+          },
         },
-      },
-    ];
-    const height = 300;
-    const width = 1340;
-    const serviceName = 'opbeans-python';
-    return (
-      <Cytoscape
-        elements={elements}
-        height={height}
-        width={width}
-        serviceName={serviceName}
-      />
-    );
-  },
-  {
-    info: {
-      propTables: false,
-      source: false,
+      ];
+      const height = 300;
+      const width = 1340;
+      const serviceName = 'opbeans-python';
+      return (
+        <Cytoscape
+          elements={elements}
+          height={height}
+          width={width}
+          serviceName={serviceName}
+        />
+      );
     },
-  }
-);
+    {
+      info: {
+        propTables: false,
+        source: false,
+      },
+    }
+  );
 
 storiesOf('app/ServiceMap/Cytoscape', module).add(
   'node icons',

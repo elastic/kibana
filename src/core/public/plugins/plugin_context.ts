@@ -101,7 +101,6 @@ export function createPluginSetupContext<
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     context: deps.context,
-    docLinks: deps.docLinks,
     fatalErrors: deps.fatalErrors,
     http: deps.http,
     notifications: deps.notifications,

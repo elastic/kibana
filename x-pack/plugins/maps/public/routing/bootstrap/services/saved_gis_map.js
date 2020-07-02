@@ -19,7 +19,7 @@ import {
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { copyPersistentState } from '../../../reducers/util';
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
-import { MAP_BASE_URL, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { getStore } from '../../store_operations';
 
 export function createSavedGisMapClass(services) {
@@ -76,7 +76,7 @@ export function createSavedGisMapClass(services) {
     }
 
     getFullPath() {
-      return `${MAP_BASE_URL}/${this.id}`;
+      return getExistingMapPath(this.id);
     }
 
     getLayerList() {

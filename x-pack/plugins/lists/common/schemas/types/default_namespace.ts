@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-const namespaceType = t.keyof({ agnostic: null, single: null });
+export const namespaceType = t.keyof({ agnostic: null, single: null });
 
 type NamespaceType = t.TypeOf<typeof namespaceType>;
 

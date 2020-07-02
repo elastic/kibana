@@ -8,17 +8,16 @@ import expect from '@kbn/expect';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
 
   function request({ method, url, data }: { method: string; url: string; data?: JsonObject }) {
     switch (method.toLowerCase()) {
       case 'post':
-        return supertest.post(url).send(data).set('kbn-xsrf', 'foo');
+        return supertestWrite.post(url).send(data).set('kbn-xsrf', 'foo');
 
       default:
-        throw new Error(`Unsupported methoed ${method}`);
+        throw new Error(`Unsupported method ${method}`);
     }
   }
 

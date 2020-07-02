@@ -11,6 +11,7 @@ import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
+import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 
 main();
 
@@ -95,19 +96,25 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'events-endpoint-1',
+      default: 'logs-endpoint.events.process-default',
+      type: 'string',
+    },
+    alertIndex: {
+      alias: 'ai',
+      describe: 'index to store alerts in',
+      default: 'logs-endpoint.alerts-default',
       type: 'string',
     },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint.metadata-default-1',
+      default: 'metrics-endpoint.metadata-default',
       type: 'string',
     },
     policyIndex: {
       alias: 'pi',
       describe: 'index to store host policy in',
-      default: 'metrics-endpoint.policy-default-1',
+      default: 'metrics-endpoint.policy-default',
       type: 'string',
     },
     ancestors: {
@@ -115,6 +122,12 @@ async function main() {
       describe: 'number of ancestors of origin to create',
       type: 'number',
       default: 3,
+    },
+    ancestryArraySize: {
+      alias: 'ancSize',
+      describe: 'the upper bound size of the ancestry array, 0 will mark the field as undefined',
+      type: 'number',
+      default: ANCESTRY_LIMIT,
     },
     generations: {
       alias: 'gen',
@@ -192,7 +205,10 @@ async function main() {
 
   const client = new Client(clientOptions);
   if (argv.delete) {
-    await deleteIndices([argv.eventIndex, argv.metadataIndex, argv.policyIndex], client);
+    await deleteIndices(
+      [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
+      client
+    );
   }
 
   let seed = argv.seed;
@@ -209,6 +225,7 @@ async function main() {
     argv.metadataIndex,
     argv.policyIndex,
     argv.eventIndex,
+    argv.alertIndex,
     argv.alertsPerHost,
     {
       ancestors: argv.ancestors,
@@ -219,6 +236,7 @@ async function main() {
       percentWithRelated: argv.percentWithRelated,
       percentTerminated: argv.percentTerminated,
       alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
+      ancestryArraySize: argv.ancestryArraySize,
     }
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);

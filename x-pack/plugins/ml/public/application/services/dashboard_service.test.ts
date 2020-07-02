@@ -70,12 +70,12 @@ describe('DashboardService', () => {
             gridData: { x: 24, y: 0, w: 24, h: 15, i: '0aa334bd-8308-4ded-9462-80dbd37680ee' },
             panelIndex: '0aa334bd-8308-4ded-9462-80dbd37680ee',
             embeddableConfig: {
-              title: 'ML anomaly swimlane for fb_population_1',
+              title: 'ML anomaly swim lane for fb_population_1',
               jobIds: ['fb_population_1'],
               limit: 5,
               swimlaneType: 'overall',
             },
-            title: 'ML anomaly swimlane for fb_population_1',
+            title: 'ML anomaly swim lane for fb_population_1',
           },
           {
             version: '8.0.0',
@@ -118,12 +118,12 @@ describe('DashboardService', () => {
           gridData: { x: 24, y: 0, w: 24, h: 15, i: '0aa334bd-8308-4ded-9462-80dbd37680ee' },
           panelIndex: '0aa334bd-8308-4ded-9462-80dbd37680ee',
           embeddableConfig: {
-            title: 'ML anomaly swimlane for fb_population_1',
+            title: 'ML anomaly swim lane for fb_population_1',
             jobIds: ['fb_population_1'],
             limit: 5,
             swimlaneType: 'overall',
           },
-          title: 'ML anomaly swimlane for fb_population_1',
+          title: 'ML anomaly swim lane for fb_population_1',
         },
         {
           version: '8.0.0',

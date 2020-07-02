@@ -54,6 +54,8 @@ export interface CreateRequestBody extends PreviewRequestBody {
 
 export interface TransformPivotConfig extends CreateRequestBody {
   id: TransformId;
+  create_time?: number;
+  version?: string;
 }
 
 export enum REFRESH_TRANSFORM_LIST_STATE {

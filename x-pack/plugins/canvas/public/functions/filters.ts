@@ -8,7 +8,7 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
 import { interpretAst } from '../lib/run_interpreter';
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';
 import { ExpressionValueFilter } from '../../types';

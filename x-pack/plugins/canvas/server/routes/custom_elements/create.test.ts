@@ -9,7 +9,7 @@ import {
   savedObjectsClientMock,
   httpServiceMock,
   httpServerMock,
-  loggingServiceMock,
+  loggingSystemMock,
 } from 'src/core/server/mocks';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
@@ -41,7 +41,7 @@ describe('POST custom element', () => {
     const router = httpService.createRouter();
     initializeCreateCustomElementRoute({
       router,
-      logger: loggingServiceMock.create().get(),
+      logger: loggingSystemMock.create().get(),
     });
 
     routeHandler = router.post.mock.calls[0][1];

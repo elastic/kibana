@@ -31,11 +31,6 @@ export const subMenuAssets = {
   menuError: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedRetrievalError', {
     defaultMessage: 'There was an error retrieving related events.',
   }),
-  relatedAlerts: {
-    title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedAlerts', {
-      defaultMessage: 'Related Alerts',
-    }),
-  },
   relatedEvents: {
     title: i18n.translate('xpack.securitySolution.endpoint.resolver.relatedEvents', {
       defaultMessage: 'Events',

@@ -70,10 +70,10 @@ describe('<IndexManagementHome />', () => {
         },
       ]);
 
-      httpRequestsMockHelpers.setLoadDataStreamsResponse([
-        createDataStreamPayload('dataStream1'),
-        createDataStreamPayload('dataStream2'),
-      ]);
+      // The detail panel should still appear even if there are no data streams.
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
+
+      httpRequestsMockHelpers.setLoadDataStreamResponse(createDataStreamPayload('dataStream1'));
 
       testBed = await setup();
 
@@ -86,13 +86,16 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('navigates to the data stream in the Data Streams tab', async () => {
-      const { table, actions } = testBed;
+      const {
+        findDataStreamDetailPanel,
+        findDataStreamDetailPanelTitle,
+        actions: { clickDataStreamAt },
+      } = testBed;
 
-      await actions.clickDataStreamAt(0);
+      await clickDataStreamAt(0);
 
-      expect(table.getMetaData('dataStreamTable').tableCellsValues).toEqual([
-        ['dataStream1', '1', '@timestamp', '1'],
-      ]);
+      expect(findDataStreamDetailPanel().length).toBe(1);
+      expect(findDataStreamDetailPanelTitle()).toBe('dataStream1');
     });
   });
 
