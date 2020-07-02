@@ -113,7 +113,7 @@ export const createMetricsFetchData = (
     title: i18n.translate('xpack.infra.observabilityHomepage.metrics.title', {
       defaultMessage: 'Metrics',
     }),
-    appLink: '../app/metrics',
+    appLink: '/app/metrics',
     stats: {
       hosts: {
         type: 'number',
@@ -123,26 +123,26 @@ export const createMetricsFetchData = (
         value: results.nodes.length,
       },
       cpu: {
-        type: 'number',
+        type: 'percent',
         label: i18n.translate('xpack.infra.observabilityHomepage.metrics.cpuLabel', {
           defaultMessage: 'CPU usage',
         }),
         value: combineNodesBy('cpu', results.nodes, average),
       },
       memory: {
-        type: 'number',
+        type: 'percent',
         label: i18n.translate('xpack.infra.observabilityHomepage.metrics.memoryLabel', {
           defaultMessage: 'Memory usage',
         }),
         value: combineNodesBy('memory', results.nodes, average),
       },
       inboundTraffic: {
-        type: 'number',
+        type: 'bytesPerSecond',
         label: inboundLabel,
         value: combineNodesBy('rx', results.nodes, average),
       },
       outboundTraffic: {
-        type: 'number',
+        type: 'bytesPerSecond',
         label: outboundLabel,
         value: combineNodesBy('tx', results.nodes, average),
       },

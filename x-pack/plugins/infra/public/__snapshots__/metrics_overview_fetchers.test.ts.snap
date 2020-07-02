@@ -2,7 +2,7 @@
 
 exports[`Metrics UI Observability Homepage Functions createMetricsFetchData() should just work 1`] = `
 Object {
-  "appLink": "../app/metrics",
+  "appLink": "/app/metrics",
   "series": Object {
     "inboundTraffic": Object {
       "coordinates": Array [
@@ -186,7 +186,7 @@ Object {
   "stats": Object {
     "cpu": Object {
       "label": "CPU usage",
-      "type": "number",
+      "type": "percent",
       "value": 0.0015,
     },
     "hosts": Object {
@@ -196,17 +196,17 @@ Object {
     },
     "inboundTraffic": Object {
       "label": "Inbound traffic",
-      "type": "number",
+      "type": "bytesPerSecond",
       "value": 3.5,
     },
     "memory": Object {
       "label": "Memory usage",
-      "type": "number",
+      "type": "percent",
       "value": 0.0015,
     },
     "outboundTraffic": Object {
       "label": "Outbound traffic",
-      "type": "number",
+      "type": "bytesPerSecond",
       "value": 3,
     },
   },
