@@ -88,7 +88,6 @@ describe('Value Lists API', () => {
     it('GETs from the lists endpoint', async () => {
       const abortCtrl = new AbortController();
       await findLists({
-        cursor: undefined,
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -106,7 +105,7 @@ describe('Value Lists API', () => {
     it('sends pagination as query parameters', async () => {
       const abortCtrl = new AbortController();
       await findLists({
-        cursor: undefined,
+        cursor: 'cursor',
         http: httpMock,
         pageIndex: 1,
         pageSize: 10,
@@ -116,7 +115,11 @@ describe('Value Lists API', () => {
       expect(httpMock.fetch).toHaveBeenCalledWith(
         '/api/lists/_find',
         expect.objectContaining({
-          query: { page: 1, per_page: 10 },
+          query: {
+            cursor: 'cursor',
+            page: 1,
+            per_page: 10,
+          },
         })
       );
     });
@@ -124,7 +127,6 @@ describe('Value Lists API', () => {
     it('rejects with an error if request payload is invalid (and does not make API call)', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<FindListsParams> = {
-        cursor: undefined,
         pageIndex: 10,
         pageSize: 0,
       };
@@ -142,7 +144,6 @@ describe('Value Lists API', () => {
     it('rejects with an error if response payload is invalid', async () => {
       const abortCtrl = new AbortController();
       const payload: ApiPayload<FindListsParams> = {
-        cursor: undefined,
         pageIndex: 1,
         pageSize: 10,
       };
