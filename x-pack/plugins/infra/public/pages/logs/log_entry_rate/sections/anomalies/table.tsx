@@ -93,7 +93,6 @@ export const AnomaliesTable: React.FunctionComponent<{
     return results.anomalies.map((anomaly) => {
       return {
         id: anomaly.id,
-        // The real ID
         dataset: anomaly.partitionId,
         datasetName: getFriendlyNameForPartitionId(anomaly.partitionId),
         anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
