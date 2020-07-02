@@ -45,7 +45,7 @@ const buildColumns = (
     field: 'created_by',
     name: i18n.COLUMN_CREATED_BY,
     truncateText: true,
-    width: '15%',
+    width: '20%',
   },
   {
     name: i18n.COLUMN_ACTIONS,
@@ -67,6 +67,7 @@ const buildColumns = (
         'data-test-subj': 'action-delete-value-list',
       },
     ],
+    width: '15%',
   },
 ];
 
