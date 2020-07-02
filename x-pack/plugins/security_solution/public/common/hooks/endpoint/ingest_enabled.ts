@@ -6,7 +6,15 @@
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-export const useIngestEnabledCheck = (): boolean => {
+/**
+ * Returns an object which ingest permissions are allowed
+ */
+export const useIngestEnabledCheck = (): {
+  allEnabled: boolean;
+  show: boolean;
+  write: boolean;
+  read: boolean;
+} => {
   const { services } = useKibana();
 
   // Check if Ingest Manager is present in the configuration
@@ -15,8 +23,12 @@ export const useIngestEnabledCheck = (): boolean => {
   const read = services.application.capabilities.ingestManager?.read ?? false;
 
   // Check if all Ingest Manager permissions are enabled
-  if (show === false || write === false || read === false) {
-    return false;
-  }
-  return true;
+  const allEnabled = show && read && write ? true : false;
+
+  return {
+    allEnabled,
+    show,
+    write,
+    read,
+  };
 };

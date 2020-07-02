@@ -49,6 +49,7 @@ describe('Overview', () => {
         (useWithSource as jest.Mock).mockReturnValue({
           indicesExist: false,
         });
+        (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
         const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<
           UseMessagesStorage
         >;
@@ -67,7 +68,6 @@ describe('Overview', () => {
       });
 
       it('does not show Endpoint get ready button when ingest is not enabled', () => {
-        (useIngestEnabledCheck as jest.Mock).mockReturnValue(false);
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -79,7 +79,7 @@ describe('Overview', () => {
       });
 
       it('shows Endpoint get ready button when ingest is enabled', () => {
-        (useIngestEnabledCheck as jest.Mock).mockReturnValue(true);
+        (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>

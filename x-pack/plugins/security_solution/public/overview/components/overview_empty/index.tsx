@@ -21,7 +21,7 @@ const OverviewEmptyComponent: React.FC = () => {
     'integrations?category=security'
   );
   const handleOnClick = useNavigateToAppEventHandler(ingestAppId, { path: ingestPath });
-  const isIngestEnabled = useIngestEnabledCheck();
+  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
   return isIngestEnabled === true ? (
     <EmptyPage
