@@ -71,10 +71,7 @@ export const AddEnvironments = ({
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiText>
-        Choose the service environments that you want to enable anomaly
-        detection for. Anomalies will surface for all the services and their
-        transaction types. You can also enter the environment name which has yet
-        to appear to analyze as soon as it is received.
+        Choose the service environments that you want to enable anomaly detection for. Anomalies will surface for all the services and their transaction types.
       </EuiText>
       <EuiSpacer size="l" />
       <EuiTitle>
