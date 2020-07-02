@@ -8,22 +8,25 @@ import React from 'react';
 import {
   EuiPanel,
   EuiTitle,
+  EuiText,
   EuiSpacer,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { AnomalyDetectionJobByEnv } from '../../../../../typings/anomaly_detection';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
+import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
 
 const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
   {
     field: 'service.environment',
     name: i18n.translate(
-      'xpack.apm.settings.anomalyDetection.environmentColumnLabel',
+      'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
     render: (environment: string) => environment,
@@ -31,20 +34,32 @@ const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
   {
     field: 'job_id',
     align: 'right',
-    name: 'Action',
+    name: i18n.translate(
+      'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
+      { defaultMessage: 'Action' }
+    ),
     render: (jobId: string) => (
-      <MLJobLink jobId={jobId}>View job in ML</MLJobLink>
+      <MLJobLink jobId={jobId}>
+        {i18n.translate(
+          'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
+          {
+            defaultMessage: 'View job in ML',
+          }
+        )}
+      </MLJobLink>
     ),
   },
 ];
 
 interface Props {
   isLoading: boolean;
+  hasFetchFailure: boolean;
   onAddEnvironments: () => void;
   anomalyDetectionJobsByEnv: AnomalyDetectionJobByEnv[];
 }
 export const JobsList = ({
   isLoading,
+  hasFetchFailure,
   onAddEnvironments,
   anomalyDetectionJobsByEnv,
 }: Props) => {
@@ -55,7 +70,7 @@ export const JobsList = ({
           <EuiTitle>
             <h2>
               {i18n.translate(
-                'xpack.apm.settings.anomalyDetection.environments',
+                'xpack.apm.settings.anomalyDetection.jobList.environments',
                 {
                   defaultMessage: 'Environments',
                 }
@@ -65,20 +80,77 @@ export const JobsList = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onAddEnvironments}>
-            Add environments
+            {i18n.translate(
+              'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
+              {
+                defaultMessage: 'Add environments',
+              }
+            )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      You can manage the anomaly detection jobs in Machine Learning.
+      <EuiText>
+        <FormattedMessage
+          id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
+          defaultMessage="You can {mlJobsLink}."
+          values={{
+            mlJobsLink: (
+              <MLLink path="jobs">
+                {i18n.translate(
+                  'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
+                  {
+                    defaultMessage:
+                      'manage the anomaly detection jobs in Machine Learning',
+                  }
+                )}
+              </MLLink>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiSpacer size="l" />
       <ManagedTable
-        noItemsMessage={<LoadingStatePrompt />}
+        noItemsMessage={
+          isLoading ? (
+            <LoadingStatePrompt />
+          ) : hasFetchFailure ? (
+            <FailureStatePrompt />
+          ) : (
+            <EmptyStatePrompt />
+          )
+        }
         columns={columns}
-        items={isLoading ? [] : anomalyDetectionJobsByEnv}
+        items={isLoading || hasFetchFailure ? [] : anomalyDetectionJobsByEnv}
         pagination={false}
       />
       <EuiSpacer size="l" />
     </EuiPanel>
   );
 };
+
+function EmptyStatePrompt() {
+  return (
+    <>
+      {i18n.translate(
+        'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
+        {
+          defaultMessage: 'No anomaly detection jobs.',
+        }
+      )}
+    </>
+  );
+}
+
+function FailureStatePrompt() {
+  return (
+    <>
+      {i18n.translate(
+        'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
+        {
+          defaultMessage: 'Unabled to fetch anomaly detection jobs.',
+        }
+      )}
+    </>
+  );
+}

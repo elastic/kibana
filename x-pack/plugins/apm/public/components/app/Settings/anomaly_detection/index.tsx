@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
@@ -23,26 +23,24 @@ export const AnomalyDetection = () => {
 
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
-
-  // if (status === FETCH_STATUS.FAILURE) {
-  //   return failurePrompt;
-  // }
-
-  // if (status === FETCH_STATUS.SUCCESS && isEmpty(data)) {
-  //   return emptyStatePrompt;
-  // }
+  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
 
   return (
     <>
       <EuiTitle size="l">
         <h1>
-          {i18n.translate('xpack.apm.settings.anomalyDetection', {
+          {i18n.translate('xpack.apm.settings.anomalyDetection.titleText', {
             defaultMessage: 'Anomaly detection',
           })}
         </h1>
       </EuiTitle>
       <EuiSpacer size="l" />
-      The Machine Learning integration enables you to see the health status of your applications in the Service map and identifies anomalies in your transaction duration to show unexpected increase in response time.
+      <EuiText>
+        {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
+          defaultMessage:
+            'The Machine Learning integration enables you to see the health status of your applications in the Service map and identifies anomalies in your transaction duration to show unexpected increase in response time.',
+        })}
+      </EuiText>
       <EuiSpacer size="l" />
       {viewAddEnvironments ? (
         <AddEnvironments
@@ -60,6 +58,7 @@ export const AnomalyDetection = () => {
       ) : (
         <JobsList
           isLoading={isLoading}
+          hasFetchFailure={hasFetchFailure}
           anomalyDetectionJobsByEnv={data}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);

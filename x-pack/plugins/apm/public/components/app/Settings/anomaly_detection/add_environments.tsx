@@ -16,6 +16,7 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -62,7 +63,7 @@ export const AddEnvironments = ({
       <EuiTitle>
         <h2>
           {i18n.translate(
-            'xpack.apm.settings.anomalyDetection.selectEnvironments',
+            'xpack.apm.settings.anomalyDetection.addEnvironments.titleText',
             {
               defaultMessage: 'Select environments',
             }
@@ -71,40 +72,59 @@ export const AddEnvironments = ({
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiText>
-        Choose the service environments that you want to enable anomaly detection for. Anomalies will surface for all the services and their transaction types.
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiTitle>
-        <h3>Environments</h3>
-      </EuiTitle>
-      <EuiComboBox
-        isLoading={isLoading}
-        placeholder="Select or add environments"
-        options={availableEnvironmentOptions}
-        selectedOptions={selectedOptions}
-        onChange={(nextSelectedOptions) => {
-          setSelected(nextSelectedOptions);
-        }}
-        onCreateOption={(searchValue) => {
-          if (currentEnvironments.includes(searchValue)) {
-            return;
+        {i18n.translate(
+          'xpack.apm.settings.anomalyDetection.addEnvironments.descriptionText',
+          {
+            defaultMessage:
+              'Choose the service environments that you want to enable anomaly detection for. Anomalies will surface for all the services and their transaction types.',
           }
-          const newOption = {
-            label: searchValue,
-            value: searchValue,
-          };
-          setSelected([...selectedOptions, newOption]);
-        }}
-        isClearable={true}
-      />
-      <EuiText>
-        You can also specify an environment variable yet to be sent.
+        )}
       </EuiText>
       <EuiSpacer size="l" />
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.apm.settings.anomalyDetection.addEnvironments.selectorLabel',
+          {
+            defaultMessage: 'Environments',
+          }
+        )}
+        fullWidth
+      >
+        <EuiComboBox
+          isLoading={isLoading}
+          placeholder={i18n.translate(
+            'xpack.apm.settings.anomalyDetection.addEnvironments.selectorPlaceholder',
+            {
+              defaultMessage: 'Select or add environments',
+            }
+          )}
+          options={availableEnvironmentOptions}
+          selectedOptions={selectedOptions}
+          onChange={(nextSelectedOptions) => {
+            setSelected(nextSelectedOptions);
+          }}
+          onCreateOption={(searchValue) => {
+            if (currentEnvironments.includes(searchValue)) {
+              return;
+            }
+            const newOption = {
+              label: searchValue,
+              value: searchValue,
+            };
+            setSelected([...selectedOptions, newOption]);
+          }}
+          isClearable={true}
+        />
+      </EuiFormRow>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty aria-label="Cancel" onClick={onCancel}>
-            Cancel
+            {i18n.translate(
+              'xpack.apm.settings.anomalyDetection.addEnvironments.cancelButtonText',
+              {
+                defaultMessage: 'Cancel',
+              }
+            )}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -124,7 +144,12 @@ export const AddEnvironments = ({
               }
             }}
           >
-            Create Jobs
+            {i18n.translate(
+              'xpack.apm.settings.anomalyDetection.addEnvironments.createJobsButtonText',
+              {
+                defaultMessage: 'Create Jobs',
+              }
+            )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
