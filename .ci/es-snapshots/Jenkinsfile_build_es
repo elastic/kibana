@@ -154,12 +154,10 @@ def buildArchives(destination) {
     "NODE_NAME=",
   ]) {
     sh """
-      ./gradlew -p distribution/archives assemble --parallel
+      ./gradlew -Dbuild.docker=true assemble --parallel
       mkdir -p ${destination}
       find distribution/archives -type f \\( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
-      ./gradlew -p distribution/docker assemble --parallel
-      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > distribution/docker/elasticsearch-${0}-docker-image.tar.gz'
-      cp distribution/docker/elasticsearch-*-docker-image.tar.gz ${destination}
+      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ${destination}/elasticsearch-${0}-docker-image.tar.gz'
     """
   }
 }
