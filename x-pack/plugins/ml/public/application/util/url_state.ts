@@ -58,32 +58,34 @@ export function parseUrlState(search: string): Dictionary<any> {
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
 export const useUrlState = (accessor: string): UrlState => {
   const history = useHistory();
-  const { search: locationSearch } = useLocation();
+  const { search: locationSearchString } = useLocation();
 
   // We maintain a local state of useLocation's search.
   // This allows us to use the callback variant of setSearch()
   // later on so we can make sure we always act on the
   // latest url state.
-  const [search, setSearch] = useState(locationSearch);
+  const [searchString, setSearchString] = useState(locationSearchString);
 
   useEffect(() => {
-    setSearch(locationSearch);
-  }, [locationSearch]);
+    setSearchString(locationSearchString);
+  }, [locationSearchString]);
 
   useEffect(() => {
     // Only push to history if something related to the accessor of this
     // url state instance is affected (e.g. a change in '_g' should not trigger
     // a push in the '_a' instance).
-    if (!isEqual(parseUrlState(locationSearch)[accessor], parseUrlState(search)[accessor])) {
-      history.push({ search });
+    if (
+      !isEqual(parseUrlState(locationSearchString)[accessor], parseUrlState(searchString)[accessor])
+    ) {
+      history.push({ search: searchString });
     }
-  }, [search]);
+  }, [searchString]);
 
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
-      setSearch((prevSearch) => {
-        const urlState = parseUrlState(prevSearch);
-        const parsedQueryString = parse(prevSearch, { sort: false });
+      setSearchString((prevSearchString) => {
+        const urlState = parseUrlState(prevSearchString);
+        const parsedQueryString = parse(prevSearchString, { sort: false });
 
         if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
           urlState[accessor] = {};
@@ -91,7 +93,7 @@ export const useUrlState = (accessor: string): UrlState => {
 
         if (typeof attribute === 'string') {
           if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-            return prevSearch;
+            return prevSearchString;
           }
 
           urlState[accessor][attribute] = value;
@@ -103,7 +105,10 @@ export const useUrlState = (accessor: string): UrlState => {
         }
 
         try {
-          const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+          const oldLocationSearchString = stringify(parsedQueryString, {
+            sort: false,
+            encode: false,
+          });
 
           Object.keys(urlState).forEach((a) => {
             if (isRisonSerializationRequired(a)) {
@@ -112,9 +117,12 @@ export const useUrlState = (accessor: string): UrlState => {
               parsedQueryString[a] = urlState[a];
             }
           });
-          const newLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+          const newLocationSearchString = stringify(parsedQueryString, {
+            sort: false,
+            encode: false,
+          });
 
-          if (oldLocationSearch !== newLocationSearch) {
+          if (oldLocationSearchString !== newLocationSearchString) {
             return stringify(parsedQueryString, { sort: false });
           }
         } catch (error) {
@@ -124,13 +132,13 @@ export const useUrlState = (accessor: string): UrlState => {
 
         // as a fallback and to satisfy the hooks callback requirements
         // return the previous state if we didn't need or were not able to update.
-        return prevSearch;
+        return prevSearchString;
       });
     },
-    [search]
+    [searchString]
   );
 
-  const urlState = useMemo(() => parseUrlState(search)[accessor], [search]);
+  const urlState = useMemo(() => parseUrlState(searchString)[accessor], [searchString]);
 
   return [urlState, setUrlState];
 };
