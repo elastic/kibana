@@ -1,17 +1,17 @@
 [role="xpack"]
 [[maps-connect-to-ems]]
-== Connecting to Elastic Maps Service
+== Connect to Elastic Maps Service
 
 https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
 tile layers and vector shapes of administrative boundaries.
-If you are using Kibana's out-of-the-box settings, **Elastic Maps** is already configured to use EMS.
+If you are using Kibana's out-of-the-box settings, Maps is already configured to use EMS.
 
 EMS requests are made to the following domains:
 
 * tiles.maps.elastic.co
 * vector.maps.elastic.co
 
-**Elastic Maps** makes requests directly from the browser to EMS.
+Maps makes requests directly from the browser to EMS.
 
 [float]
 === Connect to Elastic Maps Service from an internal network
@@ -33,5 +33,5 @@ behind a firewall. If this happens, you can disable the EMS connection to avoid 
 To disable EMS, change your <<settings, kibana.yml>> file.
 
 . Set `map.includeElasticMapsService` to `false` to turn off the EMS connection.
-. Set `map.tilemap.url` to the URL of your tile server. This configures the default tile layer of **Elastic Maps**.
+. Set `map.tilemap.url` to the URL of your tile server. This configures the default tile layer of Maps.
 . (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.

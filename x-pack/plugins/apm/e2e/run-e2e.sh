@@ -109,7 +109,7 @@ echo "${bold}Static mock data (logs: ${E2E_DIR}${TMP_DIR}/ingest-data.log)${norm
 # Download static data if not already done
 if [ ! -e "${TMP_DIR}/events.json" ]; then
     echo 'Downloading events.json...'
-    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output ${TMP_DIR}/events.json
+    curl --silent https://storage.googleapis.com/apm-ui-e2e-static-data/2020-06-12.json --output ${TMP_DIR}/events.json
 fi
 
 # echo "Deleting existing indices (apm* and .apm*)"

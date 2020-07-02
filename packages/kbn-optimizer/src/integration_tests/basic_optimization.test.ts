@@ -33,7 +33,7 @@ const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer({
-  print: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
+  serialize: (value: string) => value.split(REPO_ROOT).join('<absolute path>').replace(/\\/g, '/'),
   test: (value: any) => typeof value === 'string' && value.includes(REPO_ROOT),
 });
 

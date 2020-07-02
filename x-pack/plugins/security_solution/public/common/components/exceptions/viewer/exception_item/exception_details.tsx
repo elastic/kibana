@@ -15,9 +15,10 @@ import {
 import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
-import { DescriptionListItem, ExceptionListItemSchema } from '../../types';
+import { DescriptionListItem } from '../../types';
 import { getDescriptionListContent } from '../../helpers';
 import * as i18n from '../../translations';
+import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 
 const MyExceptionDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`

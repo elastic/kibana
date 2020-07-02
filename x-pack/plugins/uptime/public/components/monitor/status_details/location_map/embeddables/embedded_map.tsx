@@ -11,7 +11,8 @@ import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import {
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../../../legacy/plugins/maps/public';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../../maps/public/embeddable';
 import * as i18n from './translations';
 import { GeoPoint } from '../../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
@@ -23,7 +24,8 @@ import {
 } from '../../../../../../../../../src/plugins/embeddable/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
 import { MapToolTipComponent } from './map_tool_tip';
-import { RenderTooltipContentParams } from '../../../../../../../../legacy/plugins/maps/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];

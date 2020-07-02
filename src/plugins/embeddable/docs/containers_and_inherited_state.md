@@ -1,4 +1,4 @@
-## Embeddable containers and inherited input state
+## Common mistakes with embeddable containers and inherited input state
 
 `updateInput` is typed as `updateInput(input: Partial<EmbeddableInput>)`. Notice it's _partial_. This is to support the use case of inherited state when an embeddable is inside a container.
 

@@ -10,8 +10,10 @@ import {
   HostMetadata,
   HostPolicyResponse,
   AppLocation,
+  PolicyData,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
+import { GetPackagesResponse } from '../../../../../ingest_manager/common';
 
 export interface HostState {
   /** list of host **/
@@ -40,6 +42,14 @@ export interface HostState {
   policyResponseError?: ServerApiError;
   /** current location info */
   location?: Immutable<AppLocation>;
+  /** policies */
+  policyItems: PolicyData[];
+  /** policies are loading */
+  policyItemsLoading: boolean;
+  /** the selected policy ID in the onboarding flow */
+  selectedPolicyId?: string;
+  /** Endpoint package info */
+  endpointPackageInfo?: GetPackagesResponse['response'][0];
 }
 
 /**

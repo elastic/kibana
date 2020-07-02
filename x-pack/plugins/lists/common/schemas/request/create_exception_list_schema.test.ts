@@ -16,27 +16,28 @@ import {
 import { getCreateExceptionListSchemaMock } from './create_exception_list_schema.mock';
 
 describe('create_exception_list_schema', () => {
-  test('it should validate a typical exception lists request', () => {
+  test('it should validate a typical exception lists request and generate a correct body not counting the uuid', () => {
     const payload = getCreateExceptionListSchemaMock();
     const decoded = createExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-
+    delete (message.schema as CreateExceptionListSchema).list_id;
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should accept an undefined for meta', () => {
+  test('it should accept an undefined for "meta" and generate a correct body not counting the uuid', () => {
     const payload = getCreateExceptionListSchemaMock();
     delete payload.meta;
     const decoded = createExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
+    delete (message.schema as CreateExceptionListSchema).list_id;
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should accept an undefined for tags but return an array', () => {
+  test('it should accept an undefined for "tags" but return an array and generate a correct body not counting the uuid', () => {
     const inputPayload = getCreateExceptionListSchemaMock();
     const outputPayload = getCreateExceptionListSchemaMock();
     delete inputPayload.tags;
@@ -44,11 +45,12 @@ describe('create_exception_list_schema', () => {
     const decoded = createExceptionListSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
+    delete (message.schema as CreateExceptionListSchema).list_id;
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for _tags but return an array', () => {
+  test('it should accept an undefined for "_tags" but return an array and generate a correct body not counting the uuid', () => {
     const inputPayload = getCreateExceptionListSchemaMock();
     const outputPayload = getCreateExceptionListSchemaMock();
     delete inputPayload._tags;
@@ -56,11 +58,12 @@ describe('create_exception_list_schema', () => {
     const decoded = createExceptionListSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
+    delete (message.schema as CreateExceptionListSchema).list_id;
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for list_id and auto generate a uuid', () => {
+  test('it should accept an undefined for "list_id" and auto generate a uuid', () => {
     const inputPayload = getCreateExceptionListSchemaMock();
     delete inputPayload.list_id;
     const decoded = createExceptionListSchema.decode(inputPayload);
@@ -72,7 +75,7 @@ describe('create_exception_list_schema', () => {
     );
   });
 
-  test('it should accept an undefined for list_id and generate a correct body not counting the uuid', () => {
+  test('it should accept an undefined for "list_id" and generate a correct body not counting the uuid', () => {
     const inputPayload = getCreateExceptionListSchemaMock();
     delete inputPayload.list_id;
     const decoded = createExceptionListSchema.decode(inputPayload);

@@ -20,12 +20,12 @@
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 
 import { mockReadFile } from './plugin_manifest_parser.test.mocks';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { resolve } from 'path';
 import { parseManifest } from './plugin_manifest_parser';
 
-const logger = loggingServiceMock.createLogger();
+const logger = loggingSystemMock.createLogger();
 const pluginPath = resolve('path', 'existent-dir');
 const pluginManifestPath = resolve(pluginPath, 'kibana.json');
 const packageInfo = {
@@ -105,9 +105,9 @@ test('logs warning if pluginId is not in camelCase format', async () => {
     cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
   });
 
-  expect(loggingServiceMock.collect(logger).warn).toHaveLength(0);
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
   await parseManifest(pluginPath, packageInfo, logger);
-  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
     Array [
       Array [
         "Expect plugin \\"id\\" in camelCase, but found: some_name",

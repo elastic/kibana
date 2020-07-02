@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
+import { ReactWrapper, shallow } from 'enzyme';
 import { IStackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+import { mountWithTheme } from '../../../../utils/testHelpers';
 import { Stackframe } from '../Stackframe';
 import stacktracesMock from './stacktraces.json';
 
@@ -15,7 +16,9 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
-      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
+      wrapper = mountWithTheme(
+        <Stackframe id="test" stackframe={stackframe} />
+      );
     });
 
     it('should render correctly', () => {
@@ -37,7 +40,9 @@ describe('Stackframe', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const stackframe = { line: {} } as IStackframe;
-      wrapper = mount(<Stackframe id="test" stackframe={stackframe} />);
+      wrapper = mountWithTheme(
+        <Stackframe id="test" stackframe={stackframe} />
+      );
     });
 
     it('should render only FrameHeading', () => {

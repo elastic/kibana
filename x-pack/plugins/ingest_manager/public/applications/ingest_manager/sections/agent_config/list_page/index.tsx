@@ -176,12 +176,13 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'datasources',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.datasourcesCountColumnTitle', {
-          defaultMessage: 'Data sources',
+        field: 'package_configs',
+        name: i18n.translate('xpack.ingestManager.agentConfigList.packageConfigsCountColumnTitle', {
+          defaultMessage: 'Integrations',
         }),
         dataType: 'number',
-        render: (datasources: AgentConfig['datasources']) => (datasources ? datasources.length : 0),
+        render: (packageConfigs: AgentConfig['package_configs']) =>
+          packageConfigs ? packageConfigs.length : 0,
       },
       {
         name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {

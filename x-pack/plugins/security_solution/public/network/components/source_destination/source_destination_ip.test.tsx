@@ -35,6 +35,8 @@ import {
   SOURCE_GEO_REGION_NAME_FIELD_NAME,
 } from './geo_fields';
 
+jest.mock('../../../common/components/link_to');
+
 describe('SourceDestinationIp', () => {
   const mount = useMountAppended();
 

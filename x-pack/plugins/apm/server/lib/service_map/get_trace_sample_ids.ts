@@ -5,7 +5,7 @@
  */
 import { uniq, take, sortBy } from 'lodash';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { ESFilter } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,

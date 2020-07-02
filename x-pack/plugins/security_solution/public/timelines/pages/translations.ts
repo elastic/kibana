@@ -30,3 +30,17 @@ export const ERROR_FETCHING_TIMELINES_TITLE = i18n.translate(
     defaultMessage: 'Failed to query all timelines data',
   }
 );
+
+export const UPDATE_TIMELINE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.timelines.updateTimelineErrorTitle',
+  {
+    defaultMessage: 'Timeline error',
+  }
+);
+
+export const UPDATE_TIMELINE_ERROR_TEXT = i18n.translate(
+  'xpack.securitySolution.timelines.updateTimelineErrorText',
+  {
+    defaultMessage: 'Something went wrong',
+  }
+);

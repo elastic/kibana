@@ -88,8 +88,6 @@ export const getColumns = (
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -140,22 +138,6 @@ export const getColumns = (
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
       'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: TRANSFORM_LIST_COLUMN.CONFIG_SOURCE_INDEX,
-      'data-test-subj': 'transformListColumnSourceIndex',
-      name: i18n.translate('xpack.transform.sourceIndex', { defaultMessage: 'Source index' }),
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: TRANSFORM_LIST_COLUMN.CONFIG_DEST_INDEX,
-      'data-test-subj': 'transformListColumnDestinationIndex',
-      name: i18n.translate('xpack.transform.destinationIndex', {
-        defaultMessage: 'Destination index',
-      }),
       sortable: true,
       truncateText: true,
     },
@@ -242,7 +224,7 @@ export const getColumns = (
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),
       actions,
-      width: '200px',
+      width: '80px',
     },
   ];
 

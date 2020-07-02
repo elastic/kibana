@@ -13,52 +13,10 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 `yarn es snapshot` -> starts ES
 
-`npx yarn start --xpack.securitySolution.enabled=true --no-base-path` -> starts kibana
+`npx yarn start --no-base-path` -> starts kibana. Note: you may need other configurations steps to start the security solution with endpoint support.
 
-`cd ~/path/to/kibana/x-pack/plugins/endpoint`
+`cd x-pack/plugins/security_solution/scripts/endpoint`
 
-`yarn test:generate --auth elastic:changeme` -> run the resolver_generator.ts script
+`yarn test:generate` -> run the resolver_generator.ts script
 
-Resolver generator CLI options:
-
-```bash
-Options:
-  --help                         Show help                             [boolean]
-  --seed, -s                     random seed to use for document generator
-                                                                        [string]
-  --node, -n                     elasticsearch node url
-                    [string] [default: "http://elastic:changeme@localhost:9200"]
-  --kibana, -k                   kibana url
-                    [string] [default: "http://elastic:changeme@localhost:5601"]
-  --eventIndex, --ei             index to store events in
-                                         [string] [default: "events-endpoint-1"]
-  --metadataIndex, --mi          index to store host metadata in
-                       [string] [default: "metrics-endpoint.metadata-default-1"]
-  --policyIndex, --pi            index to store host policy in
-                         [string] [default: "metrics-endpoint.policy-default-1"]
-  --ancestors, --anc             number of ancestors of origin to create
-                                                           [number] [default: 3]
-  --generations, --gen           number of child generations to create
-                                                           [number] [default: 3]
-  --children, --ch               maximum number of children per node
-                                                           [number] [default: 3]
-  --relatedEvents, --related     number of related events to create for each
-                                 process event             [number] [default: 5]
-  --relatedAlerts, --relAlerts   number of related alerts to create for each
-                                 process event             [number] [default: 5]
-  --percentWithRelated, --pr     percent of process events to add related events
-                                 and related alerts to    [number] [default: 30]
-  --percentTerminated, --pt      percent of process events to add termination
-                                 event for                [number] [default: 30]
-  --maxChildrenPerNode, --maxCh  always generate the max number of children per
-                                 node instead of it being random up to the max
-                                 children             [boolean] [default: false]
-  --numHosts, --ne               number of different hosts to generate alerts
-                                 for                       [number] [default: 1]
-  --numDocs, --nd                number of metadata and policy response doc to
-                                 generate per host         [number] [default: 5]
-  --alertsPerHost, --ape         number of resolver trees to make for each host
-                                                           [number] [default: 1]
-  --delete, -d                   delete indices and remake them
-                                                      [boolean] [default: false]
-```
+To see Resolver generator CLI options, run `yarn test:generate --help`.

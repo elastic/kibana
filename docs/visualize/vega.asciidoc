@@ -213,7 +213,7 @@ url: {
 format: {property: "features"}
 ----
 
-To enable Elastic Maps, the graph must specify `type=map` in the host
+To enable Maps, the graph must specify `type=map` in the host
 configuration:
 
 [source,yaml]
@@ -306,7 +306,7 @@ to your kibana.yml file.
 [[vega-useful-links]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-List, refer to the resources and examples. 
+experimental[] To learn more about Vega and Vega-List, refer to the resources and examples.
 
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any

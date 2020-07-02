@@ -13,9 +13,13 @@ import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
 import {
   MapEmbeddable,
-  RenderTooltipContentParams,
   MapEmbeddableInput,
-} from '../../../../../../legacy/plugins/maps/public';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/embeddable';
+import {
+  RenderTooltipContentParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/maps/public/classes/tooltips/tooltip_property';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import {
@@ -124,6 +128,9 @@ export const createEmbeddable = async (
   return embeddableObject;
 };
 
+// These patterns are overly greedy and must be excluded when matching against Security indexes.
+const ignoredIndexPatterns = ['*', '*:*'];
+
 /**
  * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
  *
@@ -138,9 +145,13 @@ export const findMatchingIndexPatterns = ({
   siemDefaultIndices: string[];
 }): IndexPatternSavedObject[] => {
   try {
-    return kibanaIndexPatterns.filter((kip) =>
-      siemDefaultIndices.some((sdi) => minimatch(sdi, kip.attributes.title))
-    );
+    return kibanaIndexPatterns.filter((kip) => {
+      const pattern = kip.attributes.title;
+      return (
+        !ignoredIndexPatterns.includes(pattern) &&
+        siemDefaultIndices.some((sdi) => minimatch(sdi, pattern))
+      );
+    });
   } catch {
     return [];
   }

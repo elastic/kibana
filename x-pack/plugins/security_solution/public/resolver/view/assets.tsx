@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
   | 'descriptionText'
@@ -405,7 +406,23 @@ export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   height: 0;
 `;
 
-export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleMap } => {
+const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
+  processCreated: 'runningProcessCube',
+  processRan: 'runningProcessCube',
+  processTerminated: 'terminatedProcessCube',
+  unknownProcessEvent: 'runningProcessCube',
+  processCausedAlert: 'runningTriggerCube',
+  unknownEvent: 'runningProcessCube',
+};
+
+/**
+ * A hook to bring Resolver theming information into components.
+ */
+export const useResolverTheme = (): {
+  colorMap: ColorMap;
+  nodeAssets: NodeStyleMap;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+} => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
@@ -478,7 +495,17 @@ export const useResolverTheme = (): { colorMap: ColorMap; nodeAssets: NodeStyleM
     },
   };
 
-  return { colorMap, nodeAssets };
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+    if (isProcessTerminated) {
+      return nodeAssets[processTypeToCube.processTerminated];
+    } else if (isProcessOrigin) {
+      return nodeAssets[processTypeToCube.processCausedAlert];
+    } else {
+      return nodeAssets[processTypeToCube.processRan];
+    }
+  }
+
+  return { colorMap, nodeAssets, cubeAssetsForNode };
 };
 
 export const calculateResolverFontSize = (

@@ -13,8 +13,10 @@ import {
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
     defaultMessage: 'Vector source wizard',
   }),

@@ -28,10 +28,13 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
-import { OnNotification } from '../types';
+import {
+  OnNotification,
+  FieldSpec,
+  FieldSpecConflictDescriptions,
+  FieldSpecExportFmt,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
-
-export type FieldSpec = Record<string, any>;
 
 interface FieldDependencies {
   fieldFormats: FieldFormatsStartCommon;
@@ -59,11 +62,11 @@ export class Field implements IFieldType {
   readFromDocValues?: boolean;
   format: any;
   $$spec: FieldSpec;
-  conflictDescriptions?: Record<string, string[]>;
+  conflictDescriptions?: FieldSpecConflictDescriptions;
 
   constructor(
     indexPattern: IIndexPattern,
-    spec: FieldSpec | Field,
+    spec: FieldSpecExportFmt | FieldSpec | Field,
     shortDotsEnable: boolean,
     { fieldFormats, onNotification }: FieldDependencies
   ) {
@@ -95,7 +98,7 @@ export class Field implements IFieldType {
 
     if (!type) type = getKbnFieldType('unknown');
 
-    let format = spec.format;
+    let format: any = spec.format;
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
@@ -148,6 +151,26 @@ export class Field implements IFieldType {
     // multi info
     obj.fact('subType');
 
-    return obj.create();
+    const newObj = obj.create();
+    newObj.toSpec = function () {
+      return {
+        count: this.count,
+        script: this.script,
+        lang: this.lang,
+        conflictDescriptions: this.conflictDescriptions,
+        name: this.name,
+        type: this.type,
+        esTypes: this.esTypes,
+        scripted: this.scripted,
+        searchable: this.searchable,
+        aggregatable: this.aggregatable,
+        readFromDocValues: this.readFromDocValues,
+        subType: this.subType,
+        format: this.indexPattern?.fieldFormatMap[this.name]?.toJSON() || undefined,
+      };
+    };
+    return newObj;
   }
+  // only providing type info as constructor returns new object instead of `this`
+  toSpec = () => (({} as unknown) as FieldSpecExportFmt);
 }

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import {
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-  IRouter,
-} from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 
 import { License } from '../../../services/license';
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
@@ -46,7 +41,7 @@ describe('GET privileges', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
     registerPrivilegesRoute({
       router,
@@ -115,7 +110,7 @@ describe('GET privileges', () => {
 
   describe('With security disabled', () => {
     beforeEach(() => {
-      const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+      const router = httpService.createRouter();
 
       registerPrivilegesRoute({
         router,

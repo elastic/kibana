@@ -22,6 +22,7 @@ import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
 import { useSourceId } from '../../../../containers/source_id';
 import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
+import { GroupByExpression } from '../../shared/group_by_expression/group_by_expression';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -121,7 +122,6 @@ export const Editor: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceStatus } = useLogSourceContext();
-
   useMount(() => {
     for (const [key, value] of Object.entries({ ...DEFAULT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
@@ -133,6 +133,17 @@ export const Editor: React.FC<Props> = (props) => {
     if (sourceStatus?.logIndexFields) {
       return sourceStatus.logIndexFields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
+      });
+    } else {
+      return [];
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [sourceStatus]);
+
+  const groupByFields = useMemo(() => {
+    if (sourceStatus?.logIndexFields) {
+      return sourceStatus.logIndexFields.filter((field) => {
+        return field.type === 'string' && field.aggregatable;
       });
     } else {
       return [];
@@ -168,6 +179,13 @@ export const Editor: React.FC<Props> = (props) => {
   const updateTimeUnit = useCallback(
     (tu: string) => {
       setAlertParams('timeUnit', tu);
+    },
+    [setAlertParams]
+  );
+
+  const updateGroupBy = useCallback(
+    (groups: string[]) => {
+      setAlertParams('groupBy', groups);
     },
     [setAlertParams]
   );
@@ -219,6 +237,12 @@ export const Editor: React.FC<Props> = (props) => {
         errors={errors as { [key: string]: string[] }}
       />
 
+      <GroupByExpression
+        selectedGroups={alertParams.groupBy}
+        onChange={updateGroupBy}
+        fields={groupByFields}
+      />
+
       <div>
         <EuiButtonEmpty
           color={'primary'}
@@ -239,4 +263,4 @@ export const Editor: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Editor;
+export default ExpressionEditor;

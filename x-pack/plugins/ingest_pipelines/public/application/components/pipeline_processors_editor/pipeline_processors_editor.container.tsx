@@ -26,8 +26,7 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
-  learnMoreAboutProcessorsUrl: string;
-  learnMoreAboutOnFailureProcessorsUrl: string;
+  esDocsBasePath: string;
   /**
    * Give users a way to react to this component opening a flyout
    */
@@ -41,8 +40,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   onFlyoutOpen,
   onUpdate,
   isTestButtonDisabled,
-  learnMoreAboutOnFailureProcessorsUrl,
-  learnMoreAboutProcessorsUrl,
+  esDocsBasePath,
   onTestPipelineClick,
 }) => {
   const deserializedResult = useMemo(
@@ -61,7 +59,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   return (
     <PipelineProcessorsContextProvider
       processorsDispatch={processorsDispatch}
-      links={{ learnMoreAboutOnFailureProcessorsUrl, learnMoreAboutProcessorsUrl }}
+      links={{ esDocsBasePath }}
     >
       <PipelineProcessorsEditorUI
         onFlyoutOpen={onFlyoutOpen}

@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createConfig, configSchema } from './config';
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  readFileSync: jest.fn().mockImplementation((path: string) => `contents-of-${path}`),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+
+  return {
+    ...original,
+    readFileSync: jest.fn().mockImplementation((path: string) => `contents-of-${path}`),
+  };
+});
 
 describe('config schema', () => {
   it('generates proper defaults', () => {

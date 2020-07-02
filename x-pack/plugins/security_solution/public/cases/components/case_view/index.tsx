@@ -37,6 +37,7 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { SecurityPageName } from '../../../app/types';
 
 interface Props {
   caseId: string;
@@ -70,7 +71,7 @@ export interface CaseProps extends Props {
 export const CaseComponent = React.memo<CaseProps>(
   ({ caseId, caseData, fetchCase, updateCase, userCanCrud }) => {
     const basePath = window.location.origin + useBasePath();
-    const caseLink = `${basePath}/app/security#/case/${caseId}`;
+    const caseLink = `${basePath}/app/security/cases/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
     const [initLoadingData, setInitLoadingData] = useState(true);
     const {
@@ -252,6 +253,7 @@ export const CaseComponent = React.memo<CaseProps>(
         href: getCaseUrl(search),
         text: i18n.BACK_TO_ALL,
         dataTestSubj: 'backToCases',
+        pageId: SecurityPageName.case,
       }),
       [search]
     );
@@ -356,7 +358,7 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <SpyRoute state={spyState} />
+        <SpyRoute state={spyState} pageName={SecurityPageName.case} />
       </>
     );
   }

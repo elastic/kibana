@@ -99,6 +99,9 @@ export function A11yProvider({ getService }: FtrProviderContext) {
           'color-contrast': {
             enabled: false,
           },
+          bypass: {
+            enabled: false, // disabled because it's too flaky
+          },
         },
       };
 

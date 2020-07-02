@@ -14,7 +14,7 @@ import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { createInfluencers } from './../influencers/create_influencers';
 import * as i18n from './translations';
-import { createExplorerLink } from '../links/create_explorer_link';
+import { ExplorerLink } from '../links/create_explorer_link';
 
 const LargeScore = styled(EuiText)`
   font-size: 45px;
@@ -51,9 +51,12 @@ export const createDescriptionList = (
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>{score.jobId}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink href={createExplorerLink(score, startDate, endDate)} target="_blank">
-              {i18n.VIEW_IN_MACHINE_LEARNING}
-            </EuiLink>
+            <ExplorerLink
+              score={score}
+              startDate={startDate}
+              endDate={endDate}
+              linkName={i18n.VIEW_IN_MACHINE_LEARNING}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

@@ -7,4 +7,5 @@
 export {
   ProcessorSettingsForm,
   ProcessorSettingsFromOnSubmitArg,
+  OnSubmitHandler,
 } from './processor_settings_form.container';

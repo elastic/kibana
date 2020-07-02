@@ -5,9 +5,9 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import * as argHelper from '../../lib/resolved_arg';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { prepend } from '../../lib/modify_path';
 import { State } from '../../../types';
 

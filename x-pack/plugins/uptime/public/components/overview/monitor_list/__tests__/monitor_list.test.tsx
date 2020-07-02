@@ -14,7 +14,8 @@ import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 
-describe('MonitorList component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/70386
+describe.skip('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
 

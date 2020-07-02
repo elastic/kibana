@@ -8,7 +8,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'endpoint', 'policy', 'endpointPageUtils']);
+  const pageObjects = getPageObjects([
+    'common',
+    'endpoint',
+    'policy',
+    'endpointPageUtils',
+    'ingestManagerCreatePackageConfig',
+  ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
@@ -26,29 +32,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const policyTitle = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(policyTitle).to.equal('Policies');
     });
-    it('shows policy count total', async () => {
-      const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-      expect(policyTotal).to.equal('0 Policies');
+    it('shows header create policy button', async () => {
+      const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');
+      expect(createButtonTitle).to.equal('Create new policy');
     });
-    it('has correct table headers', async () => {
-      const allHeaderCells = await pageObjects.endpointPageUtils.tableHeaderVisibleText(
-        'policyTable'
-      );
-      expect(allHeaderCells).to.eql([
-        'Policy Name',
-        'Created By',
-        'Created Date',
-        'Last Updated By',
-        'Last Updated',
-        'Version',
-        'Actions',
-      ]);
-    });
-    it('should show empty table results message', async () => {
-      const [, [noItemsFoundMessage]] = await pageObjects.endpointPageUtils.tableData(
-        'policyTable'
-      );
-      expect(noItemsFoundMessage).to.equal('No items found');
+    it('shows empty state', async () => {
+      await testSubjects.existOrFail('emptyPolicyTable');
     });
 
     describe('and policies exists', () => {
@@ -66,6 +55,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
       });
 
+      it('has correct table headers', async () => {
+        const allHeaderCells = await pageObjects.endpointPageUtils.tableHeaderVisibleText(
+          'policyTable'
+        );
+        expect(allHeaderCells).to.eql([
+          'Policy Name',
+          'Created By',
+          'Created Date',
+          'Last Updated By',
+          'Last Updated',
+          'Version',
+          'Actions',
+        ]);
+      });
+
       it('should show policy on the list', async () => {
         const [, policyRow] = await pageObjects.endpointPageUtils.tableData('policyTable');
         // Validate row data with the exception of the Date columns - since those are initially
@@ -74,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `${policyInfo.datasource.package?.title} v${policyInfo.datasource.package?.version}`,
+          `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
@@ -96,9 +100,53 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.launchAndFindDeleteModal();
         await testSubjects.existOrFail('policyListDeleteModal');
         await pageObjects.common.clickConfirmOnModal();
-        await pageObjects.endpoint.waitForTableToNotHaveData('policyTable');
-        const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-        expect(policyTotal).to.equal('0 Policies');
+        const emptyPolicyTable = await testSubjects.find('emptyPolicyTable');
+        expect(emptyPolicyTable).not.to.be(null);
+      });
+    });
+
+    describe('and user clicks on page header create button', () => {
+      beforeEach(async () => {
+        await pageObjects.policy.navigateToPolicyList();
+        await (await pageObjects.policy.findHeaderCreateNewButton()).click();
+      });
+
+      it('should redirect to ingest management integrations add package config', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnCreatePageOrFail();
+      });
+
+      it('should redirect user back to Policy List if Cancel button is clicked', async () => {
+        await (await pageObjects.ingestManagerCreatePackageConfig.findCancelButton()).click();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+      });
+
+      it('should redirect user back to Policy List if Back link is clicked', async () => {
+        await (await pageObjects.ingestManagerCreatePackageConfig.findBackLink()).click();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+      });
+
+      it('should display custom endpoint configuration message', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        const endpointConfig = await pageObjects.policy.findPackageConfigEndpointCustomConfiguration();
+        expect(endpointConfig).not.to.be(undefined);
+      });
+
+      it('should redirect user back to Policy List after a successful save', async () => {
+        const newPolicyName = `endpoint policy ${Date.now()}`;
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        await pageObjects.ingestManagerCreatePackageConfig.setPackageConfigName(newPolicyName);
+        await (await pageObjects.ingestManagerCreatePackageConfig.findDSaveButton()).click();
+        await pageObjects.ingestManagerCreatePackageConfig.waitForSaveSuccessNotification();
+        await pageObjects.policy.ensureIsOnPolicyPage();
+        await policyTestResources.deletePolicyByName(newPolicyName);
+      });
+    });
+
+    describe('and user clicks on page header create button', () => {
+      it('should direct users to the ingest management integrations add package config', async () => {
+        await pageObjects.policy.navigateToPolicyList();
+        await (await pageObjects.policy.findOnboardingStartButton()).click();
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnCreatePageOrFail();
       });
     });
   });

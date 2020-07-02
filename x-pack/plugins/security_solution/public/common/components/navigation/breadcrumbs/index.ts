@@ -15,24 +15,25 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../alerts/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { SiemPageName } from '../../../../app/types';
+import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
   HostRouteSpyState,
   NetworkRouteSpyState,
   TimelineRouteSpyState,
 } from '../../../utils/route/types';
-import { getOverviewUrl } from '../../link_to';
+import { getAppOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
-import { SearchNavTab } from '../types';
+import { GetUrlForApp, SearchNavTab } from '../types';
 
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
-  chrome: StartServices['chrome']
+  chrome: StartServices['chrome'],
+  getUrlForApp: GetUrlForApp
 ) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState);
+  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
   if (breadcrumbs) {
     chrome.setBreadcrumbs(breadcrumbs);
   }
@@ -41,27 +42,28 @@ export const setBreadcrumbs = (
 export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
   {
     text: APP_NAME,
-    href: getOverviewUrl(),
+    href: getAppOverviewUrl(),
   },
 ];
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.network;
+  spyState != null && spyState.pageName === SecurityPageName.network;
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.hosts;
+  spyState != null && spyState.pageName === SecurityPageName.hosts;
 
 const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.timelines;
+  spyState != null && spyState.pageName === SecurityPageName.timelines;
 
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
-  spyState != null && spyState.pageName === SiemPageName.case;
+  spyState != null && spyState.pageName === SecurityPageName.case;
 
-const isDetectionsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SiemPageName.detections;
+const isAlertsRoutes = (spyState: RouteSpyState) =>
+  spyState != null && spyState.pageName === SecurityPageName.alerts;
 
 export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps
+  object: RouteSpyState & TabNavigationProps,
+  getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
   if (isHostsRoutes(spyState) && object.navTabs) {
@@ -77,7 +79,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -94,12 +97,13 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
-  if (isDetectionsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+  if (isAlertsRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'alerts', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
@@ -112,7 +116,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -130,7 +135,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
@@ -148,7 +154,8 @@ export const getBreadcrumbsForRoute = (
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
-        )
+        ),
+        getUrlForApp
       ),
     ];
   }
