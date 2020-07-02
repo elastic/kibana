@@ -23,6 +23,7 @@ import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../types';
 import { TableContext } from '../table_vis_response_handler';
 import { TableVisBasic } from './table_vis_basic';
+import { TableVisSplit } from './table_vis_split';
 
 export const TableVisualization = ({
   renderComplete,
@@ -34,30 +35,9 @@ export const TableVisualization = ({
     renderComplete();
   }, [renderComplete]);
 
-  return table ? <TableVisBasic table={table} vis={vis} visParams={visParams} /> : null;
-  // (
-  //   visData.tables.map((table, key) => (
-  //     <EuiDataGrid
-  //       key={key}
-  //       aria-label=""
-  //       columns={table.columns.map((col) => ({
-  //         id: col.id,
-  //         display: col.name,
-  //       }))}
-  //       rowCount={table.rows.length}
-  //       columnVisibility={{
-  //         visibleColumns: table.columns.map((col) => col.id),
-  //         setVisibleColumns: () => {},
-  //       }}
-  //       renderCellValue={createTableVisCell()}
-  //       pagination={{
-  //         pageIndex: 0,
-  //         pageSize: 10,
-  //         pageSizeOptions: [50, 100, 200],
-  //         onChangePage: () => {},
-  //         onChangeItemsPerPage: () => {},
-  //       }}
-  //     />
-  //   ))
-  // );
+  return table ? (
+    <TableVisBasic table={table} vis={vis} visParams={visParams} />
+  ) : (
+    <TableVisSplit tables={tables} vis={vis} visParams={visParams} />
+  );
 };

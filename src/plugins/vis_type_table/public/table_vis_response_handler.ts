@@ -83,7 +83,7 @@ export function tableVisResponseHandler(input: Input, dimensions: any): TableCon
       }
 
       const tableIndex = (splitMap as any)[splitValue];
-      (tables[tableIndex] as any).tables[0].rows.push(row);
+      tables[tableIndex].tables[0].rows.push(row);
     });
   } else {
     table = {
