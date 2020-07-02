@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, { useCallback, useState, ReactNode, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import {
@@ -148,6 +149,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiButton
+                    data-test-subj="value-lists-form-import-action"
                     onClick={handleImport}
                     disabled={!files?.length || importState.loading}
                   >

@@ -137,7 +137,9 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           />
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButton onClick={onClose}>{i18n.CLOSE_BUTTON}</EuiButton>
+          <EuiButton data-test-subj="value-lists-modal-close-action" onClick={onClose}>
+            {i18n.CLOSE_BUTTON}
+          </EuiButton>
         </EuiModalFooter>
       </EuiModal>
       <GenericDownloader
