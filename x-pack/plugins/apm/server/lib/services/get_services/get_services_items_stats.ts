@@ -184,6 +184,14 @@ export const getErrorRates = async ({
             },
           },
         },
+        aggs: {
+          services: {
+            terms: {
+              ...projection.body.aggs.services.terms,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
+          },
+        },
       },
     })
   );
