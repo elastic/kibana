@@ -263,6 +263,7 @@ Array [
         "services": Object {
           "terms": Object {
             "field": "service.name",
+            "size": 500,
           },
         },
       },
