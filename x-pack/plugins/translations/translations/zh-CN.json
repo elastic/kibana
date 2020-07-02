@@ -9801,8 +9801,6 @@
     "xpack.ml.explorer.jobIdLabel": "作业 ID",
     "xpack.ml.explorer.jobScoreAcrossAllInfluencersLabel": "（所有影响因素的作业分数）",
     "xpack.ml.explorer.kueryBar.filterPlaceholder": "按影响因素字段筛选……（{queryExample}）",
-    "xpack.ml.explorer.limitLabel": "限制",
-    "xpack.ml.explorer.loadingLabel": "正在加载",
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "“顶级影响因素”列表被隐藏，因为没有为所选作业配置影响因素。",
     "xpack.ml.explorer.noInfluencersFoundTitle": "未找到任何 {viewBySwimlaneFieldName} 影响因素",
     "xpack.ml.explorer.noInfluencersFoundTitleFilterMessage": "对于指定筛选找不到任何 {viewBySwimlaneFieldName} 影响因素",
