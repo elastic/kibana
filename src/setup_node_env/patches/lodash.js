@@ -17,16 +17,16 @@
  * under the License.
  */
 
-module.exports = function(lodash) {
+module.exports = function (lodash) {
   lodash.template = new Proxy(lodash.template, {
-    apply: function(target, thisArg, args) {
+    apply: function (target, thisArg, args) {
       var options;
       if (args.length === 1) {
         options = {
           sourceURL: '',
         };
       } else {
-        options = { ...args[1] };
+        options = Object.assign({}, args[1]);
         options.sourceURL = (options.sourceURL + '').replace(/\s/g, ' ');
       }
 
