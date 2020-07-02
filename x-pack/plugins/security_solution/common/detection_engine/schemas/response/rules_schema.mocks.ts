@@ -36,6 +36,7 @@ export const getPartialRulesSchemaMock = (): Partial<RulesSchema> => ({
 });
 
 export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => ({
+  author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
   updated_at: new Date(anchorDate).toISOString(),
@@ -49,6 +50,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   query: 'user.name: root or user.name: admin',
   references: ['test 1', 'test 2'],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic_kibana',
   tags: [],
   to: 'now',
@@ -62,6 +64,7 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   output_index: '.siem-signals-hassanabad-frank-default',
   max_signals: 100,
   risk_score: 55,
+  risk_score_mapping: [],
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
