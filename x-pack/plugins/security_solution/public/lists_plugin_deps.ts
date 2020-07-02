@@ -28,6 +28,7 @@ export {
   ExceptionListSchema,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
   Entry,
   EntryExists,
   EntryNested,

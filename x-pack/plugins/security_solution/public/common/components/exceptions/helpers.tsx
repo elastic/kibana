@@ -35,6 +35,7 @@ import {
   entriesNested,
   createExceptionListItemSchema,
   exceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
@@ -355,6 +356,23 @@ export const filterExceptionItems = (
     },
     []
   );
+};
+
+export const formatExceptionItemForUpdate = (
+  exceptionItem: ExceptionListItemSchema
+): UpdateExceptionListItemSchema => {
+  const {
+    created_at,
+    created_by,
+    list_id,
+    tie_breaker_id,
+    updated_at,
+    updated_by,
+    ...fieldsToUpdate
+  } = exceptionItem;
+  return {
+    ...fieldsToUpdate,
+  };
 };
 
 export const enrichExceptionItemsWithComments = (

@@ -16,6 +16,7 @@ import { addExceptionListItem, updateExceptionListItem } from '../../../../lists
 import { updateAlertStatus } from './api';
 // TODO: move getUpdatedAlertsQuery to api.ts
 import { getUpdateAlertsQuery } from '../../../components/alerts_table/actions';
+import { formatExceptionItemForUpdate } from '../../../../common/components/exceptions/helpers';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
@@ -68,9 +69,9 @@ export const useAddOrUpdateException = ({
       exceptionItemsToAddOrUpdate.forEach(
         (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
           if ('id' in item && item.id !== undefined) {
-            toUpdate.push(item as UpdateExceptionListItemSchema);
+            toUpdate.push(formatExceptionItemForUpdate(item));
           } else {
-            toAdd.push(item as CreateExceptionListItemSchema);
+            toAdd.push(item);
           }
         }
       );
