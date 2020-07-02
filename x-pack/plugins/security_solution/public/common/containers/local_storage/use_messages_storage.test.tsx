@@ -69,6 +69,21 @@ describe('useLocalStorage', () => {
     });
   });
 
+  it('should return presence of a message', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>
+        useMessagesStorage()
+      );
+      await waitForNextUpdate();
+      const { hasMessage, addMessage, removeMessage } = result.current;
+      addMessage('case', 'id-1');
+      addMessage('case', 'id-2');
+      removeMessage('case', 'id-2');
+      expect(hasMessage('case', 'id-1')).toEqual(true);
+      expect(hasMessage('case', 'id-2')).toEqual(false);
+    });
+  });
+
   it('should clear all messages', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseMessagesStorage>(() =>

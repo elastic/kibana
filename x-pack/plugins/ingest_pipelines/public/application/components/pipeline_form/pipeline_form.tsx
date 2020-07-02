@@ -13,16 +13,17 @@ import { Pipeline, Processor } from '../../../../common/types';
 
 import './pipeline_form.scss';
 
-import { PipelineRequestFlyout } from './pipeline_request_flyout';
-import { PipelineTestFlyout } from './pipeline_test_flyout';
-import { PipelineFormFields } from './pipeline_form_fields';
-import { PipelineFormError } from './pipeline_form_error';
-import { pipelineFormSchema } from './schema';
 import {
   OnUpdateHandlerArg,
   OnUpdateHandler,
   SerializeResult,
 } from '../pipeline_processors_editor';
+
+import { PipelineRequestFlyout } from './pipeline_request_flyout';
+import { PipelineTestFlyout } from './pipeline_test_flyout';
+import { PipelineFormFields } from './pipeline_form_fields';
+import { PipelineFormError } from './pipeline_form_error';
+import { pipelineFormSchema } from './schema';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -134,7 +135,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         error={form.getErrors()}
       >
         {/* Request error */}
-        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+        {saveError && <PipelineFormError error={saveError} />}
 
         {/* All form fields */}
         <PipelineFormFields
