@@ -51,7 +51,7 @@ import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_e
 export interface AddExceptionOnClick {
   ruleName: string;
   ruleId: string;
-  ruleExceptionLists?: ExceptionListSchema[];
+  ruleExceptionLists: ExceptionListSchema[] | undefined;
   exceptionListType: 'endpoint' | 'detection';
   alertData: TimelineNonEcsData[] | undefined;
 }

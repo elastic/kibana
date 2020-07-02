@@ -16,18 +16,18 @@ import {
   EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
-import { Comment } from '../../../lists_plugin_deps';
+import { Comments } from '../../../lists_plugin_deps';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../lib/kibana';
 import { getFormattedComments } from './helpers';
 
 interface AddExceptionCommentsProps {
-  exceptionItemComments?: Comment[];
+  exceptionItemComments?: Comments[];
   newCommentValue: string;
   newCommentOnChange: (value: string) => void;
 }
 
-const commentAccordionButtonClassname = 'exceptionCommentAccordionButton';
+const COMMENT_ACCORDION_BUTTON_CLASS_NAME = 'exceptionCommentAccordionButton';
 
 const MyAvatar = styled(EuiAvatar)`
   ${({ theme }) => css`
@@ -37,7 +37,7 @@ const MyAvatar = styled(EuiAvatar)`
 
 const CommentAccordion = styled(EuiAccordion)`
   ${({ theme }) => css`
-    .${commentAccordionButtonClassname} {
+    .${COMMENT_ACCORDION_BUTTON_CLASS_NAME} {
       color: ${theme.eui.euiColorPrimary};
       padding: ${theme.eui.paddingSizes.m} 0;
     }
@@ -64,11 +64,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
   }, []);
 
   const shouldShowAccordion: boolean = useMemo(() => {
-    return (
-      exceptionItemComments !== undefined &&
-      exceptionItemComments !== null &&
-      exceptionItemComments.length > 0
-    );
+    return exceptionItemComments != null && exceptionItemComments.length > 0;
   }, [exceptionItemComments]);
 
   const commentsAccordionTitle = useMemo(() => {
@@ -98,7 +94,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
       {shouldShowAccordion && (
         <CommentAccordion
           id={'add-exception-comments-accordion'}
-          buttonClassName={commentAccordionButtonClassname}
+          buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
           buttonContent={commentsAccordionTitle}
           data-test-subj="addExceptionCommentsAccordion"
           onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
