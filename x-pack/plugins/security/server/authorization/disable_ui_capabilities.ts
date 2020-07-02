@@ -19,7 +19,7 @@ export function disableUICapabilitiesFactory(
   authz: AuthorizationServiceSetup
 ) {
   const featureNavLinkIds = features
-    .map((feature) => feature.navLinkId)
+    .flatMap((feature) => [feature.navLinkId, ...feature.app])
     .filter((navLinkId) => navLinkId != null);
 
   const shouldDisableFeatureUICapability = (
