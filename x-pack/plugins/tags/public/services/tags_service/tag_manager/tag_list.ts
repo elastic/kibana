@@ -45,6 +45,12 @@ export class TagList {
     return this.data$$;
   }
 
+  public tag(tagId: string): Tag | undefined {
+    const data = this.data$$.getValue();
+    if (!data.hasOwnProperty(tagId)) return undefined;
+    return data[tagId];
+  }
+
   public readonly initializing$ = this.state$.pipe(
     map((state) => state === 'start' || state === 'loading')
   );
@@ -56,10 +62,15 @@ export class TagList {
     );
   }
 
-  public add(rawTag: RawTagWithId): Tag {
-    const tag = new Tag(rawTag);
-    this.data$$.next({ ...this.data$$.getValue(), [tag.id]: tag });
-    return tag;
+  public add(rawTags: RawTagWithId[]): TagMap {
+    const newTags: TagMap = {};
+    for (const rawTag of rawTags) {
+      const tag = new Tag(rawTag);
+      newTags[tag.id] = tag;
+    }
+    const data = { ...this.data$$.getValue(), ...newTags };
+    this.data$$.next(data);
+    return data;
   }
 
   public delete(ids: string[]): Tag[] {
