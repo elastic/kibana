@@ -98,6 +98,9 @@ export function resolveImportErrorsTestSuiteFactory(
   const expectResponseBody = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     statusCode: 200 | 403,
+    singleRequest: boolean,
+    overwrite: boolean,
+    createNewCopies: boolean,
     spaceId = SPACES.DEFAULT.spaceId
   ): ExpectResponseBody => async (response: Record<string, any>) => {
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
@@ -150,13 +153,15 @@ export function resolveImportErrorsTestSuiteFactory(
           expect(createNewCopy).to.be(undefined);
         }
 
-        const { _source } = await expectResponses.successCreated(
-          es,
-          spaceId,
-          type,
-          destinationId ?? id
-        );
-        expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        if (!singleRequest || overwrite || createNewCopies) {
+          const { _source } = await expectResponses.successCreated(
+            es,
+            spaceId,
+            type,
+            destinationId ?? id
+          );
+          expect(_source[type][NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        }
       }
       for (let i = 0; i < expectedFailures.length; i++) {
         const { type, id, failure, expectedNewId } = expectedFailures[i];
@@ -204,7 +209,9 @@ export function resolveImportErrorsTestSuiteFactory(
         title: getTestTitle(x, responseStatusCode),
         request: createRequest(x, overwrite),
         responseStatusCode,
-        responseBody: responseBodyOverride || expectResponseBody(x, responseStatusCode, spaceId),
+        responseBody:
+          responseBodyOverride ||
+          expectResponseBody(x, responseStatusCode, false, overwrite, createNewCopies, spaceId),
         overwrite,
         createNewCopies,
       }));
@@ -221,7 +228,8 @@ export function resolveImportErrorsTestSuiteFactory(
           })),
         responseStatusCode,
         responseBody:
-          responseBodyOverride || expectResponseBody(cases, responseStatusCode, spaceId),
+          responseBodyOverride ||
+          expectResponseBody(cases, responseStatusCode, true, overwrite, createNewCopies, spaceId),
         overwrite,
         createNewCopies,
       },

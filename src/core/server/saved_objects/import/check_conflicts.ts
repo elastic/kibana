@@ -91,7 +91,8 @@ export async function checkConflicts({
     } else if (errorObj && errorObj.statusCode !== 409) {
       errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
     } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts && !overwrite) {
-      errors.push({ type, id, title, meta: { title }, error: { type: 'conflict' } });
+      const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
+      errors.push({ type, id, title, meta: { title }, error });
     } else {
       filteredObjects.push(object);
     }

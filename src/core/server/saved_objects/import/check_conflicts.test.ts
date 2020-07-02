@@ -158,19 +158,36 @@ describe('#checkConflicts', () => {
 
   it('handles retries', async () => {
     const namespace = 'foo-namespace';
+    const obj5 = createObject('type-5', 'id-5');
+    const _objects = [...objects, obj5];
     const retries = [
-      { id: obj2.id, type: obj2.type, overwrite: true }, // find a conflict for obj2, but ignore it because of the overwrite flag
-      { id: obj3.id, type: obj3.type, destinationId: 'some-object-id', createNewCopy: true }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
+      { id: obj1.id, type: obj1.type }, // find no conflict for obj1
+      { id: obj2.id, type: obj2.type, destinationId: 'some-object-id' }, // find a conflict for obj2, and return it with the specified destinationId
+      { id: obj3.id, type: obj3.type, destinationId: 'another-object-id', createNewCopy: true }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
+      { id: obj4.id, type: obj4.type }, // get an unknown error for obj4
+      { id: obj5.id, type: obj5.type, overwrite: true }, // find a conflict for obj5, but ignore it because of the overwrite flag
     ] as SavedObjectsImportRetry[];
-    const params = setupParams({ objects, namespace, retries });
+    const params = setupParams({ objects: _objects, namespace, retries });
+    const obj5Error = getResultMock.conflict(obj5.type, obj5.id);
     socCheckConflicts.mockResolvedValue({
-      errors: [obj2Error, { ...obj3Error, id: 'some-object-id' }, obj4Error],
+      errors: [
+        { ...obj2Error, id: 'some-object-id' },
+        { ...obj3Error, id: 'another-object-id' },
+        obj4Error,
+        obj5Error,
+      ],
     });
 
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual({
-      filteredObjects: [obj1, obj2, obj3],
+      filteredObjects: [obj1, obj3, obj5],
       errors: [
+        {
+          ...obj2Error,
+          title: obj2.attributes.title,
+          meta: { title: obj2.attributes.title },
+          error: { type: 'conflict', destinationId: 'some-object-id' },
+        },
         {
           ...obj4Error,
           title: obj4.attributes.title,
