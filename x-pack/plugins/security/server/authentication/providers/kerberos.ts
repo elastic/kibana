@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import {
-  ElasticsearchError,
-  ElasticsearchErrorHelpers,
+  LegacyElasticsearchError,
+  LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -149,7 +149,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Failed to exchange SPNEGO token for an access token: ${err.message}`);
 
       // Check if SPNEGO context wasn't established and we have a response token to return to the client.
-      const challenge = ElasticsearchErrorHelpers.isNotAuthorizedError(err)
+      const challenge = LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)
         ? this.getNegotiateChallenge(err)
         : undefined;
       if (!challenge) {
@@ -294,7 +294,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via SPNEGO.');
 
     // Try to authenticate current request with Elasticsearch to see whether it supports SPNEGO.
-    let elasticsearchError: ElasticsearchError;
+    let elasticsearchError: LegacyElasticsearchError;
     try {
       await this.getUser(request, {
         // We should send a fake SPNEGO token to Elasticsearch to make sure Kerberos realm is included
@@ -308,7 +308,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     } catch (err) {
       // Fail immediately if we get unexpected error (e.g. ES isn't available). We should not touch
       // session cookie in this case.
-      if (!ElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (!LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
         return AuthenticationResult.failed(err);
       }
 
@@ -334,7 +334,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * Extracts `Negotiate` challenge from the list of challenges returned with Elasticsearch error if any.
    * @param error Error to extract challenges from.
    */
-  private getNegotiateChallenge(error: ElasticsearchError) {
+  private getNegotiateChallenge(error: LegacyElasticsearchError) {
     const challenges = ([] as string[]).concat(error.output.headers[WWWAuthenticateHeaderName]);
 
     const negotiateChallenge = challenges.find((challenge) =>

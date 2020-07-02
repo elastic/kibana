@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import {
   ResolverChildren,
   ResolverRelatedEvents,
@@ -33,7 +33,7 @@ import { AlertsQuery } from '../queries/alerts';
  */
 export class Fetcher {
   constructor(
-    private readonly client: IScopedClusterClient,
+    private readonly client: ILegacyScopedClusterClient,
     /**
      * The anchoring origin for the tree.
      */
