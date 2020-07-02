@@ -31,6 +31,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
+export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isNumber } from 'lodash';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
 import { ESFilter } from '../../../../typings/elasticsearch';
@@ -14,19 +13,25 @@ import {
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
+  transactionDurationSearchStrategy,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
+  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
 }) {
   const { start, end, client } = setup;
 
-  const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...transactionDurationSearchStrategy.documentTypeFilter,
+  ];
 
   const environmentFilter = getEnvironmentUiFilterES(environment);
 
@@ -38,13 +43,13 @@ export async function getDerivedServiceAnnotations({
     (
       await client.search({
         apm: {
-          types: [ProcessorEvent.transaction],
+          types: [transactionDurationSearchStrategy.type],
         },
         body: {
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({ range: rangeFilter(start, end) }),
+              filter: [...filter, { range: rangeFilter(start, end) }],
             },
           },
           aggs: {
@@ -65,7 +70,7 @@ export async function getDerivedServiceAnnotations({
     versions.map(async (version) => {
       const response = await client.search({
         apm: {
-          types: [ProcessorEvent.transaction],
+          types: [transactionDurationSearchStrategy.type],
         },
         body: {
           size: 0,

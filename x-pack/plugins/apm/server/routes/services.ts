@@ -16,6 +16,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getTransactionDurationSearchStrategy } from '../lib/helpers/search_strategies/transaction_duration';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -24,7 +25,19 @@ export const servicesRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const services = await getServices(setup);
+
+    const transactionDurationSearchStrategy = await getTransactionDurationSearchStrategy(
+      {
+        client: setup.client,
+        start: setup.start,
+        end: setup.end,
+      }
+    );
+
+    const services = await getServices({
+      setup,
+      transactionDurationSearchStrategy,
+    });
 
     return services;
   },
@@ -56,7 +69,17 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceTransactionTypes(serviceName, setup);
+    return getServiceTransactionTypes({
+      serviceName,
+      setup,
+      transactionDurationSearchStrategy: await getTransactionDurationSearchStrategy(
+        {
+          start: setup.start,
+          end: setup.end,
+          client: setup.client,
+        }
+      ),
+    });
   },
 }));
 
@@ -94,13 +117,24 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
-    );
+    const [
+      annotationsClient,
+      transactionDurationSearchStrategy,
+    ] = await Promise.all([
+      context.plugins.observability?.getScopedAnnotationsClient(
+        context,
+        request
+      ),
+      getTransactionDurationSearchStrategy({
+        client: setup.client,
+        start: setup.start,
+        end: setup.end,
+      }),
+    ]);
 
     return getServiceAnnotations({
       setup,
+      transactionDurationSearchStrategy,
       serviceName,
       environment,
       annotationsClient,

@@ -3,29 +3,35 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { TransactionDurationSearchStrategy } from '../helpers/search_strategies/transaction_duration';
 
-export async function getServiceTransactionTypes(
-  serviceName: string,
-  setup: Setup & SetupTimeRange
-) {
+export async function getServiceTransactionTypes({
+  setup,
+  serviceName,
+  transactionDurationSearchStrategy,
+}: {
+  serviceName: string;
+  setup: Setup & SetupTimeRange;
+  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+}) {
   const { start, end, client } = setup;
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      types: [transactionDurationSearchStrategy.type],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
+            ...transactionDurationSearchStrategy.documentTypeFilter,
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },
           ],

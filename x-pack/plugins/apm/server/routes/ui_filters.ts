@@ -30,6 +30,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumOverviewProjection } from '../projections/rum_overview';
+import { getTransactionDurationSearchStrategy } from '../lib/helpers/search_strategies/transaction_duration';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -93,7 +94,7 @@ function createLocalFiltersRoute<
 
       const { uiFilters, filterNames } = query;
       const parsedUiFilters = JSON.parse(uiFilters);
-      const projection = getProjection({
+      const projection = await getProjection({
         query,
         setup: {
           ...setup,
@@ -113,7 +114,17 @@ function createLocalFiltersRoute<
 
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
-  getProjection: ({ setup }) => getServicesProjection({ setup }),
+  getProjection: async ({ setup }) => {
+    const transactionDurationSearchStrategy = await getTransactionDurationSearchStrategy(
+      {
+        start: setup.start,
+        end: setup.end,
+        client: setup.client,
+      }
+    );
+
+    return getServicesProjection({ setup, transactionDurationSearchStrategy });
+  },
   queryRt: t.type({}),
 });
 
@@ -240,4 +251,4 @@ type GetProjection<
 }: {
   query: t.TypeOf<TQueryRT>;
   setup: Setup & SetupUIFilters & SetupTimeRange;
-}) => TProjection;
+}) => Promise<TProjection> | TProjection;

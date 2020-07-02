@@ -217,7 +217,7 @@ interface AggregationResponsePart<
   sum: MetricsAggregationResponsePart;
   max: MetricsAggregationResponsePart;
   min: MetricsAggregationResponsePart;
-  value_count: MetricsAggregationResponsePart;
+  value_count: { value: number };
   cardinality: {
     value: number;
   };

@@ -6,7 +6,6 @@
 
 import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import {
-  TRANSACTION_DURATION,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -16,6 +15,7 @@ import {
   ServicesItemsSetup,
   ServicesItemsProjection,
 } from './get_services_items';
+import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -25,11 +25,13 @@ const getDeltaAsMinutes = (setup: ServicesItemsSetup) =>
 interface AggregationParams {
   setup: ServicesItemsSetup;
   projection: ServicesItemsProjection;
+  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
 }
 
 export const getTransactionDurationAverages = async ({
   setup,
   projection,
+  transactionDurationSearchStrategy,
 }: AggregationParams) => {
   const { client } = setup;
 
@@ -37,9 +39,17 @@ export const getTransactionDurationAverages = async ({
     mergeProjection(projection, {
       size: 0,
       apm: {
-        types: [ProcessorEvent.transaction],
+        types: [transactionDurationSearchStrategy.type],
       },
       body: {
+        query: {
+          bool: {
+            filter: [
+              ...projection.body.query.bool.filter,
+              ...transactionDurationSearchStrategy.documentTypeFilter,
+            ],
+          },
+        },
         aggs: {
           services: {
             terms: {
@@ -49,7 +59,8 @@ export const getTransactionDurationAverages = async ({
             aggs: {
               average: {
                 avg: {
-                  field: TRANSACTION_DURATION,
+                  field:
+                    transactionDurationSearchStrategy.transactionDurationField,
                 },
               },
             },
@@ -78,13 +89,6 @@ export const getAgentNames = async ({
   const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      apm: {
-        types: [
-          ProcessorEvent.metric,
-          ProcessorEvent.error,
-          ProcessorEvent.transaction,
-        ],
-      },
       body: {
         size: 0,
         aggs: {
@@ -126,20 +130,37 @@ export const getAgentNames = async ({
 export const getTransactionRates = async ({
   setup,
   projection,
+  transactionDurationSearchStrategy,
 }: AggregationParams) => {
   const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
       apm: {
-        types: [ProcessorEvent.transaction],
+        types: [transactionDurationSearchStrategy.type],
       },
       body: {
         size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...projection.body.query.bool.filter,
+              ...transactionDurationSearchStrategy.documentTypeFilter,
+            ],
+          },
+        },
         aggs: {
           services: {
             terms: {
               ...projection.body.aggs.services.terms,
               size: MAX_NUMBER_OF_SERVICES,
+            },
+            aggs: {
+              value_count: {
+                value_count: {
+                  field:
+                    transactionDurationSearchStrategy.transactionDurationField,
+                },
+              },
             },
           },
         },
@@ -156,7 +177,7 @@ export const getTransactionRates = async ({
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
   return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
-    const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
+    const transactionsPerMinute = bucket.value_count.value / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
       transactionsPerMinute,
@@ -212,13 +233,6 @@ export const getEnvironments = async ({
   const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
-      apm: {
-        types: [
-          ProcessorEvent.metric,
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-        ],
-      },
       body: {
         size: 0,
         aggs: {

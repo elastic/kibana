@@ -18,15 +18,26 @@ import {
   getErrorRates,
   getEnvironments,
 } from './get_services_items_stats';
+import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
 export type ServicesItemsSetup = Setup & SetupTimeRange & SetupUIFilters;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
-export async function getServicesItems(setup: ServicesItemsSetup) {
+export async function getServicesItems({
+  setup,
+  transactionDurationSearchStrategy,
+}: {
+  setup: ServicesItemsSetup;
+  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+}) {
   const params = {
-    projection: getServicesProjection({ setup }),
+    projection: getServicesProjection({
+      setup,
+      transactionDurationSearchStrategy,
+    }),
     setup,
+    transactionDurationSearchStrategy,
   };
 
   const [
