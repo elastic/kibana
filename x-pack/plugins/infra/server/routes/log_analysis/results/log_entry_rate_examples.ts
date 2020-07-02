@@ -31,7 +31,7 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
         body: createValidationFunction(getLogEntryRateExamplesRequestPayloadRT),
       },
     },
-    async (requestContext, request, response) => {
+    framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
         data: {
           dataset,
