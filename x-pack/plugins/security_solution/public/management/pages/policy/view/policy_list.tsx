@@ -45,7 +45,8 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { MANAGEMENT_APP_ID } from '../../../common/constants';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -141,21 +142,21 @@ export const PolicyList = React.memo(() => {
     endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
     'ingestManager',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
-      // to the Integration Endpoint Package Add Datasource if we have package information.
+      // to the Integration Endpoint Package Add Integration if we have package information.
       // Also,
       // We pass along soem state information so that the Ingest page can change the behaviour
       // of the cancel and submit buttons and redirect the user back to endpoint policy
       path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
       }`,
       state: {
-        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
-        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onSaveNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
       },
     }
   );

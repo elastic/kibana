@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
+import {
+  ILegacyClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  FakeRequest,
+} from 'src/core/server';
 import moment from 'moment';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
@@ -48,7 +53,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
-    private clusterClient: IClusterClient,
+    private clusterClient: ILegacyClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup
   ) {

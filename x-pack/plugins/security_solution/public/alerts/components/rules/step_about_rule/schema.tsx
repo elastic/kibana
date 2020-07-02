@@ -22,6 +22,23 @@ import * as I18n from './translations';
 const { emptyField } = fieldValidators;
 
 export const schema: FormSchema = {
+  author: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorLabel',
+      {
+        defaultMessage: 'Author',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorHelpText',
+      {
+        defaultMessage:
+          'Type one or more author for this rule. Press enter after each author to add a new one.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   name: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
@@ -64,36 +81,44 @@ export const schema: FormSchema = {
       },
     ],
   },
-  severity: {
-    type: FIELD_TYPES.SUPER_SELECT,
+  isBuildingBlock: {
+    type: FIELD_TYPES.CHECKBOX,
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldBuildingBlockLabel',
       {
-        defaultMessage: 'Severity',
+        defaultMessage: 'Mark all generated alerts as "building block" alerts',
       }
     ),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
-            {
-              defaultMessage: 'A severity is required.',
-            }
-          )
-        ),
-      },
-    ],
+    labelAppend: OptionalFieldLabel,
+  },
+  severity: {
+    value: {
+      type: FIELD_TYPES.SUPER_SELECT,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.severityFieldRequiredError',
+              {
+                defaultMessage: 'A severity is required.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+    mapping: {
+      type: FIELD_TYPES.TEXT,
+    },
   },
   riskScore: {
-    type: FIELD_TYPES.RANGE,
-    serializer: (input: string) => Number(input),
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel',
-      {
-        defaultMessage: 'Risk score',
-      }
-    ),
+    value: {
+      type: FIELD_TYPES.RANGE,
+      serializer: (input: string) => Number(input),
+    },
+    mapping: {
+      type: FIELD_TYPES.TEXT,
+    },
   },
   references: {
     label: i18n.translate(
@@ -135,6 +160,39 @@ export const schema: FormSchema = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  license: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseLabel',
+      {
+        defaultMessage: 'License',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseHelpText',
+      {
+        defaultMessage: 'Add a license name',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
+  ruleNameOverride: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRuleNameOverrideLabel',
+      {
+        defaultMessage: 'Rule name override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRuleNameOverrideHelpText',
+      {
+        defaultMessage:
+          'Choose a field from the source event to populate the rule name in the alert list.',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   threat: {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel',
@@ -165,6 +223,23 @@ export const schema: FormSchema = {
         },
       },
     ],
+  },
+  timestampOverride: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideLabel',
+      {
+        defaultMessage: 'Timestamp override',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideHelpText',
+      {
+        defaultMessage:
+          'Choose timestamp field used when executing rule. Pick field with timestamp closest to ingest time (e.g. event.ingested).',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
   },
   tags: {
     type: FIELD_TYPES.COMBO_BOX,
