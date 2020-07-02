@@ -299,10 +299,7 @@ server.newPlatform.setup.plugins.alerts.registerType({
 Once you have registered your AlertType, you need to grant your users privileges to use it.
 When registering a feature in Kibana you can specify multiple types of privileges which are granted to users when they're assigned certain roles.
 
-Assuming your feature introduces its own AlertTypes, you'll want to control:
-- Which roles have all/read privileges for these AlertTypes when they're inside the feature
-- Which roles have all/read privileges for these AlertTypes when they're outside the feature (in another feature or in the global alerts management)
-
+Assuming your feature introduces its own AlertTypes, you'll want to control which roles have all/read privileges for these AlertTypes when they're inside the feature.
 In addition, when users are inside your feature you might want to grant them access to AlertTypes from other features, such as built-in AlertTypes or AlertTypes provided by other features.
 
 You can control all of these abilities by assigning privileges to the Alerting Framework from within your own feature, for example:
@@ -345,7 +342,7 @@ features.registerFeature({
 In this example we can see the following:
 - Our feature grants any user who's assigned the `all` role in our feature the `all` role in the Alerting framework over every alert of the `my-application-id.my-alert-type` type which is created _inside_ the feature. What that means is that this privilege will allow the user to execute any of the `all` operations (listed below) on these alerts as long as their `consumer` is `my-application-id`. Below that you'll notice we've done the same with the `read` role, which is grants the Alerting Framework's `read` role privileges over these very same alerts.
 - In addition, our feature grants the same privileges over any alert of type `my-application-id.my-restricted-alert-type`, which is another hypothetical alertType registered by this feature. It's worth noting though that this type has been omitted from the `read` role. What this means is that only users with the `all` role will be able to interact with alerts of this type.
-- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over alerts of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in type, provided by the framework, and specifying it here is all you need in order to grant privileges to use this type. On the other hand, `xpack.uptime.alerts.actionGroups.tls` is an AlertType provided by the _Uptime_ feature. Specifying this type here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use this type (with `all` and `read` applied), but that isn't enough. Using another feature's AlertType is only possible if both the producer of the AlertType, and the consumer of the AlertType, explicitly grant privileges to do so. In this case, the _Uptime_ feature would have to explicitly add these privileges to a role and this role would have to be granted to this user.
+- Next, lets look at the `.index-threshold` and `xpack.uptime.alerts.actionGroups.tls` types. These have been specified in both `read` and `all`, which means that all the users in the feature will gain privileges over alerts of these types (as long as their `consumer` is `my-application-id`). The difference between these two and the previous two is that they are _produced_ by other features! `.index-threshold` is a built-in type, provided by the _Built-In Alerts_ feature, and `xpack.uptime.alerts.actionGroups.tls` is an AlertType provided by the _Uptime_ feature. Specifying these type here tells the Alerting Framework that as far as the `my-application-id` feature is concerned, the user is privileged to use them (with `all` and `read` applied), but that isn't enough. Using another feature's AlertType is only possible if both the producer of the AlertType, and the consumer of the AlertType, explicitly grant privileges to do so. In this case, the _Built-In Alerts_ & _Uptime_ features would have to explicitly add these privileges to a role and this role would have to be granted to this user.
 
 It's important to note that any role can be granted a mix of `all` and `read` privileges accross multiple type, for example:
 
@@ -382,9 +379,9 @@ As part of that same change, we also decided that not only should they be allowe
 
 ### `read` privileges vs. `all` privileges
 When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
-- get
-- getAlertState
-- find
+- `get`
+- `getAlertState`
+- `find`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
 - `create`

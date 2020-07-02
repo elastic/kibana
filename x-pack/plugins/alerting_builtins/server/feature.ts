@@ -10,7 +10,7 @@ import { BUILT_IN_ALERTS_FEATURE_ID } from '../common';
 
 export const BUILT_IN_ALERTS_FEATURE = {
   id: BUILT_IN_ALERTS_FEATURE_ID,
-  name: i18n.translate('xpack.builtInAlerts.featureRegistry.actionsFeatureName', {
+  name: i18n.translate('xpack.alertingBuiltins.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Built-In Alerts',
   }),
   icon: 'bell',
