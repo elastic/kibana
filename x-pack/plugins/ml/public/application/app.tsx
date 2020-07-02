@@ -40,9 +40,11 @@ export function getMlGlobalServices(httpStart: HttpStart) {
   };
 }
 
-export interface MlGlobalServices {
-  mlServices: ReturnType<typeof getMlGlobalServices>;
+export interface MlServicesContext {
+  mlServices: MlGlobalServices;
 }
+
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps }) => {
   const pageDeps = {
