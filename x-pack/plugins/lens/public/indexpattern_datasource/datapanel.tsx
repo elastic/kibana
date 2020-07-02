@@ -47,9 +47,11 @@ export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
     state: IndexPatternPrivateState,
     setState: StateSetter<IndexPatternPrivateState>
   ) => void;
+  charts: ChartsPluginSetup;
 };
 import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.FunctionComponent<
@@ -82,6 +84,7 @@ export function IndexPatternDataPanel({
   filters,
   dateRange,
   changeIndexPattern,
+  charts,
   showNoDataPopover,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
@@ -170,6 +173,7 @@ export function IndexPatternDataPanel({
           dragDropContext={dragDropContext}
           core={core}
           data={data}
+          charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
         />
@@ -214,6 +218,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   core,
   data,
   existingFields,
+  charts,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -222,6 +227,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   dragDropContext: DragContextState;
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  charts: ChartsPluginSetup;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -376,6 +382,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       dateRange,
       query,
       filters,
+      chartsThemeService: charts.theme,
     }),
     [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
   );
