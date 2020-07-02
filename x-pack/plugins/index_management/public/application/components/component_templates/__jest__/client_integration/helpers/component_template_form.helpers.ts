@@ -67,11 +67,7 @@ export const getFormActions = (testBed: TestBed) => {
           jsonString: JSON.stringify(settings),
         }); // Using mocked EuiCodeEditor
       }
-    });
 
-    component.update();
-
-    await act(async () => {
       clickNextButton();
     });
 
@@ -121,11 +117,7 @@ export const getFormActions = (testBed: TestBed) => {
           jsonString: JSON.stringify(aliases),
         }); // Using mocked EuiCodeEditor
       }
-    });
 
-    component.update();
-
-    await act(async () => {
       clickNextButton();
     });
 

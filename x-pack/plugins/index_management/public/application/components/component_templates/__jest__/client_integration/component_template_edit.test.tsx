@@ -93,11 +93,6 @@ describe('<ComponentTemplateEdit />', () => {
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
-      });
-
-      component.update();
-
-      await act(async () => {
         actions.clickNextButton();
       });
 
