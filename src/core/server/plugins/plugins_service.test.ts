@@ -51,7 +51,7 @@ const logger = loggingSystemMock.create();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-['path-1', 'path-2', 'path-3', 'path-4', 'path-5'].forEach((path) => {
+['path-1', 'path-2', 'path-3', 'path-4', 'path-5', 'path-6', 'path-7', 'path-8'].forEach((path) => {
   jest.doMock(join(path, 'server'), () => ({}), {
     virtual: true,
   });
@@ -227,6 +227,26 @@ describe('PluginsService', () => {
             path: 'path-4',
             configPath: 'path-4-disabled',
           }),
+          createPlugin('plugin-with-disabled-optional-dep', {
+            path: 'path-5',
+            configPath: 'path-5',
+            optionalPlugins: ['explicitly-disabled-plugin'],
+          }),
+          createPlugin('plugin-with-missing-optional-dep', {
+            path: 'path-6',
+            configPath: 'path-6',
+            optionalPlugins: ['missing-plugin'],
+          }),
+          createPlugin('plugin-with-disabled-nested-transitive-dep', {
+            path: 'path-7',
+            configPath: 'path-7',
+            requiredPlugins: ['plugin-with-disabled-transitive-dep'],
+          }),
+          createPlugin('plugin-with-missing-nested-dep', {
+            path: 'path-8',
+            configPath: 'path-8',
+            requiredPlugins: ['plugin-with-missing-required-deps'],
+          }),
         ]),
       });
 
@@ -234,7 +254,7 @@ describe('PluginsService', () => {
       const setup = await pluginsService.setup(setupDeps);
 
       expect(setup.contracts).toBeInstanceOf(Map);
-      expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
+      expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
       expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
@@ -244,13 +264,19 @@ describe('PluginsService', () => {
             "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
           ],
           Array [
-            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-missing-required-deps\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [missing-plugin]",
           ],
           Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since some of its direct or transitive dependencies are missing or disabled.",
+            "Plugin \\"plugin-with-disabled-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [another-explicitly-disabled-plugin]",
           ],
           Array [
             "Plugin \\"another-explicitly-disabled-plugin\\" is disabled.",
+          ],
+          Array [
+            "Plugin \\"plugin-with-disabled-nested-transitive-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-disabled-transitive-dep]",
+          ],
+          Array [
+            "Plugin \\"plugin-with-missing-nested-dep\\" has been disabled since the following direct or transitive dependencies are missing or disabled: [plugin-with-missing-required-deps]",
           ],
         ]
       `);
