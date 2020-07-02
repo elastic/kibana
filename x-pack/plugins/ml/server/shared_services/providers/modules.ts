@@ -8,9 +8,10 @@ import { LegacyAPICaller, KibanaRequest, SavedObjectsClientContract } from 'kiba
 import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
 import { SharedServicesChecks } from '../shared_services';
-import { setupModuleBodySchema } from '../../routes/schemas/modules';
+import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
 
-export type ModuleSetupPayload = { moduleId: string } & TypeOf<typeof setupModuleBodySchema>;
+export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
+  TypeOf<typeof setupModuleBodySchema>;
 
 export interface ModulesProvider {
   modulesProvider(
