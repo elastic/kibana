@@ -55,6 +55,7 @@ export class SavedObjectTypeRegistry {
 
   /**
    * Returns all visible {@link SavedObjectsType | types}.
+   *
    * A visible type is a type that doesn't explicitly define `hidden=true` during registration.
    */
   public getVisibleTypes() {
@@ -64,7 +65,7 @@ export class SavedObjectTypeRegistry {
   /**
    * Return all {@link SavedObjectsType | types} currently registered, including the hidden ones.
    *
-   * To only return the visible types (which is the most common use case), use `getVisibleTypes` instead.
+   * To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
    */
   public getAllTypes() {
     return [...this.types.values()];

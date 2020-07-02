@@ -4,7 +4,9 @@
 
 ## SavedObjectTypeRegistry.getVisibleTypes() method
 
-Returns all visible [types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->. A visible type is a type that doesn't explicitly define `hidden=true` during registration.
+Returns all visible [types](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->.
+
+A visible type is a type that doesn't explicitly define `hidden=true` during registration.
 
 <b>Signature:</b>
 
