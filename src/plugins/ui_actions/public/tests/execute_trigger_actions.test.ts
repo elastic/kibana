@@ -37,13 +37,15 @@ const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionType;
 
 function createTestAction<C extends object>(
   type: string,
-  checkCompatibility: (context: C) => boolean
+  checkCompatibility: (context: C) => boolean,
+  autoExecutable = false
 ): Action<object> {
   return createAction<typeof TEST_ACTION_TYPE>({
     type: type as ActionType,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: (context) => executeFn(context),
+    shouldAutoExecute: () => Promise.resolve(autoExecutable),
   });
 }
 
@@ -172,4 +174,31 @@ test('passes whole action context to isCompatible()', async () => {
   const context = { foo: 'bar' };
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
   jest.runAllTimers();
+});
+
+test("doesn't show a context menu for auto executable actions", async () => {
+  const { setup, doStart } = uiActions;
+  const trigger: Trigger = {
+    id: 'MY-TRIGGER' as TriggerId,
+    title: 'My trigger',
+  };
+  const action1 = createTestAction('test1', () => true, true);
+  const action2 = createTestAction('test2', () => true, false);
+
+  setup.registerTrigger(trigger);
+  setup.addTriggerAction(trigger.id, action1);
+  setup.addTriggerAction(trigger.id, action2);
+
+  expect(openContextMenu).toHaveBeenCalledTimes(0);
+
+  const start = doStart();
+  const context = {};
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+
+  jest.runAllTimers();
+
+  await wait(() => {
+    expect(executeFn).toBeCalledTimes(2);
+    expect(openContextMenu).toHaveBeenCalledTimes(0);
+  });
 });

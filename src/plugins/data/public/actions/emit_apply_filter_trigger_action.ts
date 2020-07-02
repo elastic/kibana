@@ -24,11 +24,13 @@ import {
   UiActionsStart,
 } from '../../../../plugins/ui_actions/public';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-// TODO: remove this import in next iteration, this helper functions should go to data plugin probably?
-import type { RangeSelectContext, ValueClickContext } from '../../../embeddable/public';
-import { Filter } from '../../common/es_query/filters';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
-import { ChartActionContext } from '../../../embeddable/public';
+import type { Filter } from '../../common/es_query/filters';
+import type {
+  ChartActionContext,
+  RangeSelectContext,
+  ValueClickContext,
+} from '../../../embeddable/public';
 
 export const ACTION_EMIT_APPLY_FILTER_TRIGGER = 'ACTION_EMIT_APPLY_FILTER_TRIGGER';
 
