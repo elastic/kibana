@@ -56,7 +56,7 @@ export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
   return (
     <FormattedMessage
       id="xpack.snapshotRestore.policyForm.stepSettings.selectDataStreamsIndicesHelpText"
-      defaultMessage="{indicesCount} {indicesCount, plural, one {index} other {indices}} and {dataStreamsCount} data {dataStreamsCount, plural, one {stream} other {streams}} will be backed up. {deselectAllLink}"
+      defaultMessage="{indicesCount} {indicesCount, plural, one {index} other {indices}} and {dataStreamsCount} {dataStreamsCount, plural, one {data stream} other {data streams}} will be backed up. {deselectAllLink}"
       values={{
         dataStreamsCount,
         indicesCount,
