@@ -5,10 +5,10 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
 import { TransformListRow } from '../../../../common';
-import { StopAction } from './action_stop';
+import { StopButton } from './action_stop';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
@@ -18,13 +18,12 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
     const item: TransformListRow = transformListRow;
-    const props = {
-      disabled: false,
+    const props: ComponentProps<typeof StopButton> = {
+      forceDisable: false,
       items: [item],
-      stopTransform(d: TransformListRow) {},
     };
 
-    const wrapper = shallow(<StopAction {...props} />);
+    const wrapper = shallow(<StopButton {...props} />);
 
     expect(wrapper).toMatchSnapshot();
   });

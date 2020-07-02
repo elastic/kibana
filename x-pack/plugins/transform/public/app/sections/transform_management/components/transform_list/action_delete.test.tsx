@@ -5,10 +5,10 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
 import { TransformListRow } from '../../../../common';
-import { DeleteAction } from './action_delete';
+import { DeleteButton } from './action_delete';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
@@ -18,13 +18,13 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {
     const item: TransformListRow = transformListRow;
-    const props = {
-      disabled: false,
+    const props: ComponentProps<typeof DeleteButton> = {
+      forceDisable: false,
       items: [item],
-      deleteTransform(d: TransformListRow) {},
+      onClick: () => {},
     };
 
-    const wrapper = shallow(<DeleteAction {...props} />);
+    const wrapper = shallow(<DeleteButton {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

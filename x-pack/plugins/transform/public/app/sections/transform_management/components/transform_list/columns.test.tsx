@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getColumns } from './columns';
+import { renderHook } from '@testing-library/react-hooks';
+
+import { useColumns } from './columns';
 
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: Job List Columns', () => {
-  test('getColumns()', () => {
-    const columns = getColumns([], () => {}, []);
+  test('useColumns()', () => {
+    const { result } = renderHook(() => useColumns([], () => {}, []));
+    const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
     expect(columns).toHaveLength(7);
     expect(columns[0].isExpander).toBeTruthy();
