@@ -15,12 +15,13 @@ import { APMLink, APMLinkExtendProps } from './APMLink';
 interface RumOverviewLinkProps extends APMLinkExtendProps {
   serviceName?: string;
 }
-const RumOverviewLink = ({ serviceName, ...rest }: RumOverviewLinkProps) => {
+export function RumOverviewLink({
+  serviceName,
+  ...rest
+}: RumOverviewLinkProps) {
   const path = serviceName
     ? `/services/${serviceName}/rum-overview`
     : '/rum-overview';
 
   return <APMLink path={path} {...rest} />;
-};
-
-export { RumOverviewLink };
+}
