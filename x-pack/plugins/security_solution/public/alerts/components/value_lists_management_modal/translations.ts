@@ -42,8 +42,8 @@ export const UPLOAD_BUTTON = i18n.translate('xpack.securitySolution.lists.valueL
   defaultMessage: 'Upload list',
 });
 
-export const UPLOAD_SUCCESS = i18n.translate(
-  'xpack.securitySolution.lists.valueListsUploadSuccess',
+export const UPLOAD_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.valueListsUploadSuccessTitle',
   {
     defaultMessage: 'Value list uploaded',
   }

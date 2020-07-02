@@ -87,7 +87,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     (response: ListSchema) => {
       toasts.addSuccess({
         text: i18n.uploadSuccessMessage(response.name),
-        title: i18n.UPLOAD_SUCCESS,
+        title: i18n.UPLOAD_SUCCESS_TITLE,
       });
       fetchLists();
     },
