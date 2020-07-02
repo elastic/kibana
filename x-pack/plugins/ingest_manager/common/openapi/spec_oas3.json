@@ -4125,6 +4125,12 @@
           "enrolled_at": {
             "type": "string"
           },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
           "shared_id": {
             "type": "string"
           },
