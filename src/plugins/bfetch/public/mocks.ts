@@ -28,6 +28,7 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     fetchStreaming: jest.fn(),
     batchedFunction: jest.fn(),
+    createApi: jest.fn(),
   };
   return setupContract;
 };
@@ -36,6 +37,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     fetchStreaming: jest.fn(),
     batchedFunction: jest.fn(),
+    createApi: jest.fn(),
   };
 
   return startContract;

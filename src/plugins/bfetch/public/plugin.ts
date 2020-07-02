@@ -20,7 +20,7 @@
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash, ApiMethod, ApiMethodRequest } from '../common';
+import { removeLeadingSlash, ApiMethod } from '../common';
 import {
   createStreamingBatchedFunction,
   BatchedFunc,
