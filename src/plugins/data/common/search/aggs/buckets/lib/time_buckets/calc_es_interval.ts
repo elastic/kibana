@@ -20,7 +20,7 @@
 import moment from 'moment';
 import dateMath, { Unit } from '@elastic/datemath';
 
-import { parseEsInterval } from '../../../../../../common';
+import { parseEsInterval } from '../../../utils';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('M');

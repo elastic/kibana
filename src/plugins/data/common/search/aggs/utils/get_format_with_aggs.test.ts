@@ -19,9 +19,8 @@
 
 import { identity } from 'lodash';
 
-import { SerializedFieldFormat } from '../../../../../expressions/common/types';
-import { FieldFormat } from '../../../../common';
-import { IFieldFormat } from '../../../../public';
+import { SerializedFieldFormat } from 'src/plugins/expressions/common/types';
+import { FieldFormat, IFieldFormat } from '../../../../common';
 
 import { getFormatWithAggs } from './get_format_with_aggs';
 

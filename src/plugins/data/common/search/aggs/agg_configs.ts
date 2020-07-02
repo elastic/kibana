@@ -20,13 +20,12 @@
 import _ from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
+import { FetchOptions, ISearchSource } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../../index_patterns';
-import { ISearchSource } from '../search_source';
-import { FetchOptions } from '../fetch';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { TimeRange } from '../../../common';
 
 function removeParentAggs(obj: any) {

@@ -20,7 +20,7 @@
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import { parseInterval } from '../../../../../../common';
+import { parseInterval } from '../../../utils';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {

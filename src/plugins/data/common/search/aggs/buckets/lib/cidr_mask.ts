@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Ipv4Address } from '../../../../../common';
+import { Ipv4Address } from '../../utils';
 
 const NUM_BITS = 32;
 

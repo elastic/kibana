@@ -21,7 +21,7 @@ import moment from 'moment';
 import { getDateRangeBucketAgg, DateRangeBucketAggDependencies } from '../date_range';
 import { createFilterDateRange } from './date_range';
 import { FieldFormatsGetConfigFn } from '../../../../../common';
-import { DateFormat } from '../../../../field_formats';
+import { DateFormat } from '../../../../../public/field_formats';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';

@@ -20,16 +20,17 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
+
+import { FetchOptions, ISearchSource } from 'src/plugins/data/public';
 import {
   ExpressionAstFunction,
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
+
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
-import { FetchOptions } from '../fetch';
-import { ISearchSource } from '../search_source';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 

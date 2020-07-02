@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import {
   AggConfigSerialized,
   AggConfigs,
