@@ -243,6 +243,25 @@ export class JobCreator {
     );
   }
 
+  public set annotations(enable: boolean) {
+    if (enable) {
+      if (this._job_config.model_plot_config) {
+        this._job_config.model_plot_config.annotations_enabled = true;
+      } else {
+        this._job_config.model_plot_config = {
+          enabled: false,
+          annotations_enabled: true,
+        };
+      }
+    } else {
+      delete this._job_config.model_plot_config?.annotations_enabled;
+    }
+  }
+
+  public get annotations() {
+    return this._job_config.model_plot_config?.annotations_enabled === true;
+  }
+
   public set useDedicatedIndex(enable: boolean) {
     this._useDedicatedIndex = enable;
     if (enable) {

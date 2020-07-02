@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Job } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -175,9 +176,28 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { jobId } = request.params;
+        const body: Partial<Job> = request.body;
+
+        // if annotations is enabled but model plot is not
+        if (
+          body.model_plot_config?.annotations_enabled === true &&
+          body.model_plot_config?.enabled === undefined
+        ) {
+          body.model_plot_config.enabled = false;
+        }
+
+        // if annotations is undefined, change it to false by default
+        // else server side will turn it on by default
+        if (
+          body.model_plot_config?.annotations_enabled === undefined &&
+          body.model_plot_config?.enabled === true
+        ) {
+          body.model_plot_config.annotations_enabled = false;
+        }
+
         const results = await context.ml!.mlClient.callAsCurrentUser('ml.addJob', {
           jobId,
-          body: request.body,
+          body,
         });
         return response.ok({
           body: results,
