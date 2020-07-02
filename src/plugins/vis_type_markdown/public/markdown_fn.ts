@@ -26,20 +26,12 @@ interface RenderValue {
   visConfig: MarkdownVisParams;
 }
 
-type ExpressionFunctionMarkdownVis = ExpressionFunctionDefinition<
+export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
   'markdownVis',
   unknown,
   Arguments,
   Render<RenderValue>
->;
-
-declare module '../../../plugins/expressions/public' {
-  interface ExpressionFunctionDefinitions {
-    markdownVis: ExpressionFunctionMarkdownVis;
-  }
-}
-
-export const createMarkdownVisFn = (): ExpressionFunctionMarkdownVis => ({
+> => ({
   name: 'markdownVis',
   type: 'render',
   inputTypes: [],
@@ -78,8 +70,8 @@ export const createMarkdownVisFn = (): ExpressionFunctionMarkdownVis => ({
         visType: 'markdown',
         visConfig: {
           markdown: args.markdown,
-          openLinksInNewTab: args.openLinksInNewTab!,
-          fontSize: parseInt(args.font!.spec.fontSize || '12', 10),
+          openLinksInNewTab: args.openLinksInNewTab,
+          fontSize: parseInt(args.font.spec.fontSize || '12', 10),
         },
       },
     };

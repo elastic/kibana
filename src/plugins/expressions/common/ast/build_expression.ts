@@ -17,8 +17,13 @@
  * under the License.
  */
 
+import { AnyExpressionFunctionDefinition } from '../expression_functions/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from './types';
-import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_function';
+import {
+  buildExpressionFunction,
+  ExpressionAstFunctionBuilder,
+  InferFunctionDefinition,
+} from './build_function';
 import { format } from './format';
 import { parse } from './parse';
 
@@ -69,7 +74,9 @@ export interface ExpressionAstExpressionBuilder {
    * @param fnName Name of the function to search for.
    * @return `ExpressionAstFunctionBuilder[]`
    */
-  findFunction: <Fn extends string>(fnName: Fn) => Array<ExpressionAstFunctionBuilder<Fn>> | [];
+  findFunction: <FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(
+    fnName: InferFunctionDefinition<FnDef>['name']
+  ) => Array<ExpressionAstFunctionBuilder<FnDef>> | [];
   /**
    * Converts expression to an AST.
    *
@@ -125,8 +132,10 @@ export function buildExpression(
     type: 'expression_builder',
     functions: fns,
 
-    findFunction<Fn extends string>(fnName: Fn) {
-      const foundFns: Array<ExpressionAstFunctionBuilder<Fn>> = [];
+    findFunction<FnDef extends AnyExpressionFunctionDefinition>(
+      fnName: InferFunctionDefinition<FnDef>['name']
+    ) {
+      const foundFns: Array<ExpressionAstFunctionBuilder<FnDef>> = [];
       return fns.reduce((found, currFn) => {
         Object.values(currFn.arguments).forEach((values) => {
           values.forEach((value) => {
@@ -137,7 +146,7 @@ export function buildExpression(
           });
         });
         if (currFn.name === fnName) {
-          found.push(currFn as ExpressionAstFunctionBuilder<Fn>);
+          found.push(currFn as ExpressionAstFunctionBuilder<FnDef>);
         }
         return found;
       }, foundFns);

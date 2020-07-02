@@ -20,18 +20,6 @@ interface MergeTables {
   tables: KibanaDatatable[];
 }
 
-declare module '../../../../../src/plugins/expressions/server' {
-  interface ExpressionFunctionDefinitions {
-    lens_merge_tables: typeof mergeTables;
-  }
-}
-
-declare module '../../../../../src/plugins/expressions/public' {
-  interface ExpressionFunctionDefinitions {
-    lens_merge_tables: typeof mergeTables;
-  }
-}
-
 export const mergeTables: ExpressionFunctionDefinition<
   'lens_merge_tables',
   ExpressionValueSearchContext | null,

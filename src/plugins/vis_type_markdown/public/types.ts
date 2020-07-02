@@ -21,12 +21,12 @@ import { Style } from 'src/plugins/expressions/public';
 
 export interface Arguments {
   markdown: string;
-  font?: Style;
-  openLinksInNewTab?: boolean;
+  font: Style;
+  openLinksInNewTab: boolean;
 }
 
 export interface MarkdownVisParams {
   markdown: Arguments['markdown'];
+  openLinksInNewTab: Arguments['openLinksInNewTab'];
   fontSize: number;
-  openLinksInNewTab: boolean;
 }

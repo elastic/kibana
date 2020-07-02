@@ -19,8 +19,8 @@
 
 import { ExpressionAstFunction } from './types';
 import {
+  AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
-  ExpressionFunctionDefinitions,
 } from '../expression_functions/types';
 import {
   buildExpression,
@@ -31,9 +31,10 @@ import {
 import { format } from './format';
 
 // Infers the types from an ExpressionFunctionDefinition.
-type InferFunctionDefinition<
-  Name extends string
-> = ExpressionFunctionDefinitions[Name] extends ExpressionFunctionDefinition<
+// @internal
+export type InferFunctionDefinition<
+  FnDef extends AnyExpressionFunctionDefinition
+> = FnDef extends ExpressionFunctionDefinition<
   infer Name,
   infer Input,
   infer Arguments,
@@ -44,12 +45,14 @@ type InferFunctionDefinition<
   : never;
 
 // Shortcut for inferring args from a function definition.
-type FunctionArgs<Fn extends string> = InferFunctionDefinition<Fn>['arguments'];
+type FunctionArgs<FnDef extends AnyExpressionFunctionDefinition> = InferFunctionDefinition<
+  FnDef
+>['arguments'];
 
 // Gets a list of possible arg names for a given function.
-type FunctionArgName<F extends string> = {
-  [A in keyof FunctionArgs<F>]: A extends string ? A : never;
-}[keyof FunctionArgs<F>];
+type FunctionArgName<FnDef extends AnyExpressionFunctionDefinition> = {
+  [A in keyof FunctionArgs<FnDef>]: A extends string ? A : never;
+}[keyof FunctionArgs<FnDef>];
 
 // Gets all optional string keys from an interface.
 type OptionalKeys<T> = {
@@ -58,11 +61,13 @@ type OptionalKeys<T> = {
 
 // Represents the shape of arguments as they are stored
 // in the function builder.
-interface FunctionBuilderArguments<F extends string> {
-  [key: string]: Array<FunctionArgs<F>[string] | ExpressionAstExpressionBuilder>;
+interface FunctionBuilderArguments<FnDef extends AnyExpressionFunctionDefinition> {
+  [key: string]: Array<FunctionArgs<FnDef>[string] | ExpressionAstExpressionBuilder>;
 }
 
-export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
+export interface ExpressionAstFunctionBuilder<
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+> {
   /**
    * Used to identify expression function builder objects.
    */
@@ -70,14 +75,14 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
   /**
    * Name of this expression function.
    */
-  name: Fn;
+  name: InferFunctionDefinition<FnDef>['name'];
   /**
    * Object of all args currently added to the function. This is
    * structured similarly to `ExpressionAstFunction['arguments']`,
    * however any subexpressions are returned as expression builder
    * instances instead of expression ASTs.
    */
-  arguments: FunctionBuilderArguments<Fn>;
+  arguments: FunctionBuilderArguments<FnDef>;
   /**
    * Adds an additional argument to the function. For multi-args,
    * this should be called once for each new arg. Note that TS
@@ -89,9 +94,9 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * @param value The value of the argument to add.
    * @return `this`
    */
-  addArgument: <A extends FunctionArgName<Fn>>(
+  addArgument: <A extends FunctionArgName<FnDef>>(
     name: A,
-    value: FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder
+    value: FunctionArgs<FnDef>[A] | ExpressionAstExpressionBuilder
   ) => this;
   /**
    * Retrieves an existing argument by name.
@@ -102,9 +107,9 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * @param name The name of the argument to retrieve.
    * @return `ExpressionAstFunctionBuilderArgument[] | undefined`
    */
-  getArgument: <A extends FunctionArgName<Fn>>(
+  getArgument: <A extends FunctionArgName<FnDef>>(
     name: A
-  ) => Array<FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder> | undefined;
+  ) => Array<FunctionArgs<FnDef>[A] | ExpressionAstExpressionBuilder> | undefined;
   /**
    * Overwrites an existing argument with a new value.
    * In order to support multi-args, the value given must always be
@@ -114,9 +119,9 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * @param value The value of the argument. Must always be an array.
    * @return `this`
    */
-  replaceArgument: <A extends FunctionArgName<Fn>>(
+  replaceArgument: <A extends FunctionArgName<FnDef>>(
     name: A,
-    value: Array<FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder>
+    value: Array<FunctionArgs<FnDef>[A] | ExpressionAstExpressionBuilder>
   ) => this;
   /**
    * Removes an (optional) argument from the function.
@@ -127,7 +132,7 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * @param name The name of the argument to remove.
    * @return `this`
    */
-  removeArgument: <A extends OptionalKeys<FunctionArgs<Fn>>>(name: A) => this;
+  removeArgument: <A extends OptionalKeys<FunctionArgs<FnDef>>>(name: A) => this;
   /**
    * Converts function to an AST.
    *
@@ -155,8 +160,10 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
  * @param initialArgs Object containing the arguments to this function.
  * @return `this`
  */
-export function buildExpressionFunction<F extends string>(
-  fnName: F,
+export function buildExpressionFunction<
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
+>(
+  fnName: InferFunctionDefinition<FnDef>['name'],
   /**
    * To support subexpressions, we override all args to also accept an
    * ExpressionBuilder. This isn't perfectly typesafe since we don't
@@ -165,12 +172,12 @@ export function buildExpressionFunction<F extends string>(
    * builder know what they're doing.
    */
   initialArgs: {
-    [K in keyof FunctionArgs<F>]:
-      | FunctionArgs<F>[K]
+    [K in keyof FunctionArgs<FnDef>]:
+      | FunctionArgs<FnDef>[K]
       | ExpressionAstExpressionBuilder
       | ExpressionAstExpressionBuilder[];
   }
-): ExpressionAstFunctionBuilder<F> {
+): ExpressionAstFunctionBuilder<FnDef> {
   const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
     if (Array.isArray(value)) {
       acc[key] = value.map((v) => {
@@ -180,7 +187,7 @@ export function buildExpressionFunction<F extends string>(
       acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
     }
     return acc;
-  }, initialArgs as FunctionBuilderArguments<F>);
+  }, initialArgs as FunctionBuilderArguments<FnDef>);
 
   return {
     type: 'expression_function_builder',

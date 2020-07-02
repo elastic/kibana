@@ -20,18 +20,6 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
 
-/**
- * Augment `ExpressionFunctionDefinitions` with any expression functions
- * registered in this plugin.
- */
-import { EsaggsExpressionFunctionDefinition } from '../common';
-
-declare module '../../expressions/public' {
-  interface ExpressionFunctionDefinitions {
-    esaggs: EsaggsExpressionFunctionDefinition;
-  }
-}
-
 /*
  * Filters:
  */
@@ -325,7 +313,7 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
   // aggs

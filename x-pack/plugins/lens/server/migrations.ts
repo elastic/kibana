@@ -122,7 +122,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
 
   try {
     const ast = parseExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
+    const newChain: ExpressionAstFunction[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
       }

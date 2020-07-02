@@ -21,7 +21,7 @@ import {
   KibanaContext,
   KibanaDatatable,
   ExpressionFunctionDefinition,
-} from '../../../../../plugins/expressions/public';
+} from '../../../../../plugins/expressions/common';
 
 type Input = KibanaContext | null;
 type Output = Promise<KibanaDatatable>;

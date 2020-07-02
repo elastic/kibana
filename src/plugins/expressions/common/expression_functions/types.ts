@@ -109,37 +109,17 @@ export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 /**
- * Anybody registering an expression function should add a property to this
- * interface so that modules importing `ExpressionFunctionDefinitions` can
- * have the interfaces of all expression functions available to them.
- *
- * @example
- *  declare module '../../plugins/expressions/public' {
- *    interface ExpressionFunctionDefinitions {
- *      myExprFunctionName: MyExpressionFunctionDefinition;
- *    }
- *  }
- *
- *  declare module '../../plugins/expressions/server' {
- *    interface ExpressionFunctionDefinitions {
- *      myExprFunctionName: MyExpressionFunctionDefinition;
- *    }
- *  }
+ * A mapping of `ExpressionFunctionDefinition`s for functions which the
+ * Expressions services provides out-of-the-box. Any new functions registered
+ * by the Expressions plugin should have their types added here.
  *
  * @public
  */
 export interface ExpressionFunctionDefinitions {
-  // Common functions exported from the Expressions plugin
   clog: ExpressionFunctionClog;
   font: ExpressionFunctionFont;
   kibana_context: ExpressionFunctionKibanaContext;
   kibana: ExpressionFunctionKibana;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
-
-  // Other functions will be added via `declare module`
-
-  // Fallback for if a function cannot be found in the mapping,
-  // or someone forgets to `declare module`.
-  [key: string]: AnyExpressionFunctionDefinition;
 }
