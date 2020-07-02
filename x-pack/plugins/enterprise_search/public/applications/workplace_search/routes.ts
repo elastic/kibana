@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  enterpriseSearchBreadcrumbs,
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
-} from './generate_breadcrumbs';
-export { SetAppSearchBreadcrumbs, SetWorkplaceSearchBreadcrumbs } from './set_breadcrumbs';
+export const ORG_SOURCES_PATH = '/org/sources';
+export const USERS_PATH = '/org/users';
+export const ORG_SETTINGS_PATH = '/org/settings';
+export const SETUP_GUIDE_PATH = '/setup_guide';
