@@ -72,10 +72,18 @@ export const setupModuleBodySchema = schema.object({
 });
 
 export const optionalModuleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
   moduleId: schema.maybe(schema.string()),
 });
 
-export const moduleIdParamSchema = schema.object({ moduleId: schema.string() });
+export const moduleIdParamSchema = schema.object({
+  /**
+   * ID of the module.
+   */
+  moduleId: schema.string(),
+});
 
 export const modulesIndexPatternTitleSchema = schema.object({
   /**
