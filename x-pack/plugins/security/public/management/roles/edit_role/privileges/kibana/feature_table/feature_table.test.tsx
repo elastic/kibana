@@ -864,7 +864,7 @@ describe('FeatureTable', () => {
 
     const { displayedPrivileges } = setup({
       role,
-      features: kibanaFeatures,
+      features: [...kibanaFeatures, featureWithoutPrivileges],
       privilegeIndex: 0,
       calculateDisplayedPrivileges: true,
       canCustomizeSubFeaturePrivileges: false,
