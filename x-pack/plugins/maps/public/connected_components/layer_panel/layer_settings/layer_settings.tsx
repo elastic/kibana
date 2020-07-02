@@ -22,7 +22,7 @@ import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_reac
 import { ILayer } from '../../../classes/layers/layer';
 
 interface Props {
-  layer: ILayer | null;
+  layer: ILayer;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
@@ -31,10 +31,6 @@ interface Props {
 }
 
 export function LayerSettings(props: Props) {
-  if (!props.layer) {
-    return null;
-  }
-
   const minVisibilityZoom = props.layer.getMinSourceZoom();
   const maxVisibilityZoom = MAX_ZOOM;
   const layerId = props.layer.getId();
@@ -66,7 +62,7 @@ export function LayerSettings(props: Props) {
         formRowDisplay="columnCompressed"
         min={minVisibilityZoom}
         max={maxVisibilityZoom}
-        value={[props.layer!.getMinZoom(), props.layer!.getMaxZoom()]}
+        value={[props.layer.getMinZoom(), props.layer.getMaxZoom()]}
         showInput="inputWithPopover"
         showRange
         showLabels
@@ -88,13 +84,13 @@ export function LayerSettings(props: Props) {
         })}
         display="columnCompressed"
       >
-        <EuiFieldText value={props.layer!.getLabel()} onChange={onLabelChange} compressed />
+        <EuiFieldText value={props.layer.getLabel()} onChange={onLabelChange} compressed />
       </EuiFormRow>
     );
   };
 
   const renderShowLabelsOnTop = () => {
-    if (!props.layer!.supportsLabelsOnTop()) {
+    if (!props.layer.supportsLabelsOnTop()) {
       return null;
     }
 
@@ -104,7 +100,7 @@ export function LayerSettings(props: Props) {
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelsOnTop', {
             defaultMessage: `Show labels on top`,
           })}
-          checked={props.layer!.labelsOnTop()}
+          checked={props.layer.labelsOnTop()}
           onChange={onLabelsOnTopChange}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
           compressed
