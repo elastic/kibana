@@ -7,6 +7,7 @@
     "observability"
   ],
   "optionalPlugins": [
+    "home",
     "licensing"
   ],
   "ui": true,

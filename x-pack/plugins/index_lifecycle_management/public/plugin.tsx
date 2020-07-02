@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
@@ -30,7 +31,7 @@ export class IndexLifecycleManagementPlugin {
         getStartServices,
       } = coreSetup;
 
-      const { usageCollection, management, indexManagement } = plugins;
+      const { usageCollection, management, indexManagement, home } = plugins;
 
       // Initialize services even if the app isn't mounted, because they're used by index management extensions.
       initHttp(http);
@@ -57,6 +58,21 @@ export class IndexLifecycleManagementPlugin {
           const { renderApp } = await import('./application');
           return renderApp(element, I18nContext, history, navigateToApp);
         },
+      });
+
+      home.featureCatalogue.register({
+        id: 'index_lifecycle_management',
+        title: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
+          defaultMessage: 'Manage index lifecycles',
+        }),
+        description: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
+          defaultMessage:
+            'Attach a policy to automate when and how to transition an index through its lifecycle.',
+        }),
+        icon: 'indexSettings', // TODO: This is the same icon used for rollups in the feature catalogue. Do we need to pick a different one here?
+        path: '/app/management/data/index_lifecycle_management',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
       });
 
       if (indexManagement) {

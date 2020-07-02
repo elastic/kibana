@@ -69,19 +69,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, APP_ID);
 
-    plugins.home.featureCatalogue.register({
-      id: APP_ID,
-      title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
-        defaultMessage: 'Security',
-      }),
-      description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
-        defaultMessage: 'Explore security metrics and logs for events and alerts',
-      }),
-      icon: APP_ICON,
-      path: APP_OVERVIEW_PATH,
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    });
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register({
+        id: APP_ID,
+        title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
+          defaultMessage: 'Security',
+        }),
+        description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
+          defaultMessage: 'Protect & prevent',
+        }),
+        icon: APP_ICON,
+        path: APP_OVERVIEW_PATH,
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.SOLUTION,
+      });
+    }
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
