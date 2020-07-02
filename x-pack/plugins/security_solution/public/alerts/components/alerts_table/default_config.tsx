@@ -177,8 +177,8 @@ export const requiredFieldsForActions = [
 
   // Endpoint exception fields
   'file.path',
-  'file.code_signature.signer',
-  'file.code_signature.trusted',
+  'file.Ext.code_signature.subject_name',
+  'file.Ext.code_signature.trusted',
   'file.hash.sha1',
   'host.os.family',
 ];

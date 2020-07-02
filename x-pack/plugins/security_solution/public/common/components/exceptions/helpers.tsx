@@ -436,6 +436,17 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
+export const entryHasListType = (exceptionItems: ExceptionListItemSchema[]) => {
+  for (const { entries } of exceptionItems) {
+    for (const entry of entries) {
+      if (getOperatorType(entry) === 'list') {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 // TODO: abstract out types
 // TODO: should we use match or match_any for these default values?
 // TODO: check autocomplete or editing of text in builder
@@ -445,11 +456,13 @@ export const defaultEndpointExceptionItems = (
   ruleName: string,
   alertData: TimelineNonEcsData[]
 ): CreateExceptionListItemBuilderSchema[] => {
+  console.log(alertData);
   const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
   const [signatureSigner] =
-    getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.signer' }) ?? [];
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.subject_name' }) ??
+    [];
   const [signatureTrusted] =
-    getMappedNonEcsValue({ data: alertData, fieldName: 'file.code_signature.trusted' }) ?? [];
+    getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.trusted' }) ?? [];
   const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' }) ?? [];
   const namespaceType = 'agnostic';
 
@@ -469,7 +482,7 @@ export const defaultEndpointExceptionItems = (
       ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
-          field: 'file.code_signature.signer',
+          field: 'file.Ext.code_signature.subject_name',
           operator: 'included',
           type: 'match',
           value: signatureSigner ?? '',

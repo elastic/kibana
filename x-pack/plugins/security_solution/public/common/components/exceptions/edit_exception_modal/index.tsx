@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -18,7 +18,9 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiFormRow,
+  EuiText,
 } from '@elastic/eui';
+import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -80,7 +82,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
-  // TODO: need to fetch the index patterns and pass them down to the component
+  const { loading: isSignalIndexLoading, signalIndexExists, signalIndexName } = useSignalIndex();
 
   const onError = useCallback(
     (error) => {
@@ -157,7 +159,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [addOrUpdateExceptionItems, enrichExceptionItems]);
 
   // TODO: builder - Grab appropriate listId that's associated with the rule
-  // TODO: builder - dynamically set listType
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -168,40 +169,52 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </div>
         </ModalHeader>
 
-        <ModalBodySection className="builder-section">
-          <ExceptionBuilder
-            exceptionListItems={[exceptionItem]}
-            listType={exceptionListType}
-            listId={exceptionItem.list_id}
-            listNamespaceType={exceptionItem.namespace_type}
-            ruleName={ruleName}
-            isLoading={false}
-            isOrDisabled={false}
-            isAndDisabled={false}
-            dataTestSubj="edit-exception-modal-builder"
-            idAria="edit-exception-modal-builder"
-            onChange={handleBuilderOnChange}
-          />
+        {!isSignalIndexLoading && (
+          <>
+            <ModalBodySection className="builder-section">
+              <ExceptionBuilder
+                exceptionListItems={[exceptionItem]}
+                listType={exceptionListType}
+                listId={exceptionItem.list_id}
+                listNamespaceType={exceptionItem.namespace_type}
+                ruleName={ruleName}
+                isLoading={false}
+                isOrDisabled={false}
+                isAndDisabled={false}
+                dataTestSubj="edit-exception-modal-builder"
+                idAria="edit-exception-modal-builder"
+                onChange={handleBuilderOnChange}
+                indexPatternConfig={[signalIndexName]}
+              />
 
-          <EuiSpacer />
+              <EuiSpacer />
 
-          <AddExceptionComments
-            exceptionItemComments={exceptionItem.comments}
-            newCommentValue={comment}
-            newCommentOnChange={onCommentChange}
-          />
-        </ModalBodySection>
-        <EuiHorizontalRule />
-        <ModalBodySection>
-          <EuiFormRow>
-            <EuiCheckbox
-              id="close-alert-on-add-add-exception-checkbox"
-              label={i18n.BULK_CLOSE_LABEL}
-              checked={shouldBulkCloseAlert}
-              onChange={onCloseAlertCheckboxChange}
-            />
-          </EuiFormRow>
-        </ModalBodySection>
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
+                  <EuiSpacer />
+                </>
+              )}
+
+              <AddExceptionComments
+                exceptionItemComments={exceptionItem.comments}
+                newCommentValue={comment}
+                newCommentOnChange={onCommentChange}
+              />
+            </ModalBodySection>
+            <EuiHorizontalRule />
+            <ModalBodySection>
+              <EuiFormRow>
+                <EuiCheckbox
+                  id="close-alert-on-add-add-exception-checkbox"
+                  label={i18n.BULK_CLOSE_LABEL}
+                  checked={shouldBulkCloseAlert}
+                  onChange={onCloseAlertCheckboxChange}
+                />
+              </EuiFormRow>
+            </ModalBodySection>
+          </>
+        )}
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>

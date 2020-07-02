@@ -37,3 +37,11 @@ export const BULK_CLOSE_LABEL = i18n.translate(
     defaultMessage: 'Close all alerts that match attributes in this exception',
   }
 );
+
+export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.endpointQuarantineText',
+  {
+    defaultMessage:
+      'Any file in quarantine on any endpoint that matches the attribute(s) selected will automatically be restored to its original location',
+  }
+);

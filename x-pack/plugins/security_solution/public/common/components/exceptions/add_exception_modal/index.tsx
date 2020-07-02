@@ -23,6 +23,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
+import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -30,7 +31,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
-import { useKibana } from '../../../lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
@@ -43,7 +44,9 @@ import {
   enrichExceptionItemsWithOS,
   enrichExceptionItemsWithNamespace,
   defaultEndpointExceptionItems,
+  entryHasListType,
 } from '../helpers';
+import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
 
 // TODO: move somewhere else?
 // TODO: rename?
@@ -100,10 +103,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
+  const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
+  const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
   const { loading: isSignalIndexLoading, signalIndexExists, signalIndexName } = useSignalIndex();
+
+  // TODO: fix this
+  // const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  // const [{ browserFields, isLoading: indexPatternLoading }] = useFetchIndexPatterns(
+  //   [signalIndexName] ?? []
+  // );
+
+  // console.log(browserFields);
 
   const onError = useCallback(
     (error: Error) => {
@@ -159,6 +172,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
   }, [alertData, exceptionListType, ruleExceptionList, ruleName, setExceptionItemsToAdd]);
 
+  useEffect(() => {
+    setShouldDisableBulkClose(entryHasListType(exceptionItemsToAdd));
+  }, [setShouldDisableBulkClose, exceptionItemsToAdd]);
+
   const onCommentChange = useCallback(
     (value: string) => {
       setComment(value);
@@ -171,6 +188,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       setShouldCloseAlert(event.currentTarget.checked);
     },
     [setShouldCloseAlert]
+  );
+
+  const onBulkCloseAlertCheckboxChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setShouldBulkCloseAlert(event.currentTarget.checked);
+    },
+    [setShouldBulkCloseAlert]
   );
 
   const enrichExceptionItems = useCallback(() => {
@@ -260,8 +284,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 />
               </ModalBodySection>
               <EuiHorizontalRule />
-              {alertData !== undefined && (
-                <ModalBodySection>
+              <ModalBodySection>
+                {alertData !== undefined && (
                   <EuiFormRow>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
@@ -270,8 +294,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                       onChange={onCloseAlertCheckboxChange}
                     />
                   </EuiFormRow>
-                </ModalBodySection>
-              )}
+                )}
+                <EuiFormRow>
+                  <EuiCheckbox
+                    id="bulk-close-alert-on-add-add-exception-checkbox"
+                    label={i18n.BULK_CLOSE_LABEL}
+                    checked={shouldBulkCloseAlert}
+                    onChange={onBulkCloseAlertCheckboxChange}
+                    disabled={shouldDisableBulkClose}
+                  />
+                </EuiFormRow>
+              </ModalBodySection>
             </>
           )}
 
