@@ -8,6 +8,14 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 interface Usage {
   fleet_enabled: boolean;
+  agents: {
+    enrolled: number;
+  };
+  packages: {
+    name: string;
+    version: string;
+    enabled: boolean;
+  };
 }
 
 export function registerIngestManagerUsageCollector(usageCollection?: UsageCollectionSetup): void {
@@ -26,10 +34,28 @@ export function registerIngestManagerUsageCollector(usageCollection?: UsageColle
       // return the modeled object that includes whatever you want to track
       return {
         fleet_enabled: true,
+        agents: {
+          enrolled: 42,
+        },
+        packages: [
+          {
+            name: 'system',
+            version: '0.0.1',
+            enabled: true,
+          },
+        ],
       };
     },
     schema: {
       fleet_enabled: { type: 'boolean' },
+      agents: {
+        enrolled: { type: 'number' },
+      },
+      packages: {
+        name: { type: 'keyword' },
+        version: { type: 'keyword' },
+        enabled: { type: 'boolean' },
+      },
     },
   });
 
