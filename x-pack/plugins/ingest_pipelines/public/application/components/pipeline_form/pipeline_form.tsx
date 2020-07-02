@@ -13,17 +13,14 @@ import { Pipeline, Processor } from '../../../../common/types';
 
 import './pipeline_form.scss';
 
-import {
-  OnUpdateHandlerArg,
-  OnUpdateHandler,
-  SerializeResult,
-} from '../pipeline_processors_editor';
+import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
+import { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -34,12 +31,11 @@ export interface PipelineFormProps {
   isEditing?: boolean;
 }
 
-const defaultFormValue = Object.freeze({
+const defaultFormValue: Pipeline = Object.freeze({
   name: '',
   description: '',
   processors: [],
   on_failure: [],
-  version: '',
 });
 
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
@@ -70,9 +66,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const processorStateRef = useRef<OnUpdateHandlerArg>();
 
-  const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    let override: SerializeResult | undefined;
-
+  const handleSave: FormConfig<IPipelineForm>['onSubmit'] = async (formData, isValid) => {
     if (!isValid) {
       return;
     }
@@ -80,20 +74,16 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     if (processorStateRef.current) {
       const state = processorStateRef.current;
       if (await state.validate()) {
-        override = state.getData();
-      } else {
-        return;
+        onSave({ ...formData, ...state.getData() });
       }
     }
-
-    onSave({ ...formData, ...(override || {}) } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {
     setIsTestingPipeline(true);
   };
 
-  const { form } = useForm({
+  const { form } = useForm<IPipelineForm>({
     schema: pipelineFormSchema,
     defaultValue: defaultFormValues,
     onSubmit: handleSave,

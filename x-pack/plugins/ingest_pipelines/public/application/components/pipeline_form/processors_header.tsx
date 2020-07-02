@@ -19,7 +19,7 @@ export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsTitle: FunctionComponent<Props> = ({
+export const ProcessorsHeader: FunctionComponent<Props> = ({
   onTestPipelineClick,
   isTestButtonDisabled,
   onLoadJson,

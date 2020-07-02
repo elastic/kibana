@@ -8,10 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 
-import {
-  JsonEditor,
-  OnJsonEditorUpdateHandler,
-} from '../../../../../../../../../src/plugins/es_ui_shared/public';
+import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
 
 import { Processor } from '../../../../../../common/types';
 

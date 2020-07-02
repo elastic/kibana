@@ -20,7 +20,7 @@ import {
   OnDoneLoadJsonHandler,
 } from '../pipeline_processors_editor';
 
-import { ProcessorsTitle } from './processors_title';
+import { ProcessorsHeader } from './processors_header';
 import { OnFailureProcessorsTitle } from './on_failure_processors_title';
 
 interface Props {
@@ -134,7 +134,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         <div className="pipelineProcessorsEditor">
           <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
             <EuiFlexItem grow={false}>
-              <ProcessorsTitle
+              <ProcessorsHeader
                 onLoadJson={onLoadJson}
                 onTestPipelineClick={onTestPipelineClick}
                 isTestButtonDisabled={isTestButtonDisabled}
