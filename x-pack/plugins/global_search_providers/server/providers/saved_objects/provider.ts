@@ -16,8 +16,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
       const { typeRegistry, client } = core.savedObjects;
 
       const searchableTypes = typeRegistry
-        .getAllTypes()
-        .filter((type) => !typeRegistry.isHidden(type.name))
+        .getVisibleTypes()
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
       const searchFields = uniq(
         searchableTypes.map((type) => type.management!.defaultSearchField!)
