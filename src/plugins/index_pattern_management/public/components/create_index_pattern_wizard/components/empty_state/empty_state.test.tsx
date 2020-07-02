@@ -21,13 +21,18 @@ import React from 'react';
 import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
-// @ts-ignore
+// @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { docLinksServiceMock } from '../../../../../../../core/public/mocks';
+
+const docLinks = docLinksServiceMock.createStartContract();
 
 describe('EmptyState', () => {
   it('should render normally', () => {
-    const component = shallow(<EmptyState onRefresh={() => {}} prependBasePath={(x) => x} />);
+    const component = shallow(
+      <EmptyState docLinks={docLinks} onRefresh={() => {}} prependBasePath={(x) => x} />
+    );
 
     expect(component).toMatchSnapshot();
   });
@@ -38,7 +43,7 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = mountWithIntl(
-          <EmptyState onRefresh={onRefreshHandler} prependBasePath={(x) => x} />
+          <EmptyState docLinks={docLinks} onRefresh={onRefreshHandler} prependBasePath={(x) => x} />
         );
 
         findTestSubject(component, 'refreshIndicesButton').simulate('click');

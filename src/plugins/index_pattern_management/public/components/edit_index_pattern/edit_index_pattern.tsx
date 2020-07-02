@@ -27,7 +27,6 @@ import {
   EuiBadge,
   EuiText,
   EuiLink,
-  EuiIcon,
   EuiCallOut,
   EuiPanel,
 } from '@elastic/eui';

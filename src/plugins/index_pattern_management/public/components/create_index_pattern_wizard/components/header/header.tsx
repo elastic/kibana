@@ -31,7 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DocLinksSetup } from 'kibana/public';
+import { DocLinksStart } from 'kibana/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
@@ -50,7 +50,7 @@ export const Header = ({
   isIncludingSystemIndices: boolean;
   onChangeIncludingSystemIndices: () => void;
   isBeta?: boolean;
-  docLinks: DocLinksSetup;
+  docLinks: DocLinksStart;
 }) => {
   const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
   const createIndexPatternHeader = i18n.translate(

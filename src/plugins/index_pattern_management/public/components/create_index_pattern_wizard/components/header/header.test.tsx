@@ -22,6 +22,9 @@ import { Header } from '../header';
 import { mount } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
+import { docLinksServiceMock } from '../../../../../../../core/public/mocks';
+
+const docLinks = docLinksServiceMock.createStartContract();
 
 describe('Header', () => {
   const indexPatternName = 'test index pattern';
@@ -33,6 +36,7 @@ describe('Header', () => {
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={true}
         onChangeIncludingSystemIndices={() => {}}
+        docLinks={docLinks}
       />,
       {
         wrappingComponent: KibanaContextProvider,
@@ -51,6 +55,7 @@ describe('Header', () => {
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
+        docLinks={docLinks}
       />,
       {
         wrappingComponent: KibanaContextProvider,
@@ -71,6 +76,7 @@ describe('Header', () => {
         prompt={<div>Test prompt</div>}
         indexPatternName={indexPatternName}
         isBeta={true}
+        docLinks={docLinks}
       />,
       {
         wrappingComponent: KibanaContextProvider,

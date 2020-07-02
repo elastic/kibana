@@ -21,10 +21,19 @@ import React from 'react';
 import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
+const routeComponentPropsMock = {
+  history: {
+    push: jest.fn(),
+  } as any,
+  location: {} as any,
+  match: {} as any,
+};
+
 describe('EmptyIndexPatternPrompt', () => {
-  /** HELP */
   it.skip('should render normally', () => {
-    const component = shallowWithI18nProvider(<EmptyIndexPatternPrompt />);
+    const component = shallowWithI18nProvider(
+      <EmptyIndexPatternPrompt canSave {...routeComponentPropsMock} />
+    );
 
     expect(component).toMatchSnapshot();
   });
