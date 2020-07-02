@@ -27,6 +27,7 @@ import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
 import { Resources } from '../../components/app/resources';
+import { News } from '../../components/app/news';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -143,8 +144,15 @@ export const OverviewPage = ({ routeParams }: Props) => {
           )}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={2}>
-          <Resources />
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <Resources />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <News />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </WithHeaderLayout>

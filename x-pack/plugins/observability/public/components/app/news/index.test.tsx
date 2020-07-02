@@ -5,13 +5,17 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Resources } from './';
+import { News } from './';
+import { EuiThemeProvider } from '../../../typings';
 
-describe('Resources', () => {
+describe('News', () => {
   it('renders resources with all elements', () => {
-    const { getByText } = render(<Resources />);
-    expect(getByText('Documentation')).toBeInTheDocument();
-    expect(getByText('Discuss forum')).toBeInTheDocument();
-    expect(getByText('Training and webinars')).toBeInTheDocument();
+    const { getByText, getAllByText } = render(
+      <EuiThemeProvider>
+        <News />
+      </EuiThemeProvider>
+    );
+    expect(getByText("What's new")).toBeInTheDocument();
+    expect(getAllByText('Read full story')).not.toEqual([]);
   });
 });
