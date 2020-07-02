@@ -96,6 +96,39 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
+    if (!this.props.isCustomOnly && !this.props.useCustomColorMap) {
+      return null;
+    }
+
+    let colorStopEditor;
+    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+      colorStopEditor = (
+        <ColorStopsOrdinal
+          colorStops={this.state.customColorMap}
+          onChange={this._onCustomColorMapChange}
+          swatches={this.props.swatches}
+        />
+      );
+    } else {
+      colorStopEditor = (
+        <ColorStopsCategorical
+          colorStops={this.state.customColorMap}
+          field={this.props.styleProperty.getField()}
+          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
+          onChange={this._onCustomColorMapChange}
+          swatches={this.props.swatches}
+        />
+      );
+    }
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>{colorStopEditor}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  _renderColorMapSelections() {
     if (this.props.isCustomOnly) {
       return null;
     }
