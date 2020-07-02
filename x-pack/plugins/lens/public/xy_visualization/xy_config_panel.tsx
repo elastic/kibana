@@ -15,6 +15,7 @@ import {
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
@@ -90,15 +91,8 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
 
   return (
     <EuiForm>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-          defaultMessage: 'Series color',
-        })}
-      >
-        <ColorPicker {...props} />
-      </EuiFormRow>
+      <ColorPicker {...props} />
+
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -211,23 +205,46 @@ const ColorPicker = ({
   );
 
   return (
-    <EuiToolTip
-      position="top"
-      content={
-        disabled ? tooltipContent.disabled : color ? tooltipContent.custom : tooltipContent.auto
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={
+        <EuiToolTip
+          delay="long"
+          position="top"
+          content={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+        >
+          <span>
+            {i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+              defaultMessage: 'Series color',
+            })}{' '}
+            <EuiIcon type="questionInCircle" color="subdued" />
+          </span>
+        </EuiToolTip>
       }
-      delay="long"
-      anchorClassName="eui-displayBlock"
     >
-      <EuiColorPicker
-        compressed
-        onChange={handleColor}
-        color={disabled ? '' : color}
-        disabled={disabled}
-        aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-          defaultMessage: 'Series color',
-        })}
-      />
-    </EuiToolTip>
+      {disabled ? (
+        <EuiToolTip position="top" content={tooltipContent.disabled} delay="long">
+          <EuiColorPicker
+            compressed
+            onChange={handleColor}
+            color=""
+            disabled
+            aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+              defaultMessage: 'Series color',
+            })}
+          />
+        </EuiToolTip>
+      ) : (
+        <EuiColorPicker
+          compressed
+          onChange={handleColor}
+          color={color}
+          aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+            defaultMessage: 'Series color',
+          })}
+        />
+      )}
+    </EuiFormRow>
   );
 };
