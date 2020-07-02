@@ -7,7 +7,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { HttpStart } from '../../../../../../../../src/core/public';
 
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../../../lists/common/schemas';
 import { addExceptionListItem, updateExceptionListItem } from '../../../../lists_plugin_deps';
 import { updateAlertStatus } from './api';
 // TODO: move getUpdatedAlertsQuery to api.ts
@@ -21,7 +25,7 @@ import { getUpdateAlertsQuery } from '../../../components/alerts_table/actions';
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  exceptionItemsToAddOrUpdate: ExceptionListItemSchema[],
+  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string
 ) => Promise<void>;
 
@@ -57,25 +61,25 @@ export const useAddOrUpdateException = ({
     const abortCtrl = new AbortController();
 
     const addOrUpdateItems = async (
-      exceptionItemsToAddOrUpdate: ExceptionListItemSchema[]
+      exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
     ): Promise<void> => {
-      const toAdd: ExceptionListItemSchema[] = [];
-      const toUpdate: ExceptionListItemSchema[] = [];
-      exceptionItemsToAddOrUpdate.forEach((item: ExceptionListItemSchema) => {
-        if (item.id) {
-          toUpdate.push(item);
-        } else {
-          // TODO: builder should set item.id to undefined
-          delete item.id;
-          toAdd.push(item);
+      const toAdd: CreateExceptionListItemSchema[] = [];
+      const toUpdate: UpdateExceptionListItemSchema[] = [];
+      exceptionItemsToAddOrUpdate.forEach(
+        (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+          if ('id' in item && item.id !== undefined) {
+            toUpdate.push(item as UpdateExceptionListItemSchema);
+          } else {
+            toAdd.push(item as CreateExceptionListItemSchema);
+          }
         }
-      });
+      );
 
       console.log('exceptionItemsToAdd', toAdd);
       console.log('exceptionItemToEdit', toUpdate);
       const promises: Array<Promise<ExceptionListItemSchema>> = [];
       // TODO: use bulk api
-      toAdd.forEach((item: ExceptionListItemSchema) => {
+      toAdd.forEach((item: CreateExceptionListItemSchema) => {
         promises.push(
           addExceptionListItem({
             http,
@@ -85,7 +89,7 @@ export const useAddOrUpdateException = ({
         );
       });
       // TODO: use bulk api
-      toUpdate.forEach((item: ExceptionListItemSchema) => {
+      toUpdate.forEach((item: UpdateExceptionListItemSchema) => {
         promises.push(
           updateExceptionListItem({
             http,

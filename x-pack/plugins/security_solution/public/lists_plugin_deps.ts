@@ -16,13 +16,15 @@ export {
   addExceptionList,
   ExceptionIdentifiers,
   ExceptionList,
-  ExceptionListType,
   Pagination,
   UseExceptionListSuccess,
 } from '../../lists/public';
 export {
   ListSchema,
   CommentsArray,
+  CreateCommentsArray,
+  Comments,
+  CreateComments,
   ExceptionListSchema,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -44,6 +46,4 @@ export {
   entriesNested,
   entriesExists,
   entriesList,
-  // TODO: is this the right type for comments?
-  Comment,
 } from '../../lists/common/schemas';

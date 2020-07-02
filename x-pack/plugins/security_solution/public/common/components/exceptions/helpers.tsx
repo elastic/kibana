@@ -24,6 +24,8 @@ import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
 import {
   CommentsArray,
+  Comments,
+  CreateComments,
   Entry,
   ExceptionListItemSchema,
   NamespaceType,
@@ -356,10 +358,10 @@ export const filterExceptionItems = (
 };
 
 export const enrichExceptionItemsWithComments = (
-  exceptionItems: ExceptionListItemSchema[],
-  comments: Comment[]
-): ExceptionListItemSchema[] => {
-  return exceptionItems.map((item: ExceptionListItemSchema) => {
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  comments: Array<Comments | CreateComments>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
     return {
       ...item,
       comments,
@@ -368,58 +370,17 @@ export const enrichExceptionItemsWithComments = (
 };
 
 export const enrichExceptionItemsWithOS = (
-  exceptionItems: ExceptionListItemSchema[],
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   osTypes: string[]
-): ExceptionListItemSchema[] => {
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   const osTags = osTypes.map((os) => `os:${os}`);
-  return exceptionItems.map((item: ExceptionListItemSchema) => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
     const newTags = item._tags ? union(item._tags, osTags) : [...osTags];
     return {
       ...item,
       _tags: newTags,
     };
   });
-};
-
-// TODO: delete this. Namespace should be handled by the builder
-export const enrichExceptionItemsWithNamespace = (
-  exceptionItems: ExceptionListItemSchema[],
-  namespaceType: ExceptionListItemSchema['namespace_type']
-): ExceptionListItemSchema[] => {
-  return exceptionItems.map((item: ExceptionListItemSchema) => {
-    return {
-      ...item,
-      namespace_type: namespaceType,
-    };
-  });
-};
-
-// TODO: should be shared with exeption_builder helpers file
-export const createExceptionItem = ({
-  listType,
-  listId,
-}: {
-  listType: string;
-  listId: string;
-}): ExceptionListItemSchema => {
-  const newItemId = uuid.v4();
-
-  return {
-    id: null,
-    list_id: listId,
-    item_id: newItemId,
-    name: newItemId,
-    _tags: [listType],
-    type: 'simple',
-    entries: [
-      {
-        field: '',
-        operator: 'included',
-        type: 'match',
-        value: '',
-      },
-    ],
-  };
 };
 
 export const getMappedNonEcsValue = ({
@@ -436,10 +397,12 @@ export const getMappedNonEcsValue = ({
   return undefined;
 };
 
-export const entryHasListType = (exceptionItems: ExceptionListItemSchema[]): boolean => {
+export const entryHasListType = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => {
   for (const { entries } of exceptionItems) {
-    for (const entryObj of entries) {
-      if (getOperatorType(entryObj) === 'list') {
+    for (const exceptionEntry of entries) {
+      if (getOperatorType(exceptionEntry) === 'list') {
         return true;
       }
     }
@@ -472,8 +435,7 @@ export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
   alertData: TimelineNonEcsData[]
-): CreateExceptionListItemBuilderSchema[] => {
-  console.log(alertData);
+): CreateExceptionListItemSchema[] => {
   const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
   const [signatureSigner] =
     getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.subject_name' }) ??

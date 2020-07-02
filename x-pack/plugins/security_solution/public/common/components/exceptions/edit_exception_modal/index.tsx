@@ -26,6 +26,7 @@ import { useSignalIndex } from '../../../../alerts/containers/detection_engine/a
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
+  CreateExceptionListItemSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
@@ -36,7 +37,6 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
-  enrichExceptionItemsWithNamespace,
   getOsTagValues,
   entryHasListType,
   entryHasNonEcsType,
@@ -45,7 +45,7 @@ import {
 interface EditExceptionModalProps {
   ruleName: string;
   exceptionItem: ExceptionListItemSchema;
-  exceptionListType: ExceptionListSchema['type'];
+  exceptionListType: 'endpoint' | 'detection';
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -89,7 +89,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
-  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
+  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
+    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  >([]);
   const [, dispatchToaster] = useStateToaster();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
@@ -135,7 +137,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   // TODO: needs to store the whole object because we need to keep track of deteled items
   // not just newly created ones
   const handleBuilderOnChange = useCallback(
-    ({ exceptionItems }) => {
+    ({
+      exceptionItems,
+    }: {
+      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
     },
     [setExceptionItemsToAdd]
@@ -156,9 +162,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   const enrichExceptionItems = useCallback(() => {
-    let enriched = [];
+    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
-      ...exceptionItem.comments,
+      ...(exceptionItem.comments ? exceptionItem.comments : []),
       ...(comment !== '' ? [{ comment }] : []),
     ]);
     if (exceptionListType === 'endpoint') {
@@ -166,21 +172,10 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       const osTypes = exceptionItem._tags ? getOsTagValues(exceptionItem._tags) : ['windows'];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
-
-    // TODO: delete this. Namespace should be handled by the builder
-    return enrichExceptionItemsWithNamespace(enriched, exceptionItem.namespace_type);
-  }, [
-    exceptionItemsToAdd,
-    exceptionItem.comments,
-    exceptionItem.namespace_type,
-    comment,
-    exceptionListType,
-  ]);
+    return enriched;
+  }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
 
   const onEditExceptionConfirm = useCallback(() => {
-    console.log(enrichExceptionItems());
-    // TODO: Create API hook for persisting and closing
-    // TODO: insert OS tag into entries before persisting for endpoint exceptions
     if (addOrUpdateExceptionItems !== null) {
       addOrUpdateExceptionItems(enrichExceptionItems());
     }

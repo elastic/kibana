@@ -11,7 +11,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiModalBody,
   EuiOverlayMask,
   EuiButton,
   EuiButtonEmpty,
@@ -19,7 +18,6 @@ import {
   EuiCheckbox,
   EuiSpacer,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
@@ -27,7 +25,7 @@ import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
-  Comment,
+  CreateExceptionListItemSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
@@ -42,7 +40,6 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
-  enrichExceptionItemsWithNamespace,
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
@@ -55,14 +52,14 @@ export interface AddExceptionOnClick {
   ruleName: string;
   ruleId: string;
   ruleExceptionLists?: ExceptionListSchema[];
-  exceptionListType: ExceptionListSchema['type'];
+  exceptionListType: 'endpoint' | 'detection';
   alertData: TimelineNonEcsData[] | undefined;
 }
 
 interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
-  exceptionListType: ExceptionListSchema['type'];
+  exceptionListType: 'endpoint' | 'detection';
   alertData?: TimelineNonEcsData[];
   onCancel: () => void;
   onConfirm: () => void;
@@ -110,7 +107,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
-  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
+  const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
+    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
@@ -140,7 +139,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const handleBuilderOnChange = useCallback(
-    ({ exceptionItems }) => {
+    ({
+      exceptionItems,
+    }: {
+      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
     },
     [setExceptionItemsToAdd]
@@ -209,7 +212,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const enrichExceptionItems = useCallback(() => {
-    let enriched: ExceptionListItemSchema[] = [];
+    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
       comment !== ''
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
@@ -218,17 +221,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       const osTags = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
       enriched = enrichExceptionItemsWithOS(enriched, osTags);
     }
-
-    // TODO: delete this. Namespace should be handled by the builder
-    return enrichExceptionItemsWithNamespace(
-      enriched,
-      exceptionListType === 'endpoint' ? 'agnostic' : 'single'
-    );
+    return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback(() => {
-    console.log(enrichExceptionItems());
-    // TODO: Create API hook for persisting and closing
     // TODO: if close checkbox is selected, refresh signals table
     if (addOrUpdateExceptionItems !== null) {
       addOrUpdateExceptionItems(enrichExceptionItems());
