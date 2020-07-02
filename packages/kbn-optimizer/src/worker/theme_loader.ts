@@ -19,7 +19,12 @@
 
 import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
-import { parseThemeTags, ALL_THEMES } from '../common';
+import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
+
+const getVersion = (tag: ThemeTag) => (tag.includes('v7') ? 7 : 8);
+const getIsDark = (tag: ThemeTag) => tag.includes('dark');
+const compare = (a: ThemeTag, b: ThemeTag) =>
+  (getVersion(a) === getVersion(b) ? 1 : 0) + (getIsDark(a) === getIsDark(b) ? 1 : 0);
 
 // eslint-disable-next-line import/no-default-export
 export default function (this: webpack.loader.LoaderContext) {
@@ -36,7 +41,11 @@ export default function (this: webpack.loader.LoaderContext) {
     return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`;
     }
 
-    const fallback = themeTags[0];
+    const fallback = themeTags
+      .slice()
+      .sort((a, b) => compare(b, tag) - compare(a, tag))
+      .shift()!;
+
     const message = `SASS files in [${bundleId}] were not built for theme [${tag}]. Styles were compiled using the [${fallback}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [${tag}] in a comma separated list of themes you want to compile. You can also set it to "*" to build all themes.`;
     return `
   case '${tag}':
