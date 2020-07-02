@@ -179,7 +179,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
         const { fieldName, fieldType, fieldValue } = entity;
         annotation[getAnnotationFieldName(fieldType)] = fieldName;
-        annotation[getAnnotationFieldValue(fieldName)] = fieldValue;
+        annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });
       annotation.detector_index = detectorIndex;
     }

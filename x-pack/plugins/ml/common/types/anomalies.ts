@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PARTITION_FIELDS } from '../constants/anomalies';
+
 export interface Influencer {
   influencer_field_name: string;
   influencer_field_values: string[];
@@ -53,3 +55,5 @@ export interface AnomaliesTableRecord {
   typicalSort?: any;
   metricDescriptionSort?: number;
 }
+
+export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

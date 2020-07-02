@@ -5,13 +5,11 @@
  */
 
 import Boom from 'boom';
+import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
+import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { callWithRequestType } from '../../../common/types/kibana';
 import { CriteriaField } from './results_service';
-
-const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
-
-type PartitionFieldsType = typeof PARTITION_FIELDS[number];
 
 type SearchTerm =
   | {

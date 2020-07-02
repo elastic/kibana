@@ -58,16 +58,17 @@
 //     ]
 // }
 
+import { PartitionFieldsType } from './anomalies';
 import { ANNOTATION_TYPE } from '../constants/annotations';
 
 export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
 export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';
 
-export function getAnnotationFieldName(fieldType: string): AnnotationFieldName {
+export function getAnnotationFieldName(fieldType: PartitionFieldsType): AnnotationFieldName {
   return `${fieldType}_name` as AnnotationFieldName;
 }
 
-export function getAnnotationFieldValue(fieldType: string): AnnotationFieldValue {
+export function getAnnotationFieldValue(fieldType: PartitionFieldsType): AnnotationFieldValue {
   return `${fieldType}_value` as AnnotationFieldValue;
 }
 

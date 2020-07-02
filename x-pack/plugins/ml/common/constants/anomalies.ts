@@ -20,3 +20,5 @@ export enum ANOMALY_THRESHOLD {
   WARNING = 3,
   LOW = 0,
 }
+
+export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
