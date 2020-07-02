@@ -97,7 +97,7 @@ export const useWithSource = (
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...(!onlyCheckIndexToAdd ? configIndex : []), ...indexToAdd];
+      return onlyCheckIndexToAdd ? indexToAdd : [...configIndex, ...indexToAdd];
     }
     return configIndex;
   }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
