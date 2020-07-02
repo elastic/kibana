@@ -38,7 +38,7 @@ import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
-import { createEuiListItem, createRecentNavLink } from './nav_link';
+import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -184,17 +184,13 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
-                onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                  closeNav();
-                  if (
-                    event.isDefaultPrevented() ||
-                    event.altKey ||
-                    event.metaKey ||
-                    event.ctrlKey
-                  ) {
+                onClick: (event) => {
+                  if (isModifiedOrPrevented(event)) {
                     return;
                   }
+
                   event.preventDefault();
+                  closeNav();
                   navigateToApp('home');
                 },
               },
@@ -230,7 +226,13 @@ export function CollapsibleNav({
               return {
                 ...hydratedLink,
                 'data-test-subj': 'collapsibleNavAppLink--recent',
-                onClick: closeNav,
+                onClick: (event) => {
+                  if (isModifiedOrPrevented(event)) {
+                    return;
+                  }
+
+                  closeNav();
+                },
               };
             })}
             maxWidth="none"

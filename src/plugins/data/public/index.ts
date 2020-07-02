@@ -249,8 +249,6 @@ export {
   IndexPattern,
   IIndexPatternFieldList,
   Field as IndexPatternField,
-  TypeMeta as IndexPatternTypeMeta,
-  AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   getIndexPatternFieldListCreator,
 } from './index_patterns';
@@ -263,6 +261,8 @@ export {
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
 } from '../common';
 
 /*
@@ -421,7 +421,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getTime,
   getQueryLog,
   getDefaultQuery,
   FilterManager,
@@ -435,10 +434,13 @@ export {
 } from './query';
 
 export {
+  getTime,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
 } from '../common';
+
+export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export * from '../common/field_mapping';
 

@@ -17,10 +17,7 @@
  * under the License.
  */
 
-export interface IFieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
+import { FieldSpec, IFieldSubType } from '../types';
 
 export interface IFieldType {
   name: string;
@@ -41,4 +38,5 @@ export interface IFieldType {
   subType?: IFieldSubType;
   displayName?: string;
   format?: any;
+  toSpec?: () => FieldSpec;
 }

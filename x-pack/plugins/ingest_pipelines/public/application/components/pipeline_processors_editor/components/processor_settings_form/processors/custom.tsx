@@ -12,15 +12,16 @@ import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
-  JsonEditorField,
 } from '../../../../../../shared_imports';
 
 const { emptyField, isJsonField } = fieldValidators;
 
+import { XJsonEditor } from '../field_components';
+
 const customConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel', {
-    defaultMessage: 'Configuration options',
+    defaultMessage: 'Configuration',
   }),
   serializer: (value: string) => {
     try {
@@ -42,7 +43,7 @@ const customConfig: FieldConfig = {
         i18n.translate(
           'xpack.ingestPipelines.pipelineEditor.customForm.configurationRequiredError',
           {
-            defaultMessage: 'Configuration options are required.',
+            defaultMessage: 'Configuration is required.',
           }
         )
       ),
@@ -71,17 +72,17 @@ export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
   return (
     <UseField
       path="customOptions"
-      component={JsonEditorField}
+      component={XJsonEditor}
       config={customConfig}
       defaultValue={defaultOptions}
       componentProps={{
-        euiCodeEditorProps: {
+        editorProps: {
           'data-test-subj': 'processorOptionsEditor',
-          height: '300px',
+          height: 300,
           'aria-label': i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel',
             {
-              defaultMessage: 'Configuration options JSON editor',
+              defaultMessage: 'Configuration JSON editor',
             }
           ),
         },

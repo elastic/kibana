@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
@@ -13,7 +14,7 @@ import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { requestIdleCallbackViaScheduler } from '../../../../../common/lib/helpers/scheduler';
 import { Note } from '../../../../../common/lib/note';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { SkeletonRow } from '../../skeleton_row';
 import {
@@ -33,6 +34,7 @@ import { getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
+import { StoreState } from '../../../../../common/store';
 
 interface Props {
   actionsColumnWidth: number;
@@ -128,7 +130,9 @@ const StatefulEventComponent: React.FC<Props> = ({
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [initialRender, setInitialRender] = useState(false);
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-
+  const timeline = useSelector<StoreState, TimelineModel>((state) => {
+    return state.timeline.timelineById['timeline-1'];
+  });
   const divElement = useRef<HTMLDivElement | null>(null);
 
   const onToggleShowNotes = useCallback(() => {
@@ -251,6 +255,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         getNotesByIds={getNotesByIds}
                         noteIds={eventIdToNoteIds[event._id] || emptyNotes}
                         showAddNote={!!showNotes[event._id]}
+                        status={timeline.status}
                         toggleShowAddNote={onToggleShowNotes}
                         updateNote={updateNote}
                       />
