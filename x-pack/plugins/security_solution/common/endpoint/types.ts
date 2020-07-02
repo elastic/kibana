@@ -399,6 +399,13 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+    kind: string;
+    id: string;
+    category: string[];
+    type: string[];
+    module: string;
+    action: string;
+    dataset: string;
   };
   elastic: {
     agent: {
@@ -771,8 +778,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
