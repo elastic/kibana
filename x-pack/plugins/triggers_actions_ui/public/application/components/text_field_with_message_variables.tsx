@@ -14,6 +14,7 @@ interface Props {
   index: number;
   inputTargetValue?: string;
   editAction: (property: string, value: any, index: number) => void;
+  errors?: string[];
 }
 
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -22,19 +23,20 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   index,
   inputTargetValue,
   editAction,
+  errors,
 }) => {
   const [cursorPositionStart, setCursorPositionStart] = useState<number>(0);
   const [cursorPositionEnd, setCursorPositionEnd] = useState<number>(0);
 
   const onSelectMessageVariable = (variable: string) => {
-    let newValue = inputTargetValue ?? '';
+    let newValue = inputTargetValue || '';
     const templatedVar = `{{${variable}}}`;
     const startPosition = cursorPositionStart;
     const endPosition = cursorPositionEnd;
     newValue =
-      newValue.substring(0, startPosition) +
+      (inputTargetValue || '').substring(0, startPosition) +
       templatedVar +
-      newValue.substring(endPosition, newValue.length);
+      (inputTargetValue || '').substring(endPosition, (inputTargetValue || '').length);
     setCursorPositionStart(startPosition + templatedVar.length);
     setCursorPositionEnd(startPosition + templatedVar.length);
     editAction(paramsProperty, newValue, index);
@@ -55,15 +57,22 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
     <EuiFieldText
       fullWidth
       name={paramsProperty}
-      data-test-subj={`{${paramsProperty}Input`}
-      value={inputTargetValue || ''}
+      id={`${paramsProperty}Id`}
+      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+      data-test-subj={`${paramsProperty}Input`}
+      value={inputTargetValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
       onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => onClickWithMessageVariable(e)}
-      onBlur={() => {
+      onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
         if (!inputTargetValue) {
           editAction(paramsProperty, '', index);
         }
-        setCursorPositionStart((inputTargetValue ?? '').length);
+      }}
+      onMouseLeave={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+        if (e.currentTarget.id !== `${paramsProperty}Id`) {
+          setCursorPositionStart((inputTargetValue || '').length);
+          setCursorPositionEnd((inputTargetValue || '').length);
+        }
       }}
       append={
         <AddMessageVariables

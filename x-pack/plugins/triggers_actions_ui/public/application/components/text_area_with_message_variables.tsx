@@ -15,6 +15,7 @@ interface Props {
   inputTargetValue?: string;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
+  errors?: string[];
 }
 
 export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -24,31 +25,32 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   editAction,
   label,
+  errors,
 }) => {
   const [cursorPositionStart, setCursorPositionStart] = useState<number>(0);
   const [cursorPositionEnd, setCursorPositionEnd] = useState<number>(0);
 
   const onSelectMessageVariable = (variable: string) => {
-    let newValue = inputTargetValue ?? '';
+    let newValue = inputTargetValue || '';
     const templatedVar = `{{${variable}}}`;
     const startPosition = cursorPositionStart;
     const endPosition = cursorPositionEnd;
     newValue =
-      newValue.substring(0, startPosition) +
+      (inputTargetValue || '').substring(0, startPosition) +
       templatedVar +
-      newValue.substring(endPosition, newValue.length);
+      (inputTargetValue || '').substring(endPosition, (inputTargetValue || '').length);
     setCursorPositionStart(startPosition + templatedVar.length);
     setCursorPositionEnd(startPosition + templatedVar.length);
     editAction(paramsProperty, newValue, index);
   };
 
-  const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     editAction(paramsProperty, e.target.value, index);
     setCursorPositionStart(e.target.selectionStart ?? 0);
     setCursorPositionEnd(e.target.selectionEnd ?? 0);
   };
 
-  const onClickWithMessageVariable = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+  const onClickWithMessageVariable = (e: React.MouseEvent<HTMLTextAreaElement, MouseEvent>) => {
     setCursorPositionStart(e.currentTarget.selectionStart ?? 0);
     setCursorPositionEnd(e.currentTarget.selectionEnd ?? 0);
   };
@@ -56,29 +58,25 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   return (
     <EuiFormRow
       fullWidth
-      // error={errors.message}
-      // isInvalid={errors.message.length > 0 && message !== undefined}
+      error={errors}
+      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
         <AddMessageVariables
           messageVariables={messageVariables}
-          onSelectEventHandler={(variable: string) =>
-            onSelectMessageVariable(paramsProperty, variable, index)
-          }
+          onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
           paramsProperty={paramsProperty}
         />
       }
     >
       <EuiTextArea
         fullWidth
-        // isInvalid={errors.message.length > 0 && inputTargetValue !== undefined}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
         name={paramsProperty}
         value={inputTargetValue}
-        data-test-subj={`{${paramsProperty}TextArea`}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          onChangeWithMessageVariable(e, paramsProperty, index)
-        }
-        onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) =>
+        data-test-subj={`${paramsProperty}TextArea`}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+        onClick={(e: React.MouseEvent<HTMLTextAreaElement, MouseEvent>) =>
           onClickWithMessageVariable(e)
         }
         onBlur={() => {
