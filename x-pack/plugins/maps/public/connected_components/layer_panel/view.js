@@ -75,7 +75,7 @@ export class LayerPanel extends React.Component {
   };
 
   async _loadLeftJoinFields() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.isJoinable()) {
+    if (!this.props.selectedLayer || !this.props.selectedLayer.showJoinEditor()) {
       return;
     }
 
@@ -120,7 +120,7 @@ export class LayerPanel extends React.Component {
   }
 
   _renderJoinSection() {
-    if (!this.props.selectedLayer.isJoinable()) {
+    if (!this.props.selectedLayer.showJoinEditor()) {
       return null;
     }
 

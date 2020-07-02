@@ -54,7 +54,7 @@ export interface ISource {
   isESSource(): boolean;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  isJoinable(): boolean;
+  showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   cloneDescriptor(): SourceDescriptor;
   getFieldNames(): string[];
@@ -148,7 +148,7 @@ export class AbstractSource implements ISource {
     return 0;
   }
 
-  isJoinable(): boolean {
+  showJoinEditor(): boolean {
     return false;
   }
 

@@ -76,7 +76,7 @@ export interface ILayer {
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
   isPreviewLayer: () => boolean;
-  isJoinable(): boolean;
+  showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
 }
 export type Footnote = {
@@ -168,8 +168,8 @@ export class AbstractLayer implements ILayer {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
   }
 
-  isJoinable(): boolean {
-    return this.getSource().isJoinable();
+  showJoinEditor(): boolean {
+    return this.getSource().showJoinEditor();
   }
 
   getJoinsDisabledReason() {

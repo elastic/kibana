@@ -103,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
