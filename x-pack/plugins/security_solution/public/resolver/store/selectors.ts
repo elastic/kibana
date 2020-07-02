@@ -189,6 +189,14 @@ const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
 );
 
 /**
+ * Total count of related events for a process.
+ */
+export const relatedEventTotalForProcess = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalForProcess
+);
+
+/**
  * Return the visible edge lines and process nodes based on the camera position at `time`.
  * The bounding box represents what the camera can see. The camera position is a function of time because it can be
  * animated. So in order to get the currently visible entities, we need to pass in time.
