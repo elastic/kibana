@@ -106,12 +106,12 @@ export interface VegaSpec {
   mark?: string;
   title?: string;
   autosize: AutoSize;
-  projections?: Projection[];
+  projections: Projection[];
   width?: number;
   height?: number;
   padding?: number | Padding;
   _hostConfig?: KibanaConfig;
-  config?: VegaSpecConfig;
+  config: VegaSpecConfig;
 }
 
 export enum CONSTANTS {
