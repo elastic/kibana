@@ -15,6 +15,8 @@
  * to get this information from the snapshot itself, even though it contains the
  * metadata for the data stream that information is fully opaque to us until after
  * we have done the snapshot restore.
+ *
+ * Issue for tracking this discussion here: https://github.com/elastic/elasticsearch/issues/58890
  */
 export const isDataStreamBackingIndex = (indexName: string) => {
   return indexName.startsWith('.ds');

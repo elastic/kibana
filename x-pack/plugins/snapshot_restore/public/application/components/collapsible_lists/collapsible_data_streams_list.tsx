@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
+
 interface Props {
   dataStreams: string[] | string | undefined;
 }
