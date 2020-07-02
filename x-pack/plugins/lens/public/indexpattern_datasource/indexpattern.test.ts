@@ -127,7 +127,7 @@ function stateFromPersistedState(
     indexPatterns: expectedIndexPatterns,
     indexPatternRefs: [],
     existingFields: {},
-    showEmptyFields: true,
+    isFirstExistenceFetch: false,
   };
 }
 
@@ -402,7 +402,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
       };
       expect(indexPatternDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -423,7 +423,7 @@ describe('IndexPattern Data Source', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
-        showEmptyFields: false,
+        isFirstExistenceFetch: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -458,7 +458,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.getLayers({
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {
@@ -484,7 +484,7 @@ describe('IndexPattern Data Source', () => {
         indexPatternDatasource.getMetaData({
           indexPatternRefs: [],
           existingFields: {},
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
             first: {

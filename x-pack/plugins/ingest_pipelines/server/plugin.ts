@@ -11,7 +11,7 @@ import { PLUGIN_ID, PLUGIN_MIN_LICENSE_TYPE } from '../common/constants';
 
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError } from './lib';
+import { isEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {

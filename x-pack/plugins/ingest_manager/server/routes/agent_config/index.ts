@@ -10,6 +10,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
+  CopyAgentConfigRequestSchema,
   DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
 } from '../../types';
@@ -18,6 +19,7 @@ import {
   getOneAgentConfigHandler,
   createAgentConfigHandler,
   updateAgentConfigHandler,
+  copyAgentConfigHandler,
   deleteAgentConfigsHandler,
   getFullAgentConfig,
   downloadFullAgentConfig,
@@ -62,6 +64,16 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateAgentConfigHandler
+  );
+
+  // Copy
+  router.post(
+    {
+      path: AGENT_CONFIG_API_ROUTES.COPY_PATTERN,
+      validate: CopyAgentConfigRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    copyAgentConfigHandler
   );
 
   // Delete

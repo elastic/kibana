@@ -2,14 +2,16 @@
 [[upgrade-assistant]]
 == Upgrade Assistant
 
-The Upgrade Assistant helps you prepare for your upgrade to {es} 9.0. 
-To access the assistant, go to *Management > 9.0 Upgrade Assistant*. 
+The Upgrade Assistant helps you prepare for your upgrade to the next major {es} version. 
+For example, if you are using 6.8, the Upgrade Assistant helps you to upgrade to 7.0. 
+To access the assistant, open the menu, then go to *Stack Management > {es} > Upgrade Assistant*.
 
 The assistant identifies the deprecated settings in your cluster and indices 
 and guides you through the process of resolving issues, including reindexing. 
 
-Before upgrading to Elasticsearch 9.0, make sure that you are using the final 
-8.x minor release to see the most up-to-date deprecation issues. 
+Before you upgrade, make sure that you are using the latest released minor 
+version of {es} to see the most up-to-date deprecation issues. 
+For example, if you want to upgrade to to 7.0, make sure that you are using 6.8.
 
 [float]
 === Reindexing

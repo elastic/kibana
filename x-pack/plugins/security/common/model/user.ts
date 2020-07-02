@@ -8,7 +8,7 @@ export interface User {
   username: string;
   email: string;
   full_name: string;
-  roles: string[];
+  roles: readonly string[];
   enabled: boolean;
   metadata?: {
     _reserved: boolean;

@@ -6,7 +6,7 @@
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { outputService, appContextService } from '../../services';
-import { GetFleetStatusResponse } from '../../../common';
+import { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 import { PostFleetSetupRequestSchema } from '../../types';
 import { IngestManagerError, getHTTPResponseCode } from '../../errors';
@@ -20,6 +20,8 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;
+    const isUsingEphemeralEncryptionKey = appContextService.getEncryptedSavedObjectsSetup()
+      .usingEphemeralEncryptionKey;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
     if (!isAdminUserSetup) {
@@ -30,6 +32,10 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
     }
     if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
       missingRequirements.push('tls_required');
+    }
+
+    if (isUsingEphemeralEncryptionKey) {
+      missingRequirements.push('encrypted_saved_object_encryption_key_required');
     }
 
     const body: GetFleetStatusResponse = {
@@ -77,9 +83,10 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const logger = appContextService.getLogger();
   try {
+    const body: PostIngestSetupResponse = { isInitialized: true };
     await setupIngestManager(soClient, callCluster);
     return response.ok({
-      body: { isInitialized: true },
+      body,
     });
   } catch (e) {
     if (e instanceof IngestManagerError) {

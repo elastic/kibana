@@ -126,7 +126,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async cloneJob(analyticsId: string) {
       await this.openRowActions(analyticsId);
       await testSubjects.click(`mlAnalyticsJobCloneButton`);
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyout');
+      await testSubjects.existOrFail('mlAnalyticsCreationContainer');
     }
   })();
 }

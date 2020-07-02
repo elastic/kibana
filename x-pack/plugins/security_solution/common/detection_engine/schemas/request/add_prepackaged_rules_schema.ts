@@ -40,16 +40,19 @@ import {
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-import { DefaultStringArray } from '../types/default_string_array';
-import { DefaultActionsArray } from '../types/default_actions_array';
-import { DefaultBooleanFalse } from '../types/default_boolean_false';
-import { DefaultFromString } from '../types/default_from_string';
-import { DefaultIntervalString } from '../types/default_interval_string';
-import { DefaultMaxSignalsNumber } from '../types/default_max_signals_number';
-import { DefaultToString } from '../types/default_to_string';
-import { DefaultThreatArray } from '../types/default_threat_array';
-import { DefaultThrottleNull } from '../types/default_throttle_null';
-import { ListsDefaultArray, ListsDefaultArraySchema } from '../types/lists_default_array';
+import {
+  DefaultStringArray,
+  DefaultActionsArray,
+  DefaultBooleanFalse,
+  DefaultFromString,
+  DefaultIntervalString,
+  DefaultMaxSignalsNumber,
+  DefaultToString,
+  DefaultThreatArray,
+  DefaultThrottleNull,
+  DefaultListArray,
+  ListArray,
+} from '../types';
 
 /**
  * Big differences between this schema and the createRulesSchema
@@ -96,7 +99,7 @@ export const addPrepackagedRulesSchema = t.intersection([
       throttle: DefaultThrottleNull, // defaults to "null" if not set during decode
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
-      exceptions_list: ListsDefaultArray, // defaults to empty array if not set during decode
+      exceptions_list: DefaultListArray, // defaults to empty array if not set during decode
     })
   ),
 ]);
@@ -130,5 +133,5 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   to: To;
   threat: Threat;
   throttle: ThrottleOrNull;
-  exceptions_list: ListsDefaultArraySchema;
+  exceptions_list: ListArray;
 };

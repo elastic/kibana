@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 jest.mock('./browsers/install', () => ({
   installBrowser: jest.fn().mockImplementation(() => ({
     binaryPath$: {
@@ -62,10 +63,10 @@ describe('Reporting Plugin', () => {
   });
 
   it('logs setup issues', async () => {
+    initContext.config = null;
     const plugin = new ReportingPlugin(initContext);
     // @ts-ignore overloading error logger
     plugin.logger.error = jest.fn();
-    coreSetup.elasticsearch = null;
     plugin.setup(coreSetup, pluginSetup);
 
     await sleep(5);

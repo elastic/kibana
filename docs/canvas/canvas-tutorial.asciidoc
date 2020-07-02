@@ -14,7 +14,7 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample eCommerce or
 
 Your first step to working with Canvas is to create a workpad.
 
-. Open the menu, then click *Kibana > Canvas*.
+. Open the menu, then go to *Canvas*.
 
 . On the *Canvas workpads* page, click *Create workpad*.
 

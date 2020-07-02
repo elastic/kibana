@@ -11,29 +11,6 @@ export enum severity {
   warning = 'warning',
 }
 
-export const APM_ML_JOB_GROUP_NAME = 'apm';
-
-export function getMlPrefix(serviceName: string, transactionType?: string) {
-  const maybeTransactionType = transactionType ? `${transactionType}-` : '';
-  return encodeForMlApi(`${serviceName}-${maybeTransactionType}`);
-}
-
-export function getMlJobId(serviceName: string, transactionType?: string) {
-  return `${getMlPrefix(serviceName, transactionType)}high_mean_response_time`;
-}
-
-export function getMlJobServiceName(jobId: string) {
-  return jobId.split('-').slice(0, -2).join('-');
-}
-
-export function getMlIndex(serviceName: string, transactionType?: string) {
-  return `.ml-anomalies-${getMlJobId(serviceName, transactionType)}`;
-}
-
-export function encodeForMlApi(value: string) {
-  return value.replace(/\s+/g, '_').toLowerCase();
-}
-
 export function getSeverity(score?: number) {
   if (typeof score !== 'number') {
     return undefined;

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ComponentTemplateList } from './component_template_list';
+export { ComponentTemplateListContainer as ComponentTemplateList } from './component_template_list_container';

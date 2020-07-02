@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
-  getDetectionEngineUrl,
   getDetectionEngineTabUrl,
   getRulesUrl,
   getRuleDetailsUrl,
@@ -19,21 +18,28 @@ import {
 import * as i18nDetections from '../translations';
 import * as i18nRules from './translations';
 import { RouteSpyState } from '../../../../common/utils/route/types';
+import { GetUrlForApp } from '../../../../common/components/navigation/types';
+import { SecurityPageName } from '../../../../app/types';
+import { APP_ID } from '../../../../../common/constants';
 
-const getTabBreadcrumb = (pathname: string, search: string[]) => {
-  const tabPath = pathname.split('/')[2];
+const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
+  const tabPath = pathname.split('/')[1];
 
   if (tabPath === 'alerts') {
     return {
       text: i18nDetections.ALERT,
-      href: `${getDetectionEngineTabUrl(tabPath)}${!isEmpty(search[0]) ? search[0] : ''}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        path: getDetectionEngineTabUrl(tabPath, !isEmpty(search[0]) ? search[0] : ''),
+      }),
     };
   }
 
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,
-      href: `${getRulesUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        path: getRulesUrl(!isEmpty(search[0]) ? search[0] : ''),
+      }),
     };
   }
 };
@@ -44,15 +50,21 @@ const isRuleCreatePage = (pathname: string) =>
 const isRuleEditPage = (pathname: string) =>
   pathname.includes('/rules') && pathname.includes('/edit');
 
-export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeBreadcrumb[] => {
+export const getBreadcrumbs = (
+  params: RouteSpyState,
+  search: string[],
+  getUrlForApp: GetUrlForApp
+): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18nDetections.PAGE_TITLE,
-      href: `${getDetectionEngineUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        path: !isEmpty(search[0]) ? search[0] : '',
+      }),
     },
   ];
 
-  const tabBreadcrumb = getTabBreadcrumb(params.pathName, search);
+  const tabBreadcrumb = getTabBreadcrumb(params.pathName, search, getUrlForApp);
 
   if (tabBreadcrumb) {
     breadcrumb = [...breadcrumb, tabBreadcrumb];
@@ -63,7 +75,9 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeB
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: `${getRuleDetailsUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getRuleDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+        }),
       },
     ];
   }
@@ -73,7 +87,9 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeB
       ...breadcrumb,
       {
         text: i18nRules.ADD_PAGE_TITLE,
-        href: `${getCreateRuleUrl()}${!isEmpty(search[1]) ? search[1] : ''}`,
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getCreateRuleUrl(!isEmpty(search[0]) ? search[0] : ''),
+        }),
       },
     ];
   }
@@ -83,7 +99,9 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): ChromeB
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: `${getEditRuleUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getEditRuleUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+        }),
       },
     ];
   }

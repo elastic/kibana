@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { TimelineId } from '../../../../common/types/timeline';
 import { AlertsView } from '../../../common/components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 
@@ -62,7 +63,11 @@ export const filterNetworkData: Filter[] = [
 ];
 
 export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
-  <AlertsView {...alertsProps} pageFilters={filterNetworkData} />
+  <AlertsView
+    timelineId={TimelineId.networkPageExternalAlerts}
+    {...alertsProps}
+    pageFilters={filterNetworkData}
+  />
 ));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

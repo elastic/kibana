@@ -19,18 +19,18 @@
 
 import { Request } from 'hapi';
 import { errors } from 'elasticsearch';
-import { CallAPIOptions, ClusterClient, FakeRequest } from 'kibana/server';
+import { LegacyCallAPIOptions, LegacyClusterClient, FakeRequest } from 'kibana/server';
 
 export class Cluster {
   public readonly errors = errors;
 
-  constructor(private readonly clusterClient: ClusterClient) {}
+  constructor(private readonly clusterClient: LegacyClusterClient) {}
 
   public callWithRequest = async (
     req: Request | FakeRequest,
     endpoint: string,
     clientParams?: Record<string, unknown>,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => {
     return await this.clusterClient
       .asScoped(req)
@@ -40,7 +40,7 @@ export class Cluster {
   public callWithInternalUser = async (
     endpoint: string,
     clientParams?: Record<string, unknown>,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => {
     return await this.clusterClient.callAsInternalUser(endpoint, clientParams, options);
   };

@@ -7,6 +7,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import {
+  Status,
+  SignalIds,
+} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
@@ -106,12 +110,24 @@ export const getSignalStatus = () => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
+export const getQueryAllSignals = () => ({
+  query: { match_all: {} },
+});
+
+export const getQuerySignalIds = (signalIds: SignalIds) => ({
+  query: {
+    terms: {
+      _id: signalIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
 }: {
-  signalIds: string[];
-  status: 'open' | 'closed';
+  signalIds: SignalIds;
+  status: Status;
 }) => ({
   signal_ids: signalIds,
   status,
@@ -457,3 +473,29 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
 });
+
+// Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
+export const waitFor = async (
+  functionToTest: () => Promise<boolean>,
+  maxTimeout: number = 5000,
+  timeoutWait: number = 10
+) => {
+  await new Promise(async (resolve, reject) => {
+    let found = false;
+    let numberOfTries = 0;
+    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      const itPasses = await functionToTest();
+      if (itPasses) {
+        found = true;
+      } else {
+        numberOfTries++;
+      }
+      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+    }
+    if (found) {
+      resolve();
+    } else {
+      reject(new Error('timed out waiting for function condition to be true'));
+    }
+  });
+};

@@ -67,15 +67,27 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       setEvaluateSearchQuery(searchQuery);
     }, [JSON.stringify(searchQuery)]);
 
-    const classificationData = useExplorationResults(indexPattern, jobConfig, searchQuery);
-    const docFieldsCount = classificationData.columns.length;
-    const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
+    const classificationData = useExplorationResults(
+      indexPattern,
+      jobConfig,
+      searchQuery,
+      getToastNotifications()
+    );
+    const docFieldsCount = classificationData.columnsWithCharts.length;
+    const {
+      columnsWithCharts,
+      errorMessage,
+      status,
+      tableItems,
+      visibleColumns,
+    } = classificationData;
 
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
+
     // if it's a searchBar syntax error leave the table visible so they can try again
-    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
+    if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
         <EuiPanel grow={false}>
           <EuiFlexGroup gutterSize="s">
@@ -139,7 +151,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
+        {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) && (
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="s" />

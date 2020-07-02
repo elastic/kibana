@@ -68,7 +68,6 @@ uiRoutes.when('/alerts', {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      const kbnUrl = $injector.get('kbnUrl');
 
       // breadcrumbs + page title
       $scope.cluster = find($route.current.locals.clusters, {
@@ -94,7 +93,6 @@ uiRoutes.when('/alerts', {
         ) : (
           <Alerts
             alerts={data}
-            angular={{ kbnUrl, scope: $scope }}
             sorting={this.sorting}
             pagination={this.pagination}
             onTableChange={this.onTableChange}

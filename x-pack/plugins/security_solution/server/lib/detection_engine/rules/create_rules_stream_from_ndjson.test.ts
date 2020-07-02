@@ -365,9 +365,8 @@ describe('create_rules_stream_from_ndjson', () => {
         references: [],
         version: 1,
       });
-      // TODO: Change the formatter to output something better than [object Object]
       expect(resultOrError[1].message).toEqual(
-        '[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]'
+        'Invalid value "undefined" supplied to "description",Invalid value "undefined" supplied to "risk_score",Invalid value "undefined" supplied to "name",Invalid value "undefined" supplied to "severity",Invalid value "undefined" supplied to "type",Invalid value "undefined" supplied to "rule_id"'
       );
       expect(resultOrError[2]).toEqual({
         actions: [],

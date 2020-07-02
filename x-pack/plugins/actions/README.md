@@ -234,9 +234,24 @@ Payload:
 
 ## Firing actions
 
-The plugin exposes an execute function that you can use to run actions.
+Running actions is possible by using the ActionsClient which is provided by the `getActionsClientWithRequest` function part of the plugin's Start Contract.
+By providing the user's Request you'll receive an instance of the ActionsClient which is tailered to the current user and is scoped to the resources the user is authorized to access.
 
-**server.plugins.actions.execute(options)**
+## Accessing a scoped ActionsClient
+
+```
+const actionsClient = server.plugins.actions.getActionsClientWithRequest(request);
+```
+
+Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
+
+### actionsClient.enqueueExecution(options)
+
+This api schedules a task which will run the action using the current user scope at the soonest opportunity.
+
+Running the action by scheduling a task means that we will no longer have a user request by which to ascertain the action's privileges and so you might need to provide these yourself:
+- The **SpaceId** in which the user's action is expected to run
+- When security is enabled you'll also need to provide an **apiKey** which allows us to mimic the user and their privileges.
 
 The following table describes the properties of the `options` object.
 
@@ -251,10 +266,39 @@ The following table describes the properties of the `options` object.
 
 This example makes action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` send an email. The action plugin will load the saved object and find what action type to call with `params`.
 
-```
-server.plugins.actions.execute({
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+await actionsClient.enqueueExecution({
   id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   spaceId: 'default', // The spaceId of the action
+  params: {
+    from: 'example@elastic.co',
+    to: ['destination@elastic.co'],
+    subject: 'My email subject',
+    body: 'My email body',
+  },
+});
+```
+
+### actionsClient.execute(options)
+
+This api runs the action and asynchronously returns the result of running the action.
+
+The following table describes the properties of the `options` object.
+
+| Property | Description                                                                                            | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
+| id       | The id of the action you want to execute.                                                              | string |
+| params   | The `params` value to give the action type executor.                                                   | object |
+
+## Example
+
+As with the previous example, we'll use the action `3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5` to send an email. 
+
+```typescript
+const actionsClient = await server.plugins.actions.getActionsClientWithRequest(request);
+const result = await actionsClient.execute({
+  id: '3c5b2bd4-5424-4e4b-8cf5-c0a58c762cc5',
   params: {
     from: 'example@elastic.co',
     to: ['destination@elastic.co'],

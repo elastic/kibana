@@ -1,6 +1,6 @@
 [role="xpack"]
 [[machine-learning-integration]]
-=== Machine Learning integration
+===  integration
 
 ++++
 <titleabbrev>Integrate with machine learning</titleabbrev>

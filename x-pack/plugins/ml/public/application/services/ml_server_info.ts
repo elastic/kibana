@@ -53,10 +53,11 @@ export function isCloud(): boolean {
 }
 
 export function getCloudDeploymentId(): string | null {
-  if (cloudInfo.cloudId === null) {
-    return null;
-  }
-  const tempCloudId = cloudInfo.cloudId.replace(/^.+:/, '');
+  return cloudInfo.cloudId === null ? null : extractDeploymentId(cloudInfo.cloudId);
+}
+
+export function extractDeploymentId(cloudId: string) {
+  const tempCloudId = cloudId.replace(/^(.+)?:/, '');
   try {
     const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
     return matches !== null && matches.length === 2 ? matches[1] : null;

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { resolve } from 'path';
 
 import { services } from './services';
@@ -223,6 +221,31 @@ export default async function ({ readConfigFile }) {
         },
 
         global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
           kibana: [
             {
               feature: {

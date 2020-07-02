@@ -17,7 +17,7 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../../helpers/setup_request';
-import { rangeFilter } from '../../helpers/range_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 
 export async function getTransactionAvgDurationByCountry({

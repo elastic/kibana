@@ -80,36 +80,8 @@ describe('getExportAll', () => {
         note: '# Investigative notes',
         version: 1,
         exceptions_list: [
-          {
-            field: 'source.ip',
-            values_operator: 'included',
-            values_type: 'exists',
-          },
-          {
-            field: 'host.name',
-            values_operator: 'excluded',
-            values_type: 'match',
-            values: [
-              {
-                name: 'rock01',
-              },
-            ],
-            and: [
-              {
-                field: 'host.id',
-                values_operator: 'included',
-                values_type: 'match_all',
-                values: [
-                  {
-                    name: '123',
-                  },
-                  {
-                    name: '678',
-                  },
-                ],
-              },
-            ],
-          },
+          { id: 'some_uuid', namespace_type: 'single' },
+          { id: 'some_uuid', namespace_type: 'agnostic' },
         ],
       })}\n`,
       exportDetails: `${JSON.stringify({

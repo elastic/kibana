@@ -17,27 +17,20 @@
  * under the License.
  */
 
-import axios, { AxiosInstance } from 'axios';
 import util from 'util';
-import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 
 export class Role {
-  private log: ToolingLog;
-  private axios: AxiosInstance;
-
-  constructor(url: string, log: ToolingLog) {
-    this.log = log;
-    this.axios = axios.create({
-      headers: { 'kbn-xsrf': 'x-pack/ftr/services/security/role' },
-      baseURL: url,
-      maxRedirects: 0,
-      validateStatus: () => true, // we do our own validation below and throw better error messages
-    });
-  }
+  constructor(private log: ToolingLog, private kibanaServer: KbnClient) {}
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);
-    const { data, status, statusText } = await this.axios.put(`/api/security/role/${name}`, role);
+    const { data, status, statusText } = await this.kibanaServer.request({
+      path: `/api/security/role/${name}`,
+      method: 'PUT',
+      body: role,
+      retries: 0,
+    });
     if (status !== 204) {
       throw new Error(
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
@@ -47,7 +40,10 @@ export class Role {
 
   public async delete(name: string) {
     this.log.debug(`deleting role ${name}`);
-    const { data, status, statusText } = await this.axios.delete(`/api/security/role/${name}`);
+    const { data, status, statusText } = await this.kibanaServer.request({
+      path: `/api/security/role/${name}`,
+      method: 'DELETE',
+    });
     if (status !== 204 && status !== 404) {
       throw new Error(
         `Expected status code of 204 or 404, received ${status} ${statusText}: ${util.inspect(

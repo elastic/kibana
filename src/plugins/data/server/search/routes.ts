@@ -18,10 +18,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../core/server';
+import { CoreSetup } from '../../../../core/server';
 import { getRequestAbortedSignal } from '../lib';
+import { DataPluginStart } from '../plugin';
 
-export function registerSearchRoute(router: IRouter): void {
+export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): void {
+  const router = core.http.createRouter();
+
   router.post(
     {
       path: '/internal/search/{strategy}',
@@ -36,11 +39,15 @@ export function registerSearchRoute(router: IRouter): void {
       },
     },
     async (context, request, res) => {
+      const searchRequest = request.body;
       const { strategy } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
+      const [, , selfStart] = await core.getStartServices();
+      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
+
       try {
-        const response = await context.search!.search(request.body, { signal }, strategy);
+        const response = await searchStrategy.search(context, searchRequest, { signal });
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({
@@ -70,8 +77,11 @@ export function registerSearchRoute(router: IRouter): void {
       const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
+      const [, , selfStart] = await core.getStartServices();
+      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
+
       try {
-        const response = await context.search!.search({ id }, { signal }, strategy);
+        const response = await searchStrategy.search(context, { id }, { signal });
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({
@@ -101,8 +111,13 @@ export function registerSearchRoute(router: IRouter): void {
     },
     async (context, request, res) => {
       const { strategy, id } = request.params;
+
+      const [, , selfStart] = await core.getStartServices();
+      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
+      if (!searchStrategy.cancel) return res.ok();
+
       try {
-        await context.search!.cancel(id, strategy);
+        await searchStrategy.cancel(context, id);
         return res.ok();
       } catch (err) {
         return res.customError({

@@ -30,6 +30,12 @@ export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
       logAlias: {
         type: 'keyword',
       },
+      inventoryDefaultView: {
+        type: 'keyword',
+      },
+      metricsExplorerDefaultView: {
+        type: 'keyword',
+      },
       fields: {
         properties: {
           container: {

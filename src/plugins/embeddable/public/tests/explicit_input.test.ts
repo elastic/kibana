@@ -28,7 +28,7 @@ import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  HelloWorldEmbeddableFactoryDefinition,
 } from '../../../../../examples/embeddable_examples/public';
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
@@ -49,7 +49,10 @@ const factory = new SlowContactCardEmbeddableFactory({
   execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+setup.registerEmbeddableFactory(
+  HELLO_WORLD_EMBEDDABLE,
+  new HelloWorldEmbeddableFactoryDefinition()
+);
 
 const start = doStart();
 

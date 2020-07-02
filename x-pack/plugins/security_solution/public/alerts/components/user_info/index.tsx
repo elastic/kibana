@@ -163,9 +163,7 @@ export const useUserInfo = (): State => {
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.securitySolution.crud === 'boolean'
-      ? uiCapabilities.securitySolution.crud
-      : false;
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
 
   useEffect(() => {
     if (loading !== privilegeLoading || indexNameLoading) {

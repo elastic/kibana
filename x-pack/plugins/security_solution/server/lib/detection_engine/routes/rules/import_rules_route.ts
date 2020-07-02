@@ -7,6 +7,7 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
+import { validate } from '../../../../../common/validate';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
@@ -39,7 +40,6 @@ import {
 } from '../utils';
 import { patchRules } from '../../rules/patch_rules';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
-import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';

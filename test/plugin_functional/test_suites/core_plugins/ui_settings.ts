@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       expect(settingsValue).to.be('2');
 
-      const settingsValueViaObservables = await browser.executeAsync(async (callback: Function) => {
+      const settingsValueViaObservables = await browser.executeAsync(async (callback) => {
         window.__coreProvider.setup.core.uiSettings
           .get$('ui_settings_plugin')
           .subscribe((v) => callback(v));

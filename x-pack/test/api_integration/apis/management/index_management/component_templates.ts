@@ -338,5 +338,20 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
       });
     });
+
+    describe('Privileges', () => {
+      it('should return privileges result', async () => {
+        const uri = `${API_BASE_PATH}/component_templates/privileges`;
+
+        const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
+
+        expect(body).to.eql({
+          hasAllPrivileges: true,
+          missingPrivileges: {
+            cluster: [],
+          },
+        });
+      });
+    });
   });
 }

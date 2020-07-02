@@ -15,8 +15,6 @@ import { ApiCallByIdProps } from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
 
-jest.mock('../api');
-
 const mockKibanaHttpService = createKibanaCoreStartMock().http;
 
 describe('useApi', () => {

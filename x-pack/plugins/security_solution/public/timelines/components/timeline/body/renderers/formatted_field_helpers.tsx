@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -18,30 +18,48 @@ import { isUrlInvalid } from '../../../../../common/utils/validators';
 import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
 
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../../app/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../../common/constants';
+import { LinkAnchor } from '../../../../../common/components/links';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
-export const renderRuleName = ({
-  contextId,
-  eventId,
-  fieldName,
-  linkValue,
-  truncate,
-  value,
-}: {
+interface RenderRuleNameProps {
   contextId: string;
   eventId: string;
   fieldName: string;
   linkValue: string | null | undefined;
   truncate?: boolean;
   value: string | number | null | undefined;
+}
+
+export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
+  contextId,
+  eventId,
+  fieldName,
+  linkValue,
+  truncate,
+  value,
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-
+  const { search } = useFormatUrl(SecurityPageName.alerts);
+  const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
+
+  const goToRuleDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        path: getRuleDetailsUrl(ruleId ?? '', search),
+      });
+    },
+    [navigateToApp, ruleId, search]
+  );
 
   return isString(value) && ruleName.length > 0 && ruleId != null ? (
     <DefaultDraggable
@@ -50,7 +68,14 @@ export const renderRuleName = ({
       tooltipContent={value}
       value={value}
     >
-      <EuiLink href={getRuleDetailsUrl(ruleId)}>{content}</EuiLink>
+      <LinkAnchor
+        onClick={goToRuleDetails}
+        href={getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+          path: getRuleDetailsUrl(ruleId, search),
+        })}
+      >
+        {content}
+      </LinkAnchor>
     </DefaultDraggable>
   ) : (
     getEmptyTagValue()

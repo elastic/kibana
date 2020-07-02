@@ -49,6 +49,8 @@ import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { SecurityPageName } from '../../../../../app/types';
+import { useFormatUrl } from '../../../../../common/components/link_to';
 
 const SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -140,6 +142,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
+    const { formatUrl } = useFormatUrl(SecurityPageName.alerts);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions =
@@ -225,6 +228,7 @@ export const AllRules = React.memo<AllRulesProps>(
       return getColumns({
         dispatch,
         dispatchToaster,
+        formatUrl,
         history,
         hasMlPermissions,
         hasNoPermissions,
@@ -239,6 +243,7 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [
       dispatch,
       dispatchToaster,
+      formatUrl,
       hasMlPermissions,
       history,
       loadingRuleIds,
@@ -246,7 +251,10 @@ export const AllRules = React.memo<AllRulesProps>(
       reFetchRulesData,
     ]);
 
-    const monitoringColumns = useMemo(() => getMonitoringColumns(), []);
+    const monitoringColumns = useMemo(() => getMonitoringColumns(history, formatUrl), [
+      history,
+      formatUrl,
+    ]);
 
     useEffect(() => {
       if (reFetchRulesData != null) {

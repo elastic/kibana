@@ -34,6 +34,8 @@ const signalSchema = schema.object({
   type: schema.string(),
   references: schema.arrayOf(schema.string(), { defaultValue: [] }),
   version: schema.number({ defaultValue: 1 }),
+  lists: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.7. Once we use a migration script please remove this.
+  exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.8. Once we use a migration script please remove this.
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
 });
 

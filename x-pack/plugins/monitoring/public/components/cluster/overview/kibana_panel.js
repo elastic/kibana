@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export function KibanaPanel(props) {
   const setupMode = props.setupMode;
@@ -40,8 +41,8 @@ export function KibanaPanel(props) {
 
   const statusIndicator = <HealthStatusIndicator status={props.status} />;
 
-  const goToKibana = () => props.changeUrl('kibana');
-  const goToInstances = () => props.changeUrl('kibana/instances');
+  const goToKibana = () => getSafeForExternalLink('#/kibana');
+  const goToInstances = () => getSafeForExternalLink('#/kibana/instances');
 
   const setupModeData = get(setupMode.data, 'kibana');
   const setupModeTooltip =
@@ -49,7 +50,7 @@ export function KibanaPanel(props) {
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={KIBANA_SYSTEM_ID}
-        badgeClickAction={goToInstances}
+        badgeClickLink={goToInstances()}
       />
     ) : null;
 
@@ -70,7 +71,7 @@ export function KibanaPanel(props) {
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
-                  onClick={goToKibana}
+                  href={goToKibana()}
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.kibanaPanel.overviewLinkAriaLabel',
                     {
@@ -124,7 +125,7 @@ export function KibanaPanel(props) {
                 <EuiTitle size="s">
                   <h3>
                     <EuiLink
-                      onClick={goToInstances}
+                      href={goToInstances()}
                       data-test-subj="kbnInstances"
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.kibanaPanel.instancesCountLinkAriaLabel',

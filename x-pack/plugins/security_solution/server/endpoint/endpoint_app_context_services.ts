@@ -3,23 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IndexPatternRetriever } from './alerts/index_pattern';
-import { AgentService } from '../../../ingest_manager/server';
+import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
+import { handleDatasourceCreate } from './ingest_integration';
+
+export type EndpointAppContextServiceStartContract = Pick<
+  IngestManagerStartContract,
+  'agentService'
+> & {
+  registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
+};
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
 export class EndpointAppContextService {
-  private indexPatternRetriever: IndexPatternRetriever | undefined;
   private agentService: AgentService | undefined;
 
-  public start(dependencies: {
-    indexPatternRetriever: IndexPatternRetriever;
-    agentService: AgentService;
-  }) {
-    this.indexPatternRetriever = dependencies.indexPatternRetriever;
+  public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    dependencies.registerIngestCallback('datasourceCreate', handleDatasourceCreate);
   }
 
   public stop() {}
@@ -29,12 +32,5 @@ export class EndpointAppContextService {
       throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
     }
     return this.agentService;
-  }
-
-  public getIndexPatternRetriever(): IndexPatternRetriever {
-    if (!this.indexPatternRetriever) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
-    }
-    return this.indexPatternRetriever;
   }
 }

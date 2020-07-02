@@ -47,6 +47,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
   }) => void;
+  showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
@@ -186,6 +187,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
+  showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
@@ -289,6 +291,12 @@ export interface VisualizationConfigProps<T = unknown> {
 export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
   setState: (newState: T) => void;
 };
+
+export interface VisualizationToolbarProps<T = unknown> {
+  setState: (newState: T) => void;
+  frame: FramePublicAPI;
+  state: T;
+}
 
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
@@ -454,6 +462,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * for extra configurability, such as for styling the legend or axis
    */
   renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
+  /**
+   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
+   * settings for the visualization.
+   */
+  renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
   /**
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default

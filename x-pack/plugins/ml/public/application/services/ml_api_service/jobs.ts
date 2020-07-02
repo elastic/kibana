@@ -8,7 +8,11 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobWithTimeRange,
+  MlSummaryJobs,
+  CombinedJobWithStats,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
@@ -41,7 +45,7 @@ export const jobs = {
 
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http<any>({
+    return http<CombinedJobWithStats[]>({
       path: `${basePath()}/jobs/jobs`,
       method: 'POST',
       body,
@@ -95,10 +99,20 @@ export const jobs = {
       body,
     });
   },
+
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return http<any>({
       path: `${basePath()}/jobs/close_jobs`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  forceStopAndCloseJob(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return http<{ success: boolean }>({
+      path: `${basePath()}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,
     });
@@ -251,6 +265,21 @@ export const jobs = {
     const body = JSON.stringify({ jobId, count });
     return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
       path: `${basePath()}/jobs/top_categories`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  revertModelSnapshot(
+    jobId: string,
+    snapshotId: string,
+    replay: boolean,
+    end?: number,
+    calendarEvents?: Array<{ start: number; end: number; description: string }>
+  ) {
+    const body = JSON.stringify({ jobId, snapshotId, replay, end, calendarEvents });
+    return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
+      path: `${basePath()}/jobs/revert_model_snapshot`,
       method: 'POST',
       body,
     });
