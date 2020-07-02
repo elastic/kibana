@@ -10,7 +10,7 @@ import { createThunk } from '../../lib/create_thunk';
 import { getWorkpadColors } from '../selectors/workpad';
 // @ts-expect-error
 import { fetchAllRenderables } from './elements';
-import { CanvasWorkpad } from '../../../types';
+import { CanvasWorkpad, CanvasVariable } from '../../../types';
 
 export const sizeWorkpad = createAction<{ height: number; width: number }>('sizeWorkpad');
 export const setName = createAction<string>('setName');
@@ -18,7 +18,7 @@ export const setWriteable = createAction<boolean>('setWriteable');
 export const setColors = createAction<string[]>('setColors');
 export const setRefreshInterval = createAction<number>('setRefreshInterval');
 export const setWorkpadCSS = createAction<string>('setWorkpadCSS');
-export const setWorkpadVariables = createAction<any>('setWorkpadVariables'); // TODO FIX
+export const setWorkpadVariables = createAction<CanvasVariable[]>('setWorkpadVariables');
 export const enableAutoplay = createAction<boolean>('enableAutoplay');
 export const setAutoplayInterval = createAction<number>('setAutoplayInterval');
 export const resetWorkpad = createAction<void>('resetWorkpad');

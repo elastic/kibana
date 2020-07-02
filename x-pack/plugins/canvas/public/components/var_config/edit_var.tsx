@@ -39,8 +39,9 @@ interface Props {
 
 const checkDupeName = (newName: string, oldName: string | null, variables: CanvasVariable[]) => {
   const match = variables.find((v) => {
-    // If the new name matches a variable and that
-    // variable name isn't the old name, that's a bad match
+    // If the new name matches an existing variable and that
+    // matched variable name isn't the old name, then there
+    // is a duplicate
     return newName === v.name && (!oldName || v.name !== oldName);
   });
 
