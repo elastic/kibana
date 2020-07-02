@@ -5,14 +5,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiTextColor,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiButton, EuiButtonIcon, EuiTextColor, EuiLink } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { RawTagWithId } from '../../../../common';
 import { useServices } from '../../context';
@@ -24,6 +17,7 @@ import {
   txtEditSomething,
   txtDeleteSomething,
 } from './i18n';
+import { Tag } from '../../../components/tag';
 
 const pagination = {
   initialPageSize: 25,
@@ -57,7 +51,7 @@ export const TagTable: React.FC = () => {
           name: txtTag,
           render: (tag: RawTagWithId) => (
             <Link to={`/tag/${tag.id}`}>
-              <EuiBadge color={tag.color}>{tag.title}</EuiBadge>
+              <Tag tag={tag} />
             </Link>
           ),
         },
