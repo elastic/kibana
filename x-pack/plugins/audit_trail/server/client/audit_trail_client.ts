@@ -12,7 +12,7 @@ import { SpacesPluginSetup } from '../../../spaces/server';
 
 interface Deps {
   getCurrentUser: SecurityPluginSetup['authc']['getCurrentUser'];
-  getSpaceId: SpacesPluginSetup['spacesService']['getSpaceId'];
+  getSpaceId?: SpacesPluginSetup['spacesService']['getSpaceId'];
 }
 
 export class AuditTrailClient implements Auditor {
@@ -33,7 +33,7 @@ export class AuditTrailClient implements Auditor {
   public add(event: AuditableEvent) {
     const user = this.deps.getCurrentUser(this.request);
     // doesn't use getSpace since it's async operation calling ES
-    const spaceId = this.deps.getSpaceId(this.request);
+    const spaceId = this.deps.getSpaceId ? this.deps.getSpaceId(this.request) : undefined;
 
     this.event$.next({
       message: event.message,

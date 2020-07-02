@@ -27,7 +27,7 @@ import { LicensingPluginStart } from '../../licensing/server';
 
 interface DepsSetup {
   security: SecurityPluginSetup;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 interface DepStart {
@@ -47,7 +47,7 @@ export class AuditTrailPlugin implements Plugin {
   public setup(core: CoreSetup, deps: DepsSetup) {
     const depsApi = {
       getCurrentUser: deps.security.authc.getCurrentUser,
-      getSpaceId: deps.spaces.spacesService.getSpaceId,
+      getSpaceId: deps.spaces?.spacesService.getSpaceId,
     };
 
     this.event$.subscribe(({ message, ...other }) => this.logger.debug(message, other));

@@ -5,6 +5,6 @@
   "configPath": ["xpack", "audit_trail"],
   "server": true,
   "ui": false,
-  "requiredPlugins": ["licensing", "security", "spaces"],
-  "optionalPlugins": []
+  "requiredPlugins": ["licensing", "security"],
+  "optionalPlugins": ["spaces"]
 }
