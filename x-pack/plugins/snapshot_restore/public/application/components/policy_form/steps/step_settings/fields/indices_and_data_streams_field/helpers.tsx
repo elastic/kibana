@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { DataStreamBadge, orderDataStreamsAndIndices } from '../../../../../shared';
+import { orderDataStreamsAndIndices } from '../../../../../lib';
+import { DataStreamBadge } from '../../../../../data_stream_badge';
 
 export const mapSelectionToIndicesOptions = ({
   allSelected,

@@ -27,7 +27,8 @@ import { SlmPolicyPayload } from '../../../../../../../../common/types';
 import { useServices } from '../../../../../../app_context';
 import { PolicyValidation } from '../../../../../../services/validation';
 
-import { orderDataStreamsAndIndices, DataStreamBadge } from '../../../../../shared';
+import { orderDataStreamsAndIndices } from '../../../../../lib';
+import { DataStreamBadge } from '../../../../../data_stream_badge';
 
 import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
