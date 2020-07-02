@@ -5,7 +5,7 @@
  */
 
 import { TagsClientParams, TagsClient } from './tags_client';
-import { TagManager } from './tags_manager';
+import { TagManager } from './tag_manager';
 import { TagAttachmentsClient } from './tag_attachments_client';
 
 export type TagsServiceSetupParams = TagsClientParams;

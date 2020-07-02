@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './tags_client';
-export * from './tag_attachments_client';
-export * from './tag_manager';
-export * from './tags_service';
+import { ITagsClient, ITagAttachmentsClient } from '../../../../common';
+
+export interface TagsManagerParams {
+  tags: ITagsClient;
+  attachments: ITagAttachmentsClient;
+}
