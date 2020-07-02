@@ -40,6 +40,7 @@ import {
 } from '../common';
 import { StreamingRequestHandler } from './types';
 import { createNDJSONStream } from './streaming';
+import { ApiMethod, ApiMethodRequest } from '../common';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}
@@ -60,6 +61,7 @@ export interface BfetchServerSetup {
       context: RequestHandlerContext
     ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => void;
+
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
     params: (
@@ -67,6 +69,7 @@ export interface BfetchServerSetup {
       context: RequestHandlerContext
     ) => StreamingResponseHandler<Payload, Response>
   ) => void;
+
   /**
    * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
    * This is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.
@@ -90,7 +93,6 @@ export interface BfetchServerSetup {
    *     return results$;
    *   })
    * )}
-   *
    * ```
    *
    * @param streamHandler
@@ -98,6 +100,24 @@ export interface BfetchServerSetup {
   createStreamingRequestHandler: <Response, P, Q, B, Method extends RouteMethod = any>(
     streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
   ) => RequestHandler<P, Q, B, Method>;
+
+  /**
+   * Creates a batch processing route that can route between a map of API methods.
+   *
+   * @example
+   * ```ts
+   * plugins.bfetch.createApiRoute('/calculator', {
+   *   add: async ({a, b}) => ({ result: a + b }),
+   *   subtract: async ({a, b}) => ({ result: a - b }),
+   *   multiply: async ({a, b}) => ({ result: a * b }),
+   *   divide: async ({a, b}) => ({ result: a / b }),
+   * });
+   * ```
+   *
+   * @param path
+   * @param api
+   */
+  createApiRoute: (path: string, api: Record<string, ApiMethod<object, object>>) => void;
 }
 
 // eslint-disable-next-line
@@ -126,10 +146,22 @@ export class BfetchServerPlugin
     const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
     const createStreamingRequestHandler = this.createStreamingRequestHandler({ logger });
 
+    const createApiRoute: BfetchServerSetup['createApiRoute'] = (path, api) => {
+      addBatchProcessingRoute(path, (request) => ({
+        onBatchItem: async ({ name, payload }: ApiMethodRequest<object>) => {
+          if (typeof name !== 'string') throw new Error('Api method name should be a string.');
+          if (!api.hasOwnProperty(name))
+            throw new Error(`Api method [name = ${name}] does not exist.`);
+          return await api[name](payload);
+        },
+      }));
+    };
+
     return {
       addBatchProcessingRoute,
       addStreamingResponseRoute,
       createStreamingRequestHandler,
+      createApiRoute,
     };
   }
 

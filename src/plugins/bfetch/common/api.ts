@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export * from './util';
-export * from './streaming';
-export * from './buffer';
-export * from './batch';
-export * from './api';
+export type ApiMethod<Payload = unknown, Result = unknown> = (payload: Payload) => Promise<Result>;
+
+export interface ApiMethodRequest<Payload = unknown> {
+  name: string;
+  payload: Payload;
+}

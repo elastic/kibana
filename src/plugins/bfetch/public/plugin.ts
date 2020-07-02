@@ -18,8 +18,9 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { Ensure } from '@kbn/utility-types';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash } from '../common';
+import { removeLeadingSlash, ApiMethod, ApiMethodRequest } from '../common';
 import {
   createStreamingBatchedFunction,
   BatchedFunc,
@@ -37,6 +38,12 @@ export interface BfetchPublicContract {
   batchedFunction: <Payload, Result extends object>(
     params: StreamingBatchedFunctionParams<Payload, Result>
   ) => BatchedFunc<Payload, Result>;
+  createApi: <Api extends object>(
+    url: string
+  ) => <K extends keyof Api>(
+    name: K,
+    payload: Parameters<Ensure<Api[K], ApiMethod>>[0]
+  ) => ReturnType<Ensure<Api[K], ApiMethod>>;
 }
 
 export type BfetchPublicSetup = BfetchPublicContract;
@@ -61,9 +68,15 @@ export class BfetchPublicPlugin
     const fetchStreaming = this.fetchStreaming(version, basePath);
     const batchedFunction = this.batchedFunction(fetchStreaming);
 
+    const createApi: BfetchPublicContract['createApi'] = ((url: string) => {
+      const fn = batchedFunction({ url });
+      return async (name, payload) => await fn({ name, payload } as unknown);
+    }) as BfetchPublicContract['createApi'];
+
     this.contract = {
       fetchStreaming,
       batchedFunction,
+      createApi,
     };
 
     return this.contract;
