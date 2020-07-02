@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
@@ -54,41 +54,40 @@ export async function getIndices(
     return [];
   }
 
+  const query = showAllIndices ? { expand_wildcards: 'all' } : undefined;
+
   try {
-    const query = showAllIndices ? { expand_wildcards: 'all' } : undefined;
     const response = await http.get<ResolveIndexResponse>(
       `/api/index-pattern-management/resolve_index/${pattern}`,
       { query }
     );
-    return responseToItemArray(response, indexPatternCreationType);
-  } catch (err) {
-    const type = get(err, 'body.error.caused_by.type');
-    if (type === 'index_not_found_exception') {
-      // This happens in a CSS environment when the controlling node returns a 500 even though the data
-      // nodes returned a 404. Remove this when/if this is handled: https://github.com/elastic/elasticsearch/issues/27461
+    if (!response) {
       return [];
     }
-    throw err;
+
+    return responseToItemArray(response, indexPatternCreationType);
+  } catch {
+    return [];
   }
 }
 
-const responseToItemArray = (
+export const responseToItemArray = (
   response: ResolveIndexResponse,
   indexPatternCreationType: IndexPatternCreationConfig
 ): MatchedItem[] => {
   const source: MatchedItem[] = [];
 
-  response.indices.forEach((index) => {
+  (response.indices || []).forEach((index) => {
     source.push({
       name: index.name,
       tags: indexPatternCreationType.getIndexTags(index.name),
       item: index,
     });
   });
-  response.aliases.forEach((alias) => {
+  (response.aliases || []).forEach((alias) => {
     source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }], item: alias });
   });
-  response.data_streams.forEach((dataStream) => {
+  (response.data_streams || []).forEach((dataStream) => {
     source.push({
       name: dataStream.name,
       tags: [{ key: 'data_stream', name: dataStreamLabel }],

@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { getIndices } from './get_indices';
+import { getIndices, responseToItemArray } from './get_indices';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-// import { LegacyApiCaller } from '../../../../../data/public/search/legacy';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 
 export const successfulResponse = {
@@ -28,24 +27,6 @@ export const successfulResponse = {
       name: 'remoteCluster1:bar-01',
       attributes: ['open'],
     },
-    /*
-    {
-      name: 'foo-000001',
-      attributes: ['open', 'hidden'],
-      data_stream: 'foo',
-    },
-
-    {
-      name: 'foo_closed',
-      attributes: ['closed'],
-    },
-
-    {
-      name: 'freeze-index',
-      aliases: ['f-alias'],
-      attributes: ['open', 'frozen'],
-    },
-    */
   ],
   aliases: [
     {
@@ -62,40 +43,6 @@ export const successfulResponse = {
   ],
 };
 
-/*
-export const exceptionResponse = {
-  body: {
-    error: {
-      root_cause: [
-        {
-          type: 'index_not_found_exception',
-          reason: 'no such index',
-          index_uuid: '_na_',
-          'resource.type': 'index_or_alias',
-          'resource.id': 't',
-          index: 't',
-        },
-      ],
-      type: 'transport_exception',
-      reason: 'unable to communicate with remote cluster [cluster_one]',
-      caused_by: {
-        type: 'index_not_found_exception',
-        reason: 'no such index',
-        index_uuid: '_na_',
-        'resource.type': 'index_or_alias',
-        'resource.id': 't',
-        index: 't',
-      },
-    },
-  },
-  status: 500,
-};
-
-export const errorResponse = {
-  statusCode: 400,
-  error: 'Bad Request',
-};
-*/
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
@@ -103,20 +50,6 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   httpClient: {},
   isBeta: false,
 });
-
-/*
-function esClientFactory(search: (params: any) => any): LegacyApiCaller {
-  return {
-    search,
-    msearch: () => ({
-      abort: () => {},
-      ...new Promise((resolve) => resolve({})),
-    }),
-  };
-}
-*/
-
-// const es = esClientFactory(() => successfulResponse);
 
 const http = httpServiceMock.createStartContract();
 http.get.mockResolvedValue(successfulResponse);
@@ -139,63 +72,36 @@ describe('getIndices', () => {
     expect((await getIndices(http, mockIndexPatternCreationType, ',foobar', false)).length).toBe(0);
   });
 
-  it('should trim the input', async () => {
-    let index;
-    // http.get.mockImplementation
-    http.get.mockResolvedValue((params: { index: string }) => {
-      index = params.index;
-    });
-    /*
-
-    const esClient = esClientFactory(
-      jest.fn().mockImplementation((params) => {
-        index = params.index;
-      })
-    );
-    */
-
-    await getIndices(http, mockIndexPatternCreationType, 'kibana          ', false);
-    expect(index).toBe('kibana');
-  });
-
-  it('should use the limit', async () => {
-    let limit;
-    /*
-    const esClient = esClientFactory(
-      jest.fn().mockImplementation((params) => {
-        limit = params.body.aggs.indices.terms.size;
-      })
-    );
-    */
-    await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
-    expect(limit).toBe(10);
+  it('response object to item array', () => {
+    const result = {
+      indices: [
+        {
+          name: 'test_index',
+        },
+      ],
+      aliases: [
+        {
+          name: 'test_alias',
+          indices: [],
+        },
+      ],
+      data_streams: [
+        {
+          name: 'test_data_stream',
+          backing_indices: [],
+          timestamp_field: 'test_timestamp_field',
+        },
+      ],
+    };
+    expect(responseToItemArray(result, mockIndexPatternCreationType)).toMatchSnapshot();
+    expect(responseToItemArray({}, mockIndexPatternCreationType)).toEqual([]);
   });
 
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
-      // const esClient = esClientFactory(() => errorResponse);
-      const result = await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
-      expect(result.length).toBe(0);
-    });
-
-    it('should throw exceptions', async () => {
-      /*
-      const esClient = esClientFactory(() => {
-        throw new Error('Fail');
+      http.get.mockImplementationOnce(() => {
+        throw new Error('Test error');
       });
-      */
-
-      await expect(
-        getIndices(http, mockIndexPatternCreationType, 'kibana', false)
-      ).rejects.toThrow();
-    });
-
-    it('should handle index_not_found_exception errors gracefully', async () => {
-      /*
-      const esClient = esClientFactory(
-        () => new Promise((resolve, reject) => reject(exceptionResponse))
-      );
-      */
       const result = await getIndices(http, mockIndexPatternCreationType, 'kibana', false);
       expect(result.length).toBe(0);
     });

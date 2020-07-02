@@ -27,9 +27,9 @@ export interface MatchedItem {
 }
 
 export interface ResolveIndexResponse {
-  indices: ResolveIndexResponseItemIndex[];
-  aliases: ResolveIndexResponseItemAlias[];
-  data_streams: ResolveIndexResponseItemDataStream[];
+  indices?: ResolveIndexResponseItemIndex[];
+  aliases?: ResolveIndexResponseItemAlias[];
+  data_streams?: ResolveIndexResponseItemDataStream[];
 }
 
 export interface ResolveIndexResponseItem {
