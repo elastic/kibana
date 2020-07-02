@@ -15,7 +15,6 @@ import {
   esDataTypeGeoShape,
   esDataTypeRangeTerm,
   esDataTypeSingle,
-  esDataTypeUnion,
 } from '../../../common/schemas';
 
 export const DEFAULT_DATE_REGEX = RegExp('(?<gte>.+),(?<lte>.+)|(?<value>.+)');
@@ -82,21 +81,6 @@ export const transformListItemToElasticQuery = ({
   }
 };
 
-export const serializeDefault = ({
-  type,
-  value,
-}: {
-  type: Type;
-  value: string;
-}): EsDataTypeUnion | null => {
-  const unionType = { [type]: value };
-  if (esDataTypeUnion.is(unionType)) {
-    return unionType;
-  } else {
-    return null;
-  }
-};
-
 export const serializeGeoShape = ({
   defaultSerializer,
   serializer,
@@ -109,11 +93,11 @@ export const serializeGeoShape = ({
   type: 'geo_shape' | 'shape';
 }): EsDataTypeGeoShape | null => {
   const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value);
+  const parsed = regExpSerializer.exec(value.trim());
 
   // we only support lat/lon for point and represent it as Well Known Text (WKT)
   if (parsed?.groups?.lat != null && parsed?.groups?.lon != null) {
-    const unionType = { [type]: `POINT(${parsed.groups.lon} ${parsed.groups.lat})` };
+    const unionType = { [type]: `POINT (${parsed.groups.lon.trim()} ${parsed.groups.lat.trim()})` };
     if (esDataTypeGeoShape.is(unionType)) {
       return unionType;
     } else {
@@ -121,7 +105,7 @@ export const serializeGeoShape = ({
     }
   } else {
     // This should be in Well Known Text (WKT) at this point so let's return it as is
-    const unionType = { [type]: value };
+    const unionType = { [type]: value.trim() };
     if (esDataTypeGeoShape.is(unionType)) {
       return unionType;
     } else {
@@ -140,15 +124,15 @@ export const serializeGeoPoint = ({
   defaultSerializer: RegExp;
 }): EsDataTypeGeoPoint | null => {
   const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value);
+  const parsed = regExpSerializer.exec(value.trim());
 
   if (parsed?.groups?.lat != null && parsed?.groups?.lon != null) {
     return {
-      geo_point: { lat: parsed.groups.lat, lon: parsed.groups.lon },
+      geo_point: { lat: parsed.groups.lat.trim(), lon: parsed.groups.lon.trim() },
     };
   } else {
     // This might be in Well Known Text (WKT) so let's return it as is
-    return { geo_point: value };
+    return { geo_point: value.trim() };
   }
 };
 
@@ -162,21 +146,21 @@ export const serializeIpRange = ({
   defaultSerializer: RegExp;
 }): EsDataTypeRangeTerm | null => {
   const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value);
+  const parsed = regExpSerializer.exec(value.trim());
 
   if (parsed?.groups?.lte != null && parsed?.groups?.gte != null) {
     return {
-      ip_range: { gte: parsed.groups.gte, lte: parsed.groups.lte },
+      ip_range: { gte: parsed.groups.gte.trim(), lte: parsed.groups.lte.trim() },
     };
   } else if (parsed?.groups?.value != null) {
     // This is a CIDR string based on the serializer involving value such as (?<value>.+)
     if (parsed.groups.value.includes('/')) {
       return {
-        ip_range: parsed.groups.value,
+        ip_range: parsed.groups.value.trim(),
       };
     } else {
       return {
-        ip_range: { gte: parsed.groups.value, lte: parsed.groups.value },
+        ip_range: { gte: parsed.groups.value.trim(), lte: parsed.groups.value.trim() },
       };
     }
   } else {
@@ -196,11 +180,11 @@ export const serializeRanges = ({
   defaultSerializer: RegExp;
 }): EsDataTypeRangeTerm | null => {
   const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value);
+  const parsed = regExpSerializer.exec(value.trim());
 
   if (parsed?.groups?.lte != null && parsed?.groups?.gte != null) {
     const unionType = {
-      [type]: { gte: parsed.groups.gte, lte: parsed.groups.lte },
+      [type]: { gte: parsed.groups.gte.trim(), lte: parsed.groups.lte.trim() },
     };
     if (esDataTypeRangeTerm.is(unionType)) {
       return unionType;
@@ -209,7 +193,7 @@ export const serializeRanges = ({
     }
   } else if (parsed?.groups?.value != null) {
     const unionType = {
-      [type]: { gte: parsed.groups.value, lte: parsed.groups.value },
+      [type]: { gte: parsed.groups.value.trim(), lte: parsed.groups.value.trim() },
     };
     if (esDataTypeRangeTerm.is(unionType)) {
       return unionType;
@@ -248,10 +232,10 @@ export const serializeSingleValue = ({
   defaultSerializer: RegExp;
 }): EsDataTypeSingle | null => {
   const regExpSerializer = serializer != null ? RegExp(serializer) : defaultSerializer;
-  const parsed = regExpSerializer.exec(value);
+  const parsed = regExpSerializer.exec(value.trim());
 
   if (parsed?.groups?.value != null) {
-    const unionType = { [type]: `${parsed.groups.value}` };
+    const unionType = { [type]: `${parsed.groups.value.trim()}` };
     if (esDataTypeSingle.is(unionType)) {
       return unionType;
     } else {
