@@ -7,6 +7,8 @@
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -42,13 +44,13 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
     onChange(newValue);
   };
 
-  let renderCallout;
+  let calloutContent;
   if (error) {
-    renderCallout = (
+    calloutContent = (
       <Fragment>
         <EuiSpacer size="m" />
-
         <EuiCallOut
+          data-test-subj="policiesErrorCallout"
           size="s"
           iconType="help"
           color="warning"
@@ -59,7 +61,18 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
                 defaultMessage="Couldn't load existing policies."
               />
 
-              <EuiButtonIcon size="s" color="warning" onClick={sendRequest} iconType="refresh" />
+              <EuiButtonIcon
+                size="s"
+                color="warning"
+                onClick={sendRequest}
+                iconType="refresh"
+                aria-label={i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.deletePhase.reloadPoliciesLabel',
+                  {
+                    defaultMessage: 'Reload policies',
+                  }
+                )}
+              />
             </Fragment>
           }
         >
@@ -71,10 +84,11 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
       </Fragment>
     );
   } else if (data.length === 0) {
-    renderCallout = (
+    calloutContent = (
       <Fragment>
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="noPoliciesCallout"
           size="s"
           iconType="help"
           color="warning"
@@ -93,10 +107,11 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
       </Fragment>
     );
   } else if (value && !data.includes(value)) {
-    renderCallout = (
+    calloutContent = (
       <Fragment>
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="customPolicyCallout"
           size="s"
           iconType="help"
           color="warning"
@@ -133,7 +148,7 @@ export const SnapshotPolicies: React.FunctionComponent<SnapshotPoliciesProps> = 
         onChange={onComboChange}
         noSuggestions={!!(error || data.length === 0)}
       />
-      {renderCallout}
+      {calloutContent}
     </Fragment>
   );
 };

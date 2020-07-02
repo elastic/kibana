@@ -74,6 +74,15 @@ describe('<EditPolicy />', () => {
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
 
+    test('wait for snapshot field should display a callout when the input is not an existing policy', async () => {
+      const { actions } = testBed;
+
+      await actions.setWaitForSnapshotPolicy('my_custom_policy');
+      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
+      expect(testBed.find('customPolicyCallout').exists()).toBeTruthy();
+    });
+
     test('wait for snapshot field should delete action if field is empty', async () => {
       const { actions } = testBed;
 
@@ -96,6 +105,32 @@ describe('<EditPolicy />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    test('wait for snapshot field should display a callout when there are no snapshot policies', async () => {
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
+      expect(testBed.find('noPoliciesCallout').exists()).toBeTruthy();
+    });
+
+    test('wait for snapshot field should display a callout when there is an error loading snapshot policies', async () => {
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([], { status: 500, body: 'error' });
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
+      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeTruthy();
     });
   });
 });
