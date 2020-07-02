@@ -5,15 +5,18 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { RawTagWithId } from '../../../common';
-
-export type TagView = Pick<RawTagWithId, 'color' | 'title'>;
+import { Tag, TagView } from '../tag/tag';
 
 export interface Props {
-  tag: TagView;
+  tags: TagView[];
 }
 
-export const Tag: React.FC<Props> = ({ tag }) => {
-  return <EuiBadge color={tag.color}>{tag.title}</EuiBadge>;
+export const TagList: React.FC<Props> = ({ tags }) => {
+  return (
+    <>
+      {tags.map((tag) => (
+        <Tag tag={tag} />
+      ))}
+    </>
+  );
 };
