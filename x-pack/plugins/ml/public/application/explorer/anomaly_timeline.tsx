@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DRAG_SELECT_ACTION, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { DRAG_SELECT_ACTION, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddToDashboardControl } from './add_to_dashboard_control';
 import { useMlKibana } from '../contexts/kibana';
 import { TimeBuckets } from '../util/time_buckets';
@@ -328,7 +328,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                     timeBuckets={timeBuckets}
                     swimlaneCellClick={swimlaneCellClick}
                     swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
-                    swimlaneType={'viewBy'}
+                    swimlaneType={SWIMLANE_TYPE.VIEW_BY}
                     selection={selectedCells}
                     swimlaneRenderDoneListener={swimlaneRenderDoneListener}
                     onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
