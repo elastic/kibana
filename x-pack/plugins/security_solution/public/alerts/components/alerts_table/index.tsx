@@ -333,6 +333,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     initializeTimeline({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      defaultModel: alertsDefaultModel,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       loadingText: i18n.LOADING_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,

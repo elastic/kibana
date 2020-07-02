@@ -138,8 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/57377
-    describe.skip('no advanced_settings privileges', function () {
+    describe('no advanced_settings privileges', function () {
       before(async () => {
         await security.role.create('no_advanced_settings_privileges_role', {
           elasticsearch: {

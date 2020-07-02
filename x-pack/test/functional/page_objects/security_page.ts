@@ -315,6 +315,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getElasticsearchUsers() {
       const users = [];
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-100-rows');
       for (const user of await testSubjects.findAll('userRow')) {
         const fullnameElement = await user.findByTestSubject('userRowFullName');
         const usernameElement = await user.findByTestSubject('userRowUserName');
@@ -339,6 +341,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getElasticsearchRoles() {
       const roles = [];
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click('tablePagination-100-rows');
       for (const role of await testSubjects.findAll('roleRow')) {
         const [rolename, reserved, deprecated] = await Promise.all([
           role.findByTestSubject('roleRowName').then((el) => el.getVisibleText()),

@@ -27,9 +27,15 @@ describe('ManagementService', () => {
     managementService = new ManagementSectionsService();
   });
 
+  const capabilities = {
+    navLinks: {},
+    catalogue: {},
+    management: {},
+  };
+
   test('Provides default sections', () => {
     managementService.setup();
-    const start = managementService.start();
+    const start = managementService.start({ capabilities });
 
     expect(start.getAllSections().length).toEqual(6);
     expect(start.getSection(ManagementSectionId.Ingest)).toBeDefined();
@@ -48,12 +54,46 @@ describe('ManagementService', () => {
     expect(setup.getSection('test-section')).not.toBeUndefined();
 
     // Start phase:
-    const start = managementService.start();
+    const start = managementService.start({ capabilities });
 
     expect(start.getSectionsEnabled().length).toEqual(7);
 
     testSection.disable();
 
     expect(start.getSectionsEnabled().length).toEqual(6);
+  });
+
+  test('Disables items that are not allowed by Capabilities', () => {
+    // Setup phase:
+    const setup = managementService.setup();
+    const testSection = setup.register({ id: 'test-section', title: 'Test Section' });
+    testSection.registerApp({ id: 'test-app-1', title: 'Test App 1', mount: jest.fn() });
+    testSection.registerApp({ id: 'test-app-2', title: 'Test App 2', mount: jest.fn() });
+    testSection.registerApp({ id: 'test-app-3', title: 'Test App 3', mount: jest.fn() });
+
+    expect(setup.getSection('test-section')).not.toBeUndefined();
+
+    // Start phase:
+    managementService.start({
+      capabilities: {
+        navLinks: {},
+        catalogue: {},
+        management: {
+          ['test-section']: {
+            'test-app-1': true,
+            'test-app-2': false,
+            // test-app-3 intentionally left undefined. Should be enabled by default
+          },
+        },
+      },
+    });
+
+    expect(testSection.apps).toHaveLength(3);
+    expect(testSection.getAppsEnabled().map((app) => app.id)).toMatchInlineSnapshot(`
+      Array [
+        "test-app-1",
+        "test-app-3",
+      ]
+    `);
   });
 });
