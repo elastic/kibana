@@ -239,11 +239,15 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
-      if (this.shouldEnablePlugin(pluginName, pluginEnableStatuses)) {
+      const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
+
+      if (pluginEnablement.enabled) {
         this.pluginsSystem.addPlugin(plugin);
       } else if (isEnabled) {
         this.log.info(
-          `Plugin "${pluginName}" has been disabled since some of its direct or transitive dependencies are missing or disabled.`
+          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing or disabled: [${pluginEnablement.missingDependencies.join(
+            ', '
+          )}]`
         );
       } else {
         this.log.info(`Plugin "${pluginName}" is disabled.`);
@@ -257,17 +261,34 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     pluginName: PluginName,
     pluginEnableStatuses: Map<PluginName, { plugin: PluginWrapper; isEnabled: boolean }>,
     parents: PluginName[] = []
-  ): boolean {
+  ): { enabled: true } | { enabled: false; missingDependencies: string[] } {
     const pluginInfo = pluginEnableStatuses.get(pluginName);
-    return (
-      pluginInfo !== undefined &&
-      pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredPlugins
-        .filter((dep) => !parents.includes(dep))
-        .every((dependencyName) =>
-          this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
-        )
-    );
+
+    if (pluginInfo === undefined || !pluginInfo.isEnabled) {
+      return {
+        enabled: false,
+        missingDependencies: [],
+      };
+    }
+
+    const missingDependencies = pluginInfo.plugin.requiredPlugins
+      .filter((dep) => !parents.includes(dep))
+      .filter(
+        (dependencyName) =>
+          !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
+            .enabled
+      );
+
+    if (missingDependencies.length === 0) {
+      return {
+        enabled: true,
+      };
+    }
+
+    return {
+      enabled: false,
+      missingDependencies,
+    };
   }
 
   private registerPluginStaticDirs(deps: PluginsServiceSetupDeps) {
