@@ -15,6 +15,14 @@ export const EMPTY_MESSAGE = i18n.translate('xpack.securitySolution.pages.common
     'To begin using security information and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. Let’s do that now!',
 });
 
+export const OVERVIEW_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.pages.common.overviewEmptyMessage',
+  {
+    defaultMessage:
+      'To begin using security information and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. For additional information, you can view our ',
+  }
+);
+
 export const EMPTY_ACTION_PRIMARY = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionPrimary',
   {

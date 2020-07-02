@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 import * as i18nCommon from '../../../common/translations';
 import { EmptyPage } from '../../../common/components/empty_page';
 import { useKibana } from '../../../common/lib/kibana';
@@ -28,17 +30,25 @@ const OverviewEmptyComponent: React.FC = () => {
       actionPrimaryIcon="gear"
       actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
       actionPrimaryUrl={`${basePath}${ADD_DATA_PATH}`}
-      actionSecondaryIcon="popout"
-      actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
-      actionSecondaryTarget="_blank"
-      actionSecondaryUrl={docLinks.links.siem.gettingStarted}
-      actionTertiaryIcon="gear"
-      actionTertiaryLabel={i18nCommon.EMPTY_ACTION_ENDPOINT}
-      actionTertiaryUrl={ingestUrl}
-      actionTertiaryOnClick={handleOnClick}
-      actionTertiaryFill={true}
+      actionPrimaryFill={false}
+      actionSecondaryIcon="gear"
+      actionSecondaryLabel={i18nCommon.EMPTY_ACTION_ENDPOINT}
+      actionSecondaryUrl={ingestUrl}
+      actionSecondaryOnClick={handleOnClick}
       data-test-subj="empty-page"
-      message={i18nCommon.EMPTY_MESSAGE}
+      message={
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.emptyMessage"
+            defaultMessage={i18nCommon.OVERVIEW_EMPTY_MESSAGE}
+          />
+          <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
+            {i18n.translate('xpack.securitySolution.overview.gettingStartedGuide', {
+              defaultMessage: 'getting started guide.',
+            })}
+          </EuiLink>
+        </>
+      }
       title={i18nCommon.EMPTY_TITLE}
     />
   ) : (
@@ -46,12 +56,21 @@ const OverviewEmptyComponent: React.FC = () => {
       actionPrimaryIcon="gear"
       actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
       actionPrimaryUrl={`${basePath}${ADD_DATA_PATH}`}
-      actionSecondaryIcon="popout"
-      actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
-      actionSecondaryTarget="_blank"
-      actionSecondaryUrl={docLinks.links.siem.gettingStarted}
+      actionPrimaryFill={true}
       data-test-subj="empty-page"
-      message={i18nCommon.EMPTY_MESSAGE}
+      message={
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.emptyMessage"
+            defaultMessage={i18nCommon.OVERVIEW_EMPTY_MESSAGE}
+          />
+          <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
+            {i18n.translate('xpack.securitySolution.overview.gettingStartedGuide', {
+              defaultMessage: 'getting started guide.',
+            })}
+          </EuiLink>
+        </>
+      }
       title={i18nCommon.EMPTY_TITLE}
     />
   );
