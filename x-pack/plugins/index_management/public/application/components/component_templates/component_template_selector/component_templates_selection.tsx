@@ -21,7 +21,7 @@ interface DraggableLocation {
 interface Props {
   components: ComponentTemplateListItem[];
   onReorder: (components: ComponentTemplateListItem[]) => void;
-  listItemProps?: Omit<ComponentTemplatesListItemProps, 'component'>;
+  listItemProps: Omit<ComponentTemplatesListItemProps, 'component'>;
 }
 
 export const ComponentTemplatesSelection = ({ components, onReorder, listItemProps }: Props) => {
