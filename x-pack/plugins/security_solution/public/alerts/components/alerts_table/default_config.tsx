@@ -200,7 +200,8 @@ interface AlertActionArgs {
   openAddExceptionModal: ({
     exceptionListType,
     alertData,
-    ruleExceptionLists,
+    ruleName,
+    ruleId,
   }: AddExceptionOnClick) => void;
 }
 
@@ -328,7 +329,6 @@ export const getAlertActions = ({
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
         const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
         const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
-        console.log(ruleId);
         if (ruleId !== undefined && ruleId.length > 0) {
           openAddExceptionModal({
             ruleName: ruleNameValue ? ruleNameValue[0] : '',

@@ -24,7 +24,6 @@ import {
 import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import {
   ExceptionListItemSchema,
-  ExceptionListSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
@@ -51,7 +50,6 @@ import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_e
 export interface AddExceptionOnClick {
   ruleName: string;
   ruleId: string;
-  ruleExceptionLists: ExceptionListSchema[] | undefined;
   exceptionListType: 'endpoint' | 'detection';
   alertData: TimelineNonEcsData[] | undefined;
 }
