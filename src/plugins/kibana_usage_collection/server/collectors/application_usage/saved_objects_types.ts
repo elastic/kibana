@@ -35,10 +35,12 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      dynamic: false,
       properties: {
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
+        // Disabled the mapping of these fields since they are not searched and we need to reduce the amount of indexed fields (#43673)
+        // appId: { type: 'keyword' },
+        // numberOfClicks: { type: 'long' },
+        // minutesOnScreen: { type: 'float' },
       },
     },
   });
@@ -48,11 +50,13 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      dynamic: false,
       properties: {
         timestamp: { type: 'date' },
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
+        // Disabled the mapping of these fields since they are not searched and we need to reduce the amount of indexed fields (#43673)
+        // appId: { type: 'keyword' },
+        // numberOfClicks: { type: 'long' },
+        // minutesOnScreen: { type: 'float' },
       },
     },
   });
