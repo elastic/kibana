@@ -122,6 +122,7 @@ export const MlPopover = React.memo(() => {
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        repositionOnScroll
       >
         <UpgradeContents />
       </EuiPopover>
@@ -147,6 +148,7 @@ export const MlPopover = React.memo(() => {
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        repositionOnScroll
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
           <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
