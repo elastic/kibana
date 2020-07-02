@@ -8,7 +8,7 @@ import React, { useContext, useState, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { TransformPivotConfig } from '../../../../common';
 import {
@@ -16,35 +16,27 @@ import {
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-import { EditTransformFlyout } from '../edit_transform_flyout';
-
-interface EditActionProps {
+interface EditButtonProps {
   config: TransformPivotConfig;
+  onClick: (config: TransformPivotConfig) => void;
 }
-
-export const EditAction: FC<EditActionProps> = ({ config }) => {
+export const EditButton: FC<EditButtonProps> = ({ config, onClick }) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
-
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const closeFlyout = () => setIsFlyoutVisible(false);
-  const showFlyout = () => setIsFlyoutVisible(true);
 
   const buttonEditText = i18n.translate('xpack.transform.transformList.editActionName', {
     defaultMessage: 'Edit',
   });
 
   const editButton = (
-    <EuiButtonEmpty
+    <EuiLink
       data-test-subj="transformActionEdit"
-      size="xs"
-      color="text"
+      color={!canCreateTransform ? 'subdued' : 'text'}
       disabled={!canCreateTransform}
-      iconType="copy"
-      onClick={showFlyout}
+      onClick={!canCreateTransform ? undefined : () => onClick(config)}
       aria-label={buttonEditText}
     >
-      {buttonEditText}
-    </EuiButtonEmpty>
+      <EuiIcon type="pencil" /> {buttonEditText}
+    </EuiLink>
   );
 
   if (!canCreateTransform) {
@@ -57,10 +49,22 @@ export const EditAction: FC<EditActionProps> = ({ config }) => {
     );
   }
 
-  return (
-    <>
-      {editButton}
-      {isFlyoutVisible && <EditTransformFlyout closeFlyout={closeFlyout} config={config} />}
-    </>
-  );
+  return editButton;
+};
+
+export const useEditAction = () => {
+  const [config, setConfig] = useState<TransformPivotConfig>();
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const closeFlyout = () => setIsFlyoutVisible(false);
+  const showFlyout = (newConfig: TransformPivotConfig) => {
+    setConfig(newConfig);
+    setIsFlyoutVisible(true);
+  };
+
+  return {
+    config,
+    closeFlyout,
+    isFlyoutVisible,
+    showFlyout,
+  };
 };

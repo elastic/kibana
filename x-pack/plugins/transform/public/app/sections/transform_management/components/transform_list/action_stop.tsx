@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -17,12 +17,11 @@ import {
 } from '../../../../lib/authorization';
 import { useStopTransforms } from '../../../../hooks';
 
-interface StopActionProps {
+interface StopButtonProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-
-export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
+export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const stopTransforms = useStopTransforms();
@@ -57,18 +56,17 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
     stopTransforms(items);
   };
 
+  const disabled = forceDisable === true || !canStartStopTransform || stoppedTransform === true;
+
   const stopButton = (
-    <EuiButtonEmpty
+    <EuiLink
       data-test-subj="transformActionStop"
-      size="xs"
-      color="text"
-      disabled={forceDisable === true || !canStartStopTransform || stoppedTransform === true}
-      iconType="stop"
+      color={disabled ? 'subdued' : 'text'}
       onClick={handleStop}
       aria-label={buttonStopText}
     >
-      {buttonStopText}
-    </EuiButtonEmpty>
+      <EuiIcon type="stop" /> {buttonStopText}
+    </EuiLink>
   );
   if (!canStartStopTransform || stoppedTransform) {
     return (

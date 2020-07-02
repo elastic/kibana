@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useContext, useMemo, useState } from 'react';
+import React, { FC, useContext, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EUI_MODAL_CONFIRM_BUTTON,
-  EuiButtonEmpty,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
@@ -26,50 +27,20 @@ import {
 } from '../../../../lib/authorization';
 import { TransformListRow } from '../../../../common';
 
-interface DeleteActionProps {
+interface DeleteButtonProps {
   items: TransformListRow[];
   forceDisable?: boolean;
+  onClick: (items: TransformListRow[]) => void;
 }
 
 const transformCanNotBeDeleted = (i: TransformListRow) =>
   ![TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED].includes(i.stats.state);
 
-export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => {
+export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onClick }) => {
   const isBulkAction = items.length > 1;
 
   const disabled = items.some(transformCanNotBeDeleted);
-  const shouldForceDelete = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
-    [items]
-  );
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
-  const deleteTransforms = useDeleteTransforms();
-  const {
-    userCanDeleteIndex,
-    deleteDestIndex,
-    indexPatternExists,
-    deleteIndexPattern,
-    toggleDeleteIndex,
-    toggleDeleteIndexPattern,
-  } = useDeleteIndexAndTargetIndex(items);
-
-  const [isModalVisible, setModalVisible] = useState(false);
-
-  const closeModal = () => setModalVisible(false);
-  const deleteAndCloseModal = () => {
-    setModalVisible(false);
-
-    const shouldDeleteDestIndex = userCanDeleteIndex && deleteDestIndex;
-    const shouldDeleteDestIndexPattern =
-      userCanDeleteIndex && indexPatternExists && deleteIndexPattern;
-    // if we are deleting multiple transforms, then force delete all if at least one item has failed
-    // else, force delete only when the item user picks has failed
-    const forceDelete = isBulkAction
-      ? shouldForceDelete
-      : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
-    deleteTransforms(items, shouldDeleteDestIndex, shouldDeleteDestIndexPattern, forceDelete);
-  };
-  const openModal = () => setModalVisible(true);
 
   const buttonDeleteText = i18n.translate('xpack.transform.transformList.deleteActionName', {
     defaultMessage: 'Delete',
@@ -86,6 +57,67 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
       defaultMessage: 'Stop the transform in order to delete it.',
     }
   );
+
+  const buttonDisabled = forceDisable === true || disabled || !canDeleteTransform;
+  let deleteButton = (
+    <EuiLink
+      data-test-subj="transformActionDelete"
+      color={buttonDisabled ? 'subdued' : 'text'}
+      disabled={buttonDisabled}
+      onClick={buttonDisabled ? undefined : () => onClick(items)}
+      aria-label={buttonDeleteText}
+    >
+      <EuiIcon type="trash" /> {buttonDeleteText}
+    </EuiLink>
+  );
+
+  if (disabled || !canDeleteTransform) {
+    let content;
+    if (disabled) {
+      content = isBulkAction ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
+    } else {
+      content = createCapabilityFailureMessage('canDeleteTransform');
+    }
+
+    deleteButton = (
+      <EuiToolTip position="top" content={content}>
+        {deleteButton}
+      </EuiToolTip>
+    );
+  }
+
+  return deleteButton;
+};
+
+type DeleteButtonModalProps = Pick<
+  DeleteAction,
+  | 'closeModal'
+  | 'deleteAndCloseModal'
+  | 'deleteDestIndex'
+  | 'deleteIndexPattern'
+  | 'indexPatternExists'
+  | 'isModalVisible'
+  | 'items'
+  | 'shouldForceDelete'
+  | 'toggleDeleteIndex'
+  | 'toggleDeleteIndexPattern'
+  | 'userCanDeleteIndex'
+>;
+export const DeleteButtonModal: FC<DeleteButtonModalProps> = ({
+  closeModal,
+  deleteAndCloseModal,
+  deleteDestIndex,
+  deleteIndexPattern,
+  indexPatternExists,
+  isModalVisible,
+  items,
+  shouldForceDelete,
+  toggleDeleteIndex,
+  toggleDeleteIndexPattern,
+  userCanDeleteIndex,
+}) => {
+  const isBulkAction = items.length > 1;
+
   const bulkDeleteModalTitle = i18n.translate(
     'xpack.transform.transformList.bulkDeleteModalTitle',
     {
@@ -203,42 +235,12 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
     </>
   );
 
-  let deleteButton = (
-    <EuiButtonEmpty
-      data-test-subj="transformActionDelete"
-      size="xs"
-      color="text"
-      disabled={forceDisable === true || disabled || !canDeleteTransform}
-      iconType="trash"
-      onClick={openModal}
-      aria-label={buttonDeleteText}
-    >
-      {buttonDeleteText}
-    </EuiButtonEmpty>
-  );
-
-  if (disabled || !canDeleteTransform) {
-    let content;
-    if (disabled) {
-      content = isBulkAction ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
-    } else {
-      content = createCapabilityFailureMessage('canDeleteTransform');
-    }
-
-    deleteButton = (
-      <EuiToolTip position="top" content={content}>
-        {deleteButton}
-      </EuiToolTip>
-    );
-  }
-
   return (
-    <Fragment>
-      {deleteButton}
+    <>
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={isBulkAction ? bulkDeleteModalTitle : deleteModalTitle}
+            title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
             onCancel={closeModal}
             onConfirm={deleteAndCloseModal}
             cancelButtonText={i18n.translate(
@@ -260,6 +262,69 @@ export const DeleteAction: FC<DeleteActionProps> = ({ items, forceDisable }) => 
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
-    </Fragment>
+    </>
   );
+};
+
+type DeleteAction = ReturnType<typeof useDeleteAction>;
+export const useDeleteAction = () => {
+  const deleteTransforms = useDeleteTransforms();
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [items, setItems] = useState<TransformListRow[]>([]);
+
+  const isBulkAction = items.length > 1;
+  const shouldForceDelete = useMemo(
+    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
+    [items]
+  );
+
+  const closeModal = () => setModalVisible(false);
+
+  const {
+    userCanDeleteIndex,
+    deleteDestIndex,
+    indexPatternExists,
+    deleteIndexPattern,
+    toggleDeleteIndex,
+    toggleDeleteIndexPattern,
+  } = useDeleteIndexAndTargetIndex(items);
+
+  const deleteAndCloseModal = () => {
+    setModalVisible(false);
+
+    const shouldDeleteDestIndex = userCanDeleteIndex && deleteDestIndex;
+    const shouldDeleteDestIndexPattern =
+      userCanDeleteIndex && indexPatternExists && deleteIndexPattern;
+    // if we are deleting multiple transforms, then force delete all if at least one item has failed
+    // else, force delete only when the item user picks has failed
+    const forceDelete = isBulkAction
+      ? shouldForceDelete
+      : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
+    deleteTransforms(items, shouldDeleteDestIndex, shouldDeleteDestIndexPattern, forceDelete);
+  };
+
+  const openModal = (newItems: TransformListRow[]) => {
+    // EUI issue: Might trigger twice, one time as an array,
+    // one time as a single object. See https://github.com/elastic/eui/issues/3679
+    if (Array.isArray(newItems)) {
+      setItems(newItems);
+      setModalVisible(true);
+    }
+  };
+
+  return {
+    closeModal,
+    deleteAndCloseModal,
+    deleteDestIndex,
+    deleteIndexPattern,
+    indexPatternExists,
+    isModalVisible,
+    items,
+    openModal,
+    shouldForceDelete,
+    toggleDeleteIndex,
+    toggleDeleteIndexPattern,
+    userCanDeleteIndex,
+  };
 };

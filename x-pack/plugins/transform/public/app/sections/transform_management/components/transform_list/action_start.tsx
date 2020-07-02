@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useContext, useState } from 'react';
+import React, { FC, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiConfirmModal,
+  EuiIcon,
+  EuiLink,
   EuiOverlayMask,
   EuiToolTip,
   EUI_MODAL_CONFIRM_BUTTON,
@@ -23,24 +24,14 @@ import {
 } from '../../../../lib/authorization';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
-interface StartActionProps {
+interface StartButtonProps {
   items: TransformListRow[];
   forceDisable?: boolean;
+  onClick: (items: TransformListRow[]) => void;
 }
-
-export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
-  const isBulkAction = items.length > 1;
+export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick }) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
-  const startTransforms = useStartTransforms();
-
-  const [isModalVisible, setModalVisible] = useState(false);
-
-  const closeModal = () => setModalVisible(false);
-  const startAndCloseModal = () => {
-    setModalVisible(false);
-    startTransforms(items);
-  };
-  const openModal = () => setModalVisible(true);
+  const isBulkAction = items.length > 1;
 
   const buttonStartText = i18n.translate('xpack.transform.transformList.startActionName', {
     defaultMessage: 'Start',
@@ -87,24 +78,11 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     );
   }
 
-  const actionIsDisabled = !canStartStopTransform || completedBatchTransform || startedTransform;
+  const actionIsDisabled =
+    !canStartStopTransform || completedBatchTransform || startedTransform || items.length === 0;
 
-  let startButton = (
-    <EuiButtonEmpty
-      data-test-subj="transformActionStart"
-      size="xs"
-      color="text"
-      disabled={forceDisable === true || actionIsDisabled}
-      iconType="play"
-      onClick={openModal}
-      aria-label={buttonStartText}
-    >
-      {buttonStartText}
-    </EuiButtonEmpty>
-  );
-
-  if (actionIsDisabled) {
-    let content;
+  let content: string | undefined;
+  if (actionIsDisabled && items.length > 0) {
     if (!canStartStopTransform) {
       content = createCapabilityFailureMessage('canStartStopTransform');
     } else if (completedBatchTransform) {
@@ -112,13 +90,40 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
     } else if (startedTransform) {
       content = startedTransformMessage;
     }
+  }
 
-    startButton = (
+  const disabled = forceDisable === true || actionIsDisabled;
+
+  const startButton = (
+    <EuiLink
+      data-test-subj="transformActionStart"
+      color={disabled ? 'subdued' : 'text'}
+      onClick={disabled ? undefined : () => onClick(items)}
+    >
+      <EuiIcon type="play" /> {buttonStartText}
+    </EuiLink>
+  );
+  if (disabled && content !== undefined) {
+    return (
       <EuiToolTip position="top" content={content}>
         {startButton}
       </EuiToolTip>
     );
   }
+  return startButton;
+};
+
+type StartButtonModalProps = Pick<
+  StartAction,
+  'closeModal' | 'isModalVisible' | 'items' | 'startAndCloseModal'
+>;
+export const StartButtonModal: FC<StartButtonModalProps> = ({
+  closeModal,
+  isModalVisible,
+  items,
+  startAndCloseModal,
+}) => {
+  const isBulkAction = items.length > 1;
 
   const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {
     defaultMessage: 'Start {count} {count, plural, one {transform} other {transforms}}?',
@@ -130,8 +135,7 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
   });
 
   return (
-    <Fragment>
-      {startButton}
+    <>
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -163,6 +167,38 @@ export const StartAction: FC<StartActionProps> = ({ items, forceDisable }) => {
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
-    </Fragment>
+    </>
   );
+};
+
+type StartAction = ReturnType<typeof useStartAction>;
+export const useStartAction = () => {
+  const startTransforms = useStartTransforms();
+
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [items, setItems] = useState<TransformListRow[]>([]);
+
+  const closeModal = () => setModalVisible(false);
+
+  const startAndCloseModal = () => {
+    setModalVisible(false);
+    startTransforms(items);
+  };
+
+  const openModal = (newItems: TransformListRow[]) => {
+    // EUI issue: Might trigger twice, one time as an array,
+    // one time as a single object. See https://github.com/elastic/eui/issues/3679
+    if (Array.isArray(newItems)) {
+      setItems(newItems);
+      setModalVisible(true);
+    }
+  };
+
+  return {
+    closeModal,
+    isModalVisible,
+    items,
+    openModal,
+    startAndCloseModal,
+  };
 };

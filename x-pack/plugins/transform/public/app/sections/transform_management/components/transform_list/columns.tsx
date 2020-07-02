@@ -30,7 +30,7 @@ import {
   TransformStats,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
-import { getActions } from './actions';
+import { useActions } from './actions';
 
 enum STATE_COLOR {
   aborting = 'warning',
@@ -64,12 +64,12 @@ export const getTaskStateBadge = (
   );
 };
 
-export const getColumns = (
+export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformSelection: TransformListRow[]
 ) => {
-  const actions = getActions({ forceDisable: transformSelection.length > 0 });
+  const { actions, modals } = useActions({ forceDisable: transformSelection.length > 0 });
 
   function toggleDetails(item: TransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -228,5 +228,5 @@ export const getColumns = (
     },
   ];
 
-  return columns;
+  return { columns, modals };
 };
