@@ -6,17 +6,19 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
 import {
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageRequestSchema,
-  DeletePackageRequestSchema,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
+} from '../../../common';
+import {
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageRequestSchema,
+  DeletePackageRequestSchema,
 } from '../../types';
 import {
   getCategories,

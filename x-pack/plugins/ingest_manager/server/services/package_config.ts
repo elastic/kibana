@@ -10,6 +10,7 @@ import {
   PackageConfigInput,
   PackageConfigInputStream,
   PackageInfo,
+  ListWithKuery,
   packageToPackageConfig,
   isPackageLimited,
   doesAgentConfigAlreadyIncludePackage,
@@ -18,9 +19,9 @@ import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
   NewPackageConfig,
   PackageConfig,
-  ListWithKuery,
   PackageConfigSOAttributes,
   RegistryPackage,
+  CallESAsCurrentUser,
 } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';

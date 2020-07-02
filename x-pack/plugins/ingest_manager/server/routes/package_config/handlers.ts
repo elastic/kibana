@@ -7,7 +7,7 @@ import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
 import { appContextService, packageConfigService } from '../../services';
-import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
+import { getPackageInfo } from '../../services/epm/packages';
 import {
   GetPackageConfigsRequestSchema,
   GetOnePackageConfigRequestSchema,
