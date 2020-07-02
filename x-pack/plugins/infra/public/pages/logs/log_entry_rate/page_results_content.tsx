@@ -149,7 +149,10 @@ export const LogEntryRateResultsContent: React.FunctionComponent<LogEntryRateRes
   ]);
 
   const isFirstUse = useMemo(
-    () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
+    () =>
+      ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
+        setupStatus.type === 'succeeded') &&
+      !hasResults,
     [hasResults, setupStatus]
   );
 
