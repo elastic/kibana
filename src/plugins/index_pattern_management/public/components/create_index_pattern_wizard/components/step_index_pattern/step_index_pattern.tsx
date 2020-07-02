@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
