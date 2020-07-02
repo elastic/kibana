@@ -28,7 +28,7 @@
           "application_usage_transactional": "965839e75f809fefe04f92dc4d99722a",
           "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
           "fleet-agent-events": "3231653fafe4ef3196fe3b32ab774bf2",
-          "ingest-datasources": "2346514df03316001d56ed4c8d46fa94",
+          "ingest-package-configs": "2346514df03316001d56ed4c8d46fa94",
           "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
           "inventory-view": "5299b67717e96502c77babf1c16fd4d3",
           "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
@@ -1799,7 +1799,7 @@
         },
         "ingest-agent-configs": {
           "properties": {
-            "datasources": {
+            "package_configs": {
               "type": "keyword"
             },
             "description": {
@@ -1829,12 +1829,12 @@
             "updated_by": {
               "type": "keyword"
             },
-            "updated_on": {
+            "updated_at": {
               "type": "keyword"
             }
           }
         },
-        "ingest-datasources": {
+        "ingest-package-configs": {
           "properties": {
             "config_id": {
               "type": "keyword"
