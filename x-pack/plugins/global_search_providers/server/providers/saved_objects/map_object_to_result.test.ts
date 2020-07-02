@@ -14,11 +14,6 @@ const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
     namespaceType: 'single',
     mappings: { properties: {} },
     ...props,
-    management: {
-      defaultSearchField: 'field',
-      getInAppUrl: (obj) => ({ path: `/object/${obj.id}`, uiCapabilitiesPath: '' }),
-      ...props.management,
-    },
   };
 };
 
@@ -64,6 +59,53 @@ describe('mapToResult', () => {
       url: '/dashboard/dash1',
       score: 42,
     });
+  });
+
+  it('throws if the type do not have management information', () => {
+    const object = createObject(
+      { id: 'dash1', type: 'dashboard', score: 42 },
+      { title: 'My dashboard' }
+    );
+
+    expect(() => {
+      mapToResult(
+        object,
+        createType({
+          name: 'dashboard',
+          management: {
+            getInAppUrl: (obj) => ({ path: `/dashboard/${obj.id}`, uiCapabilitiesPath: '' }),
+          },
+        })
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Trying to map an object from a type without management metadata"`
+    );
+
+    expect(() => {
+      mapToResult(
+        object,
+        createType({
+          name: 'dashboard',
+          management: {
+            defaultSearchField: 'title',
+          },
+        })
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Trying to map an object from a type without management metadata"`
+    );
+
+    expect(() => {
+      mapToResult(
+        object,
+        createType({
+          name: 'dashboard',
+          management: undefined,
+        })
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Trying to map an object from a type without management metadata"`
+    );
   });
 });
 

@@ -19,9 +19,9 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         .getAllTypes()
         .filter((type) => !typeRegistry.isHidden(type.name))
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
-      const searchFields = [
-        ...new Set(searchableTypes.map((type) => type.management!.defaultSearchField!)),
-      ];
+      const searchFields = uniq(
+        searchableTypes.map((type) => type.management!.defaultSearchField!)
+      );
 
       const responsePromise = client.find({
         page: 1,
@@ -39,3 +39,5 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
     },
   };
 };
+
+const uniq = <T>(values: T[]): T[] => [...new Set(values)];
