@@ -41,17 +41,18 @@ export async function getTransactionCoordinates({
             field: '@timestamp',
             fixed_interval: bucketSize,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
           },
         },
       },
     },
   });
 
+  const deltaAsMinutes = (end - start) / 1000 / 60;
+
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count,
+      y: bucket.doc_count / deltaAsMinutes,
     })) || []
   );
 }
