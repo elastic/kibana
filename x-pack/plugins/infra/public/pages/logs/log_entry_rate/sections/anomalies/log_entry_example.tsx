@@ -45,7 +45,7 @@ const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenu
 });
 
 const VIEW_IN_STREAM_LABEL = i18n.translate(
-  'xpack.infra.logAnomalies.logEntryExamplesViewInStreamLabel',
+  'xpack.infra.logs.analysis.logEntryExamplesViewInStreamLabel',
   {
     defaultMessage: 'View in stream',
   }
