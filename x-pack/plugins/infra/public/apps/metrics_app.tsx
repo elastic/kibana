@@ -16,7 +16,7 @@ import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { MetricDetail } from '../pages/metrics/metric_detail';
-import { ClientPluginDeps } from '../types';
+import { InfraClientStartDeps } from '../types';
 import { createApolloClient } from '../utils/apollo_client';
 import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
@@ -24,7 +24,7 @@ import { prepareMountElement } from './common_styles';
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ClientPluginDeps,
+  plugins: InfraClientStartDeps,
   { element, history }: AppMountParameters
 ) => {
   const apolloClient = createApolloClient(core.http.fetch);
@@ -45,7 +45,7 @@ const MetricsApp: React.FC<{
   apolloClient: ApolloClient<{}>;
   core: CoreStart;
   history: History<unknown>;
-  plugins: ClientPluginDeps;
+  plugins: InfraClientStartDeps;
 }> = ({ apolloClient, core, history, plugins }) => {
   const uiCapabilities = core.application.capabilities;
 

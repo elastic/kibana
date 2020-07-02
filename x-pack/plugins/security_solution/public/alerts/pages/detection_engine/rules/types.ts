@@ -10,6 +10,15 @@ import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import {
+  Author,
+  BuildingBlockType,
+  License,
+  RiskScoreMapping,
+  RuleNameOverride,
+  SeverityMapping,
+  TimestampOverride,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -52,13 +61,18 @@ interface StepRuleData {
   isNew: boolean;
 }
 export interface AboutStepRule extends StepRuleData {
+  author: string[];
   name: string;
   description: string;
-  severity: string;
-  riskScore: number;
+  isBuildingBlock: boolean;
+  severity: AboutStepSeverity;
+  riskScore: AboutStepRiskScore;
   references: string[];
   falsePositives: string[];
+  license: string;
+  ruleNameOverride: string;
   tags: string[];
+  timestampOverride: string;
   threat: IMitreEnterpriseAttack[];
   note: string;
 }
@@ -66,6 +80,16 @@ export interface AboutStepRule extends StepRuleData {
 export interface AboutStepRuleDetails {
   note: string;
   description: string;
+}
+
+export interface AboutStepSeverity {
+  value: string;
+  mapping: SeverityMapping;
+}
+
+export interface AboutStepRiskScore {
+  value: number;
+  mapping: RiskScoreMapping;
 }
 
 export interface DefineStepRule extends StepRuleData {
@@ -104,14 +128,21 @@ export interface DefineStepRuleJson {
 }
 
 export interface AboutStepRuleJson {
+  author: Author;
+  building_block_type?: BuildingBlockType;
   name: string;
   description: string;
+  license: License;
   severity: string;
+  severity_mapping: SeverityMapping;
   risk_score: number;
+  risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
+  rule_name_override: RuleNameOverride;
   tags: string[];
   threat: IMitreEnterpriseAttack[];
+  timestamp_override: TimestampOverride;
   note?: string;
 }
 
