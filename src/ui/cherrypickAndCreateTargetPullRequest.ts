@@ -39,7 +39,9 @@ export async function cherrypickAndCreateTargetPullRequest({
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
   await createBackportBranch({ options, targetBranch, backportBranch });
-  await sequentially(commits, (commit) => waitForCherrypick(options, commit));
+  await sequentially(commits, (commit) =>
+    waitForCherrypick(options, commit, targetBranch)
+  );
 
   if (options.resetAuthor) {
     await setCommitAuthor(options, options.username);
@@ -117,7 +119,8 @@ export function getBackportBranch(
 
 async function waitForCherrypick(
   options: BackportOptions,
-  commit: CommitSelected
+  commit: CommitSelected,
+  targetBranch: string
 ) {
   const spinnerText = `Cherry-picking: ${chalk.greenBright(
     commit.formattedMessage
@@ -157,6 +160,7 @@ async function waitForCherrypick(
       files: filesWithConflicts,
       directory: repoPath,
       logger,
+      targetBranch,
     });
 
     // conflicts were automatically resolved

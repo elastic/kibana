@@ -10,10 +10,12 @@ type AutoFixConflictsHandler = ({
   files,
   directory,
   logger,
+  targetBranch,
 }: {
   files: string[];
   directory: string;
   logger: Logger;
+  targetBranch: string;
 }) => boolean | Promise<boolean>;
 
 export interface ConfigOptions {
