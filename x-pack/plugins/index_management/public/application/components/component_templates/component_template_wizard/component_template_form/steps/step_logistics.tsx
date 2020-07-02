@@ -47,7 +47,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
     const { documentation } = useComponentTemplatesContext();
 
     const [isVersionVisible, setIsVersionVisible] = useState<boolean>(
-      Boolean(defaultValue.version)
+      isNaN(defaultValue.version) === false
     );
 
     const [isMetaVisible, setIsMetaVisible] = useState<boolean>(

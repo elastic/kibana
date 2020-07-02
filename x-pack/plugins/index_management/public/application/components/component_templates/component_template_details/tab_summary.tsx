@@ -74,7 +74,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDe
         )}
 
         {/* Version (optional) */}
-        {version && (
+        {isNaN(version) === false && (
           <>
             <EuiDescriptionListTitle data-test-subj="versionTitle">
               <FormattedMessage
