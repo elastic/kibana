@@ -11,6 +11,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -140,6 +141,7 @@ describe('IndexPattern Data Source', () => {
       storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
+      charts: chartPluginMock.createSetupContract(),
     });
 
     persistedState = {
