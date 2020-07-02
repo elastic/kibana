@@ -23,7 +23,7 @@ import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { AlertStatus } from '../../../alerts/status';
+import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import './listing.scss';
 
@@ -119,7 +119,7 @@ const getColumns = (
       render: (_status, cluster) => (
         <IsClusterSupported {...cluster}>
           <IsAlertsSupported cluster={cluster}>
-            <AlertStatus alerts={cluster.alerts.list} />
+            <AlertsStatus alerts={cluster.alerts.list} />
           </IsAlertsSupported>
         </IsClusterSupported>
       ),

@@ -40,6 +40,7 @@ export class AngularApp {
           isCloud,
           pluginInitializerContext,
           externalConfig,
+          kibanaLegacy,
           triggersActionsUi,
         },
         this.injector

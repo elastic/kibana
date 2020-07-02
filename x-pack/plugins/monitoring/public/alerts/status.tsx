@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
 import { AlertState } from '../../server/alerts/types';
+import { AlertsBadge } from './badge';
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
+  showBadge: boolean;
 }
-export const AlertStatus: React.FC<Props> = (props: Props) => {
-  const { alerts } = props;
+export const AlertsStatus: React.FC<Props> = (props: Props) => {
+  const { alerts, showBadge } = props;
 
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
@@ -33,22 +35,20 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
   if (count === 0) {
     return (
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.monitoring.cluster.listing.alertsInticator.clearStatusTooltip',
-          {
-            defaultMessage: 'Cluster status is clear!',
-          }
-        )}
+        content={i18n.translate('xpack.monitoring.alerts.status.clearToolip', {
+          defaultMessage: 'No alerts firing',
+        })}
         position="bottom"
       >
         <EuiHealth color="success" data-test-subj="alertIcon">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.listing.alertsInticator.clearTooltip"
-            defaultMessage="Clear"
-          />
+          <FormattedMessage id="xpack.monitoring.alerts.status.clearText" defaultMessage="Clear" />
         </EuiHealth>
       </EuiToolTip>
     );
+  }
+
+  if (showBadge) {
+    return <AlertsBadge alerts={alerts} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;
@@ -56,28 +56,18 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
   const tooltipText = (() => {
     switch (severity) {
       case AlertSeverity.Danger:
-        return i18n.translate(
-          'xpack.monitoring.cluster.listing.alertsInticator.highSeverityTooltip',
-          {
-            defaultMessage:
-              'There are some critical cluster issues that require your immediate attention!',
-          }
-        );
+        return i18n.translate('xpack.monitoring.alerts.status.highSeverityTooltip', {
+          defaultMessage: 'There are some critical issues that require your immediate attention!',
+        });
       case AlertSeverity.Warning:
-        return i18n.translate(
-          'xpack.monitoring.cluster.listing.alertsInticator.mediumSeverityTooltip',
-          {
-            defaultMessage: 'There are some issues that might have impact on your cluster.',
-          }
-        );
+        return i18n.translate('xpack.monitoring.alerts.status.mediumSeverityTooltip', {
+          defaultMessage: 'There are some issues that might have impact on the stack.',
+        });
       default:
         // might never show
-        return i18n.translate(
-          'xpack.monitoring.cluster.listing.alertsInticator.lowSeverityTooltip',
-          {
-            defaultMessage: 'There are some low-severity cluster issues',
-          }
-        );
+        return i18n.translate('xpack.monitoring.alerts.status.lowSeverityTooltip', {
+          defaultMessage: 'There are some low-severity issues',
+        });
     }
   })();
 
@@ -85,7 +75,7 @@ export const AlertStatus: React.FC<Props> = (props: Props) => {
     <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
       <EuiHealth color={severity} data-test-subj="alertIcon">
         <FormattedMessage
-          id="xpack.monitoring.cluster.listing.alertsInticator.alertsTooltip"
+          id="xpack.monitoring.alerts.status.alertsTooltip"
           defaultMessage="Alerts"
         />
       </EuiHealth>

@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ClusterStatus } from '../cluster_status';
@@ -25,13 +24,14 @@ import {
   EuiButton,
   EuiText,
   EuiScreenReaderOnly,
+  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsBadge } from '../../../alerts/badge';
+import { AlertsStatus } from '../../../alerts/status';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -132,15 +132,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     width: '175px',
     sortable: true,
     render: () => {
-      if (alerts) {
-        return (
-          <div>
-            <AlertsBadge alerts={alerts} />
-          </div>
-        );
-      }
-
-      return null;
+      return <AlertsStatus showBadge={true} alerts={alerts} />;
     },
   });
 
@@ -159,9 +151,11 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
             defaultMessage: 'Offline',
           });
       return (
-        <div className="monTableCell__status">
-          <NodeStatusIcon isOnline={value} status={status} /> {status}
-        </div>
+        <EuiToolTip content={status} position="bottom" trigger="hover">
+          <EuiHealth color={value ? 'success' : 'subdued'} data-test-subj="statusIcon">
+            {status}
+          </EuiHealth>
+        </EuiToolTip>
       );
     },
   });

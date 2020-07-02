@@ -272,9 +272,4 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
  */
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
-/**
- * The number of alerts that have been migrated
- */
-export const NUMBER_OF_MIGRATED_ALERTS = 2;
-
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];

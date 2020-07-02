@@ -157,7 +157,7 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
-    const uiCapabilities = Legacy.shims.capabilities;
+    const uiCapabilities = Legacy.shims.capabilities.get();
     const show = uiCapabilities.logs && uiCapabilities.logs.show;
     const {
       logs: { enabled },

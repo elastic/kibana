@@ -14,11 +14,12 @@ import {
   EuiLink,
   EuiCallOut,
   EuiScreenReaderOnly,
+  EuiToolTip,
+  EuiHealth,
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
-import { KibanaStatusIcon } from '../status_icon';
 import { StatusIcon } from '../../status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -27,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { AlertsBadge } from '../../../alerts/badge';
+import { AlertsStatus } from '../../../alerts/status';
 
 const getColumns = (setupMode, alerts) => {
   const columns = [
@@ -88,15 +89,7 @@ const getColumns = (setupMode, alerts) => {
       width: '175px',
       sortable: true,
       render: () => {
-        if (alerts) {
-          return (
-            <div>
-              <AlertsBadge alerts={alerts} />
-            </div>
-          );
-        }
-
-        return null;
+        return <AlertsStatus showBadge={true} alerts={alerts} />;
       },
     },
     {
@@ -104,28 +97,18 @@ const getColumns = (setupMode, alerts) => {
         defaultMessage: 'Status',
       }),
       field: 'status',
-      render: (status, kibana) => (
-        <div
-          title={i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
-            defaultMessage: 'Instance status: {kibanaStatus}',
-            values: {
-              kibanaStatus: status,
-            },
-          })}
-          className="monTableCell__status"
-        >
-          <KibanaStatusIcon status={status} availability={kibana.availability} />
-          &nbsp;
-          {!kibana.availability ? (
-            <FormattedMessage
-              id="xpack.monitoring.kibana.listing.instanceStatus.offlineLabel"
-              defaultMessage="Offline"
-            />
-          ) : (
-            capitalize(status)
-          )}
-        </div>
-      ),
+      render: (status, kibana) => {
+        return (
+          <EuiToolTip content={status} position="bottom" trigger="hover">
+            <EuiHealth
+              color={kibana.availability ? 'success' : 'subdued'}
+              data-test-subj="statusIcon"
+            >
+              {capitalize(status)}
+            </EuiHealth>
+          </EuiToolTip>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {

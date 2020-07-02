@@ -37,7 +37,7 @@ export interface KFetchKibanaOptions {
 
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: ApplicationStart['capabilities'];
+  capabilities: { get: () => CoreStart['application']['capabilities'] };
   getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
@@ -70,7 +70,7 @@ export class Legacy {
   ) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
-      capabilities: core.application.capabilities,
+      capabilities: { get: () => core.application.capabilities },
       getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>

@@ -24,7 +24,7 @@ import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { AlertsBadge } from '../../../alerts/badge';
+import { AlertsStatus } from '../../../alerts/status';
 
 export class Listing extends PureComponent {
   getColumns() {
@@ -82,15 +82,7 @@ export class Listing extends PureComponent {
         width: '175px',
         sortable: true,
         render: () => {
-          if (alerts) {
-            return (
-              <div>
-                <AlertsBadge alerts={alerts} />
-              </div>
-            );
-          }
-
-          return null;
+          return <AlertsStatus showBadge={true} alerts={alerts} />;
         },
       },
       {
