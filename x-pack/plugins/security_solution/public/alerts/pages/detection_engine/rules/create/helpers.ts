@@ -122,11 +122,30 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
 };
 
 export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, references, riskScore, threat, isNew, note, ...rest } = aboutStepData;
-  return {
+  const {
+    author,
+    falsePositives,
+    references,
+    riskScore,
+    severity,
+    threat,
+    isBuildingBlock,
+    isNew,
+    note,
+    ruleNameOverride,
+    timestampOverride,
+    ...rest
+  } = aboutStepData;
+  const resp = {
+    author: author.filter((item) => !isEmpty(item)),
+    ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
-    risk_score: riskScore,
+    risk_score: riskScore.value,
+    risk_score_mapping: riskScore.mapping,
+    rule_name_override: ruleNameOverride,
+    severity: severity.value,
+    severity_mapping: severity.mapping,
     threat: threat
       .filter((singleThreat) => singleThreat.tactic.name !== 'none')
       .map((singleThreat) => ({
@@ -137,9 +156,11 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
           return { id, name, reference };
         }),
       })),
+    timestamp_override: timestampOverride,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };
+  return resp;
 };
 
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {

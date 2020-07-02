@@ -18,7 +18,11 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
+import {
+  AboutStepRiskScore,
+  AboutStepSeverity,
+  IMitreEnterpriseAttack,
+} from '../../../pages/detection_engine/rules/types';
 import { FieldValueTimeline } from '../pick_timeline';
 import { FormSchema } from '../../../../shared_imports';
 import { ListItems } from './types';
@@ -184,9 +188,18 @@ export const getDescriptionItem = (
   } else if (Array.isArray(get(field, data))) {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
+    // TODO: Add custom UI for Risk/Severity Mappings (and fix missing label)
+  } else if (field === 'riskScore') {
+    const val: AboutStepRiskScore = get(field, data);
+    return [
+      {
+        title: label,
+        description: val.value,
+      },
+    ];
   } else if (field === 'severity') {
-    const val: string = get(field, data);
-    return buildSeverityDescription(label, val);
+    const val: AboutStepSeverity = get(field, data);
+    return buildSeverityDescription(label, val.value);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [
