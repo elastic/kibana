@@ -27,7 +27,6 @@ export enum SecurityPageName {
   timelines = 'timelines',
   case = 'case',
   management = 'management',
-  endpointAlerts = 'endpointAlerts',
 }
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T | undefined>;
