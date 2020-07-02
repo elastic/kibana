@@ -1,0 +1,211 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should not render fields-editor when there is no layername 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Tile layer"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      isInvalid={true}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label={
+      <EuiToolTip
+        anchorClassName="eui-alignMiddle"
+        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Available levels
+           
+          <EuiIcon
+            color="subdued"
+            type="questionInCircle"
+          />
+        </span>
+      </EuiToolTip>
+    }
+    max={24}
+    min={0}
+    onChange={[Function]}
+    prepend="Zoom"
+    showInput="inputWithPopover"
+    showLabels={true}
+    value={
+      Array [
+        4,
+        14,
+      ]
+    }
+  />
+</Fragment>
+`;
+
+exports[`should render with fields 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Tile layer"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      isInvalid={false}
+      onChange={[Function]}
+      value="foobar"
+    />
+  </EuiFormRow>
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label={
+      <EuiToolTip
+        anchorClassName="eui-alignMiddle"
+        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Available levels
+           
+          <EuiIcon
+            color="subdued"
+            type="questionInCircle"
+          />
+        </span>
+      </EuiToolTip>
+    }
+    max={24}
+    min={0}
+    onChange={[Function]}
+    prepend="Zoom"
+    showInput="inputWithPopover"
+    showLabels={true}
+    value={
+      Array [
+        4,
+        14,
+      ]
+    }
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <EuiToolTip
+        anchorClassName="eui-alignMiddle"
+        content={
+          <React.Fragment>
+            Fields which are available in 
+            <React.Fragment>
+              <b>
+                foobar
+              </b>
+              .
+               
+            </React.Fragment>
+            These can be used for tooltips and dynamic styling.
+          </React.Fragment>
+        }
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Fields
+           
+          <EuiIcon
+            color="subdued"
+            type="questionInCircle"
+          />
+        </span>
+      </EuiToolTip>
+    }
+    labelType="label"
+  >
+    <MVTFieldConfigEditor
+      fields={Array []}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render without fields 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="columnCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Tile layer"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      isInvalid={false}
+      onChange={[Function]}
+      value="foobar"
+    />
+  </EuiFormRow>
+  <ValidatedDualRange
+    allowEmptyRange={false}
+    compressed={true}
+    formRowDisplay="columnCompressed"
+    fullWidth={false}
+    label={
+      <EuiToolTip
+        anchorClassName="eui-alignMiddle"
+        content="Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa)."
+        delay="regular"
+        position="top"
+      >
+        <span>
+          Available levels
+           
+          <EuiIcon
+            color="subdued"
+            type="questionInCircle"
+          />
+        </span>
+      </EuiToolTip>
+    }
+    max={24}
+    min={0}
+    onChange={[Function]}
+    prepend="Zoom"
+    showInput="inputWithPopover"
+    showLabels={true}
+    value={
+      Array [
+        4,
+        14,
+      ]
+    }
+  />
+</Fragment>
+`;
