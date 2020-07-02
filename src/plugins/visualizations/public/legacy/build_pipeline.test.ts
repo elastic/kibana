@@ -339,6 +339,22 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
       expect(expression).toMatchSnapshot();
     });
+
+    it('returns pipeline even if data on vis is an empty object', async () => {
+      const vis = ({
+        getState: () => {},
+        isHierarchical: () => false,
+        data: {},
+        // @ts-ignore
+        type: {
+          toExpression: () => 'testing custom expressions',
+        },
+      } as unknown) as Vis;
+      const pipeline = await buildPipeline(vis, {
+        timefilter: dataStart.query.timefilter.timefilter,
+      });
+      expect(pipeline).toEqual('kibana | kibana_context | testing custom expressions');
+    });
   });
 
   describe('buildVislibDimensions', () => {

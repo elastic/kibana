@@ -488,8 +488,8 @@ export const buildPipeline = async (
   }
 ) => {
   const { indexPattern, searchSource } = vis.data;
-  const query = searchSource!.getField('query');
-  const filters = searchSource!.getField('filter');
+  const query = searchSource?.getField('query');
+  const filters = searchSource?.getField('filter');
   const { uiState } = vis;
 
   // context
