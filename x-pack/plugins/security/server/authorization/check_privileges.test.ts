@@ -737,7 +737,7 @@ describe('#atSpaces', () => {
                 [`saved_object:${savedObjectTypes[0]}/get`]: false,
                 [`saved_object:${savedObjectTypes[1]}/get`]: true,
               },
-              // @ts-expect-error this is wrong on purpose
+              // @ts-ignore this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
@@ -765,7 +765,7 @@ describe('#atSpaces', () => {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
               },
-              // @ts-expect-error this is wrong on purpose
+              // @ts-ignore this is wrong on purpose
               'space:space_1': {
                 [mockActions.login]: true,
                 [mockActions.version]: true,
