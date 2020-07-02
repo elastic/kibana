@@ -47,8 +47,8 @@ export interface TagAttachmentClientGetResourceTagsResult {
 export interface TagAttachmentClientFindResourcesParams {
   tagIds: string[];
   kidPrefix: string;
-  perPage?: number;
-  page?: number;
+  perPage: number;
+  page: number;
 }
 
 export interface TagAttachmentClientFindResourcesResult {

@@ -12,6 +12,8 @@ import {
   TagAttachmentClientGetResourceTagsParams,
   TagAttachmentClientGetResourceTagsResult,
   TagAttachmentClientDeleteParams,
+  TagAttachmentClientFindResourcesParams,
+  TagAttachmentClientFindResourcesResult,
 } from '../../../common';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
@@ -41,6 +43,17 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
   }: TagAttachmentClientGetResourceTagsParams): Promise<TagAttachmentClientGetResourceTagsResult> {
     return await this.params.http.get<TagAttachmentClientGetResourceTagsResult>(
       `${this.path}/resource/${btoa(kid)}/tags`
+    );
+  }
+
+  public async findResources(
+    params: TagAttachmentClientFindResourcesParams
+  ): Promise<TagAttachmentClientFindResourcesResult> {
+    return await this.params.http.post<TagAttachmentClientFindResourcesResult>(
+      `${this.path}/find_resources`,
+      {
+        body: JSON.stringify(params),
+      }
     );
   }
 }

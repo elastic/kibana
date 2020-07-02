@@ -127,8 +127,8 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
   public async findResources({
     tagIds,
     kidPrefix,
-    perPage = 20,
-    page = 1,
+    perPage,
+    page,
   }: TagAttachmentClientFindResourcesParams): Promise<TagAttachmentClientFindResourcesResult> {
     validateTagIds(tagIds);
     validateKID(kidPrefix);
