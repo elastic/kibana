@@ -36,7 +36,7 @@ import { I18nStart } from '../../i18n';
 
 interface ErrorToastProps {
   title: string;
-  error: RequestError;
+  error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
   i18nContext: () => I18nStart['Context'];
@@ -45,6 +45,9 @@ interface ErrorToastProps {
 interface RequestError extends Error {
   body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
 }
+
+const isRequestError = (e: Error): e is RequestError =>
+  e.body?.attributes?.error?.caused_by !== undefined;
 
 /**
  * This should instead be replaced by the overlay service once it's available.
@@ -61,7 +64,7 @@ function showErrorDialog({
   const I18nContext = i18nContext();
   let text = '';
 
-  if (error.body?.attributes?.error?.caused_by) {
+  if (isRequestError(error)) {
     text += `${error.body.attributes.error.caused_by.type}\n`;
     text += `${error.body.attributes.error.caused_by.reason}\n\n`;
   }
