@@ -19,7 +19,7 @@ export const TagList: React.FC<TagListProps> = React.memo(({ kid }) => {
   return (
     <>
       {attachments.map(({ data }) => (
-        <Tag id={data.tagId} />
+        <Tag key={data.tagId} id={data.tagId} />
       ))}
     </>
   );

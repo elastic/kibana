@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { Tag, TagList } from '../../../../../../plugins/tags/public';
+import { Tag, TagList, TagPicker } from '../../../../../../plugins/tags/public';
 
 export const TagListExample: React.FC = () => {
+  const [selected, setSelected] = useState<string[]>([]);
+
   return (
     <div>
       <div>
@@ -23,6 +25,13 @@ export const TagListExample: React.FC = () => {
           <h2>TagList</h2>
         </EuiTitle>
         <TagList kid={'kid::data:ip:index_pattern/123'} />
+      </div>
+
+      <div>
+        <EuiTitle size="m">
+          <h2>TagPicker</h2>
+        </EuiTitle>
+        <TagPicker selected={selected} onChange={setSelected} />
       </div>
     </div>
   );
