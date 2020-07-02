@@ -75,8 +75,8 @@ function setRumAgent(item) {
     '"name":"client"',
     '"name":"opbean-client-rum"'
   );
-  console.log(item.body);
 }
+
 async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
