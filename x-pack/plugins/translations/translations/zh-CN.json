@@ -13772,8 +13772,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel": "MITRE ATT&amp;CK\\u2122",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNameLabel": "名称",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel": "引用 URL",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel": "风险分数",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel": "严重性",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText": "为此规则键入一个或多个定制识别标记。在每个标记后按 Enter 键可开始新的标记。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsLabel": "标记",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText": "选择现有时间线以将其用作调查生成的信号时的模板。",

@@ -13766,8 +13766,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldMitreThreatLabel": "MITRE ATT&amp;CK\\u2122",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNameLabel": "名前",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldReferenceUrlsLabel": "参照URL",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRiskScoreLabel": "リスクスコア",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldSeverityLabel": "深刻度",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsHelpText": "このルールの1つ以上のカスタム識別タグを入力します。新しいタグを開始するには、各タグの後でEnterを押します。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTagsLabel": "タグ",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText": "生成されたシグナルを調査するときにテンプレートとして使用する既存のタイムラインを選択します。",
