@@ -644,11 +644,6 @@ export interface UIPolicyConfig {
 
 interface PolicyConfigAdvancedOptions {
   elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
     kernel: {
       connect: boolean;
       process: boolean;
@@ -665,7 +660,6 @@ export interface MalwareFields {
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
-  preventNotify = 'preventNotify',
   off = 'off',
 }
 

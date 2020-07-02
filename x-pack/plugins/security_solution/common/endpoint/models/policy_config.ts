@@ -30,11 +30,6 @@ export const factory = (): PolicyConfig => {
       },
       advanced: {
         elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
           kernel: {
             connect: true,
             process: true,
@@ -49,7 +44,7 @@ export const factory = (): PolicyConfig => {
         network: true,
       },
       malware: {
-        mode: ProtectionModes.detect,
+        mode: ProtectionModes.prevent,
       },
       logging: {
         stdout: 'debug',
@@ -57,11 +52,6 @@ export const factory = (): PolicyConfig => {
       },
       advanced: {
         elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
           kernel: {
             connect: true,
             process: true,
@@ -81,11 +71,6 @@ export const factory = (): PolicyConfig => {
       },
       advanced: {
         elasticsearch: {
-          indices: {
-            control: 'control-index',
-            event: 'event-index',
-            logging: 'logging-index',
-          },
           kernel: {
             connect: true,
             process: true,

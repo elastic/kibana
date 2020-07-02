@@ -120,11 +120,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 linux: {
                   advanced: {
                     elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
                       kernel: { connect: true, process: true },
                     },
                   },
@@ -134,26 +129,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 mac: {
                   advanced: {
                     elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
                       kernel: { connect: true, process: true },
                     },
                   },
                   events: { file: false, network: true, process: true },
                   logging: { file: 'info', stdout: 'debug' },
-                  malware: { mode: 'detect' },
+                  malware: { mode: 'prevent' },
                 },
                 windows: {
                   advanced: {
                     elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
                       kernel: { connect: true, process: true },
                     },
                   },
