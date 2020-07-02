@@ -192,7 +192,15 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
   if (registryElasticsearch && registryElasticsearch['index_template.mappings']) {
     mappingsTemplate = {
       template: {
-        mappings: registryElasticsearch['index_template.mappings'],
+        mappings: {
+          ...registryElasticsearch['index_template.mappings'],
+          // temporary change until https://github.com/elastic/elasticsearch/issues/58956 is resolved
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+          },
+        },
       },
     };
   }
@@ -282,6 +290,7 @@ export async function installTemplate({
     packageName,
     composedOfTemplates,
   });
+
   // TODO: Check return values for errors
   const callClusterParams: {
     method: string;
