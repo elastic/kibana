@@ -47,12 +47,9 @@ export function createSavedObjectKibanaAsset(
 // to be prepended with the package name to distinguish assets from Beats modules' assets
 export const changeAssetIds = (asset: ArchiveAsset, pkgName: string): ArchiveAsset => {
   const references = asset.references.map((ref) => {
-    if (ref.type !== KibanaAssetType.indexPattern) {
-      const id = getAssetId(ref.id, pkgName);
-      return { ...ref, id };
-    } else {
-      return ref;
-    }
+    if (ref.type === KibanaAssetType.indexPattern) return ref;
+    const id = getAssetId(ref.id, pkgName);
+    return { ...ref, id };
   });
   return {
     ...asset,
@@ -76,7 +73,7 @@ export async function installKibanaAssets(options: {
 
   // Only install Kibana assets during package installation.
   const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const installationPromises = kibanaAssetTypes.map(async (assetType) =>
+  const installationPromises = kibanaAssetTypes.map((assetType) =>
     installKibanaSavedObjects({ savedObjectsClient, assetType, paths, pkgName })
   );
 
