@@ -38,7 +38,7 @@ const createServicesMock = () => {
     }
   > = {
     callCluster: elasticsearchServiceMock.createScopedClusterClient().callAsCurrentUser,
-    getScopedCallCluster: jest.fn(),
+    getScopedClusterClient: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
   };
   return mock;
