@@ -12,7 +12,23 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { AS_TELEMETRY_NAME, ITelemetrySavedObject } from '../../saved_objects/app_search/telemetry';
+interface ITelemetry {
+  ui_viewed: {
+    setup_guide: number;
+    engines_overview: number;
+  };
+  ui_error: {
+    cannot_connect: number;
+    no_as_account: number;
+  };
+  ui_clicked: {
+    create_first_engine_button: number;
+    header_launch_button: number;
+    engine_table_link: number;
+  };
+}
+
+export const AS_TELEMETRY_NAME = 'app_search_telemetry';
 
 /**
  * Register the telemetry collector
@@ -22,10 +38,25 @@ export const registerTelemetryUsageCollector = (
   usageCollection: UsageCollectionSetup,
   savedObjects: SavedObjectsServiceStart
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
     type: 'app_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),
     isReady: () => true,
+    schema: {
+      ui_viewed: {
+        setup_guide: { type: 'long' },
+        engines_overview: { type: 'long' },
+      },
+      ui_error: {
+        cannot_connect: { type: 'long' },
+        no_as_account: { type: 'long' },
+      },
+      ui_clicked: {
+        create_first_engine_button: { type: 'long' },
+        header_launch_button: { type: 'long' },
+        engine_table_link: { type: 'long' },
+      },
+    },
   });
   usageCollection.registerCollector(telemetryUsageCollector);
 };
@@ -40,7 +71,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
     savedObjectsRepository
   )) as SavedObjectAttributes;
 
-  const defaultTelemetrySavedObject: ITelemetrySavedObject = {
+  const defaultTelemetrySavedObject: ITelemetry = {
     ui_viewed: {
       setup_guide: 0,
       engines_overview: 0,
@@ -68,7 +99,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
     set(telemetryObj, key, savedObjectAttributes[key]);
   });
 
-  return telemetryObj as ITelemetrySavedObject;
+  return telemetryObj as ITelemetry;
 };
 
 /**
