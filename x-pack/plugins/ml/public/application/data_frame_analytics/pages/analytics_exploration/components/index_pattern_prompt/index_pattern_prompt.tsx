@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -24,17 +24,19 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
     <>
       <EuiText size="xs" color="warning">
         <FormattedMessage
-          size="xs"
-          id="xpack.ml.dataframe.analytics.clone.creationPageTitle"
-          defaultMessage="No index pattern exists for index {destIndex}. Create an index pattern or  {linkToIndexPatternManagement}."
+          id="xpack.ml.dataframe.analytics.indexPatternPromptMessage"
+          defaultMessage="No index pattern exists for index {destIndex}. {linkToIndexPatternManagement} for {destIndex}."
           values={{
             destIndex,
             linkToIndexPatternManagement: (
               <EuiLink
-                href={`${basePath.get()}/app/management/kibana/indexPatterns`}
+                href={`${basePath.get()}/app/management/kibana/indexPatterns/create`}
                 target="_blank"
               >
-                manage index patterns
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analytics.indexPatternPromptLinkText"
+                  defaultMessage="Create an index pattern"
+                />
               </EuiLink>
             ),
           }}
