@@ -5,6 +5,7 @@
  */
 
 import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -691,6 +692,9 @@ export type NewPolicyData = NewPackageConfig & {
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };
