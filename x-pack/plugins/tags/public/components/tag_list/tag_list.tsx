@@ -11,7 +11,7 @@ export interface Props {
   tags: TagView[];
 }
 
-export const TagList: React.FC<Props> = ({ tags }) => {
+export const TagList: React.FC<Props> = React.memo(({ tags }) => {
   return (
     <>
       {tags.map((tag) => (
@@ -19,4 +19,4 @@ export const TagList: React.FC<Props> = ({ tags }) => {
       ))}
     </>
   );
-};
+});

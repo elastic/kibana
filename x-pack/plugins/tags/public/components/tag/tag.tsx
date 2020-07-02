@@ -14,6 +14,6 @@ export interface Props {
   tag: TagView;
 }
 
-export const Tag: React.FC<Props> = ({ tag }) => {
+export const Tag: React.FC<Props> = React.memo(({ tag }) => {
   return <EuiBadge color={tag.color}>{tag.title}</EuiBadge>;
-};
+});
