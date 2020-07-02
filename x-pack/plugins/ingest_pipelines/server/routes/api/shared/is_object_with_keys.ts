@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useSwimlaneLimit, SelectLimit } from './select_limit';
+export const isObjectWithKeys = (value: unknown) => {
+  return typeof value === 'object' && !!value && Object.keys(value).length > 0;
+};

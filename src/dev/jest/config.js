@@ -47,7 +47,7 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
-    'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
+    'src/legacy/core_plugins/**/*.{js,mjs,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
   ],
   moduleNameMapper: {
@@ -77,10 +77,10 @@ export default {
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: ['html', 'text'],
-  moduleFileExtensions: ['js', 'json', 'ts', 'tsx', 'node'],
+  moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testEnvironment: 'jest-environment-jsdom-thirteen',
-  testMatch: ['**/*.test.{js,ts,tsx}'],
+  testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
