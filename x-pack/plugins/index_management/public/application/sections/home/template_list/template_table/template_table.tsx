@@ -247,6 +247,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const goToList = () => {
+    return history.push('templates');
+  };
+
   return (
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
@@ -254,9 +258,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
-            } else {
-              setTemplatesToDelete([]);
+              // Close the flyout if it is opened
+              goToList();
             }
+            setTemplatesToDelete([]);
           }}
           templatesToDelete={templatesToDelete}
         />
