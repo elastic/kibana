@@ -21,6 +21,7 @@ export {
   PackageConfigInput,
   PackageConfigInputStream,
   NewPackageConfig,
+  UpdatePackageConfig,
   PackageConfigSOAttributes,
   FullAgentConfigInput,
   FullAgentConfig,
