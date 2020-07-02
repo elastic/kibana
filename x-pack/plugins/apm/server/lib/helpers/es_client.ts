@@ -19,11 +19,10 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../typings/elasticsearch';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
@@ -85,20 +84,19 @@ function addFilterForLegacyData(
 }
 
 // add additional params for search (aka: read) requests
-async function getParamsForSearchRequest(
-  context: APMRequestHandlerContext,
-  params: ESSearchRequest,
-  apmOptions?: APMOptions
-) {
-  const { uiSettings } = context.core;
-  const [indices, includeFrozen] = await Promise.all([
-    getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
-      config: context.config,
-    }),
-    uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-  ]);
-
+function getParamsForSearchRequest({
+  context,
+  params,
+  indices,
+  includeFrozen,
+  includeLegacyData,
+}: {
+  context: APMRequestHandlerContext;
+  params: ESSearchRequest;
+  indices: ApmIndicesConfig;
+  includeFrozen: boolean;
+  includeLegacyData?: boolean;
+}) {
   // Get indices for legacy data filter (only those which apply)
   const apmIndices = Object.values(
     pickKeys(
@@ -112,7 +110,7 @@ async function getParamsForSearchRequest(
     )
   );
   return {
-    ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
+    ...addFilterForLegacyData(apmIndices, params, { includeLegacyData }), // filter out pre-7.0 data
     ignore_throttled: !includeFrozen, // whether to query frozen indices or not
   };
 }
@@ -123,6 +121,8 @@ interface APMOptions {
 
 interface ClientCreateOptions {
   clientAsInternalUser?: boolean;
+  indices: ApmIndicesConfig;
+  includeFrozen: boolean;
 }
 
 export type ESClient = ReturnType<typeof getESClient>;
@@ -134,7 +134,7 @@ function formatObj(obj: Record<string, any>) {
 export function getESClient(
   context: APMRequestHandlerContext,
   request: KibanaRequest,
-  { clientAsInternalUser = false }: ClientCreateOptions = {}
+  { clientAsInternalUser = false, indices, includeFrozen }: ClientCreateOptions
 ) {
   const {
     callAsCurrentUser,
@@ -194,11 +194,13 @@ export function getESClient(
       params: TSearchRequest,
       apmOptions?: APMOptions
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
-      const nextParams = await getParamsForSearchRequest(
+      const nextParams = await getParamsForSearchRequest({
         context,
         params,
-        apmOptions
-      );
+        indices,
+        includeFrozen,
+        ...apmOptions,
+      });
 
       return callEs('search', nextParams);
     },
