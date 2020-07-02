@@ -9,6 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../common/mock/match_media';
+import { waitForUpdates } from '../../common/utils/test_utils';
 import { TestProviders } from '../../common/mock';
 import { useWithSource } from '../../common/containers/source';
 import { Overview } from './index';
@@ -31,7 +32,6 @@ describe('Overview', () => {
       (useWithSource as jest.Mock).mockReturnValue({
         indicesExist: false,
       });
-
       const wrapper = mount(
         <TestProviders>
           <MemoryRouter>
@@ -39,6 +39,7 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
 
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
     });
@@ -55,6 +56,8 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
+      await waitForUpdates(wrapper);
+
       expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
     });
   });
