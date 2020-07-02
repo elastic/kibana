@@ -5,5 +5,5 @@
  */
 
 export { SessionService } from './session_service';
-export { backgroundSession, BACKGROUND_SESSION_TYPE } from './saved_object';
+export { sessionMapping, BACKGROUND_SESSION_TYPE } from './saved_object';
 export { registerBackgroundSessionGetRoute, registerBackgroundSessionSaveRoute } from './routes';

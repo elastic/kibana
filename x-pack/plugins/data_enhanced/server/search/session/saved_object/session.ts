@@ -8,7 +8,7 @@ import { SavedObjectsType } from 'kibana/server';
 
 export const BACKGROUND_SESSION_TYPE = 'background-session';
 
-export const backgroundSession: SavedObjectsType = {
+export const sessionMapping: SavedObjectsType = {
   name: BACKGROUND_SESSION_TYPE,
   namespaceType: 'single',
   hidden: false,
@@ -33,7 +33,6 @@ export const backgroundSession: SavedObjectsType = {
         type: 'short',
       },
       idMapping: {
-        dynamic: 'true',
         type: 'object',
         enabled: false,
       },

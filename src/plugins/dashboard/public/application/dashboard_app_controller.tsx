@@ -1125,7 +1125,7 @@ export class DashboardAppController {
       unmountNavBar();
 
       dashboardStateManager.setSessionId(undefined);
-      queryServiceSubscription.unsubscribe();
+      if (queryServiceSubscription) queryServiceSubscription.unsubscribe();
       searchEventsSubscription.unsubscribe();
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();

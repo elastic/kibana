@@ -26,7 +26,7 @@ export function defineRoutes(router: IRouter) {
       request: KibanaRequest<unknown, unknown, DemoBody>,
       response: KibanaResponseFactory
     ) => {
-      return await backgroundSessionRouteHandler(context.backgroundSession!, request, response);
+      return await backgroundSessionRouteHandler(context.sessionService!, request, response);
     }
   );
 }

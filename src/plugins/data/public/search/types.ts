@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Subscription } from 'rxjs';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';

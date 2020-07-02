@@ -16,10 +16,10 @@ import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/ser
 import { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './search';
 import {
   SessionService,
-  backgroundSession,
+  sessionMapping,
   registerBackgroundSessionGetRoute,
   registerBackgroundSessionSaveRoute,
-} from './session';
+} from './search';
 import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {
@@ -28,7 +28,9 @@ interface SetupDependencies {
 }
 
 export interface DataEnhancedStart {
-  backgroundSession: SessionService;
+  search: {
+    session: SessionService;
+  };
 }
 
 export class EnhancedDataServerPlugin
@@ -49,8 +51,8 @@ export class EnhancedDataServerPlugin
 
     // Background session registrations
     this.security = deps.security;
-    core.savedObjects.registerType(backgroundSession);
-    core.http.registerRouteHandlerContext<'backgroundSession'>('backgroundSession', () => {
+    core.savedObjects.registerType(sessionMapping);
+    core.http.registerRouteHandlerContext<'sessionService'>('sessionService', () => {
       return this.sessionService;
     });
     const router = core.http.createRouter();
@@ -69,7 +71,9 @@ export class EnhancedDataServerPlugin
     );
 
     return {
-      backgroundSession: this.sessionService,
+      search: {
+        session: this.sessionService,
+      },
     };
   }
 

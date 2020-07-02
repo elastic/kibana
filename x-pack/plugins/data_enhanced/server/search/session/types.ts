@@ -9,7 +9,7 @@ import { SessionService } from './session_service';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
-    backgroundSession?: SessionService;
+    sessionService?: SessionService;
   }
 }
 export interface SessionInfo {

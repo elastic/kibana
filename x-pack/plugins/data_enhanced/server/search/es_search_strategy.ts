@@ -21,6 +21,7 @@ import {
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 
+type IEnhancedSearchContext = any;
 export interface AsyncSearchResponse<T> {
   id: string;
   is_partial: boolean;
@@ -100,7 +101,7 @@ function trackBackgroundSearch(
   }
 }
 
-export function updateExpirationProvider(caller: APICaller) {
+export function updateExpirationProvider(caller: LegacyAPICaller) {
   return async (searchId: string) => {
     const path = encodeURI(`/_async_search/${searchId}`);
 

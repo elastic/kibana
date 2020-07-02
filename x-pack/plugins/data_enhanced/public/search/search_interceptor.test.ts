@@ -9,6 +9,8 @@ import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreStart } from 'kibana/public';
 import { SessionService } from '../session';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 jest.useFakeTimers();
 
@@ -17,6 +19,7 @@ const mockSearch = jest.fn();
 let searchInterceptor: EnhancedSearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;
 let mockSessionService: SessionService;
+let mockDataStart: DataPublicPluginStart;
 
 describe('EnhancedSearchInterceptor', () => {
   beforeEach(() => {
@@ -25,8 +28,10 @@ describe('EnhancedSearchInterceptor', () => {
     mockSessionService = {
       store: () => Promise.resolve(),
     } as SessionService;
+    mockDataStart = dataPluginMock.createStartContract();
     searchInterceptor = new EnhancedSearchInterceptor(
       mockSessionService,
+      mockDataStart,
       mockCoreStart.notifications.toasts,
       mockCoreStart.application,
       1000

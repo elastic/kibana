@@ -14,15 +14,15 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from '../../../../../src/core/server';
+} from '../../../../../../src/core/server';
 import {
   BACKGROUND_SESSION_STORE_DAYS,
   SessionSavedObjectAttributes,
   SavedSessionStatus,
-} from '../../common';
+} from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { SessionInfo, SessionKeys } from './types';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 
 const INMEM_TRACKING_TIMEOUT_SEC = 60;
 const INMEM_TRACKING_INTERVAL = 2000;
@@ -177,7 +177,7 @@ export class SessionService {
       if (res && !res.error) {
         sessionInfo.requests.forEach(async (searchId) => {
           try {
-            const updateResult = await this.updateExpirationHandler(searchId);
+            await this.updateExpirationHandler(searchId);
           } catch (eUpdate) {
             this.logger.debug(
               `${sessionSavedObject.id} Error during expiration update. C'est la vie.`

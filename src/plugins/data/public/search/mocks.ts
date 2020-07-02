@@ -49,6 +49,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
         msearch: jest.fn(),
       },
     },
+    subscribe: jest.fn(),
   };
 }
 

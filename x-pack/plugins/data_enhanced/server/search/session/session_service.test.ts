@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
 import { SessionService } from './session_service';
-import { securityMock } from '../../../security/server/mocks';
-import { BACKGROUND_SESSION_STORE_DAYS, SavedSessionStatus } from '../../common/background_session';
+import { securityMock } from '../../../../security/server/mocks';
+import { BACKGROUND_SESSION_STORE_DAYS, SavedSessionStatus } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { KibanaRequest, SavedObjectsClient } from 'kibana/server';
 

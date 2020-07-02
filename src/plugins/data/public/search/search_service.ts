@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { NextObserver } from 'rxjs';
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategiesMap, ISearchStrategy } from './types';

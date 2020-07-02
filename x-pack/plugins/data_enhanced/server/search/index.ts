@@ -5,3 +5,4 @@
  */
 
 export { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './es_search_strategy';
+export * from './session';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetch from 'node-fetch';
 import uuid from 'uuid';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../src/core/server';
@@ -26,11 +26,11 @@ const getData = async (wordCount: number) => {
 };
 
 export async function backgroundSessionRouteHandler(
-  backgroundSession: DataEnhancedStart['backgroundSession'],
+  sessionService: DataEnhancedStart['sessionService'],
   request: KibanaRequest<unknown, unknown, DemoBody>,
   response: KibanaResponseFactory
 ) {
-  const storedId = await backgroundSession.getId(request, request.body.sessionId, {
+  const storedId = await sessionService.getId(request, request.body.sessionId, {
     wordCount: request.body.wordCount,
   });
   let wordsArray: string[] | undefined;
@@ -40,7 +40,7 @@ export async function backgroundSessionRouteHandler(
     const internalId = getUUID();
     wordsArray = await getData(request.body.wordCount);
     demoWords.set(internalId, wordsArray!);
-    backgroundSession.trackId(request, request.body.sessionId, request.body, internalId);
+    sessionService.trackId(request, request.body.sessionId, request.body, internalId);
   }
 
   return response.ok({

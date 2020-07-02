@@ -29,11 +29,14 @@ export interface DataEnhancedStartDependencies {
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export interface DataEnhancedStart {
-  sessionService: SessionService;
+  search: {
+    session: SessionService;
+  };
 }
 
 export class DataEnhancedPlugin
-  implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  implements
+    Plugin<void, DataEnhancedStart, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private sessionService!: SessionService;
 
   public setup(
@@ -72,7 +75,9 @@ export class DataEnhancedPlugin
     });
 
     return {
-      sessionService: this.sessionService,
+      search: {
+        session: this.sessionService,
+      },
     };
   }
 }
