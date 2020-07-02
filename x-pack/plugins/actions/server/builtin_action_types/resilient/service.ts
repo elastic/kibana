@@ -5,7 +5,6 @@
  */
 
 import axios from 'axios';
-import https from 'https';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import {
@@ -72,9 +71,6 @@ export const createExternalService = ({
   const incidentUrl = `${url}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
   const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
   const axiosInstance = axios.create({
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
     auth: { username: apiKeyId, password: apiKeySecret },
   });
 
