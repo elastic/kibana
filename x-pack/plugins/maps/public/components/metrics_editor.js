@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
-import { DEFAULT_METRIC } from '../classes/sources/es_agg_source';
+import { DEFAULT_METRIC } from '../layers/sources/es_agg_source';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
   function renderMetrics() {
