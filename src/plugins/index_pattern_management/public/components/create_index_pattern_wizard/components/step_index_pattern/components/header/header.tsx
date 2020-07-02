@@ -63,14 +63,15 @@ export const Header: React.FC<HeaderProps> = ({
       </h2>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem>
         <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
-                defaultMessage="Index pattern"
+                defaultMessage="Index pattern name"
               />
             }
             isInvalid={isInputInvalid}
@@ -79,16 +80,12 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <p>
                   <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
-                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                    values={{ asterisk: <strong>*</strong> }}
-                  />
-                </p>
-                <p>
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                    defaultMessage="You can't use spaces or the characters {characterList}."
-                    values={{ characterList: <strong>{characterList}</strong> }}
+                    id="indexPatternManagement.createIndexPattern.step.indexPattern.allowDisallowLabel"
+                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern. You can't use spaces or the characters {characterList}."
+                    values={{
+                      asterisk: <strong>*</strong>,
+                      characterList: <strong>{characterList}</strong>,
+                    }}
                   />
                 </p>
               </div>
@@ -106,6 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
               data-test-subj="createIndexPatternNameInput"
+              fullWidth
             />
           </EuiFormRow>
         </EuiForm>

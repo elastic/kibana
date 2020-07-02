@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiTextColor, EuiIcon, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MatchedItem } from '../../../../types';
@@ -53,13 +53,15 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
 
     if (allIndicesLength > 1) {
       statusMessage = (
-        <span>
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern can match any of your {strongIndices}, below."
-            values={{ strongIndices: <strong>{allIndicesLength} indices</strong> }}
-          />
-        </span>
+        <EuiText>
+          <h4>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
+              defaultMessage="{allIndicesLength} total matches"
+              values={{ allIndicesLength }}
+            />
+          </h4>
+        </EuiText>
       );
     } else if (!isIncludingSystemIndices && showSystemIndices) {
       statusMessage = (
@@ -163,11 +165,14 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   }
 
   return (
-    <EuiText size="s" data-test-subj="createIndexPatternStatusMessage">
-      <EuiTextColor color={statusColor}>
-        {statusIcon ? <EuiIcon type={statusIcon} /> : null}
-        {statusMessage}
-      </EuiTextColor>
-    </EuiText>
+    <>
+      <EuiSpacer />
+      <EuiText size="s" data-test-subj="createIndexPatternStatusMessage">
+        <EuiTextColor color={statusColor}>
+          {statusIcon ? <EuiIcon type={statusIcon} /> : null}
+          {statusMessage}
+        </EuiTextColor>
+      </EuiText>
+    </>
   );
 };

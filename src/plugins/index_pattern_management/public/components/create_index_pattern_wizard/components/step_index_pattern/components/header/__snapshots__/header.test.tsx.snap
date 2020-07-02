@@ -17,12 +17,10 @@ exports[`Header should mark the input as invalid 1`] = `
     size="m"
   />
   <EuiFlexGroup
-    alignItems="flexEnd"
+    alignItems="center"
     justifyContent="spaceBetween"
   >
-    <EuiFlexItem
-      grow={false}
-    >
+    <EuiFlexItem>
       <EuiForm
         isInvalid={true}
       >
@@ -34,30 +32,20 @@ exports[`Header should mark the input as invalid 1`] = `
               "Input is invalid",
             ]
           }
-          fullWidth={false}
+          fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern. You can't use spaces or the characters {characterList}."
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowDisallowLabel"
                   values={
                     Object {
                       "asterisk": <strong>
                         *
                       </strong>,
-                    }
-                  }
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                  values={
-                    Object {
                       "characterList": <strong>
                         %
                       </strong>,
@@ -70,7 +58,7 @@ exports[`Header should mark the input as invalid 1`] = `
           isInvalid={true}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
@@ -79,6 +67,7 @@ exports[`Header should mark the input as invalid 1`] = `
         >
           <EuiFieldText
             data-test-subj="createIndexPatternNameInput"
+            fullWidth={true}
             isInvalid={true}
             name="indexPattern"
             onChange={[Function]}
@@ -125,12 +114,10 @@ exports[`Header should render normally 1`] = `
     size="m"
   />
   <EuiFlexGroup
-    alignItems="flexEnd"
+    alignItems="center"
     justifyContent="spaceBetween"
   >
-    <EuiFlexItem
-      grow={false}
-    >
+    <EuiFlexItem>
       <EuiForm
         isInvalid={false}
       >
@@ -138,30 +125,20 @@ exports[`Header should render normally 1`] = `
           describedByIds={Array []}
           display="row"
           error={Array []}
-          fullWidth={false}
+          fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
               <p>
                 <FormattedMessage
-                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern. You can't use spaces or the characters {characterList}."
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowDisallowLabel"
                   values={
                     Object {
                       "asterisk": <strong>
                         *
                       </strong>,
-                    }
-                  }
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
-                  values={
-                    Object {
                       "characterList": <strong>
                         %
                       </strong>,
@@ -174,7 +151,7 @@ exports[`Header should render normally 1`] = `
           isInvalid={false}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
@@ -183,6 +160,7 @@ exports[`Header should render normally 1`] = `
         >
           <EuiFieldText
             data-test-subj="createIndexPatternNameInput"
+            fullWidth={true}
             isInvalid={false}
             name="indexPattern"
             onChange={[Function]}
