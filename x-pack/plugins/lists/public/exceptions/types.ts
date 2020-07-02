@@ -37,7 +37,6 @@ export type AddExceptionListItem = CreateExceptionListItemSchema | UpdateExcepti
 export interface PersistHookProps {
   http: HttpStart;
   onError: (arg: Error) => void;
-  onSuccess?: () => void;
 }
 
 export interface ExceptionList extends ExceptionListSchema {

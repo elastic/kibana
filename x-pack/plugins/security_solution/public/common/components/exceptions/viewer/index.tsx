@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiOverlayMask, EuiModal, EuiModalBody, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import * as i18n from '../translations';
@@ -262,29 +262,19 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
-            onCancel={onCloseExceptionModal}
-            onConfirm={onCloseExceptionModal}
+            onCancel={handleCloseExceptionModal}
+            onConfirm={handleCloseExceptionModal}
           />
         )}
+
       {currentModal === 'addModal' && exceptionListTypeToEdit !== null && (
         <AddExceptionModal
           ruleName={ruleName}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
-          onCancel={onCloseExceptionModal}
-          onConfirm={onCloseExceptionModal}
+          onCancel={handleCloseExceptionModal}
+          onConfirm={handleCloseExceptionModal}
         />
-      )}
-      {false && (
-        <EuiOverlayMask>
-          <EuiModal onClose={handleCloseExceptionModal}>
-            <EuiModalBody>
-              <EuiCodeBlock language="json" fontSize="m" paddingSize="m" overflowHeight={300}>
-                {`Modal goes here`}
-              </EuiCodeBlock>
-            </EuiModalBody>
-          </EuiModal>
-        </EuiOverlayMask>
       )}
 
       <Panel loading={isInitLoading || loadingList}>
