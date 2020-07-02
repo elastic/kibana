@@ -22,16 +22,18 @@ import {
 } from '@elastic/eui';
 import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { FieldBasedIndexPatternColumn, FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternAggRestrictions, search } from '../../../../../../../src/plugins/data/public';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
 
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface DateHistogramIndexPatternColumn
+  extends FieldBasedIndexPatternColumn,
+    FormattedIndexPatternColumn {
   operationType: 'date_histogram';
-  params: {
+  params: FormattedIndexPatternColumn['params'] & {
     interval: string;
     timeZone?: string;
   };

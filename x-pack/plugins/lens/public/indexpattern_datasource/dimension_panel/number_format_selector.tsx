@@ -36,11 +36,14 @@ interface State {
   decimalPlaces: number;
 }
 
-export function FormatSelector(props: FormatSelectorProps) {
+export function NumberFormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
 
   const currentFormat =
-    'params' in selectedColumn && selectedColumn.params && 'format' in selectedColumn.params
+    'params' in selectedColumn &&
+    selectedColumn.operationType !== 'date_histogram' &&
+    selectedColumn.params &&
+    'format' in selectedColumn.params
       ? selectedColumn.params.format
       : undefined;
   const [state, setState] = useState<State>({

@@ -10,11 +10,12 @@ interface FormatColumn {
   format: string;
   columnId: string;
   decimals?: number;
+  pattern?: string;
 }
 
-const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) => string }> = {
+const supportedFormats: Record<string, { argsToPattern: (decimals?: number) => string }> = {
   number: {
-    decimalsToPattern: (decimals = 2) => {
+    argsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0`;
       }
@@ -22,7 +23,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
     },
   },
   percent: {
-    decimalsToPattern: (decimals = 2) => {
+    argsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0%`;
       }
@@ -30,7 +31,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
     },
   },
   bytes: {
-    decimalsToPattern: (decimals = 2) => {
+    argsToPattern: (decimals = 2) => {
       if (decimals === 0) {
         return `0,0b`;
       }
@@ -63,9 +64,13 @@ export const formatColumn: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    pattern: {
+      types: ['string'],
+      help: '',
+    },
   },
   inputTypes: ['kibana_datatable'],
-  fn(input, { format, columnId, decimals }: FormatColumn) {
+  fn(input, { format, columnId, decimals, pattern }: FormatColumn) {
     return {
       ...input,
       columns: input.columns.map((col) => {
@@ -75,13 +80,13 @@ export const formatColumn: ExpressionFunctionDefinition<
               ...col,
               formatHint: {
                 id: format,
-                params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+                params: { pattern: supportedFormats[format].argsToPattern(decimals) },
               },
             };
           } else {
             return {
               ...col,
-              formatHint: { id: format, params: {} },
+              formatHint: { id: format, params: pattern ? { pattern } : {} },
             };
           }
         }

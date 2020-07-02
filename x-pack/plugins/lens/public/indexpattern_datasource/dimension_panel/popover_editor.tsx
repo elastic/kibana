@@ -33,7 +33,8 @@ import { hasField } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { FormatSelector } from './format_selector';
+import { NumberFormatSelector } from './number_format_selector';
+import { DateFormatSelector } from './date_format_selector';
 
 const operationPanels = getOperationDisplay();
 
@@ -390,7 +391,24 @@ export function PopoverEditor(props: PopoverEditorProps) {
               )}
 
               {selectedColumn && selectedColumn.dataType === 'number' ? (
-                <FormatSelector
+                <NumberFormatSelector
+                  selectedColumn={selectedColumn}
+                  onChange={(newFormat) => {
+                    setState(
+                      updateColumnParam({
+                        state,
+                        layerId,
+                        currentColumn: selectedColumn,
+                        paramName: 'format',
+                        value: newFormat,
+                      })
+                    );
+                  }}
+                />
+              ) : null}
+
+              {selectedColumn && selectedColumn.dataType === 'date' ? (
+                <DateFormatSelector
                   selectedColumn={selectedColumn}
                   onChange={(newFormat) => {
                     setState(

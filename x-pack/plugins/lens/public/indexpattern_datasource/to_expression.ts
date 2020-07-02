@@ -11,6 +11,7 @@ import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
@@ -60,30 +61,21 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
-    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
-
     const columnsWithFormatters = columnEntries.filter(
       ([, col]) => col.params && 'format' in col.params && col.params.format
-    ) as Array<[string, FormattedColumn]>;
+    ) as Array<[string, FormattedIndexPatternColumn]>;
     const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
-      const format = (col as FormattedColumn).params!.format;
+      const format = col.params!.format!;
       const base: ExpressionFunctionAST = {
         type: 'function',
         function: 'lens_format_column',
         arguments: {
           format: [format.id],
           columnId: [id],
+          decimals: typeof format.params?.decimals === 'number' ? [format.params.decimals] : [],
+          pattern: typeof format.params?.pattern === 'string' ? [format.params.pattern] : [],
         },
       };
-      if (typeof format.params?.decimals === 'number') {
-        return {
-          ...base,
-          arguments: {
-            ...base.arguments,
-            decimals: [format.params.decimals],
-          },
-        };
-      }
       return base;
     });
 
