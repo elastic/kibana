@@ -33,7 +33,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         },
         producer: 'alertsFixture',
       });
-      expect(authorizedConsumers).to.contain('alertsFixture');
+      expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
 
     it('should return actionVariables with both context and state', async () => {
