@@ -89,20 +89,24 @@ interface UseWithSourceState {
   loading: boolean;
 }
 
-export const useWithSource = (sourceId = 'default', indexToAdd?: string[] | null) => {
+export const useWithSource = (
+  sourceId = 'default',
+  indexToAdd?: string[] | null,
+  onlyCheckIndexToAdd?: boolean
+) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...configIndex, ...indexToAdd];
+      return [...(!onlyCheckIndexToAdd ? configIndex : []), ...indexToAdd];
     }
     return configIndex;
-  }, [configIndex, indexToAdd]);
+  }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
 
   const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
-    indicesExist: undefined,
+    indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
     loading: false,
   });
 

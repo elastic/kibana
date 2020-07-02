@@ -14,7 +14,7 @@ import {
 } from '../../../state/actions';
 import {
   anomaliesSelector,
-  hasMLFeatureAvailable,
+  hasMLFeatureSelector,
   hasMLJobSelector,
   selectDurationLines,
 } from '../../../state/selectors';
@@ -34,7 +34,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
-  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+  const isMLAvailable = useSelector(hasMLFeatureSelector);
 
   const { data: mlJobs, loading: jobsLoading } = useSelector(hasMLJobSelector);
 

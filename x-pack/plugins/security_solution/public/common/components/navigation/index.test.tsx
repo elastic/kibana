@@ -81,6 +81,7 @@ describe('SIEM Navigation', () => {
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
+        graphEventId: '',
       },
     },
   };
@@ -140,13 +141,6 @@ describe('SIEM Navigation', () => {
             name: 'Timelines',
             urlKey: 'timeline',
           },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
-          },
         },
         pageName: 'hosts',
         pathName: '/',
@@ -160,6 +154,7 @@ describe('SIEM Navigation', () => {
         timeline: {
           id: '',
           isOpen: false,
+          graphEventId: '',
         },
         timerange: {
           global: {
@@ -216,13 +211,6 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
-          endpointAlerts: {
-            disabled: false,
-            href: '/app/security/endpoint-alerts',
-            id: 'endpointAlerts',
-            name: 'Endpoint Alerts',
-            urlKey: 'management',
-          },
           hosts: {
             disabled: false,
             href: '/app/security/hosts',
@@ -266,7 +254,7 @@ describe('SIEM Navigation', () => {
         search: '',
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false },
+        timeline: { id: '', isOpen: false, graphEventId: '' },
         timerange: {
           global: {
             linkTo: ['timeline'],

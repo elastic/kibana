@@ -5,7 +5,7 @@
  */
 
 import { isEqual, difference } from 'lodash';
-import { IClusterClient, Logger } from '../../../../../src/core/server';
+import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
 
 import { serializePrivileges } from './privileges_serializer';
 import { PrivilegesService } from './privileges';
@@ -14,7 +14,7 @@ export async function registerPrivilegesWithCluster(
   logger: Logger,
   privileges: PrivilegesService,
   application: string,
-  clusterClient: IClusterClient
+  clusterClient: ILegacyClusterClient
 ) {
   const arePrivilegesEqual = (
     existingPrivileges: Record<string, unknown>,

@@ -16,8 +16,10 @@ import {
   getTagsInclude,
   getDescriptionListContent,
   getFormattedComments,
+  filterExceptionItems,
+  getNewExceptionItem,
 } from './helpers';
-import { FormattedEntry, DescriptionListItem } from './types';
+import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
   isOperator,
   isNotOperator,
@@ -27,8 +29,8 @@ import {
   isNotInListOperator,
   existsOperator,
   doesNotExistOperator,
-} from './operators';
-import { OperatorTypeEnum } from '../../../lists_plugin_deps';
+} from '../autocomplete/operators';
+import { OperatorTypeEnum, OperatorEnum } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   getEntryExistsMock,
@@ -37,7 +39,7 @@ import {
   getEntryMatchAnyMock,
   getEntriesArrayMock,
 } from '../../../../../lists/common/schemas/types/entries.mock';
-import { getCommentsMock } from '../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -169,7 +171,7 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'exists',
-          value: null,
+          value: undefined,
         },
       ];
       expect(result).toEqual(expected);
@@ -221,13 +223,13 @@ describe('Exception helpers', () => {
           fieldName: 'host.name',
           isNested: false,
           operator: 'exists',
-          value: null,
+          value: undefined,
         },
         {
           fieldName: 'host.name',
           isNested: false,
-          operator: null,
-          value: null,
+          operator: undefined,
+          value: undefined,
         },
         {
           fieldName: 'host.name.host.name',
@@ -382,7 +384,7 @@ describe('Exception helpers', () => {
 
   describe('#getFormattedComments', () => {
     test('it returns formatted comment object with username and timestamp', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       expect(result[0].username).toEqual('some user');
@@ -390,7 +392,7 @@ describe('Exception helpers', () => {
     });
 
     test('it returns formatted timeline icon with comment users initial', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].timelineIcon as React.ReactElement);
@@ -399,12 +401,44 @@ describe('Exception helpers', () => {
     });
 
     test('it returns comment text', () => {
-      const payload = getCommentsMock();
+      const payload = getCommentsArrayMock();
       const result = getFormattedComments(payload);
 
       const wrapper = mount<React.ReactElement>(result[0].children as React.ReactElement);
 
-      expect(wrapper.text()).toEqual('some comment');
+      expect(wrapper.text()).toEqual('some old comment');
+    });
+  });
+
+  describe('#filterExceptionItems', () => {
+    test('it removes empty entry items', () => {
+      const { entries, ...rest } = getExceptionListItemSchemaMock();
+      const mockEmptyException: EmptyEntry = {
+        field: 'host.name',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: undefined,
+      };
+      const exceptions = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
+    });
+
+    test('it removes `temporaryId` from items', () => {
+      const { meta, ...rest } = getNewExceptionItem({
+        listType: 'detection',
+        listId: '123',
+        namespaceType: 'single',
+        ruleName: 'rule name',
+      });
+      const exceptions = filterExceptionItems([{ ...rest, meta }]);
+
+      expect(exceptions).toEqual([{ ...rest, meta: undefined }]);
     });
   });
 });

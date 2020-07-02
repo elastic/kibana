@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
@@ -55,9 +56,27 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataSelectors.processNodePositionsAndEdgeLineSegments
 );
 
+/**
+ * If we need to fetch, this is the entity ID to fetch.
+ */
+export const databaseDocumentIDToFetch = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToFetch
+);
+
+export const databaseDocumentIDToAbort = composeSelectors(
+  dataStateSelector,
+  dataSelectors.databaseDocumentIDToAbort
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
+);
+
+export const terminatedProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.terminatedProcesses
 );
 
 /**
@@ -153,15 +172,6 @@ export const graphableProcesses = composeSelectors(
 );
 
 /**
- * Select the `ancestors` and `children` limits that were reached or exceeded
- * during the request for the current tree.
- */
-export const lineageLimitsReached = composeSelectors(
-  dataStateSelector,
-  dataSelectors.limitsReached
-);
-
-/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */
@@ -171,3 +181,35 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 ): (state: OuterState) => ReturnValue {
   return (state) => secondSelector(selector(state));
 }
+
+const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
+const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
+  dataStateSelector,
+  dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
+);
+
+/**
+ * Total count of related events for a process.
+ */
+export const relatedEventTotalForProcess = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventTotalForProcess
+);
+
+/**
+ * Return the visible edge lines and process nodes based on the camera position at `time`.
+ * The bounding box represents what the camera can see. The camera position is a function of time because it can be
+ * animated. So in order to get the currently visible entities, we need to pass in time.
+ */
+export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
+  indexedProcessNodesAndEdgeLineSegments,
+  boundingBox,
+  function (
+    /* eslint-disable no-shadow */
+    indexedProcessNodesAndEdgeLineSegments,
+    boundingBox
+    /* eslint-enable no-shadow */
+  ) {
+    return (time: number) => indexedProcessNodesAndEdgeLineSegments(boundingBox(time));
+  }
+);

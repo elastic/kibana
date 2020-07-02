@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -255,6 +256,31 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         const refreshedTimeString = await PageObjects.discover.getChartTimespan();
         expect(refreshedTimeString).not.to.be(initialTimeString);
+      });
+    });
+
+    describe('invalid time range in URL', function () {
+      it('should display a "Invalid time range toast"', async function () {
+        await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+        const toastMessage = await PageObjects.common.closeToast();
+        expect(toastMessage).to.be('Invalid time range');
+      });
+    });
+
+    describe('managing fields', function () {
+      it('should add a field, sort by it, remove it and also sorting by it', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        await PageObjects.discover.clickFieldSort('_score');
+        const currentUrlWithScore = await browser.getCurrentUrl();
+        expect(currentUrlWithScore).to.contain('_score');
+        await PageObjects.discover.clickFieldListItemAdd('_score');
+        const currentUrlWithoutScore = await browser.getCurrentUrl();
+        expect(currentUrlWithoutScore).not.to.contain('_score');
       });
     });
   });

@@ -5,6 +5,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -12,6 +13,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -21,11 +27,13 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -45,8 +53,9 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -60,6 +69,43 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -73,6 +119,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -80,6 +127,11 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -89,11 +141,13 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -113,8 +167,9 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -128,6 +183,43 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -141,6 +233,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -148,6 +241,11 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -157,11 +255,13 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -181,8 +281,9 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -196,6 +297,43 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -209,6 +347,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -216,6 +355,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -225,11 +369,13 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -249,8 +395,9 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -264,6 +411,43 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -277,6 +461,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -284,6 +469,11 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -293,11 +483,13 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -317,8 +509,9 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -336,6 +529,47 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -349,6 +583,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -356,6 +591,11 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -365,11 +605,13 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -389,8 +631,9 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -408,6 +651,47 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }
@@ -421,6 +705,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   renderer="canvas"
 >
   <Connect(SpecInstance)
+    baseTheme={Object {}}
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -428,6 +713,11 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     showLegend={false}
     showLegendExtra={false}
     theme={Object {}}
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
   />
   <Connect(SpecInstance)
     id="x"
@@ -437,11 +727,13 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title="c"
   />
   <Connect(SpecInstance)
-    id="y"
+    groupId="left"
+    id="left"
+    key="left"
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title=""
+    title="a"
   />
   <Connect(SpecInstance)
     data={
@@ -461,8 +753,9 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
       ]
     }
     enableHistogramMode={false}
-    id="d"
-    key="0"
+    groupId="left"
+    id="d-a"
+    key="0-0"
     name={[Function]}
     splitSeriesAccessors={
       Array [
@@ -480,6 +773,47 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     yAccessors={
       Array [
         "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
         "b",
       ]
     }

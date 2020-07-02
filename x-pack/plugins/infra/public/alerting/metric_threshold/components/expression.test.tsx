@@ -37,6 +37,7 @@ describe('Expression', () => {
     };
 
     const mocks = coreMock.createSetup();
+    const startMocks = coreMock.createStart();
     const [
       {
         application: { capabilities },
@@ -48,7 +49,7 @@ describe('Expression', () => {
       toastNotifications: mocks.notifications.toasts,
       actionTypeRegistry: actionTypeRegistryMock.create() as any,
       alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: mocks.docLinks,
+      docLinks: startMocks.docLinks,
       capabilities: {
         ...capabilities,
         actions: {

@@ -175,7 +175,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <OnFailureProcessorsTitle />

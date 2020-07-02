@@ -41,6 +41,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
+    graphEventId,
     id,
     isLive,
     isTimelineExists,
@@ -56,6 +57,8 @@ const StatefulTimelineComponent = React.memo<Props>(
     showCallOutUnauthorizedMsg,
     sort,
     start,
+    status,
+    timelineType,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
     updateItemsPerPage,
@@ -168,6 +171,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         end={end}
         eventType={eventType}
         filters={filters}
+        graphEventId={graphEventId}
         id={id}
         indexPattern={indexPattern}
         indexToAdd={indexToAdd}
@@ -187,6 +191,7 @@ const StatefulTimelineComponent = React.memo<Props>(
         showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
         sort={sort!}
         start={start}
+        status={status}
         toggleColumn={toggleColumn}
         usersViewing={usersViewing}
       />
@@ -196,6 +201,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
+      prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
@@ -204,6 +210,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
+      prevProps.timelineType === nextProps.timelineType &&
+      prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
@@ -229,22 +237,25 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType,
       filters,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       show,
       sort,
+      status,
+      timelineType,
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
 
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
-
     return {
       columns,
       dataProviders,
       eventType,
       end: input.timerange.to,
       filters: timelineFilter,
+      graphEventId,
       id,
       isLive: input.policy.kind === 'interval',
       isTimelineExists: getTimeline(state, id) != null,
@@ -256,6 +267,8 @@ const makeMapStateToProps = () => {
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       sort,
       start: input.timerange.from,
+      status,
+      timelineType,
     };
   };
   return mapStateToProps;

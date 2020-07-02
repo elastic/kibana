@@ -1,0 +1,3 @@
+  package_paths:
+    - /registry/packages/package-storage
+    - /registry/packages/test-packages
