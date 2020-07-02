@@ -17,6 +17,7 @@ export const jobSelectionChange = (state: ExplorerState, payload: ActionPayload)
     noInfluencersConfigured: getInfluencers(selectedJobs).length === 0,
     overallSwimlaneData: getDefaultSwimlaneData(),
     selectedJobs,
+    viewByFromPage: 1,
   };
 
   // clear filter if selected jobs have no influencers

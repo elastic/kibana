@@ -24,7 +24,12 @@ expect.addSnapshotSerializer({
 test('get template', () => {
   const templateName = 'logs-nginx-access-abcd';
 
-  const template = getTemplate('logs', templateName, { properties: {} });
+  const template = getTemplate({
+    type: 'logs',
+    templateName,
+    packageName: 'nginx',
+    mappings: { properties: {} },
+  });
   expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
 });
 
@@ -35,7 +40,12 @@ test('tests loading base.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('logs', 'foo', mappings);
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'foo',
+    packageName: 'nginx',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
@@ -47,7 +57,12 @@ test('tests loading coredns.logs.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('logs', 'foo', mappings);
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'foo',
+    packageName: 'coredns',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
@@ -59,7 +74,12 @@ test('tests loading system.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('metrics', 'whatsthis', mappings);
+  const template = getTemplate({
+    type: 'metrics',
+    templateName: 'whatsthis',
+    packageName: 'system',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
