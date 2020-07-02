@@ -205,12 +205,12 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id, namespace_type }: ExceptionIdentifiers) => {
-      setLoadingItemIds([{ id, namespace_type }]);
+    ({ id, namespaceType }: ExceptionIdentifiers) => {
+      setLoadingItemIds([{ id, namespaceType }]);
 
       deleteExceptionItem({
         id,
-        namespaceType: namespace_type,
+        namespaceType,
         onSuccess: () => {
           setLoadingItemIds(loadingItemIds.filter((t) => t.id !== id));
           handleFetchList();

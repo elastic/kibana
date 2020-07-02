@@ -73,25 +73,25 @@ export const useExceptionList = ({
         let exceptions: ExceptionListItemSchema[] = [];
         let exceptionListsReturned: ExceptionList[] = [];
 
-        const fetchData = async ({ id, namespace_type }: ExceptionIdentifiers): Promise<void> => {
+        const fetchData = async ({ id, namespaceType }: ExceptionIdentifiers): Promise<void> => {
           try {
             setLoading(true);
 
             const {
               list_id,
-              namespace_type: namespaceType,
+              namespace_type,
               ...restOfExceptionList
             } = await fetchExceptionListById({
               http,
               id,
-              namespaceType: namespace_type,
+              namespaceType,
               signal: abortCtrl.signal,
             });
             const fetchListItemsResult = await fetchExceptionListItemsByListId({
               filterOptions,
               http,
               listId: list_id,
-              namespaceType,
+              namespaceType: namespace_type,
               pagination,
               signal: abortCtrl.signal,
             });
@@ -147,8 +147,8 @@ export const useExceptionList = ({
         // TODO: Workaround for now. Once api updated, we can pass in array of lists to fetch
         await Promise.all(
           lists.map(
-            ({ id, namespace_type }: ExceptionIdentifiers): Promise<void> =>
-              fetchData({ id, namespace_type })
+            ({ id, namespaceType }: ExceptionIdentifiers): Promise<void> =>
+              fetchData({ id, namespaceType })
           )
         );
 

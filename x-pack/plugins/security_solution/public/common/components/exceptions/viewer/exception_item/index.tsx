@@ -55,7 +55,7 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const handleDelete = useCallback((): void => {
-    onDeleteException({ id: exceptionItem.id, namespace_type: exceptionItem.namespace_type });
+    onDeleteException({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
   }, [onDeleteException, exceptionItem.id, exceptionItem.namespace_type]);
 
   const handleEdit = useCallback((): void => {

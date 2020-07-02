@@ -141,7 +141,7 @@ describe('ExceptionsViewerItems', () => {
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
-      namespace_type: 'single',
+      namespaceType: 'single',
     });
   });
 });
