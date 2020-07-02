@@ -64,17 +64,27 @@ export const createTableVisCell = (table: Table, formattedColumns: any[], vis: E
   );
 
   if (column?.filterable && contentsIsDefined) {
+    const filterForToolTipText = i18n.translate(
+      'visTypeTable.tableCellFilter.filterForValueTooltip',
+      {
+        defaultMessage: 'Filter for value',
+      }
+    );
+    const filterOutToolTipText = i18n.translate(
+      'visTypeTable.tableCellFilter.filterOutValueTooltip',
+      {
+        defaultMessage: 'Filter out value',
+      }
+    );
+
     return (
       <EuiFlexGroup className="tbvChartCell__filterable" gutterSize="s" alignItems="center">
         <EuiFlexItem>{cellContent}</EuiFlexItem>
 
         <EuiFlexItem className="tbvChartCellFilter" grow={false}>
-          <EuiToolTip
-            content={i18n.translate('visTypeTable.tableCellFilter.filterForValueTooltip', {
-              defaultMessage: 'Filter for value',
-            })}
-          >
+          <EuiToolTip content={filterForToolTipText}>
             <EuiButtonIcon
+              aria-label={filterForToolTipText}
               data-test-subj="filterForCellValue"
               onClick={() => onFilterClick(false)}
               iconType="magnifyWithPlus"
@@ -83,12 +93,12 @@ export const createTableVisCell = (table: Table, formattedColumns: any[], vis: E
         </EuiFlexItem>
 
         <EuiFlexItem className="tbvChartCellFilter" grow={false}>
-          <EuiToolTip
-            content={i18n.translate('visTypeTable.tableCellFilter.filterOutValueTooltip', {
-              defaultMessage: 'Filter out value',
-            })}
-          >
-            <EuiButtonIcon onClick={() => onFilterClick(true)} iconType="magnifyWithMinus" />
+          <EuiToolTip content={filterOutToolTipText}>
+            <EuiButtonIcon
+              aria-label={filterOutToolTipText}
+              onClick={() => onFilterClick(true)}
+              iconType="magnifyWithMinus"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
