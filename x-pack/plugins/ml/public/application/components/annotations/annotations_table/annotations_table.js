@@ -67,7 +67,7 @@ export class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
-      queryText: `event: ${ANNOTATION_EVENT_USER}`,
+      queryText: `event:(${ANNOTATION_EVENT_USER})`,
       searchError: undefined,
       jobId:
         Array.isArray(this.props.jobs) &&
