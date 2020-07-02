@@ -61,5 +61,8 @@ if (window.__kbnThemeVersion__ === 'v7') {
   ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
 }
 
+import * as Theme from './theme.ts';
+export { Theme };
+
 // massive deps that we should really get rid of or reduce in size substantially
 export const ElasticsearchBrowser = require('elasticsearch-browser/elasticsearch.js');
