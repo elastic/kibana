@@ -19,12 +19,11 @@ import {
   SortDirection,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
-// @ts-ignore untyped local
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { Paginate, PaginateChildProps } from '../paginate';
 import { TagList } from '../tag_list';
 import { getTagsFilter } from '../../lib/get_tags_filter';
-// @ts-ignore untyped local
+// @ts-expect-error
 import { extractSearch } from '../../lib/extract_search';
 import { ComponentStrings } from '../../../i18n';
 import { CanvasTemplate } from '../../../types';
@@ -61,7 +60,7 @@ export class WorkpadTemplates extends React.PureComponent<
   WorkpadTemplatesState
 > {
   static propTypes = {
-    createFromTemplate: PropTypes.func.isRequired,
+    onCreateFromTemplate: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     templates: PropTypes.object,
   };
