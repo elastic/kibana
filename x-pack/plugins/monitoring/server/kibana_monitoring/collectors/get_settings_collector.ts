@@ -20,11 +20,11 @@ let loggedDeprecationWarning = false;
  */
 export async function getDefaultAdminEmail(config: MonitoringConfig, log?: Logger) {
   const {
-    email_notifications: { enabled, email_address: emailAddresss },
+    email_notifications: { enabled, email_address: emailAddress },
   } = config.cluster_alerts;
 
-  if (enabled && emailAddresss?.length) {
-    return emailAddresss;
+  if (enabled && emailAddress?.length) {
+    return emailAddress;
   }
 
   const defaultAdminEmail = await CoreServices.getUISetting(XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING);
@@ -34,7 +34,7 @@ export async function getDefaultAdminEmail(config: MonitoringConfig, log?: Logge
     loggedDeprecationWarning = true;
     const message =
       `Monitoring is using "${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING}" for cluster alert notifications, ` +
-      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`;
+      `which will not be supported in Kibana 8.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`;
     log.warn(message);
   }
 
