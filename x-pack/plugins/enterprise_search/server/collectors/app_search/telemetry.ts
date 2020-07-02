@@ -12,7 +12,11 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import { AS_TELEMETRY_NAME, ITelemetrySavedObject } from '../../saved_objects/app_search/telemetry';
+import {
+  AS_TELEMETRY_NAME,
+  ITelemetrySavedObject,
+  appSearchTelemetrySchema,
+} from '../../saved_objects/app_search/telemetry';
 
 /**
  * Register the telemetry collector
@@ -22,10 +26,11 @@ export const registerTelemetryUsageCollector = (
   usageCollection: UsageCollectionSetup,
   savedObjects: SavedObjectsServiceStart
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetrySavedObject>({
     type: 'app_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),
     isReady: () => true,
+    schema: appSearchTelemetrySchema,
   });
   usageCollection.registerCollector(telemetryUsageCollector);
 };

@@ -24,6 +24,22 @@ export interface ITelemetrySavedObject {
   };
 }
 
+export const appSearchTelemetrySchema = {
+  ui_viewed: {
+    setup_guide: { type: 'long' },
+    engines_overview: { type: 'long' },
+  },
+  ui_error: {
+    cannot_connect: { type: 'long' },
+    no_as_account: { type: 'long' },
+  },
+  ui_clicked: {
+    create_first_engine_button: { type: 'long' },
+    header_launch_button: { type: 'long' },
+    engine_table_link: { type: 'long' },
+  },
+};
+
 export const appSearchTelemetryType: SavedObjectsType = {
   name: AS_TELEMETRY_NAME,
   hidden: false,
@@ -35,10 +51,12 @@ export const appSearchTelemetryType: SavedObjectsType = {
           setup_guide: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
           engines_overview: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
         },
       },
@@ -47,10 +65,12 @@ export const appSearchTelemetryType: SavedObjectsType = {
           cannot_connect: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
           no_as_account: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
         },
       },
@@ -59,14 +79,17 @@ export const appSearchTelemetryType: SavedObjectsType = {
           create_first_engine_button: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
           header_launch_button: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
           engine_table_link: {
             type: 'long',
             null_value: 0,
+            index: false,
           },
         },
       },
