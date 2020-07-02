@@ -136,33 +136,30 @@ async function fetchRollupVisualizations(
   let rollupVisualizations = 0;
   let rollupVisualizationsFromSavedSearches = 0;
 
-  visualizations.forEach((visualizationData) => {
-    const {
-      _source: { visualization, references = [] as any[] },
-    } = visualizationData;
+  visualizations.forEach((visualization) => {
+    const references = get(visualization, '_source.references', []);
+    const savedSearchRefName = get(visualization, '_source.visualization.savedSearchRefName');
+    const searchSourceJSON = get(
+      visualization,
+      '_source.visualization.kibanaSavedObjectMeta.searchSourceJSON'
+    );
 
-    if (visualization) {
-      const {
-        savedSearchRefName,
-        kibanaSavedObjectMeta: { searchSourceJSON },
-      } = visualization;
-
+    if (savedSearchRefName) {
+      // This visualization depends upon a saved search.
+      const savedSearch = references.find((ref) => ref.name === savedSearchRefName);
+      if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
+        rollupVisualizations++;
+        rollupVisualizationsFromSavedSearches++;
+      }
+    } else if (searchSourceJSON) {
+      // This visualization depends upon an index pattern.
       const searchSource = JSON.parse(searchSourceJSON);
 
-      if (savedSearchRefName) {
-        // This visualization depends upon a saved search.
-        const savedSearch = references.find((ref) => ref.name === savedSearchRefName);
-        if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
-          rollupVisualizations++;
-          rollupVisualizationsFromSavedSearches++;
-        }
-      } else {
-        // This visualization depends upon an index pattern.
-        if (rollupIndexPatternToFlagMap[searchSource.index]) {
-          rollupVisualizations++;
-        }
+      if (rollupIndexPatternToFlagMap[searchSource.index]) {
+        rollupVisualizations++;
       }
     }
+
     return rollupVisualizations;
   });
 
