@@ -55,7 +55,7 @@ export const xpackMain = (kibana) => {
           deprecation: {
             message: i18n.translate('xpack.main.uiSettings.adminEmailDeprecation', {
               defaultMessage:
-                'This setting is deprecated and will not be supported in Kibana 7.0. Please configure `xpack.monitoring.cluster_alerts.email_notifications.email_address` in your kibana.yml settings.',
+                'This setting is deprecated and will not be supported in Kibana 7.0. Please configure `monitoring.cluster_alerts.email_notifications.email_address` in your kibana.yml settings.',
             }),
             docLinksKey: 'kibanaGeneralSettings',
           },

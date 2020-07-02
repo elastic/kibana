@@ -258,5 +258,6 @@ export const NUMBER_OF_MIGRATED_ALERTS = 2;
  * The advanced settings config name for the email address
  */
 export const MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS = 'monitoring:alertingEmailAddress';
+export const XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING = 'xPack:defaultAdminEmail';
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
