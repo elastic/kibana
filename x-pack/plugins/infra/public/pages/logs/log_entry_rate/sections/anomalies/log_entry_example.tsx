@@ -52,7 +52,7 @@ const VIEW_IN_STREAM_LABEL = i18n.translate(
 );
 
 const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
-  'xpack.infra.logAnomalies.logEntryExamplesViewAnomalyInMlLabel',
+  'xpack.infra.logs.analysis.logEntryExamplesViewAnomalyInMlLabel',
   {
     defaultMessage: 'View anomaly in machine learning',
   }
