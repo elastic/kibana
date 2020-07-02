@@ -149,7 +149,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
     // code + styles + style/css-loader runtimes + public path updater
-    14
+    18
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`

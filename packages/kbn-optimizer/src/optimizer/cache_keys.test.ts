@@ -104,6 +104,7 @@ describe('getOptimizerCacheKey()', () => {
                 "optimizerCacheKey": "♻",
                 "repoRoot": <absolute path>,
                 "themeTags": Array [
+                  "v7dark",
                   "v7light",
                 ],
               },
