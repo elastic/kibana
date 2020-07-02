@@ -37,7 +37,7 @@ const PolicyEmptyState = React.memo<{
   actionDisabled?: boolean;
 }>(({ loading, onActionClick, actionDisabled }) => {
   return (
-    <div data-test-sub="emptyPolicyTable">
+    <div data-test-subj="emptyPolicyTable">
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
