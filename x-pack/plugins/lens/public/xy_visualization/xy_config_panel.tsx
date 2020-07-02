@@ -106,6 +106,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           })}
           name="axisSide"
           buttonSize="compressed"
+          fullWidth
           className="eui-displayInlineBlock"
           options={[
             {
@@ -218,13 +219,18 @@ const ColorPicker = ({
             {i18n.translate('xpack.lens.xyChart.seriesColor.label', {
               defaultMessage: 'Series color',
             })}{' '}
-            <EuiIcon type="questionInCircle" color="subdued" />
+            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       }
     >
       {disabled ? (
-        <EuiToolTip position="top" content={tooltipContent.disabled} delay="long">
+        <EuiToolTip
+          position="top"
+          content={tooltipContent.disabled}
+          delay="long"
+          anchorClassName="eui-displayBlock"
+        >
           <EuiColorPicker
             compressed
             onChange={handleColor}
