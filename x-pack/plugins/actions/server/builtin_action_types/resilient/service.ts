@@ -90,7 +90,10 @@ export const createExternalService = ({
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}/${id}?text_content_output_format=objects_convert`,
+        url: `${incidentUrl}/${id}`,
+        params: {
+          text_content_output_format: 'objects_convert',
+        },
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
