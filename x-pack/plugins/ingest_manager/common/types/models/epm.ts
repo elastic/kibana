@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
+export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -276,6 +276,7 @@ export interface IndexTemplate {
   data_stream: {
     timestamp_field: string;
   };
+  _meta: object;
 }
 
 export interface TemplateRef {
