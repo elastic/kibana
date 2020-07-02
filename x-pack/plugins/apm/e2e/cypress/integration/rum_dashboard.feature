@@ -39,4 +39,4 @@ Feature: RUM Dashboard
 
   Scenario: Service name filter
     When a user changes the selected service name
-    Then it display relevant client metrics
+    Then it displays relevant client metrics
