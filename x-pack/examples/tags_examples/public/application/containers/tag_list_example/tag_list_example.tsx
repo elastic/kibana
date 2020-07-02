@@ -5,16 +5,12 @@
  */
 
 import React from 'react';
-import { Page } from '../../components';
-import { TagListExample } from '../tag_list_example';
+import { Tag } from '../../../../../../plugins/tags/public';
 
-// eslint-disable-next-line
-export interface Props {}
-
-export const App: React.FC<Props> = () => {
+export const TagListExample: React.FC = () => {
   return (
-    <Page title={'Tags examples'}>
-      <TagListExample />
-    </Page>
+    <div>
+      <Tag id={'8e07bc40-bc3d-11ea-ad31-378b8af727f3'} />
+    </div>
   );
 };

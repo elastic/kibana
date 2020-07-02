@@ -17,3 +17,5 @@ export {
   TagsPluginSetupDependencies,
   TagsPluginStartDependencies,
 } from './plugin';
+
+export { Tag, TagProps } from './containers/tag';

@@ -38,7 +38,7 @@ export interface TagsPluginSetup {
 export interface TagsPluginStart {
   tags: TagsServiceStart;
   ui: {
-    TagsProvider: React.FC;
+    Provider: React.FC;
     Tag: React.FC<TagProps>;
   };
 }
@@ -92,13 +92,13 @@ export class TagsPlugin
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
-    const TagsProvider = createTagsProvider(this.tagsService);
+    const Provider = createTagsProvider(this.tagsService);
 
     return {
       tags: this.tagsService.start(),
       ui: {
-        TagsProvider,
-        Tag: (props) => h(TagsProvider, {}, h(Tag, props)),
+        Provider,
+        Tag: (props) => h(Provider, {}, h(Tag, props)),
       },
     };
   }

@@ -5,17 +5,17 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { TagsPluginSetup, TagsPluginStart } from '../../../plugins/tags/public';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {
-  tags: DataPublicPluginSetup;
+  tags: TagsPluginSetup;
   developerExamples: DeveloperExamplesSetup;
 }
 
 export interface StartDependencies {
-  tags: DataPublicPluginStart;
+  tags: TagsPluginStart;
 }
 
 export class TagsExamplesPlugin

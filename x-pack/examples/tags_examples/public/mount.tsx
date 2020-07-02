@@ -11,10 +11,14 @@ import { StartDependencies } from './plugin';
 import { App } from './application/containers/app/lazy';
 
 export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
-  appBasePath,
   element,
 }: AppMountParameters) => {
-  const reactElement = <App />;
+  const [, plugins] = await coreSetup.getStartServices();
+  const reactElement = (
+    <plugins.tags.ui.Provider>
+      <App />
+    </plugins.tags.ui.Provider>
+  );
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };
