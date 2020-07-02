@@ -213,6 +213,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             {
               loader: require.resolve('./theme_loader'),
               options: {
+                bundleId: bundle.id,
                 themeTags: worker.themeTags,
               },
             },

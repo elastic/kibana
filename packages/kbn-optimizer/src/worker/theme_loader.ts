@@ -25,7 +25,9 @@ import { parseThemeTags, ALL_THEMES } from '../common';
 export default function (this: webpack.loader.LoaderContext) {
   this.cacheable(true);
 
-  const themeTags = parseThemeTags(getOptions(this).themeTags);
+  const options = getOptions(this);
+  const bundleId: string = options.bundleId!;
+  const themeTags = parseThemeTags(options.themeTags);
 
   const cases = ALL_THEMES.map((tag) => {
     if (themeTags.includes(tag)) {
@@ -35,7 +37,7 @@ export default function (this: webpack.loader.LoaderContext) {
     }
 
     const fallback = themeTags[0];
-    const message = `Styles for [${tag}] were not built by the current @kbn/optimizer config. Falling back to [${fallback}] theme to make Kibana usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [${tag}] in a comma separated list of themes you want to use. You can also set it to "*" to build all themes.`;
+    const message = `SASS files in [${bundleId}] were not built for theme [${tag}]. Styles were compiled using the [${fallback}] theme instead to keep Kibana somewhat usable. Please adjust the advanced settings to make use of [${themeTags}] or make sure the KBN_OPTIMIZER_THEMES environment variable includes [${tag}] in a comma separated list of themes you want to compile. You can also set it to "*" to build all themes.`;
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
