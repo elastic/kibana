@@ -30,7 +30,6 @@ export {
   EntryNested,
   EntryList,
   EntriesArray,
-  ListSchema,
   NamespaceType,
   Operator,
   OperatorEnum,
