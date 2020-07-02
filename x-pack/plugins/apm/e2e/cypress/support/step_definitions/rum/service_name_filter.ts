@@ -15,7 +15,7 @@ When('a user changes the selected service name', (filterName) => {
   );
 });
 
-Then(`it display relevant client metrics`, () => {
+Then(`it displays relevant client metrics`, () => {
   const clientMetrics = '[data-cy=client-metrics] .euiStat__title';
 
   // wait for all loading to finish
