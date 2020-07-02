@@ -23,12 +23,15 @@ export const getAddPrepackagedRulesSchemaMock = (): AddPrepackagedRulesSchema =>
 });
 
 export const getAddPrepackagedRulesSchemaDecodedMock = (): AddPrepackagedRulesSchemaDecoded => ({
+  author: [],
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
+  severity_mapping: [],
   type: 'query',
   risk_score: 55,
+  risk_score_mapping: [],
   language: 'kuery',
   references: [],
   actions: [],

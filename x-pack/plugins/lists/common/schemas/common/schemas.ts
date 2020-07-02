@@ -130,6 +130,10 @@ export type NamespaceType = t.TypeOf<typeof namespace_type>;
 
 export const operator = t.keyof({ excluded: null, included: null });
 export type Operator = t.TypeOf<typeof operator>;
+export enum OperatorEnum {
+  INCLUDED = 'included',
+  EXCLUDED = 'excluded',
+}
 
 export const operator_type = t.keyof({
   exists: null,
