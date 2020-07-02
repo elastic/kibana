@@ -20,10 +20,8 @@ var hook = require('require-in-the-middle');
 var isIterateeCall = require('lodash/_isIterateeCall');
 
 hook(['lodash'], function (lodash) {
-  return {
-    ...lodash,
-    template: createProxy(lodash.template),
-  };
+  lodash.template = createProxy(lodash.template);
+  return lodash;
 });
 
 hook(['lodash/template'], function (template) {
@@ -31,10 +29,8 @@ hook(['lodash/template'], function (template) {
 });
 
 hook(['lodash/fp'], function (fp) {
-  return {
-    ...fp,
-    template: createFpProxy(fp.template),
-  };
+  fp.template = createFpProxy(fp.template);
+  return fp;
 });
 
 hook(['lodash/fp/template'], function (template) {
