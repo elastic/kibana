@@ -6,30 +6,30 @@
 
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
-import { NewDatasource } from '../../../ingest_manager/common/types/models';
+import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 
 /**
- * Callback to handle creation of Datasources in Ingest Manager
- * @param newDatasource
+ * Callback to handle creation of package configs in Ingest Manager
+ * @param newPackageConfig
  */
-export const handleDatasourceCreate = async (
-  newDatasource: NewDatasource
-): Promise<NewDatasource> => {
-  // We only care about Endpoint datasources
-  if (newDatasource.package?.name !== 'endpoint') {
-    return newDatasource;
+export const handlePackageConfigCreate = async (
+  newPackageConfig: NewPackageConfig
+): Promise<NewPackageConfig> => {
+  // We only care about Endpoint package configs
+  if (newPackageConfig.package?.name !== 'endpoint') {
+    return newPackageConfig;
   }
 
   // We cast the type here so that any changes to the Endpoint specific data
   // follow the types/schema expected
-  let updatedDatasource = newDatasource as NewPolicyData;
+  let updatedPackageConfig = newPackageConfig as NewPolicyData;
 
   // Until we get the Default Policy Configuration in the Endpoint package,
   // we will add it here manually at creation time.
   // @ts-ignore
-  if (newDatasource.inputs.length === 0) {
-    updatedDatasource = {
-      ...newDatasource,
+  if (newPackageConfig.inputs.length === 0) {
+    updatedPackageConfig = {
+      ...newPackageConfig,
       inputs: [
         {
           type: 'endpoint',
@@ -45,5 +45,5 @@ export const handleDatasourceCreate = async (
     };
   }
 
-  return updatedDatasource;
+  return updatedPackageConfig;
 };
