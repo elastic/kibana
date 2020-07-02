@@ -188,23 +188,27 @@ const ColorPicker = ({
     }
   };
 
-  const updateColorInState: EuiColorPickerProps['onChange'] = debounce((text, output) => {
-    const newYConfigs = [...(layer.yConfig || [])];
-    const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
-    if (existingIndex !== -1) {
-      if (text === '') {
-        delete newYConfigs[existingIndex].color;
-      } else {
-        newYConfigs[existingIndex].color = output.hex;
-      }
-    } else {
-      newYConfigs.push({
-        forAccessor: accessor,
-        color: output.hex,
-      });
-    }
-    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
-  }, 256);
+  const updateColorInState: EuiColorPickerProps['onChange'] = React.useMemo(
+    () =>
+      debounce((text, output) => {
+        const newYConfigs = [...(layer.yConfig || [])];
+        const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
+        if (existingIndex !== -1) {
+          if (text === '') {
+            delete newYConfigs[existingIndex].color;
+          } else {
+            newYConfigs[existingIndex].color = output.hex;
+          }
+        } else {
+          newYConfigs.push({
+            forAccessor: accessor,
+            color: output.hex,
+          });
+        }
+        setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+      }, 256),
+    [state, layer, accessor, index]
+  );
 
   return (
     <EuiToolTip
