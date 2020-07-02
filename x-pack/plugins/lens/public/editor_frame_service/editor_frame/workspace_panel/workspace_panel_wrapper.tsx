@@ -14,29 +14,43 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FramePublicAPI, Visualization } from '../../types';
-import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
+import { Datasource, FramePublicAPI, Visualization } from '../../../types';
+import { NativeRenderer } from '../../../native_renderer';
+import { Action } from '../state_management';
+import { ChartSwitch } from './chart_switch';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
-  activeVisualization: Visualization | null;
   dispatch: (action: Action) => void;
   emptyExpression: boolean;
   title?: string;
+  visualizationMap: Record<string, Visualization>;
+  visualizationId: string | null;
+  datasourceMap: Record<string, Datasource>;
+  datasourceStates: Record<
+    string,
+    {
+      isLoading: boolean;
+      state: unknown;
+    }
+  >;
 }
 
 export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
   visualizationState,
-  activeVisualization,
   dispatch,
   title,
   emptyExpression,
+  visualizationId,
+  visualizationMap,
+  datasourceMap,
+  datasourceStates,
 }: WorkspacePanelWrapperProps) {
+  const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -52,7 +66,19 @@ export function WorkspacePanelWrapper({
     [dispatch]
   );
   return (
-    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch">
+    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <ChartSwitch
+          data-test-subj="lnsChartSwitcher"
+          visualizationMap={visualizationMap}
+          visualizationId={visualizationId}
+          visualizationState={visualizationState}
+          datasourceMap={datasourceMap}
+          datasourceStates={datasourceStates}
+          dispatch={dispatch}
+          framePublicAPI={framePublicAPI}
+        />
+      </EuiFlexItem>
       {activeVisualization && activeVisualization.renderToolbar && (
         <EuiFlexItem grow={false}>
           <NativeRenderer
