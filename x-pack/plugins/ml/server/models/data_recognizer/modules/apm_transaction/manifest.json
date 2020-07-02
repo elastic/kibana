@@ -1,7 +1,7 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in transactions from your APM services",
+  "description": "Detect anomalies in transactions from your APM services.",
   "type": "Transaction data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*-transaction",

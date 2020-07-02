@@ -3,12 +3,12 @@
   "groups": [
     "apm"
   ],
-  "description": "Detect transaction duration anomalies across transaction types for your APM services",
+  "description": "Detect transaction duration anomalies across transaction types for your APM services.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "high_mean('transaction.duration.us') by 'transaction.type' partitionfield='service.name'",
+        "detector_description": "high duration by transaction type for an APM service",
         "function": "high_mean",
         "field_name": "transaction.duration.us",
         "by_field_name": "transaction.type",
