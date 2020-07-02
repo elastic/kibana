@@ -2468,6 +2468,7 @@ export class SavedObjectTypeRegistry {
     getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
+    getVisibleTypes(): SavedObjectsType[];
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
     isMultiNamespace(type: string): boolean;
