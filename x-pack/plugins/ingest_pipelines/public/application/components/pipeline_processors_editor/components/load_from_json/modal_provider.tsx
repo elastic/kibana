@@ -94,8 +94,6 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
                 setIsModalVisible(false);
               } catch (e) {
                 setError(e);
-                // eslint-disable-next-line no-console
-                console.error(e);
               }
             }}
             cancelButtonText={i18nTexts.buttons.cancel}
@@ -131,7 +129,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
                 label={i18nTexts.editor.label}
                 onUpdate={onJsonUpdate}
                 euiCodeEditorProps={{
-                  height: '450px',
+                  height: '300px',
                 }}
               />
             </div>
