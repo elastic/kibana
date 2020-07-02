@@ -106,7 +106,7 @@ export const LogEntryRateSetupFlyout: React.FC<LogEntryRateSetupFlyoutProps> = (
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="logEntryRateSetupPage">
+      <EuiFlyoutBody>
         <EuiTitle size="s">
           <h3>
             <FormattedMessage

@@ -26,7 +26,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent<LogEntryCat
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 
   return (
-    <LogAnalysisSetupPage>
+    <LogAnalysisSetupPage data-test-subj="logEntryCategoriesSetupPage">
       <LogAnalysisSetupPageHeader>
         <FormattedMessage
           id="xpack.infra.logs.logEntryCategories.setupTitle"

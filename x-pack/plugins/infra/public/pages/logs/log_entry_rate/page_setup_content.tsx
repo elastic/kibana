@@ -26,7 +26,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   return (
-    <LogAnalysisSetupPage>
+    <LogAnalysisSetupPage data-test-subj="logEntryRateSetupPage">
       <LogAnalysisSetupPageHeader>
         <FormattedMessage
           id="xpack.infra.logs.logEntryRate.setupTitle"

@@ -106,7 +106,7 @@ export const LogEntryCategoriesSetupFlyout: React.FC<LogEntryCategoriesSetupFlyo
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="logEntryCategoriesSetupPage">
+      <EuiFlyoutBody>
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
