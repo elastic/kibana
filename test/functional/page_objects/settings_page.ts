@@ -326,10 +326,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async createIndexPattern(
       indexPatternName: string,
       timefield = '@timestamp',
-      isStandardIndexPattern = true,
-      expectWildcard = true
+      isStandardIndexPattern = true
     ) {
-      log.debug(`createIndexPattern expectWildcard = ${expectWildcard}`);
       await retry.try(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();

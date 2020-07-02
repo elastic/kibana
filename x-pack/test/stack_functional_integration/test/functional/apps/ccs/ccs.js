@@ -105,7 +105,6 @@ export default ({ getService, getPageObjects }) => {
 
     it('create local admin makelogs index pattern', async () => {
       log.debug('create local admin makelogs工程 index pattern');
-      // note that a trailing * is added to the index pattern name in this case
       await PageObjects.settings.createIndexPattern('local:makelogs工程*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('local:makelogs工程*');
@@ -113,7 +112,6 @@ export default ({ getService, getPageObjects }) => {
 
     it('create remote data makelogs index pattern', async () => {
       log.debug('create remote data makelogs工程 index pattern');
-      // note that a trailing * is added to the index pattern name in this case
       await PageObjects.settings.createIndexPattern('data:makelogs工程*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('data:makelogs工程*');
@@ -123,7 +121,6 @@ export default ({ getService, getPageObjects }) => {
       log.debug(
         'create comma separated index patterns for data and local makelogs工程 index pattern'
       );
-      // note that a trailing * is added to the index pattern name in this case
       await PageObjects.settings.createIndexPattern('data:makelogs工程-*,local:makelogs工程-*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('data:makelogs工程-*,local:makelogs工程-*');
@@ -140,11 +137,6 @@ export default ({ getService, getPageObjects }) => {
 
       await PageObjects.discover.selectIndexPattern('local:makelogs工程*');
       await PageObjects.timePicker.setCommonlyUsedTime('makelogs');
-      // const currentUrl = await browser.getCurrentUrl();
-      // const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
-      // const urlWithGlobalTime = `${kibanaBaseUrl}#/discover/?_g=(time:(from:now-3d,to:now%2B3d))`;
-      // await browser.get(urlWithGlobalTime, false);
-      // // await PageObjects.timePicker.setRelativeRange('3', 'd', '3', 'd+'); // s=seconds, m=minutes. h=hours, d=days, w=weeks, d+=days from now
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);
