@@ -5,7 +5,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -30,7 +30,7 @@ function isRisonSerializationRequired(queryParam: string): boolean {
   return risonSerializedParams.has(queryParam);
 }
 
-export function getUrlState(search: string): Dictionary<any> {
+export function parseUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = parse(search, { sort: false });
 
@@ -74,7 +74,7 @@ export const useUrlState = (accessor: string): UrlState => {
     // Only push to history if something related to the accessor of this
     // url state instance is affected (e.g. a change in '_g' should not trigger
     // a push in the '_a' instance).
-    if (!isEqual(getUrlState(locationSearch)[accessor], getUrlState(search)[accessor])) {
+    if (!isEqual(parseUrlState(locationSearch)[accessor], parseUrlState(search)[accessor])) {
       history.push({ search });
     }
   }, [search]);
@@ -82,7 +82,7 @@ export const useUrlState = (accessor: string): UrlState => {
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
       setSearch((prevSearch) => {
-        const urlState = getUrlState(prevSearch);
+        const urlState = parseUrlState(prevSearch);
         const parsedQueryString = parse(prevSearch, { sort: false });
 
         if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
@@ -130,5 +130,7 @@ export const useUrlState = (accessor: string): UrlState => {
     [search]
   );
 
-  return [getUrlState(search)[accessor], setUrlState];
+  const urlState = useMemo(() => parseUrlState(search)[accessor], [search]);
+
+  return [urlState, setUrlState];
 };
