@@ -23,10 +23,16 @@ import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { RumOverview } from '../RumDashboard';
-import { RumOverviewByServiceLink } from '../../shared/Links/apm/RumOverviewByServiceLink';
+import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 interface Props {
-  tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
+  tab:
+    | 'transactions'
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'service-map'
+    | 'rum-overview';
 }
 
 export function ServiceDetailTabs({ tab }: Props) {
@@ -115,11 +121,11 @@ export function ServiceDetailTabs({ tab }: Props) {
   if (isRumAgentName(agentName)) {
     tabs.push({
       link: (
-        <RumOverviewByServiceLink serviceName={serviceName}>
+        <RumOverviewLink serviceName={serviceName}>
           {i18n.translate('xpack.apm.home.rumTabLabel', {
             defaultMessage: 'Real User Monitoring',
           })}
-        </RumOverviewByServiceLink>
+        </RumOverviewLink>
       ),
       render: () => <RumOverview />,
       name: 'rum-overview',

@@ -262,7 +262,7 @@ export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/services/:serviceName/rum-overview',
-    component: () => <Home tab="rum-overview" />,
+    component: () => <ServiceDetails tab="rum-overview" />,
     breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
       defaultMessage: 'Real User Monitoring',
     }),

@@ -11,21 +11,16 @@
  */
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
 
-const RumOverviewLink = (props: APMLinkExtendProps) => {
-  const { urlParams } = useUrlParams();
+interface RumOverviewLinkProps extends APMLinkExtendProps {
+  serviceName?: string;
+}
+const RumOverviewLink = ({ serviceName, ...rest }: RumOverviewLinkProps) => {
+  const path = serviceName
+    ? `/services/${serviceName}/rum-overview`
+    : '/rum-overview';
 
-  const persistedFilters = pickKeys(
-    urlParams,
-    'transactionResult',
-    'host',
-    'containerId',
-    'podName'
-  );
-
-  return <APMLink path="/rum-overview" query={persistedFilters} {...props} />;
+  return <APMLink path={path} {...rest} />;
 };
 
 export { RumOverviewLink };
