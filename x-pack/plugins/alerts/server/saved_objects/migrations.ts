@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../alerting_builtins/common';
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
