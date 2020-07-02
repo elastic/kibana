@@ -12,8 +12,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     before(async () => {
       await ingestManager.setup();
     });
-    // loadTestFile(require.resolve('./endpoint_list'));
+    loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_list'));
-    // loadTestFile(require.resolve('./policy_details'));
+    loadTestFile(require.resolve('./policy_details'));
   });
 }
