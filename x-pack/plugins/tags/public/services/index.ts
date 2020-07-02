@@ -5,4 +5,3 @@
  */
 
 export * from './tags_service';
-export * from './tag_attachments_service';

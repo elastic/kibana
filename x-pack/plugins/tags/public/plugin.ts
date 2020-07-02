@@ -19,14 +19,7 @@ import {
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
-import {
-  TagsService,
-  TagsServiceSetup,
-  TagsServiceStart,
-  TagAttachmentsService,
-  TagAttachmentsServiceSetup,
-  TagAttachmentsServiceStart,
-} from './services';
+import { TagsService, TagsServiceSetup, TagsServiceStart } from './services';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -38,12 +31,10 @@ export interface TagsPluginStartDependencies {
 
 export interface TagsPluginSetup {
   tags: TagsServiceSetup;
-  attachments: TagAttachmentsServiceSetup;
 }
 
 export interface TagsPluginStart {
   tags: TagsServiceStart;
-  attachments: TagAttachmentsServiceStart;
 }
 
 export class TagsPlugin
@@ -55,7 +46,6 @@ export class TagsPlugin
       TagsPluginStartDependencies
     > {
   private readonly tagsService = new TagsService();
-  private readonly attachmentsService = new TagAttachmentsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -66,7 +56,6 @@ export class TagsPlugin
     const { http, notifications } = core;
 
     const tags = this.tagsService.setup({ http });
-    const attachments = this.attachmentsService.setup({ http });
 
     const kibanaSection = plugins.management.sections.getSection(ManagementSectionId.Kibana);
 
@@ -82,7 +71,6 @@ export class TagsPlugin
           history,
           setBreadcrumbs,
           tags,
-          attachments,
           toasts: notifications.toasts,
         });
         render(h(TagsManagementSection, { services }), element);
@@ -94,14 +82,12 @@ export class TagsPlugin
 
     return {
       tags,
-      attachments,
     };
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
     return {
       tags: this.tagsService.start(),
-      attachments: this.attachmentsService.start(),
     };
   }
 }

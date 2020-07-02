@@ -5,5 +5,6 @@
  */
 
 export * from './tags_client';
+export * from './tag_attachments_client';
 export * from './tags_manager';
 export * from './tags_service';

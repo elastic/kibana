@@ -10,10 +10,16 @@ import { useMemo } from 'react';
 import { BehaviorSubject, Observable, from } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
-import { ITagsClient, RawTagWithId, TagsClientCreateParams } from '../../../common';
+import {
+  ITagsClient,
+  RawTagWithId,
+  TagsClientCreateParams,
+  ITagAttachmentsClient,
+} from '../../../common';
 
 export interface TagsManagerParams {
-  client: ITagsClient;
+  tags: ITagsClient;
+  attachments: ITagAttachmentsClient;
 }
 
 export class Tag {
@@ -47,7 +53,7 @@ export class TagList {
   public get data$(): BehaviorSubject<TagMap> {
     if (this.state$.getValue() === 'start') {
       this.state$.next('loading');
-      this.params.client.getAll().then(
+      this.params.tags.getAll().then(
         (response) => {
           const tags: Record<string, Tag> = {};
           for (const rawTag of response.tags) tags[rawTag.id] = new Tag(rawTag);
@@ -110,7 +116,7 @@ export class TagManager {
   public readonly useTags = this.list.useData;
 
   public create$(params: TagsClientCreateParams): Observable<Tag> {
-    const { client } = this.params;
+    const { tags: client } = this.params;
     return from(client.create(params)).pipe(
       share(),
       map((response) => {
@@ -121,7 +127,7 @@ export class TagManager {
   }
 
   public delete$(ids: string[]): Observable<void> {
-    const { client } = this.params;
+    const { tags: client } = this.params;
     const deletedTags = this.list.delete(ids);
     const promise = Promise.all(ids.map((id) => client.del({ id }))).then(() => undefined);
     const observable = from(promise).pipe(share());

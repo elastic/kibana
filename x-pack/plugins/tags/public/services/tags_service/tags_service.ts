@@ -6,27 +6,32 @@
 
 import { TagsClientParams, TagsClient } from './tags_client';
 import { TagManager } from './tags_manager';
+import { TagAttachmentsClient } from './tag_attachments_client';
 
 export type TagsServiceSetupParams = TagsClientParams;
 
 export class TagsService {
-  public client?: TagsClient;
+  public tags?: TagsClient;
+  public attachments?: TagAttachmentsClient;
   public manager?: TagManager;
 
   setup(params: TagsServiceSetupParams) {
-    this.client = new TagsClient(params);
-    this.manager = new TagManager({ client: this.client });
+    const tags = (this.tags = new TagsClient(params));
+    const attachments = (this.attachments = new TagAttachmentsClient(params));
+    const manager = (this.manager = new TagManager({ tags, attachments }));
 
     return {
-      client: this.client,
-      manager: this.manager,
+      tags,
+      attachments,
+      manager,
     };
   }
 
   start() {
     return {
-      client: this.client,
-      manager: this.manager,
+      tags: this.tags!,
+      attachments: this.attachments!,
+      manager: this.manager!,
     };
   }
 }
