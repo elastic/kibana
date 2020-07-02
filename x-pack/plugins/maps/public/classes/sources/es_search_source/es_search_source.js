@@ -385,7 +385,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, sourceType: SOURCE_TYPES.ES_SEARCH },
+      meta,
     };
   }
 
@@ -540,6 +540,7 @@ export class ESSearchSource extends AbstractESSource {
       scalingType: this._descriptor.scalingType,
       topHitsSplitField: this._descriptor.topHitsSplitField,
       topHitsSize: this._descriptor.topHitsSize,
+      sourceType: SOURCE_TYPES.ES_SEARCH,
     };
   }
 

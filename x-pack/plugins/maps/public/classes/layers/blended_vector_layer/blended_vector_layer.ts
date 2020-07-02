@@ -192,8 +192,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       const requestMeta = sourceDataRequest.getMeta();
       if (
         requestMeta &&
-        requestMeta.sourceType &&
-        requestMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
+        requestMeta.sourceMeta &&
+        requestMeta.sourceMeta.sourceType === SOURCE_TYPES.ES_GEO_GRID
       ) {
         isClustered = true;
       }
