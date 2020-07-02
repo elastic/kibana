@@ -86,12 +86,6 @@ describe('<ComponentTemplateEdit />', () => {
       const { actions, component, form } = testBed;
 
       await act(async () => {
-        actions.toggleVersionSwitch();
-      });
-
-      component.update();
-
-      await act(async () => {
         form.setInputValue('versionField.input', '1');
         actions.clickNextButton();
       });

@@ -68,21 +68,6 @@ describe('<ComponentTemplateCreate />', () => {
     });
 
     describe('Step: Logistics', () => {
-      test('should toggle the version field', async () => {
-        const { exists, component, actions } = testBed;
-
-        // Version field should be hidden by default
-        expect(exists('versionField')).toBe(false);
-
-        await act(async () => {
-          actions.toggleVersionSwitch();
-        });
-
-        component.update();
-
-        expect(exists('versionField')).toBe(true);
-      });
-
       test('should toggle the metadata field', async () => {
         const { exists, component, actions } = testBed;
 

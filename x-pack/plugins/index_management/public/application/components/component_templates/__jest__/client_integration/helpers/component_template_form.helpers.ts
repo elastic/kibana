@@ -156,5 +156,4 @@ export type ComponentTemplateFormTestSubjects =
   | 'stepReview.summaryTab'
   | 'stepReview.requestTab'
   | 'versionField'
-  | 'versionField.input'
-  | 'versionToggle';
+  | 'versionField.input';

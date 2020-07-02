@@ -46,10 +46,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
     const { documentation } = useComponentTemplatesContext();
 
-    const [isVersionVisible, setIsVersionVisible] = useState<boolean>(
-      isNaN(defaultValue.version) === false
-    );
-
     const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
       Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
     );
@@ -110,7 +106,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
         <EuiSpacer size="l" />
 
-        {/* Name with optional version field */}
+        {/* Name field */}
         <FormRow
           title={
             <FormattedMessage
@@ -119,26 +115,10 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             />
           }
           description={
-            <>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
-                defaultMessage="A unique identifier for this component template."
-              />
-
-              <EuiSpacer size="m" />
-
-              <EuiSwitch
-                label={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionToggleDescription"
-                    defaultMessage="Add version number"
-                  />
-                }
-                checked={isVersionVisible}
-                onChange={(e) => setIsVersionVisible(e.target.checked)}
-                data-test-subj="versionToggle"
-              />
-            </>
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
+              defaultMessage="A unique identifier for this component template."
+            />
           }
         >
           <UseField
@@ -148,15 +128,29 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               euiFieldProps: { disabled: isEditing },
             }}
           />
+        </FormRow>
 
-          {isVersionVisible && (
-            <UseField
-              path="version"
-              componentProps={{
-                ['data-test-subj']: 'versionField',
-              }}
+        {/* version field */}
+        <FormRow
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle"
+              defaultMessage="Version"
             />
-          )}
+          }
+          description={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription"
+              defaultMessage="A number that identifies the component template to external management systems."
+            />
+          }
+        >
+          <UseField
+            path="version"
+            componentProps={{
+              ['data-test-subj']: 'versionField',
+            }}
+          />
         </FormRow>
 
         {/* _meta field */}
