@@ -188,15 +188,30 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         />
       </EuiFormRow>
       <EuiFormRow
-        isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
-        error={
-          createIndexPattern &&
-          destinationIndexPatternTitleExists && [
-            i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
-              defaultMessage: 'An index pattern with this title already exists.',
-            }),
-          ]
+        fullWidth
+        isInvalid={
+          (createIndexPattern && destinationIndexPatternTitleExists) || !createIndexPattern
         }
+        error={[
+          ...(createIndexPattern && destinationIndexPatternTitleExists
+            ? [
+                i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
+                  defaultMessage: 'An index pattern with this title already exists.',
+                }),
+              ]
+            : []),
+          ...(!createIndexPattern
+            ? [
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
+                  {
+                    defaultMessage:
+                      'You may not be able to view job results if an index pattern is not created for the destination index.',
+                  }
+                ),
+              ]
+            : []),
+        ]}
       >
         <EuiSwitch
           disabled={isJobCreated}
