@@ -25,16 +25,7 @@ export const factory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
       },
       logging: {
-        stdout: 'debug',
         file: 'info',
-      },
-      advanced: {
-        elasticsearch: {
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
       },
     },
     mac: {
@@ -47,16 +38,7 @@ export const factory = (): PolicyConfig => {
         mode: ProtectionModes.prevent,
       },
       logging: {
-        stdout: 'debug',
         file: 'info',
-      },
-      advanced: {
-        elasticsearch: {
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
       },
     },
     linux: {
@@ -66,16 +48,7 @@ export const factory = (): PolicyConfig => {
         network: true,
       },
       logging: {
-        stdout: 'debug',
         file: 'info',
-      },
-      advanced: {
-        elasticsearch: {
-          kernel: {
-            connect: true,
-            process: true,
-          },
-        },
       },
     },
   };

@@ -592,10 +592,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   mac: {
     events: {
@@ -605,10 +603,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   linux: {
     events: {
@@ -617,10 +613,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
 }
 
@@ -640,15 +634,6 @@ export interface UIPolicyConfig {
    * Linux-specific policy configuration that is supported via the UI
    */
   linux: Pick<PolicyConfig['linux'], 'events'>;
-}
-
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
 }
 
 /** Policy: Malware protection fields */
