@@ -95,7 +95,6 @@ export const AnomaliesTable: React.FunctionComponent<{
         id: anomaly.id,
         // The real ID
         dataset: anomaly.partitionId,
-        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
         datasetName: getFriendlyNameForPartitionId(anomaly.partitionId),
         anomalyScore: formatAnomalyScore(anomaly.anomalyScore),
         anomalyMessage: getAnomalyMessage(anomaly.actualLogEntryRate, anomaly.typicalLogEntryRate),
