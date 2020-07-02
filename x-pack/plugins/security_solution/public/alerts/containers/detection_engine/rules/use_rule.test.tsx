@@ -32,6 +32,7 @@ describe('useRule', () => {
         false,
         {
           actions: [],
+          author: [],
           created_at: 'mm/dd/yyyyTHH:MM:sssz',
           created_by: 'mockUser',
           description: 'some desc',
@@ -56,8 +57,10 @@ describe('useRule', () => {
           query: "user.email: 'root@elastic.co'",
           references: [],
           risk_score: 75,
+          risk_score_mapping: [],
           rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
           severity: 'high',
+          severity_mapping: [],
           tags: ['APM'],
           threat: [],
           throttle: null,
