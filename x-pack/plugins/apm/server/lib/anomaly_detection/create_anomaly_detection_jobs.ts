@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
-// import uuid from 'uuid/v4';
+import uuid from 'uuid/v4';
 // import { Job as AnomalyDetectionJob } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
@@ -51,11 +51,11 @@ async function configureAnomalyDetectionJob({
   ml: Required<Setup>['ml'];
   environment: string;
 }) {
-  const convertedEnvironment = environment; // TODO convert to ML id compatible format
-  const randomToken = '1234'; // TODO use generated UUID
+  const convertedEnvironmentName = convertToMLIdentifier(environment);
+  const randomToken = uuid().substr(-4);
   const moduleId = 'apm_transaction';
-  const prefix = `apm-${convertedEnvironment}-${randomToken}-`;
-  const groups = ['apm', convertedEnvironment];
+  const prefix = `apm-${convertedEnvironmentName}-${randomToken}-`;
+  const groups = ['apm', convertedEnvironmentName];
   const indexPatternName = 'apm-*-transaction-*';
   const query = {
     bool: {
@@ -94,4 +94,8 @@ async function configureAnomalyDetectionJob({
     jobOverrides, // Typescript Error: '{ job_tags: { 'service.environment': string; }; }' has no properties in common with type 'CustomSettings'.
     datafeedOverrides
   );
+}
+
+export function convertToMLIdentifier(value: string) {
+  return value.replace(/\s+/g, '_').toLowerCase();
 }
