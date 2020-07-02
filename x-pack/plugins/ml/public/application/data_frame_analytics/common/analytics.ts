@@ -129,7 +129,7 @@ export interface Eval {
 export interface RegressionEvaluateResponse {
   regression: {
     mean_squared_error: {
-      error: number;
+      value: number;
     };
     r_squared: {
       value: number;
@@ -410,7 +410,7 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+  let meanSquaredError = response?.regression?.mean_squared_error?.value;
 
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
