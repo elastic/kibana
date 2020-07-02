@@ -4,35 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewDatasource } from '../../../ingest_manager/common/types/models';
+import { NewPackageConfig } from '../../../ingest_manager/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
 
 /**
- * Callback to handle creation of Datasources in Ingest Manager
+ * Callback to handle creation of PackageConfigs in Ingest Manager
  */
-export const getDatasourceCreateCallback = (
+export const getPackageConfigCreateCallback = (
   manifestManager: ManifestManager
-): ((newDatasource: NewDatasource) => Promise<NewDatasource>) => {
-  const handleDatasourceCreate = async (newDatasource: NewDatasource): Promise<NewDatasource> => {
-    // We only care about Endpoint datasources
-    if (newDatasource.package?.name !== 'endpoint') {
-      return newDatasource;
+): ((newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>) => {
+  const handlePackageConfigCreate = async (
+    newPackageConfig: NewPackageConfig
+  ): Promise<NewPackageConfig> => {
+    // We only care about Endpoint package configs
+    if (newPackageConfig.package?.name !== 'endpoint') {
+      return newPackageConfig;
     }
 
     // We cast the type here so that any changes to the Endpoint specific data
     // follow the types/schema expected
-    let updatedDatasource = newDatasource as NewPolicyData;
+    let updatedPackageConfig = newPackageConfig as NewPolicyData;
 
     const wrappedManifest = await manifestManager.refresh({ initialize: true });
     if (wrappedManifest !== null) {
       // Until we get the Default Policy Configuration in the Endpoint package,
       // we will add it here manually at creation time.
       // @ts-ignore
-      if (newDatasource.inputs.length === 0) {
-        updatedDatasource = {
-          ...newDatasource,
+      if (newPackageConfig.inputs.length === 0) {
+        updatedPackageConfig = {
+          ...newPackageConfig,
           inputs: [
             {
               type: 'endpoint',
@@ -53,11 +55,11 @@ export const getDatasourceCreateCallback = (
     }
 
     try {
-      return updatedDatasource;
+      return updatedPackageConfig;
     } finally {
       await manifestManager.commit(wrappedManifest);
     }
   };
 
-  return handleDatasourceCreate;
+  return handlePackageConfigCreate;
 };

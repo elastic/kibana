@@ -5,7 +5,7 @@
  */
 
 import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import { DatasourceServiceInterface } from '../../../../../../ingest_manager/server';
+import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
@@ -25,7 +25,7 @@ export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: ArtifactClient;
   exceptionListClient: ExceptionListClient;
-  datasourceService: DatasourceServiceInterface;
+  packageConfigService: PackageConfigServiceInterface;
   logger: Logger;
   cache: ExceptionsCache;
 }
@@ -42,7 +42,7 @@ export interface WrappedManifest {
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
   protected exceptionListClient: ExceptionListClient;
-  protected datasourceService: DatasourceServiceInterface;
+  protected packageConfigService: PackageConfigServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: ExceptionsCache;
@@ -50,7 +50,7 @@ export class ManifestManager {
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
-    this.datasourceService = context.datasourceService;
+    this.packageConfigService = context.packageConfigService;
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
     this.cache = context.cache;
@@ -159,7 +159,7 @@ export class ManifestManager {
   }
 
   /**
-   * Dispatches the manifest by writing it to the endpoint datasource.
+   * Dispatches the manifest by writing it to the endpoint packageConfig.
    *
    * @return {WrappedManifest | null} WrappedManifest if all dispatched, else null
    */
@@ -183,35 +183,41 @@ export class ManifestManager {
       let success = true;
 
       while (paging) {
-        const { items, total, page } = await this.datasourceService.list(this.savedObjectsClient, {
-          page: 1,
-          perPage: 20,
-          kuery: 'ingest-datasources.package.name:endpoint',
-        });
+        const { items, total, page } = await this.packageConfigService.list(
+          this.savedObjectsClient,
+          {
+            page: 1,
+            perPage: 20,
+            kuery: 'ingest-package-configs.package.name:endpoint',
+          }
+        );
 
-        for (const datasource of items) {
-          const { id, revision, updated_at, updated_by, ...newDatasource } = datasource;
+        for (const packageConfig of items) {
+          const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
 
-          if (newDatasource.inputs.length > 0 && newDatasource.inputs[0].config !== undefined) {
-            const artifactManifest = newDatasource.inputs[0].config.artifact_manifest ?? {
+          if (
+            newPackageConfig.inputs.length > 0 &&
+            newPackageConfig.inputs[0].config !== undefined
+          ) {
+            const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
               value: {},
             };
             artifactManifest.value = wrappedManifest.manifest.toEndpointFormat();
-            newDatasource.inputs[0].config.artifact_manifest = artifactManifest;
+            newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
 
-            await this.datasourceService
-              .update(this.savedObjectsClient, id, newDatasource)
+            await this.packageConfigService
+              .update(this.savedObjectsClient, id, newPackageConfig)
               .then((response) => {
-                this.logger.debug(`Updated datasource ${id}`);
+                this.logger.debug(`Updated package config ${id}`);
               })
               .catch((err) => {
                 success = false;
-                this.logger.debug(`Error updating datasource ${id}`);
+                this.logger.debug(`Error updating package config ${id}`);
                 this.logger.error(err);
               });
           } else {
             success = false;
-            this.logger.debug(`Datasource ${id} has no config.`);
+            this.logger.debug(`Package config ${id} has no config.`);
           }
         }
 

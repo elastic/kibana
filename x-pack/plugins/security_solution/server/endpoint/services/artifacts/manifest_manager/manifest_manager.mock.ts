@@ -20,7 +20,7 @@ import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 
-function getMockDatasource() {
+function getMockPackageConfig() {
   return {
     id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
     inputs: [
@@ -37,21 +37,21 @@ function getMockDatasource() {
   };
 }
 
-class DatasourceServiceMock {
-  public create = jest.fn().mockResolvedValue(getMockDatasource());
-  public get = jest.fn().mockResolvedValue(getMockDatasource());
-  public getByIds = jest.fn().mockResolvedValue([getMockDatasource()]);
+class PackageConfigServiceMock {
+  public create = jest.fn().mockResolvedValue(getMockPackageConfig());
+  public get = jest.fn().mockResolvedValue(getMockPackageConfig());
+  public getByIds = jest.fn().mockResolvedValue([getMockPackageConfig()]);
   public list = jest.fn().mockResolvedValue({
-    items: [getMockDatasource()],
+    items: [getMockPackageConfig()],
     total: 1,
     page: 1,
     perPage: 20,
   });
-  public update = jest.fn().mockResolvedValue(getMockDatasource());
+  public update = jest.fn().mockResolvedValue(getMockPackageConfig());
 }
 
-export function getDatasourceServiceMock() {
-  return new DatasourceServiceMock();
+export function getPackageConfigServiceMock() {
+  return new PackageConfigServiceMock();
 }
 
 async function mockBuildExceptionListArtifacts(
@@ -84,12 +84,12 @@ export class ManifestManagerMock extends ManifestManager {
 }
 
 export const getManifestManagerMock = (opts?: {
-  datasourceService?: DatasourceServiceMock;
+  packageConfigService?: PackageConfigServiceMock;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManagerMock => {
-  let datasourceService = getDatasourceServiceMock();
-  if (opts?.datasourceService !== undefined) {
-    datasourceService = opts.datasourceService;
+  let packageConfigService = getPackageConfigServiceMock();
+  if (opts?.packageConfigService !== undefined) {
+    packageConfigService = opts.packageConfigService;
   }
 
   let savedObjectsClient = savedObjectsClientMock.create();
@@ -101,7 +101,7 @@ export const getManifestManagerMock = (opts?: {
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache: new ExceptionsCache(5),
     // @ts-ignore
-    datasourceService,
+    packageConfigService,
     exceptionListClient: listMock.getExceptionListClient(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     savedObjectsClient,

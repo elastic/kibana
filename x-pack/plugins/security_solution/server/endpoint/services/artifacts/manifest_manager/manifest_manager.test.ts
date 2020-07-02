@@ -6,7 +6,7 @@
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ArtifactConstants, ManifestConstants, Manifest } from '../../../lib/artifacts';
-import { getDatasourceServiceMock, getManifestManagerMock } from './manifest_manager.mock';
+import { getPackageConfigServiceMock, getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
@@ -24,15 +24,15 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager can dispatch manifest', async () => {
-      const datasourceService = getDatasourceServiceMock();
-      const manifestManager = getManifestManagerMock({ datasourceService });
+      const packageConfigService = getPackageConfigServiceMock();
+      const manifestManager = getManifestManagerMock({ packageConfigService });
       const manifestWrapperRefresh = await manifestManager.refresh();
       const manifestWrapperDispatch = await manifestManager.dispatch(manifestWrapperRefresh);
       expect(manifestWrapperRefresh).toEqual(manifestWrapperDispatch);
       const entries = manifestWrapperDispatch!.manifest.getEntries();
       const artifact = Object.values(entries)[0].getArtifact();
       expect(
-        datasourceService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
+        packageConfigService.update.mock.calls[0][2].inputs[0].config.artifact_manifest.value
       ).toEqual({
         manifest_version: 'v0',
         schema_version: '1.0.0',

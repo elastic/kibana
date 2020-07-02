@@ -9,7 +9,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
-import { getDatasourceCreateCallback } from './ingest_integration';
+import { getPackageConfigCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 
 export type EndpointAppContextServiceStartContract = Pick<
@@ -37,8 +37,8 @@ export class EndpointAppContextService {
 
     if (this.manifestManager !== undefined) {
       dependencies.registerIngestCallback(
-        'datasourceCreate',
-        getDatasourceCreateCallback(this.manifestManager)
+        'packageConfigCreate',
+        getPackageConfigCreateCallback(this.manifestManager)
       );
     }
   }

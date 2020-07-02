@@ -249,7 +249,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        datasourceService: plugins.ingestManager.datasourceService,
+        packageConfigService: plugins.ingestManager.packageConfigService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
