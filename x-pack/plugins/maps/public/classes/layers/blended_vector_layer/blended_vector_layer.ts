@@ -220,6 +220,14 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       : displayName;
   }
 
+  showJoinEditor() {
+    return true;
+  }
+
+  getJoinsDisabledReason() {
+    return this._documentSource.getJoinsDisabledReason();
+  }
+
   getJoins() {
     return [];
   }
