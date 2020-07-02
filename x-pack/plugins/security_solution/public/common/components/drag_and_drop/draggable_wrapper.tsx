@@ -49,7 +49,11 @@ class DragDropErrorBoundary extends React.PureComponent {
   }
 }
 
-const Wrapper = styled.div`
+interface WrapperProps {
+  disabled: boolean;
+}
+
+const Wrapper = styled.div<WrapperProps>`
   display: inline-block;
   max-width: 100%;
 
@@ -229,7 +233,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     [dataProvider, render, registerProvider, truncate]
   );
 
-  if (true || disabled) return <>{renderContent()}</>;
+  if (disabled) return <>{renderContent()}</>;
 
   return (
     <WithHoverActions alwaysShow={showTopN} hoverContent={hoverContent} render={renderContent} />

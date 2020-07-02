@@ -22,7 +22,6 @@ export const INPUT_TIMEOUT = 250;
 
 const FieldsBrowserButtonContainer = styled.div`
   position: relative;
-  width: 24px;
 `;
 
 FieldsBrowserButtonContainer.displayName = 'FieldsBrowserButtonContainer';

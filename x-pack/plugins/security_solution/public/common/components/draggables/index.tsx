@@ -73,7 +73,6 @@ Content.displayName = 'Content';
  * Draggable text (or an arbitrary visualization specified by `children`)
  * that's only displayed when the specified value is non-`null`.
  *
- * @param disabled - disallows to drag the badge, used in customize row renderer example column
  * @param id - a unique draggable id, which typically follows the format `${contextId}-${eventId}-${field}-${value}`
  * @param field - the name of the field, e.g. `network.transport`
  * @param value - value of the field e.g. `tcp`
@@ -84,7 +83,7 @@ Content.displayName = 'Content';
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
 export const DefaultDraggable = React.memo<DefaultDraggableType>(
-  ({ id, field, value, name, children, tooltipContent, queryValue, disabled }) =>
+  ({ id, field, value, name, children, tooltipContent, queryValue }) =>
     value != null ? (
       <DraggableWrapper
         dataProvider={{

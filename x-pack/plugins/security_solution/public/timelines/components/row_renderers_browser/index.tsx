@@ -4,17 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiToolTip, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiOverlayMask,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { State } from '../../../common/store';
 
+import { RowRendererId } from '../../../../common/types/timeline';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 import { FieldBrowserProps } from './types';
+
+const CloseButtonIcon = styled(EuiButtonIcon)`
+  position: absolute;
+  right: 0;
+  top: 0;
+`;
 
 const RowRenderersBrowserButtonContainer = styled.div`
   position: relative;
@@ -22,10 +41,39 @@ const RowRenderersBrowserButtonContainer = styled.div`
 
 RowRenderersBrowserButtonContainer.displayName = 'RowRenderersBrowserButtonContainer';
 
-export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> = ({
-  height,
+const StyledEuiModal = styled(EuiModal)`
+  margin: 0 auto;
+`;
+
+const StyledEuiModalBody = styled(EuiModalBody)`
+  .euiModalBody__overflow {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+
+      > div:first-child {
+        flex: 0;
+      }
+
+      .euiBasicTable {
+        flex: 1;
+        overflow: auto;
+      }
+    }
+  }
+`;
+
+interface StatefulRowRenderersBrowserProps {
+  timelineId: string;
+}
+
+export const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
   timelineId,
-  width,
 }) => {
   const dispatch = useDispatch();
   const excludedRowRendererIds = useSelector(
@@ -36,7 +84,10 @@ export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> =
   const setExcludedRowRendererIds = useCallback(
     (payload) =>
       dispatch(
-        dispatchSetExcludedRowRendererIds({ id: timelineId, excludedRowRendererIds: payload })
+        dispatchSetExcludedRowRendererIds({
+          id: timelineId,
+          excludedRowRendererIds: payload,
+        })
       ),
     [dispatch, timelineId]
   );
@@ -45,33 +96,76 @@ export const StatefulRowRenderersBrowserComponent: React.FC<FieldBrowserProps> =
 
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
-  const button = (
-    <EuiToolTip content={'Customize Event Renderers'}>
-      <EuiButtonEmpty
-        data-test-subj="show-field-browser"
-        iconType="gear"
-        onClick={toggleShow}
-        size="xs"
-      >
-        {'Event Renderers'}
-      </EuiButtonEmpty>
-    </EuiToolTip>
-  );
+  const handleDisableAll = useCallback(() => setExcludedRowRendererIds([RowRendererId.all]), [
+    setExcludedRowRendererIds,
+  ]);
+  const handleEnableAll = useCallback(() => setExcludedRowRendererIds([]), [
+    setExcludedRowRendererIds,
+  ]);
 
   return (
     <>
-      <EuiPopover button={button} isOpen={show} closePopover={hideFieldBrowser}>
-        <RowRenderersBrowserButtonContainer data-test-subj="fields-browser-button-container">
-          <RowRenderersBrowser
-            height={height}
-            onOutsideClick={hideFieldBrowser}
-            timelineId={timelineId}
-            width={width}
-            excludedRowRendererIds={excludedRowRendererIds}
-            setExcludedRowRendererIds={setExcludedRowRendererIds}
-          />
-        </RowRenderersBrowserButtonContainer>
-      </EuiPopover>
+      <EuiToolTip content={'Customize Event Renderers'}>
+        <EuiButtonEmpty
+          data-test-subj="show-field-browser"
+          iconType="gear"
+          onClick={toggleShow}
+          size="xs"
+        >
+          {'Event Renderers'}
+        </EuiButtonEmpty>
+      </EuiToolTip>
+
+      {show && (
+        <EuiOverlayMask>
+          <StyledEuiModal maxWidth="95vw" onClose={hideFieldBrowser}>
+            <CloseButtonIcon color="text" onClick={hideFieldBrowser} iconType="cross" />
+            <EuiModalHeader>
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="spaceBetween"
+                direction="row"
+                gutterSize="none"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiModalHeaderTitle>{'Customize Row Renderers'}</EuiModalHeaderTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        data-test-subj="disable-all"
+                        onClick={handleDisableAll}
+                      >
+                        {'Disable All'}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        size="s"
+                        data-test-subj="enable-all"
+                        onClick={handleEnableAll}
+                      >
+                        {'Enable All'}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiModalHeader>
+
+            <StyledEuiModalBody>
+              <RowRenderersBrowser
+                excludedRowRendererIds={excludedRowRendererIds}
+                setExcludedRowRendererIds={setExcludedRowRendererIds}
+              />
+            </StyledEuiModalBody>
+          </StyledEuiModal>
+        </EuiOverlayMask>
+      )}
     </>
   );
 };

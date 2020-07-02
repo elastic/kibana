@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+
+import { createSocketRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { mockEndgameIpv4ConnectionAcceptEvent } from '../../../../common/mock/mock_endgame_ecs_data';
+
+const SystemSocketExampleComponent: React.FC = () => {
+  const systemSocketRowRenderer = createSocketRowRenderer({
+    actionName: 'ipv4_connection_accept_event',
+    text: 'accepted a connection via',
+  });
+  return (
+    <>
+      {systemSocketRowRenderer.renderRow({
+        browserFields: {},
+        data: mockEndgameIpv4ConnectionAcceptEvent,
+        timelineId: 'row-renderer-example',
+      })}
+    </>
+  );
+};
+export const SystemSocketExample = React.memo(SystemSocketExampleComponent);

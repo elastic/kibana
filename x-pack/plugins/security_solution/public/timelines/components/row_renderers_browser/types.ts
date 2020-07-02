@@ -32,6 +32,4 @@ export interface FieldBrowserProps {
   timelineId: string;
   /** Adds or removes a column to / from the timeline */
   toggleColumn: (column: ColumnHeaderOptions) => void;
-  /** The width of the field browser */
-  width: number;
 }
