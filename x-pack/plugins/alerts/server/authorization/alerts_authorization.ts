@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pluck, mapValues, remove, omit, isUndefined, zipObject } from 'lodash';
+import { pluck, mapValues, remove, zipObject } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
@@ -83,67 +83,63 @@ export class AlertsAuthorization {
     const { authorization } = this;
     if (authorization) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
+      const requiredPrivilegesByScope = {
+        consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
+        producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
+      };
 
       // We special case the Alerts Management `consumer` as we don't want to have to
       // manually authorize each alert type in the management UI
       const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
-      // We special case the Alerts Management `prodcuer` as all users are authorized
-      // to use built-in alert types by definition
-      const shouldAuthorizeProducer =
-        alertType.producer !== ALERTS_FEATURE_ID && alertType.producer !== consumer;
 
-      if (shouldAuthorizeConsumer || shouldAuthorizeProducer) {
-        const requiredPrivilegesByScope = omit(
-          {
-            consumer: shouldAuthorizeConsumer
-              ? authorization.actions.alerting.get(alertTypeId, consumer, operation)
-              : undefined,
-            producer: shouldAuthorizeProducer
-              ? authorization.actions.alerting.get(alertTypeId, alertType.producer, operation)
-              : undefined,
-          },
-          isUndefined
+      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+      const { hasAllRequested, username, privileges } = await checkPrivileges(
+        shouldAuthorizeConsumer && consumer !== alertType.producer
+          ? [
+              // check for access at consumer level
+              requiredPrivilegesByScope.consumer,
+              // check for access at producer level
+              requiredPrivilegesByScope.producer,
+            ]
+          : [
+              // skip consumer privilege checks under `alerts` as all alert types can
+              // be created under `alerts` if you have producer level privileges
+              requiredPrivilegesByScope.producer,
+            ]
+      );
+
+      if (hasAllRequested) {
+        this.auditLogger.alertsAuthorizationSuccess(
+          username,
+          alertTypeId,
+          ScopeType.Consumer,
+          consumer,
+          operation
+        );
+      } else {
+        const authorizedPrivileges = pluck(
+          privileges.filter((privilege) => privilege.authorized),
+          'privilege'
+        );
+        const unauthorizedScopes = mapValues(
+          requiredPrivilegesByScope,
+          (privilege) => !authorizedPrivileges.includes(privilege)
         );
 
-        const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-        const { hasAllRequested, username, privileges } = await checkPrivileges(
-          Object.values(requiredPrivilegesByScope)
-        );
+        const [unauthorizedScopeType, unauthorizedScope] =
+          shouldAuthorizeConsumer && unauthorizedScopes.consumer
+            ? [ScopeType.Consumer, consumer]
+            : [ScopeType.Producer, alertType.producer];
 
-        if (hasAllRequested) {
-          this.auditLogger.alertsAuthorizationSuccess(
+        throw Boom.forbidden(
+          this.auditLogger.alertsAuthorizationFailure(
             username,
             alertTypeId,
-            ScopeType.Consumer,
-            consumer,
+            unauthorizedScopeType,
+            unauthorizedScope,
             operation
-          );
-        } else {
-          const authorizedPrivileges = pluck(
-            privileges.filter((privilege) => privilege.authorized),
-            'privilege'
-          );
-
-          const unauthorizedScopes = mapValues(
-            requiredPrivilegesByScope,
-            (privilege) => !authorizedPrivileges.includes(privilege)
-          );
-
-          const [unauthorizedScopeType, unauthorizedScope] =
-            shouldAuthorizeConsumer && unauthorizedScopes.consumer
-              ? [ScopeType.Consumer, consumer]
-              : [ScopeType.Producer, alertType.producer];
-
-          throw Boom.forbidden(
-            this.auditLogger.alertsAuthorizationFailure(
-              username,
-              alertTypeId,
-              unauthorizedScopeType,
-              unauthorizedScope,
-              operation
-            )
-          );
-        }
+          )
+        );
       }
     }
   }
@@ -259,7 +255,6 @@ export class AlertsAuthorization {
 
       // add an empty `authorizedConsumers` array on each alertType
       const alertTypesWithAutherization = this.augmentWithAuthorizedConsumers(alertTypes, {});
-      const preAuthorizedAlertTypes = new Set<RegistryAlertTypeWithAuth>();
 
       // map from privilege to alertType which we can refer back to when analyzing the result
       // of checkPrivileges
@@ -270,11 +265,6 @@ export class AlertsAuthorization {
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
       for (const alertType of alertTypesWithAutherization) {
-        if (alertType.producer === ALERTS_FEATURE_ID) {
-          alertType.authorizedConsumers[ALERTS_FEATURE_ID] = { read: true, all: true };
-          preAuthorizedAlertTypes.add(alertType);
-        }
-
         for (const feature of featuresIds) {
           for (const operation of operations) {
             privilegeToAlertType.set(
@@ -324,7 +314,7 @@ export class AlertsAuthorization {
                 authorizedAlertTypes.add(alertType);
               }
               return authorizedAlertTypes;
-            }, preAuthorizedAlertTypes),
+            }, new Set<RegistryAlertTypeWithAuth>()),
       };
     }
   }
