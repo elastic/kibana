@@ -80,15 +80,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('variableMenuButton-0');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
-      await messageTextArea.focus();
-      await testSubjects.focus('messageAddVariableButton');
+      await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-1');
 
-      const messageTextArea1 = await find.byCssSelector('[data-test-subj="messageTextArea"]');
-      expect(await messageTextArea1.getAttribute('value')).to.eql(
-        'test message {{alertId}}{{alertName}}'
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alertId}} some additional text {{alertName}}'
       );
 
       await testSubjects.click('saveAlertButton');
