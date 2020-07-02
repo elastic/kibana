@@ -1979,6 +1979,8 @@ export interface SavedObjectsClientWrapperOptions {
 // @public
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
+    doc_values?: boolean;
+    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -1986,6 +1988,8 @@ export interface SavedObjectsComplexFieldMapping {
 
 // @public
 export interface SavedObjectsCoreFieldMapping {
+    // (undocumented)
+    doc_values?: boolean;
     // (undocumented)
     enabled?: boolean;
     // (undocumented)

@@ -19,5 +19,6 @@ export function clearInfluencerFilterSettings(state: ExplorerState): ExplorerSta
     queryString: '',
     tableQueryString: '',
     ...getClearedSelectedAnomaliesState(),
+    viewByFromPage: 1,
   };
 }
