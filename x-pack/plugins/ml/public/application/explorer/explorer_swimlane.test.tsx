@@ -10,7 +10,6 @@ import moment from 'moment-timezone';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
-import { dragSelect$ } from './explorer_dashboard_service';
 import { ExplorerSwimlane } from './explorer_swimlane';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { ChartTooltipService } from '../components/chart_tooltip';
@@ -26,14 +25,6 @@ jest.mock('d3', () => {
     }),
   };
 });
-
-jest.mock('./explorer_dashboard_service', () => ({
-  dragSelect$: {
-    subscribe: jest.fn(() => ({
-      unsubscribe: jest.fn(),
-    })),
-  },
-}));
 
 function getExplorerSwimlaneMocks() {
   const swimlaneData = ({ laneLabels: [] } as unknown) as OverallSwimlaneData;
@@ -74,16 +65,14 @@ describe('ExplorerSwimlane', () => {
 
   test('Minimal initialization', () => {
     const mocks = getExplorerSwimlaneMocks();
-    const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(
       <ExplorerSwimlane
         chartWidth={mockChartWidth}
         timeBuckets={mocks.timeBuckets}
-        swimlaneCellClick={jest.fn()}
+        setSelectedCells={jest.fn()}
         swimlaneData={mocks.swimlaneData}
         swimlaneType="overall"
-        swimlaneRenderDoneListener={swimlaneRenderDoneListener}
         tooltipService={mocks.tooltipService}
       />
     );
@@ -95,28 +84,23 @@ describe('ExplorerSwimlane', () => {
 
     // test calls to mock functions
     // @ts-ignore
-    expect(dragSelect$.subscribe.mock.calls.length).toBeGreaterThanOrEqual(1);
-    // @ts-ignore
     expect(wrapper.instance().dragSelectSubscriber.unsubscribe.mock.calls).toHaveLength(0);
     // @ts-ignore
     expect(mocks.timeBuckets.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
     // @ts-ignore
     expect(mocks.timeBuckets.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
-    expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
-    const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(
       <ExplorerSwimlane
         chartWidth={mockChartWidth}
         timeBuckets={mocks.timeBuckets}
-        swimlaneCellClick={jest.fn()}
+        setSelectedCells={jest.fn()}
         swimlaneData={mockOverallSwimlaneData}
         swimlaneType="overall"
-        swimlaneRenderDoneListener={swimlaneRenderDoneListener}
         tooltipService={mocks.tooltipService}
       />
     );
@@ -125,13 +109,10 @@ describe('ExplorerSwimlane', () => {
 
     // test calls to mock functions
     // @ts-ignore
-    expect(dragSelect$.subscribe.mock.calls.length).toBeGreaterThanOrEqual(1);
-    // @ts-ignore
     expect(wrapper.instance().dragSelectSubscriber.unsubscribe.mock.calls).toHaveLength(0);
     // @ts-ignore
     expect(mocks.timeBuckets.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
     // @ts-ignore
     expect(mocks.timeBuckets.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
-    expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 });
