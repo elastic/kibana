@@ -64,6 +64,17 @@ export const Settings: React.FC = (props) => {
                     href: getAPMHref('/settings/customize-ui', search),
                     isSelected: pathname === '/settings/customize-ui',
                   },
+                  {
+                    name: i18n.translate(
+                      'xpack.apm.settings.anomalyDetection',
+                      {
+                        defaultMessage: 'Anomaly detection',
+                      }
+                    ),
+                    id: '4',
+                    href: getAPMHref('/settings/anomaly-detection', search),
+                    isSelected: pathname === '/settings/anomaly-detection',
+                  },
                 ],
               },
             ]}

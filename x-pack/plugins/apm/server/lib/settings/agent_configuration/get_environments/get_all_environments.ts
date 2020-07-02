@@ -16,7 +16,7 @@ export async function getAllEnvironments({
   serviceName,
   setup,
 }: {
-  serviceName: string | undefined;
+  serviceName?: string;
   setup: Setup;
 }) {
   const { client, indices } = setup;
@@ -60,5 +60,6 @@ export async function getAllEnvironments({
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
     ) || [];
-  return [ALL_OPTION_VALUE, ...environments];
+  return [ALL_OPTION_VALUE, ...environments]; // TODO move this file out of agent_configuration dir into common dir
+  // TODO and move ALL_OPTION_VALUE to the agent_configuration implementation
 }
