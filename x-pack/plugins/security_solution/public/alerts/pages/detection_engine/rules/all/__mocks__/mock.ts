@@ -41,6 +41,7 @@ export const mockQueryBar: FieldValueQueryBar = {
 
 export const mockRule = (id: string): Rule => ({
   actions: [],
+  author: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -58,6 +59,7 @@ export const mockRule = (id: string): Rule => ({
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 21,
+  risk_score_mapping: [],
   name: 'Home Grown!',
   query: '',
   references: [],
@@ -66,6 +68,7 @@ export const mockRule = (id: string): Rule => ({
   timeline_title: 'Untitled timeline',
   meta: { from: '0m' },
   severity: 'low',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',

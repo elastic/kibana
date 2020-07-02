@@ -21,6 +21,7 @@ import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
 import { CommonUseField } from '../../../../cases/components/create';
+import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -53,17 +54,18 @@ export const SeverityField = ({
 
   const updateSeverityMapping = useCallback(
     (index: number, severity: string, mappingField: string, event) => {
+      const values = field.value as AboutStepSeverity;
       field.setValue({
-        value: field.value.value,
+        value: values.value,
         mapping: [
-          ...field.value.mapping.slice(0, index),
+          ...values.mapping.slice(0, index),
           {
-            ...field.value.mapping[index],
+            ...values.mapping[index],
             [mappingField]: event.target.value,
             operator: 'equals',
             severity,
           },
-          ...field.value.mapping.slice(index + 1),
+          ...values.mapping.slice(index + 1),
         ],
       });
     },
@@ -177,20 +179,20 @@ export const SeverityField = ({
                       <EuiFlexItem>
                         <EuiFieldText
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
-                          idAria={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
-                          isDisabled={false}
+                          aria-label={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
+                          disabled={false}
                           onChange={updateSeverityMapping.bind(null, index, option.value, 'field')}
-                          value={field.value.mapping?.[index]?.field ?? ''}
+                          value={(field.value as AboutStepSeverity).mapping?.[index]?.field ?? ''}
                         />
                       </EuiFlexItem>
 
                       <EuiFlexItem>
                         <EuiFieldText
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
-                          idAria={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
-                          isDisabled={false}
+                          aria-label={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
+                          disabled={false}
                           onChange={updateSeverityMapping.bind(null, index, option.value, 'value')}
-                          value={field.value.mapping?.[index]?.value ?? ''}
+                          value={(field.value as AboutStepSeverity).mapping?.[index]?.value ?? ''}
                         />
                       </EuiFlexItem>
                       <EuiFlexItemIconColumn grow={false}>

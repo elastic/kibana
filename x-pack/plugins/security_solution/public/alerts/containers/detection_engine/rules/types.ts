@@ -87,6 +87,7 @@ const MetaRule = t.intersection([
 
 export const RuleSchema = t.intersection([
   t.type({
+    author,
     created_at: t.string,
     created_by: t.string,
     description: t.string,
@@ -100,8 +101,10 @@ export const RuleSchema = t.intersection([
     max_signals: t.number,
     references: t.array(t.string),
     risk_score: t.number,
+    risk_score_mapping,
     rule_id: t.string,
     severity: t.string,
+    severity_mapping,
     tags: t.array(t.string),
     type: RuleTypeSchema,
     to: t.string,
@@ -112,7 +115,6 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
-    author,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
@@ -125,10 +127,8 @@ export const RuleSchema = t.intersection([
     machine_learning_job_id: t.string,
     output_index: t.string,
     query: t.string,
-    risk_score_mapping,
     rule_name_override,
     saved_id: t.string,
-    severity_mapping,
     status: t.string,
     status_date: t.string,
     timeline_id: t.string,

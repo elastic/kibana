@@ -105,7 +105,7 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> => {
   return pickBy<RulesSchema>((value: unknown) => value != null, {
-    author: alert.params.author,
+    author: alert.params.author ?? [],
     actions: ruleActions?.actions ?? [],
     building_block_type: alert.params.buildingBlockType,
     created_at: alert.createdAt.toISOString(),
@@ -128,7 +128,7 @@ export const transformAlertToRule = (
     max_signals: alert.params.maxSignals,
     machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
-    risk_score_mapping: alert.params.riskScoreMapping,
+    risk_score_mapping: alert.params.riskScoreMapping ?? [],
     rule_name_override: alert.params.ruleNameOverride,
     name: alert.name,
     query: alert.params.query,
@@ -138,7 +138,7 @@ export const transformAlertToRule = (
     timeline_title: alert.params.timelineTitle,
     meta: alert.params.meta,
     severity: alert.params.severity,
-    severity_mapping: alert.params.severityMapping,
+    severity_mapping: alert.params.severityMapping ?? [],
     updated_by: alert.updatedBy ?? 'elastic',
     tags: transformTags(alert.tags),
     to: alert.params.to,

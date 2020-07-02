@@ -129,7 +129,7 @@ export interface DefineStepRuleJson {
 
 export interface AboutStepRuleJson {
   author: Author;
-  building_block_type: BuildingBlockType;
+  building_block_type?: BuildingBlockType;
   name: string;
   description: string;
   license: License;

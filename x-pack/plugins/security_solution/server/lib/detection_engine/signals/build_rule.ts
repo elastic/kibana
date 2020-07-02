@@ -42,7 +42,7 @@ export const buildRule = ({
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
-    author: ruleParams.author,
+    author: ruleParams.author ?? [],
     building_block_type: ruleParams.buildingBlockType,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
@@ -51,7 +51,7 @@ export const buildRule = ({
     meta: ruleParams.meta,
     max_signals: ruleParams.maxSignals,
     risk_score: ruleParams.riskScore, // TODO: Risk Score Override via risk_score_mapping
-    risk_score_mapping: ruleParams.riskScoreMapping,
+    risk_score_mapping: ruleParams.riskScoreMapping ?? [],
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
     note: ruleParams.note,
@@ -66,7 +66,7 @@ export const buildRule = ({
     references: ruleParams.references,
     rule_name_override: ruleParams.ruleNameOverride,
     severity: ruleParams.severity, // TODO: Severity Override via severity_mapping
-    severity_mapping: ruleParams.severityMapping,
+    severity_mapping: ruleParams.severityMapping ?? [],
     tags,
     type: ruleParams.type,
     to: ruleParams.to,

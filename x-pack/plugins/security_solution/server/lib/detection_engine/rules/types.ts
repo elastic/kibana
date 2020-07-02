@@ -73,9 +73,12 @@ import {
   LastSuccessMessage,
   LastFailureAt,
   LastFailureMessage,
+  Author,
   AuthorOrUndefined,
   LicenseOrUndefined,
+  RiskScoreMapping,
   RiskScoreMappingOrUndefined,
+  SeverityMapping,
   SeverityMappingOrUndefined,
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
@@ -172,11 +175,11 @@ export const isRuleStatusFindTypes = (
 export interface CreateRulesOptions {
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
-  author: AuthorOrUndefined;
+  author: Author;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
-  falsePositives: FalsePositives; // TODO: Why isn't this FalsePositivesOrUndefined?
+  falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
   language: LanguageOrUndefined;
@@ -193,12 +196,12 @@ export interface CreateRulesOptions {
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
-  riskScoreMapping: RiskScoreMappingOrUndefined;
+  riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
-  severityMapping: SeverityMappingOrUndefined;
+  severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
   timestampOverride: TimestampOverrideOrUndefined;
@@ -216,7 +219,7 @@ export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
-  author: AuthorOrUndefined;
+  author: Author;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
@@ -236,12 +239,12 @@ export interface UpdateRulesOptions {
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
-  riskScoreMapping: RiskScoreMappingOrUndefined;
+  riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
   severity: Severity;
-  severityMapping: SeverityMappingOrUndefined;
+  severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
   timestampOverride: TimestampOverrideOrUndefined;

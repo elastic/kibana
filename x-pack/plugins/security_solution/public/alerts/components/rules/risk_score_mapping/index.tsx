@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { CommonUseField } from '../../../../cases/components/create';
+import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -45,8 +46,9 @@ export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskSco
 
   const updateRiskScoreMapping = useCallback(
     (event) => {
+      const values = field.value as AboutStepRiskScore;
       field.setValue({
-        value: field.value.value,
+        value: values.value,
         mapping: [
           {
             field: event.target.value,
@@ -163,11 +165,11 @@ export const RiskScoreField = ({ dataTestSubj, field, idAria, indices }: RiskSco
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem>
                       <EuiFieldText
-                        data-test-subj={`detectionEngineStepAboutRuleRiskScoreMappingValue`}
-                        idAria={`detectionEngineStepAboutRuleRiskScoreMappingValue`}
-                        isDisabled={false}
+                        data-test-subj={'detectionEngineStepAboutRuleRiskScoreMappingValue'}
+                        aria-label={'detectionEngineStepAboutRuleRiskScoreMappingValu'}
+                        disabled={false}
                         onChange={updateRiskScoreMapping.bind(null)}
-                        value={field.value.mapping?.[0]?.field ?? ''}
+                        value={(field.value as AboutStepRiskScore).mapping?.[0]?.field ?? ''}
                       />
                     </EuiFlexItem>
                     <EuiFlexItemIconColumn grow={false}>
