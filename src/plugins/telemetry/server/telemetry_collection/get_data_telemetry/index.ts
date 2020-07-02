@@ -17,13 +17,11 @@
  * under the License.
  */
 
+export { DATA_TELEMETRY_ID } from './constants';
+
 export {
-  DATA_TELEMETRY_ID,
   DataTelemetryIndex,
   DataTelemetryPayload,
+  getDataTelemetry,
   buildDataTelemetryPayload,
 } from './get_data_telemetry';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getLocalLicense } from './get_local_license';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
