@@ -69,18 +69,18 @@ export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
           <EuiText grow={false}>
             <h2>
               <FormattedMessage
-                id="kbn.management.emptyIndexPatternPrompt.youHaveData"
+                id="indexPatternManagement.emptyIndexPatternPrompt.youHaveData"
                 defaultMessage="You have data in Elasticsearch."
               />
               <br />
               <FormattedMessage
-                id="kbn.management.emptyIndexPatternPrompt.nowCreate"
+                id="indexPatternManagement.emptyIndexPatternPrompt.nowCreate"
                 defaultMessage="Now, create an index pattern."
               />
             </h2>
             <p>
               <FormattedMessage
-                id="kbn.management.emptyIndexPatternPrompt.indexPatternExplanation"
+                id="indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation"
                 defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
                 index pattern can point to a specific index, for example, your log data from
                 yesterday, or all indices that contain your log data."
@@ -101,14 +101,14 @@ export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
       <EuiDescriptionList className="inpEmptyIndexPatternPrompt__footer" type="responsiveColumn">
         <EuiDescriptionListTitle className="inpEmptyIndexPatternPrompt__title">
           <FormattedMessage
-            id="kbn.management.emptyIndexPatternPrompt.learnMore"
+            id="indexPatternManagement.emptyIndexPatternPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
             <FormattedMessage
-              id="kbn.management.emptyIndexPatternPrompt.documentation"
+              id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"
             />
           </EuiLink>
