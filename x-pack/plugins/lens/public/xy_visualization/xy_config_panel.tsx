@@ -16,8 +16,10 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiSelect,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 import {
   VisualizationLayerWidgetProps,
   VisualizationDimensionEditorProps,
@@ -86,11 +88,20 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+const idPrefix = htmlIdGenerator()();
+
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const [open, setOpen] = useState(false);
   const hasNonBarSeries = props.state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
+  // props.state?.
+  const legendMode =
+    props.state?.legend.isVisible && !props.state?.legend.showSingleMetric
+      ? 'auto'
+      : !props.state?.legend.isVisible
+      ? 'hide'
+      : 'show';
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -149,12 +160,88 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               hasDividers
             />
           </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+              defaultMessage: 'Legend display',
+            })}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                defaultMessage: 'Legend display',
+              })}
+              name="legendDisplay"
+              buttonSize="compressed"
+              className="eui-displayInlineBlock"
+              options={[
+                {
+                  id: `${idPrefix}auto`,
+                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
+                    defaultMessage: 'auto',
+                  }),
+                },
+                {
+                  id: `${idPrefix}show`,
+                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
+                    defaultMessage: 'show',
+                  }),
+                },
+                {
+                  id: `${idPrefix}hide`,
+                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
+                    defaultMessage: 'hide',
+                  }),
+                },
+              ]}
+              idSelected={`${idPrefix}${legendMode}`}
+              onChange={(id) => {
+                const newMode = id.replace(idPrefix, '') as 'auto' | 'hide' | 'show';
+                if (newMode === 'auto') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: true, showSingleMetric: false },
+                  });
+                } else if (newMode === 'show') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: true, showSingleMetric: true },
+                  });
+                } else if (newMode === 'hide') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: false, showSingleMetric: false },
+                  });
+                }
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+              defaultMessage: 'Legend position',
+            })}
+          >
+            <EuiSelect
+              options={[
+                { value: Position.Top, text: 'Top' },
+                { value: Position.Left, text: 'Left' },
+                { value: Position.Right, text: 'Right' },
+                { value: Position.Bottom, text: 'Bottom' },
+              ]}
+              value={props.state?.legend.position}
+              onChange={(e) => {
+                props.setState({
+                  ...props.state,
+                  legend: { ...props.state.legend, position: e.target.value as Position },
+                });
+              }}
+            />
+          </EuiFormRow>
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
-const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor({
   state,
