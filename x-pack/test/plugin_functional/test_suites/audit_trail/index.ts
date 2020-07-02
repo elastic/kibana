@@ -22,10 +22,17 @@ class FileWrapper {
     const content = await this.read();
     return content.map((l) => JSON.parse(l));
   }
+  // writing in a file is an async operation. we use this method to make sure logs have been written.
+  async isNotEmpty() {
+    const content = await this.read();
+    const line = content[0];
+    return line.length > 0;
+  }
 }
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Audit trail service', function () {
     this.tags('ciGroup7');
@@ -45,8 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
-      const content = await logFile.readJSON();
+      await retry.waitFor('logs event in the dest file', async () => {
+        return await logFile.isNotEmpty();
+      });
 
+      const content = await logFile.readJSON();
       const pingCall = content.find(
         (c) => c.meta.scope === 'audit_trail_test/context/as_current_user'
       );
@@ -62,8 +72,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
-      const content = await logFile.readJSON();
+      await retry.waitFor('logs event in the dest file', async () => {
+        return await logFile.isNotEmpty();
+      });
 
+      const content = await logFile.readJSON();
       const pingCall = content.find(
         (c) => c.meta.scope === 'audit_trail_test/context/as_internal_user'
       );
@@ -79,8 +92,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
-      const content = await logFile.readJSON();
+      await retry.waitFor('logs event in the dest file', async () => {
+        return await logFile.isNotEmpty();
+      });
 
+      const content = await logFile.readJSON();
       const pingCall = content.find(
         (c) => c.meta.scope === 'audit_trail_test/contract/as_current_user'
       );
@@ -96,8 +112,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
-      const content = await logFile.readJSON();
+      await retry.waitFor('logs event in the dest file', async () => {
+        return await logFile.isNotEmpty();
+      });
 
+      const content = await logFile.readJSON();
       const pingCall = content.find(
         (c) => c.meta.scope === 'audit_trail_test/contract/as_internal_user'
       );

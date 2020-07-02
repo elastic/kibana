@@ -32,6 +32,7 @@ export class AuditTrailClient implements Auditor {
 
   public add(event: AuditableEvent) {
     const user = this.deps.getCurrentUser(this.request);
+    // doesn't use getSpace since it's async operation calling ES
     const spaceId = this.deps.getSpaceId(this.request);
 
     this.event$.next({
