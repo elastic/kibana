@@ -14,7 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { Panel } from '../../../../common/components/panel';
 import { Loader } from '../../../../common/components/loader';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListType, Filter } from '../types';
+import { ExceptionListType, Filter, ExceptionListItemIdentifiers } from '../types';
 import { allExceptionItemsReducer, State } from './reducer';
 import {
   useExceptionList,
@@ -195,7 +195,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const setLoadingItemIds = useCallback(
-    (items: ExceptionIdentifiers[]): void => {
+    (items: ExceptionListItemIdentifiers[]): void => {
       dispatch({
         type: 'updateLoadingItemIds',
         items,
@@ -205,8 +205,8 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id, namespaceType, type }: ExceptionIdentifiers) => {
-      setLoadingItemIds([{ id, namespaceType, type }]);
+    ({ id, namespaceType }: ExceptionListItemIdentifiers) => {
+      setLoadingItemIds([{ id, namespaceType }]);
 
       deleteExceptionItem({
         id,
