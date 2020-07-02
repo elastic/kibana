@@ -19,12 +19,20 @@ import { tagMappings, tagAttachmentMappings } from './saved_objects';
 import { TagsClientProvider } from './tags';
 import { TagAttachmentsClientProvider } from './tag_attachments';
 import { SecurityPluginSetup } from '../../security/server';
+import { BfetchServerSetup, BfetchServerStart } from '../../../../src/plugins/bfetch/server';
+import {
+  TAGS_API_PATH,
+  TagAttachmentClientGetResourceTagsParams,
+  TagAttachmentClientGetResourceTagsResult,
+} from '../common';
 
 export interface TagsPluginSetupDependencies {
+  bfetch: BfetchServerSetup;
   security?: SecurityPluginSetup;
 }
 
 export interface TagsPluginStartDependencies {
+  bfetch: BfetchServerStart;
   security?: undefined;
 }
 
@@ -97,6 +105,18 @@ export class TagsPlugin
 
     http.registerRouteHandlerContext('tags', this.createRouteHandlerContext(core, plugins));
     setupRoutes({ router });
+
+    // Batch and stream back tags attached to KID resources as we will execute
+    // this API call many times.
+    plugins.bfetch.addBatchProcessingRoute<
+      TagAttachmentClientGetResourceTagsParams,
+      TagAttachmentClientGetResourceTagsResult
+    >(`${TAGS_API_PATH}/_bfetch/get_attached_tags`, (request, { tags }) => ({
+      onBatchItem: async (params) => {
+        if (!tags) throw new Error('Tags request context not set up.');
+        return await tags.attachmentsClient.getAttachedTags(params);
+      },
+    }));
 
     return {
       createTagsClient: this.tagsClientProvider.create,

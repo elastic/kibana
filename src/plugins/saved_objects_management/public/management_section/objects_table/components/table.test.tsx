@@ -79,6 +79,7 @@ const defaultProps: TableProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
+  onShowJSON: () => {},
   canDelete: true,
 };
 

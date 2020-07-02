@@ -123,7 +123,7 @@ export class TagManager {
   public delete$(ids: string[]): Observable<void> {
     const { client } = this.params;
     const deletedTags = this.list.delete(ids);
-    const promise = Promise.all(ids.map((id) => client.del(id))).then(() => undefined);
+    const promise = Promise.all(ids.map((id) => client.del({ id }))).then(() => undefined);
     const observable = from(promise).pipe(share());
 
     observable.subscribe({

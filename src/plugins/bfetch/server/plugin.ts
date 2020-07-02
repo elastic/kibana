@@ -26,6 +26,7 @@ import {
   KibanaRequest,
   RouteMethod,
   RequestHandler,
+  RequestHandlerContext,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -54,11 +55,17 @@ export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
 export interface BfetchServerSetup {
   addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
-    handler: (request: KibanaRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (
+      request: KibanaRequest,
+      context: RequestHandlerContext
+    ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => void;
   addStreamingResponseRoute: <Payload, Response>(
     path: string,
-    params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
+    params: (
+      request: KibanaRequest,
+      context: RequestHandlerContext
+    ) => StreamingResponseHandler<Payload, Response>
   ) => void;
   /**
    * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
@@ -147,7 +154,7 @@ export class BfetchServerPlugin
         },
       },
       async (context, request, response) => {
-        const handlerInstance = handler(request);
+        const handlerInstance = handler(request, context);
         const data = request.body;
         return response.ok({
           headers: streamingHeaders,
@@ -181,13 +188,16 @@ export class BfetchServerPlugin
     E extends ErrorLike = ErrorLike
   >(
     path: string,
-    handler: (request: KibanaRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
+    handler: (
+      request: KibanaRequest,
+      context: RequestHandlerContext
+    ) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
   ) => {
     addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >(path, (request) => {
-      const handlerInstance = handler(request);
+    >(path, (request, context) => {
+      const handlerInstance = handler(request, context);
       return {
         getResponseStream: ({ batch }) => {
           const subject = new Subject<BatchResponseItem<BatchItemResult, E>>();
