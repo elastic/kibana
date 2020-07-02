@@ -12,14 +12,19 @@ import {
   UI_SETTINGS,
 } from '../../../../../../src/plugins/data/public';
 import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
-import { ExplorerJob, OverallSwimlaneData, SwimlaneData } from '../explorer/explorer_utils';
+import {
+  ExplorerJob,
+  OverallSwimlaneData,
+  SwimlaneData,
+  ViewBySwimLaneData,
+} from '../explorer/explorer_utils';
 import { VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import { MlResultsService } from './results_service';
 
 /**
- * Anomaly Explorer Service
+ * Service for retrieving anomaly swim lanes data.
  */
-export class ExplorerService {
+export class AnomalyTimelineService {
   private timeBuckets: TimeBuckets;
   private _customTimeRange: TimeRange | undefined;
 
@@ -130,12 +135,27 @@ export class ExplorerService {
     return overallSwimlaneData;
   }
 
+  /**
+   * Fetches view by swim lane data.
+   *
+   * @param fieldValues
+   * @param bounds
+   * @param selectedJobs
+   * @param viewBySwimlaneFieldName
+   * @param swimlaneLimit
+   * @param perPage
+   * @param fromPage
+   * @param swimlaneContainerWidth
+   * @param influencersFilterQuery
+   */
   public async loadViewBySwimlane(
     fieldValues: string[],
     bounds: { earliest: number; latest: number },
     selectedJobs: ExplorerJob[],
     viewBySwimlaneFieldName: string,
     swimlaneLimit: number,
+    perPage: number,
+    fromPage: number,
     swimlaneContainerWidth: number,
     influencersFilterQuery?: any
   ): Promise<SwimlaneData | undefined> {
@@ -172,7 +192,8 @@ export class ExplorerService {
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),
         interval,
-        swimlaneLimit
+        perPage,
+        fromPage
       );
     } else {
       response = await this.mlResultsService.getInfluencerValueMaxScoreByTime(
@@ -183,6 +204,8 @@ export class ExplorerService {
         searchBounds.max.valueOf(),
         interval,
         swimlaneLimit,
+        perPage,
+        fromPage,
         influencersFilterQuery
       );
     }
@@ -193,6 +216,7 @@ export class ExplorerService {
 
     const viewBySwimlaneData = this.processViewByResults(
       response.results,
+      response.cardinality,
       fieldValues,
       bounds,
       viewBySwimlaneFieldName,
@@ -202,6 +226,55 @@ export class ExplorerService {
     console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
 
     return viewBySwimlaneData;
+  }
+
+  public async loadViewByTopFieldValuesForSelectedTime(
+    earliestMs: number,
+    latestMs: number,
+    selectedJobs: ExplorerJob[],
+    viewBySwimlaneFieldName: string,
+    swimlaneLimit: number,
+    perPage: number,
+    fromPage: number,
+    swimlaneContainerWidth: number
+  ) {
+    const selectedJobIds = selectedJobs.map((d) => d.id);
+
+    // Find the top field values for the selected time, and then load the 'view by'
+    // swimlane over the full time range for those specific field values.
+    if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
+      const resp = await this.mlResultsService.getTopInfluencers(
+        selectedJobIds,
+        earliestMs,
+        latestMs,
+        swimlaneLimit,
+        perPage,
+        fromPage
+      );
+      if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
+        return [];
+      }
+
+      const topFieldValues: any[] = [];
+      const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
+      if (Array.isArray(topInfluencers)) {
+        topInfluencers.forEach((influencerData) => {
+          if (influencerData.maxAnomalyScore > 0) {
+            topFieldValues.push(influencerData.influencerFieldValue);
+          }
+        });
+      }
+      return topFieldValues;
+    } else {
+      const resp = await this.mlResultsService.getScoresByBucket(
+        selectedJobIds,
+        earliestMs,
+        latestMs,
+        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asSeconds() + 's',
+        swimlaneLimit
+      );
+      return Object.keys(resp.results);
+    }
   }
 
   private getTimeBounds(): TimeRangeBounds {
@@ -245,6 +318,7 @@ export class ExplorerService {
 
   private processViewByResults(
     scoresByInfluencerAndTime: Record<string, { [timeMs: number]: number }>,
+    cardinality: number,
     sortedLaneValues: string[],
     bounds: any,
     viewBySwimlaneFieldName: string,
@@ -254,7 +328,7 @@ export class ExplorerService {
     // Sorts the lanes according to the supplied array of lane
     // values in the order in which they should be displayed,
     // or pass an empty array to sort lanes according to max score over all time.
-    const dataset: OverallSwimlaneData = {
+    const dataset: ViewBySwimLaneData = {
       fieldName: viewBySwimlaneFieldName,
       points: [],
       laneLabels: [],
@@ -262,6 +336,7 @@ export class ExplorerService {
       // Set the earliest and latest to be the same as the overall swim lane.
       earliest: bounds.earliest,
       latest: bounds.latest,
+      cardinality,
     };
 
     const maxScoreByLaneLabel: Record<string, number> = {};
