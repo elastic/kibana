@@ -47,6 +47,7 @@ npm-debug.log*
 .tern-project
 .nyc_output
 .ci/pipeline-library/build/
+.ci/runbld
 .gradle
 
 # apm plugin
