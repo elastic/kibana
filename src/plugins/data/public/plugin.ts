@@ -104,7 +104,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public setup(
     core: CoreSetup,
-    { expressions, uiActions }: DataSetupDependencies
+    { expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -144,6 +144,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
         expressions,
+        usageCollection,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,

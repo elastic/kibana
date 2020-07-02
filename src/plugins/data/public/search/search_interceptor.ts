@@ -24,6 +24,7 @@ import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
+import { SearchUsageCollector } from './telemetry';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
@@ -32,6 +33,7 @@ export interface SearchInterceptorDeps {
   application: ApplicationStart;
   http: CoreStart['http'];
   uiSettings: CoreStart['uiSettings'];
+  usageCollector: SearchUsageCollector;
 }
 
 export class SearchInterceptor {
@@ -136,6 +138,7 @@ export class SearchInterceptor {
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timer(this.requestTimeout);
     const subscription = timeout$.subscribe(() => {
+      this.deps.usageCollector.trackQueryTimedOut();
       timeoutController.abort();
     });
     this.timeoutSubscriptions.add(subscription);
@@ -155,6 +158,7 @@ export class SearchInterceptor {
 
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
+      subscription.unsubscribe();
       this.timeoutSubscriptions.remove(subscription);
       notificationSubscription.unsubscribe();
     };
@@ -186,6 +190,7 @@ export class SearchInterceptor {
     if (this.longRunningToast) {
       this.deps.toasts.remove(this.longRunningToast);
       delete this.longRunningToast;
+      this.deps.usageCollector.trackLongQueryDialogDismissed();
     }
   };
 }

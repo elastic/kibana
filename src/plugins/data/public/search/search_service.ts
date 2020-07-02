@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+import { Plugin, CoreSetup, CoreStart } from '../../../../core/public';
 import { ISearchSetup, ISearchStart } from './types';
-import { ExpressionsSetup } from '../../../../plugins/expressions/public';
-
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { getEsClient, LegacyApiCaller } from './legacy';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
-import { QuerySetup } from '../query';
-import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -34,20 +29,10 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
-import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './types';
+import { createUsageCollector, SearchUsageCollector } from './telemetry';
 
-interface SearchServiceSetupDependencies {
-  expressions: ExpressionsSetup;
-  getInternalStartServices: GetInternalStartServicesFn;
-  packageInfo: PackageInfo;
-  query: QuerySetup;
-}
-
-interface SearchServiceStartDependencies {
-  indexPatterns: IndexPatternsContract;
-  fieldFormats: FieldFormatsStart;
-}
+import { SearchServiceSetupDependencies, SearchServiceStartDependencies } from './types';
 
 /**
  * The search plugin exposes a method `registerSearchStrategy` for other plugins
@@ -59,11 +44,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
   private searchInterceptor!: SearchInterceptor;
+  private usageCollector?: SearchUsageCollector;
 
   public setup(
     core: CoreSetup,
-    { expressions, packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
+    {
+      expressions,
+      usageCollection,
+      packageInfo,
+      query,
+      getInternalStartServices,
+    }: SearchServiceSetupDependencies
   ): ISearchSetup {
+    this.usageCollector = createUsageCollector(core, usageCollection);
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
@@ -102,6 +95,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
+        usageCollector: this.usageCollector,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
@@ -135,6 +129,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search: this.searchInterceptor.search,
+      usageCollector: this.usageCollector,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {
