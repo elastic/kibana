@@ -61,7 +61,7 @@ class PackageConfigService {
         const agentConfig = await agentConfigService.get(soClient, packageConfig.config_id, true);
         if (agentConfig && doesAgentConfigAlreadyIncludePackage(agentConfig, pkgInfo.name)) {
           throw new Error(
-            `Unable to create package config. A config for '${pkgInfo.name}' already exists on this agent config.`
+            `Unable to create package config. Package '${pkgInfo.name}' already exists on this agent config.`
           );
         }
       }
