@@ -19,21 +19,20 @@ export const BUILT_IN_ALERTS_FEATURE = {
   privileges: {
     all: {
       app: [],
-      api: [],
       catalogue: [],
       alerting: {
         all: [IndexThreshold],
         read: [],
       },
       savedObject: {
-        all: [],
+        all: ['action'],
         read: [],
       },
-      ui: ['alerting:show'],
+      api: ['actions-read'],
+      ui: ['alerting:show', 'actions:show', 'actions:save', 'actions:delete'],
     },
     read: {
       app: [],
-      api: [],
       catalogue: [],
       alerting: {
         all: [],
@@ -41,9 +40,10 @@ export const BUILT_IN_ALERTS_FEATURE = {
       },
       savedObject: {
         all: [],
-        read: [],
+        read: ['action'],
       },
-      ui: ['alerting:show'],
+      api: ['actions-read'],
+      ui: ['alerting:show', 'actions:show'],
     },
   },
 };

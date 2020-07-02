@@ -24,6 +24,7 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -39,6 +40,7 @@ import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { hasAllPrivilege } from '../../lib/capabilities';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -79,6 +81,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  operation: string;
 }
 
 export const AlertForm = ({
@@ -87,6 +90,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const {
@@ -174,9 +178,7 @@ export const AlertForm = ({
         .filter(
           (alertTypeRegistryItem: AlertTypeModel) =>
             alertTypesIndex.has(alertTypeRegistryItem.id) &&
-            (alertTypesIndex.get(alertTypeRegistryItem.id)?.authorizedConsumers[alert.consumer]
-              ?.all ??
-              false)
+            hasAllPrivilege(alert, alertTypesIndex.get(alertTypeRegistryItem.id))
         )
         .filter((alertTypeRegistryItem: AlertTypeModel) =>
           alert.consumer === ALERTS_FEATURE_ID
@@ -322,7 +324,9 @@ export const AlertForm = ({
     </>
   );
 
-  return (
+  return !(alertTypeModel || alertTypeNodes.length) ? (
+    <NoAuthorizedAlertTypes operation={operation} />
+  ) : (
     <EuiForm>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
@@ -490,7 +494,7 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
-      ) : (
+      ) : alertTypeNodes.length ? (
         <Fragment>
           <EuiHorizontalRule />
           <EuiTitle size="s">
@@ -506,7 +510,37 @@ export const AlertForm = ({
             {alertTypeNodes}
           </EuiFlexGroup>
         </Fragment>
+      ) : (
+        <NoAuthorizedAlertTypes operation={operation} />
       )}
     </EuiForm>
   );
 };
+
+const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
+  <EuiEmptyPrompt
+    iconType="lock"
+    data-test-subj="noAuthorizedAlertTypesPrompt"
+    titleSize="xs"
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypesTitle"
+          defaultMessage="You have not been authorized to {operation} any Alert types"
+          values={{ operation }}
+        />
+      </h2>
+    }
+    body={
+      <div>
+        <p role="banner">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertForm.error.noAuthorizedAlertTypes"
+            defaultMessage="In order to {operation} an Alert you need to have been granted the appropriate privileges."
+            values={{ operation }}
+          />
+        </p>
+      </div>
+    }
+  />
+);
