@@ -116,10 +116,10 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   }, [closePopOver, field, value, filterManager, onFilterAdded]);
 
   const handleGoGetTimelineId = useCallback(() => {
-    if (goGetTimelineId != null) {
+    if (goGetTimelineId != null && timelineId == null) {
       goGetTimelineId(true);
     }
-  }, [goGetTimelineId]);
+  }, [goGetTimelineId, timelineId]);
 
   const { browserFields, indexPattern } = useWithSource('default', indexToAdd);
 
@@ -189,7 +189,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                 indexPattern={indexPattern}
                 indexToAdd={indexToAdd}
                 onFilterAdded={onFilterAdded}
-                timelineId={timelineId ?? null}
+                timelineId={timelineId ?? undefined}
                 toggleTopN={toggleTopN}
                 value={value}
               />

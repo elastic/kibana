@@ -137,7 +137,7 @@ describe('DraggableWrapperHoverContent', () => {
       test(`it should call goGetTimelineId when user is over the 'Filter ${hoverAction} value' button`, () => {
         const wrapper = mount(
           <TestProviders>
-            <DraggableWrapperHoverContent {...{ ...defaultProps }} />
+            <DraggableWrapperHoverContent {...{ ...defaultProps, timelineId: undefined }} />
           </TestProviders>
         );
         const button = wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first();
@@ -483,6 +483,7 @@ describe('DraggableWrapperHoverContent', () => {
             {...{
               ...defaultProps,
               field: whitelistedField,
+              timelineId: undefined,
             }}
           />
         </TestProviders>

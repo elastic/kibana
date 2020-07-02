@@ -67,6 +67,7 @@ export interface Props {
     refetch: inputsModel.Refetch;
   }) => void;
   to: number;
+  timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -89,6 +90,7 @@ const TopNComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  timelineId,
   to,
   toggleTopN,
 }) => {
@@ -136,6 +138,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            timelineId={timelineId}
             to={to}
           />
         ) : (
@@ -149,6 +152,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
+            timelineId={timelineId}
             to={to}
           />
         )}

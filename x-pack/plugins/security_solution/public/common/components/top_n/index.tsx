@@ -75,7 +75,7 @@ interface OwnProps {
   field: string;
   indexPattern: IIndexPattern;
   indexToAdd: string[] | null;
-  timelineId: string | null;
+  timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -150,6 +150,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             timelineId === TimelineId.active ? 'timeline' : 'global'
           }
           setQuery={setQuery}
+          timelineId={timelineId}
           to={timelineId === TimelineId.active ? activeTimelineTo : to}
           toggleTopN={toggleTopN}
           onFilterAdded={onFilterAdded}

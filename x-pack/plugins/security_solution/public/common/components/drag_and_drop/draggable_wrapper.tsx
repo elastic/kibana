@@ -76,6 +76,7 @@ interface Props {
   dataProvider: DataProvider;
   inline?: boolean;
   render: RenderFunctionProp;
+  timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
@@ -100,12 +101,12 @@ export const getStyle = (
 };
 
 export const DraggableWrapper = React.memo<Props>(
-  ({ dataProvider, onFilterAdded, render, truncate }) => {
+  ({ dataProvider, onFilterAdded, render, timelineId, truncate }) => {
     const draggableRef = useRef<HTMLDivElement | null>(null);
     const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
     const [showTopN, setShowTopN] = useState<boolean>(false);
     const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-    const timelineId = useGetTimelineId(draggableRef, goGetTimelineId);
+    const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
     const [providerRegistered, setProviderRegistered] = useState(false);
 
     const dispatch = useDispatch();
@@ -153,7 +154,7 @@ export const DraggableWrapper = React.memo<Props>(
           goGetTimelineId={setGoGetTimelineId}
           onFilterAdded={onFilterAdded}
           showTopN={showTopN}
-          timelineId={timelineId}
+          timelineId={timelineId ?? timelineIdFind}
           toggleTopN={toggleTopN}
           value={
             typeof dataProvider.queryMatch.value !== 'number'
@@ -162,7 +163,15 @@ export const DraggableWrapper = React.memo<Props>(
           }
         />
       ),
-      [dataProvider, handleClosePopOverTrigger, onFilterAdded, showTopN, timelineId, toggleTopN]
+      [
+        dataProvider,
+        handleClosePopOverTrigger,
+        onFilterAdded,
+        showTopN,
+        timelineId,
+        timelineIdFind,
+        toggleTopN,
+      ]
     );
 
     const renderContent = useCallback(
