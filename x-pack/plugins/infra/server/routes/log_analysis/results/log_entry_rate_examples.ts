@@ -39,10 +39,7 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
           sourceId,
           timeRange: { startTime, endTime },
         },
-      } = pipe(
-        getLogEntryRateExamplesRequestPayloadRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+      } = request.body;
 
       const sourceConfiguration = await sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
