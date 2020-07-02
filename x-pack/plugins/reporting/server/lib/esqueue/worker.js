@@ -158,8 +158,8 @@ export class Worker extends events.EventEmitter {
       kibana_name: this.kibanaName,
     };
 
-    return this._client
-      .callAsInternalUser('update', {
+    return this.queue.store
+      .updateReport({
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -197,8 +197,8 @@ export class Worker extends events.EventEmitter {
       output: docOutput,
     });
 
-    return this._client
-      .callAsInternalUser('update', {
+    return this.queue.store
+      .updateReport({
         index: job._index,
         id: job._id,
         if_seq_no: job._seq_no,
@@ -294,8 +294,8 @@ export class Worker extends events.EventEmitter {
           output: docOutput,
         };
 
-        return this._client
-          .callAsInternalUser('update', {
+        return this.queue.store
+          .updateReport({
             index: job._index,
             id: job._id,
             if_seq_no: job._seq_no,

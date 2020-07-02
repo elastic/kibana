@@ -64,6 +64,14 @@ export const setupEnvironment = () => {
   };
 };
 
+/**
+ * Suppress error messages about Worker not being available in JS DOM.
+ */
+(window as any).Worker = function Worker() {
+  this.postMessage = () => {};
+  this.terminate = () => {};
+};
+
 export const WithAppDependencies = (Comp: any) => (props: any) => (
   <AppContextProvider value={appDependencies as any}>
     <Comp {...props} />

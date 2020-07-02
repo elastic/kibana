@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import { ActionFactory } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
+
+const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 const noopFn = () => {};
 
@@ -49,10 +52,32 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
     </EuiFormRow>
   );
 
+  const hasNotCompatibleLicenseFactory = () =>
+    actionFactories?.some((f) => !f.isCompatibleLicence());
+
+  const renderGetMoreActionsLink = () => (
+    <EuiText size="s">
+      <EuiLink
+        href={GET_MORE_ACTIONS_LINK}
+        target="_blank"
+        external
+        data-test-subj={'getMoreActionsLink'}
+      >
+        <FormattedMessage
+          id="xpack.uiActionsEnhanced.drilldowns.components.FormDrilldownWizard.getMoreActionsLinkLabel"
+          defaultMessage="Get more actions"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+
   const actionWizard = (
     <EuiFormRow
       label={actionFactories?.length > 1 ? txtDrilldownAction : undefined}
       fullWidth={true}
+      labelAppend={
+        !currentActionFactory && hasNotCompatibleLicenseFactory() && renderGetMoreActionsLink()
+      }
     >
       <ActionWizard
         actionFactories={actionFactories}

@@ -4,79 +4,99 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut, EuiButton, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useState, useMemo } from 'react';
 
-import * as i18n from './translations';
+import { useMessagesStorage } from '../../../common/containers/local_storage/use_messages_storage';
+import { CallOut } from './callout';
+import { ErrorMessage } from './types';
+import { createCalloutId } from './helpers';
 
 export * from './helpers';
 
-interface ErrorMessage {
+export interface CaseCallOutProps {
   title: string;
-  description: JSX.Element;
-  errorType?: 'primary' | 'success' | 'warning' | 'danger';
-}
-
-interface CaseCallOutProps {
-  title: string;
-  message?: string;
   messages?: ErrorMessage[];
 }
 
-const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) => {
-  const [showCallOut, setShowCallOut] = useState(true);
-  const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
-  let callOutMessages = messages ?? [];
+type GroupByTypeMessages = {
+  [key in NonNullable<ErrorMessage['errorType']>]: {
+    messagesId: string[];
+    messages: ErrorMessage[];
+  };
+};
 
-  if (message) {
-    callOutMessages = [
-      ...callOutMessages,
-      {
-        title: '',
-        description: <p data-test-subj="callout-message-primary">{message}</p>,
-        errorType: 'primary',
-      },
-    ];
-  }
+interface CalloutVisibility {
+  [index: string]: boolean;
+}
 
-  const groupedErrorMessages = callOutMessages.reduce((acc, currentMessage: ErrorMessage) => {
-    const key = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
-    return {
-      ...acc,
-      [key]: [...(acc[key] || []), currentMessage],
-    };
-  }, {} as { [key in NonNullable<ErrorMessage['errorType']>]: ErrorMessage[] });
+const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
+  const { getMessages, addMessage } = useMessagesStorage();
 
-  return showCallOut ? (
+  const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
+  const dismissedCallouts = useMemo(
+    () =>
+      caseMessages.reduce<CalloutVisibility>(
+        (acc, id) => ({
+          ...acc,
+          [id]: false,
+        }),
+        {}
+      ),
+    [caseMessages]
+  );
+
+  const [calloutVisibility, setCalloutVisibility] = useState(dismissedCallouts);
+  const handleCallOut = useCallback(
+    (id, type) => {
+      setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
+      if (type === 'primary') {
+        addMessage('case', id);
+      }
+    },
+    [setCalloutVisibility, addMessage]
+  );
+
+  const groupedByTypeErrorMessages = useMemo(
+    () =>
+      messages.reduce<GroupByTypeMessages>(
+        (acc: GroupByTypeMessages, currentMessage: ErrorMessage) => {
+          const type = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
+          return {
+            ...acc,
+            [type]: {
+              messagesId: [...(acc[type]?.messagesId ?? []), currentMessage.id],
+              messages: [...(acc[type]?.messages ?? []), currentMessage],
+            },
+          };
+        },
+        {} as GroupByTypeMessages
+      ),
+    [messages]
+  );
+
+  return (
     <>
-      {(Object.keys(groupedErrorMessages) as Array<keyof ErrorMessage['errorType']>).map((key) => (
-        <React.Fragment key={key}>
-          <EuiCallOut
-            title={title}
-            color={key}
-            iconType="gear"
-            data-test-subj={`case-call-out-${key}`}
-          >
-            {!isEmpty(groupedErrorMessages[key]) && (
-              <EuiDescriptionList
-                data-test-subj={`callout-messages-${key}`}
-                listItems={groupedErrorMessages[key]}
+      {(Object.keys(groupedByTypeErrorMessages) as Array<keyof ErrorMessage['errorType']>).map(
+        (type: NonNullable<ErrorMessage['errorType']>) => {
+          const id = createCalloutId(groupedByTypeErrorMessages[type].messagesId);
+          return (
+            <React.Fragment key={id}>
+              <CallOut
+                id={id}
+                type={type}
+                title={title}
+                messages={groupedByTypeErrorMessages[type].messages}
+                showCallOut={calloutVisibility[id] ?? true}
+                handleDismissCallout={handleCallOut}
               />
-            )}
-            <EuiButton
-              data-test-subj={`callout-dismiss-${key}`}
-              color={key === 'success' ? 'secondary' : key}
-              onClick={handleCallOut}
-            >
-              {i18n.DISMISS_CALLOUT}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer />
-        </React.Fragment>
-      ))}
+              <EuiSpacer />
+            </React.Fragment>
+          );
+        }
+      )}
     </>
-  ) : null;
+  );
 };
 
 export const CaseCallOut = memo(CaseCallOutComponent);

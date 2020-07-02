@@ -41,10 +41,14 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
+  isProcessTerminated,
+  isProcessOrigin,
   pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  pushToQueryParams: (arg0: CrumbInfo) => unknown;
+  isProcessTerminated: boolean;
+  isProcessOrigin: boolean;
+  pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
   const processInfoEntry = useMemo(() => {
@@ -178,8 +182,8 @@ export const ProcessDetails = memo(function ProcessDetails({
     if (!processEvent) {
       return { descriptionText: '' };
     }
-    return cubeAssetsForNode(processEvent);
-  }, [processEvent, cubeAssetsForNode]);
+    return cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+  }, [processEvent, cubeAssetsForNode, isProcessTerminated, isProcessOrigin]);
 
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -188,7 +192,10 @@ export const ProcessDetails = memo(function ProcessDetails({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4 aria-describedby={titleId}>
-          <CubeForProcess processEvent={processEvent} />
+          <CubeForProcess
+            isProcessTerminated={isProcessTerminated}
+            isProcessOrigin={isProcessOrigin}
+          />
           {processName}
         </h4>
       </EuiTitle>
