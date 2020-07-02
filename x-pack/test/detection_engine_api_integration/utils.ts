@@ -179,6 +179,7 @@ export const binaryToString = (res: any, callback: any): void => {
  */
 export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
@@ -192,10 +193,12 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 1,
+  risk_score_mapping: [],
   name: 'Simple Rule Query',
   query: 'user.name: root or user.name: admin',
   references: [],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -307,6 +310,7 @@ export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -314,6 +318,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -340,6 +345,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -391,6 +397,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -399,6 +406,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -426,6 +434,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [

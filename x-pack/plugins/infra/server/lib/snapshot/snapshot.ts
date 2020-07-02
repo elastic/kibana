@@ -41,12 +41,13 @@ export class InfraSnapshot {
     // when they have both been completed.
     const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, options);
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
+
     const groupedNodesPromise = requestGroupedNodes(client, optionsWithTimerange);
     const nodeMetricsPromise = requestNodeMetrics(client, optionsWithTimerange);
-
-    const groupedNodeBuckets = await groupedNodesPromise;
-    const nodeMetricBuckets = await nodeMetricsPromise;
-
+    const [groupedNodeBuckets, nodeMetricBuckets] = await Promise.all([
+      groupedNodesPromise,
+      nodeMetricsPromise,
+    ]);
     return {
       nodes: mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options),
       interval: timeRangeWithIntervalApplied.interval,
@@ -103,22 +104,30 @@ const requestGroupedNodes = async (
       },
     },
   };
+  return getAllCompositeData<InfraSnapshotAggregationResponse, InfraSnapshotNodeGroupByBucket>(
+    callClusterFactory(client),
+    query,
+    bucketSelector,
+    handleAfterKey
+  );
+};
 
-  return await getAllCompositeData<
-    InfraSnapshotAggregationResponse,
-    InfraSnapshotNodeGroupByBucket
-  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
+const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
+  const { metrics } = options;
+  if (metrics.every((m) => m.type === 'logRate')) {
+    return options.sourceConfiguration.logAlias;
+  }
+  if (metrics.some((m) => m.type === 'logRate')) {
+    return `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`;
+  }
+  return options.sourceConfiguration.metricAlias;
 };
 
 const requestNodeMetrics = async (
   client: ESSearchClient,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
-  const index =
-    options.metric.type === 'logRate'
-      ? `${options.sourceConfiguration.logAlias}`
-      : `${options.sourceConfiguration.metricAlias}`;
-
+  const index = calculateIndexPatterBasedOnMetrics(options);
   const query = {
     allowNoIndices: true,
     index,
@@ -154,10 +163,12 @@ const requestNodeMetrics = async (
       },
     },
   };
-  return await getAllCompositeData<
-    InfraSnapshotAggregationResponse,
-    InfraSnapshotNodeMetricsBucket
-  >(callClusterFactory(client), query, bucketSelector, handleAfterKey);
+  return getAllCompositeData<InfraSnapshotAggregationResponse, InfraSnapshotNodeMetricsBucket>(
+    callClusterFactory(client),
+    query,
+    bucketSelector,
+    handleAfterKey
+  );
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
@@ -179,7 +190,7 @@ const mergeNodeBuckets = (
   return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
-      metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
+      metrics: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };
   });
 };
