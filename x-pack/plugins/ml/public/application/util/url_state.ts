@@ -5,7 +5,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -58,51 +58,74 @@ export function getUrlState(search: string): Dictionary<any> {
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
 export const useUrlState = (accessor: string): UrlState => {
   const history = useHistory();
-  const { search } = useLocation();
+  const { search: locationSearch } = useLocation();
+
+  // We maintain a local state of useLocation's search.
+  // This allows us to use the callback variant of setSearch()
+  // later on so we can make sure we always act on the
+  // latest url state.
+  const [search, setSearch] = useState(locationSearch);
+
+  useEffect(() => {
+    setSearch(locationSearch);
+  }, [locationSearch]);
+
+  useEffect(() => {
+    // Only push to history if something related to the accessor of this
+    // url state instance is affected (e.g. a change in '_g' should not trigger
+    // a push in the '_a' instance).
+    if (!isEqual(getUrlState(locationSearch)[accessor], getUrlState(search)[accessor])) {
+      history.push({ search });
+    }
+  }, [search]);
 
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
-      const urlState = getUrlState(search);
-      const parsedQueryString = parse(search, { sort: false });
+      setSearch((prevSearch) => {
+        const urlState = getUrlState(prevSearch);
+        const parsedQueryString = parse(prevSearch, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-        urlState[accessor] = {};
-      }
-
-      if (typeof attribute === 'string') {
-        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-          return;
+        if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+          urlState[accessor] = {};
         }
 
-        urlState[accessor][attribute] = value;
-      } else {
-        const attributes = attribute;
-        Object.keys(attributes).forEach((a) => {
-          urlState[accessor][a] = attributes[a];
-        });
-      }
-
-      try {
-        const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
-
-        Object.keys(urlState).forEach((a) => {
-          if (isRisonSerializationRequired(a)) {
-            parsedQueryString[a] = encode(urlState[a]);
-          } else {
-            parsedQueryString[a] = urlState[a];
+        if (typeof attribute === 'string') {
+          if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+            return prevSearch;
           }
-        });
-        const newLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
 
-        if (oldLocationSearch !== newLocationSearch) {
-          history.push({
-            search: stringify(parsedQueryString, { sort: false }),
+          urlState[accessor][attribute] = value;
+        } else {
+          const attributes = attribute;
+          Object.keys(attributes).forEach((a) => {
+            urlState[accessor][a] = attributes[a];
           });
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Could not save url state', error);
-      }
+
+        try {
+          const oldLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+
+          Object.keys(urlState).forEach((a) => {
+            if (isRisonSerializationRequired(a)) {
+              parsedQueryString[a] = encode(urlState[a]);
+            } else {
+              parsedQueryString[a] = urlState[a];
+            }
+          });
+          const newLocationSearch = stringify(parsedQueryString, { sort: false, encode: false });
+
+          if (oldLocationSearch !== newLocationSearch) {
+            return stringify(parsedQueryString, { sort: false });
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Could not save url state', error);
+        }
+
+        // as a fallback and to satisfy the hooks callback requirements
+        // return the previous state if we didn't need or were not able to update.
+        return prevSearch;
+      });
     },
     [search]
   );
