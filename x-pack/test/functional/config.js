@@ -250,18 +250,6 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
-
-        global_devtools_read: {
-          kibana: [
-            {
-              feature: {
-                dev_tools: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        },
-
         global_maps_all: {
           kibana: [
             {
@@ -282,6 +270,31 @@ export default async function ({ readConfigFile }) {
               },
             ],
           },
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965

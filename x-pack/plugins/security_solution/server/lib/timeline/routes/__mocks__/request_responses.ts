@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as rt from 'io-ts';
+import stream from 'stream';
+
 import {
   TIMELINE_DRAFT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
 } from '../../../../../common/constants';
-import stream from 'stream';
-import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+
+import { requestMock } from '../../../detection_engine/routes/__mocks__';
+
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
 
@@ -59,7 +62,7 @@ export const inputTimeline: SavedTimeline = {
   title: 't',
   timelineType: TimelineType.default,
   templateTimelineId: null,
-  templateTimelineVersion: null,
+  templateTimelineVersion: 1,
   dateRange: { start: 1585227005527, end: 1585313405527 },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
@@ -68,7 +71,7 @@ export const inputTimeline: SavedTimeline = {
 export const inputTemplateTimeline = {
   ...inputTimeline,
   timelineType: TimelineType.template,
-  templateTimelineId: null,
+  templateTimelineId: '79deb4c0-6bc1-11ea-inpt-templatea189',
   templateTimelineVersion: null,
 };
 
@@ -90,11 +93,11 @@ export const createDraftTimelineWithoutTimelineId = {
 };
 
 export const createTemplateTimelineWithoutTimelineId = {
-  templateTimelineId: null,
   timeline: inputTemplateTimeline,
   timelineId: null,
   version: null,
   timelineType: TimelineType.template,
+  status: TimelineStatus.active,
 };
 
 export const createTimelineWithTimelineId = {
@@ -110,7 +113,6 @@ export const createDraftTimelineWithTimelineId = {
 export const createTemplateTimelineWithTimelineId = {
   ...createTemplateTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-  templateTimelineId: 'existing template timeline id',
 };
 
 export const updateTimelineWithTimelineId = {
@@ -122,7 +124,7 @@ export const updateTimelineWithTimelineId = {
 export const updateTemplateTimelineWithTimelineId = {
   timeline: {
     ...inputTemplateTimeline,
-    templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+    templateTimelineId: '79deb4c0-6bc1-0000-0000-f5341fb7a189',
     templateTimelineVersion: 1,
   },
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',

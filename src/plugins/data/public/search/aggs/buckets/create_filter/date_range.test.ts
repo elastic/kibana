@@ -76,7 +76,6 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
     };
