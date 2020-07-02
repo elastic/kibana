@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
 
 import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
-import { createTableVisCell } from './table_vis_cell';
 import { TableVisParams } from '../types';
 import { TableContext } from '../table_vis_response_handler';
+import { TableVisBasic } from './table_vis_basic';
 
 export const TableVisualization = ({
   renderComplete,
+  vis,
   visData: { direction, table, tables },
   visParams,
 }: ReactVisComponentProps<TableContext, TableVisParams>) => {
@@ -34,28 +34,7 @@ export const TableVisualization = ({
     renderComplete();
   }, [renderComplete]);
 
-  return table ? (
-    <EuiDataGrid
-      aria-label=""
-      columns={table.columns.map((col) => ({
-        id: col.id,
-        display: col.name,
-      }))}
-      rowCount={table.rows.length}
-      columnVisibility={{
-        visibleColumns: table.columns.map((col) => col.id),
-        setVisibleColumns: () => {},
-      }}
-      renderCellValue={createTableVisCell(table, visParams)}
-      pagination={{
-        pageIndex: 0,
-        pageSize: 10,
-        pageSizeOptions: [50, 100, 200],
-        onChangePage: () => {},
-        onChangeItemsPerPage: () => {},
-      }}
-    />
-  ) : null;
+  return table ? <TableVisBasic table={table} vis={vis} visParams={visParams} /> : null;
   // (
   //   visData.tables.map((table, key) => (
   //     <EuiDataGrid

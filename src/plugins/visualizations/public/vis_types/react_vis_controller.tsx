@@ -20,12 +20,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { IUiSettingsClient } from 'kibana/public';
-import { Vis, VisualizationController } from '../types';
+import { VisualizationController } from '../types';
 import { getI18n, getUISettings } from '../services';
+import { ExprVis } from '../expressions/vis';
 
 export interface ReactVisComponentProps<TData, TParams> {
   config: IUiSettingsClient;
-  vis: Vis;
+  vis: ExprVis;
   visData: TData;
   visParams: TParams;
   renderComplete: () => void;
@@ -33,9 +34,9 @@ export interface ReactVisComponentProps<TData, TParams> {
 
 export class ReactVisController implements VisualizationController {
   private el: HTMLElement;
-  private vis: Vis;
+  private vis: ExprVis;
 
-  constructor(element: HTMLElement, vis: Vis) {
+  constructor(element: HTMLElement, vis: ExprVis) {
     this.el = element;
     this.vis = vis;
   }

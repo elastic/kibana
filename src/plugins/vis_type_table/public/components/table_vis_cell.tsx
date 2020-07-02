@@ -17,13 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
+import { ExprVis } from 'src/plugins/visualizations/public';
 import { TableVisParams } from '../types';
 import { Table } from '../table_vis_response_handler';
 import { getFormatService } from '../services';
 
-export const createTableVisCell = (table: Table, visParams: TableVisParams) => ({
+export const createTableVisCell = (table: Table, vis: ExprVis, visParams: TableVisParams) => ({
+  // @ts-expect-error
+  colIndex,
   rowIndex,
   columnId,
 }: EuiDataGridCellValueElementProps) => {
@@ -135,5 +144,42 @@ export const createTableVisCell = (table: Table, visParams: TableVisParams) => (
 
   const cellContent = contentsIsDefined ? column?.formatter?.convert(rowValue) : '';
 
-  return cellContent;
+  const onFilterClick = useCallback(
+    (negate: boolean) => {
+      vis.API.events.filter({
+        data: [
+          {
+            table,
+            row: rowIndex,
+            column: colIndex,
+            value: rowValue,
+          },
+        ],
+        negate,
+      });
+    },
+    [colIndex, rowIndex, rowValue]
+  );
+
+  const cell = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem>{cellContent}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          onClick={() => onFilterClick(false)}
+          iconType="magnifyWithPlus"
+          aria-label="Next"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          onClick={() => onFilterClick(true)}
+          iconType="magnifyWithMinus"
+          aria-label="Next"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return column?.filterable && contentsIsDefined ? cell : cellContent;
 };

@@ -23,12 +23,12 @@ import { getFormatService } from './services';
 import { Input } from './table_vis_fn';
 
 export interface TableContext {
-  tables: Array<TableGroup | Table>;
+  table?: Table;
+  tables: TableGroup[];
   direction?: 'row' | 'column';
 }
 
 export interface TableGroup {
-  $parent: TableContext;
   table: Input;
   tables: Table[];
   title: string;
@@ -39,60 +39,62 @@ export interface TableGroup {
 }
 
 export interface Table {
-  $parent?: TableGroup;
   columns: Input['columns'];
   rows: Input['rows'];
 }
 
-export function tableVisResponseHandler(table: Input, dimensions: any): TableContext {
-  const converted: TableContext = {
-    tables: [],
-  };
+export function tableVisResponseHandler(input: Input, dimensions: any): TableContext {
+  let table: Table | undefined;
+  let tables: TableGroup[] = [];
+  let direction: TableContext['direction'];
 
   const split = dimensions.splitColumn || dimensions.splitRow;
 
   if (split) {
-    converted.direction = dimensions.splitRow ? 'row' : 'column';
+    tables = [];
+    direction = dimensions.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
-    const splitColumn = table.columns[splitColumnIndex];
+    const splitColumn = input.columns[splitColumnIndex];
     const splitMap = {};
     let splitIndex = 0;
 
-    table.rows.forEach((row, rowIndex) => {
+    input.rows.forEach((row, rowIndex) => {
       const splitValue: any = row[splitColumn.id];
 
       if (!splitMap.hasOwnProperty(splitValue as any)) {
         (splitMap as any)[splitValue] = splitIndex++;
         const tableGroup: Required<TableGroup, 'tables'> = {
-          $parent: converted,
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           name: splitColumn.name,
           key: splitValue,
           column: splitColumnIndex,
           row: rowIndex,
-          table,
+          table: input,
           tables: [],
         };
 
         tableGroup.tables.push({
-          $parent: tableGroup,
-          columns: table.columns,
+          columns: input.columns,
           rows: [],
         });
 
-        converted.tables.push(tableGroup);
+        tables.push(tableGroup);
       }
 
       const tableIndex = (splitMap as any)[splitValue];
-      (converted.tables[tableIndex] as any).tables[0].rows.push(row);
+      (tables[tableIndex] as any).tables[0].rows.push(row);
     });
   } else {
-    converted.tables.push({
-      columns: table.columns,
-      rows: table.rows,
-    });
+    table = {
+      columns: input.columns,
+      rows: input.rows,
+    };
   }
 
-  return converted;
+  return {
+    direction,
+    table,
+    tables,
+  };
 }
