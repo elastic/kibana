@@ -116,7 +116,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-              defaultMessage: 'Missing values',
+              defaultMessage: 'Fill missing values',
             })}
             helpText={
               !hasNonBarSeries &&

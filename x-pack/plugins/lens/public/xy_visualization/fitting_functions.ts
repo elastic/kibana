@@ -13,7 +13,7 @@ export const fittingFunctionDefinitions = [
   {
     id: 'None',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.none', {
-      defaultMessage: 'hidden',
+      defaultMessage: 'Hide',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.none', {
       defaultMessage: 'Do not fill gaps',
@@ -22,7 +22,7 @@ export const fittingFunctionDefinitions = [
   {
     id: 'Zero',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.zero', {
-      defaultMessage: 'zero',
+      defaultMessage: 'Zero',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.zero', {
       defaultMessage: 'Fill gaps with zeros',
@@ -31,46 +31,28 @@ export const fittingFunctionDefinitions = [
   {
     id: 'Linear',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.linear', {
-      defaultMessage: 'linear',
+      defaultMessage: 'Linear',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.linear', {
-      defaultMessage: 'Interpolate linearly between values',
-    }),
-  },
-  {
-    id: 'Average',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.average', {
-      defaultMessage: 'average',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.average', {
-      defaultMessage: 'Fill gaps with the average of the nearest values',
-    }),
-  },
-  {
-    id: 'Nearest',
-    title: i18n.translate('xpack.lens.fittingFunctionsTitle.nearest', {
-      defaultMessage: 'nearest',
-    }),
-    description: i18n.translate('xpack.lens.fittingFunctionsDescription.nearest', {
-      defaultMessage: 'Fill gaps with the nearest value',
+      defaultMessage: 'Fill gaps with a line',
     }),
   },
   {
     id: 'Carry',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.carry', {
-      defaultMessage: 'carry',
+      defaultMessage: 'Last',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.carry', {
-      defaultMessage: 'Fill gaps with last value',
+      defaultMessage: 'Fill gaps with the last value',
     }),
   },
   {
     id: 'Lookahead',
     title: i18n.translate('xpack.lens.fittingFunctionsTitle.lookahead', {
-      defaultMessage: 'lookahead',
+      defaultMessage: 'Next',
     }),
     description: i18n.translate('xpack.lens.fittingFunctionsDescription.lookahead', {
-      defaultMessage: 'Fill gaps with next value',
+      defaultMessage: 'Fill gaps with the next value',
     }),
   },
 ] as const;
