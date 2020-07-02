@@ -82,10 +82,21 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
             unenrolledHostIds: unenrolledHostIds.map((host: HostId) => host.host.id),
           }
         );
-        const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+        let response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
         )) as SearchResponse<HostMetadata>;
+
+        const total = response?.aggregations?.total?.value || 0;
+        if (response.hits.hits.length === 0 && queryParams.from > total) {
+          queryParams.from = total - queryParams.size > 0 ? total - queryParams.size : 0;
+          response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+            'search',
+            queryParams
+          )) as SearchResponse<HostMetadata>;
+          // note: in this case, we never seem to return the new response. may need to consume a promise somewhere?
+        }
+
         return res.ok({
           body: await mapToHostResultList(queryParams, response, {
             endpointAppContext,
