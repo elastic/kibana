@@ -358,6 +358,9 @@ const CreateRulePageComponent: React.FC = () => {
             <StepAboutRule
               addPadding={true}
               defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
+              defineRuleData={
+                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
+              }
               descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}

@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
           updated_by: 'elastic',
-          datasources: [],
+          package_configs: [],
         });
       });
 
