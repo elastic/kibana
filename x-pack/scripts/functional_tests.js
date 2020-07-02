@@ -6,6 +6,7 @@
 
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),
+  require.resolve('../test/security_solution_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/functional/config_security_trial.ts'),
@@ -50,6 +51,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/reporting_api_integration/config.js'),
+  require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();

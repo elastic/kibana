@@ -46,7 +46,7 @@ Array [
               },
             },
             "composite": Object {
-              "size": 10000,
+              "size": 101,
               "sources": Array [
                 Object {
                   "service": Object {
@@ -159,7 +159,7 @@ Array [
               },
             },
             "composite": Object {
-              "size": 10000,
+              "size": 101,
               "sources": Array [
                 Object {
                   "transaction": Object {

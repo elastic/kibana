@@ -21,27 +21,28 @@ import { coreMock } from '../../../../core/server/mocks';
 
 import { SearchService } from './search_service';
 import { CoreSetup } from '../../../../core/server';
-
-const mockSearchApi = { search: jest.fn() };
-jest.mock('./create_api', () => ({
-  createApi: () => mockSearchApi,
-}));
+import { DataPluginStart } from '../plugin';
 
 describe('Search service', () => {
   let plugin: SearchService;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
 
   beforeEach(() => {
     plugin = new SearchService(coreMock.createPluginInitializerContext({}));
     mockCoreSetup = coreMock.createSetup();
-    mockSearchApi.search.mockClear();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const setup = plugin.setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      expect(setup).toHaveProperty('registerSearchStrategy');
+    });
+  });
+
+  describe('start()', () => {
+    it('exposes proper contract', async () => {
+      const setup = plugin.start();
+      expect(setup).toHaveProperty('getSearchStrategy');
     });
   });
 });

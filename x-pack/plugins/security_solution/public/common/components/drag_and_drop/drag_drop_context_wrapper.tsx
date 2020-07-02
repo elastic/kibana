@@ -126,6 +126,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
           }
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [dataProviders, activeTimelineDataProviders, browserFields]
     );
     return (
@@ -167,18 +168,6 @@ export const DragDropContextWrapper = connector(DragDropContextWrapperComponent)
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 
 const onBeforeCapture = (before: BeforeCapture) => {
-  const x =
-    window.pageXOffset !== undefined
-      ? window.pageXOffset
-      : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-
-  const y =
-    window.pageYOffset !== undefined
-      ? window.pageYOffset
-      : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-
-  window.onscroll = () => window.scrollTo(x, y);
-
   if (!draggableIsField(before)) {
     document.body.classList.add(IS_DRAGGING_CLASS_NAME);
   }

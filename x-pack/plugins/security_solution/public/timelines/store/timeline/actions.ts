@@ -16,6 +16,8 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/t
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+import { InsertTimeline } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -67,6 +69,9 @@ export const createTimeline = actionCreator<{
   sort?: Sort;
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
+  timelineType?: TimelineTypeLiteral;
+  templateTimelineId?: string;
+  templateTimelineVersion?: number;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -84,6 +89,10 @@ export const removeProvider = actionCreator<{
 
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
+export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
+  'UPDATE_TIMELINE_GRAPH_EVENT_ID'
+);
+
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 
 export const updateTimeline = actionCreator<{
@@ -95,6 +104,8 @@ export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
 }>('ADD_TIMELINE');
+
+export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;

@@ -146,6 +146,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         abortCtrl.abort();
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

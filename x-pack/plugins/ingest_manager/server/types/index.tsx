@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ScopedClusterClient } from 'src/core/server';
+import { LegacyScopedClusterClient } from 'src/core/server';
 
 export {
   // Object types
@@ -17,16 +17,21 @@ export {
   AgentEventSOAttributes,
   AgentAction,
   AgentActionSOAttributes,
-  Datasource,
-  NewDatasource,
-  FullAgentConfigDatasource,
+  PackageConfig,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  NewPackageConfig,
+  PackageConfigSOAttributes,
+  FullAgentConfigInput,
   FullAgentConfig,
   AgentConfig,
+  AgentConfigSOAttributes,
   NewAgentConfig,
   AgentConfigStatus,
   DataStream,
   Output,
   NewOutput,
+  OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
@@ -56,7 +61,7 @@ export {
   SettingsSOAttributes,
 } from '../../common';
 
-export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
+export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
 export type AgentConfigUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',

@@ -17,7 +17,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 
-export const servicesRoute = createRoute((core) => ({
+export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt]),
@@ -105,6 +105,7 @@ export const serviceAnnotationsRoute = createRoute(() => ({
       environment,
       annotationsClient,
       apiCaller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+      logger: context.logger,
     });
   },
 }));

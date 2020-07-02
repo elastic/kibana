@@ -17,7 +17,7 @@ import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { createRoute } from '../create_route';
 
-export const customLinkTransactionRoute = createRoute((core) => ({
+export const customLinkTransactionRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/transaction',
   params: {
     query: filterOptionsRt,
@@ -31,7 +31,7 @@ export const customLinkTransactionRoute = createRoute((core) => ({
   },
 }));
 
-export const listCustomLinksRoute = createRoute((core) => ({
+export const listCustomLinksRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links',
   params: {
     query: filterOptionsRt,

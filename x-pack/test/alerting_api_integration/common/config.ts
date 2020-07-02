@@ -82,13 +82,14 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
           ])}`,
+          '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
-              config: {
+              secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
             },

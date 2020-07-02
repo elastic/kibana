@@ -22,10 +22,9 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    deps.data.search.registerSearchStrategyProvider(
-      this.initializerContext.opaqueId,
+    deps.data.search.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider
+      enhancedEsSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
   }
 

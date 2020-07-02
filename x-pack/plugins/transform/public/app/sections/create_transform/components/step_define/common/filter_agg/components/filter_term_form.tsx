@@ -84,8 +84,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
 
       await fetchOptions(searchValue);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedField]
+    [fetchOptions, selectedField]
   );
 
   const updateConfig = useCallback(
@@ -97,13 +96,16 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         },
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config]
+    [config, onChange]
   );
 
   useEffect(() => {
     // Simulate initial load.
     onSearchChange('');
+    return () => {
+      // make sure the ongoing request is canceled
+      fetchOptions.cancel();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -115,7 +117,6 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
         value: undefined,
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedField]);
 
   const selectedOptions = config?.value ? [{ label: config.value }] : undefined;

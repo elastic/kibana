@@ -491,7 +491,6 @@ export class ForecastingModalUI extends Component {
       <EuiButton
         onClick={this.openModal}
         isDisabled={isForecastingDisabled}
-        fill
         data-test-subj="mlSingleMetricViewerButtonForecast"
       >
         <FormattedMessage

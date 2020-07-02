@@ -33,7 +33,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const nodeName = $route.current.params.node;
 
       super({
@@ -80,7 +79,6 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           this.renderReact(
             <Node
               scope={$scope}
-              kbnUrl={kbnUrl}
               nodeId={this.nodeName}
               clusterUuid={$scope.cluster.cluster_uuid}
               onBrush={this.onBrush}

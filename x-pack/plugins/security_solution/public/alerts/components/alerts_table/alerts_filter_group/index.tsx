@@ -6,18 +6,19 @@
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18n from '../translations';
 
-export const FILTER_OPEN = 'open';
-export const FILTER_CLOSED = 'closed';
-export type AlertFilterOption = typeof FILTER_OPEN | typeof FILTER_CLOSED;
+export const FILTER_OPEN: Status = 'open';
+export const FILTER_CLOSED: Status = 'closed';
+export const FILTER_IN_PROGRESS: Status = 'in-progress';
 
 interface Props {
-  onFilterGroupChanged: (filterGroup: AlertFilterOption) => void;
+  onFilterGroupChanged: (filterGroup: Status) => void;
 }
 
 const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged }) => {
-  const [filterGroup, setFilterGroup] = useState(FILTER_OPEN);
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const onClickOpenFilterCallback = useCallback(() => {
     setFilterGroup(FILTER_OPEN);
@@ -29,6 +30,11 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
     onFilterGroupChanged(FILTER_CLOSED);
   }, [setFilterGroup, onFilterGroupChanged]);
 
+  const onClickInProgressFilterCallback = useCallback(() => {
+    setFilterGroup(FILTER_IN_PROGRESS);
+    onFilterGroupChanged(FILTER_IN_PROGRESS);
+  }, [setFilterGroup, onFilterGroupChanged]);
+
   return (
     <EuiFilterGroup>
       <EuiFilterButton
@@ -38,6 +44,15 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
         withNext
       >
         {i18n.OPEN_ALERTS}
+      </EuiFilterButton>
+
+      <EuiFilterButton
+        data-test-subj="inProgressAlerts"
+        hasActiveFilters={filterGroup === FILTER_IN_PROGRESS}
+        onClick={onClickInProgressFilterCallback}
+        withNext
+      >
+        {i18n.IN_PROGRESS_ALERTS}
       </EuiFilterButton>
 
       <EuiFilterButton

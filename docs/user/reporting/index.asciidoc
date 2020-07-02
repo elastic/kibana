@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Reporting from Kibana
+= Reporting
 
 [partintro]
 
@@ -94,7 +94,7 @@ image::user/reporting/images/preserve-layout-switch.png["Share"]
 [[manage-report-history]]
 == View and manage report history
 
-For a list of your reports, go to *Management > Reporting*.
+For a list of your reports, open the menu, then go to *Stack Management > {kib} > Reporting*.
 From this view, you can monitor the generation of a report and
 download reports that you previously generated.
 

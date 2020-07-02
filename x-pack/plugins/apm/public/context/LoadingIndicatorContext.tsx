@@ -10,7 +10,7 @@ import { useDelayedVisibility } from '../components/shared/useDelayedVisibility'
 
 export const LoadingIndicatorContext = React.createContext({
   statuses: {},
-  dispatchStatus: (action: Action) => {},
+  dispatchStatus: (_action: Action) => {},
 });
 
 interface State {

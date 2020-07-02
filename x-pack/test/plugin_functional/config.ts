@@ -16,7 +16,7 @@ import { pageObjects } from './page_objects';
 /* eslint-disable import/no-default-export */
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional_endpoint/config.ts')
+    require.resolve('../security_solution_endpoint/config.ts')
   );
 
   // Find all folders in ./plugins since we treat all them as plugin folder

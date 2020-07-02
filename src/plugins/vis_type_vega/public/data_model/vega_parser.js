@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
+import { vega, vegaLite } from '../lib/vega';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
@@ -32,21 +31,19 @@ import { i18n } from '@kbn/i18n';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor = VISUALIZATION_COLORS[0];
-
-const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
-
 const locToDirMap = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
   bottom: 'column',
 };
+const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER = 'elasticsearch';
 
 export class VegaParser {
-  constructor(spec, searchCache, timeCache, filters, serviceSettings) {
+  constructor(spec, searchAPI, timeCache, filters, serviceSettings) {
     this.spec = spec;
     this.hideWarnings = false;
     this.error = undefined;
@@ -54,7 +51,7 @@ export class VegaParser {
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchCache, filters, onWarn),
+      elasticsearch: new EsQueryParser(timeCache, searchAPI, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };

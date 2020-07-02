@@ -111,10 +111,15 @@ export const ExpressionChart: React.FC<Props> = ({
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
   const firstSeries = first(data.series);
-  if (!firstSeries) {
+  if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">Oops, no chart data available</EuiText>
+        <EuiText color="subdued" data-test-subj="noChartData">
+          <FormattedMessage
+            id="xpack.infra.metrics.alerts.noDataMessage"
+            defaultMessage="Oops, no chart data available"
+          />
+        </EuiText>
       </EmptyContainer>
     );
   }
@@ -146,7 +151,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
-  const timeLabel = TIME_LABELS[timeUnit];
+  const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
 
   return (
     <>

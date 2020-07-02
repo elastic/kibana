@@ -43,14 +43,13 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
+import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 
 import {
   annotation$,
   annotationsRefresh$,
   annotationsRefreshed,
 } from '../../../services/annotations_service';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * Table component for rendering the lists of annotations for an ML job.

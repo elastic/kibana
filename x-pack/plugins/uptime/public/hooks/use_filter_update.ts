@@ -20,14 +20,18 @@ interface SelectedFilters {
   selectedFilters: Map<string, string[]>;
 }
 
-export const useFilterUpdate = (fieldName?: string, values?: string[]): SelectedFilters => {
+export const useFilterUpdate = (
+  fieldName?: string,
+  values?: string[],
+  shouldUpdateUrl: boolean = true
+): SelectedFilters => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
   const { filters: currentFilters } = getUrlParams();
 
   // update filters in the URL from filter group
   const onFilterUpdate = (filtersKuery: string) => {
-    if (currentFilters !== filtersKuery) {
+    if (currentFilters !== filtersKuery && shouldUpdateUrl) {
       updateUrl({ filters: filtersKuery, pagination: '' });
     }
   };

@@ -6,8 +6,7 @@
 
 import { isUndefined } from 'lodash';
 import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
-import { Query } from 'react-apollo';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 
@@ -50,18 +49,6 @@ export const getAllFieldsByName = (
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
-interface WithSourceArgs {
-  indicesExist: boolean;
-  browserFields: BrowserFields;
-  indexPattern: IIndexPattern;
-}
-
-interface WithSourceProps {
-  children: (args: WithSourceArgs) => React.ReactNode;
-  indexToAdd?: string[] | null;
-  sourceId: string;
-}
-
 export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
@@ -71,109 +58,128 @@ export const getIndexFields = memoizeOne(
           ),
           title,
         }
-      : { fields: [], title }
+      : { fields: [], title },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const getBrowserFields = memoizeOne(
-  (title: string, fields: IndexField[]): BrowserFields =>
+  (_title: string, fields: IndexField[]): BrowserFields =>
     fields && fields.length > 0
       ? fields.reduce<BrowserFields>(
           (accumulator: BrowserFields, field: IndexField) =>
             set([field.category, 'fields', field.name], field, accumulator),
           {}
         )
-      : {}
+      : {},
+  // Update the value only if _title has changed
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, sourceId }) => {
+export const indicesExistOrDataTemporarilyUnavailable = (
+  indicesExist: boolean | null | undefined
+) => indicesExist || isUndefined(indicesExist);
+
+const EMPTY_BROWSER_FIELDS = {};
+
+interface UseWithSourceState {
+  browserFields: BrowserFields;
+  errorMessage: string | null;
+  indexPattern: IIndexPattern;
+  indicesExist: boolean | undefined | null;
+  loading: boolean;
+}
+
+export const useWithSource = (
+  sourceId = 'default',
+  indexToAdd?: string[] | null,
+  onlyCheckIndexToAdd?: boolean
+) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...configIndex, ...indexToAdd];
+      return [...(!onlyCheckIndexToAdd ? configIndex : []), ...indexToAdd];
     }
     return configIndex;
-  }, [configIndex, indexToAdd]);
+  }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
 
-  return (
-    <Query<SourceQuery.Query, SourceQuery.Variables>
-      query={sourceQuery}
-      fetchPolicy="cache-first"
-      notifyOnNetworkStatusChange
-      variables={{
-        sourceId,
-        defaultIndex,
-      }}
-    >
-      {({ data }) =>
-        children({
-          indicesExist: get('source.status.indicesExist', data),
-          browserFields: getBrowserFields(
-            defaultIndex.join(),
-            get('source.status.indexFields', data)
-          ),
-          indexPattern: getIndexFields(defaultIndex.join(), get('source.status.indexFields', data)),
-        })
-      }
-    </Query>
-  );
-});
-
-WithSource.displayName = 'WithSource';
-
-export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
-  indicesExist || isUndefined(indicesExist);
-
-export const useWithSource = (sourceId: string, indices: string[]) => {
-  const [loading, updateLoading] = useState(false);
-  const [indicesExist, setIndicesExist] = useState<boolean | undefined | null>(undefined);
-  const [browserFields, setBrowserFields] = useState<BrowserFields | null>(null);
-  const [indexPattern, setIndexPattern] = useState<IIndexPattern | null>(null);
-  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
+  const [state, setState] = useState<UseWithSourceState>({
+    browserFields: EMPTY_BROWSER_FIELDS,
+    errorMessage: null,
+    indexPattern: getIndexFields(defaultIndex.join(), []),
+    indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
+    loading: false,
+  });
 
   const apolloClient = useApolloClient();
-  async function fetchSource(signal: AbortSignal) {
-    updateLoading(true);
-    if (apolloClient) {
-      apolloClient
-        .query<SourceQuery.Query, SourceQuery.Variables>({
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+
+    async function fetchSource() {
+      if (!apolloClient) return;
+
+      setState((prevState) => ({ ...prevState, loading: true }));
+
+      try {
+        const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
           query: sourceQuery,
           fetchPolicy: 'cache-first',
           variables: {
             sourceId,
-            defaultIndex: indices,
+            defaultIndex,
           },
           context: {
             fetchOptions: {
-              signal,
+              signal: abortCtrl.signal,
             },
           },
-        })
-        .then(
-          (result) => {
-            updateLoading(false);
-            updateErrorMessage(null);
-            setIndicesExist(get('data.source.status.indicesExist', result));
-            setBrowserFields(
-              getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
-            );
-            setIndexPattern(
-              getIndexFields(indices.join(), get('data.source.status.indexFields', result))
-            );
-          },
-          (error) => {
-            updateLoading(false);
-            updateErrorMessage(error.message);
-          }
-        );
+        });
+        if (!isSubscribed) {
+          return setState((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        }
+
+        setState({
+          loading: false,
+          indicesExist: indicesExistOrDataTemporarilyUnavailable(
+            get('data.source.status.indicesExist', result)
+          ),
+          browserFields: getBrowserFields(
+            defaultIndex.join(),
+            get('data.source.status.indexFields', result)
+          ),
+          indexPattern: getIndexFields(
+            defaultIndex.join(),
+            get('data.source.status.indexFields', result)
+          ),
+          errorMessage: null,
+        });
+      } catch (error) {
+        if (!isSubscribed) {
+          return setState((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        }
+
+        setState((prevState) => ({
+          ...prevState,
+          loading: false,
+          errorMessage: error.message,
+        }));
+      }
     }
-  }
 
-  useEffect(() => {
-    const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    fetchSource(signal);
-    return () => abortCtrl.abort();
-  }, [apolloClient, sourceId, indices]);
+    fetchSource();
 
-  return { indicesExist, browserFields, indexPattern, loading, errorMessage };
+    return () => {
+      isSubscribed = false;
+      return abortCtrl.abort();
+    };
+  }, [apolloClient, sourceId, defaultIndex]);
+
+  return state;
 };

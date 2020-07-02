@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { debounce } from 'lodash';
+import { debounce, pick } from 'lodash';
+import { Unit } from '@elastic/datemath';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -18,11 +19,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertPreview } from '../../common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   Comparator,
   Aggregators,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../../../../common/alerting/metrics';
 import {
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -38,22 +41,17 @@ import { useSourceViaHttp } from '../../../containers/source/use_source_via_http
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
-import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
+import { AlertContextMeta, MetricExpression, AlertParams } from '../types';
 import { ExpressionChart } from './expression_chart';
+import { validateMetricThreshold } from './validation';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: {
-    criteria: MetricExpression[];
-    groupBy?: string;
-    filterQuery?: string;
-    sourceId?: string;
-    filterQueryText?: string;
-    alertOnNoData?: boolean;
-  };
+  alertParams: AlertParams;
   alertsContext: AlertsContextValue<AlertContextMeta>;
+  alertInterval: string;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
@@ -65,9 +63,10 @@ const defaultExpression = {
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
+export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, alertsContext } = props;
+  const { setAlertParams, alertParams, errors, alertsContext, alertInterval } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -76,7 +75,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
+  const [timeUnit, setTimeUnit] = useState<Unit>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
@@ -143,7 +142,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      setAlertParams('groupBy', group || '');
+      setAlertParams('groupBy', group && group.length ? group : '');
     },
     [setAlertParams]
   );
@@ -177,7 +176,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as TimeUnit);
+      setTimeUnit(tu as Unit);
       setAlertParams('criteria', criteria);
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -224,6 +223,13 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
 
+  const preFillAlertGroupBy = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.groupBy && !md.series) {
+      setAlertParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
+
   useEffect(() => {
     if (alertParams.criteria && alertParams.criteria.length) {
       setTimeSize(alertParams.criteria[0].timeSize);
@@ -234,6 +240,10 @@ export const Expressions: React.FC<Props> = (props) => {
 
     if (!alertParams.filterQuery) {
       preFillAlertFilter();
+    }
+
+    if (!alertParams.groupBy) {
+      preFillAlertGroupBy();
     }
 
     if (!alertParams.sourceId) {
@@ -381,6 +391,22 @@ export const Expressions: React.FC<Props> = (props) => {
           }}
         />
       </EuiFormRow>
+
+      <EuiSpacer size={'m'} />
+      <AlertPreview
+        alertInterval={alertInterval}
+        alertType={METRIC_THRESHOLD_ALERT_TYPE_ID}
+        alertParams={pick(alertParams, 'criteria', 'groupBy', 'filterQuery', 'sourceId')}
+        showNoDataResults={alertParams.alertOnNoData}
+        validate={validateMetricThreshold}
+        fetch={alertsContext.http.fetch}
+        groupByDisplayName={alertParams.groupBy}
+      />
+      <EuiSpacer size={'m'} />
     </>
   );
 };
+
+// required for dynamic import
+// eslint-disable-next-line import/no-default-export
+export default Expressions;

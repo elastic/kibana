@@ -5,3 +5,5 @@
  */
 
 export * from '../common/types/anomalies';
+export * from '../common/types/anomaly_detection_jobs';
+export * from './lib/capabilities/errors';

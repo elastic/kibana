@@ -9,12 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
-import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SendRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../../components';
+import { encodePathForReactRouter } from '../../../../../services/routing';
 import { useServices } from '../../../../../app_context';
-import { SendRequestResponse } from '../../../../../../shared_imports';
 
 interface Props {
   templates: TemplateListItem[];
@@ -52,7 +52,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             {...reactRouterNavigate(
               history,
               {
-                pathname: `/templates/${encodeURIComponent(encodeURIComponent(name))}`,
+                pathname: `/templates/${encodePathForReactRouter(name)}`,
                 search: `legacy=${Boolean(item._kbnMeta.isLegacy)}`,
               },
               () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)

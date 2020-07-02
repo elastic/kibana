@@ -8,14 +8,23 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { History } from 'history';
+import {
+  Query,
+  DataPublicPluginStart,
+  syncQueryStateWithUrl,
+} from '../../../../../src/plugins/data/public';
+import {
+  createKbnUrlStateStorage,
+  IStorageWrapper,
+} from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
+  checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
@@ -31,10 +40,10 @@ import {
 } from '../../../../../src/plugins/data/public';
 
 interface State {
+  indicateNoData: boolean;
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
-  originatingApp: string | undefined;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -56,9 +65,10 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  originatingAppFromUrl,
+  originatingApp,
   navigation,
   onAppLeave,
+  history,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
@@ -67,14 +77,10 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (
-    id?: string,
-    returnToOrigin?: boolean,
-    originatingApp?: string | undefined,
-    newlyCreated?: boolean
-  ) => void;
-  originatingAppFromUrl?: string | undefined;
+  redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+  originatingApp?: string | undefined;
   onAppLeave: AppMountParameters['onAppLeave'];
+  history: History;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') ||
@@ -87,14 +93,31 @@ export function App({
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
       query: { query: '', language },
-      originatingApp: originatingAppFromUrl,
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
       filters: [],
+      indicateNoData: false,
     };
   });
+
+  const showNoDataPopover = useCallback(() => {
+    setState((prevState) => ({ ...prevState, indicateNoData: true }));
+  }, [setState]);
+
+  useEffect(() => {
+    if (state.indicateNoData) {
+      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    }
+  }, [
+    setState,
+    state.indicateNoData,
+    state.query,
+    state.filters,
+    state.dateRange,
+    state.indexPatternsForTopNav,
+  ]);
 
   const { lastKnownDoc } = state;
 
@@ -129,7 +152,17 @@ export function App({
       },
     });
 
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: core.uiSettings.get('state:storeInSessionStorage'),
+    });
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      data.query,
+      kbnUrlStateStorage
+    );
+
     return () => {
+      stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
@@ -232,9 +265,11 @@ export function App({
     // state.persistedDoc,
   ]);
 
-  const runSave = (
+  const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+      newDescription?: string;
     }
   ) => {
     if (!lastKnownDoc) {
@@ -256,9 +291,29 @@ export function App({
 
     const doc = {
       ...lastDocWithoutPinned,
+      description: saveProps.newDescription,
       id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
       title: saveProps.newTitle,
     };
+
+    await checkForDuplicateTitle(
+      {
+        ...doc,
+        copyOnSave: saveProps.newCopyOnSave,
+        lastSavedTitle: lastKnownDoc?.title,
+        getEsType: () => 'lens',
+        getDisplayName: () =>
+          i18n.translate('xpack.lens.app.saveModalType', {
+            defaultMessage: 'Lens visualization',
+          }),
+      },
+      saveProps.isTitleDuplicateConfirmed,
+      saveProps.onTitleDuplicate,
+      {
+        savedObjectsClient: core.savedObjects.client,
+        overlays: core.overlays,
+      }
+    );
 
     const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
     docStorage
@@ -273,7 +328,7 @@ export function App({
           lastKnownDoc: newDoc,
         }));
         if (docId !== id || saveProps.returnToOrigin) {
-          redirectTo(id, saveProps.returnToOrigin, state.originatingApp, newlyCreated);
+          redirectTo(id, saveProps.returnToOrigin, newlyCreated);
         }
       })
       .catch((e) => {
@@ -313,7 +368,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!state.originatingApp && lastKnownDoc?.id
+                ...(!!originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -338,14 +393,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!state.originatingApp
+                    lastKnownDoc?.id && !!originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
+                  emphasize: !originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -422,6 +477,7 @@ export function App({
               query={state.query}
               dateRangeFrom={state.dateRange.fromDate}
               dateRangeTo={state.dateRange.toDate}
+              indicateNoData={state.indicateNoData}
             />
           </div>
 
@@ -436,6 +492,7 @@ export function App({
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
                 onError,
+                showNoDataPopover,
                 onChange: ({ filterableIndexPatterns, doc }) => {
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState((s) => ({ ...s, lastKnownDoc: doc }));
@@ -466,12 +523,13 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={state.originatingApp}
+            originatingApp={originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
               id: lastKnownDoc.id,
               title: lastKnownDoc.title || '',
+              description: lastKnownDoc.description || '',
             }}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',

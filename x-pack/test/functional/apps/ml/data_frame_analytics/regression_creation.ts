@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-
-  // flaky test, see https://github.com/elastic/kibana/issues/68352
+  // flaky test https://github.com/elastic/kibana/issues/70455
   describe.skip('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
@@ -37,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         dependentVariable: 'stab',
         trainingPercent: '20',
-        modelMemory: '105mb',
+        modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
           row: {
@@ -53,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {
@@ -66,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('selects the source data and loads the job wizard page', async () => {
-          ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
         });
 
         it('selects the job type', async () => {

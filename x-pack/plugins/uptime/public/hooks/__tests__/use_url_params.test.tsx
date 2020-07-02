@@ -8,7 +8,7 @@ import DateMath from '@elastic/datemath';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, UptimeUrlParamsHook } from '../use_url_params';
 import { UptimeRefreshContext } from '../../contexts';
-import { mountWithRouter } from '../../lib';
+import { mountWithRouter, MountWithReduxProvider } from '../../lib';
 import { createMemoryHistory } from 'history';
 
 interface MockUrlParamsComponentProps {
@@ -52,9 +52,11 @@ describe('useUrlParams', () => {
     jest.spyOn(history, 'push');
 
     const component = mountWithRouter(
-      <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
-        <UseUrlParamsTestComponent hook={useUrlParams} />
-      </UptimeRefreshContext.Provider>,
+      <MountWithReduxProvider>
+        <UptimeRefreshContext.Provider value={{ lastRefresh: 123, refreshApp: jest.fn() }}>
+          <UseUrlParamsTestComponent hook={useUrlParams} />
+        </UptimeRefreshContext.Provider>
+      </MountWithReduxProvider>,
       history
     );
 
@@ -68,14 +70,16 @@ describe('useUrlParams', () => {
 
   it('gets the expected values using the context', () => {
     const component = mountWithRouter(
-      <UptimeRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-        }}
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} />
-      </UptimeRefreshContext.Provider>
+      <MountWithReduxProvider>
+        <UptimeRefreshContext.Provider
+          value={{
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+          }}
+        >
+          <UseUrlParamsTestComponent hook={useUrlParams} />
+        </UptimeRefreshContext.Provider>
+      </MountWithReduxProvider>
     );
 
     const getUrlParamsButton = component.find('#getUrlParams');
@@ -92,14 +96,16 @@ describe('useUrlParams', () => {
 
     jest.spyOn(history, 'push');
     const component = mountWithRouter(
-      <UptimeRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-        }}
-      >
-        <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
-      </UptimeRefreshContext.Provider>,
+      <MountWithReduxProvider>
+        <UptimeRefreshContext.Provider
+          value={{
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+          }}
+        >
+          <UseUrlParamsTestComponent hook={useUrlParams} updateParams={{ pagination: '' }} />
+        </UptimeRefreshContext.Provider>
+      </MountWithReduxProvider>,
       history
     );
 

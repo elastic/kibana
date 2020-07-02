@@ -65,10 +65,12 @@ export const useGetActionLicense = (): ActionLicenseState => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionLicenseState]);
 
   useEffect(() => {
     fetchActionLicense();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...actionLicenseState };
 };

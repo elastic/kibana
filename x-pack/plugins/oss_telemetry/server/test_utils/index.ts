@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { of } from 'rxjs';
+import moment from 'moment';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   ConcreteTaskInstance,
@@ -38,22 +39,27 @@ const defaultMockSavedObjects = [
     _source: {
       type: 'visualization',
       visualization: { visState: '{"type": "shell_beads"}' },
+      updated_at: moment().subtract(7, 'days').startOf('day').toString(),
     },
   },
 ];
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockEs = async (mockCallWithInternal: APICaller = getMockCallWithInternal()) => {
+export const getMockEs = async (
+  mockCallWithInternal: LegacyAPICaller = getMockCallWithInternal()
+) => {
   const client = elasticsearchServiceMock.createClusterClient();
   (client.callAsInternalUser as any) = mockCallWithInternal;
   return client;
 };
 
-export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObjects): APICaller => {
+export const getMockCallWithInternal = (
+  hits: unknown[] = defaultMockSavedObjects
+): LegacyAPICaller => {
   return ((() => {
     return Promise.resolve({ hits: { hits } });
-  }) as unknown) as APICaller;
+  }) as unknown) as LegacyAPICaller;
 };
 
 export const getMockTaskFetch = (

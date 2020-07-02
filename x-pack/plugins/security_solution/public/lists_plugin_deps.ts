@@ -5,10 +5,37 @@
  */
 
 export {
+  useApi,
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
-  mockNewExceptionItem,
-  mockNewExceptionList,
+  useFindLists,
+  ExceptionIdentifiers,
+  ExceptionList,
+  Pagination,
+  UseExceptionListSuccess,
 } from '../../lists/public';
-export { ExceptionListItemSchema, Entries } from '../../lists/common/schemas';
+export {
+  ListSchema,
+  CommentsArray,
+  ExceptionListSchema,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  Entry,
+  EntryExists,
+  EntryNested,
+  EntryList,
+  EntriesArray,
+  NamespaceType,
+  Operator,
+  OperatorEnum,
+  OperatorType,
+  OperatorTypeEnum,
+  exceptionListItemSchema,
+  createExceptionListItemSchema,
+  listSchema,
+  entry,
+  entriesNested,
+  entriesExists,
+  entriesList,
+} from '../../lists/common/schemas';

@@ -99,12 +99,6 @@ export interface GroupBucket {
   };
 }
 
-export interface HistogramAggregation {
-  histogramAgg: {
-    buckets: GroupBucket[];
-  };
-}
-
 export interface BarchartConfigs {
   series: {
     xScaleType: ScaleType;

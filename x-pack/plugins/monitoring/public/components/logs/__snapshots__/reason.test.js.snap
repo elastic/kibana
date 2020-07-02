@@ -12,7 +12,7 @@ exports[`Logs should render a default message 1`] = `
       id="xpack.monitoring.logs.reason.defaultMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
             target="_blank"
           >
@@ -21,7 +21,7 @@ exports[`Logs should render a default message 1`] = `
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               values={Object {}}
             />
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -41,12 +41,12 @@ exports[`Logs should render with a bad indices reason 1`] = `
       id="xpack.monitoring.logs.reason.correctIndexNameMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
             target="_blank"
           >
             Click here for more information
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -66,12 +66,12 @@ exports[`Logs should render with a no cluster found reason 1`] = `
       id="xpack.monitoring.logs.reason.noClusterMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -91,12 +91,12 @@ exports[`Logs should render with a no index found reason 1`] = `
       id="xpack.monitoring.logs.reason.noIndexMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -116,12 +116,12 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
       id="xpack.monitoring.logs.reason.noIndexPatternMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
             target="_blank"
           >
             Filebeat
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -141,12 +141,12 @@ exports[`Logs should render with a no node found reason 1`] = `
       id="xpack.monitoring.logs.reason.noNodeMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             setup
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />
@@ -166,12 +166,12 @@ exports[`Logs should render with a no structured logs reason 1`] = `
       id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             points to JSON logs
-          </ForwardRef>,
+          </EuiLink>,
           "varPaths": <Monospace>
             var.paths
           </Monospace>,
@@ -194,12 +194,12 @@ exports[`Logs should render with a no type found reason 1`] = `
       id="xpack.monitoring.logs.reason.noTypeMessage"
       values={
         Object {
-          "link": <ForwardRef
+          "link": <EuiLink
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
             target="_blank"
           >
             these directions
-          </ForwardRef>,
+          </EuiLink>,
         }
       }
     />

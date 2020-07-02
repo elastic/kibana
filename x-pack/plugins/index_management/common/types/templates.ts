@@ -49,6 +49,11 @@ export interface TemplateDeserialized {
   };
 }
 
+export interface TemplateFromEs {
+  name: string;
+  index_template: TemplateSerialized;
+}
+
 /**
  * Interface for the template list in our UI table
  * we don't include the mappings, settings and aliases

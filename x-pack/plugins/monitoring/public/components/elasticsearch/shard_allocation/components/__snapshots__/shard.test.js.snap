@@ -2,8 +2,8 @@
 
 exports[`Shard should show for assigned primary shards 1`] = `
 <div
-  className="shard primary started master"
-  data-shard-classification="shard primary started master 0"
+  className="shard monShard primary started master"
+  data-shard-classification="shard monShard primary started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}
@@ -19,8 +19,8 @@ exports[`Shard should show for assigned primary shards 1`] = `
 
 exports[`Shard should show for assigned replica shards 1`] = `
 <div
-  className="shard replica started master"
-  data-shard-classification="shard replica started master 0"
+  className="shard monShard replica started master"
+  data-shard-classification="shard monShard replica started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}
@@ -36,8 +36,8 @@ exports[`Shard should show for assigned replica shards 1`] = `
 
 exports[`Shard should show for initializing shards 1`] = `
 <div
-  className="shard primary initializing master"
-  data-shard-classification="shard primary initializing master 0"
+  className="shard monShard primary initializing master"
+  data-shard-classification="shard monShard primary initializing master 0"
   data-shard-tooltip="Initializing"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}
@@ -53,8 +53,8 @@ exports[`Shard should show for initializing shards 1`] = `
 
 exports[`Shard should show for relocating shards 1`] = `
 <div
-  className="shard primary relocating master"
-  data-shard-classification="shard primary relocating master 0"
+  className="shard monShard primary relocating master"
+  data-shard-classification="shard monShard primary relocating master 0"
   data-shard-tooltip="Relocating"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}
@@ -70,8 +70,8 @@ exports[`Shard should show for relocating shards 1`] = `
 
 exports[`Shard should show unassigned primary shards 1`] = `
 <div
-  className="shard primary unassigned emergency master"
-  data-shard-classification="shard primary unassigned emergency master 0"
+  className="shard monShard primary unassigned emergency master"
+  data-shard-classification="shard monShard primary unassigned emergency master 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}
@@ -87,8 +87,8 @@ exports[`Shard should show unassigned primary shards 1`] = `
 
 exports[`Shard should show unassigned replica shards 1`] = `
 <div
-  className="shard replica unassigned"
-  data-shard-classification="shard replica unassigned 0"
+  className="shard monShard replica unassigned"
+  data-shard-classification="shard monShard replica unassigned 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"
   onMouseEnter={[Function]}

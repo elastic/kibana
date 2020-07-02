@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -13,6 +13,7 @@ import {
   RuleStepProps,
   RuleStep,
   AboutStepRule,
+  DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
@@ -35,11 +36,14 @@ import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
 import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
+import { SeverityField } from '../severity_mapping';
+import { RiskScoreField } from '../risk_score_mapping';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
   defaultValues?: AboutStepRule | null;
+  defineRuleData?: DefineStepRule | null;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -77,6 +81,7 @@ const AdvancedSettingsAccordionButton = (
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
+  defineRuleData,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isUpdateView = false,
@@ -101,6 +106,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   useEffect(() => {
@@ -113,12 +119,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       setMyStepData(myDefaultValues);
       setFieldValue(form, schema, myDefaultValues);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultValues]);
 
   useEffect(() => {
     if (setForm != null) {
       setForm(RuleStep.aboutRule, form);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
 
   return isReadOnlyView && myStepData.name != null ? (
@@ -129,64 +137,54 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form}>
-          <ThreeQuartersContainer>
-            <CommonUseField
-              path="name"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleName',
-                'data-test-subj': 'detectionEngineStepAboutRuleName',
-                euiFieldProps: {
-                  fullWidth: true,
-                  disabled: isLoading,
-                },
-              }}
-            />
-          </ThreeQuartersContainer>
-          <EuiSpacer size="m" />
-          <ThreeQuartersContainer>
-            <CommonUseField
-              path="description"
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleDescription',
-                'data-test-subj': 'detectionEngineStepAboutRuleDescription',
-                euiFieldProps: {
-                  disabled: isLoading,
-                  compressed: true,
-                  fullWidth: true,
-                },
-              }}
-            />
-          </ThreeQuartersContainer>
-          <EuiSpacer size="m" />
+          <CommonUseField
+            path="name"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleName',
+              'data-test-subj': 'detectionEngineStepAboutRuleName',
+              euiFieldProps: {
+                fullWidth: true,
+                disabled: isLoading,
+              },
+            }}
+          />
+          <EuiSpacer size="l" />
+
+          <CommonUseField
+            path="description"
+            componentProps={{
+              idAria: 'detectionEngineStepAboutRuleDescription',
+              'data-test-subj': 'detectionEngineStepAboutRuleDescription',
+              euiFieldProps: {
+                disabled: isLoading,
+                compressed: true,
+                fullWidth: true,
+              },
+            }}
+          />
+          <EuiSpacer size="l" />
           <EuiFlexItem>
-            <CommonUseField
+            <UseField
               path="severity"
+              component={SeverityField}
               componentProps={{
-                idAria: 'detectionEngineStepAboutRuleSeverity',
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
-                euiFieldProps: {
-                  fullWidth: false,
-                  disabled: isLoading,
-                  options: severityOptions,
-                },
+                'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
+                idAria: 'detectionEngineStepAboutRuleSeverityField',
+                isDisabled: isLoading,
+                options: severityOptions,
+                indices: defineRuleData?.index ?? [],
               }}
             />
           </EuiFlexItem>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <EuiFlexItem>
             <CommonUseField
               path="riskScore"
+              component={RiskScoreField}
               componentProps={{
-                idAria: 'detectionEngineStepAboutRuleRiskScore',
                 'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
-                euiFieldProps: {
-                  max: 100,
-                  min: 0,
-                  fullWidth: false,
-                  disabled: isLoading,
-                  showTicks: true,
-                  tickInterval: 25,
-                },
+                idAria: 'detectionEngineStepAboutRuleRiskScore',
+                isDisabled: isLoading,
               }}
             />
           </EuiFlexItem>
@@ -204,13 +202,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
           </TagContainer>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <AdvancedSettingsAccordion
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
             buttonContent={AdvancedSettingsAccordionButton}
           >
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <UseField
               path="references"
               component={AddItem}
@@ -241,19 +239,88 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleMitreThreat',
               }}
             />
-            <EuiSpacer size="m" />
-            <ThreeQuartersContainer>
-              <UseField
-                path="note"
-                component={MarkdownEditorForm}
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleNote',
+            <EuiSpacer size="l" />
+            <UseField
+              path="note"
+              component={MarkdownEditorForm}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleNote',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleNote',
+                placeholder: I18n.ADD_RULE_NOTE_HELP_TEXT,
+              }}
+            />
+            <EuiSpacer size="l" />
+            <CommonUseField
+              path="author"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleAuthor',
+                'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
+                euiFieldProps: {
+                  fullWidth: true,
                   isDisabled: isLoading,
-                  dataTestSubj: 'detectionEngineStepAboutRuleNote',
-                  placeholder: I18n.ADD_RULE_NOTE_HELP_TEXT,
+                  placeholder: '',
+                },
+              }}
+            />
+            <EuiSpacer size="l" />
+            <CommonUseField
+              path="license"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleLicense',
+                'data-test-subj': 'detectionEngineStepAboutRuleLicense',
+                euiFieldProps: {
+                  fullWidth: true,
+                  isDisabled: isLoading,
+                  placeholder: '',
+                },
+              }}
+            />
+            <EuiSpacer size="l" />
+            <EuiFormRow label={'Building block'} error={'errorMessage'} isInvalid={false} fullWidth>
+              <CommonUseField
+                path="isBuildingBlock"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleBuildingBlock',
+                  'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    isDisabled: isLoading,
+                    placeholder: '',
+                  },
                 }}
               />
-            </ThreeQuartersContainer>
+            </EuiFormRow>
+            <EuiSpacer size="l" />
+            <EuiFlexItem>
+              <CommonUseField
+                path="ruleNameOverride"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  'data-test-subj': 'detectionEngineStepAboutRuleRuleNameOverride',
+                  euiFieldProps: {
+                    fullWidth: false,
+                    isDisabled: isLoading,
+                    placeholder: '',
+                  },
+                }}
+              />
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+            <EuiFlexItem>
+              <CommonUseField
+                path="timestampOverride"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                  'data-test-subj': 'detectionEngineStepAboutRuleLicense',
+                  euiFieldProps: {
+                    fullWidth: false,
+                    isDisabled: isLoading,
+                    placeholder: '',
+                  },
+                }}
+              />
+            </EuiFlexItem>
           </AdvancedSettingsAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {

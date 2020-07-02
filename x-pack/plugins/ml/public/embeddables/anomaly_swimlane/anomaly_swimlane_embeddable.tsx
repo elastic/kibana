@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import {
   Embeddable,
@@ -15,24 +16,31 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ExplorerService } from '../../application/services/explorer_service';
+import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
 import {
   Filter,
   Query,
   RefreshInterval,
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
+import { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
+export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+  i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+    defaultMessage: 'ML anomaly swim lane for {jobIds}',
+    values: { jobIds: jobIds.join(', ') },
+  });
+
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
@@ -43,16 +51,19 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;
 
-export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
+export type AnomalySwimlaneEmbeddableOutput = EmbeddableOutput &
+  AnomalySwimlaneEmbeddableCustomOutput;
+
+export interface AnomalySwimlaneEmbeddableCustomOutput {
   jobIds: JobId[];
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   viewBy?: string;
-  limit?: number;
+  perPage?: number;
 }
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
-  explorerService: ExplorerService;
+  anomalyTimelineService: AnomalyTimelineService;
 }
 
 export type AnomalySwimlaneEmbeddableServices = [
@@ -90,14 +101,20 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
     super.render(node);
     this.node = node;
 
+    const I18nContext = this.services[0].i18n.Context;
+
     ReactDOM.render(
-      <ExplorerSwimlaneContainer
-        id={this.input.id}
-        embeddableInput={this.getInput$()}
-        services={this.services}
-        refresh={this.reload$.asObservable()}
-        onOutputChange={(output) => this.updateOutput(output)}
-      />,
+      <I18nContext>
+        <EmbeddableSwimLaneContainer
+          id={this.input.id}
+          embeddableInput={this.getInput$()}
+          services={this.services}
+          refresh={this.reload$.asObservable()}
+          onInputChange={(input) => {
+            this.updateInput(input);
+          }}
+        />
+      </I18nContext>,
       node
     );
   }

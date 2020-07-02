@@ -8,6 +8,6 @@
 
 ```typescript
 extractReferences: (state: SearchSourceFields) => [SearchSourceFields & {
-    indexRefName?: string | undefined;
+    indexRefName?: string;
 }, SavedObjectReference[]]
 ```

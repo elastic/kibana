@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -17,6 +17,8 @@ import { setLicenseCache } from './license';
 import { MlSetupDependencies, MlStartDependencies } from '../plugin';
 
 import { MlRouter } from './routing';
+import { mlApiServicesProvider } from './services/ml_api_service';
+import { HttpService } from './services/http_service';
 
 type MlDependencies = MlSetupDependencies & MlStartDependencies;
 
@@ -27,6 +29,23 @@ interface AppProps {
 
 const localStorage = new Storage(window.localStorage);
 
+/**
+ * Provides global services available across the entire ML app.
+ */
+export function getMlGlobalServices(httpStart: HttpStart) {
+  const httpService = new HttpService(httpStart);
+  return {
+    httpService,
+    mlApiServices: mlApiServicesProvider(httpService),
+  };
+}
+
+export interface MlServicesContext {
+  mlServices: MlGlobalServices;
+}
+
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
+
 const App: FC<AppProps> = ({ coreStart, deps }) => {
   const pageDeps = {
     indexPatterns: deps.data.indexPatterns,
@@ -35,6 +54,8 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
   };
   const services = {
     appName: 'ML',
+    kibanaVersion: deps.kibanaVersion,
+    share: deps.share,
     data: deps.data,
     security: deps.security,
     licenseManagement: deps.licenseManagement,
@@ -45,7 +66,9 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
   const I18nContext = coreStart.i18n.Context;
   return (
     <I18nContext>
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider
+        services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
+      >
         <MlRouter pageDeps={pageDeps} />
       </KibanaContextProvider>
     </I18nContext>
@@ -76,11 +99,13 @@ export const renderApp = (
     urlGenerators: deps.share.urlGenerators,
   });
 
-  const mlLicense = setLicenseCache(deps.licensing);
+  deps.kibanaLegacy.loadFontAwesome();
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
+  const mlLicense = setLicenseCache(deps.licensing, [
+    () => ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element),
+  ]);
 
   return () => {
     mlLicense.unsubscribe();

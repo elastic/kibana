@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { ILegacyScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -17,7 +17,7 @@ import { error } from '../../lib/reindexing/error';
 
 interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
-  dataClient: IScopedClusterClient;
+  dataClient: ILegacyScopedClusterClient;
   indexName: string;
   log: Logger;
   licensing: LicensingPluginSetup;

@@ -30,7 +30,6 @@ import {
   MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
@@ -516,24 +515,6 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 
 export const canUseMappingsEditor = (maxNestedDepth: number) =>
   maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
-
-const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
-
-export const isStateValid = (state: State): boolean | undefined =>
-  Object.entries(state)
-    .filter(([key]) => stateWithValidity.includes(key as keyof State))
-    .reduce((isValid, { 1: value }) => {
-      if (value === undefined) {
-        return isValid;
-      }
-
-      // If one section validity of the state is "undefined", the mappings validity is also "undefined"
-      if (isValid === undefined || value.isValid === undefined) {
-        return undefined;
-      }
-
-      return isValid && value.isValid;
-    }, true as undefined | boolean);
 
 /**
  * This helper removes all the keys on an object with an "undefined" value.

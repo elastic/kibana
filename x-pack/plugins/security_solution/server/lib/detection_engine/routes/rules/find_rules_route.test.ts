@@ -91,7 +91,7 @@ describe('find_rules', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('"invalid_value" is not allowed');
+      expect(result.badRequest).toHaveBeenCalledWith('invalid keys "invalid_value"');
     });
   });
 });

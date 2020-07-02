@@ -20,7 +20,7 @@ export const HeroCopy = memo(() => {
           <h1>
             <FormattedMessage
               id="xpack.ingestManager.epm.pageTitle"
-              defaultMessage="Elastic Integrations"
+              defaultMessage="Integrations"
             />
           </h1>
         </EuiText>
@@ -46,7 +46,7 @@ export const HeroImage = memo(() => {
 
   const Illustration = styled(EuiImage).attrs((props) => ({
     alt: i18n.translate('xpack.ingestManager.epm.illustrationAltText', {
-      defaultMessage: 'Illustration of an Elastic integration',
+      defaultMessage: 'Illustration of an integration',
     }),
     url: IS_DARK_THEME
       ? toAssets('illustration_integrations_darkmode.svg')

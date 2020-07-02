@@ -29,6 +29,7 @@ jest.doMock('./capabilities', () => ({
 
 export const MockHistory = {
   push: jest.fn(),
+  replace: jest.fn(),
 };
 export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
 jest.doMock('history', () => ({
@@ -36,7 +37,11 @@ jest.doMock('history', () => ({
 }));
 
 export const parseAppUrlMock = jest.fn();
-jest.doMock('./utils', () => ({
-  ...jest.requireActual('./utils'),
-  parseAppUrl: parseAppUrlMock,
-}));
+jest.doMock('./utils', () => {
+  const original = jest.requireActual('./utils');
+
+  return {
+    ...original,
+    parseAppUrl: parseAppUrlMock,
+  };
+});

@@ -26,18 +26,22 @@ class LocalStorageMock implements Partial<Storage> {
   getItem = jest.fn();
   setItem = jest.fn();
 }
+const mockLocalStorage = new LocalStorageMock();
+const originalLocalStorage = window.localStorage;
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
 
 describe('TelemetrySender', () => {
-  let originalLocalStorage: Storage;
-  let mockLocalStorage: LocalStorageMock;
-  beforeAll(() => {
-    originalLocalStorage = window.localStorage;
+  beforeEach(() => {
+    mockLocalStorage.getItem.mockClear();
+    mockLocalStorage.setItem.mockClear();
   });
-
-  // @ts-ignore
-  beforeEach(() => (window.localStorage = mockLocalStorage = new LocalStorageMock()));
-  // @ts-ignore
-  afterAll(() => (window.localStorage = originalLocalStorage));
+  afterAll(() =>
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+    })
+  );
 
   describe('constructor', () => {
     it('defaults lastReport if unset', () => {

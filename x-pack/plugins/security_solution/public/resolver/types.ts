@@ -5,11 +5,9 @@
  */
 
 import { Store } from 'redux';
-
+import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-export { ResolverAction } from './store/actions';
-import { ResolverEvent } from '../../common/endpoint/types';
-import { eventType } from '../../common/endpoint/models/event';
+import { ResolverEvent, ResolverRelatedEvents, ResolverTree } from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -43,6 +41,14 @@ export interface ResolverUIState {
    * The ID attribute of the resolver's currently selected descendant.
    */
   readonly selectedDescendantId: string | null;
+  /**
+   * The entity_id of the process for the resolver's currently selected descendant.
+   */
+  readonly processEntityIdOfSelectedDescendant: string | null;
+  /**
+   * Which panel the ui should display
+   */
+  readonly panelToDisplay: string | null;
 }
 
 /**
@@ -132,61 +138,81 @@ export type CameraState = {
 );
 
 /**
- * This represents all the raw data (sans statistics, metadata, etc.)
- * about a particular subject's related events
+ * Wrappers around our internal types that make them compatible with `rbush`.
  */
-export interface RelatedEventDataEntry {
-  relatedEvents: Array<{
-    relatedEvent: ResolverEvent;
-    relatedEventType: ReturnType<typeof eventType>;
-  }>;
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in rbush for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
 }
 
 /**
- * Represents the status of the request for related event data, which will be either the data,
- * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
+ * The entity store in rbush for resolver process nodes.
  */
-export type RelatedEventDataResults =
-  | RelatedEventDataEntry
-  | 'waitingForRelatedEventData'
-  | 'error';
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: ResolverEvent;
+  position: Vector2;
+}
 
 /**
- * This represents the raw related events data enhanced with statistics
- * (e.g. counts of items grouped by their related event types)
+ * A type containing all things to actually be rendered to the DOM.
  */
-export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
-  stats: Record<string, number>;
-};
-
-/**
- * The status or value of any particular event's related events w.r.t. their valence to the current view.
- * One of:
- * `RelatedEventDataEntryWithStats` when results have been received and processed and are ready to display
- * `waitingForRelatedEventData` when related events have been requested but have not yet matriculated
- * `Error` when the request for any event encounters an error during service
- */
-export type RelatedEventEntryWithStatsOrWaiting =
-  | RelatedEventDataEntryWithStats
-  | `waitingForRelatedEventData`
-  | 'error';
-
-/**
- * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
- * or a `waitingForRelatedEventData` symbol when referenced with a unique event.
- */
-export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
+export interface VisibleEntites {
+  processNodePositions: ProcessPositions;
+  connectingEdgeLineSegments: EdgeLineSegment[];
+}
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ResolverEvent[];
-  isLoading: boolean;
-  hasError: boolean;
-  resultsEnrichedWithRelatedEventInfo: Map<ResolverEvent, RelatedEventDataResults>;
+  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
+  readonly relatedEventsReady: Map<string, boolean>;
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  readonly databaseDocumentID?: string;
+  /**
+   * The id used for the pending request, if there is one.
+   */
+  readonly pendingRequestDatabaseDocumentID?: string;
+
+  /**
+   * The parameters and response from the last successful request.
+   */
+  readonly lastResponse?: {
+    /**
+     * The id used in the request.
+     */
+    readonly databaseDocumentID: string;
+  } & (
+    | {
+        /**
+         * If a response with a success code was received, this is `true`.
+         */
+        readonly successful: true;
+        /**
+         * The ResolverTree parsed from the response.
+         */
+        readonly result: ResolverTree;
+      }
+    | {
+        /**
+         * If the request threw an exception or the response had a failure code, this will be false.
+         */
+        readonly successful: false;
+      }
+  );
 }
 
+/**
+ * Represents an ordered pair. Used for x-y coordinates and the like.
+ */
 export type Vector2 = readonly [number, number];
 
 /**
@@ -288,10 +314,52 @@ export type ProcessWidths = Map<ResolverEvent, number>;
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
 export type ProcessPositions = Map<ResolverEvent, Vector2>;
+
+export type DurationTypes =
+  | 'millisecond'
+  | 'milliseconds'
+  | 'second'
+  | 'seconds'
+  | 'minute'
+  | 'minutes'
+  | 'hour'
+  | 'hours'
+  | 'day'
+  | 'days'
+  | 'week'
+  | 'weeks'
+  | 'month'
+  | 'months'
+  | 'year'
+  | 'years';
+
 /**
- * An array of vectors2 forming an polyline. Used to connect process nodes in the graph.
+ * duration value and description string
  */
-export type EdgeLineSegment = Vector2[];
+export interface DurationDetails {
+  duration: number;
+  durationType: DurationTypes;
+}
+/**
+ * Values shared between two vertices joined by an edge line.
+ */
+export interface EdgeLineMetadata {
+  elapsedTime?: DurationDetails;
+  // A string of the two joined process nodes concatted together.
+  uniqueId: string;
+}
+/**
+ * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
+ */
+export type EdgeLinePoints = Vector2[];
+
+/**
+ * Edge line components including the points joining the edgeline and any optional associated metadata
+ */
+export interface EdgeLineSegment {
+  points: EdgeLinePoints;
+  metadata: EdgeLineMetadata;
+}
 
 /**
  * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
@@ -376,3 +444,17 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
+
+/**
+ * Describes the basic Resolver graph layout.
+ */
+export interface IsometricTaxiLayout {
+  /**
+   * A map of events to position. each event represents its own node.
+   */
+  processNodePositions: Map<ResolverEvent, Vector2>;
+  /**
+   * A map of edgline segments, which graphically connect nodes.
+   */
+  edgeLineSegments: EdgeLineSegment[];
+}

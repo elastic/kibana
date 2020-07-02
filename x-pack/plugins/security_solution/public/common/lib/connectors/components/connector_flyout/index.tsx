@@ -53,6 +53,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
       if (!isEmpty(apiUrl)) {
         secretKeys.forEach((key: string) => editActionSecrets(key, ''));
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isEmpty(mapping)) {
@@ -64,6 +65,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
 
     const handleOnChangeActionConfig = useCallback(
       (key: string, value: string) => editActionConfig(key, value),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
 
@@ -73,11 +75,13 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           editActionConfig(key, '');
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [action.config]
     );
 
     const handleOnChangeSecretConfig = useCallback(
       (key: string, value: string) => editActionSecrets(key, value),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
 
@@ -87,6 +91,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           editActionSecrets(key, '');
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [action.secrets]
     );
 
@@ -96,6 +101,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           ...action.config.casesConfiguration,
           mapping: newMapping,
         }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [action.config]
     );
 

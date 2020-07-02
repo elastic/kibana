@@ -70,11 +70,14 @@ export function Header(props: HeaderProps) {
               <EuiButton
                 isDisabled={!hasWriteCapabilites}
                 iconType="plusInCircle"
-                href={getHref('add_datasource_from_integration', { pkgkey: `${name}-${version}` })}
+                href={getHref('add_integration_to_configuration', { pkgkey: `${name}-${version}` })}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.epm.addDatasourceButtonText"
-                  defaultMessage="Create data source"
+                  id="xpack.ingestManager.epm.addPackageConfigButtonText"
+                  defaultMessage="Add {packageName}"
+                  values={{
+                    packageName: title,
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>

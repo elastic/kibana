@@ -79,10 +79,12 @@ export const useGetReporters = (): UseGetReporters => {
       didCancel = true;
       abortCtrl.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportersState]);
 
   useEffect(() => {
     fetchReporters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return { ...reportersState, fetchReporters };
 };

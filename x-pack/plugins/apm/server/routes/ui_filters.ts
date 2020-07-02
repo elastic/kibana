@@ -29,6 +29,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../../common/projections/service_nodes';
+import { getRumOverviewProjection } from '../../common/projections/rum_overview';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -75,7 +76,10 @@ function createLocalFiltersRoute<
   queryRt,
 }: {
   path: TPath;
-  getProjection: GetProjection<TProjection, TQueryRT & BaseQueryType>;
+  getProjection: GetProjection<
+    TProjection,
+    t.IntersectionC<[TQueryRT, BaseQueryType]>
+  >;
   queryRt: TQueryRT;
 }) {
   return createRoute(() => ({
@@ -93,10 +97,7 @@ function createLocalFiltersRoute<
         query,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(
-            setup.dynamicIndexPattern,
-            omit(parsedUiFilters, filterNames)
-          ),
+          uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
         },
       });
 
@@ -207,14 +208,25 @@ export const errorGroupsLocalFiltersRoute = createLocalFiltersRoute({
 export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/serviceNodes',
   getProjection: ({ setup, query }) => {
+    const { serviceName } = query;
     return getServiceNodesProjection({
       setup,
-      serviceName: query.serviceName,
+      serviceName,
     });
   },
   queryRt: t.type({
     serviceName: t.string,
   }),
+});
+
+export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
+  path: '/api/apm/ui_filters/local_filters/rumOverview',
+  getProjection: ({ setup }) => {
+    return getRumOverviewProjection({
+      setup,
+    });
+  },
+  queryRt: t.type({}),
 });
 
 type BaseQueryType = typeof localUiBaseQueryRt;

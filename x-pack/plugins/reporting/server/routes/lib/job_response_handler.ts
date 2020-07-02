@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup, kibanaResponseFactory } from 'kibana/server';
+import { kibanaResponseFactory } from 'kibana/server';
+import { ReportingCore } from '../../';
 import { AuthenticatedUser } from '../../../../security/server';
-import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry } from '../../lib/export_types_registry';
 import { jobsQueryFactory } from '../../lib/jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
@@ -20,12 +19,9 @@ interface JobResponseHandlerOpts {
   excludeContent?: boolean;
 }
 
-export function downloadJobResponseHandlerFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup,
-  exportTypesRegistry: ExportTypesRegistry
-) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
+  const jobsQuery = jobsQueryFactory(reporting);
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
 
   return async function jobResponseHandler(
@@ -69,11 +65,8 @@ export function downloadJobResponseHandlerFactory(
   };
 }
 
-export function deleteJobResponseHandlerFactory(
-  config: ReportingConfig,
-  elasticsearch: ElasticsearchServiceSetup
-) {
-  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
+  const jobsQuery = jobsQueryFactory(reporting);
 
   return async function deleteJobResponseHander(
     res: typeof kibanaResponseFactory,

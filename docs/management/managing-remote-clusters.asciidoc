@@ -6,7 +6,7 @@ connection from your cluster to other clusters. This functionality is
 required for {ref}/xpack-ccr.html[cross-cluster replication] and
 {ref}/modules-cross-cluster-search.html[cross-cluster search].
 
-To get started, go to *Management > Remote Clusters*.
+To get started, open the menu, then go to *Stack Management > {es} > Remote Clusters*.
 
 [role="screenshot"]
 image::images/remote-clusters-list-view.png[Remote Clusters list view, including Add a remote cluster button]

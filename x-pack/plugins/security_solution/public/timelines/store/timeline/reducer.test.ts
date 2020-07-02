@@ -139,6 +139,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: defaultHeaders,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
@@ -148,6 +149,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: timelineDefaults.columns,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).toEqual({
         foo: timelineByIdMock.foo,
@@ -163,6 +165,7 @@ describe('Timeline', () => {
         id: 'bar',
         columns: defaultHeaders,
         timelineById: timelineByIdMock,
+        timelineType: TimelineType.default,
       });
       expect(update).toEqual({
         foo: timelineByIdMock.foo,
@@ -1785,6 +1788,7 @@ describe('Timeline', () => {
           isLoading: false,
           id: 'foo',
           savedObjectId: null,
+          showRowRenderers: true,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
@@ -1799,7 +1803,6 @@ describe('Timeline', () => {
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',

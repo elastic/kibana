@@ -225,6 +225,10 @@ export const buildSeverityDescription = (label: string, value: string): ListItem
   },
 ];
 
+const MyRefUrlLink = styled(EuiLink)`
+  word-break: break-word;
+`;
+
 export const buildUrlsDescription = (label: string, values: string[]): ListItems[] => {
   if (isNotEmptyArray(values)) {
     return [
@@ -237,9 +241,9 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
                 .filter((v) => !isEmpty(v))
                 .map((val, index) => (
                   <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${val}`}>
-                    <EuiLink href={val} external target="_blank">
+                    <MyRefUrlLink href={val} external target="_blank">
                       {val}
-                    </EuiLink>
+                    </MyRefUrlLink>
                   </li>
                 ))}
             </ul>

@@ -24,7 +24,7 @@ const bodySchema = schema.object({
 export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.post(
     {
-      path: addBasePath('/delete-index-templates'),
+      path: addBasePath('/delete_index_templates'),
       validate: { body: bodySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {

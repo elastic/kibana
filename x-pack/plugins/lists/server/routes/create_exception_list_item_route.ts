@@ -7,12 +7,8 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { validate } from '../../common/siem_common_deps';
 import {
   CreateExceptionListItemSchemaDecoded,
   createExceptionListItemSchema,
@@ -44,7 +40,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           _tags,
           tags,
           meta,
-          comment,
+          comments,
           description,
           entries,
           item_id: itemId,
@@ -76,7 +72,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           } else {
             const createdList = await exceptionLists.createExceptionListItem({
               _tags,
-              comment,
+              comments,
               description,
               entries,
               itemId,

@@ -232,7 +232,11 @@ export const ArgumentStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.arguments.paletteLabel', {
-        defaultMessage: 'Choose a color palette',
+        defaultMessage: 'The collection of colors used to render the element',
+      }),
+    getCustomPaletteLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.customPaletteLabel', {
+        defaultMessage: 'Custom',
       }),
   },
   Percentage: {
@@ -791,8 +795,12 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.pie.args.labelsTitle', {
         defaultMessage: 'Labels',
       }),
-    getLabelsHelp: () =>
+    getLabelsToggleSwitch: () =>
       i18n.translate('xpack.canvas.uis.views.pie.args.labelsToggleSwitch', {
+        defaultMessage: 'Show labels',
+      }),
+    getLabelsHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.pie.args.labelsLabel', {
         defaultMessage: 'Show/hide labels',
       }),
     getLegendDisplayName: () =>
@@ -1075,10 +1083,14 @@ export const ViewStrings = {
       }),
     getMaintainAspectDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectTitle', {
-        defaultMessage: 'Fixed ratio',
+        defaultMessage: 'Aspect ratio settings',
+      }),
+    getMaintainAspectLabelName: () =>
+      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
+        defaultMessage: 'Use a fixed ratio',
       }),
     getMaintainAspectHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectLabel', {
+      i18n.translate('xpack.canvas.uis.views.shape.args.maintainAspectHelpLabel', {
         defaultMessage: `Enable to maintain aspect ratio`,
       }),
     getShapeDisplayName: () =>
@@ -1099,6 +1111,10 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.table.args.paginateTitle', {
         defaultMessage: 'Pagination',
       }),
+    getPaginateToggleSwitch: () =>
+      i18n.translate('xpack.canvas.uis.views.table.args.paginateToggleSwitch', {
+        defaultMessage: 'Show pagination controls',
+      }),
     getPaginateHelp: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.paginateLabel', {
         defaultMessage:
@@ -1115,6 +1131,10 @@ export const ViewStrings = {
     getShowHeaderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.showHeaderTitle', {
         defaultMessage: 'Header',
+      }),
+    getShowHeaderToggleSwitch: () =>
+      i18n.translate('xpack.canvas.uis.views.table.args.showHeaderToggleSwitch', {
+        defaultMessage: 'Show the header row',
       }),
     getShowHeaderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.table.args.showHeaderLabel', {

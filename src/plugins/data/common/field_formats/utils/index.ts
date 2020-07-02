@@ -22,6 +22,5 @@ import { IFieldFormat } from '../index';
 
 export { asPrettyString } from './as_pretty_string';
 export { getHighlightHtml, getHighlightRequest } from './highlight';
-export { serializeFieldFormat } from './serialize';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -86,6 +86,23 @@ describe('exact_check', () => {
     expect(message.schema).toEqual({ a: 'test' });
   });
 
+  test('it will work with decoding a null payload when the schema expects a null', () => {
+    const someType = t.union([
+      t.exact(
+        t.type({
+          a: t.string,
+        })
+      ),
+      t.null,
+    ]);
+    const payload = null;
+    const decoded = someType.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(null);
+  });
+
   test('it should find no differences recursively with two empty objects', () => {
     const difference = findDifferencesRecursive({}, {});
     expect(difference).toEqual([]);
@@ -150,5 +167,10 @@ describe('exact_check', () => {
       { a: 1, b: { c: { e: 1 } } }
     );
     expect(difference).toEqual(['d']);
+  });
+
+  test('it should not find any differences when the original and decoded are both null', () => {
+    const difference = findDifferencesRecursive(null, null);
+    expect(difference).toEqual([]);
   });
 });

@@ -5,21 +5,21 @@
  */
 
 import { shallow } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../../common/mock/match_media';
 
-import { mocksSource } from '../../../common/containers/source/mock';
+import { useWithSource } from '../../../common/containers/source';
 import { FlowTarget } from '../../../graphql/types';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
@@ -31,6 +31,9 @@ const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/containers/source');
+
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({
@@ -39,19 +42,6 @@ jest.mock('../../../common/components/search_bar', () => ({
 jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-
-let localSource: Array<{
-  request: {};
-  result: {
-    data: {
-      source: {
-        status: {
-          indicesExist: boolean;
-        };
-      };
-    };
-  };
-}>;
 
 const getMockHistory = (ip: string) => ({
   length: 2,
@@ -101,8 +91,11 @@ const getMockProps = (ip: string) => ({
 
 describe('Ip Details', () => {
   const mount = useMountAppended();
-
   beforeAll(() => {
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: false,
+      indexPattern: {},
+    });
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
@@ -114,15 +107,27 @@ describe('Ip Details', () => {
   });
 
   afterAll(() => {
-    delete (global as GlobalWithFetch).fetch;
+    jest.resetAllMocks();
   });
 
   const state: State = mockGlobalState;
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
-    localSource = cloneDeep(mocksSource);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders', () => {
@@ -136,20 +141,18 @@ describe('Ip Details', () => {
   });
 
   test('it renders ipv6 headline', async () => {
-    localSource[0].result.data.source.status.indicesExist = true;
+    (useWithSource as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      indexPattern: {},
+    });
     const ip = 'fe80--24ce-f7ff-fede-a571';
     const wrapper = mount(
       <TestProviders store={store}>
-        <MockedProvider mocks={localSource} addTypename={false}>
-          <Router history={getMockHistory(ip)}>
-            <IPDetails {...getMockProps(ip)} />
-          </Router>
-        </MockedProvider>
+        <Router history={getMockHistory(ip)}>
+          <IPDetails {...getMockProps(ip)} />
+        </Router>
       </TestProviders>
     );
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise((resolve) => setTimeout(resolve));
-    wrapper.update();
     expect(
       wrapper
         .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')

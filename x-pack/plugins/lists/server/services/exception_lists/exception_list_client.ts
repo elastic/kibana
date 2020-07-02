@@ -133,7 +133,7 @@ export class ExceptionListClient {
 
   public createExceptionListItem = async ({
     _tags,
-    comment,
+    comments,
     description,
     entries,
     itemId,
@@ -147,7 +147,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     return createExceptionListItem({
       _tags,
-      comment,
+      comments,
       description,
       entries,
       itemId,
@@ -164,7 +164,7 @@ export class ExceptionListClient {
 
   public updateExceptionListItem = async ({
     _tags,
-    comment,
+    comments,
     description,
     entries,
     id,
@@ -178,7 +178,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
       _tags,
-      comment,
+      comments,
       description,
       entries,
       id,

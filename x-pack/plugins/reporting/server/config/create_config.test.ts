@@ -45,7 +45,11 @@ describe('Reporting server createConfig$', () => {
     mockInitContext = makeMockInitContext({
       kibanaServer: {},
     });
-    mockLogger = ({ warn: jest.fn(), debug: jest.fn() } as unknown) as LevelLogger;
+    mockLogger = ({
+      warn: jest.fn(),
+      debug: jest.fn(),
+      clone: jest.fn().mockImplementation(() => mockLogger),
+    } as unknown) as LevelLogger;
   });
 
   afterEach(() => {

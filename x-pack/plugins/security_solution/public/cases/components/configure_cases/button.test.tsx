@@ -12,6 +12,19 @@ import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
 import { TestProviders } from '../../../common/mock';
 import { searchURL } from './__mock__';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../common/components/link_to');
+
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
@@ -35,7 +48,7 @@ describe('Configuration button', () => {
 
   test('it pass the correct props to the button', () => {
     expect(wrapper.find('[data-test-subj="configure-case-button"]').first().props()).toMatchObject({
-      href: `#/link-to/case/configure${searchURL}`,
+      href: `/configure`,
       iconType: 'controlsHorizontal',
       isDisabled: false,
       'aria-label': 'My label',

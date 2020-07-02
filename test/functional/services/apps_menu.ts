@@ -58,6 +58,10 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
     public async closeCollapsibleNav() {
       const CLOSE_BUTTON = '[data-test-subj=collapsibleNav] > button';
       if (await find.existsByCssSelector(CLOSE_BUTTON)) {
+        // Close button is only visible when focused
+        const button = await find.byCssSelector(CLOSE_BUTTON);
+        await button.focus();
+
         await find.clickByCssSelector(CLOSE_BUTTON);
       }
     }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN, API_BASE_PATH, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from './constants';
+export { PLUGIN, API_BASE_PATH, CREATE_LEGACY_TEMPLATE_BY_DEFAULT, BASE_PATH } from './constants';
 
 export { getTemplateParameter } from './lib';
 

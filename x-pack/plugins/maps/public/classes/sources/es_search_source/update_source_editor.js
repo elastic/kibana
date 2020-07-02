@@ -12,7 +12,12 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { getTermsFields, getSourceFields, supportsGeoTileAgg } from '../../../index_pattern_util';
+import {
+  getGeoTileAggNotSupportedReason,
+  getTermsFields,
+  getSourceFields,
+  supportsGeoTileAgg,
+} from '../../../index_pattern_util';
 import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -91,6 +96,7 @@ export class UpdateSourceEditor extends Component {
 
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
+      clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
@@ -201,6 +207,7 @@ export class UpdateSourceEditor extends Component {
           onChange={this.props.onChange}
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
+          clusteringDisabledReason={this.state.clusteringDisabledReason}
           termFields={this.state.termFields}
           topHitsSplitField={this.props.topHitsSplitField}
           topHitsSize={this.props.topHitsSize}

@@ -5,7 +5,6 @@
  */
 
 import { connect } from 'react-redux';
-// @ts-ignore
 import { addColor, removeColor } from '../../state/actions/workpad';
 import { getWorkpadColors } from '../../state/selectors/workpad';
 

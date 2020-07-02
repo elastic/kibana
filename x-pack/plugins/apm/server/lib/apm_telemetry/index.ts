@@ -120,7 +120,7 @@ export async function createApmTelemetry({
 
   usageCollector.registerCollector(collector);
 
-  core.getStartServices().then(([coreStart, pluginsStart]) => {
+  core.getStartServices().then(([_coreStart, pluginsStart]) => {
     const { taskManager: taskManagerStart } = pluginsStart as {
       taskManager: TaskManagerStartContract;
     };

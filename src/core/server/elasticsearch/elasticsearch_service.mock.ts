@@ -19,26 +19,29 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { Client } from 'elasticsearch';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
-import { IScopedClusterClient } from './scoped_cluster_client';
+import {
+  ILegacyClusterClient,
+  ILegacyCustomClusterClient,
+  ILegacyScopedClusterClient,
+} from './legacy';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { InternalElasticsearchServiceSetup, ElasticsearchStatusMeta } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
-const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
+const createScopedClusterClientMock = (): jest.Mocked<ILegacyScopedClusterClient> => ({
   callAsInternalUser: jest.fn(),
   callAsCurrentUser: jest.fn(),
 });
 
-const createCustomClusterClientMock = (): jest.Mocked<ICustomClusterClient> => ({
+const createCustomClusterClientMock = (): jest.Mocked<ILegacyCustomClusterClient> => ({
   ...createClusterClientMock(),
   close: jest.fn(),
 });
 
 function createClusterClientMock() {
-  const client: jest.Mocked<IClusterClient> = {
+  const client: jest.Mocked<ILegacyClusterClient> = {
     callAsInternalUser: jest.fn(),
     asScoped: jest.fn(),
   };
@@ -48,8 +51,8 @@ function createClusterClientMock() {
 
 interface MockedElasticSearchServiceSetup {
   legacy: {
-    createClient: jest.Mock<ICustomClusterClient, any>;
-    client: jest.Mocked<IClusterClient>;
+    createClient: jest.Mock<ILegacyCustomClusterClient, any>;
+    client: jest.Mocked<ILegacyClusterClient>;
   };
 }
 
@@ -81,7 +84,7 @@ const createStartContractMock = () => {
 
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
-    legacy: { client: jest.Mocked<IClusterClient> };
+    legacy: { client: jest.Mocked<ILegacyClusterClient> };
   }
 >;
 const createInternalSetupContractMock = () => {

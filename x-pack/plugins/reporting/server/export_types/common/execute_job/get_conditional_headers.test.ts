@@ -8,8 +8,8 @@ import sinon from 'sinon';
 import { ReportingConfig } from '../../../';
 import { ReportingCore } from '../../../core';
 import { createMockReportingCore } from '../../../test_helpers';
-import { JobDocPayload } from '../../../types';
-import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { ScheduledTaskParams } from '../../../types';
+import { ScheduledTaskParamsPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
 let mockConfig: ReportingConfig;
@@ -37,7 +37,7 @@ describe('conditions', () => {
     };
 
     const conditionalHeaders = await getConditionalHeaders({
-      job: {} as JobDocPayload<any>,
+      job: {} as ScheduledTaskParams<any>,
       filteredHeaders: permittedHeaders,
       config: mockConfig,
     });
@@ -64,14 +64,14 @@ test('uses basePath from job when creating saved object service', async () => {
     baz: 'quix',
   };
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as JobDocPayload<any>,
+    job: {} as ScheduledTaskParams<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
   const jobBasePath = '/sbp/s/marketing';
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: { basePath: jobBasePath } as JobDocPayloadPDF,
+    job: { basePath: jobBasePath } as ScheduledTaskParamsPDF,
     conditionalHeaders,
     config: mockConfig,
   });
@@ -94,14 +94,14 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
     baz: 'quix',
   };
   const conditionalHeaders = await getConditionalHeaders({
-    job: {} as JobDocPayload<any>,
+    job: {} as ScheduledTaskParams<any>,
     filteredHeaders: permittedHeaders,
     config: mockConfig,
   });
 
   await getCustomLogo({
     reporting: mockReportingPlugin,
-    job: {} as JobDocPayloadPDF,
+    job: {} as ScheduledTaskParamsPDF,
     conditionalHeaders,
     config: mockConfig,
   });
@@ -139,7 +139,7 @@ describe('config formatting', () => {
     mockConfig = getMockConfig(mockConfigGet);
 
     const conditionalHeaders = await getConditionalHeaders({
-      job: {} as JobDocPayload<any>,
+      job: {} as ScheduledTaskParams<any>,
       filteredHeaders: {},
       config: mockConfig,
     });

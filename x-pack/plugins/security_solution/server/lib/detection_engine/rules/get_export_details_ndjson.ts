@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OutputRuleAlertRest } from '../types';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 
 export const getExportDetailsNdjson = (
-  rules: Array<Partial<OutputRuleAlertRest>>,
+  rules: Array<Partial<RulesSchema>>,
   missingRules: Array<{ rule_id: string }> = []
 ): string => {
   const stringified = JSON.stringify({
