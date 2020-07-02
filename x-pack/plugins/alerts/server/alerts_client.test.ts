@@ -1886,7 +1886,7 @@ describe('get()', () => {
       references: [],
     });
     await expect(alertsClient.get({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Reference action_0 not found"`
+      `"Action reference \\"action_0\\" not found in alert id: 1"`
     );
   });
 

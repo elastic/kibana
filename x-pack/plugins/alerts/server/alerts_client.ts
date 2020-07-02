@@ -719,13 +719,14 @@ export class AlertsClient {
   }
 
   private injectReferencesIntoActions(
+    alertId: string,
     actions: RawAlert['actions'],
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
       const reference = references.find((ref) => ref.name === action.actionRef);
       if (!reference) {
-        throw new Error(`Reference ${action.actionRef} not found`);
+        throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
       return {
         ...omit(action, 'actionRef'),
@@ -759,7 +760,7 @@ export class AlertsClient {
       // Once we support additional types, this type signature will likely change
       schedule: rawAlert.schedule as IntervalSchedule,
       actions: rawAlert.actions
-        ? this.injectReferencesIntoActions(rawAlert.actions, references || [])
+        ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
         : [],
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),

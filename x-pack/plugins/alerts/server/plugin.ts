@@ -222,9 +222,19 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
+    const getAlertsClientWithRequest = (request: KibanaRequest) => {
+      if (isESOUsingEphemeralEncryptionKey === true) {
+        throw new Error(
+          `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        );
+      }
+      return alertsClientFactory!.create(request, core.savedObjects);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+      getAlertsClientWithRequest,
       spaceIdToNamespace: this.spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
@@ -236,15 +246,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
-      // Ability to get an alerts client from legacy code
-      getAlertsClientWithRequest: (request: KibanaRequest) => {
-        if (isESOUsingEphemeralEncryptionKey === true) {
-          throw new Error(
-            `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
-          );
-        }
-        return alertsClientFactory!.create(request, core.savedObjects);
-      },
+      getAlertsClientWithRequest,
     };
   }
 
