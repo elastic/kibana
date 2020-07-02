@@ -12,6 +12,6 @@ type ContextValue = TagsService;
 const context = createContext<ContextValue | undefined>(undefined);
 
 export const TagsProvider = context.Provider;
-export const useTagsService = () => useContext(context)!;
+export const useTags = () => useContext(context)!;
 export const createTagsProvider = (value: ContextValue): React.FC => ({ children }) =>
   h(TagsProvider, { value, children });

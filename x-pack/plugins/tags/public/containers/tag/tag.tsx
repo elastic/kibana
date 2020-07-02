@@ -5,11 +5,18 @@
  */
 
 import React from 'react';
+import { useTags } from '../../context';
+import { Tag as TagUi } from '../../components/tag';
 
 export interface TagProps {
   id: string;
 }
 
-export const Tag: React.FC<TagProps> = ({ id }) => {
-  return <div>this is tag</div>;
-};
+export const Tag: React.FC<TagProps> = React.memo(({ id }) => {
+  const { manager } = useTags();
+  const tag = manager!.useTag(id);
+
+  if (!tag) return null;
+
+  return <TagUi tag={tag} />;
+});

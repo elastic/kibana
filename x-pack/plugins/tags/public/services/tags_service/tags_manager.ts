@@ -7,8 +7,8 @@
 /* eslint-disable max-classes-per-file, react-hooks/rules-of-hooks */
 
 import { useMemo } from 'react';
-import { BehaviorSubject, Observable, from } from 'rxjs';
-import { map, share } from 'rxjs/operators';
+import { BehaviorSubject, Observable, from, of, iif } from 'rxjs';
+import { map, share, switchMap } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
 import {
   ITagsClient,
@@ -73,14 +73,12 @@ export class TagList {
     map((state) => state === 'start' || state === 'loading')
   );
 
-  public readonly useInitializing = () => {
-    return useObservable(this.initializing$, true);
-  };
-
-  public readonly useData = () => {
-    const observable = useMemo(() => this.data$, []);
-    return useObservable(observable, observable.getValue());
-  };
+  public tagData$(tagId: string): Observable<RawTagWithId | null> {
+    return this.data$.pipe(
+      map((tags) => tags[tagId]),
+      switchMap((tag) => (tag ? tag.data$ : of(null)))
+    );
+  }
 
   public add(rawTag: RawTagWithId): Tag {
     const tag = new Tag(rawTag);
@@ -105,6 +103,20 @@ export class TagList {
     for (const tag of tags) newTags[tag.id] = tag;
     this.data$$.next({ ...oldTags, ...newTags });
   }
+
+  public readonly useInitializing = () => {
+    return useObservable(this.initializing$, true);
+  };
+
+  public readonly useData = () => {
+    const observable = useMemo(() => this.data$, []);
+    return useObservable(observable, observable.getValue());
+  };
+
+  public readonly useTag = (tagId: string): RawTagWithId | null => {
+    const observable = useMemo(() => this.tagData$(tagId), [tagId]);
+    return useObservable(observable, null);
+  };
 }
 
 export class TagManager {
@@ -114,6 +126,7 @@ export class TagManager {
 
   public readonly useInitializing = this.list.useInitializing;
   public readonly useTags = this.list.useData;
+  public readonly useTag = this.list.useTag;
 
   public create$(params: TagsClientCreateParams): Observable<Tag> {
     const { tags: client } = this.params;
