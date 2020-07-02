@@ -24,6 +24,7 @@ import { ExprVis } from 'src/plugins/visualizations/public';
 import { createTableVisCell } from './table_vis_cell';
 import { Table } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
+import { useFormattedColumns } from '../utils';
 
 interface TableVisBasicProps {
   table: Table;
@@ -32,10 +33,11 @@ interface TableVisBasicProps {
 }
 
 export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps) => {
-  const renderCellValue = useMemo(() => createTableVisCell(table, vis, visParams), [
+  const formattedColumns = useFormattedColumns(table, visParams);
+  const renderCellValue = useMemo(() => createTableVisCell(table, formattedColumns, vis), [
     table,
+    formattedColumns,
     vis,
-    visParams,
   ]);
 
   return (
