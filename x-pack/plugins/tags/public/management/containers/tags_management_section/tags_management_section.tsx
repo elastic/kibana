@@ -18,7 +18,7 @@ export const TagsManagementSection: React.FC<Props> = ({ services }) => {
   //   services.params.tags.attachments.create({
   //     attachments: [
   //       {
-  //         tagId: 'ab565450-bc3d-11ea-ad31-378b8af727f3',
+  //         tagId: '821e9250-bc3d-11ea-ad31-378b8af727f3',
   //         kid: 'kid::data:ip:index_pattern/123',
   //       },
   //     ],

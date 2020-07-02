@@ -5,13 +5,23 @@
  */
 
 import React from 'react';
+import { EuiTitle } from '@elastic/eui';
 import { Tag, TagList } from '../../../../../../plugins/tags/public';
 
 export const TagListExample: React.FC = () => {
   return (
     <div>
-      <Tag id={'8e07bc40-bc3d-11ea-ad31-378b8af727f3'} />
       <div>
+        <EuiTitle size="m">
+          <h2>Tag</h2>
+        </EuiTitle>
+        <Tag id={'8e07bc40-bc3d-11ea-ad31-378b8af727f3'} />
+      </div>
+
+      <div>
+        <EuiTitle size="m">
+          <h2>TagList</h2>
+        </EuiTitle>
         <TagList kid={'kid::data:ip:index_pattern/123'} />
       </div>
     </div>

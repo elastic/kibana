@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { useTags } from '../../context';
+import { Tag } from '../tag';
 
 export interface TagListProps {
   kid: string;
@@ -15,5 +16,11 @@ export const TagList: React.FC<TagListProps> = React.memo(({ kid }) => {
   const { manager } = useTags();
   const attachments = manager!.useResource(kid);
 
-  return <div>list</div>;
+  return (
+    <>
+      {attachments.map(({ data }) => (
+        <Tag id={data.tagId} />
+      ))}
+    </>
+  );
 });
