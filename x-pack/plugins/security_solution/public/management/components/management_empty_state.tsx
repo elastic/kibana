@@ -45,7 +45,7 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiFlexGroup>
+        <EuiFlexGroup data-test-subj="policyOnboardingInstructions">
           <EuiFlexItem>
             <EuiText>
               <h3>
@@ -135,6 +135,7 @@ const PolicyEmptyState = React.memo<{
                   iconType="plusInCircle"
                   onClick={onActionClick}
                   isDisabled={actionDisabled}
+                  data-test-subj="onboardingStartButton"
                 >
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.policyList.actionButtonText"
