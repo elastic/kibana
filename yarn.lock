@@ -2219,10 +2219,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@26.1.0":
-  version "26.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-26.1.0.tgz#618d7402908a5ccc803884047395fb334b97cbf7"
-  integrity sha512-jfrnYYVb3Q//tJBIYxv0ahnmxOMzUhuGmXiAROcCPr+d78JdCrpOc+qt8Cv9cG9Q0cDMWdtJxVhHGOMWuT1p0g==
+"@elastic/eui@26.3.0":
+  version "26.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-26.3.0.tgz#6944728eac9c6d3006f7a8656ea73b81f04f6d94"
+  integrity sha512-nSlddu0TmwWSiTIpkr/7MHMMpJ83cWj6bt/YlSkJz5RuHOdxysima0F/PthD8vtABtCuFqDY4mcNxMww8y2zGA==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/enzyme" "^3.1.13"
