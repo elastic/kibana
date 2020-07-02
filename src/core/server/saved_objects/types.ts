@@ -63,7 +63,7 @@ export interface SavedObjectStatusMeta {
  *
  * @public
  */
-export interface SavedObjectsFindOptions extends Omit<SavedObjectsBaseOptions, 'namespace'> {
+export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;

@@ -2109,7 +2109,7 @@ export interface SavedObjectsExportResultDetails {
 export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends Omit<SavedObjectsBaseOptions, 'namespace'> {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];

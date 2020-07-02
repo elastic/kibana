@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsFindOptions extends Omit<SavedObjectsBaseOptions, 'namespace'> 
+export interface SavedObjectsFindOptions 
 ```
 
 ## Properties

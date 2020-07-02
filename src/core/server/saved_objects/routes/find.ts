@@ -54,12 +54,8 @@ export const registerFindRoute = (router: IRouter) => {
     router.handleLegacyErrors(async (context, req, res) => {
       const query = req.query;
 
-      let namespaces: string[] | undefined;
-      if (Array.isArray(req.query.namespaces)) {
-        namespaces = req.query.namespaces;
-      } else if (typeof req.query.namespaces === 'string') {
-        namespaces = [req.query.namespaces];
-      }
+      const namespaces =
+        typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
 
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,

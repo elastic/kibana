@@ -63,7 +63,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespaces: string[] | undefined = ['default'],
+  namespaces: string[] = ['default'],
   type: string
 ) {
   if (registry.isMultiNamespace(type)) {
@@ -79,11 +79,11 @@ function getClauseForType(
     if (eligibleNamespaces.length > 0) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
-    if (namespaces.includes('default') ?? true) {
+    if (namespaces.includes('default')) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
-      throw new Error('unhandled search conditions!!');
+      throw new Error('cannot specify empty namespaces array');
     }
     return {
       bool: {
