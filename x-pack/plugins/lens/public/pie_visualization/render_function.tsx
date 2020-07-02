@@ -15,7 +15,6 @@ import {
   PartialTheme,
   Partition,
   PartitionConfig,
-  PartitionFillLabel,
   PartitionLayer,
   PartitionLayout,
   PartitionFillLabel,

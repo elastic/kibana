@@ -11,7 +11,6 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
