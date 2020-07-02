@@ -8,12 +8,13 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { StartDependencies } from './plugin';
+import { App } from './application/containers/app/lazy';
 
 export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
   appBasePath,
   element,
 }: AppMountParameters) => {
-  const reactElement = <div>This is tags examples</div>;
+  const reactElement = <App />;
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };
