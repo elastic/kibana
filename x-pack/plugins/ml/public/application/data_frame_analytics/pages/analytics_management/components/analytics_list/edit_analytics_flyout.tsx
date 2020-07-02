@@ -58,8 +58,10 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   const { id: jobId, config } = item;
   const { state } = item.stats;
 
+  // Disable if all fields are empty or mml is not valid
   const updateButtonDisabled =
-    allowLazyStart === '' && description === '' && modelMemoryLimit === '';
+    (allowLazyStart === '' && description === '' && modelMemoryLimit === '') ||
+    mmlValidationError !== undefined;
 
   useEffect(() => {
     if (mmLValidator === undefined) {
@@ -176,7 +178,9 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
                 ]}
                 value={allowLazyStart}
                 hasNoInitialSelection={true}
-                onChange={(e: any) => setAllowLazyStart(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  setAllowLazyStart(e.target.value)
+                }
               />
             </EuiFormRow>
             <EuiFormRow
