@@ -671,6 +671,7 @@ export class Field extends PureComponent<FieldProps> {
 
     return (
       <EuiDescribedFormGroup
+        id={id}
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}

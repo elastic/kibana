@@ -56,7 +56,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       }),
       icon: 'managementApp',
       path: '/app/management',
-      showOnHomePage: false,
+      showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN,
     });
 

@@ -42,6 +42,7 @@ import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { AppNavLinkStatus } from '../../../core/public';
+import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -56,7 +57,12 @@ export interface HomePluginSetupDependencies {
 
 export class HomePublicPlugin
   implements
-    Plugin<HomePublicPluginSetup, void, HomePluginSetupDependencies, HomePluginStartDependencies> {
+    Plugin<
+      HomePublicPluginSetup,
+      HomePublicPluginStart,
+      HomePluginSetupDependencies,
+      HomePluginStartDependencies
+    > {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -66,9 +72,9 @@ export class HomePublicPlugin
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
     { kibanaLegacy, usageCollection }: HomePluginSetupDependencies
-  ): HomePublicPluginSetup {
+  ) {
     core.application.register({
-      id: 'home',
+      id: PLUGIN_ID,
       title: 'Home',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -120,11 +126,9 @@ export class HomePublicPlugin
     { application: { capabilities, currentAppId$ }, http }: CoreStart,
     { kibanaLegacy }: HomePluginStartDependencies
   ) {
-    this.featuresCatalogueRegistry.start({ capabilities });
-
     // If the home app is the initial location when loading Kibana...
     if (
-      window.location.pathname === http.basePath.prepend(`/app/home`) &&
+      window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
       window.location.hash === ''
     ) {
       // ...wait for the app to mount initially and then...
@@ -136,6 +140,8 @@ export class HomePublicPlugin
         }
       });
     }
+
+    return { featureCatalogue: { ...this.featuresCatalogueRegistry.start({ capabilities }) } };
   }
 }
 
@@ -149,13 +155,5 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 export type TutorialSetup = TutorialServiceSetup;
 
 /** @public */
-export interface HomePublicPluginSetup {
-  tutorials: TutorialServiceSetup;
-  featureCatalogue: FeatureCatalogueSetup;
-  /**
-   * The environment service is only available for a transition period and will
-   * be replaced by display specific extension points.
-   * @deprecated
-   */
-  environment: EnvironmentSetup;
-}
+export type HomePublicPluginSetup = ReturnType<HomePublicPlugin['setup']>;
+export type HomePublicPluginStart = ReturnType<HomePublicPlugin['start']>;

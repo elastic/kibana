@@ -16,27 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginInitializerContext } from 'kibana/public';
-
-export {
-  FeatureCatalogueSetup,
-  EnvironmentSetup,
-  TutorialSetup,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from './plugin';
-export {
-  FeatureCatalogueEntry,
-  FeatureCatalogueCategory,
-  Environment,
-  TutorialVariables,
-  TutorialDirectoryNoticeComponent,
-  TutorialDirectoryHeaderLinkComponent,
-  TutorialModuleNoticeComponent,
-} from './services';
-export * from '../common/instruction_variant';
-import { HomePublicPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new HomePublicPlugin(initializerContext);

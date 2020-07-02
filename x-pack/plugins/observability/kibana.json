@@ -6,6 +6,9 @@
     "xpack",
     "observability"
   ],
+  "requiredPlugins": [
+    "home"
+  ],
   "optionalPlugins": [
     "licensing"
   ],

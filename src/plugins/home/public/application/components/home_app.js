@@ -48,8 +48,6 @@ export function HomeApp({ directories }) {
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
-  const mlEnabled = environment.ml;
-  const apmUiEnabled = environment.apmUi;
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -87,8 +85,6 @@ export function HomeApp({ directories }) {
             <Home
               addBasePath={addBasePath}
               directories={directories}
-              apmUiEnabled={apmUiEnabled}
-              mlEnabled={mlEnabled}
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}

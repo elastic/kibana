@@ -114,6 +114,19 @@ export class AdvancedSettingsComponent extends Component<
         filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
       });
     });
+
+    // scrolls to setting provided in the URL hash
+    const { hash } = window.location;
+    if (hash !== '') {
+      setTimeout(() => {
+        const id = hash.replace('#', '');
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView();
+          window.scrollBy(0, -48); // offsets scroll by height of the global nav
+        }
+      }, 0);
+    }
   }
 
   componentWillUnmount() {
