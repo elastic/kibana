@@ -25,7 +25,6 @@ import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_e
 import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
-  ExceptionListSchema,
   CreateExceptionListItemSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
@@ -182,7 +181,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   }, [addOrUpdateExceptionItems, enrichExceptionItems]);
 
-  // TODO: builder - Grab appropriate listId that's associated with the rule
+  const indexPatternConfig = useCallback(() => {
+    if (exceptionListType === 'endpoint') {
+      return [alertsIndexPattern];
+    }
+    return signalIndexName ? [signalIndexName] : [];
+  }, [exceptionListType, signalIndexName]);
+
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -205,12 +210,10 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 isLoading={false}
                 isOrDisabled={false}
                 isAndDisabled={false}
-                dataTestSubj="edit-exception-modal-builder"
-                idAria="edit-exception-modal-builder"
+                data-test-subj="edit-exception-modal-builder"
+                id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
-                indexPatternConfig={
-                  exceptionListType === 'endpoint' ? [alertsIndexPattern] : [signalIndexName]
-                }
+                indexPatternConfig={indexPatternConfig()}
               />
 
               <EuiSpacer />

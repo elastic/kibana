@@ -401,7 +401,7 @@ export const entryHasListType = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries) {
+    for (const exceptionEntry of entries ?? []) {
       if (getOperatorType(exceptionEntry) === 'list') {
         return true;
       }
@@ -411,14 +411,14 @@ export const entryHasListType = (
 };
 
 export const entryHasNonEcsType = (
-  exceptionItems: ExceptionListItemSchema[],
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   indexPatterns: IIndexPattern
 ): boolean => {
   if (exceptionItems.length === 0) {
     return false;
   }
   for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries) {
+    for (const exceptionEntry of entries ?? []) {
       if (indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined) {
         return true;
       }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { memo, useEffect, useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -28,8 +28,8 @@ import {
   CreateExceptionListItemSchema,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
-import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
-import { useKibana, useUiSetting$ } from '../../../lib/kibana';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
@@ -162,18 +162,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onError: onFetchOrCreateExceptionListError,
   });
 
-  useEffect(() => {
+  const initialExceptionItems = useCallback(() => {
     if (alertData !== undefined && exceptionListType === 'endpoint' && ruleExceptionList) {
-      setExceptionItemsToAdd(
-        defaultEndpointExceptionItems(
-          exceptionListType,
-          ruleExceptionList.list_id,
-          ruleName,
-          alertData
-        )
+      return defaultEndpointExceptionItems(
+        exceptionListType,
+        ruleExceptionList.list_id,
+        ruleName,
+        alertData
       );
     }
-  }, [alertData, exceptionListType, ruleExceptionList, ruleName, setExceptionItemsToAdd]);
+  }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
   useEffect(() => {
     if (indexPatternLoading === false && isSignalIndexLoading === false) {
@@ -218,8 +216,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTags = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
-      enriched = enrichExceptionItemsWithOS(enriched, osTags);
+      const osTypes = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
+      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
@@ -235,6 +233,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
+
+  const indexPatternConfig = useCallback(() => {
+    if (exceptionListType === 'endpoint') {
+      return [alertsIndexPattern];
+    }
+    return signalIndexName ? [signalIndexName] : [];
+  }, [exceptionListType, signalIndexName]);
 
   return (
     <EuiOverlayMask>
@@ -264,19 +269,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilder
-                  exceptionListItems={exceptionItemsToAdd}
+                  exceptionListItems={initialExceptionItems()}
                   listType={exceptionListType}
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
-                  indexPatternConfig={
-                    exceptionListType === 'endpoint' ? [alertsIndexPattern] : [signalIndexName]
-                  }
+                  indexPatternConfig={indexPatternConfig()}
                   isLoading={false}
                   isOrDisabled={false}
                   isAndDisabled={false}
-                  dataTestSubj="alert-exception-builder"
-                  idAria="alert-exception-builder"
+                  data-test-subj="alert-exception-builder"
+                  id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
                 />
 
