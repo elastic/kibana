@@ -10,7 +10,6 @@ import { CoreSetup } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-  KibanaDatatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
@@ -273,14 +272,7 @@ export interface OperationMetadata {
   // introduce a raw document datasource, this should be considered here.
 }
 
-export interface LensMultiTable {
-  type: 'lens_multitable';
-  tables: Record<string, KibanaDatatable>;
-  dateRange?: {
-    fromDate: Date;
-    toDate: Date;
-  };
-}
+export { LensMultiTable } from '../common';
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;

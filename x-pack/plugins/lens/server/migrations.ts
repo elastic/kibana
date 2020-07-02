@@ -6,6 +6,7 @@
 
 import { cloneDeep } from 'lodash';
 import { SavedObjectMigrationMap, SavedObjectMigrationFn } from 'src/core/server';
+import { EsaggsExpressionFunctionDefinition } from 'src/plugins/data/server';
 import {
   buildExpression,
   ExpressionAstExpression,
@@ -15,6 +16,7 @@ import {
   isExpressionAstBuilder,
   parseExpression,
 } from '../../../../src/plugins/expressions/server';
+import { MergeTablesExpressionFunctionDefinition } from '../common';
 
 interface LensDocShape<VisualizationState = unknown> {
   id?: string;
@@ -70,12 +72,12 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
   }
   try {
     const ast = buildExpression(expression);
-    ast.findFunction('lens_merge_tables').forEach((fn) => {
+    ast.findFunction<MergeTablesExpressionFunctionDefinition>('lens_merge_tables').forEach((fn) => {
       const arg = fn.getArgument('tables');
       if (arg) {
         const tables = arg.reduce((acc, table) => {
           if (isExpressionAstBuilder(table)) {
-            const esaggs = table.findFunction('esaggs')[0];
+            const esaggs = table.findFunction<EsaggsExpressionFunctionDefinition>('esaggs')[0];
             const aggConfigs = esaggs.getArgument('aggConfigs');
             if (aggConfigs) {
               aggConfigs.forEach((aggConfig) => {
