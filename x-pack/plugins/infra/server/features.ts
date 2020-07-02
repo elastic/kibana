@@ -15,11 +15,11 @@ export const METRICS_FEATURE = {
   icon: 'metricsApp',
   navLinkId: 'metrics',
   app: ['infra', 'kibana'],
-  catalogue: ['infraops'],
+  catalogue: ['infraops', 'metrics'],
   privileges: {
     all: {
       app: ['infra', 'kibana'],
-      catalogue: ['infraops'],
+      catalogue: ['infraops', 'metrics'],
       api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
       savedObject: {
         all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
@@ -39,7 +39,7 @@ export const METRICS_FEATURE = {
     },
     read: {
       app: ['infra', 'kibana'],
-      catalogue: ['infraops'],
+      catalogue: ['infraops', 'metrics'],
       api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
       savedObject: {
         all: ['alert', 'action', 'action_task_params'],
@@ -67,11 +67,11 @@ export const LOGS_FEATURE = {
   icon: 'logsApp',
   navLinkId: 'logs',
   app: ['infra', 'kibana'],
-  catalogue: ['infralogging'],
+  catalogue: ['infralogging', 'logs'],
   privileges: {
     all: {
       app: ['infra', 'kibana'],
-      catalogue: ['infralogging'],
+      catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -81,7 +81,7 @@ export const LOGS_FEATURE = {
     },
     read: {
       app: ['infra', 'kibana'],
-      catalogue: ['infralogging'],
+      catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       savedObject: {
         all: [],

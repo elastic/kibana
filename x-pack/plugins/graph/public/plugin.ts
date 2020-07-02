@@ -23,6 +23,7 @@ import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
@@ -38,6 +39,7 @@ export interface GraphPluginStartDependencies {
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
+  home?: HomePublicPluginStart;
 }
 
 export class GraphPlugin
@@ -108,12 +110,20 @@ export class GraphPlugin
     });
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { home }: GraphPluginStartDependencies) {
     if (this.licensing === null) {
       throw new Error('Start called before setup');
     }
     this.licensing.license$.subscribe((license) => {
-      toggleNavLink(checkLicense(license), core.chrome.navLinks);
+      const licenseInformation = checkLicense(license);
+      toggleNavLink(licenseInformation, core.chrome.navLinks);
+      if (home) {
+        if (licenseInformation.showAppLink) {
+          home.featureCatalogue.showOnHomePage('graph');
+        } else {
+          home.featureCatalogue.hideFromHomePage('graph');
+        }
+      }
     });
   }
 

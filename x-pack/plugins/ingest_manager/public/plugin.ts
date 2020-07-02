@@ -13,9 +13,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  HomePublicPluginSetup,
+  FeatureCatalogueCategory,
+} from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
@@ -95,6 +99,20 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+
+      deps.home.featureCatalogue.register({
+        id: 'ingestManager',
+        title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
+          defaultMessage: 'Manage ingest',
+        }),
+        description: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
+          defaultMessage: 'Management for Elastic Agents and integrations.',
+        }),
+        icon: 'logstashInput',
+        showOnHomePage: true,
+        path: BASE_PATH,
+        category: FeatureCatalogueCategory.ADMIN, // TODO: is the correct category for this plugin?
+      });
     }
 
     return {};

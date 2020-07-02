@@ -42,7 +42,7 @@ export interface FeatureCatalogueEntry {
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
   /** Whether or not this link should be shown on the front page of Kibana. */
-  readonly showOnHomePage: boolean;
+  showOnHomePage: boolean;
 }
 
 export class FeatureCatalogueRegistry {
@@ -65,6 +65,22 @@ export class FeatureCatalogueRegistry {
 
   public start({ capabilities }: { capabilities: Capabilities }) {
     this.capabilities = capabilities;
+    return {
+      showOnHomePage: (featureId: string) => {
+        const feature = this.features.get(featureId);
+        if (feature) {
+          feature.showOnHomePage = true;
+          this.features.set(featureId, feature);
+        }
+      },
+      hideFromHomePage: (featureId: string) => {
+        const feature = this.features.get(featureId);
+        if (feature) {
+          feature.showOnHomePage = false;
+          this.features.set(featureId, feature);
+        }
+      },
+    };
   }
 
   public get(): readonly FeatureCatalogueEntry[] {

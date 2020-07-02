@@ -17,30 +17,27 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
-import { AddData } from './add_data';
+import { ChangeHomeRoute } from './change_home_route';
+import { SolutionsPanel } from './solutions_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
-  EuiPage,
-  EuiPanel,
+  EuiButtonEmpty,
   EuiTitle,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlexGrid,
-  EuiText,
-  EuiPageBody,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Welcome } from './welcome';
 import { getServices } from '../kibana_services';
-import { FeatureCatalogueCategory } from '../../services';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -116,105 +113,204 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  renderDirectories = (category) => {
-    const { addBasePath, directories } = this.props;
-    return directories
-      .filter((directory) => {
-        return directory.showOnHomePage && directory.category === category;
-      })
-      .map((directory) => {
-        return (
-          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
-            <Synopsis
-              onClick={createAppNavigationHandler(directory.path)}
-              description={directory.description}
-              iconType={directory.icon}
-              title={directory.title}
-              url={addBasePath(directory.path)}
-            />
-          </EuiFlexItem>
-        );
-      });
+  findDirectoryById = (id) =>
+    this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
+
+  renderDirectory = (directory) => {
+    const { addBasePath } = this.props;
+
+    return directory ? (
+      <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
+        <Synopsis
+          onClick={createAppNavigationHandler(directory.path)}
+          description={directory.description}
+          iconType={directory.icon}
+          title={directory.title}
+          url={addBasePath(directory.path)}
+          wrapInPanel
+        />
+      </EuiFlexItem>
+    ) : null;
   };
 
   renderNormal() {
-    const { apmUiEnabled, mlEnabled } = this.props;
+    const { addBasePath, directories } = this.props;
+
+    const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
+    const ingestManager = this.findDirectoryById('ingestManager');
+    const security = this.findDirectoryById('security');
+    const monitoring = this.findDirectoryById('monitoring');
+    const snapshotRestore = this.findDirectoryById('snapshot_restore');
+    const indexLifecycleManagement = this.findDirectoryById('index_lifecycle_management');
+    const devTools = this.findDirectoryById('console');
+    const stackManagement = this.findDirectoryById('stack-management');
+    const advancedSettings = this.findDirectoryById('advanced_settings');
+
+    console.log({ directories });
 
     return (
-      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
-        <EuiPageBody className="eui-displayBlock">
-          <EuiScreenReaderOnly>
-            <h1>
-              <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
-            </h1>
-          </EuiScreenReaderOnly>
-
-          <AddData
-            apmUiEnabled={apmUiEnabled}
-            mlEnabled={mlEnabled}
-            isNewKibanaInstance={this.state.isNewKibanaInstance}
-          />
-
-          <EuiSpacer size="l" />
-
-          <EuiFlexGroup>
+      <Fragment>
+        <header className="homPageHeader">
+          <EuiFlexGroup gutterSize="none">
             <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
+              <EuiScreenReaderOnly>
+                <h1>
+                  <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
+                </h1>
+              </EuiScreenReaderOnly>
+              <EuiFlexGroup gutterSize="none">
+                <EuiTitle size="m">
+                  <h1>
                     <FormattedMessage
-                      id="home.directories.visualize.nameTitle"
-                      defaultMessage="Visualize and Explore Data"
+                      id="home.pageHeader.welcomeNoUserTitle"
+                      defaultMessage="Welcome to {ELASTIC}!"
+                      values={{ ELASTIC: 'Elastic' }}
                     />
-                  </h2>
+                  </h1>
                 </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2} gutterSize="s">
-                  {this.renderDirectories(FeatureCatalogueCategory.DATA)}
-                </EuiFlexGrid>
-              </EuiPanel>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
+              <EuiFlexGroup alignItems="flexEnd">
+                <EuiFlexItem>
+                  <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
+                    {i18n.translate('home.pageHeader.addDataButtonLabel', {
+                      defaultMessage: 'Add data',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {stackManagement ? (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      onClick={createAppNavigationHandler(stackManagement.path)}
+                      iconType="gear"
+                    >
+                      {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
+                        defaultMessage: 'Manage stack',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                {devTools ? (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      onClick={createAppNavigationHandler(devTools.path)}
+                      iconType="wrench"
+                    >
+                      {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                        defaultMessage: 'Dev tools',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
+                {/* <EuiFlexItem>
+                  <EuiButtonEmpty href="#/feature_directory" iconType="apps">
+                    {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
+                      defaultMessage: 'App directory',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem> */}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </header>
+        <div className="homPageContainer">
+          <main className="homPage" data-test-subj="homeApp">
+            <div className="homSolutionsPanel">
+              <SolutionsPanel
+                addBasePath={addBasePath}
+                findDirectoryById={this.findDirectoryById}
+              />
+            </div>
+
+            <EuiHorizontalRule margin="xl" />
+            <EuiSpacer size="s" />
+
+            <div className="homAddData">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+                <EuiFlexItem grow={1}>
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('home.addData.sectionTitle', {
+                        defaultMessage: 'Add your data',
+                      })}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="tableDensityExpanded"
+                    href="#/tutorial_directory/sampleData"
+                    size="xs"
+                  >
                     <FormattedMessage
-                      id="home.directories.manage.nameTitle"
-                      defaultMessage="Manage and Administer the Elastic Stack"
+                      id="home.addData.sampleDataButtonLabel"
+                      defaultMessage="Try our sample data"
                     />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
-                  {this.renderDirectories(FeatureCatalogueCategory.ADMIN)}
-                </EuiFlexGrid>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-          <EuiSpacer size="l" />
+              <EuiSpacer />
 
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} className="eui-textCenter">
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="home.directories.notFound.description"
-                    defaultMessage="Didn’t find what you were looking for?"
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiButton data-test-subj="allPlugins" href="#/feature_directory">
-                <FormattedMessage
-                  id="home.directories.notFound.viewFullButtonLabel"
-                  defaultMessage="View full directory of Kibana plugins"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPage>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={1}>
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiFlexItem className="homHome__synopsisItem">
+                      <Synopsis
+                        description={i18n.translate('home.addData.addIntegrationDescription', {
+                          defaultMessage: 'Add data from a variety of common sources.',
+                        })}
+                        iconType="indexOpen"
+                        title={i18n.translate('home.addData.addIntegrationTitle', {
+                          defaultMessage: 'Add an integration',
+                        })}
+                        url="#/tutorial_directory"
+                        wrapInPanel
+                      />
+                    </EuiFlexItem>
+                    {this.renderDirectory(ingestManager)}
+                    {this.renderDirectory(fileDataVisualizer)}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+
+            {security || monitoring || snapshotRestore || indexLifecycleManagement ? (
+              <Fragment>
+                <EuiHorizontalRule margin="xl" />
+                <EuiSpacer size="s" />
+
+                <div className="homManageData">
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('home.manageData.sectionTitle', {
+                        defaultMessage: 'Manage your data',
+                      })}
+                    </h3>
+                  </EuiTitle>
+
+                  <EuiSpacer />
+
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    {this.renderDirectory(security)}
+                    {this.renderDirectory(monitoring)}
+                    {this.renderDirectory(snapshotRestore)}
+                    {this.renderDirectory(indexLifecycleManagement)}
+                  </EuiFlexGroup>
+                </div>
+              </Fragment>
+            ) : null}
+
+            {advancedSettings && (
+              <Fragment>
+                <EuiHorizontalRule margin="xl" />
+                <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />
+              </Fragment>
+            )}
+          </main>
+        </div>
+      </Fragment>
     );
   }
 
@@ -262,11 +358,9 @@ Home.propTypes = {
       category: PropTypes.string.isRequired,
     })
   ),
-  apmUiEnabled: PropTypes.bool.isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
-  mlEnabled: PropTypes.bool.isRequired,
   telemetry: PropTypes.shape({
     telemetryService: PropTypes.any,
     telemetryNotifications: PropTypes.any,
