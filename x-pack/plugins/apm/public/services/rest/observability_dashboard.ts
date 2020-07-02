@@ -6,12 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import mean from 'lodash.mean';
+import { Theme } from '@kbn/ui-shared-deps/theme';
 import {
   ApmFetchDataResponse,
   FetchDataParams,
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
-import { Theme } from '../../utils/get_theme';
 
 interface Options {
   theme: Theme;
