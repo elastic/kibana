@@ -58,11 +58,11 @@ export const determineListMode = ({
 }): 'custom' | 'list' => {
   const indicesAndDataStreams = indices.concat(dataStreams);
   return typeof configuredIndices === 'string' ||
+    indicesAndDataStreams.length > 100 ||
     (Array.isArray(configuredIndices) &&
-      (indices.length > 100 ||
-        // If not every past configured index maps to an existing index or data stream
-        // we also show the custom list
-        !configuredIndices.every((c) => indicesAndDataStreams.some((i) => i === c))))
+      // If not every past configured index maps to an existing index or data stream
+      // we also show the custom list
+      !configuredIndices.every((c) => indicesAndDataStreams.some((i) => i === c)))
     ? 'custom'
     : 'list';
 };
