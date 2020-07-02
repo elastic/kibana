@@ -40,6 +40,7 @@ export class FieldFormatsRegistry {
   protected defaultMap: Record<string, FieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
   protected getConfig?: FieldFormatsGetConfigFn;
+  protected customParams: Record<string, any> = {};
   // overriden on the public contract
   public deserialize: (mapping: SerializedFieldFormat) => IFieldFormat = () => {
     return new (FieldFormat.from(identity))();
@@ -55,6 +56,13 @@ export class FieldFormatsRegistry {
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;
     this.metaParamsOptions = metaParamsOptions;
+  }
+
+  /*
+   * Allow use-case specific params that are reflected in getInstance / getDefaultInstancePlain
+   */
+  setCustomParams(params: Record<string, any>) {
+    this.customParams = params;
   }
 
   /**
@@ -157,7 +165,11 @@ export class FieldFormatsRegistry {
    * @return {FieldFormat}
    */
   getInstance = memoize(
-    (formatId: FieldFormatId, params: Record<string, any> = {}): FieldFormat => {
+    (formatId: FieldFormatId, instanceParams: Record<string, any> = {}): FieldFormat => {
+      const params = {
+        ...instanceParams,
+        ...this.customParams,
+      };
       const ConcreteFieldFormat = this.getType(formatId);
 
       if (!ConcreteFieldFormat) {
@@ -182,8 +194,12 @@ export class FieldFormatsRegistry {
    */
   getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
+    const defaultParams = {
+      ...conf.params,
+      ...this.customParams,
+    };
 
-    return this.getInstance(conf.id, conf.params);
+    return this.getInstance(conf.id, defaultParams);
   }
   /**
    * Returns a cache key built by the given variables for caching in memoized
