@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './repository';
-export * from './snapshot';
-export * from './restore';
-export * from './policy';
-export * from './indices';
+export const orderDataStreamsAndIndices = <D extends any>({
+  dataStreams,
+  indices,
+}: {
+  dataStreams: D[];
+  indices: D[];
+}) => {
+  return dataStreams.concat(indices);
+};

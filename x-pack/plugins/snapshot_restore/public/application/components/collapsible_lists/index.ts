@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './repository';
-export * from './snapshot';
-export * from './restore';
-export * from './policy';
-export * from './indices';
+export { CollapsibleIndicesList } from './collapsible_indices_list';
+export { CollapsibleDataStreamsList } from './collapsible_data_streams_list';

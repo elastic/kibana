@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './repository';
-export * from './snapshot';
-export * from './restore';
-export * from './policy';
-export * from './indices';
+export interface PolicyIndicesResponse {
+  indices: string[];
+  dataStreams: string[];
+}
