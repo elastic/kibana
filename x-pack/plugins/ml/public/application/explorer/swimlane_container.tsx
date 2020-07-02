@@ -125,7 +125,11 @@ export const SwimlaneContainer: FC<
                 )}
                 {isLoading && (
                   <EuiText textAlign={'center'}>
-                    <EuiLoadingChart size="xl" data-test-subj="mlSwimLaneLoadingIndicator" />
+                    <EuiLoadingChart
+                      size="xl"
+                      mono={true}
+                      data-test-subj="mlSwimLaneLoadingIndicator"
+                    />
                   </EuiText>
                 )}
                 {!isLoading && !showSwimlane && (
