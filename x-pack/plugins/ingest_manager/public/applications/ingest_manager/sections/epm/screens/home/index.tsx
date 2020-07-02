@@ -116,8 +116,7 @@ function AvailablePackages() {
   useBreadcrumbs('integrations_all');
   const history = useHistory();
   const queryParams = new URLSearchParams(useLocation().search);
-  const initialCategory =
-    queryParams.get('category') !== null ? (queryParams.get('category') as string) : '';
+  const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
     category: selectedCategory,
@@ -147,7 +146,7 @@ function AvailablePackages() {
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {
         // clear category query param in the url
-        if (queryParams.get('category') !== null) {
+        if (queryParams.get('category')) {
           history.push({});
         }
         setSelectedCategory(id);
