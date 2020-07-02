@@ -33,7 +33,6 @@ export const registerTelemetryUsageCollector = (
       },
       ui_error: {
         cannot_connect: { type: 'long' },
-        no_as_account: { type: 'long' },
       },
       ui_clicked: {
         create_first_engine_button: { type: 'long' },
