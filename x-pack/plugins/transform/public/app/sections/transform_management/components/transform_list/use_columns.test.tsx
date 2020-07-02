@@ -6,7 +6,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useColumns } from './columns';
+import { useColumns } from './use_columns';
 
 jest.mock('../../../../../shared_imports');
 

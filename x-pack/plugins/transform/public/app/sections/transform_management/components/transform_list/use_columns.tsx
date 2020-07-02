@@ -30,7 +30,7 @@ import {
   TransformStats,
   TRANSFORM_LIST_COLUMN,
 } from '../../../../common';
-import { useActions } from './actions';
+import { useActions } from './use_actions';
 
 enum STATE_COLOR {
   aborting = 'warning',
@@ -223,7 +223,7 @@ export const useColumns = (
     },
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),
-      actions,
+      actions: actions as EuiTableActionsColumnType<TransformListRow>['actions'],
       width: '80px',
     },
   ];

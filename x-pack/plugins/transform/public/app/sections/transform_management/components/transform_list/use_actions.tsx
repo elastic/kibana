@@ -7,7 +7,7 @@
 import React from 'react';
 import { pick } from 'lodash';
 
-import { EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiTableComputedColumnType } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -24,7 +24,7 @@ export const useActions = ({
   forceDisable,
 }: {
   forceDisable: boolean;
-}): { actions: EuiTableActionsColumnType<TransformListRow>['actions']; modals: JSX.Element } => {
+}): { actions: Array<EuiTableComputedColumnType<TransformListRow>>; modals: JSX.Element } => {
   const deleteAction = useDeleteAction();
   const editAction = useEditAction();
   const startAction = useStartAction();
