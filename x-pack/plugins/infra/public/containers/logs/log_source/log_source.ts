@@ -78,10 +78,6 @@ export const useLogSource = ({
     [sourceId, fetch]
   );
 
-  const logIndicesExist = useMemo(() => (sourceStatus?.logIndexNames?.length ?? 0) > 0, [
-    sourceStatus,
-  ]);
-
   const derivedIndexPattern = useMemo(
     () => ({
       fields: sourceStatus?.logIndexFields ?? [],
@@ -158,7 +154,6 @@ export const useLogSource = ({
     loadSourceFailureMessage,
     loadSourceConfiguration,
     loadSourceStatus,
-    logIndicesExist,
     sourceConfiguration,
     sourceId,
     sourceStatus,
