@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues, last } from 'lodash';
+import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import {
   InfraDatabaseSearchResponse,
@@ -95,7 +95,7 @@ const getData = async (
     nodeType,
     groupBy: [],
     sourceConfiguration,
-    metric: { type: metric },
+    metrics: [{ type: metric }],
     timerange,
     includeTimeseries: Boolean(timerange.lookbackSize),
   };
@@ -104,12 +104,13 @@ const getData = async (
 
   return nodes.reduce((acc, n) => {
     const nodePathItem = last(n.path) as any;
-    if (n.metric?.value && n.metric?.timeseries) {
-      const { timeseries } = n.metric;
+    const m = first(n.metrics);
+    if (m && m.value && m.timeseries) {
+      const { timeseries } = m;
       const values = timeseries.rows.map((row) => row.metric_0) as Array<number | null>;
       acc[nodePathItem.label] = values;
     } else {
-      acc[nodePathItem.label] = n.metric && n.metric.value;
+      acc[nodePathItem.label] = m && m.value;
     }
     return acc;
   }, {} as Record<string, number | Array<number | string | null | undefined> | undefined | null>);
