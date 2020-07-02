@@ -14,7 +14,6 @@ import {
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
-  EuiFieldText,
 } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
@@ -168,10 +167,6 @@ const tooltipContent = {
       'Individual series cannot be custom colored when the layer includes a “Split by.“',
   }),
 };
-
-const autoMessage = i18n.translate('xpack.lens.configPanel.color.auto', {
-  defaultMessage: 'Auto',
-});
 
 const ColorPicker = ({
   state,
