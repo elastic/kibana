@@ -88,22 +88,26 @@ export function SavedQueryManagementComponent({
     }
   }, [isOpen, activePage, savedQueryService]);
 
+  const handleTogglePopover = useCallback(() => setIsOpen((currentState) => !currentState), [
+    setIsOpen,
+  ]);
+
   const handleClosePopover = useCallback(() => setIsOpen(false), []);
 
   const handleSave = useCallback(() => {
-    onSave();
     handleClosePopover();
+    onSave();
   }, [handleClosePopover, onSave]);
 
   const handleSaveAsNew = useCallback(() => {
-    onSaveAsNew();
     handleClosePopover();
+    onSaveAsNew();
   }, [handleClosePopover, onSaveAsNew]);
 
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
-      onLoad(savedQueryToSelect);
       handleClosePopover();
+      onLoad(savedQueryToSelect);
     },
     [handleClosePopover, onLoad]
   );
@@ -157,9 +161,7 @@ export function SavedQueryManagementComponent({
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      onClick={() => {
-        setIsOpen(!isOpen);
-      }}
+      onClick={handleTogglePopover}
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
