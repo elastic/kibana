@@ -22,7 +22,6 @@ import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
-import { queryServiceMock } from '../../../query/mocks';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { InternalStartServices } from '../../../types';
 import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
@@ -79,8 +78,7 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
     coreSetup.uiSettings.get = mockUiSettings;
 
     const aggTypes = getAggTypes({
-      uiSettings: coreSetup.uiSettings,
-      query: queryServiceMock.createSetupContract(),
+      calculateBounds: jest.fn(),
       getInternalStartServices: () =>
         (({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -88,6 +86,7 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
           uiSettings: coreStart.uiSettings,
           injectedMetadata: coreStart.injectedMetadata,
         } as unknown) as InternalStartServices),
+      uiSettings: coreSetup.uiSettings,
     });
 
     aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));

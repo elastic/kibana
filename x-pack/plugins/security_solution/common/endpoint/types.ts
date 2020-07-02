@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datasource, NewDatasource } from '../../../ingest_manager/common';
+import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -179,6 +180,8 @@ export interface OSFields {
   full: string;
   name: string;
   version: string;
+  platform: string;
+  family: string;
   Ext: OSFieldsExt;
 }
 
@@ -195,8 +198,10 @@ export interface OSFieldsExt {
 export interface Host {
   id: string;
   hostname: string;
+  name: string;
   ip: string[];
   mac: string[];
+  architecture: string;
   os: OSFields;
 }
 
@@ -395,6 +400,13 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+    kind: string;
+    id: string;
+    category: string[];
+    type: string[];
+    module: string;
+    action: string;
+    dataset: string;
   };
   elastic: {
     agent: {
@@ -510,6 +522,11 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * The response body for the resolver '/entity' index API
+ */
+export type ResolverEntityIndex = Array<{ entity_id: string }>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -661,20 +678,23 @@ export enum ProtectionModes {
 }
 
 /**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
+ * Endpoint Policy data, which extends Ingest's `PackageConfig` type
  */
-export type PolicyData = Datasource & NewPolicyData;
+export type PolicyData = PackageConfig & NewPolicyData;
 
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewDatasource & {
+export type NewPolicyData = NewPackageConfig & {
   inputs: [
     {
       type: 'endpoint';
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };
@@ -762,8 +782,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
