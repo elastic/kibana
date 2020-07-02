@@ -10,7 +10,10 @@ import { Readable } from 'stream';
 import { createListStream } from '../../../../../../../src/legacy/utils';
 import { importTimelines } from '../../timeline/routes/utils/import_timelines';
 import { FrameworkRequest } from '../../framework';
-import { ImportTimelineResultSchema } from '../../timeline/routes/schemas/import_timelines_schema';
+import {
+  ImportTimelineResultSchema,
+  ImportTimelinesSchema,
+} from '../../timeline/routes/schemas/import_timelines_schema';
 import { getTimelinesToInstall } from './get_timelines_to_install';
 import { getTimelinesToUpdate } from './get_timelines_to_update';
 import { getExistingPrepackagedTimelines } from '../../timeline/saved_object';
@@ -35,12 +38,12 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
     });
   });
 
-const loadData = <T>(
+const loadData = <T, U>(
   readStream: Readable,
-  bulkInsert: (docs: Readable | string[]) => Promise<T | string>,
-  encoding?: 'utf-8' | null,
+  bulkInsert: <V>(docs: V) => Promise<U | string>,
+  encoding?: T,
   maxTimelineImportExportSize?: number | null
-): Promise<T | string> => {
+): Promise<U | string> => {
   return new Promise((resolved, reject) => {
     let docs: string[] = [];
     let isPaused: boolean = false;
@@ -49,22 +52,20 @@ const loadData = <T>(
     const onClose = async () => {
       if (docs.length > 0) {
         try {
-          const docstmp = createListStream(docs.join('\n'));
-
-          const bulkInsertResult = await bulkInsert(encoding === 'utf-8' ? docs : docstmp);
+          let bulkInsertResult;
+          if (typeof encoding === 'string' && encoding === 'utf-8') {
+            bulkInsertResult = await bulkInsert<string[]>(docs);
+          } else {
+            const docstmp = createListStream(docs.join('\n'));
+            bulkInsertResult = await bulkInsert<Readable>(docstmp);
+          }
           resolved(bulkInsertResult);
         } catch (err) {
           reject(err);
           return;
         }
       }
-      resolved({
-        success: true,
-        success_count: 0,
-        errors: [],
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
+      resolved('No data provided');
     };
 
     const closeWithError = (err: Error) => {
@@ -93,7 +94,11 @@ const loadData = <T>(
         docs = [];
 
         try {
-          await bulkInsert(encoding === 'utf-8' ? docs : docstmp);
+          if (typeof encoding === 'string' && encoding === 'utf-8') {
+            await bulkInsert<string[]>(docs);
+          } else {
+            await bulkInsert<Readable>(docstmp);
+          }
           lineStream.resume();
         } catch (err) {
           closeWithError(err);
@@ -138,19 +143,26 @@ export const installPrepackagedTimelines = async (
     };
   }
 
-  return loadData<ImportTimelineResultSchema>(
-    readStream,
-    (docs: string[] | Readable) =>
-      importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable),
-    null,
-    maxTimelineImportExportSize
+  return loadData<null, ImportTimelineResultSchema>(readStream, <T>(docs: T) =>
+    docs instanceof Readable
+      ? importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)
+      : Promise.resolve({
+          success: false,
+          success_count: 0,
+          timelines_installed: 0,
+          timelines_updated: 0,
+          errors: [
+            {
+              error: { message: `read prepackaged timelines error`, status_code: 500 },
+            },
+          ],
+        })
   );
 };
-
 interface CheckTimelinesStatus {
-  timelinesToInstall: [];
-  timelinesToUpdate: [];
-  prepackagedTimelines: [];
+  timelinesToInstall: ImportTimelinesSchema[];
+  timelinesToUpdate: ImportTimelinesSchema[];
+  prepackagedTimelines: TimelineSavedObject[];
 }
 
 export const checkTimelinesStatus = async (
@@ -178,26 +190,32 @@ export const checkTimelinesStatus = async (
     };
   }
 
-  return loadData<CheckTimelinesStatus>(
+  return loadData<'utf-8', CheckTimelinesStatus>(
     readStream,
-    (timelinesFromFileSystem: Readable | string[]) => {
-      const parsedTimelinesFromFileSystem = timelinesFromFileSystem.map((t) => JSON.parse(t));
-      const prepackagedTimelines = timeline.timeline ?? [];
+    <T>(timelinesFromFileSystem: T) => {
+      if (Array.isArray(timelinesFromFileSystem)) {
+        const parsedTimelinesFromFileSystem = timelinesFromFileSystem.map((t: string) =>
+          JSON.parse(t)
+        );
+        const prepackagedTimelines = timeline.timeline ?? [];
 
-      const timelinesToInstall = getTimelinesToInstall(
-        parsedTimelinesFromFileSystem,
-        prepackagedTimelines
-      );
-      const timelinesToUpdate = getTimelinesToUpdate(
-        parsedTimelinesFromFileSystem,
-        prepackagedTimelines
-      );
+        const timelinesToInstall = getTimelinesToInstall(
+          parsedTimelinesFromFileSystem,
+          prepackagedTimelines
+        );
+        const timelinesToUpdate = getTimelinesToUpdate(
+          parsedTimelinesFromFileSystem,
+          prepackagedTimelines
+        );
 
-      return {
-        timelinesToInstall,
-        timelinesToUpdate,
-        prepackagedTimelines,
-      };
+        return Promise.resolve({
+          timelinesToInstall,
+          timelinesToUpdate,
+          prepackagedTimelines,
+        });
+      } else {
+        return Promise.reject(new Error('load timeline error'));
+      }
     },
     'utf-8'
   );

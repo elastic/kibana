@@ -105,6 +105,18 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
+  const getMissingRulesOrTimelinesButtonTitle = useCallback(
+    (missingRules: number, missingTimelines: number) => {
+      if (missingRules > 0 && missingTimelines === 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_RULES(missingRules);
+      else if (missingRules === 0 && missingTimelines > 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_TIMELINES(missingTimelines);
+      else if (missingRules > 0 && missingTimelines > 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES(missingRules, missingTimelines);
+    },
+    []
+  );
+
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -159,7 +171,8 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {prePackagedRuleStatus === 'someRuleUninstall' && (
+            {(prePackagedRuleStatus === 'someRuleUninstall' ||
+              prePackagedTimelineStatus === 'someTimelineUninstall') && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="reloadPrebuiltRulesBtn"
@@ -168,7 +181,10 @@ const RulesPageComponent: React.FC = () => {
                   isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
-                  {i18n.RELOAD_MISSING_PREPACKAGED_RULES(rulesNotInstalled ?? 0)}
+                  {getMissingRulesOrTimelinesButtonTitle(
+                    rulesNotInstalled ?? 0,
+                    timelinesNotInstalled ?? 0
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             )}

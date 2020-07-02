@@ -485,6 +485,19 @@ export const RELOAD_MISSING_PREPACKAGED_TIMELINES = (missingTimelines: number) =
     }
   );
 
+export const RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES = (
+  missingRules: number,
+  missingTimelines: number
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.reloadMissingPrePackagedRulesAndTimelinesButton',
+    {
+      values: { missingRules, missingTimelines },
+      defaultMessage:
+        'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} and {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
+    }
+  );
+
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
   {

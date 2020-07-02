@@ -5,10 +5,11 @@
  */
 
 import { ImportTimelinesSchema } from '../../timeline/routes/schemas/import_timelines_schema';
+import { TimelineSavedObject } from '../../../../common/types/timeline';
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelinesSchema[],
-  installedTimelines: ImportTimelinesSchema[]
+  installedTimelines: TimelineSavedObject[]
 ): ImportTimelinesSchema[] => {
   return timelinesFromFileSystem.filter((timeline) =>
     installedTimelines.some((installedTimeline) => {

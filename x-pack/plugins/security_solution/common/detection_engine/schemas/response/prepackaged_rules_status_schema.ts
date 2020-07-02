@@ -18,16 +18,22 @@ import {
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const prePackagedRulesStatusSchema = t.exact(
+export const prePackagedTimelinesStatusSchema = t.exact(
   t.type({
-    rules_custom_installed,
-    rules_installed,
-    rules_not_installed,
-    rules_not_updated,
     timelines_installed,
     timelines_not_installed,
     timelines_not_updated,
   })
 );
+
+export const prePackagedRulesStatusSchema = t.intersection([
+  t.type({
+    rules_custom_installed,
+    rules_installed,
+    rules_not_installed,
+    rules_not_updated,
+  }),
+  prePackagedTimelinesStatusSchema,
+]);
 
 export type PrePackagedRulesStatusSchema = t.TypeOf<typeof prePackagedRulesStatusSchema>;
