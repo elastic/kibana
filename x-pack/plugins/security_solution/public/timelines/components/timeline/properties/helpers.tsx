@@ -157,19 +157,21 @@ export const NewCase = React.memo<NewCaseProps>(
 
     const handleClick = useCallback(() => {
       onClosePopover();
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: savedObjectId,
-          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-        })
-      );
+
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
 
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCreateCaseUrl(),
-      });
+      }).then(() =>
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: savedObjectId,
+            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+          })
+        )
+      );
     }, [
       dispatch,
       graphEventId,

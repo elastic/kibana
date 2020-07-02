@@ -48,7 +48,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     onDocumentsChange(convertToJson(newValue));
   };
 
-  const onClickWithMessageVariable = (_value: any, e: any) => {
+  const onClickWithMessageVariable = (_value: any) => {
     setCursorPosition(_value);
   };
 
@@ -79,7 +79,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           // Keep the documents in sync with the editor content
           onDocumentsChange(convertToJson(xjson));
         }}
-        onCursorChange={(_value: any, e: any) => onClickWithMessageVariable(_value, e)}
+        onCursorChange={(_value: any) => onClickWithMessageVariable(_value)}
       />
     </EuiFormRow>
   );
