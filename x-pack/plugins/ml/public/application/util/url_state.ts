@@ -56,9 +56,13 @@ export function parseUrlState(search: string): Dictionary<any> {
 // - `history.push()` is the successor of `save`.
 // - The exposed state and set call make use of the above and make sure that
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
-export const useUrlState = (accessor: string): UrlState => {
+export const useUrlState = (defaultAccessor: string): UrlState => {
   const history = useHistory();
   const { search: locationSearchString } = useLocation();
+
+  // Note that `accessor` is used like a factory/provider value,
+  // updates to it will not be considered.
+  const [accessor] = useState(defaultAccessor);
 
   // We maintain a local state of useLocation's search.
   // This allows us to use the callback variant of setSearch()
@@ -66,19 +70,28 @@ export const useUrlState = (accessor: string): UrlState => {
   // latest url state.
   const [searchString, setSearchString] = useState(locationSearchString);
 
+  // Any change of the original search
+  // string we get from React Router
+  // we pass on to our own state.
   useEffect(() => {
     setSearchString(locationSearchString);
   }, [locationSearchString]);
 
+  // Any change to the search string we maintain in our own state
+  // should trigger a possible URL update. However, we only
+  // push to history if something related to the accessor of this
+  // url state instance is affected (e.g. a change in '_g' should
+  // not trigger a push in the '_a' instance).
   useEffect(() => {
-    // Only push to history if something related to the accessor of this
-    // url state instance is affected (e.g. a change in '_g' should not trigger
-    // a push in the '_a' instance).
     if (
       !isEqual(parseUrlState(locationSearchString)[accessor], parseUrlState(searchString)[accessor])
     ) {
       history.push({ search: searchString });
     }
+    // `locationSearchString` is not part of this comparator since we only want
+    // to trigger this when `searchString` updates. Since `locationSearchString` triggers
+    // the previous `useEffect` and updates to `searchString` anyway it's not necessary
+    // to have it here too.
   }, [searchString]);
 
   const setUrlState = useCallback(
