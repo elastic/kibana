@@ -11,13 +11,14 @@ import { EuiSpacer } from '@elastic/eui';
 import { TemplateDeserialized, CREATE_LEGACY_TEMPLATE_BY_DEFAULT } from '../../../../common';
 import { serializers, Forms } from '../../../shared_imports';
 import { SectionError } from '../section_error';
+import { StepLogisticsContainer, StepReviewContainer } from './steps';
 import {
-  StepLogisticsContainer,
+  CommonWizardSteps,
   StepSettingsContainer,
   StepMappingsContainer,
   StepAliasesContainer,
-  StepReviewContainer,
-} from './steps';
+} from '../shared';
+import { documentationService } from '../../services/documentation';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
@@ -31,11 +32,8 @@ interface Props {
   isEditing?: boolean;
 }
 
-export interface WizardContent {
+export interface WizardContent extends CommonWizardSteps {
   logistics: Omit<TemplateDeserialized, '_kbnMeta' | 'template'>;
-  settings: TemplateDeserialized['template']['settings'];
-  mappings: TemplateDeserialized['template']['mappings'];
-  aliases: TemplateDeserialized['template']['aliases'];
 }
 
 export type WizardSection = keyof WizardContent | 'review';
@@ -183,15 +181,15 @@ export const TemplateForm = ({
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.settings.id} label={wizardSections.settings.label}>
-        <StepSettingsContainer />
+        <StepSettingsContainer esDocsBase={documentationService.getEsDocsBase()} />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.mappings.id} label={wizardSections.mappings.label}>
-        <StepMappingsContainer />
+        <StepMappingsContainer esDocsBase={documentationService.getEsDocsBase()} />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.aliases.id} label={wizardSections.aliases.label}>
-        <StepAliasesContainer />
+        <StepAliasesContainer esDocsBase={documentationService.getEsDocsBase()} />
       </FormWizardStep>
 
       <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>

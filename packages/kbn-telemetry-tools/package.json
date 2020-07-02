@@ -1,0 +1,22 @@
+{
+  "name": "@kbn/telemetry-tools",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "private": true,
+  "scripts": {
+    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts --source-maps=inline",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
+    "@kbn/dev-utils": "1.0.0",
+    "@kbn/utility-types": "1.0.0",
+    "@types/normalize-path": "^3.0.0",
+    "normalize-path": "^3.0.0",
+    "@types/lodash": "^3.10.1",
+    "moment": "^2.24.0",
+    "typescript": "3.9.5"
+  }
+}

@@ -9,6 +9,7 @@
     "visualizations",
     "expressions",
     "mapsLegacy",
+    "kibanaLegacy",
     "data"
   ]
 }

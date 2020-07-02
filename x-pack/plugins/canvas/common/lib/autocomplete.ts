@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-// @ts-ignore Untyped Library
+// @ts-expect-error untyped library
 import { parse } from '@kbn/interpreter/common';
 import {
   ExpressionAstExpression,

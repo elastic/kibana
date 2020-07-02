@@ -489,6 +489,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<Agent>
         className="fleet__agentList__table"
+        data-test-subj="fleetAgentListTable"
         loading={isLoading && agentsRequest.isInitialRequest}
         hasActions={true}
         noItemsMessage={

@@ -27,6 +27,7 @@ import { RuleNotificationAlertType } from '../../notifications/types';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -341,6 +342,8 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    author: ['Elastic'],
+    buildingBlockType: undefined,
     anomalyThreshold: undefined,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
@@ -351,6 +354,7 @@ export const getResult = (): RuleAlertType => ({
     savedId: undefined,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    license: 'Elastic License',
     machineLearningJobId: undefined,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
@@ -366,8 +370,11 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     riskScore: 50,
+    riskScoreMapping: [],
+    ruleNameOverride: undefined,
     maxSignals: 100,
     severity: 'high',
+    severityMapping: [],
     to: 'now',
     type: 'query',
     threat: [
@@ -387,41 +394,11 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
+    timestampOverride: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
     version: 1,
-    exceptionsList: [
-      {
-        field: 'source.ip',
-        values_operator: 'included',
-        values_type: 'exists',
-      },
-      {
-        field: 'host.name',
-        values_operator: 'excluded',
-        values_type: 'match',
-        values: [
-          {
-            name: 'rock01',
-          },
-        ],
-        and: [
-          {
-            field: 'host.id',
-            values_operator: 'included',
-            values_type: 'match_all',
-            values: [
-              {
-                name: '123',
-              },
-              {
-                name: '678',
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    exceptionsList: getListArrayMock(),
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),

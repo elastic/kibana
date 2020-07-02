@@ -25,7 +25,7 @@ import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -34,7 +34,7 @@ import {
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
-  registerDatasourceRoutes,
+  registerPackageConfigRoutes,
   registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
@@ -45,15 +45,21 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { IngestManagerConfigType } from '../common';
+import { IngestManagerConfigType, NewPackageConfig } from '../common';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  packageConfigService,
 } from './services';
-import { getAgentStatusById } from './services/agents';
+import {
+  getAgentStatusById,
+  authenticateAgentWithAccessToken,
+  listAgents,
+  getAgent,
+} from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 
@@ -85,7 +91,7 @@ export type IngestManagerSetupContract = void;
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -93,11 +99,30 @@ const allSavedObjectTypes = [
 ];
 
 /**
+ * Callbacks supported by the Ingest plugin
+ */
+export type ExternalCallback = [
+  'packageConfigCreate',
+  (newPackageConfig: NewPackageConfig) => Promise<NewPackageConfig>
+];
+
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
+
+/**
  * Describes public IngestManager plugin contract returned at the `startup` stage.
  */
 export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   agentService: AgentService;
+  /**
+   * Services for Ingest's package configs
+   */
+  packageConfigService: typeof packageConfigService;
+  /**
+   * Register callbacks for inclusion in ingest API processing
+   * @param args
+   */
+  registerExternalCallback: (...args: ExternalCallback) => void;
 }
 
 export class IngestManagerPlugin
@@ -180,7 +205,7 @@ export class IngestManagerPlugin
     if (this.security) {
       registerSetupRoutes(router, config);
       registerAgentConfigRoutes(router);
-      registerDatasourceRoutes(router);
+      registerPackageConfigRoutes(router);
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
@@ -216,8 +241,8 @@ export class IngestManagerPlugin
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ) {
-    appContextService.start({
+  ): Promise<IngestManagerStartContract> {
+    await appContextService.start({
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: this.security,
@@ -235,7 +260,14 @@ export class IngestManagerPlugin
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
+        getAgent,
+        listAgents,
         getAgentStatusById,
+        authenticateAgentWithAccessToken,
+      },
+      packageConfigService,
+      registerExternalCallback: (...args: ExternalCallback) => {
+        return appContextService.addExternalCallback(...args);
       },
     };
   }

@@ -16,13 +16,21 @@ import {
   PluginInitializerContext,
   Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
+import {
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins,
+  StartServices,
+  AppObservableLibs,
+} from './types';
 import {
   APP_ID,
   APP_ICON,
@@ -33,8 +41,9 @@ import {
   APP_TIMELINES_PATH,
   APP_MANAGEMENT_PATH,
   APP_CASES_PATH,
+  APP_PATH,
 } from '../common/constants';
-import { ConfigureEndpointDatasource } from './management/pages/policy/view/ingest_manager_integration/configure_datasource';
+import { ConfigureEndpointPackageConfig } from './management/pages/policy/view/ingest_manager_integration/configure_package_config';
 
 import { State, createStore, createInitialState } from './common/store';
 import { SecurityPageName } from './app/types';
@@ -84,18 +93,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       return { coreStart, startPlugins, services, store: this.store, storage };
     };
 
-    // Waiting for https://github.com/elastic/kibana/issues/69110
-    // core.application.register({
-    //   id: APP_ID,
-    //   title: 'Security',
-    //   appRoute: APP_PATH,
-    //   navLinkStatus: AppNavLinkStatus.hidden,
-    //   mount: async (params: AppMountParameters) => {
-    //     const [{ application }] = await core.getStartServices();
-    //     application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
-    //     return () => true;
-    //   },
-    // });
+    core.application.register({
+      exactRoute: true,
+      id: APP_ID,
+      title: 'Security',
+      appRoute: APP_PATH,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (params: AppMountParameters) => {
+        const [{ application }] = await core.getStartServices();
+        application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, { replace: true });
+        return () => true;
+      },
+    });
 
     core.application.register({
       id: `${APP_ID}:${SecurityPageName.overview}`,
@@ -116,6 +125,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.downloadAssets(),
           this.downloadSubPlugins(),
         ]);
+
         return renderApp({
           ...composeLibs(coreStart),
           ...params,
@@ -307,7 +317,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    plugins.ingestManager.registerDatasource('endpoint', ConfigureEndpointDatasource);
+    plugins.ingestManager.registerPackageConfigComponent(
+      'endpoint',
+      ConfigureEndpointPackageConfig
+    );
 
     return {};
   }
@@ -336,7 +349,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await import('./sub_plugins');
 
@@ -347,7 +359,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       networkSubPlugin,
       overviewSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     };
   }
@@ -360,17 +371,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       hostsSubPlugin,
       networkSubPlugin,
       timelinesSubPlugin,
-      endpointAlertsSubPlugin,
       managementSubPlugin,
     } = await this.downloadSubPlugins();
-
-    const libs$ = new BehaviorSubject(composeLibs(coreStart));
+    const { apolloClient } = composeLibs(coreStart);
+    const appLibs: AppObservableLibs = { apolloClient, kibana: coreStart };
+    const libs$ = new BehaviorSubject(appLibs);
 
     const alertsStart = alertsSubPlugin.start(storage);
     const hostsStart = hostsSubPlugin.start(storage);
     const networkStart = networkSubPlugin.start(storage);
     const timelinesStart = timelinesSubPlugin.start();
-    const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
     const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
     const timelineInitialState = {
@@ -390,22 +400,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ...hostsStart.store.initialState,
         ...networkStart.store.initialState,
         ...timelineInitialState,
-        ...endpointAlertsStart.store.initialState,
         ...managementSubPluginStart.store.initialState,
       }),
       {
         ...hostsStart.store.reducer,
         ...networkStart.store.reducer,
         ...timelinesStart.store.reducer,
-        ...endpointAlertsStart.store.reducer,
         ...managementSubPluginStart.store.reducer,
       },
       libs$.pipe(pluck('apolloClient')),
+      libs$.pipe(pluck('kibana')),
       storage,
-      [
-        ...(endpointAlertsStart.store.middleware ?? []),
-        ...(managementSubPluginStart.store.middleware ?? []),
-      ]
+      [...(managementSubPluginStart.store.middleware ?? [])]
     );
   }
 }

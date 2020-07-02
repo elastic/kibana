@@ -16,7 +16,7 @@ const CONFIG_KEYS_ORDER = [
   'inputs',
   'enabled',
   'use_output',
-  'package',
+  'meta',
   'input',
 ];
 

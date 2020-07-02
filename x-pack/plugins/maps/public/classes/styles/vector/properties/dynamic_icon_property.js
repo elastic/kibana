@@ -23,7 +23,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
   getNumberOfCategories() {
     const palette = getIconPalette(this._options.iconPaletteId);
-    return palette ? palette.length : 0;
+    return palette.length;
   }
 
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {

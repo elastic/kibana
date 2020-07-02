@@ -8,6 +8,7 @@ import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
 
+import Boom from 'boom';
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
@@ -17,7 +18,8 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { findAllUnenrolledAgentIds } from './support/unenroll';
 
 interface HitSource {
   _source: HostMetadata;
@@ -68,11 +70,20 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
+        const unenrolledAgentIds = await findAllUnenrolledAgentIds(
+          endpointAppContext.service.getAgentService(),
+          context.core.savedObjects.client
+        );
+
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          metadataIndexPattern
+          metadataIndexPattern,
+          {
+            unenrolledAgentIds,
+          }
         );
+
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
@@ -113,6 +124,12 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         return res.notFound({ body: 'Endpoint Not Found' });
       } catch (err) {
         logger.warn(JSON.stringify(err, null, 2));
+        if (err.isBoom) {
+          return res.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.message },
+          });
+        }
         return res.internalError({ body: err });
       }
     }
@@ -133,7 +150,36 @@ export async function getHostData(
     return undefined;
   }
 
-  return enrichHostMetadata(response.hits.hits[0]._source, metadataRequestContext);
+  const hostMetadata: HostMetadata = response.hits.hits[0]._source;
+  const agent = await findAgent(metadataRequestContext, hostMetadata);
+
+  if (agent && !agent.active) {
+    throw Boom.badRequest('the requested endpoint is unenrolled');
+  }
+
+  return enrichHostMetadata(hostMetadata, metadataRequestContext);
+}
+
+async function findAgent(
+  metadataRequestContext: MetadataRequestContext,
+  hostMetadata: HostMetadata
+): Promise<Agent | undefined> {
+  const logger = metadataRequestContext.endpointAppContext.logFactory.get('metadata');
+  try {
+    return await metadataRequestContext.endpointAppContext.service
+      .getAgentService()
+      .getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        hostMetadata.elastic.agent.id
+      );
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      logger.warn(`agent with id ${hostMetadata.elastic.agent.id} not found`);
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
 }
 
 async function mapToHostResultList(

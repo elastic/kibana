@@ -16,6 +16,7 @@ describe('EncryptedSavedObjects Plugin', () => {
       await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .resolves.toMatchInlineSnapshot(`
               Object {
+                "createMigration": [Function],
                 "registerType": [Function],
                 "usingEphemeralEncryptionKey": true,
               }

@@ -20,6 +20,7 @@ export const FONT_FAMILY = '`font-family`';
 export const FONT_WEIGHT = '`font-weight`';
 export const HEX = 'HEX';
 export const HTML = 'HTML';
+export const INSTAGRAM = 'Instagram';
 export const ISO8601 = 'ISO8601';
 export const JS = 'JavaScript';
 export const JSON = 'JSON';
