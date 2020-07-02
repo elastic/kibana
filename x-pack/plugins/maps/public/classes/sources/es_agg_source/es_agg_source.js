@@ -50,6 +50,7 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getMetricFields() {
     const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
+    // Handle case where metrics is empty because older saved object state is empty array or there are no valid aggs.
     return metrics.length === 0
       ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
       : metrics;
