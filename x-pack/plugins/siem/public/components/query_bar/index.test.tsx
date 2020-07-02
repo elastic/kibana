@@ -376,4 +376,63 @@ describe('QueryBar ', () => {
       expect(onSubmitQueryRef).toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
     });
   });
+
+  describe('SavedQueryManagementComponent state', () => {
+    test('popover should hidden when "Save current query" button was clicked', () => {
+      const KibanaWithStorageProvider = createKibanaContextProviderMock();
+
+      const Proxy = (props: QueryBarComponentProps) => (
+        <TestProviders>
+          <KibanaWithStorageProvider
+            services={{
+              data: {
+                query: {
+                  savedQueries: {
+                    findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
+                    getAllSavedQueries: jest.fn().mockResolvedValue([]),
+                  },
+                },
+              },
+            }}
+          >
+            <QueryBar {...props} />
+          </KibanaWithStorageProvider>
+        </TestProviders>
+      );
+
+      const wrapper = mount(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockIndexPattern}
+          isRefreshPaused={true}
+          filterQuery={{
+            query: 'here: query',
+            language: 'kuery',
+          }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+        />
+      );
+
+      const isSavedQueryPopoverOpen = () =>
+        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+
+      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+
+      wrapper
+        .find('button[data-test-subj="saved-query-management-popover-button"]')
+        .simulate('click');
+
+      expect(isSavedQueryPopoverOpen()).toBeTruthy();
+
+      wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
+
+      expect(isSavedQueryPopoverOpen()).toBeFalsy();
+    });
+  });
 });
