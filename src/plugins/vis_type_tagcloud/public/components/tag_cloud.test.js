@@ -22,8 +22,6 @@ import d3 from 'd3';
 import 'jest-canvas-mock';
 
 import { fromNode, delay } from 'bluebird';
-// Replace with mock when converting to jest tests
-import { seedColors } from '../../../charts/public/services/colors/seed_colors';
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
 
@@ -107,7 +105,9 @@ describe('tag cloud tests', () => {
   let domNode;
   let tagCloud;
 
-  const colorScale = d3.scale.ordinal().range(seedColors);
+  const colorScale = d3.scale
+    .ordinal()
+    .range(['#00a69b', '#57c17b', '#6f87d8', '#663db8', '#bc52bc', '#9e3533', '#daa05d']);
 
   function setupDOM() {
     domNode = document.createElement('div');

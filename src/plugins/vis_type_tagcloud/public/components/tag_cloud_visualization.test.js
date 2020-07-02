@@ -21,14 +21,13 @@ import 'jest-canvas-mock';
 
 import { ExprVis } from '../../../visualizations/public/expressions/vis';
 
-// Replace with mock when converting to jest tests
-import { seedColors } from '../../../charts/public/services/colors/seed_colors';
-import { BaseVisType } from '../../../visualizations/public/vis_types/base_vis_type';
 import { createTagCloudVisTypeDefinition } from '../tag_cloud_type';
 import { createTagCloudVisualization } from './tag_cloud_visualization';
 import { setFormatService } from '../services';
-import { fieldFormatsServiceMock } from '../../../data/public/field_formats/mocks';
+import { dataPluginMock } from '../../../data/public/mocks';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
+
+const seedColors = ['#00a69b', '#57c17b', '#6f87d8', '#663db8', '#bc52bc', '#9e3533', '#daa05d'];
 
 describe('TagCloudVisualizationTest', () => {
   let domNode;
@@ -64,7 +63,7 @@ describe('TagCloudVisualizationTest', () => {
   const originTransformSVGElement = window.SVGElement.prototype.transform;
 
   beforeAll(() => {
-    setFormatService(fieldFormatsServiceMock.createStartContract());
+    setFormatService(dataPluginMock.createStartContract().fieldFormats);
     Object.defineProperties(window.SVGElement.prototype, {
       transform: {
         get: () => ({
@@ -85,7 +84,7 @@ describe('TagCloudVisualizationTest', () => {
 
   describe('TagCloudVisualization - basics', () => {
     beforeEach(async () => {
-      const visType = new BaseVisType(createTagCloudVisTypeDefinition({ colors: seedColors }));
+      const visType = createTagCloudVisTypeDefinition({ colors: seedColors });
       setupDOM(512, 512);
 
       vis = new ExprVis({
@@ -173,7 +172,5 @@ describe('TagCloudVisualizationTest', () => {
 
     HTMLElementOffsetMockInstance = setHTMLElementOffset(width, height);
     SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(width, height);
-
-    document.body.appendChild(domNode);
   }
 });
