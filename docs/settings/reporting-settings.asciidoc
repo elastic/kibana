@@ -212,7 +212,7 @@ When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you c
 
 | `xpack.reporting.csv.scroll.size`
   | Number of documents retrieved from {es} for each scroll iteration during a CSV 
-  export is executed.
+  export.
   Defaults to `500`.
 
 | `xpack.reporting.csv.scroll.duration`
