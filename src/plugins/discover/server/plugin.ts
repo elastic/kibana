@@ -20,13 +20,13 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { uiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
-import { search } from './saved_objects';
+import { searchSavedObjectType } from './saved_objects';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(uiSettings);
-    core.savedObjects.registerType(search);
+    core.savedObjects.registerType(searchSavedObjectType);
 
     return {};
   }
