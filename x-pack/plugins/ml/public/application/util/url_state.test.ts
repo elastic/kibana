@@ -5,7 +5,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { getUrlState, useUrlState } from './url_state';
+import { parseUrlState, useUrlState } from './url_state';
 
 const mockHistoryPush = jest.fn();
 
@@ -22,7 +22,7 @@ jest.mock('react-router-dom', () => ({
 describe('getUrlState', () => {
   test('properly decode url with _g and _a', () => {
     expect(
-      getUrlState(
+      parseUrlState(
         "?_a=(mlExplorerFilter:(),mlExplorerSwimlane:(viewByFieldName:action),query:(query_string:(analyze_wildcard:!t,query:'*')))&_g=(ml:(jobIds:!(dec-2)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2019-01-01T00:03:40.000Z',mode:absolute,to:'2019-08-30T11:55:07.000Z'))&savedSearchId=571aaf70-4c88-11e8-b3d7-01146121b73d"
       )
     ).toEqual({
