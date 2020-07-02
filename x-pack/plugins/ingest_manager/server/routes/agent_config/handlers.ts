@@ -133,20 +133,9 @@ export const createAgentConfigHandler: RequestHandler<
     if (withSysMonitoring && newSysPackageConfig !== undefined && agentConfig !== undefined) {
       newSysPackageConfig.config_id = agentConfig.id;
       newSysPackageConfig.namespace = agentConfig.namespace;
-      const sysPackageConfig = await packageConfigService.create(
-        soClient,
-        callCluster,
-        newSysPackageConfig,
-        {
-          user,
-        }
-      );
-
-      if (sysPackageConfig) {
-        agentConfig = await agentConfigService.assignPackageConfigs(soClient, agentConfig.id, [
-          sysPackageConfig.id,
-        ]);
-      }
+      await packageConfigService.create(soClient, callCluster, newSysPackageConfig, {
+        user,
+      });
     }
 
     const body: CreateAgentConfigResponse = {
