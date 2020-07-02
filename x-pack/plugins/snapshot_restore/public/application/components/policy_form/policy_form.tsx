@@ -73,6 +73,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     },
   });
 
+  const isEditingManagedPolicy = Boolean(isEditing && policy.isManagedPolicy);
+
   // Policy validation state
   const [validation, setValidation] = useState<PolicyValidation>({
     isValid: true,
@@ -187,8 +189,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill={!(isEditing && policy.isManagedPolicy)}
-                    color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
+                    fill={!isEditingManagedPolicy}
+                    color={isEditingManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}
