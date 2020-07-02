@@ -11,8 +11,3 @@ export function getChartContainerWidth() {
   const chartContainer = document.querySelector('.explorer-charts');
   return Math.floor((chartContainer && chartContainer.clientWidth) || 0);
 }
-
-export function getSwimlaneContainerWidth() {
-  const explorerContainer = document.querySelector('.ml-explorer');
-  return (explorerContainer && explorerContainer.clientWidth) || 0;
-}
