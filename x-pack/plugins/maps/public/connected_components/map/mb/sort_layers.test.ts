@@ -126,7 +126,7 @@ describe('sortLayer', () => {
     moveCounter = 0;
   });
 
-  test('Should move layers to expected order', () => {
+  test('Should initial layer load order to expected order', () => {
     const initialMbStyle = {
       version: 0,
       layers: [
@@ -142,6 +142,42 @@ describe('sortLayer', () => {
         { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
         { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
         { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+      ],
+    };
+    const mbMap = new MockMbMap(initialMbStyle);
+    syncLayerOrder((mbMap as unknown) as MbMap, spatialFilterLayer, mapLayers);
+    const sortedMbStyle = mbMap.getStyle();
+    const sortedMbLayerIds = sortedMbStyle.layers!.map((mbLayer) => {
+      return mbLayer.id;
+    });
+    expect(sortedMbLayerIds).toEqual([
+      'charlie_fill',
+      'bravo_text',
+      'bravo_circle',
+      'alpha_text',
+      'alpha_circle',
+      'charlie_text',
+      'SPATIAL_FILTERS_LAYER_ID_fill',
+      'SPATIAL_FILTERS_LAYER_ID_circle',
+    ]);
+  });
+
+  test('Should move layer single order to expected order', () => {
+    const initialMbStyle = {
+      version: 0,
+      layers: [
+        { id: `${CHARLIE_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
+        { id: `${ALPHA_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
+        { id: `${ALPHA_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        { id: `${BRAVO_LAYER_ID}_text`, type: 'symbol' } as MbLayer,
+        { id: `${BRAVO_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
+        {
+          id: `${CHARLIE_LAYER_ID}_text`,
+          type: 'symbol',
+          paint: { 'text-color': 'red' },
+        } as MbLayer,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_fill`, type: 'fill' } as MbLayer,
+        { id: `${SPATIAL_FILTERS_LAYER_ID}_circle`, type: 'circle' } as MbLayer,
       ],
     };
     const mbMap = new MockMbMap(initialMbStyle);
