@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should open the wizard with a proper header', async () => {
           const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
-          expect(headerText).to.match(/Clone analytics job/);
+          expect(headerText).to.match(/Clone job/);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
