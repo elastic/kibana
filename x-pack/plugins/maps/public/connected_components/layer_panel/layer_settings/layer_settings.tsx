@@ -27,7 +27,7 @@ interface Props {
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
-  updateLabelsOnTop: (layerId: string, labelsOnTop: boolean) => void;
+  updateLabelsOnTop: (layerId: string, areLabelsOnTop: boolean) => void;
 }
 
 export function LayerSettings(props: Props) {
@@ -100,7 +100,7 @@ export function LayerSettings(props: Props) {
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelsOnTop', {
             defaultMessage: `Show labels on top`,
           })}
-          checked={props.layer.labelsOnTop()}
+          checked={props.layer.areLabelsOnTop()}
           onChange={onLabelsOnTopChange}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
           compressed

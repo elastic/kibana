@@ -76,7 +76,7 @@ export interface ILayer {
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
   isPreviewLayer: () => boolean;
-  labelsOnTop: () => boolean;
+  areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
 }
 export type Footnote = {
@@ -486,7 +486,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.type;
   }
 
-  labelsOnTop(): boolean {
+  areLabelsOnTop(): boolean {
     return false;
   }
 

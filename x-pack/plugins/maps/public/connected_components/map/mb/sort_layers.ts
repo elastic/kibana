@@ -122,7 +122,7 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
   [...layerList]
     .reverse()
     .filter((mapLayer) => {
-      return mapLayer.labelsOnTop();
+      return mapLayer.areLabelsOnTop();
     })
     .forEach((mapLayer: ILayer) => {
       if (!isLayerInOrder(mbMap, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId)) {
@@ -133,7 +133,7 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
 
   // Sort map layers
   [...layerList].reverse().forEach((mapLayer: ILayer) => {
-    const layerClass = mapLayer.labelsOnTop() ? LAYER_CLASS.NON_LABEL : LAYER_CLASS.ANY;
+    const layerClass = mapLayer.areLabelsOnTop() ? LAYER_CLASS.NON_LABEL : LAYER_CLASS.ANY;
     if (!isLayerInOrder(mbMap, mapLayer, layerClass, beneathMbLayerId)) {
       moveMapLayer(mbMap, mbLayers, mapLayer, layerClass, beneathMbLayerId);
     }

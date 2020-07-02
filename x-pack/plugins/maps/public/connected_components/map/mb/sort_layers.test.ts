@@ -61,19 +61,19 @@ class MockMbMap {
 
 class MockMapLayer {
   private readonly _id: string;
-  private readonly _labelsOnTop: boolean;
+  private readonly _areLabelsOnTop: boolean;
 
-  constructor(id: string, labelsOnTop: boolean) {
+  constructor(id: string, areLabelsOnTop: boolean) {
     this._id = id;
-    this._labelsOnTop = labelsOnTop;
+    this._areLabelsOnTop = areLabelsOnTop;
   }
 
   ownsMbLayerId(mbLayerId: string) {
     return mbLayerId.startsWith(this._id);
   }
 
-  labelsOnTop() {
-    return this._labelsOnTop;
+  areLabelsOnTop() {
+    return this._areLabelsOnTop;
   }
 
   getId() {
@@ -126,6 +126,7 @@ describe('sortLayer', () => {
     moveCounter = 0;
   });
 
+  // Initial order that styles are added to mapbox is non-deterministic and depends on the order of data fetches.
   test('Should sort initial layer load order to expected order', () => {
     const initialMbStyle = {
       version: 0,
@@ -162,6 +163,7 @@ describe('sortLayer', () => {
     ]);
   });
 
+  // Test case testing when layer is moved in Table of Contents
   test('Should sort single layer single move to expected order', () => {
     const initialMbStyle = {
       version: 0,

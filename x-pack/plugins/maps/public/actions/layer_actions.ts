@@ -318,12 +318,12 @@ export function updateLayerAlpha(id: string, alpha: number) {
   };
 }
 
-export function updateLabelsOnTop(id: string, labelsOnTop: boolean) {
+export function updateLabelsOnTop(id: string, areLabelsOnTop: boolean) {
   return {
     type: UPDATE_LAYER_PROP,
     id,
-    propName: 'labelsOnTop',
-    newValue: labelsOnTop,
+    propName: 'areLabelsOnTop',
+    newValue: areLabelsOnTop,
   };
 }
 
