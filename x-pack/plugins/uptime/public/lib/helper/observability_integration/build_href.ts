@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { Check } from '../../../../common/runtime_types';
 
 /**
@@ -21,7 +20,7 @@ export const buildHref = (
   getHref: (value: string | string[] | undefined) => string | undefined
 ): string | undefined => {
   const queryValue = checks
-    .map((check) => get<string | undefined>(check, path, undefined))
+    .map((check) => check?.path)
     .filter((value: string | undefined) => value !== undefined);
   if (queryValue.length === 0) {
     return getHref(undefined);

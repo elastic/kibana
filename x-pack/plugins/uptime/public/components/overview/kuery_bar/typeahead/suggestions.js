@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
 import Suggestion from './suggestion';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { units, px, unit } from '../../../../../../apm/public/style/variables';
@@ -73,7 +72,7 @@ class Suggestions extends Component {
   }
 
   render() {
-    if (!this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.show || this.props.suggestions?.length === 0) {
       return null;
     }
 
