@@ -120,11 +120,13 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
     return [
       {
         label: VIEW_IN_STREAM_LABEL,
-        ...viewInStreamLinkProps,
+        onClick: viewInStreamLinkProps.onClick,
+        href: viewInStreamLinkProps.href,
       },
       {
         label: VIEW_ANOMALY_IN_ML_LABEL,
-        ...viewAnomalyInMachineLearningLinkProps,
+        onClick: viewAnomalyInMachineLearningLinkProps.onClick,
+        href: viewAnomalyInMachineLearningLinkProps.href,
       },
     ];
   }, [viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
@@ -236,39 +238,48 @@ export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
 }> = ({ dateTime }) => {
   return (
     <LogEntryRateExampleMessageHeadersWrapper>
-      {exampleMessageColumnConfigurations.map((columnConfiguration) => {
-        if (isTimestampLogColumnConfiguration(columnConfiguration)) {
-          return (
-            <LogColumnHeader
-              key={columnConfiguration.timestampColumn.id}
-              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-              data-test-subj="logColumnHeader timestampLogColumnHeader"
-            >
-              {localizedDate(dateTime)}
-            </LogColumnHeader>
-          );
-        } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
-          return (
-            <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
-              data-test-subj="logColumnHeader messageLogColumnHeader"
-              key={columnConfiguration.messageColumn.id}
-            >
-              Message
-            </LogColumnHeader>
-          );
-        } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
-          return (
-            <LogColumnHeader
-              columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
-              data-test-subj="logColumnHeader fieldLogColumnHeader"
-              key={columnConfiguration.fieldColumn.id}
-            >
-              {columnConfiguration.fieldColumn.field}
-            </LogColumnHeader>
-          );
-        }
-      })}
+      <>
+        {exampleMessageColumnConfigurations.map((columnConfiguration) => {
+          if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+            return (
+              <LogColumnHeader
+                key={columnConfiguration.timestampColumn.id}
+                columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+                data-test-subj="logColumnHeader timestampLogColumnHeader"
+              >
+                {localizedDate(dateTime)}
+              </LogColumnHeader>
+            );
+          } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+            return (
+              <LogColumnHeader
+                columnWidth={columnWidths[columnConfiguration.messageColumn.id]}
+                data-test-subj="logColumnHeader messageLogColumnHeader"
+                key={columnConfiguration.messageColumn.id}
+              >
+                Message
+              </LogColumnHeader>
+            );
+          } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+            return (
+              <LogColumnHeader
+                columnWidth={columnWidths[columnConfiguration.fieldColumn.id]}
+                data-test-subj="logColumnHeader fieldLogColumnHeader"
+                key={columnConfiguration.fieldColumn.id}
+              >
+                {columnConfiguration.fieldColumn.field}
+              </LogColumnHeader>
+            );
+          }
+        })}
+        <LogColumnHeader
+          columnWidth={columnWidths[iconColumnId]}
+          data-test-subj="logColumnHeader contextMenuLogColumnHeader"
+          key={'icon-column-header'}
+        >
+          {null}
+        </LogColumnHeader>
+      </>
     </LogEntryRateExampleMessageHeadersWrapper>
   );
 };
@@ -276,4 +287,5 @@ export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
 const LogEntryRateExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
   border-bottom: none;
   box-shadow: none;
+  padding-right: 0;
 `;

@@ -14,7 +14,6 @@ import { AnomalyRecord } from '../../use_log_entry_rate_results';
 import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
 import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
-import { bucketSpan } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryRateExampleMessage, LogEntryRateExampleMessageHeaders } from './log_entry_example';
 import { euiStyled } from '../../../../../../../observability/public';
 

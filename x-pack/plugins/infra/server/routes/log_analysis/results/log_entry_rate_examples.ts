@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-
-import { throwErrors } from '../../../../common/runtime_types';
+import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import { NoLogAnalysisResultsIndexError, getLogEntryRateExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
@@ -19,8 +14,6 @@ import {
   getLogEntryRateExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
-
-const anyObject = schema.object({}, { unknowns: 'allow' });
 
 export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
