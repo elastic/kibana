@@ -240,7 +240,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
-  // TODO: set default exception items in builder if type is endpoint and alert data is passed in
   return (
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">

@@ -437,9 +437,6 @@ export const getMappedNonEcsValue = ({
 };
 
 export const entryHasListType = (exceptionItems: ExceptionListItemSchema[]): boolean => {
-  if (exceptionItems.length === 0) {
-    return true;
-  }
   for (const { entries } of exceptionItems) {
     for (const entryObj of entries) {
       if (getOperatorType(entryObj) === 'list') {
@@ -454,14 +451,17 @@ export const entryHasNonEcsType = (
   exceptionItems: ExceptionListItemSchema[],
   indexPatterns: IIndexPattern
 ): boolean => {
+  if (exceptionItems.length === 0) {
+    return false;
+  }
   for (const { entries } of exceptionItems) {
     for (const entryObj of entries) {
       if (indexPatterns.fields.find(({ name }) => name === entryObj.field) === undefined) {
-        return false;
+        return true;
       }
     }
   }
-  return true;
+  return false;
 };
 
 // TODO: abstract out types
