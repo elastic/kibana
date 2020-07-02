@@ -15,7 +15,6 @@ import {
   AreaSeries,
   BarSeries,
   Position,
-  PartialTheme,
   GeometryValue,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
@@ -38,6 +37,7 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
@@ -60,7 +60,7 @@ export interface XYRender {
 }
 
 type XYChartRenderProps = XYChartProps & {
-  chartTheme: PartialTheme;
+  chartsThemeService: ChartsPluginSetup['theme'];
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -123,7 +123,7 @@ export const xyChart: ExpressionFunctionDefinition<
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
+  chartsThemeService: ChartsPluginSetup['theme'];
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -152,7 +152,7 @@ export const getXyChartRenderer = (dependencies: {
         <XYChartReportable
           {...config}
           formatFactory={formatFactory}
-          chartTheme={dependencies.chartTheme}
+          chartsThemeService={dependencies.chartsThemeService}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -194,12 +194,14 @@ export function XYChart({
   args,
   formatFactory,
   timeZone,
-  chartTheme,
+  chartsThemeService,
   histogramBarTarget,
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction } = args;
+  const chartTheme = chartsThemeService.useChartsTheme();
+  const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
@@ -284,6 +286,7 @@ export function XYChart({
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}
+        baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => xAxisFormatter.convert(d.value),
         }}

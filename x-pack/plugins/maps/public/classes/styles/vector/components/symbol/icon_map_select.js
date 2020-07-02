@@ -8,8 +8,8 @@ import React from 'react';
 
 import { StyleMapSelect } from '../style_map_select';
 import { i18n } from '@kbn/i18n';
-import { getIconPaletteOptions } from '../../symbol_utils';
 import { IconStops } from './icon_stops';
+import { getIconPaletteOptions } from '../../symbol_utils';
 
 export function IconMapSelect({
   customIconStops,
@@ -19,6 +19,7 @@ export function IconMapSelect({
   styleProperty,
   symbolOptions,
   useCustomIconMap,
+  isCustomOnly,
 }) {
   function onMapSelectChange({ customMapStops, selectedMapId, useCustomMap }) {
     onChange({
@@ -52,6 +53,7 @@ export function IconMapSelect({
       useCustomMap={useCustomIconMap}
       selectedMapId={iconPaletteId}
       renderCustomStopsInput={renderCustomIconStopsInput}
+      isCustomOnly={isCustomOnly}
     />
   );
 }

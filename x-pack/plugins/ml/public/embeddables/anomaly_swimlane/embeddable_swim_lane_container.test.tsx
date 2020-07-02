@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
+import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -17,6 +17,7 @@ import { CoreStart } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -24,12 +25,11 @@ jest.mock('./swimlane_input_resolver', () => ({
   }),
 }));
 
-jest.mock('../../application/explorer/explorer_swimlane', () => ({
-  ExplorerSwimlane: jest.fn(),
-}));
-
-jest.mock('../../application/components/chart_tooltip', () => ({
-  MlTooltipComponent: jest.fn(),
+jest.mock('../../application/explorer/swimlane_container', () => ({
+  SwimlaneContainer: jest.fn(() => {
+    return null;
+  }),
+  isViewBySwimLaneData: jest.fn(),
 }));
 
 const defaultOptions = { wrapper: I18nProvider };
@@ -38,6 +38,7 @@ describe('ExplorerSwimlaneContainer', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
   let refresh: BehaviorSubject<any>;
   let services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  const onInputChange = jest.fn();
 
   beforeEach(() => {
     embeddableInput = new BehaviorSubject({
@@ -61,25 +62,39 @@ describe('ExplorerSwimlaneContainer', () => {
     };
 
     (useSwimlaneInputResolver as jest.Mock).mockReturnValueOnce([
-      mockOverallData,
       SWIMLANE_TYPE.OVERALL,
-      undefined,
+      mockOverallData,
+      10,
+      jest.fn(),
+      {},
+      false,
+      null,
     ]);
 
-    const { findByTestId } = render(
-      <ExplorerSwimlaneContainer
+    render(
+      <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
+        onInputChange={onInputChange}
       />,
       defaultOptions
     );
-    expect(
-      await findByTestId('mlMaxAnomalyScoreEmbeddable_test-swimlane-embeddable')
-    ).toBeDefined();
+
+    const calledWith = ((SwimlaneContainer as unknown) as jest.Mock<typeof SwimlaneContainer>).mock
+      .calls[0][0];
+
+    expect(calledWith).toMatchObject({
+      perPage: 10,
+      swimlaneType: SWIMLANE_TYPE.OVERALL,
+      swimlaneData: mockOverallData,
+      isLoading: false,
+      swimlaneLimit: undefined,
+      fromPage: 1,
+    });
   });
 
   test('should render an error in case it could not fetch the ML swimlane data', async () => {
@@ -87,38 +102,25 @@ describe('ExplorerSwimlaneContainer', () => {
       undefined,
       undefined,
       undefined,
+      undefined,
+      undefined,
+      false,
       { message: 'Something went wrong' },
     ]);
 
     const { findByText } = render(
-      <ExplorerSwimlaneContainer
+      <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableInput={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
         refresh={refresh}
+        onInputChange={onInputChange}
       />,
       defaultOptions
     );
     const errorMessage = await findByText('Something went wrong');
     expect(errorMessage).toBeDefined();
-  });
-
-  test('should render a loading indicator during the data fetching', async () => {
-    const { findByTestId } = render(
-      <ExplorerSwimlaneContainer
-        id={'test-swimlane-embeddable'}
-        embeddableInput={
-          embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
-        }
-        services={services}
-        refresh={refresh}
-      />,
-      defaultOptions
-    );
-    expect(
-      await findByTestId('loading_mlMaxAnomalyScoreEmbeddable_test-swimlane-embeddable')
-    ).toBeDefined();
   });
 });
