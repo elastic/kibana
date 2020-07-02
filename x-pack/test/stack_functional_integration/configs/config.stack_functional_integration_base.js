@@ -28,8 +28,8 @@ export default async ({ readConfigFile }) => {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
   };
-  console.log(servers);
-  console.log(JSON.stringify(servers));
+  log.debug(servers);
+  log.debug(JSON.stringify(servers));
 
   return {
     ...defaultConfigs.getAll(),

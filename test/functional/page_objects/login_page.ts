@@ -72,6 +72,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
       log.debug('### found and clicked log out--------------------------');
       await this.sleep(8002);
     }
+
     async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
       await delay(sleepMilliseconds);
