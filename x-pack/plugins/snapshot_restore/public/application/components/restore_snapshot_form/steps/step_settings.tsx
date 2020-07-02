@@ -110,7 +110,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             )}
           >
             <FormattedMessage
-              id="xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.body"
+              id="xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.description"
               defaultMessage="These settings also apply to the backing indices of data streams."
             />
           </EuiCallOut>

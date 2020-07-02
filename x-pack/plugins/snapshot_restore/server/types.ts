@@ -34,7 +34,7 @@ export interface RouteDependencies {
 /**
  * An object representing a resolved index, data stream or alias
  */
-interface DataObjectFromES {
+interface IndexAndAliasFromEs {
   name: string;
   // per https://github.com/elastic/elasticsearch/pull/57626
   attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
@@ -42,8 +42,8 @@ interface DataObjectFromES {
 }
 
 export interface ResolveIndexResponseFromES {
-  indices: DataObjectFromES[];
-  aliases: DataObjectFromES[];
+  indices: IndexAndAliasFromEs[];
+  aliases: IndexAndAliasFromEs[];
   data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
 }
 

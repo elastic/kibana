@@ -44,7 +44,7 @@ interface Props {
 }
 
 /**
- * In future we may be able to split data streams to it's own field, but for now
+ * In future we may be able to split data streams to its own field, but for now
  * they share an array "indices" in the snapshot lifecycle policy config. See
  * this github issue for progress: https://github.com/elastic/elasticsearch/issues/58474
  */
