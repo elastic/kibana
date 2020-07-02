@@ -21,7 +21,7 @@ import { share } from 'rxjs/operators';
 import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
-import { createAddFilterToQueryLog } from './lib';
+import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
@@ -71,7 +71,7 @@ export class QueryService {
 
   public start({ savedObjectsClient, storage, uiSettings }: QueryServiceStartDependencies) {
     return {
-      addFilterToQueryLog: createAddFilterToQueryLog({
+      addToQueryLog: createAddToQueryLog({
         storage,
         uiSettings,
       }),

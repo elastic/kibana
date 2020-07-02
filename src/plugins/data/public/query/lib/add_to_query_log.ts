@@ -22,22 +22,12 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { Query } from '../../../common';
 import { getQueryLog } from './get_query_log';
 
-/** @internal */
-export interface FilterValue {
-  input: Query;
-  label: string;
-  id: string;
-}
-
-interface AddFilterToQueryLogDependencies {
+interface AddToQueryLogDependencies {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
 }
 
-export function createAddFilterToQueryLog({
-  storage,
-  uiSettings,
-}: AddFilterToQueryLogDependencies) {
+export function createAddToQueryLog({ storage, uiSettings }: AddToQueryLogDependencies) {
   /**
    * This function is to be used in conjunction with `<QueryStringInput />`.
    * It provides a way for external editors to add new filter entries to the
@@ -45,10 +35,10 @@ export function createAddFilterToQueryLog({
    * read by `<QueryStringInput />` and provided in the autocomplete options.
    *
    * @param appName Name of the app where this filter is added from.
-   * @param filter Filter value to add. Retrieved from AggConfigs via agg.params.filters.
+   * @param query Filter value to add.
    */
-  return function addFilterToQueryLog(appName: string, filter: FilterValue) {
-    const persistedLog = getQueryLog(uiSettings, storage, appName, filter.input.language);
-    persistedLog.add(filter.input.query);
+  return function addToQueryLog(appName: string, { language, query }: Query) {
+    const persistedLog = getQueryLog(uiSettings, storage, appName, language);
+    persistedLog.add(query);
   };
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './add_filter_to_query_log';
+export * from './add_to_query_log';
 export * from './from_user';
 export * from './get_default_query';
 export * from './get_query_log';
