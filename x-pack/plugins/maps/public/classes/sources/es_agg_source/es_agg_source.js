@@ -10,6 +10,8 @@ import { esAggFieldsFactory } from '../../fields/es_agg_field';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 
+export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
+
 export class AbstractESAggSource extends AbstractESSource {
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
