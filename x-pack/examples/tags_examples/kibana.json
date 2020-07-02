@@ -1,0 +1,10 @@
+{
+  "id": "tagsExamples",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["tags_examples"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["tags", "developerExamples"],
+  "optionalPlugins": []
+}
