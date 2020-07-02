@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { coreMock } from 'src/core/server/mocks';
-import { SessionService } from './session_service';
+import { SessionService, INMEM_TRACKING_INTERVAL } from './session_service';
 import { securityMock } from '../../../../security/server/mocks';
 import { BACKGROUND_SESSION_STORE_DAYS, SavedSessionStatus } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
@@ -116,7 +116,7 @@ describe('Session service', () => {
         .spyOn(mockScopedClient(), 'bulkGet')
         .mockResolvedValueOnce(undefined as any);
       createMockInternalSavedObjectClient(undefined, bulkGetSpy);
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
       expect(bulkGetSpy).not.toHaveBeenCalled();
     });
 
@@ -131,7 +131,7 @@ describe('Session service', () => {
         .mockResolvedValueOnce(undefined as any);
       createMockInternalSavedObjectClient(undefined, bulkGetSpy);
 
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
       expect(bulkGetSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -147,7 +147,7 @@ describe('Session service', () => {
       });
 
       // Get setInterval to fire
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
       // Release timers to call check after test actions are done.
       jest.useRealTimers();
@@ -170,7 +170,7 @@ describe('Session service', () => {
       });
 
       // Get setInterval to fire
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
       // Release timers to call check after test actions are done.
       jest.useRealTimers();
@@ -194,7 +194,7 @@ describe('Session service', () => {
       });
 
       // Get setInterval to fire
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
       // Release timers to call check after test actions are done.
       jest.useRealTimers();
@@ -218,7 +218,7 @@ describe('Session service', () => {
       });
 
       // Get setInterval to fire
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(INMEM_TRACKING_INTERVAL);
 
       // Release timers to call check after test actions are done.
       jest.useRealTimers();

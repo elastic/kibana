@@ -24,9 +24,9 @@ import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { SessionInfo, SessionKeys } from './types';
 import { SecurityPluginSetup } from '../../../../security/server';
 
-const INMEM_TRACKING_TIMEOUT_SEC = 60;
-const INMEM_TRACKING_INTERVAL = 2000;
-const MAX_UPDATE_RETRIES = 3;
+export const INMEM_TRACKING_TIMEOUT_SEC = 60;
+export const INMEM_TRACKING_INTERVAL = 2000;
+export const MAX_UPDATE_RETRIES = 3;
 
 export class SessionService {
   private readonly idMapping!: Map<string, SessionInfo>;
