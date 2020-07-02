@@ -27,16 +27,22 @@ import {
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
-import { memoryInputValidator } from '../../../../../../../common/util/validators';
+import {
+  memoryInputValidator,
+  MemoryInputValidatorResult,
+} from '../../../../../../../common/util/validators';
 import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
+import {
+  useRefreshAnalyticsList,
+  UpdateDataFrameAnalyticsConfig,
+} from '../../../../common/analytics';
 
 interface EditAnalyticsJobFlyoutProps {
   closeFlyout: () => void;
   item: DataFrameAnalyticsListRow;
 }
 
-let mmLValidator: any;
+let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
 export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyout, item }) => {
   const [allowLazyStart, setAllowLazyStart] = useState<string>('');
@@ -78,7 +84,7 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   }, [modelMemoryLimit]);
 
   const onSubmit = async () => {
-    const updateConfig = Object.assign(
+    const updateConfig: UpdateDataFrameAnalyticsConfig | {} = Object.assign(
       {},
       allowLazyStart && { allow_lazy_start: allowLazyStart },
       description && { description },
@@ -101,7 +107,7 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
 
       notifications.toasts.addDanger(
         i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
-          defaultMessage: 'Could not save changes to {jobId}',
+          defaultMessage: 'Could not save changes to analytics job {jobId}',
           values: {
             jobId,
           },
