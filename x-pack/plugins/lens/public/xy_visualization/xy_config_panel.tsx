@@ -92,14 +92,16 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     <EuiForm>
       <EuiFormRow
         display="columnCompressed"
+        fullWidth
         label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-          defaultMessage: 'Series Color',
+          defaultMessage: 'Series color',
         })}
       >
         <ColorPicker {...props} />
       </EuiFormRow>
       <EuiFormRow
         display="columnCompressed"
+        fullWidth
         label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
           defaultMessage: 'Axis side',
         })}
@@ -212,23 +214,17 @@ const ColorPicker = ({
         disabled ? tooltipContent.disabled : color ? tooltipContent.custom : tooltipContent.auto
       }
       delay="long"
+      anchorClassName="eui-displayBlock"
     >
-      {disabled ? (
-        <EuiFieldText
-          compressed={true}
-          type="text"
-          disabled={true}
-          icon={{
-            type: 'stopSlash',
-          }}
-          className="euiFieldText"
-          value=""
-          placeholder={autoMessage}
-          aria-label="Color picker disabled"
-        />
-      ) : (
-        <EuiColorPicker compressed={true} onChange={handleColor} color={color} />
-      )}
+      <EuiColorPicker
+        compressed
+        onChange={handleColor}
+        color={disabled ? '' : color}
+        disabled={disabled}
+        aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+          defaultMessage: 'Series color',
+        })}
+      />
     </EuiToolTip>
   );
 };
