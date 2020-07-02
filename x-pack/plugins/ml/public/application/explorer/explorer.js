@@ -336,47 +336,50 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
-            <EuiPanel>
-              <EuiAccordion
-                id={this.htmlIdGen()}
-                buttonContent={
-                  <EuiTitle className="panel-title">
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.ml.explorer.annotationsTitle"
-                        defaultMessage="Annotations {badge}"
-                        values={{
-                          badge: (
-                            <EuiBadge color={'hollow'}>
-                              <FormattedMessage
-                                id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                defaultMessage="Total: {count}"
-                                values={{ count: annotationsData.length }}
-                              />
-                            </EuiBadge>
-                          ),
-                        }}
+            {annotationsData.length > 0 && (
+              <>
+                <EuiPanel>
+                  <EuiAccordion
+                    id={this.htmlIdGen()}
+                    buttonContent={
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.explorer.annotationsTitle"
+                            defaultMessage="Annotations {badge}"
+                            values={{
+                              badge: (
+                                <EuiBadge color={'hollow'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                    defaultMessage="Total: {count}"
+                                    values={{ count: annotationsData.length }}
+                                  />
+                                </EuiBadge>
+                              ),
+                            }}
+                          />
+                        </h2>
+                      </EuiTitle>
+                    }
+                  >
+                    <>
+                      <AnnotationsTable
+                        jobIds={selectedJobIds}
+                        annotations={annotationsData}
+                        aggregations={aggregations}
+                        drillDown={true}
+                        numberBadge={false}
                       />
-                    </h2>
-                  </EuiTitle>
-                }
-              >
-                {annotationsData.length > 0 && (
-                  <>
-                    <AnnotationsTable
-                      jobIds={selectedJobIds}
-                      annotations={annotationsData}
-                      aggregations={aggregations}
-                      drillDown={true}
-                      numberBadge={false}
-                    />
-                    <AnnotationFlyout />
-                    <EuiSpacer size="l" />
-                  </>
-                )}
-              </EuiAccordion>
-            </EuiPanel>
-            <EuiSpacer size="m" />
+                      <AnnotationFlyout />
+                      <EuiSpacer size="l" />
+                    </>
+                  </EuiAccordion>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             <EuiPanel>
               <EuiTitle className="panel-title">
                 <h2>
