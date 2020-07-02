@@ -115,7 +115,7 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
       perPage: 100,
     });
 
-    const ids: string[] = saved_objects.map(({ id }) => id);
+    const ids: string[] = saved_objects.map(({ attributes }) => attributes.tagId);
     const { tags } = await tagsClient.readBulk({ ids });
 
     return {

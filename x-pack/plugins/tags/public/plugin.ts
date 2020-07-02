@@ -24,6 +24,7 @@ import { Tag, TagProps } from './containers/tag';
 import { createTagsProvider } from './context';
 import { TagListProps, TagList } from './containers/tag_list';
 import { TagPickerProps, TagPicker } from './containers/tag_picker';
+import { TagListEditableProps, TagListEditable } from './containers/tag_list_editable';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -44,6 +45,7 @@ export interface TagsPluginStart {
     Tag: React.ComponentType<TagProps>;
     TagList: React.ComponentType<TagListProps>;
     TagPicker: React.ComponentType<TagPickerProps>;
+    TagListEditable: React.ComponentType<TagListEditableProps>;
   };
 }
 
@@ -105,6 +107,7 @@ export class TagsPlugin
         Tag: (props) => h(Provider, {}, h(Tag, props)),
         TagList: (props) => h(Provider, {}, h(TagList, props)),
         TagPicker: (props) => h(Provider, {}, h(TagPicker, props)),
+        TagListEditable: (props) => h(Provider, {}, h(TagListEditable, props)),
       },
     };
   }

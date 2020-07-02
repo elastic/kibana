@@ -21,3 +21,4 @@ export {
 export { Tag, TagProps } from './containers/tag';
 export { TagList, TagListProps } from './containers/tag_list';
 export { TagPicker, TagPickerProps } from './containers/tag_picker';
+export { TagListEditable, TagListEditableProps } from './containers/tag_list_editable';

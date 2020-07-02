@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 import { useTags } from '../../context';
 import { Tag } from '../tag';
 
 export interface TagListProps {
   kid: string;
+  onEditClick?: () => void;
 }
 
-export const TagList: React.FC<TagListProps> = React.memo(({ kid }) => {
+export const TagList: React.FC<TagListProps> = React.memo(({ kid, onEditClick }) => {
   const { manager } = useTags();
   const attachments = manager!.useResource(kid);
 
@@ -21,6 +23,7 @@ export const TagList: React.FC<TagListProps> = React.memo(({ kid }) => {
       {attachments.map(({ data }) => (
         <Tag key={data.tagId} id={data.tagId} />
       ))}
+      {!!onEditClick && <EuiBadge onClick={onEditClick}>...</EuiBadge>}
     </>
   );
 });

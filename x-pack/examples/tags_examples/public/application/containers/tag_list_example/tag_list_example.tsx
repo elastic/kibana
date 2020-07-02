@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { Tag, TagList, TagPicker } from '../../../../../../plugins/tags/public';
+import { Tag, TagList, TagPicker, TagListEditable } from '../../../../../../plugins/tags/public';
 
 export const TagListExample: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
@@ -25,6 +25,7 @@ export const TagListExample: React.FC = () => {
           <h2>TagList</h2>
         </EuiTitle>
         <TagList kid={'kid::data:ip:index_pattern/123'} />
+        <TagList kid={'kid::data:ip:index_pattern/123'} />
       </div>
 
       <div>
@@ -32,6 +33,13 @@ export const TagListExample: React.FC = () => {
           <h2>TagPicker</h2>
         </EuiTitle>
         <TagPicker selected={selected} onChange={setSelected} />
+      </div>
+
+      <div>
+        <EuiTitle size="m">
+          <h2>TagListEditable</h2>
+        </EuiTitle>
+        <TagListEditable kid={'kid::data:ip:index_pattern/123'} />
       </div>
     </div>
   );
