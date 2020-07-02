@@ -73,8 +73,8 @@ interface AgentBase {
   type: AgentType;
   active: boolean;
   enrolled_at: string;
-  unenrolled_at: string;
-  unenrollement_started_at: string;
+  unenrolled_at?: string;
+  unenrollement_started_at?: string;
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;

@@ -152,7 +152,6 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
         .set('kbn-xsrf', 'xx')
-
         .send({
           events: [
             {
