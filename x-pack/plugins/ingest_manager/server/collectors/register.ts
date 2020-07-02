@@ -11,11 +11,11 @@ interface Usage {
   agents: {
     enrolled: number;
   };
-  packages: {
+  packages: Array<{
     name: string;
     version: string;
     enabled: boolean;
-  };
+  }>;
 }
 
 export function registerIngestManagerUsageCollector(usageCollection?: UsageCollectionSetup): void {
