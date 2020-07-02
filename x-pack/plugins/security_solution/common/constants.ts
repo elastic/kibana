@@ -43,9 +43,6 @@ export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
 
-export const SHOW_ENDPOINT_ALERTS_NAV = true;
-export const APP_ENDPOINT_ALERTS_PATH = `${APP_PATH}/endpoint-alerts`;
-
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
