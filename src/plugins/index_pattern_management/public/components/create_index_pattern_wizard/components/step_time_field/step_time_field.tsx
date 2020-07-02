@@ -22,10 +22,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiText,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ensureMinimumTime, extractTimeFields } from '../../lib';
@@ -185,21 +185,19 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     if (isCreating) {
       return (
-        <EuiPanel>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
-                  defaultMessage="Creating index pattern…"
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
+                defaultMessage="Creating index pattern…"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
 
@@ -238,7 +236,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     ) : null;
 
     return (
-      <EuiPanel paddingSize="l">
+      <>
         <Header indexPattern={indexPattern} indexPatternName={indexPatternName} />
         <EuiSpacer size="m" />
         <TimeField
@@ -249,7 +247,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
-        <EuiSpacer size="s" />
+        <EuiHorizontalRule />
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}
@@ -263,7 +261,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           submittable={submittable}
           createIndexPattern={this.createIndexPattern}
         />
-      </EuiPanel>
+      </>
     );
   }
 }

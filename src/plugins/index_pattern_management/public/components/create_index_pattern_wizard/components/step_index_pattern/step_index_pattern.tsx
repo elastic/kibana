@@ -362,7 +362,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
 
     return (
-      <EuiPanel paddingSize="l">
+      <>
         {this.renderHeader(matchedIndices)}
         <EuiSpacer size="s" />
         {this.renderLoadingState()}
@@ -370,7 +370,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer size="s" />
         {this.renderList(matchedIndices)}
-      </EuiPanel>
+      </>
     );
   }
 }

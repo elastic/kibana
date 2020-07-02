@@ -31,12 +31,9 @@ exports[`Header should render a different name, prompt, and beta tag if provided
         </EuiBetaBadge>
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup>
       <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <EuiFlexItem
           grow={false}
@@ -50,25 +47,32 @@ exports[`Header should render a different name, prompt, and beta tag if provided
               <div
                 className="euiText euiText--small"
               >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
+                <EuiTextColor
+                  color="subdued"
+                  dangerouslySetInnerHTML={
+                    Object {
+                      "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                    }
+                  }
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    dangerouslySetInnerHTML={
+                      Object {
+                        "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                      }
+                    }
+                  />
+                </EuiTextColor>
+                <EuiIcon
+                  size="s"
+                  type="popout"
+                >
+                  <div
+                    data-euiicon-type="popout"
+                    size="s"
+                  />
+                </EuiIcon>
               </div>
             </EuiText>
           </div>
@@ -85,13 +89,11 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     <div>
       Test prompt
     </div>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
+    <EuiHorizontalRule>
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
       />
-    </EuiSpacer>
+    </EuiHorizontalRule>
   </div>
 </Header>
 `;
@@ -110,12 +112,9 @@ exports[`Header should render normally 1`] = `
         Create test index pattern
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup>
       <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <EuiFlexItem
           grow={false}
@@ -129,38 +128,43 @@ exports[`Header should render normally 1`] = `
               <div
                 className="euiText euiText--small"
               >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
+                <EuiTextColor
+                  color="subdued"
+                  dangerouslySetInnerHTML={
+                    Object {
+                      "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                    }
+                  }
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    dangerouslySetInnerHTML={
+                      Object {
+                        "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                      }
+                    }
+                  />
+                </EuiTextColor>
+                <EuiIcon
+                  size="s"
+                  type="popout"
+                >
+                  <div
+                    data-euiicon-type="popout"
+                    size="s"
+                  />
+                </EuiIcon>
               </div>
             </EuiText>
           </div>
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
+    <EuiHorizontalRule>
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
       />
-    </EuiSpacer>
+    </EuiHorizontalRule>
   </div>
 </Header>
 `;
@@ -179,12 +183,9 @@ exports[`Header should render without including system indices 1`] = `
         Create test index pattern
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup>
       <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <EuiFlexItem
           grow={false}
@@ -198,38 +199,43 @@ exports[`Header should render without including system indices 1`] = `
               <div
                 className="euiText euiText--small"
               >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
+                <EuiTextColor
+                  color="subdued"
+                  dangerouslySetInnerHTML={
+                    Object {
+                      "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                    }
+                  }
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    dangerouslySetInnerHTML={
+                      Object {
+                        "__html": "An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. <a href=\\"https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">Read documentation</a>",
+                      }
+                    }
+                  />
+                </EuiTextColor>
+                <EuiIcon
+                  size="s"
+                  type="popout"
+                >
+                  <div
+                    data-euiicon-type="popout"
+                    size="s"
+                  />
+                </EuiIcon>
               </div>
             </EuiText>
           </div>
         </EuiFlexItem>
       </div>
     </EuiFlexGroup>
-    <EuiSpacer
-      size="m"
-    >
-      <div
-        className="euiSpacer euiSpacer--m"
+    <EuiHorizontalRule>
+      <hr
+        className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
       />
-    </EuiSpacer>
+    </EuiHorizontalRule>
   </div>
 </Header>
 `;

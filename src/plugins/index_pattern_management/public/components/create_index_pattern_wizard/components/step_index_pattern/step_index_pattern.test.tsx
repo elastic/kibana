@@ -38,16 +38,16 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 jest.mock('../../lib/get_indices', () => ({
   getIndices: ({}, {}, query: string) => {
     if (query.startsWith('e')) {
-      return [{ name: 'es' }];
+      return [{ name: 'es', item: {} }];
     }
 
-    return [{ name: 'kibana' }];
+    return [{ name: 'kibana', item: {} }];
   },
 }));
 
 const allIndices = [
-  { name: 'kibana', tags: [] },
-  { name: 'es', tags: [] },
+  { name: 'kibana', tags: [], item: {} },
+  { name: 'es', tags: [], item: {} },
 ];
 
 const goToNextStep = () => {};

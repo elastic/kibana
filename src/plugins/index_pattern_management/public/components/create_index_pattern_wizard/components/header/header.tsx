@@ -29,6 +29,8 @@ import {
   EuiTextColor,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -60,6 +62,19 @@ export const Header = ({
     }
   );
 
+  const createIndexPatternLabel = i18n.translate('indexPatternManagement.createIndexPatternLabel', {
+    defaultMessage:
+      'An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. {docsLink}',
+    values: {
+      docsLink:
+        '<a href="https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html" target="_blank" rel="noopener noreferrer">' +
+        i18n.translate('indexPatternManagement.indexPatternDocLink', {
+          defaultMessage: 'Read documentation',
+        }) +
+        '</a>',
+    },
+  });
+
   changeTitle(createIndexPatternHeader);
 
   return (
@@ -79,20 +94,19 @@ export const Header = ({
           ) : null}
         </h1>
       </EuiTitle>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <p>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPatternLabel"
-                  defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                />
-              </EuiTextColor>
-            </p>
+            <EuiTextColor
+              color="subdued"
+              dangerouslySetInnerHTML={{ __html: createIndexPatternLabel }}
+            />
+            <EuiIcon type="popout" size="s" />
           </EuiText>
         </EuiFlexItem>
-        {showSystemIndices ? (
+      </EuiFlexGroup>
+      {showSystemIndices ? (
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={
@@ -106,15 +120,16 @@ export const Header = ({
               onChange={onChangeIncludingSystemIndices}
             />
           </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      ) : null}
+
       {prompt ? (
         <Fragment>
           <EuiSpacer size="s" />
           {prompt}
         </Fragment>
       ) : null}
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule />
     </div>
   );
 };
