@@ -50,6 +50,7 @@ import {
 } from '../../../services/annotations_service';
 import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
 
+const CURRENT_SERIES = 'current_series';
 /**
  * Table component for rendering the lists of annotations for an ML job.
  */
@@ -121,6 +122,25 @@ export class AnnotationsTable extends Component {
             jobId: undefined,
           });
         });
+    }
+  }
+
+  getAnnotationsWithExtraInfo(annotations) {
+    // if there is a specific view/chart entities that the annotations can be scoped to
+    // add a new column called 'current_series'
+    if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
+      return annotations.map((annotation) => {
+        const allMatched = this.props.chartDetails?.entityData?.entities.every(
+          ({ fieldType, fieldValue }) => {
+            const field = `${fieldType}_value`;
+            return !(!annotation[field] || annotation[field] !== fieldValue);
+          }
+        );
+        return { ...annotation, [CURRENT_SERIES]: allMatched };
+      });
+    } else {
+      // if not make it return the original annotations
+      return annotations;
     }
   }
 
@@ -527,7 +547,7 @@ export class AnnotationsTable extends Component {
 
       filters.push({
         type: 'is',
-        field: 'current_series',
+        field: CURRENT_SERIES,
         name: i18n.translate('xpack.ml.annotationsTable.seriesOnlyFilterName', {
           defaultMessage: 'Filter to series',
         }),
@@ -552,30 +572,20 @@ export class AnnotationsTable extends Component {
         actions,
       },
       {
-        field: 'current_series',
-        name: 'current_series',
+        // hidden column, for search only
+        field: CURRENT_SERIES,
+        name: CURRENT_SERIES,
         width: '0px',
       }
     );
-    const annotationsWithMarker = annotations.map((annotation) => {
-      const allMatched = this.props.chartDetails?.entityData?.entities.every(
-        ({ fieldType, fieldValue }) => {
-          const field = `${fieldType}_value`;
-          if (!annotation[field] || annotation[field] !== fieldValue) {
-            return false;
-          }
-          return true;
-        }
-      );
-      return { ...annotation, current_series: allMatched };
-    });
+
     return (
       <Fragment>
         <EuiInMemoryTable
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
-          items={annotationsWithMarker}
+          items={this.getAnnotationsWithExtraInfo(annotations)}
           columns={columns}
           pagination={{
             pageSizeOptions: [5, 10, 25],
