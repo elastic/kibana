@@ -29,6 +29,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiAccordion,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { getToastNotifications } from '../util/dependency_cache';
@@ -1322,8 +1323,18 @@ export class TimeSeriesExplorer extends React.Component {
                       <h2>
                         <FormattedMessage
                           id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                          defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
-                          values={{ count: focusAnnotationData.length }}
+                          defaultMessage="Annotations {badge}"
+                          values={{
+                            badge: (
+                              <EuiBadge color={'hollow'}>
+                                <FormattedMessage
+                                  id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                  defaultMessage="Total: {count}"
+                                  values={{ count: focusAnnotationData.length }}
+                                />
+                              </EuiBadge>
+                            ),
+                          }}
                         />
                       </h2>
                     </EuiTitle>

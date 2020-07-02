@@ -41,6 +41,10 @@ import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import {
+  getAnnotationFieldName,
+  getAnnotationFieldValue,
+} from '../../../../../common/types/annotations';
 interface Entity {
   fieldName: string;
   fieldType: string;
@@ -174,10 +178,8 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
         const { fieldName, fieldType, fieldValue } = entity;
-        // @ts-ignore
-        annotation[`${fieldType}_name`] = fieldName;
-        // @ts-ignore
-        annotation[`${fieldType}_value`] = fieldValue;
+        annotation[getAnnotationFieldName(fieldType)] = fieldName;
+        annotation[getAnnotationFieldValue(fieldName)] = fieldValue;
       });
       annotation.detector_index = detectorIndex;
     }

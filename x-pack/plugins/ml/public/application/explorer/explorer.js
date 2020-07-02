@@ -29,6 +29,7 @@ import {
   EuiTitle,
   EuiPanel,
   EuiAccordion,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -343,8 +344,18 @@ export class Explorer extends React.Component {
                     <h2>
                       <FormattedMessage
                         id="xpack.ml.explorer.annotationsTitle"
-                        defaultMessage=" {count, plural, one {Annotation} other {Annotations}} ({count})"
-                        values={{ count: annotationsData.length }}
+                        defaultMessage="Annotations {badge}"
+                        values={{
+                          badge: (
+                            <EuiBadge color={'hollow'}>
+                              <FormattedMessage
+                                id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                defaultMessage="Total: {count}"
+                                values={{ count: annotationsData.length }}
+                              />
+                            </EuiBadge>
+                          ),
+                        }}
                       />
                     </h2>
                   </EuiTitle>
