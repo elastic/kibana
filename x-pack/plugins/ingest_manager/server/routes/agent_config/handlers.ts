@@ -7,7 +7,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
 import { configToYaml } from '../../../common/services';
-import { appContextService, agentConfigService, datasourceService } from '../../services';
+import { appContextService, agentConfigService, packageConfigService } from '../../services';
 import { listAgents } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import {
@@ -20,7 +20,7 @@ import {
   GetFullAgentConfigRequestSchema,
   AgentConfig,
   DefaultPackages,
-  NewDatasource,
+  NewPackageConfig,
 } from '../../types';
 import {
   GetAgentConfigsResponse,
@@ -107,30 +107,34 @@ export const createAgentConfigHandler: RequestHandler<
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
     // eslint-disable-next-line prefer-const
-    let [agentConfig, newSysDatasource] = await Promise.all<AgentConfig, NewDatasource | undefined>(
-      [
-        agentConfigService.create(soClient, request.body, {
-          user,
-        }),
-        // If needed, retrieve System package information and build a new Datasource for the system package
-        // NOTE: we ignore failures in attempting to create datasource, since config might have been created
-        // successfully
-        withSysMonitoring
-          ? datasourceService
-              .buildDatasourceFromPackage(soClient, DefaultPackages.system)
-              .catch(() => undefined)
-          : undefined,
-      ]
-    );
+    let [agentConfig, newSysPackageConfig] = await Promise.all<
+      AgentConfig,
+      NewPackageConfig | undefined
+    >([
+      agentConfigService.create(soClient, request.body, {
+        user,
+      }),
+      // If needed, retrieve System package information and build a new package config for the system package
+      // NOTE: we ignore failures in attempting to create package config, since config might have been created
+      // successfully
+      withSysMonitoring
+        ? packageConfigService
+            .buildPackageConfigFromPackage(soClient, DefaultPackages.system)
+            .catch(() => undefined)
+        : undefined,
+    ]);
 
-    // Create the system monitoring datasource and add it to config.
-    if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {
-      newSysDatasource.config_id = agentConfig.id;
-      const sysDatasource = await datasourceService.create(soClient, newSysDatasource, { user });
+    // Create the system monitoring package config and add it to agent config.
+    if (withSysMonitoring && newSysPackageConfig !== undefined && agentConfig !== undefined) {
+      newSysPackageConfig.config_id = agentConfig.id;
+      newSysPackageConfig.namespace = agentConfig.namespace;
+      const sysPackageConfig = await packageConfigService.create(soClient, newSysPackageConfig, {
+        user,
+      });
 
-      if (sysDatasource) {
-        agentConfig = await agentConfigService.assignDatasources(soClient, agentConfig.id, [
-          sysDatasource.id,
+      if (sysPackageConfig) {
+        agentConfig = await agentConfigService.assignPackageConfigs(soClient, agentConfig.id, [
+          sysPackageConfig.id,
         ]);
       }
     }
