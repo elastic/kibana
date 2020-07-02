@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "^4.1.0",
-    "@elastic/safer-lodash-set": "0.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
@@ -202,6 +201,7 @@
     "@elastic/maki": "6.3.0",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.0",
+    "@elastic/safer-lodash-set": "0.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
     "@kbn/i18n": "1.0.0",
