@@ -12,10 +12,10 @@
 import { SearchEsListItemSchema, Type, type } from '../../../common/schemas';
 
 export const findSourceType = (
-  hit: SearchEsListItemSchema,
+  listItem: SearchEsListItemSchema,
   types: string[] = Object.keys(type.keys)
 ): Type | null => {
-  const foundEntry = Object.entries(hit).find(
+  const foundEntry = Object.entries(listItem).find(
     ([key, value]) => types.includes(key) && value != null
   );
   if (foundEntry != null && type.is(foundEntry[0])) {

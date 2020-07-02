@@ -56,20 +56,8 @@ export const dateNanosOrUndefined = t.union([date_nanos, t.undefined]);
 export const double = t.string;
 export const doubleOrUndefined = t.union([double, t.undefined]);
 
-export const double_range = t.string;
-export const doubleRangeOrUndefined = t.union([double, t.undefined]);
-
-export const date_range = t.string;
-export const dateRangeOrUndefined = t.union([date_range, t.undefined]);
-
 export const float = t.string;
 export const floatOrUndefined = t.union([float, t.undefined]);
-
-export const float_range = t.string;
-export const floatRangeOrUndefined = t.union([float_range, t.undefined]);
-
-export const geo_point = t.string;
-export const geoPointOrUndefined = t.union([geo_point, t.undefined]);
 
 export const geo_shape = t.string;
 export const geoShapeOrUndefined = t.union([geo_shape, t.undefined]);
@@ -80,14 +68,8 @@ export const halfFloatOrUndefined = t.union([half_float, t.undefined]);
 export const integer = t.string;
 export const integerOrUndefined = t.union([integer, t.undefined]);
 
-export const integer_range = t.string;
-export const integerRangeOrUndefined = t.union([integer_range, t.undefined]);
-
 export const ip = t.string;
 export const ipOrUndefined = t.union([ip, t.undefined]);
-
-export const ip_range = t.string;
-export const ipRangeOrUndefined = t.union([ip_range, t.undefined]);
 
 export const keyword = t.string;
 export const keywordOrUndefined = t.union([keyword, t.undefined]);
@@ -97,9 +79,6 @@ export const textOrUndefined = t.union([text, t.undefined]);
 
 export const long = t.string;
 export const longOrUndefined = t.union([long, t.undefined]);
-
-export const long_range = t.string;
-export const longRangeOrUndefined = t.union([long_range, t.undefined]);
 
 export const shape = t.string;
 export const shapeOrUndefined = t.union([shape, t.undefined]);
@@ -148,55 +127,48 @@ export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
 export const esDataTypeRange = t.exact(t.type({ gte: t.string, lte: t.string }));
+
+export const date_range = esDataTypeRange;
+export const dateRangeOrUndefined = t.union([date_range, t.undefined]);
+
+export const double_range = esDataTypeRange;
+export const doubleRangeOrUndefined = t.union([double_range, t.undefined]);
+
+export const float_range = esDataTypeRange;
+export const floatRangeOrUndefined = t.union([float_range, t.undefined]);
+
+export const integer_range = esDataTypeRange;
+export const integerRangeOrUndefined = t.union([integer_range, t.undefined]);
+
+// ip_range can be just a CIDR value as a range
+export const ip_range = t.union([esDataTypeRange, t.string]);
+export const ipRangeOrUndefined = t.union([ip_range, t.undefined]);
+
+export const long_range = esDataTypeRange;
+export const longRangeOrUndefined = t.union([long_range, t.undefined]);
+
 export type EsDataTypeRange = t.TypeOf<typeof esDataTypeRange>;
 
 export const esDataTypeRangeTerm = t.union([
-  t.exact(
-    t.type({
-      date_range: esDataTypeRange,
-    })
-  ),
-  t.exact(
-    t.type({
-      double_range: esDataTypeRange,
-    })
-  ),
-  t.exact(
-    t.type({
-      float_range: esDataTypeRange,
-    })
-  ),
-  t.exact(
-    t.type({
-      integer_range: esDataTypeRange,
-    })
-  ),
-  t.exact(
-    t.type({
-      ip_range: esDataTypeRange,
-    })
-  ),
-  t.exact(
-    t.type({
-      ip_range, // ip_range can be just a CIDR value as a range
-    })
-  ),
-  t.exact(
-    t.type({
-      long_range: esDataTypeRange,
-    })
-  ),
+  t.exact(t.type({ date_range })),
+  t.exact(t.type({ double_range })),
+  t.exact(t.type({ float_range })),
+  t.exact(t.type({ integer_range })),
+  t.exact(t.type({ ip_range })),
+  t.exact(t.type({ long_range })),
 ]);
+
 export type EsDataTypeRangeTerm = t.TypeOf<typeof esDataTypeRangeTerm>;
 
 export const esDataTypeGeoPointRange = t.exact(t.type({ lat: t.string, lon: t.string }));
 export type EsDataTypeGeoPointRange = t.TypeOf<typeof esDataTypeGeoPointRange>;
 
-export const esDataTypeGeoPoint = t.union([
-  t.exact(t.type({ geo_point })),
-  t.exact(t.type({ geo_point: esDataTypeGeoPointRange })),
-]);
+export const geo_point = t.union([esDataTypeGeoPointRange, t.string]);
+export type GeoPoint = t.TypeOf<typeof geo_point>;
 
+export const geoPointOrUndefined = t.union([geo_point, t.undefined]);
+
+export const esDataTypeGeoPoint = t.exact(t.type({ geo_point }));
 export type EsDataTypeGeoPoint = t.TypeOf<typeof esDataTypeGeoPoint>;
 
 export const esDataTypeGeoShape = t.union([

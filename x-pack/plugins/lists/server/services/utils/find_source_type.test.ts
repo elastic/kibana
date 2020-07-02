@@ -5,7 +5,7 @@
  */
 
 import { getSearchEsListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { Type } from '../../../common/schemas';
+import { SearchEsListItemSchema, Type } from '../../../common/schemas';
 
 import { findSourceType } from './find_source_type';
 
@@ -19,25 +19,29 @@ describe('find_source_type', () => {
   });
 
   test('it returns the item ip if it exists', () => {
-    const item = getSearchEsListItemMock();
-    const derivedType = findSourceType(item);
+    const listItem = getSearchEsListItemMock();
+    const derivedType = findSourceType(listItem);
     const expected: Type = 'ip';
     expect(derivedType).toEqual(expected);
   });
 
   test('it returns the item keyword if it exists', () => {
-    const item = getSearchEsListItemMock();
-    item.ip = undefined;
-    item.keyword = 'some keyword';
-    const derivedType = findSourceType(item);
+    const listItem: SearchEsListItemSchema = {
+      ...getSearchEsListItemMock(),
+      ip: undefined,
+      keyword: 'some keyword',
+    };
+    const derivedType = findSourceType(listItem);
     const expected: Type = 'keyword';
     expect(derivedType).toEqual(expected);
   });
 
   test('it returns a null if all the attached types are undefined', () => {
-    const item = getSearchEsListItemMock();
-    item.ip = undefined;
-    item.keyword = undefined;
+    const item: SearchEsListItemSchema = {
+      ...getSearchEsListItemMock(),
+      ip: undefined,
+      keyword: undefined,
+    };
     expect(findSourceType(item)).toEqual(null);
   });
 });

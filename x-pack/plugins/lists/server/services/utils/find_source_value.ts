@@ -14,16 +14,16 @@ import {
   type,
 } from '../../../common/schemas';
 
-export const DEFAULT_GEO_POINT = '{{lat}},{{lon}}';
-export const DEFAULT_DATE_RANGE = '{{gte}},{{lte}}';
-export const DEFAULT_LTE_GTE = '{{gte}}-{{lte}}';
-export const DEFAULT_VALUE = '{{value}}';
+export const DEFAULT_GEO_POINT = '{{{lat}}},{{{lon}}}';
+export const DEFAULT_DATE_RANGE = '{{{gte}}},{{{lte}}}';
+export const DEFAULT_LTE_GTE = '{{{gte}}}-{{{lte}}}';
+export const DEFAULT_VALUE = '{{{value}}}';
 
 export const findSourceValue = (
-  hit: SearchEsListItemSchema,
+  listItem: SearchEsListItemSchema,
   types: string[] = Object.keys(type.keys)
 ): string | null => {
-  const foundEntry = Object.entries(hit).find(
+  const foundEntry = Object.entries(listItem).find(
     ([key, value]) => types.includes(key) && value != null
   );
   if (foundEntry != null) {
@@ -34,7 +34,8 @@ export const findSourceValue = (
       case 'geo_point': {
         return deserializeValue({
           defaultDeserializer: DEFAULT_GEO_POINT,
-          deserializer: hit.deserializer,
+          defaultValueDeserializer: DEFAULT_VALUE,
+          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -45,21 +46,24 @@ export const findSourceValue = (
       case 'ip_range': {
         return deserializeValue({
           defaultDeserializer: DEFAULT_LTE_GTE,
-          deserializer: hit.deserializer,
+          defaultValueDeserializer: DEFAULT_VALUE,
+          deserializer: listItem.deserializer,
           value,
         });
       }
       case 'date_range': {
         return deserializeValue({
           defaultDeserializer: DEFAULT_DATE_RANGE,
-          deserializer: hit.deserializer,
+          defaultValueDeserializer: DEFAULT_VALUE,
+          deserializer: listItem.deserializer,
           value,
         });
       }
       default: {
         return deserializeValue({
-          defaultDeserializer: DEFAULT_LTE_GTE,
-          deserializer: hit.deserializer,
+          defaultDeserializer: DEFAULT_VALUE,
+          defaultValueDeserializer: DEFAULT_VALUE,
+          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -71,31 +75,33 @@ export const findSourceValue = (
 
 export const deserializeValue = ({
   deserializer,
+  defaultValueDeserializer,
   defaultDeserializer,
   value,
 }: {
   deserializer: DeserializerOrUndefined;
+  defaultValueDeserializer: string;
   defaultDeserializer: string;
   value: string | object | undefined;
 }): string | null => {
   if (esDataTypeRange.is(value)) {
-    if (value.gte === value.lte) {
-      // Since gte and lte are the same we want to deserialize this back out as the default of a single element
-      return value.gte;
-    } else {
-      const template = deserializer ?? defaultDeserializer;
-      const variables = { gte: value.gte, lte: value.lte };
-      return Mustache.render(template, variables);
-    }
+    const template =
+      deserializer?.includes('gte') && deserializer?.includes('lte')
+        ? deserializer
+        : defaultDeserializer;
+    const variables = { gte: value.gte, lte: value.lte };
+    return Mustache.render(template, variables);
   } else if (esDataTypeGeoPointRange.is(value)) {
-    const template = deserializer ?? defaultDeserializer;
+    const template =
+      deserializer?.includes('lat') && deserializer?.includes('lon')
+        ? deserializer
+        : defaultDeserializer;
     const variables = { lat: value.lat, lon: value.lon };
     return Mustache.render(template, variables);
   } else if (typeof value === 'string') {
-    // This fall back works as it returns the regular string which can be anything
-    // from a well known type (WKT) or a plain number string as "52" or just a regular
-    // value of a date time such as 2020-06-28T15:36:13.764Z
-    return value;
+    const template = deserializer?.includes('value') ? deserializer : defaultValueDeserializer;
+    const variables = { value };
+    return Mustache.render(template, variables);
   } else {
     return null;
   }
