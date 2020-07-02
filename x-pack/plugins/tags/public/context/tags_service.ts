@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createContext, useContext } from 'react';
+import { createElement as h, createContext, useContext } from 'react';
 import { TagsService } from '../services';
 
-const context = createContext<TagsService | undefined>(undefined);
+type ContextValue = TagsService;
 
-export const TagsServiceProvider = context.Provider;
+const context = createContext<ContextValue | undefined>(undefined);
+
+export const TagsProvider = context.Provider;
 export const useTagsService = () => useContext(context)!;
+export const createTagsProvider = (value: ContextValue): React.FC => ({ children }) =>
+  h(TagsProvider, { value, children });

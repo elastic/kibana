@@ -20,6 +20,8 @@ import {
 } from '../../../../src/plugins/management/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
 import { TagsService, TagsServiceSetup, TagsServiceStart } from './services';
+import { Tag, TagProps } from './containers/tag';
+import { createTagsProvider } from './context';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -35,6 +37,10 @@ export interface TagsPluginSetup {
 
 export interface TagsPluginStart {
   tags: TagsServiceStart;
+  ui: {
+    TagsProvider: React.FC;
+    Tag: React.FC<TagProps>;
+  };
 }
 
 export class TagsPlugin
@@ -86,8 +92,14 @@ export class TagsPlugin
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
+    const TagsProvider = createTagsProvider(this.tagsService);
+
     return {
       tags: this.tagsService.start(),
+      ui: {
+        TagsProvider,
+        Tag: (props) => h(TagsProvider, {}, h(Tag, props)),
+      },
     };
   }
 }
