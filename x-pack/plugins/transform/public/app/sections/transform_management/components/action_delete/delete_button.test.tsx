@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React, { ComponentProps } from 'react';
 
 import { TransformListRow } from '../../../../common';
-import { DeleteButton } from './action_delete';
+import { DeleteButton } from './delete_button';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 

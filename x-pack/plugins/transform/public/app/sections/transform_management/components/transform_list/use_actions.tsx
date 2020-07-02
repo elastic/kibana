@@ -13,12 +13,12 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 
 import { TransformListRow } from '../../../../common';
 
-import { CloneButton } from './action_clone';
-import { useDeleteAction, DeleteButton, DeleteButtonModal } from './action_delete';
+import { CloneButton } from '../action_clone';
+import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
 import { EditTransformFlyout } from '../edit_transform_flyout';
-import { useEditAction, EditButton } from './action_edit';
-import { useStartAction, StartButton, StartButtonModal } from './action_start';
-import { StopButton } from './action_stop';
+import { useEditAction, EditButton } from '../action_edit';
+import { useStartAction, StartButton, StartButtonModal } from '../action_start';
+import { StopButton } from '../action_stop';
 
 export const useActions = ({
   forceDisable,

@@ -36,13 +36,12 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
-import { getTaskStateBadge } from './columns';
-import { useDeleteAction, DeleteButton, DeleteButtonModal } from './action_delete';
-import { useStartAction, StartButton, StartButtonModal } from './action_start';
-import { StopButton } from './action_stop';
+import { useDeleteAction, DeleteButton, DeleteButtonModal } from '../action_delete';
+import { useStartAction, StartButton, StartButtonModal } from '../action_start';
+import { StopButton } from '../action_stop';
 
 import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
-import { useColumns } from './columns';
+import { getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 
 function getItemIdToExpandedRowMap(

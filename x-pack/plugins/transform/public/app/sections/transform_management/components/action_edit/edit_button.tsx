@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState, FC } from 'react';
+import React, { useContext, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -50,21 +50,4 @@ export const EditButton: FC<EditButtonProps> = ({ config, onClick }) => {
   }
 
   return editButton;
-};
-
-export const useEditAction = () => {
-  const [config, setConfig] = useState<TransformPivotConfig>();
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const closeFlyout = () => setIsFlyoutVisible(false);
-  const showFlyout = (newConfig: TransformPivotConfig) => {
-    setConfig(newConfig);
-    setIsFlyoutVisible(true);
-  };
-
-  return {
-    config,
-    closeFlyout,
-    isFlyoutVisible,
-    showFlyout,
-  };
 };
