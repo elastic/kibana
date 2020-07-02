@@ -29,6 +29,7 @@ const createSetupContract = (): Setup => {
     addBatchProcessingRoute: jest.fn(),
     addStreamingResponseRoute: jest.fn(),
     createStreamingRequestHandler: jest.fn(),
+    createApiRoute: jest.fn(),
   };
   return setupContract;
 };

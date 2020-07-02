@@ -16,8 +16,16 @@ import {
   TagAttachmentClientGetResourceTagsParams,
   TagAttachmentClientGetResourceTagsResult,
   TagAttachmentClientDeleteParams,
+  TagAttachmentClientFindResourcesParams,
+  TagAttachmentClientFindResourcesResult,
 } from '../../common';
-import { validateTagId, validateKID } from '../util/validators';
+import {
+  validateTagId,
+  validateKID,
+  validateTagIds,
+  validatePerPage,
+  validatePage,
+} from '../util/validators';
 import { TagsClient } from '../tags';
 
 export type TagAttachmentSavedObject = SavedObject<RawTagAttachment>;
@@ -114,5 +122,28 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
       attachments: saved_objects.map(this.toTagAttachment),
       tags,
     };
+  }
+
+  public async findResources({
+    tagIds,
+    kidPrefix,
+    perPage = 20,
+    page = 1,
+  }: TagAttachmentClientFindResourcesParams): Promise<TagAttachmentClientFindResourcesResult> {
+    validateTagIds(tagIds);
+    validateKID(kidPrefix);
+    validatePerPage(perPage);
+    validatePage(page);
+
+    const { savedObjectsClient } = this.params;
+
+    const { saved_objects } = await savedObjectsClient.find<RawTagAttachmentWithId>({
+      type: this.type,
+      search: `attributes.tagId:(${tagIds.join(' OR ')}) AND attributes.kid:(${kidPrefix}*)`,
+      perPage: 100,
+      page: 1,
+    });
+
+    return { attachments: saved_objects.map(this.toTagAttachment) };
   }
 }

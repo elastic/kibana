@@ -44,6 +44,17 @@ export interface TagAttachmentClientGetResourceTagsResult {
   tags: RawTagWithId[];
 }
 
+export interface TagAttachmentClientFindResourcesParams {
+  tagIds: string[];
+  kidPrefix: string;
+  perPage?: number;
+  page?: number;
+}
+
+export interface TagAttachmentClientFindResourcesResult {
+  attachments: RawTagAttachmentWithId[];
+}
+
 /**
  * CRUD + List/Find API for tag attachments.
  */
@@ -53,4 +64,7 @@ export interface ITagAttachmentsClient {
   getAttachedTags(
     params: TagAttachmentClientGetResourceTagsParams
   ): Promise<TagAttachmentClientGetResourceTagsResult>;
+  findResources(
+    params: TagAttachmentClientFindResourcesParams
+  ): Promise<TagAttachmentClientFindResourcesResult>;
 }

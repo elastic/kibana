@@ -13,6 +13,11 @@ export const validateTagId = (id: string) => {
   if (id.length > 256) throw Boom.badRequest('ID is too long.');
 };
 
+export const validateTagIds = (ids: string[]) => {
+  if (!Array.isArray(ids)) throw Boom.badRequest('Expected tags IDs to be an array.');
+  ids.forEach(validateTagId);
+};
+
 export const validateKID = (kid: string) => parseKID(kid);
 
 export const validateTagTitle = (title: string) => {
@@ -48,4 +53,18 @@ export const validateTagColor = (color: string) => {
     const char = color[i];
     if (HEX_CHARS.indexOf(char) === -1) throw Boom.badRequest('Invalid digit in tag color.');
   }
+};
+
+export const validatePerPage = (perPage: number) => {
+  if (typeof perPage !== 'number')
+    throw Boom.badRequest('Expected perPage parameter to be a number');
+  if (perPage < 1) throw Boom.badRequest('Too few results per page.');
+  if (perPage > 100) throw Boom.badRequest('Too many requests per page.');
+  if (perPage !== Math.round(perPage)) throw Boom.badRequest('Invalid perPage parameter.');
+};
+
+export const validatePage = (page: number) => {
+  if (typeof page !== 'number') throw Boom.badRequest('Expected page parameter to be a number');
+  if (page < 1 || page > 1000) throw Boom.badRequest('Invalid page.');
+  if (page !== Math.round(page)) throw Boom.badRequest('Invalid page parameter.');
 };
