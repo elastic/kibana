@@ -13,6 +13,7 @@ import {
   getLayerListRaw,
   getSelectedLayerId,
   getMapReady,
+  getMapColors,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import { cancelRequest } from '../reducers/non_serializable_instances';
@@ -384,7 +385,8 @@ export function clearMissingStyleProperties(layerId: string) {
 
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
-      nextFields
+      nextFields,
+      getMapColors(getState())
     );
     if (hasChanges && nextStyleDescriptor) {
       dispatch<any>(updateLayerStyle(layerId, nextStyleDescriptor));
