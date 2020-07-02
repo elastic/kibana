@@ -130,6 +130,10 @@ export class ESAggField implements IESAggField {
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return this._esDocField ? this._esDocField.getCategoricalFieldMetaRequest(size) : null;
   }
+
+  supportsAutoDomain(): boolean {
+    return true;
+  }
 }
 
 export function esAggFieldsFactory(
