@@ -56,6 +56,9 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
             "auditbeat": Object {
               "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
             },
+            "dashboard": Object {
+              "drilldowns": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/drilldowns.html",
+            },
             "date": Object {
               "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
             },
@@ -193,6 +196,9 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
           "auditbeat": Object {
             "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
           },
+          "dashboard": Object {
+            "drilldowns": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/drilldowns.html",
+          },
           "date": Object {
             "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
           },
@@ -303,6 +309,9 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
             },
             "auditbeat": Object {
               "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "dashboard": Object {
+              "drilldowns": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/drilldowns.html",
             },
             "date": Object {
               "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
@@ -436,6 +445,9 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
             "auditbeat": Object {
               "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
             },
+            "dashboard": Object {
+              "drilldowns": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/drilldowns.html",
+            },
             "date": Object {
               "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
             },
@@ -567,6 +579,9 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
             },
             "auditbeat": Object {
               "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "dashboard": Object {
+              "drilldowns": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/drilldowns.html",
             },
             "date": Object {
               "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",

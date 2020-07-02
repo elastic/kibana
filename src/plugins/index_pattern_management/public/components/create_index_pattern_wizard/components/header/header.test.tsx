@@ -22,9 +22,11 @@ import { Header } from '../header';
 import { mount } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
-import { docLinksServiceMock } from '../../../../../../../core/public/mocks';
+import { DocLinksStart } from 'kibana/public';
+// import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-const docLinks = docLinksServiceMock.createStartContract();
+// links.indexPatterns
+const docLinks = { links: { indexPatterns: {} } } as DocLinksStart;
 
 describe('Header', () => {
   const indexPatternName = 'test index pattern';
