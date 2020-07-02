@@ -52,6 +52,7 @@ import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
+import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -178,6 +179,7 @@ import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Unit } from '@elastic/datemath';
 import { UnregisterCallback } from 'history';
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { UserProvidedValues } from 'src/core/server/types';
@@ -421,6 +423,15 @@ export enum ES_FIELD_TYPES {
 //
 // @public (undocumented)
 export const ES_SEARCH_STRATEGY = "es";
+
+// Warning: (ae-forgotten-export) The symbol "ExpressionFunctionDefinition" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Input" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Arguments" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "Output" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "EsaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input, Arguments, Output>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
