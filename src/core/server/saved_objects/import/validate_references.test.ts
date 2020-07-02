@@ -334,7 +334,6 @@ describe('validateReferences()', () => {
         "errors": Array [
           Object {
             "error": Object {
-              "blocking": Array [],
               "references": Array [
                 Object {
                   "id": "3",
@@ -352,7 +351,6 @@ describe('validateReferences()', () => {
           },
           Object {
             "error": Object {
-              "blocking": Array [],
               "references": Array [
                 Object {
                   "id": "5",

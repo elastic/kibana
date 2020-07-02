@@ -68,7 +68,7 @@ import {
   saveObjects,
 } from '../../../lib/resolve_saved_objects';
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
-import { FailedImportConflict, ConflictResolution } from '../../../lib/resolve_import_errors';
+import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -195,7 +195,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
   getConflictResolutions = async (failures: FailedImportConflict[]) => {
-    const resolutions: Record<string, ConflictResolution> = {};
+    const resolutions: Record<string, RetryDecision> = {};
     for (const {
       obj: { type, id, title },
       error: { destinationId },

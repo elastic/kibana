@@ -90,18 +90,29 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     setCopyResult({});
     try {
       const copySavedObjectsResult = await spacesManager.copySavedObjects(
-        [
-          {
-            type: savedObject.type,
-            id: savedObject.id,
-          },
-        ],
+        [{ type: savedObject.type, id: savedObject.id }],
         copyOptions.selectedSpaceIds,
         copyOptions.includeRelated,
         copyOptions.overwrite
       );
       const processedResult = mapValues(copySavedObjectsResult, processImportResponse);
       setCopyResult(processedResult);
+
+      // retry all successful imports
+      const getSuccessRetries = (response: ProcessedImportResponse): ImportRetry[] => {
+        const { failedImports, successfulImports } = response;
+        if (!failedImports.length) {
+          // if no imports failed for this space, return an empty array
+          return [];
+        }
+        // otherwise, some imports failed for this space, so retry any successful imports (if any)
+        return successfulImports.map(({ type, id, destinationId, createNewCopy }) => {
+          const { overwrite } = copyOptions;
+          return { type, id, overwrite, destinationId, createNewCopy };
+        });
+      };
+      const successRetries = mapValues(processedResult, getSuccessRetries);
+      setRetries(successRetries);
     } catch (e) {
       setCopyInProgress(false);
       toastNotifications.addError(e, {
@@ -113,20 +124,14 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   }
 
   async function finishCopy() {
-    const needsConflictResolution = Object.values(retries).some((spaceRetry) =>
-      spaceRetry.some((retry) => retry.overwrite)
-    );
+    // if any retries are present, attempt to resolve errors again
+    const needsConflictResolution = Object.values(retries).some((spaceRetry) => spaceRetry.length);
 
     if (needsConflictResolution) {
       setConflictResolutionInProgress(true);
       try {
         await spacesManager.resolveCopySavedObjectsErrors(
-          [
-            {
-              type: savedObject.type,
-              id: savedObject.id,
-            },
-          ],
+          [{ type: savedObject.type, id: savedObject.id }],
           retries,
           copyOptions.includeRelated
         );

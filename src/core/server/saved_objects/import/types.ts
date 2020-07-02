@@ -87,14 +87,7 @@ export interface SavedObjectsImportUnknownError {
  */
 export interface SavedObjectsImportMissingReferencesError {
   type: 'missing_references';
-  references: Array<{
-    type: string;
-    id: string;
-  }>;
-  blocking: Array<{
-    type: string;
-    id: string;
-  }>;
+  references: Array<{ type: string; id: string }>;
 }
 
 /**

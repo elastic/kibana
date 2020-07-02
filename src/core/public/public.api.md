@@ -1262,11 +1262,6 @@ export interface SavedObjectsImportError {
 // @public
 export interface SavedObjectsImportMissingReferencesError {
     // (undocumented)
-    blocking: Array<{
-        type: string;
-        id: string;
-    }>;
-    // (undocumented)
     references: Array<{
         type: string;
         id: string;

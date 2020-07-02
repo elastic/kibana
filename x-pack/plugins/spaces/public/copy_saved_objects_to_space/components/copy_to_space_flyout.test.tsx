@@ -384,6 +384,7 @@ describe('CopyToSpaceFlyout', () => {
     expect(mockSpacesManager.resolveCopySavedObjectsErrors).toHaveBeenCalledWith(
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
+        'space-1': [],
         'space-2': [{ type: 'index-pattern', id: 'conflicting-ip', overwrite: true }],
       },
       true
@@ -410,7 +411,6 @@ describe('CopyToSpaceFlyout', () => {
             id: 'my-viz',
             error: {
               type: 'missing_references',
-              blocking: [],
               references: [{ type: 'index-pattern', id: 'missing-index-pattern' }],
             },
             meta: {},

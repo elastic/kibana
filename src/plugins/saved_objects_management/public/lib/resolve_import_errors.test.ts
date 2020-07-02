@@ -50,15 +50,14 @@ describe('resolveImportErrors', () => {
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
-      state: {
-        importCount: 0,
-      },
+      state: { importCount: 0 },
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "failedImports": Array [],
         "importCount": 0,
         "status": "success",
+        "successfulImports": Array [],
       }
     `);
   });
@@ -76,13 +75,12 @@ describe('resolveImportErrors', () => {
               id: '1',
               meta: {},
             },
-            error: {
-              type: 'unknown',
-            } as SavedObjectsImportUnknownError,
+            error: { type: 'unknown' } as SavedObjectsImportUnknownError,
           },
         ],
       },
     });
+    expect(httpMock.post).not.toHaveBeenCalled();
     expect(result).toMatchInlineSnapshot(`
       Object {
         "failedImports": Array [
@@ -99,6 +97,7 @@ describe('resolveImportErrors', () => {
         ],
         "importCount": 0,
         "status": "success",
+        "successfulImports": Array [],
       }
     `);
   });
@@ -106,7 +105,11 @@ describe('resolveImportErrors', () => {
   test('resolves conflicts', async () => {
     httpMock.post.mockResolvedValueOnce({
       success: true,
-      successCount: 1,
+      successCount: 2,
+      successResults: [
+        { type: 'a', id: '1' },
+        { type: 'a', id: '2', destinationId: 'x' },
+      ],
     });
     getConflictResolutions.mockReturnValueOnce({
       'a:1': { retry: true, options: { overwrite: true } },
@@ -131,8 +134,19 @@ describe('resolveImportErrors', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "failedImports": Array [],
-        "importCount": 1,
+        "importCount": 2,
         "status": "success",
+        "successfulImports": Array [
+          Object {
+            "id": "1",
+            "type": "a",
+          },
+          Object {
+            "destinationId": "x",
+            "id": "2",
+            "type": "a",
+          },
+        ],
       }
     `);
 
@@ -144,94 +158,17 @@ describe('resolveImportErrors', () => {
           Object {
             "id": "1",
             "overwrite": true,
-            "replaceReferences": Array [],
             "type": "a",
           },
           Object {
             "destinationId": "x",
             "id": "2",
             "overwrite": true,
-            "replaceReferences": Array [],
             "type": "a",
           },
         ],
       }
     `);
-  });
-
-  test('resolves missing references without duplicating retries', async () => {
-    httpMock.post.mockResolvedValueOnce({
-      success: true,
-      successCount: 3,
-    });
-    getConflictResolutions.mockResolvedValueOnce({});
-    const result = await resolveImportErrors({
-      http: httpMock,
-      getConflictResolutions,
-      state: {
-        importCount: 0,
-        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3' }],
-        failedImports: [
-          {
-            obj: { type: 'a', id: '1', meta: {} },
-            error: {
-              type: 'missing_references',
-              references: [{ type: 'index-pattern', id: '2' }],
-              blocking: [{ type: 'a', id: '2' }],
-            },
-          },
-          {
-            obj: { type: 'a', id: '3', meta: {} },
-            error: {
-              type: 'missing_references',
-              references: [{ type: 'index-pattern', id: '2' }],
-              blocking: [{ type: 'a', id: '2' }], // this is blocking the same object, it should not result in a duplicate retry
-            },
-          },
-        ],
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "failedImports": Array [],
-  "importCount": 3,
-  "status": "success",
-}
-`);
-    const formData = getFormData(extractBodyFromCall(0));
-    expect(formData).toMatchInlineSnapshot(`
-Object {
-  "file": "undefined",
-  "retries": Array [
-    Object {
-      "id": "1",
-      "replaceReferences": Array [
-        Object {
-          "from": "2",
-          "to": "3",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "a",
-    },
-    Object {
-      "id": "3",
-      "replaceReferences": Array [
-        Object {
-          "from": "2",
-          "to": "3",
-          "type": "index-pattern",
-        },
-      ],
-      "type": "a",
-    },
-    Object {
-      "id": "2",
-      "type": "a",
-    },
-  ],
-}
-`);
   });
 
   test(`doesn't resolve missing references if newIndexPatternId isn't defined`, async () => {
@@ -242,10 +179,7 @@ Object {
       state: {
         importCount: 0,
         unmatchedReferences: [
-          {
-            existingIndexPatternId: '2',
-            newIndexPatternId: undefined,
-          },
+          { existingIndexPatternId: '2', newIndexPatternId: undefined, list: [] },
         ],
         failedImports: [
           {
@@ -256,18 +190,7 @@ Object {
             },
             error: {
               type: 'missing_references',
-              references: [
-                {
-                  type: 'index-pattern',
-                  id: '2',
-                },
-              ],
-              blocking: [
-                {
-                  type: 'a',
-                  id: '2',
-                },
-              ],
+              references: [{ type: 'index-pattern', id: '2' }],
             },
           },
         ],
@@ -278,6 +201,7 @@ Object {
         "failedImports": Array [],
         "importCount": 0,
         "status": "success",
+        "successfulImports": Array [],
       }
     `);
   });
@@ -291,6 +215,7 @@ Object {
     httpMock.post.mockResolvedValueOnce({
       success: true,
       successCount: 1,
+      successResults: [{ type: 'a', id: '1' }],
     });
     getConflictResolutions.mockResolvedValueOnce({});
     getConflictResolutions.mockResolvedValueOnce({
@@ -301,15 +226,11 @@ Object {
       getConflictResolutions,
       state: {
         importCount: 0,
-        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3' }],
+        unmatchedReferences: [{ existingIndexPatternId: '2', newIndexPatternId: '3', list: [] }],
         failedImports: [
           {
             obj: { type: 'a', id: '1', meta: {} },
-            error: {
-              type: 'missing_references',
-              references: [{ type: 'index-pattern', id: '2' }],
-              blocking: [],
-            },
+            error: { type: 'missing_references', references: [{ type: 'index-pattern', id: '2' }] },
           },
         ],
       },
@@ -319,6 +240,12 @@ Object {
         "failedImports": Array [],
         "importCount": 1,
         "status": "success",
+        "successfulImports": Array [
+          Object {
+            "id": "1",
+            "type": "a",
+          },
+        ],
       }
     `);
     const formData1 = getFormData(extractBodyFromCall(0));

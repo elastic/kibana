@@ -65,7 +65,7 @@ const createFailureConflict = ({ type, id, meta }: ObjectProperties): FailedImpo
 const createFailureMissingReferences = ({ type, id, meta }: ObjectProperties): FailedImport => {
   return {
     obj: { type, id, meta },
-    error: { type: 'missing_references', blocking: [], references: [] },
+    error: { type: 'missing_references', references: [] },
   };
 };
 

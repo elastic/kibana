@@ -89,7 +89,7 @@ export async function validateReferences(
   );
 
   // Filter out objects with missing references, add to error object
-  let filteredObjects = savedObjects.filter((savedObject) => {
+  const filteredObjects = savedObjects.filter((savedObject) => {
     const missingReferences = [];
     const enforcedTypeReferences = (savedObject.references || []).filter(
       filterReferencesToValidate
@@ -108,31 +108,9 @@ export async function validateReferences(
       type: savedObject.type,
       title,
       meta: { title },
-      error: {
-        type: 'missing_references',
-        references: missingReferences,
-        blocking: [],
-      },
+      error: { type: 'missing_references', references: missingReferences },
     };
     return false;
-  });
-
-  // Filter out objects that reference objects within the import but are missing_references
-  // For example: visualization referencing a search that is missing an index pattern needs to be filtered out
-  filteredObjects = filteredObjects.filter((savedObject) => {
-    let isBlocked = false;
-    for (const reference of savedObject.references || []) {
-      const referencedObjectError = errorMap[`${reference.type}:${reference.id}`];
-      if (!referencedObjectError || referencedObjectError.error.type !== 'missing_references') {
-        continue;
-      }
-      referencedObjectError.error.blocking.push({
-        type: savedObject.type,
-        id: savedObject.id,
-      });
-      isBlocked = true;
-    }
-    return !isBlocked;
   });
 
   return {

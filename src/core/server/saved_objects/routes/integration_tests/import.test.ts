@@ -257,7 +257,7 @@ describe(`POST ${URL}`, () => {
 
     expect(result.body).toEqual({
       success: false,
-      successCount: 0,
+      successCount: 1,
       errors: [
         {
           id: 'my-vis',
@@ -267,8 +267,14 @@ describe(`POST ${URL}`, () => {
           error: {
             type: 'missing_references',
             references: [{ type: 'index-pattern', id: 'my-pattern' }],
-            blocking: [{ type: 'dashboard', id: 'my-dashboard' }],
           },
+        },
+      ],
+      successResults: [
+        {
+          type: mockDashboard.type,
+          id: mockDashboard.id,
+          meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
         },
       ],
     });

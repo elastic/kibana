@@ -195,7 +195,6 @@ export default function ({ getService }) {
                     meta: { title: 'My visualization', icon: 'visualizeApp' },
                     error: {
                       type: 'missing_references',
-                      blocking: [],
                       references: [
                         {
                           type: 'index-pattern',
