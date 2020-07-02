@@ -68,18 +68,22 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
             timing,
           }),
         });
-      } catch (e) {
-        const { statusCode = 500, message = 'Unknown error occurred' } = e;
+      } catch (error) {
+        if (Boom.isBoom(error)) {
+          throw error;
+        }
 
-        if (e instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message } });
+        if (error instanceof NoLogAnalysisResultsIndexError) {
+          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({
-          statusCode,
-          body: { message },
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
         });
       }
-    }
+    })
   );
 };
