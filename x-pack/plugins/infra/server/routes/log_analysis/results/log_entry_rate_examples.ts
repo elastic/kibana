@@ -28,8 +28,7 @@ export const initGetLogEntryRateExamplesRoute = ({ framework, sources }: InfraBa
       method: 'post',
       path: LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
       validate: {
-        // short-circuit forced @kbn/config-schema validation so we can do io-ts validation
-        body: anyObject,
+        body: createValidationFunction(getLogEntryRateExamplesRequestPayloadRT),
       },
     },
     async (requestContext, request, response) => {
