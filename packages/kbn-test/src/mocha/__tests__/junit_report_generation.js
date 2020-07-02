@@ -51,7 +51,7 @@ describe('dev/mocha/junit report generation', () => {
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
     const report = await fcb((cb) =>
-      parseString(readFileSync(makeJunitReportPath(PROJECT_DIR, 'test')), cb)
+      parseString(readFileSync(getJunitReportPath(PROJECT_DIR, 'test')), cb)
     );
 
     // test case results are wrapped in <testsuites></testsuites>
