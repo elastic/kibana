@@ -30,7 +30,7 @@ export const buildLastSignalsQuery = (ruleId: string | undefined | null) => {
             : queryFilter,
       },
     },
-    size: 0,
+    size: 1,
     track_total_hits: true,
   };
 };
