@@ -45,3 +45,10 @@ export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
       'Any file in quarantine on any endpoint that matches the attribute(s) selected will automatically be restored to its original location',
   }
 );
+
+export const EXCEPTION_BUILDER_INFO = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.infoLabel',
+  {
+    defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
+  }
+);

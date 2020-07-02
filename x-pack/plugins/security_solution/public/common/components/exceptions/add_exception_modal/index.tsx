@@ -261,6 +261,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+                <EuiSpacer />
                 <ExceptionBuilder
                   exceptionListItems={exceptionItemsToAdd}
                   listType={exceptionListType}

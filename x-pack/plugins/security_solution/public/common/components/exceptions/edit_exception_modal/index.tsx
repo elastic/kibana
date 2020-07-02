@@ -89,6 +89,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
+  const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
@@ -235,6 +236,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   label={i18n.BULK_CLOSE_LABEL}
                   checked={shouldBulkCloseAlert}
                   onChange={onBulkCloseAlertCheckboxChange}
+                  disabled={shouldDisableBulkClose}
                 />
               </EuiFormRow>
             </ModalBodySection>

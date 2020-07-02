@@ -418,8 +418,8 @@ export const entryHasNonEcsType = (
     return false;
   }
   for (const { entries } of exceptionItems) {
-    for (const entryObj of entries) {
-      if (indexPatterns.fields.find(({ name }) => name === entryObj.field) === undefined) {
+    for (const exceptionEntry of entries) {
+      if (indexPatterns.fields.find(({ name }) => name === exceptionEntry.field) === undefined) {
         return true;
       }
     }

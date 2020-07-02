@@ -52,3 +52,10 @@ export const BULK_CLOSE_LABEL = i18n.translate(
     defaultMessage: 'Close all alerts that match attributes in this exception',
   }
 );
+
+export const EXCEPTION_BUILDER_INFO = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.infoLabel',
+  {
+    defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
+  }
+);
