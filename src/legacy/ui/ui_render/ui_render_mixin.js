@@ -181,8 +181,6 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            darkMode,
-            themeVersion,
             themeTag,
             jsDependencyPaths,
             styleSheetPaths,
