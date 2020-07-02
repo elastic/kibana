@@ -25,31 +25,21 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   editAction,
   errors,
 }) => {
-  const [cursorPositionStart, setCursorPositionStart] = useState<number>(0);
-  const [cursorPositionEnd, setCursorPositionEnd] = useState<number>(0);
+  const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
   const onSelectMessageVariable = (variable: string) => {
     const templatedVar = `{{${variable}}}`;
-    const startPosition = cursorPositionStart;
-    const endPosition = cursorPositionEnd;
+    const startPosition = currentTextElement?.selectionStart ?? 0;
+    const endPosition = currentTextElement?.selectionEnd ?? 0;
     const newValue =
       (inputTargetValue ?? '').substring(0, startPosition) +
       templatedVar +
-      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue || '').length);
-    setCursorPositionStart(startPosition + templatedVar.length);
-    setCursorPositionEnd(endPosition + templatedVar.length);
+      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
     editAction(paramsProperty, newValue, index);
   };
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setCursorPositionStart(e.target.selectionStart ?? 0);
-    setCursorPositionEnd(e.target.selectionEnd ?? 0);
-  };
-
-  const onClickWithMessageVariable = (target: HTMLInputElement) => {
-    setCursorPositionStart(target.selectionStart ?? 0);
-    setCursorPositionEnd(target.selectionEnd ?? 0);
   };
 
   return (
@@ -61,21 +51,12 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       data-test-subj={`${paramsProperty}Input`}
       value={inputTargetValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
-      onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) =>
-        onClickWithMessageVariable(e.currentTarget)
-      }
-      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-        onClickWithMessageVariable(e.currentTarget)
-      }
+      onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+        setCurrentTextElement(e.target);
+      }}
       onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
         if (!inputTargetValue) {
           editAction(paramsProperty, '', index);
-        }
-      }}
-      onMouseLeave={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
-        if (e.currentTarget.id !== `${paramsProperty}Id`) {
-          setCursorPositionStart((inputTargetValue || '').length);
-          setCursorPositionEnd((inputTargetValue || '').length);
         }
       }}
       append={

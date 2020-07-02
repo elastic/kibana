@@ -27,32 +27,21 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   label,
   errors,
 }) => {
-  const [cursorPositionStart, setCursorPositionStart] = useState<number>(0);
-  const [cursorPositionEnd, setCursorPositionEnd] = useState<number>(0);
+  const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
   const onSelectMessageVariable = (variable: string) => {
-    let newValue = inputTargetValue || '';
     const templatedVar = `{{${variable}}}`;
-    const startPosition = cursorPositionStart;
-    const endPosition = cursorPositionEnd;
-    newValue =
-      (inputTargetValue || '').substring(0, startPosition) +
+    const startPosition = currentTextElement?.selectionStart ?? 0;
+    const endPosition = currentTextElement?.selectionEnd ?? 0;
+    const newValue =
+      (inputTargetValue ?? '').substring(0, startPosition) +
       templatedVar +
-      (inputTargetValue || '').substring(endPosition, (inputTargetValue || '').length);
-    setCursorPositionStart(startPosition + templatedVar.length);
-    setCursorPositionEnd(endPosition + templatedVar.length);
+      (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
     editAction(paramsProperty, newValue, index);
   };
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setCursorPositionStart(e.target.selectionStart ?? 0);
-    setCursorPositionEnd(e.target.selectionEnd ?? 0);
-  };
-
-  const onClickWithMessageVariable = (target: HTMLInputElement) => {
-    setCursorPositionStart(target.selectionStart ?? 0);
-    setCursorPositionEnd(target.selectionEnd ?? 0);
   };
 
   return (
@@ -76,12 +65,9 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         value={inputTargetValue}
         data-test-subj={`${paramsProperty}TextArea`}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-        onClick={(e: React.MouseEvent<HTMLTextAreaElement, MouseEvent>) =>
-          onClickWithMessageVariable(e.currentTarget)
-        }
-        onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
-          onClickWithMessageVariable(e.currentTarget)
-        }
+        onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+          setCurrentTextElement(e.target);
+        }}
         onBlur={() => {
           if (!inputTargetValue) {
             editAction(paramsProperty, '', index);
