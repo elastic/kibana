@@ -19,10 +19,12 @@ import { FieldItem } from './field_item';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
   data: DataPublicPluginStart;
+  chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;
   query: Query;

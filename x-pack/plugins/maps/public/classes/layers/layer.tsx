@@ -326,6 +326,10 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
+  _getMbSourceId() {
+    return this.getId();
+  }
+
   _requiresPrevSourceCleanup(mbMap: unknown) {
     return false;
   }
@@ -427,7 +431,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
-  ownsMbSourceId(sourceId: string): boolean {
+  ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 
