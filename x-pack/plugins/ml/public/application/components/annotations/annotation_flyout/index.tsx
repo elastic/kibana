@@ -45,6 +45,7 @@ import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '../../../../../common/types/annotations';
+import { PartitionFieldsType } from '../../../../../common/types/anomalies';
 interface Entity {
   fieldName: string;
   fieldType: string;
@@ -177,7 +178,8 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
     if (this.state.applyAnnotationToSeries && chartDetails?.entityData?.entities) {
       chartDetails.entityData.entities.forEach((entity: Entity) => {
-        const { fieldName, fieldType, fieldValue } = entity;
+        const { fieldName, fieldValue } = entity;
+        const fieldType = entity.fieldType as PartitionFieldsType;
         annotation[getAnnotationFieldName(fieldType)] = fieldName;
         annotation[getAnnotationFieldValue(fieldType)] = fieldValue;
       });

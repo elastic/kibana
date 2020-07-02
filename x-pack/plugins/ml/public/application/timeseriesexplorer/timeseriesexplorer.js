@@ -1316,41 +1316,43 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
-                <EuiAccordion
-                  id={'EuiAccordion-blah'}
-                  buttonContent={
-                    <EuiTitle className="panel-title">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                          defaultMessage="Annotations {badge}"
-                          values={{
-                            badge: (
-                              <EuiBadge color={'hollow'}>
-                                <FormattedMessage
-                                  id="xpack.ml.explorer.annotationsTitleTotalCount"
-                                  defaultMessage="Total: {count}"
-                                  values={{ count: focusAnnotationData.length }}
-                                />
-                              </EuiBadge>
-                            ),
-                          }}
-                        />
-                      </h2>
-                    </EuiTitle>
-                  }
-                >
-                  <AnnotationsTable
-                    chartDetails={chartDetails}
-                    detectorIndex={selectedDetectorIndex}
-                    jobIds={[this.props.selectedJobId]}
-                    annotations={focusAnnotationData}
-                    aggregations={focusAggregations}
-                    isSingleMetricViewerLinkVisible={false}
-                    isNumberBadgeVisible={true}
-                  />
-                  <EuiSpacer size="l" />
-                </EuiAccordion>
+                {focusAnnotationData && focusAnnotationData.length > 0 && (
+                  <EuiAccordion
+                    id={'EuiAccordion-blah'}
+                    buttonContent={
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                            defaultMessage="Annotations {badge}"
+                            values={{
+                              badge: (
+                                <EuiBadge color={'hollow'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                    defaultMessage="Total: {count}"
+                                    values={{ count: focusAnnotationData.length }}
+                                  />
+                                </EuiBadge>
+                              ),
+                            }}
+                          />
+                        </h2>
+                      </EuiTitle>
+                    }
+                  >
+                    <AnnotationsTable
+                      chartDetails={chartDetails}
+                      detectorIndex={selectedDetectorIndex}
+                      jobIds={[this.props.selectedJobId]}
+                      annotations={focusAnnotationData}
+                      aggregations={focusAggregations}
+                      isSingleMetricViewerLinkVisible={false}
+                      isNumberBadgeVisible={true}
+                    />
+                    <EuiSpacer size="l" />
+                  </EuiAccordion>
+                )}
                 <AnnotationFlyout
                   chartDetails={chartDetails}
                   detectorIndex={selectedDetectorIndex}
