@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var Symbol = require('./_Symbol'),
     getRawTag = require('./_getRawTag'),
     objectToString = require('./_objectToString');

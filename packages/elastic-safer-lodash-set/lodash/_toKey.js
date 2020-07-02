@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var isSymbol = require('./isSymbol');
 
 /** Used as references for various `Number` constants. */

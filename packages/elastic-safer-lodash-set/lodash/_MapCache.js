@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var mapCacheClear = require('./_mapCacheClear'),
     mapCacheDelete = require('./_mapCacheDelete'),
     mapCacheGet = require('./_mapCacheGet'),

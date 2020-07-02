@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var MapCache = require('./_MapCache');
 
 /** Error message constants. */

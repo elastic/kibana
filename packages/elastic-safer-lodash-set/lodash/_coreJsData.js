@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var root = require('./_root');
 
 /** Used to detect overreaching core-js shims. */

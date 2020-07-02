@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var coreJsData = require('./_coreJsData');
 
 /** Used to detect methods masquerading as native. */

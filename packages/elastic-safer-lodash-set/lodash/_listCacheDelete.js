@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var assocIndexOf = require('./_assocIndexOf');
 
 /** Used for built-in method references. */

@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 /** Used for built-in method references. */
 var funcProto = Function.prototype;
 

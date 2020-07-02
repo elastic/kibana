@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var baseAssignValue = require('./_baseAssignValue'),
     eq = require('./eq');
 

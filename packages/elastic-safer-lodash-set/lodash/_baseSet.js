@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var assignValue = require('./_assignValue'),
     castPath = require('./_castPath'),
     isIndex = require('./_isIndex'),

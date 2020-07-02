@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var memoizeCapped = require('./_memoizeCapped');
 
 /** Used to match property names within property paths. */

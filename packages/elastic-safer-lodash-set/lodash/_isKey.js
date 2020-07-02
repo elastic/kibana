@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var isArray = require('./isArray'),
     isSymbol = require('./isSymbol');
 

@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var nativeCreate = require('./_nativeCreate');
 
 /** Used for built-in method references. */

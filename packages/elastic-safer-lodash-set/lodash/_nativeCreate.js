@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var getNative = require('./_getNative');
 
 /* Built-in method references that are verified to be native. */

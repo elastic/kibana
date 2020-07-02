@@ -1,4 +1,4 @@
-0a1,7
+0a1,9
 > /*
 >  * This file is forked from the lodash project (https://lodash.com/),
 >  * and may include modifications made by Elasticsearch B.V.
@@ -6,12 +6,14 @@
 >  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
 >  */
 > 
-31a39,42
+> /* eslint-disable */
+> 
+31a41,44
 >     if (typeof nested == 'function' && key == 'prototype' && hasOwnProperty.call(nested, 'prototype')) {
 >       throw new Error('Illegal access of function prototype')
 >     }
 > 
-33c44
+33c46
 <       var objValue = nested[key];
 ---
 >       var objValue = hasOwnProperty.call(nested, key) ? nested[key] : undefined

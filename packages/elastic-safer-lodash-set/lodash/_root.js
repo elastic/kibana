@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */

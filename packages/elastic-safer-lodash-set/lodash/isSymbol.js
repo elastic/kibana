@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var baseGetTag = require('./_baseGetTag'),
     isObjectLike = require('./isObjectLike');
 

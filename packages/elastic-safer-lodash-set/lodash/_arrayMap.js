@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 /**
  * A specialized version of `_.map` for arrays without support for iteratee
  * shorthands.

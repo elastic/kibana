@@ -5,6 +5,8 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` more information.
  */
 
+/* eslint-disable */
+
 var memoize = require('./memoize');
 
 /** Used as the maximum memoize cache size. */
