@@ -18,9 +18,9 @@ export const postAgentsUnenrollHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     if (request.body?.force === true) {
-      await AgentService.unenrollAgent(soClient, request.params.agentId);
-    } else {
       await AgentService.forceUnenrollAgent(soClient, request.params.agentId);
+    } else {
+      await AgentService.unenrollAgent(soClient, request.params.agentId);
     }
 
     const body: PostAgentUnenrollResponse = {

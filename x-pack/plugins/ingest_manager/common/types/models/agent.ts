@@ -11,7 +11,7 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
+export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning' | 'unenrolling';
 export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
 export interface NewAgentAction {
   type: AgentActionType;
