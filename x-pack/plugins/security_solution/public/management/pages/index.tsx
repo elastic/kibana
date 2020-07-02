@@ -7,6 +7,8 @@
 import React, { memo } from 'react';
 import { useHistory, Route, Switch } from 'react-router-dom';
 
+import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyContainer } from './policy';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -16,13 +18,50 @@ import {
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { getEndpointListPath } from '../common/routing';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../app/types';
+
+const NoPermissions = memo(() => {
+  return (
+    <>
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpointManagemnet.noPermissions"
+            defaultMessage="You do not have permission to use Elastic Endpoint Secuirty."
+          />
+        }
+        body={
+          <p>
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.endpointManagemnet.noPermissions"
+                defaultMessage="It looks like Ingest Mananger is disabled which is required for this feature.  If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+              />
+            </EuiText>
+          </p>
+        }
+      />
+      <SpyRoute pageName={SecurityPageName.management} />
+    </>
+  );
+});
+NoPermissions.displayName = 'NoPermissions';
 
 export const ManagementContainer = memo(() => {
   const history = useHistory();
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
+      <Route
+        path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
+        component={false ? NoPermissions : EndpointsContainer}
+      />
+      <Route
+        path={MANAGEMENT_ROUTING_POLICIES_PATH}
+        component={false ? NoPermissions : PolicyContainer}
+      />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
