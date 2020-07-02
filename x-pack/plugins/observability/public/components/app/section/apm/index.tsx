@@ -25,15 +25,18 @@ import { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ApmFetchDataResponse } from '../../../../typings';
-import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { onBrushEnd } from '../helper';
+import { StyledStat } from '../../styled_stat';
 
 interface Props {
   startTime?: string;
   endTime?: string;
   bucketSize?: string;
+}
+
+function formatTransactionValue(value?: number) {
+  return numeral(value).format('0.00a');
 }
 
 export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
@@ -46,45 +49,44 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
     }
   }, [startTime, endTime, bucketSize]);
 
-  const transactionSeries = data?.series.transactions;
+  const { title = 'APM', appLink, stats, series } = data || {};
 
   const min = moment.utc(startTime).valueOf();
   const max = moment.utc(endTime).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
-  const getSerieColor = (color?: string) => {
-    if (color) {
-      return color;
-    }
-  };
-
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  const transactionsColor = series?.transactions.color || theme.euiColorVis1;
 
   return (
     <SectionContainer
       minHeight={296}
-      title={data?.title || 'APM'}
+      title={title || 'APM'}
       subtitle={i18n.translate('xpack.observability.overview.chart.apm.subtitle', {
         defaultMessage: 'Summary',
       })}
-      appLink={data?.appLink}
+      appLink={appLink}
     >
       <EuiFlexGroup>
-        {data &&
-          Object.keys(data.stats).map((key) => {
-            const stat = data?.stats[key as keyof ApmFetchDataResponse['stats']];
-            return (
-              <EuiFlexItem key={key} grow={false}>
-                <EuiStat
-                  title={formatStatValue(stat)}
-                  description={stat.label}
-                  titleSize="s"
-                  isLoading={isLoading}
-                />
-              </EuiFlexItem>
-            );
-          })}
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            title={numeral(stats?.services.value).format('0a')}
+            description={stats?.services.label || ''}
+            titleSize="s"
+            isLoading={isLoading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <StyledStat
+            title={formatTransactionValue(stats?.transactions.value)}
+            description={stats?.transactions.label || ''}
+            titleSize="s"
+            isLoading={isLoading}
+            color={transactionsColor}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <ChartContainer height={177} isLoading={isLoading}>
         <Chart size={{ height: 177 }}>
@@ -95,23 +97,23 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
             legendPosition="bottom"
             xDomain={{ min, max }}
           />
-          {transactionSeries?.coordinates && (
+          {series?.transactions.coordinates && (
             <>
               <BarSeries
                 id="transactions"
                 name="Transactions"
-                data={transactionSeries.coordinates}
+                data={series?.transactions.coordinates}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor={'x'}
                 yAccessors={['y']}
-                color={getSerieColor(transactionSeries.color)}
+                color={transactionsColor}
               />
               <Axis
                 id="y-axis"
                 position={Position.Left}
                 showGridLines
-                tickFormat={(d) => numeral(d).format('0a')}
+                tickFormat={(value) => numeral(value).format('0.00a')}
               />
               <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
             </>

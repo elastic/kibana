@@ -51,6 +51,8 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const formatter = niceTimeFormatter([min, max]);
 
+  const { title = 'Logs', appLink, stats, series } = data || {};
+
   const customColors = {
     colors: {
       vizColors: euiPaletteColorBlind({
@@ -64,16 +66,16 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
   return (
     <SectionContainer
       minHeight={296}
-      title={data?.title || 'Logs'}
+      title={title}
       subtitle={i18n.translate('xpack.observability.overview.chart.logs.subtitle', {
         defaultMessage: 'Logs rate',
       })}
-      appLink={data?.appLink}
+      appLink={appLink}
     >
       <EuiFlexGroup>
-        {data &&
-          Object.keys(data.stats).map((key) => {
-            const stat = data.stats[key as keyof LogsFetchDataResponse['stats']];
+        {stats &&
+          Object.keys(stats).map((key) => {
+            const stat = stats[key as keyof LogsFetchDataResponse['stats']];
             return (
               <EuiFlexItem key={key} grow={false}>
                 <EuiStat
@@ -95,9 +97,9 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
             legendPosition="bottom"
             xDomain={{ min, max }}
           />
-          {data &&
-            Object.keys(data.series).map((key) => {
-              const serie = data.series[key];
+          {series &&
+            Object.keys(series).map((key) => {
+              const serie = series[key];
               const chartData = serie.coordinates.map((coordinate) => ({
                 ...coordinate,
                 g: serie.label,

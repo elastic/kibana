@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiAccordion, EuiButtonEmpty, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 
 interface Props {
@@ -21,8 +19,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
     border-bottom: ${(props) => props.theme.eui.euiBorderThin};
   }
-  .euiAccordion__button,
-  .euiAccordion__optionalAction {
+  .euiAccordion__button {
     margin-bottom: 16px;
   }
   .euiAccordion__childWrapper {
@@ -43,20 +40,20 @@ export const SectionContainer = ({ title, appLink, children, subtitle, minHeight
       }
       extraAction={
         appLink && (
-          <EuiButtonEmpty href={appLink}>
+          <EuiLink href={appLink}>
             <EuiText size="s">
               {i18n.translate('xpack.observability.chart.viewInAppLabel', {
                 defaultMessage: 'View in app',
               })}
             </EuiText>
-          </EuiButtonEmpty>
+          </EuiLink>
         )
       }
     >
       <EuiPanel hasShadow style={{ minHeight: `${minHeight}px` }}>
-        <EuiText size="xs">
+        <EuiTitle size="xs">
           <h3>{subtitle}</h3>
-        </EuiText>
+        </EuiTitle>
         <EuiSpacer size="s" />
         {children}
       </EuiPanel>
