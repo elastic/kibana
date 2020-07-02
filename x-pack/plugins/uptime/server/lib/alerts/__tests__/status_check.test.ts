@@ -11,6 +11,7 @@ import {
   hasFilters,
   statusCheckAlertFactory,
   uniqueMonitorIds,
+  availabilityMessage,
 } from '../status_check';
 import { GetMonitorStatusResult } from '../../requests';
 import { AlertType } from '../../../../../alerts/server';
@@ -617,25 +618,135 @@ describe('status check alert', () => {
     });
 
     it('creates a message with appropriate number of monitors', () => {
-      expect(contextMessage(ids, 3)).toMatchInlineSnapshot(
+      expect(contextMessage(ids, 3, [], 0)).toMatchInlineSnapshot(
         `"Down monitors: first, second, third... and 2 other monitors"`
       );
     });
 
     it('throws an error if `max` is less than 2', () => {
-      expect(() => contextMessage(ids, 1)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => contextMessage(ids, 1, [], 0)).toThrowErrorMatchingInlineSnapshot(
         '"Maximum value must be greater than 2, received 1."'
       );
     });
 
     it('returns only the ids if length < max', () => {
-      expect(contextMessage(ids.slice(0, 2), 3)).toMatchInlineSnapshot(
+      expect(contextMessage(ids.slice(0, 2), 3, [], 0)).toMatchInlineSnapshot(
         `"Down monitors: first, second"`
       );
     });
 
     it('returns a default message when no monitors are provided', () => {
-      expect(contextMessage([], 3)).toMatchInlineSnapshot(`"No down monitor IDs received"`);
+      expect(contextMessage([], 3, [], 0)).toMatchInlineSnapshot(`"No down monitor IDs received"`);
+    });
+  });
+
+  describe('availabilityMessage', () => {
+    it('creates message for singular item', () => {
+      expect(
+        availabilityMessage(
+          [
+            {
+              monitorId: 'test-node-service',
+              location: 'fairbanks',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 821.0,
+              down: 2450.0,
+              availabilityRatio: 0.25099357994497096,
+            },
+          ],
+          59
+        )
+      ).toMatchInlineSnapshot(`
+        "Monitor Below Availability Threshold (59 %):
+        Test Node Service(http://localhost:12349): 0.25099357994497096
+        "
+      `);
+    });
+
+    it('creates message for multiple items', () => {
+      expect(
+        availabilityMessage(
+          [
+            {
+              monitorId: 'test-node-service',
+              location: 'fairbanks',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 821.0,
+              down: 2450.0,
+              availabilityRatio: 0.25099357994497096,
+            },
+            {
+              monitorId: 'test-node-service',
+              location: 'harrisburg',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 3389.0,
+              down: 2450.0,
+              availabilityRatio: 0.5804076040417879,
+            },
+          ],
+          59
+        )
+      ).toMatchInlineSnapshot(`
+        "Top 2 Monitors Below Availability Threshold (59 %):
+        Test Node Service(http://localhost:12349): 0.25099357994497096
+        Test Node Service(http://localhost:12349): 0.5804076040417879
+        "
+      `);
+    });
+
+    it('caps message for multiple items', () => {
+      expect(
+        availabilityMessage(
+          [
+            {
+              monitorId: 'test-node-service',
+              location: 'fairbanks',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 821.0,
+              down: 2450.0,
+              availabilityRatio: 0.250993579944971,
+            },
+            {
+              monitorId: 'test-node-service',
+              location: 'harrisburg',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 3389.0,
+              down: 2450.0,
+              availabilityRatio: 0.58040760404178,
+            },
+            {
+              monitorId: 'test-node-service',
+              location: 'berlin',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 3645.0,
+              down: 2982.0,
+              availabilityRatio: 0.550022634676324,
+            },
+            {
+              monitorId: 'test-node-service',
+              location: 'st paul',
+              name: 'Test Node Service',
+              url: 'http://localhost:12349',
+              up: 3601.0,
+              down: 2681.0,
+              availabilityRatio: 0.573225087551735,
+            },
+          ],
+          59
+        )
+      ).toMatchInlineSnapshot(`
+        "Top 3 Monitors Below Availability Threshold (59 %):
+        Test Node Service(http://localhost:12349): 0.250993579944971
+        Test Node Service(http://localhost:12349): 0.550022634676324
+        Test Node Service(http://localhost:12349): 0.573225087551735
+        "
+      `);
     });
   });
 });

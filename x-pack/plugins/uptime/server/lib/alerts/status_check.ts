@@ -18,12 +18,15 @@ import {
   StatusCheckParams,
   StatusCheckFilters,
   AtomicStatusCheckParamsType,
+  UniversalStatusCheckParamsType,
+  UniversalStatusCheckParams,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
 import { commonStateTranslations } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
+import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -37,12 +40,47 @@ export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =
     return acc;
   }, new Set<string>());
 
+const MESSAGE_AVAILABILITY_MAX = 3;
+
+export const availabilityMessage = (
+  availabilityResult: GetMonitorAvailabilityResult[],
+  threshold: number
+): string => {
+  return availabilityResult
+    .sort((a, b) => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100))
+    .slice(0, MESSAGE_AVAILABILITY_MAX)
+    .map(
+      ({ availabilityRatio, name, monitorId, url }) =>
+        `${name || monitorId}(${url}): ${availabilityRatio}`
+    )
+    .reduce((prev: string, cur: string, _ind: number, array: string[]) => {
+      let next = '';
+      if (prev === '') {
+        if (array.length > 1) {
+          next = `Top ${Math.min(
+            array.length,
+            MESSAGE_AVAILABILITY_MAX
+          )} Monitors Below Availability Threshold (${threshold} %):\n`;
+        } else {
+          next = `Monitor Below Availability Threshold (${threshold} %):\n`;
+        }
+      }
+      next += `${cur}\n`;
+      return prev + next;
+    }, '');
+};
+
 /**
  * Generates a message to include in contexts of alerts.
  * @param monitors the list of monitors to include in the message
  * @param max the maximum number of items the summary should contain
  */
-export const contextMessage = (monitorIds: string[], max: number): string => {
+export const contextMessage = (
+  monitorIds: string[],
+  max: number,
+  availabilityResult: GetMonitorAvailabilityResult[],
+  availabilityThreshold: number
+): string => {
   const MIN = 2;
   if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
 
@@ -82,6 +120,10 @@ export const contextMessage = (monitorIds: string[], max: number): string => {
     } else {
       message = message + `, ${id}`;
     }
+  }
+
+  if (availabilityResult.length) {
+    return message + availabilityMessage(availabilityResult, availabilityThreshold);
   }
 
   return message;
@@ -253,7 +295,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     );
     const atomicDecoded = AtomicStatusCheckParamsType.decode(rawParams);
     const decoded = StatusCheckParamsType.decode(rawParams);
-    let params: StatusCheckParams;
+    let params: StatusCheckParams & UniversalStatusCheckParams;
     if (isRight(atomicDecoded)) {
       const { filters, search, numTimes, timerangeCount, timerangeUnit } = atomicDecoded.right;
       const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
@@ -283,18 +325,37 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       };
     }
 
+    const universalDecoded = UniversalStatusCheckParamsType.decode(rawParams);
+    if (isRight(universalDecoded)) {
+      params = { ...universalDecoded.right, ...params };
+    }
+
+    let availabilityResults: GetMonitorAvailabilityResult[] = [];
+    if (params.shouldCheckAvailability === true && params.availability) {
+      availabilityResults = await libs.requests.getMonitorAvailability({
+        callES: options.services.callCluster,
+        dynamicSettings,
+        ...params.availability,
+      });
+    }
+
     /* This is called `monitorsByLocation` but it's really
      * monitors by location by status. The query we run to generate this
      * filters on the status field, so effectively there should be one and only one
      * status represented in the result set. */
-    const monitorsByLocation = await libs.requests.getMonitorStatus({
-      callES: options.services.callCluster,
-      dynamicSettings,
-      ...params,
-    });
+    let monitorsByLocation: GetMonitorStatusResult[] = [];
+
+    // old alert versions are missing this field so it must default to true
+    if (params.shouldCheckStatus ?? true) {
+      monitorsByLocation = await libs.requests.getMonitorStatus({
+        callES: options.services.callCluster,
+        dynamicSettings,
+        ...params,
+      });
+    }
 
     // if no monitors are down for our query, we don't need to trigger an alert
-    if (monitorsByLocation.length) {
+    if (monitorsByLocation.length || availabilityResults.length) {
       const uniqueIds = uniqueMonitorIds(monitorsByLocation);
       const alertInstance = options.services.alertInstanceFactory(MONITOR_STATUS.id);
       alertInstance.replaceState({
@@ -303,7 +364,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         ...updateState(options.state, true),
       });
       alertInstance.scheduleActions(MONITOR_STATUS.id, {
-        message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
+        message: contextMessage(
+          Array.from(uniqueIds.keys()),
+          DEFAULT_MAX_MESSAGE_ROWS,
+          availabilityResults,
+          params?.availability?.threshold ?? 100
+        ),
         downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });
     }
