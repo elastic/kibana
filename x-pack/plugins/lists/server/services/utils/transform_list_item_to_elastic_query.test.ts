@@ -101,6 +101,18 @@ describe('transform_elastic_to_elastic_query', () => {
       expect(elasticQuery).toEqual(expected);
     });
 
+    test('it transforms a ip CIDR to a union', () => {
+      const elasticQuery = transformListItemToElasticQuery({
+        serializer: undefined,
+        type: 'ip_range',
+        value: '127.0.0.1/16',
+      });
+      const expected: EsDataTypeUnion = {
+        ip_range: '127.0.0.1/16',
+      };
+      expect(elasticQuery).toEqual(expected);
+    });
+
     test('it transforms a ip_range to a union even if only a single value is found', () => {
       const elasticQuery = transformListItemToElasticQuery({
         serializer: undefined,
@@ -427,6 +439,18 @@ describe('transform_elastic_to_elastic_query', () => {
       });
       const expected: EsDataTypeUnion = {
         ip_range: { gte: '127.0.0.1', lte: '127.0.0.2' },
+      };
+      expect(elasticQuery).toEqual(expected);
+    });
+
+    test('it transforms a ip CIDR to a union', () => {
+      const elasticQuery = serializeIpRange({
+        defaultSerializer: DEFAULT_LTE_GTE_REGEX,
+        serializer: undefined,
+        value: '127.0.0.1/16',
+      });
+      const expected: EsDataTypeUnion = {
+        ip_range: '127.0.0.1/16',
       };
       expect(elasticQuery).toEqual(expected);
     });
