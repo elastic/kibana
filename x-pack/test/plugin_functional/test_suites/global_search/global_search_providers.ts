@@ -23,13 +23,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('GlobalSearch - SavedObject provider', function () {
-    beforeEach(async () => {
+    before(async () => {
       await esArchiver.load('global_search/basic');
-      await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
 
-    afterEach(async () => {
+    after(async () => {
       await esArchiver.unload('global_search/basic');
+    });
+
+    beforeEach(async () => {
+      await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
 
     it('can search for index patterns', async () => {
@@ -58,7 +61,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const results = await findResultsWithAPI('Amazing');
       expect(results.length).to.be(1);
       expect(results[0].type).to.be('dashboard');
-      expect(results[0].title).to.be('Amazing  Dashboard');
+      expect(results[0].title).to.be('Amazing Dashboard');
+    });
+
+    it('returns all objects matching the search', async () => {
+      const results = await findResultsWithAPI('dashboard');
+      expect(results.length).to.be.greaterThan(2);
+      expect(results.map((r) => r.title)).to.contain('dashboard with map');
+      expect(results.map((r) => r.title)).to.contain('Amazing Dashboard');
     });
   });
 }

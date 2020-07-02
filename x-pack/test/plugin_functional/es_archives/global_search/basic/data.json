@@ -50,7 +50,7 @@
     "id": "dashboard:i-exist",
     "source": {
       "dashboard": {
-        "title": "Amazing  Dashboard",
+        "title": "Amazing Dashboard",
         "hits": 0,
         "description": "",
         "panelsJSON": "[{\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"version\":\"7.0.0\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"id\":\"75c3e060-1e7c-11e9-8488-65449e65d0ed\",\"embeddableConfig\":{}}]",
