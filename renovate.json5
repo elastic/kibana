@@ -558,14 +558,6 @@
         ],
       },
       {
-        groupSlug: 'lodash3',
-        groupName: 'lodash3 related packages',
-        packageNames: [
-          'lodash3',
-          '@types/lodash3',
-        ],
-      },
-      {
         groupSlug: 'log-symbols',
         groupName: 'log-symbols related packages',
         packageNames: [
