@@ -126,7 +126,7 @@ describe('sortLayer', () => {
     moveCounter = 0;
   });
 
-  test('Should initial layer load order to expected order', () => {
+  test('Should sort initial layer load order to expected order', () => {
     const initialMbStyle = {
       version: 0,
       layers: [
@@ -162,7 +162,7 @@ describe('sortLayer', () => {
     ]);
   });
 
-  test('Should move layer single order to expected order', () => {
+  test('Should sort single layer single move to expected order', () => {
     const initialMbStyle = {
       version: 0,
       layers: [
