@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -29,20 +29,13 @@ import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 import { FieldBrowserProps } from './types';
 
-const CloseButtonIcon = styled(EuiButtonIcon)`
-  position: absolute;
-  right: 0;
-  top: 0;
-`;
-
-const RowRenderersBrowserButtonContainer = styled.div`
-  position: relative;
-`;
-
-RowRenderersBrowserButtonContainer.displayName = 'RowRenderersBrowserButtonContainer';
-
 const StyledEuiModal = styled(EuiModal)`
   margin: 0 auto;
+  max-width: 95vw;
+
+  > .euiModal__flex {
+    max-height: 95vh;
+  }
 `;
 
 const StyledEuiModalBody = styled(EuiModalBody)`
@@ -68,13 +61,19 @@ const StyledEuiModalBody = styled(EuiModalBody)`
   }
 `;
 
+const StyledEuiOverlayMask = styled(EuiOverlayMask)`
+  z-index: 8001;
+  padding-bottom: 0;
+`;
+
 interface StatefulRowRenderersBrowserProps {
   timelineId: string;
 }
 
-export const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
+const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
   timelineId,
 }) => {
+  const tableRef = useRef();
   const dispatch = useDispatch();
   const excludedRowRendererIds = useSelector(
     (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []
@@ -96,12 +95,15 @@ export const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderers
 
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
-  const handleDisableAll = useCallback(() => setExcludedRowRendererIds([RowRendererId.all]), [
-    setExcludedRowRendererIds,
-  ]);
-  const handleEnableAll = useCallback(() => setExcludedRowRendererIds([]), [
-    setExcludedRowRendererIds,
-  ]);
+  const handleDisableAll = useCallback(() => {
+    setExcludedRowRendererIds([RowRendererId.all]);
+    tableRef.current.setSelection([]);
+  }, [setExcludedRowRendererIds]);
+
+  const handleEnableAll = useCallback(() => {
+    setExcludedRowRendererIds([]);
+    tableRef.current.setSelection([]);
+  }, [setExcludedRowRendererIds]);
 
   return (
     <>
@@ -117,9 +119,8 @@ export const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderers
       </EuiToolTip>
 
       {show && (
-        <EuiOverlayMask>
-          <StyledEuiModal maxWidth="95vw" onClose={hideFieldBrowser}>
-            <CloseButtonIcon color="text" onClick={hideFieldBrowser} iconType="cross" />
+        <StyledEuiOverlayMask>
+          <StyledEuiModal onClose={hideFieldBrowser}>
             <EuiModalHeader>
               <EuiFlexGroup
                 alignItems="center"
@@ -159,12 +160,13 @@ export const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderers
 
             <StyledEuiModalBody>
               <RowRenderersBrowser
+                ref={tableRef}
                 excludedRowRendererIds={excludedRowRendererIds}
                 setExcludedRowRendererIds={setExcludedRowRendererIds}
               />
             </StyledEuiModalBody>
           </StyledEuiModal>
-        </EuiOverlayMask>
+        </StyledEuiOverlayMask>
       )}
     </>
   );

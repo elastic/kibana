@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
@@ -78,7 +78,7 @@ const search = {
   },
 };
 
-const renderers: RowRendererOption[] = [
+export const renderers: RowRendererOption[] = [
   {
     id: RowRendererId.auditd,
     name: 'Auditd',
@@ -97,14 +97,12 @@ const renderers: RowRendererOption[] = [
     description: 'System Row Renderer',
     example: SystemExample,
   },
-
   {
     id: RowRendererId.system_endgame_process,
     name: 'System Endgame Process',
     description: 'Endgame Process Row Renderer',
     example: SystemEndgameProcessExample,
   },
-
   {
     id: RowRendererId.system_fin,
     name: 'System FIM',
@@ -123,21 +121,18 @@ const renderers: RowRendererOption[] = [
     description: 'System Socket Row Renderer',
     example: SystemSocketExample,
   },
-
   {
     id: RowRendererId.system_security_event,
     name: 'System Security Event',
     description: 'System Security Event Row Renderer',
     example: SystemSecurityEventExample,
   },
-
   {
     id: RowRendererId.system_dns,
     name: 'System DNS',
     description: 'System DNS Row Renderer',
     example: SystemDnsExample,
   },
-
   {
     id: RowRendererId.suricata,
     name: 'Suricata',
@@ -158,76 +153,74 @@ const renderers: RowRendererOption[] = [
   },
 ];
 
-const FieldsBrowserComponent: React.FC<Props> = ({
-  excludedRowRendererIds = [],
-  setExcludedRowRendererIds,
-}) => {
-  const columns = useMemo(
-    () => [
-      {
-        field: 'name',
-        name: 'Name',
-        sortable: true,
-        truncateText: true,
-        width: '15%',
+const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
+  ({ excludedRowRendererIds = [], setExcludedRowRendererIds }, ref) => {
+    const columns = useMemo(
+      () => [
+        {
+          field: 'name',
+          name: 'Name',
+          sortable: true,
+          truncateText: true,
+          width: '15%',
+        },
+        {
+          field: 'description',
+          name: 'Description',
+          truncateText: true,
+          width: '20%',
+        },
+        {
+          field: 'example',
+          name: 'Example',
+          width: '65%',
+          render: ExampleWrapperComponent,
+        },
+      ],
+      []
+    );
+
+    const notExcludedRowRenderers = useMemo(() => {
+      if (excludedRowRendererIds.includes(RowRendererId.all)) return [];
+
+      return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
+    }, [excludedRowRendererIds]);
+
+    const handleSelectable = useCallback(() => true, []);
+
+    const handleSelectionChange = useCallback(
+      (selection: RowRendererOption[]) => {
+        if (!selection || !selection.length) return setExcludedRowRendererIds([RowRendererId.all]);
+
+        const excludedRowRenderers = xorBy('id', renderers, selection);
+
+        setExcludedRowRendererIds(excludedRowRenderers.map((rowRenderer) => rowRenderer.id));
       },
-      {
-        field: 'description',
-        name: 'Description',
-        truncateText: true,
-        width: '20%',
-      },
-      {
-        field: 'example',
-        name: 'Example',
-        width: '65%',
-        render: ExampleWrapperComponent,
-      },
-    ],
-    []
-  );
+      [setExcludedRowRendererIds]
+    );
 
-  const notExcludedRowRenderers = useMemo(() => {
-    if (excludedRowRendererIds.includes(RowRendererId.all)) return [];
+    const selectionValue = useMemo(
+      () => ({
+        selectable: handleSelectable,
+        onSelectionChange: handleSelectionChange,
+        initialSelected: notExcludedRowRenderers,
+      }),
+      [handleSelectable, handleSelectionChange, notExcludedRowRenderers]
+    );
 
-    return renderers.filter((renderer) => !excludedRowRendererIds.includes(renderer.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleSelectable = useCallback(() => true, []);
-
-  const handleSelectionChange = useCallback(
-    (selection: RowRendererOption[]) => {
-      if (!selection || !selection.length) return setExcludedRowRendererIds([RowRendererId.all]);
-
-      const excludedRowRenderers = xorBy('id', renderers, selection);
-
-      setExcludedRowRendererIds(excludedRowRenderers.map((rowRenderer) => rowRenderer.id));
-    },
-    [setExcludedRowRendererIds]
-  );
-
-  const selectionValue = useMemo(
-    () => ({
-      selectable: handleSelectable,
-      onSelectionChange: handleSelectionChange,
-      initialSelected: notExcludedRowRenderers,
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [handleSelectable, handleSelectionChange]
-  );
-
-  return (
-    <StyledEuiInMemoryTable
-      items={renderers}
-      itemId="id"
-      columns={columns}
-      search={search}
-      sorting={true}
-      isSelectable={true}
-      selection={selectionValue}
-    />
-  );
-};
+    return (
+      <StyledEuiInMemoryTable
+        ref={ref}
+        items={renderers}
+        itemId="id"
+        columns={columns}
+        search={search}
+        sorting={true}
+        isSelectable={true}
+        selection={selectionValue}
+      />
+    );
+  }
+);
 
 export const RowRenderersBrowser = React.memo(FieldsBrowserComponent);
