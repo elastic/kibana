@@ -30,6 +30,7 @@ describe('getExportAll', () => {
     const exports = await getExportAll(alertsClient);
     expect(exports).toEqual({
       rulesNdjson: `${JSON.stringify({
+        author: ['Elastic'],
         actions: [],
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -45,9 +46,11 @@ describe('getExportAll', () => {
         interval: '5m',
         rule_id: 'rule-1',
         language: 'kuery',
+        license: 'Elastic License',
         output_index: '.siem-signals',
         max_signals: 100,
         risk_score: 50,
+        risk_score_mapping: [],
         name: 'Detect Root/Admin Users',
         query: 'user.name: root or user.name: admin',
         references: ['http://www.example.com', 'https://ww.example.com'],
@@ -55,6 +58,7 @@ describe('getExportAll', () => {
         timeline_title: 'some-timeline-title',
         meta: { someMeta: 'someField' },
         severity: 'high',
+        severity_mapping: [],
         updated_by: 'elastic',
         tags: [],
         to: 'now',
