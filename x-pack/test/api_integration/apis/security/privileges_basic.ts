@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
             apm: ['all', 'read'],
             siem: ['all', 'read'],
             ingestManager: ['all', 'read'],
+            builtInAlerts: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],

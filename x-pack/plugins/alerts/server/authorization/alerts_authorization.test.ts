@@ -459,12 +459,12 @@ describe('ensureAuthorized', () => {
 });
 
 describe('getFindAuthorizationFilter', () => {
-  const alertingAlertType = {
+  const myOtherAppAlertType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
-    id: 'alertingAlertType',
-    name: 'alertingAlertType',
+    id: 'myOtherAppAlertType',
+    name: 'myOtherAppAlertType',
     producer: 'alerts',
   };
   const myAppAlertType = {
@@ -475,7 +475,7 @@ describe('getFindAuthorizationFilter', () => {
     name: 'myAppAlertType',
     producer: 'myApp',
   };
-  const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
+  const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
   test('omits filter when there is no authorization api', async () => {
     const alertAuthorization = new AlertsAuthorization({
@@ -533,7 +533,7 @@ describe('getFindAuthorizationFilter', () => {
     alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
     expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchInlineSnapshot(
-      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:alertingAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
+      `"((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))"`
     );
 
     expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
@@ -550,11 +550,11 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'find'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'find'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
           authorized: false,
         },
         {
@@ -608,11 +608,11 @@ describe('getFindAuthorizationFilter', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'find'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'find'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'find'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'find'),
           authorized: false,
         },
         {
@@ -655,13 +655,13 @@ describe('getFindAuthorizationFilter', () => {
 });
 
 describe('filterByAlertTypeAuthorization', () => {
-  const alertingAlertType = {
+  const myOtherAppAlertType = {
     actionGroups: [],
     actionVariables: undefined,
     defaultActionGroupId: 'default',
-    id: 'alertingAlertType',
-    name: 'alertingAlertType',
-    producer: 'alerts',
+    id: 'myOtherAppAlertType',
+    name: 'myOtherAppAlertType',
+    producer: 'myOtherApp',
   };
   const myAppAlertType = {
     actionGroups: [],
@@ -671,7 +671,7 @@ describe('filterByAlertTypeAuthorization', () => {
     name: 'myAppAlertType',
     producer: 'myApp',
   };
-  const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
+  const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
   test('augments a list of types with all features when there is no authorization api', async () => {
     const alertAuthorization = new AlertsAuthorization({
@@ -684,7 +684,7 @@ describe('filterByAlertTypeAuthorization', () => {
 
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
-        new Set([myAppAlertType, alertingAlertType]),
+        new Set([myAppAlertType, myOtherAppAlertType]),
         [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
@@ -737,9 +737,9 @@ describe('filterByAlertTypeAuthorization', () => {
                   },
                 },
                 "defaultActionGroupId": "default",
-                "id": "alertingAlertType",
-                "name": "alertingAlertType",
-                "producer": "alerts",
+                "id": "myOtherAppAlertType",
+                "name": "myOtherAppAlertType",
+                "producer": "myOtherApp",
               },
             }
           `);
@@ -756,11 +756,11 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
           authorized: false,
         },
         {
@@ -785,7 +785,7 @@ describe('filterByAlertTypeAuthorization', () => {
 
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
-        new Set([myAppAlertType, alertingAlertType]),
+        new Set([myAppAlertType, myOtherAppAlertType]),
         [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
@@ -794,19 +794,15 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionGroups": Array [],
                 "actionVariables": undefined,
                 "authorizedConsumers": Object {
-                  "alerts": Object {
-                    "all": true,
-                    "read": true,
-                  },
                   "myApp": Object {
                     "all": true,
                     "read": true,
                   },
                 },
                 "defaultActionGroupId": "default",
-                "id": "alertingAlertType",
-                "name": "alertingAlertType",
-                "producer": "alerts",
+                "id": "myOtherAppAlertType",
+                "name": "myOtherAppAlertType",
+                "producer": "myOtherApp",
               },
               Object {
                 "actionGroups": Array [],
@@ -903,11 +899,11 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
           authorized: false,
         },
         {
@@ -919,11 +915,11 @@ describe('filterByAlertTypeAuthorization', () => {
           authorized: false,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'get'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'get'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'get'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'get'),
           authorized: true,
         },
         {
@@ -948,7 +944,7 @@ describe('filterByAlertTypeAuthorization', () => {
 
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
-        new Set([myAppAlertType, alertingAlertType]),
+        new Set([myAppAlertType, myOtherAppAlertType]),
         [WriteOperations.Create, ReadOperations.Get]
       )
     ).resolves.toMatchInlineSnapshot(`
@@ -958,7 +954,7 @@ describe('filterByAlertTypeAuthorization', () => {
                 "actionVariables": undefined,
                 "authorizedConsumers": Object {
                   "alerts": Object {
-                    "all": true,
+                    "all": false,
                     "read": true,
                   },
                   "myApp": Object {
@@ -971,9 +967,9 @@ describe('filterByAlertTypeAuthorization', () => {
                   },
                 },
                 "defaultActionGroupId": "default",
-                "id": "alertingAlertType",
-                "name": "alertingAlertType",
-                "producer": "alerts",
+                "id": "myOtherAppAlertType",
+                "name": "myOtherAppAlertType",
+                "producer": "myOtherApp",
               },
               Object {
                 "actionGroups": Array [],
@@ -1012,11 +1008,11 @@ describe('filterByAlertTypeAuthorization', () => {
       hasAllRequested: false,
       privileges: [
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'create'),
           authorized: true,
         },
         {
-          privilege: mockAuthorizationAction('alertingAlertType', 'myOtherApp', 'create'),
+          privilege: mockAuthorizationAction('myOtherAppAlertType', 'myOtherApp', 'create'),
           authorized: true,
         },
         {
@@ -1041,7 +1037,7 @@ describe('filterByAlertTypeAuthorization', () => {
 
     await expect(
       alertAuthorization.filterByAlertTypeAuthorization(
-        new Set([myAppAlertType, alertingAlertType]),
+        new Set([myAppAlertType, myOtherAppAlertType]),
         [WriteOperations.Create]
       )
     ).resolves.toMatchInlineSnapshot(`
@@ -1064,9 +1060,9 @@ describe('filterByAlertTypeAuthorization', () => {
                   },
                 },
                 "defaultActionGroupId": "default",
-                "id": "alertingAlertType",
-                "name": "alertingAlertType",
-                "producer": "alerts",
+                "id": "myOtherAppAlertType",
+                "name": "myOtherAppAlertType",
+                "producer": "myOtherApp",
               },
             }
           `);

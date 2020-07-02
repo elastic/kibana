@@ -9,7 +9,6 @@ import { omit } from 'lodash';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix } from '../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ALERTS_FEATURE_ID, AlertType } from '../../../../../plugins/alerts/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function listAlertTypes({ getService }: FtrProviderContext) {
