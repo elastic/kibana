@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FilterOptions, ExceptionsPagination } from '../types';
+import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 import {
   ExceptionList,
   ExceptionListItemSchema,
@@ -20,7 +20,7 @@ export interface State {
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
   loadingLists: ExceptionIdentifiers[];
-  loadingItemIds: ExceptionIdentifiers[];
+  loadingItemIds: ExceptionListItemIdentifiers[];
   isInitLoading: boolean;
   isModalOpen: boolean;
 }
@@ -41,7 +41,7 @@ export type Action =
   | { type: 'updateIsInitLoading'; loading: boolean }
   | { type: 'updateModalOpen'; isOpen: boolean }
   | { type: 'updateExceptionToEdit'; exception: ExceptionListItemSchema }
-  | { type: 'updateLoadingItemIds'; items: ExceptionIdentifiers[] };
+  | { type: 'updateLoadingItemIds'; items: ExceptionListItemIdentifiers[] };
 
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {

@@ -256,9 +256,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   const exceptionLists = useMemo((): ExceptionIdentifiers[] => {
     if (rule != null && rule.exceptions_list != null) {
-      return rule.exceptions_list.map(({ id, namespace_type }) => ({
+      return rule.exceptions_list.map(({ id, namespace_type, type }) => ({
         id,
         namespaceType: namespace_type,
+        type,
       }));
     } else {
       return [];

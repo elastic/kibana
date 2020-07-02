@@ -18,11 +18,8 @@ import styled from 'styled-components';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntries, getFormattedComments } from '../../helpers';
-import { FormattedEntry } from '../../types';
-import {
-  ExceptionIdentifiers,
-  ExceptionListItemSchema,
-} from '../../../../../../public/lists_plugin_deps';
+import { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
+import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {
@@ -32,10 +29,10 @@ const MyFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ExceptionItemProps {
-  loadingItemIds: ExceptionIdentifiers[];
+  loadingItemIds: ExceptionListItemIdentifiers[];
   exceptionItem: ExceptionListItemSchema;
   commentsAccordionId: string;
-  onDeleteException: (arg: ExceptionIdentifiers) => void;
+  onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
 }
 
@@ -55,7 +52,10 @@ const ExceptionItemComponent = ({
   }, [exceptionItem.entries]);
 
   const handleDelete = useCallback((): void => {
-    onDeleteException({ id: exceptionItem.id, namespaceType: exceptionItem.namespace_type });
+    onDeleteException({
+      id: exceptionItem.id,
+      namespaceType: exceptionItem.namespace_type,
+    });
   }, [onDeleteException, exceptionItem.id, exceptionItem.namespace_type]);
 
   const handleEdit = useCallback((): void => {
