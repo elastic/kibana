@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { SavedObjectsFindResponsePublic } from 'kibana/public';
-import { StepIndexPattern } from '../step_index_pattern';
+import { StepIndexPattern, canPreselectTimeField } from './step_index_pattern';
 import { Header } from './components/header';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { mockManagementPlugin } from '../../../../mocks';
@@ -204,5 +204,60 @@ describe('StepIndexPattern', () => {
     instance.lastQuery = 'k';
     await new Promise((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
+  });
+
+  it('it can preselect time field', async () => {
+    const dataStream1 = {
+      name: 'data stream 1',
+      tags: [],
+      item: { name: 'data stream 1', backing_indices: [], timestamp_field: 'timestamp_field' },
+    };
+
+    const dataStream2 = {
+      name: 'data stream 2',
+      tags: [],
+      item: { name: 'data stream 2', backing_indices: [], timestamp_field: 'timestamp_field' },
+    };
+
+    const differentDataStream = {
+      name: 'different data stream',
+      tags: [],
+      item: { name: 'different data stream 2', backing_indices: [], timestamp_field: 'x' },
+    };
+
+    const index = {
+      name: 'index',
+      tags: [],
+      item: {
+        name: 'index',
+      },
+    };
+
+    const alias = {
+      name: 'alias',
+      tags: [],
+      item: {
+        name: 'alias',
+        indices: [],
+      },
+    };
+
+    expect(canPreselectTimeField([index]).canPreselect).toEqual(false);
+    expect(canPreselectTimeField([alias]).canPreselect).toEqual(false);
+    expect(canPreselectTimeField([index, alias, dataStream1]).canPreselect).toEqual(false);
+
+    expect(canPreselectTimeField([dataStream1])).toEqual({
+      canPreselect: true,
+      timeFieldName: 'timestamp_field',
+    });
+
+    expect(canPreselectTimeField([dataStream1, dataStream2])).toEqual({
+      canPreselect: true,
+      timeFieldName: 'timestamp_field',
+    });
+
+    expect(
+      canPreselectTimeField([dataStream1, dataStream2, differentDataStream]).canPreselect
+    ).toEqual(false);
   });
 });

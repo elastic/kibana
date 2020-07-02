@@ -62,6 +62,29 @@ interface StepIndexPatternState {
   indexPatternName: string;
 }
 
+export const canPreselectTimeField = (indices: MatchedItem[]) =>
+  indices.reduce(
+    (
+      { canPreselect, timeFieldName }: { canPreselect: boolean; timeFieldName?: string },
+      matchedItem
+    ) => {
+      const dataStreamItem = matchedItem.item as ResolveIndexResponseItemDataStream;
+      const dataStreamTimestampField = dataStreamItem.timestamp_field;
+      const isDataStream = !!dataStreamItem.timestamp_field;
+      const timestampFieldMatches =
+        timeFieldName === undefined || timeFieldName === dataStreamTimestampField;
+
+      return {
+        canPreselect: canPreselect && isDataStream && timestampFieldMatches,
+        timeFieldName: dataStreamTimestampField || timeFieldName,
+      };
+    },
+    {
+      canPreselect: true,
+      timeFieldName: undefined,
+    }
+  );
+
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
 
@@ -308,33 +331,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
     // if all are data streams with same time field then create index pattern
-    const {
-      allMatchingDataStreams: uniformDataStreams,
-      timeFieldName: matchingTimestamp,
-    } = indices.reduce(
-      (
-        {
-          allMatchingDataStreams,
-          timeFieldName,
-        }: { allMatchingDataStreams: boolean; timeFieldName?: string },
-        matchedItem
-      ) => {
-        const dataStreamItem = matchedItem.item as ResolveIndexResponseItemDataStream;
-        const dataStreamTimestampField = dataStreamItem.timestamp_field;
-        const isDataStream = !!dataStreamItem.timestamp_field;
-        const timestampFieldMatches =
-          timeFieldName === undefined || timeFieldName === dataStreamTimestampField;
-
-        return {
-          allMatchingDataStreams: allMatchingDataStreams && isDataStream && timestampFieldMatches,
-          timeFieldName: dataStreamTimestampField || timeFieldName,
-        };
-      },
-      {
-        allMatchingDataStreams: true,
-        timeFieldName: undefined,
-      }
-    );
+    const { canPreselect, timeFieldName: matchingTimestamp } = canPreselectTimeField(indices);
 
     return (
       <Header
@@ -344,7 +341,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={() => goToNextStep(query, uniformDataStreams ? matchingTimestamp : undefined)}
+        goToNextStep={() => goToNextStep(query, canPreselect ? matchingTimestamp : undefined)}
         isNextStepDisabled={isNextStepDisabled}
       />
     );
