@@ -42,9 +42,7 @@ export const AnomalyDetection = () => {
         </h1>
       </EuiTitle>
       <EuiSpacer size="l" />
-      Our Machine Learning integration enables you to see the health status of
-      your applications in the Service map and indentifies anomalies in your
-      transaction duration to show unexpected decrease in response time.
+      The Machine Learning integration enables you to see the health status of your applications in the Service map and identifies anomalies in your transaction duration to show unexpected increase in response time.
       <EuiSpacer size="l" />
       {viewAddEnvironments ? (
         <AddEnvironments
