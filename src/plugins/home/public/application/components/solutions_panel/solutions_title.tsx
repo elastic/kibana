@@ -17,19 +17,37 @@
  * under the License.
  */
 
-import { MouseEvent } from 'react';
-import { getServices } from '../kibana_services';
+import React, { FunctionComponent } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToken,
+  EuiTitle,
+  EuiText,
+  EuiIcon,
+  IconType,
+} from '@elastic/eui';
 
-export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {
-  if (event.altKey || event.metaKey || event.ctrlKey) {
-    return;
-  }
-  if (targetUrl.startsWith('/app/')) {
-    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl) || [];
-    if (!appId) {
-      return;
-    }
-    event.preventDefault();
-    getServices().application.navigateToApp(appId, { path });
-  }
-};
+interface Props {
+  title: string;
+  subtitle: string;
+  iconType: IconType;
+}
+
+export const SolutionsTitle: FunctionComponent<Props> = ({ title, subtitle, iconType }) => (
+  <EuiFlexGroup gutterSize="none" alignItems="center">
+    <EuiFlexItem className="eui-textCenter">
+      <p>
+        <EuiToken iconType={iconType} shape="circle" fill="light" size="l" />
+      </p>
+      <EuiTitle className="eui-textInheritColor" size="s">
+        <p>{title}</p>
+      </EuiTitle>
+      <EuiText size="s">
+        <p>
+          {subtitle} <EuiIcon type="sortRight" />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

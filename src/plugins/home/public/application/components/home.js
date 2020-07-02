@@ -17,30 +17,32 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
-import { AddData } from './add_data';
+import { ChangeHomeRoute } from './change_home_route';
+import { SolutionsPanel } from './solutions_panel';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiPage,
-  EuiPanel,
   EuiTitle,
-  EuiSpacer,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiFlexGrid,
-  EuiText,
+  EuiFlexItem,
   EuiPageBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiHorizontalRule,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Welcome } from './welcome';
 import { getServices } from '../kibana_services';
-import { FeatureCatalogueCategory } from '../../services';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -116,29 +118,39 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  renderDirectories = (category) => {
-    const { addBasePath, directories } = this.props;
-    return directories
-      .filter((directory) => {
-        return directory.showOnHomePage && directory.category === category;
-      })
-      .map((directory) => {
-        return (
-          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
-            <Synopsis
-              onClick={createAppNavigationHandler(directory.path)}
-              description={directory.description}
-              iconType={directory.icon}
-              title={directory.title}
-              url={addBasePath(directory.path)}
-            />
-          </EuiFlexItem>
-        );
-      });
+  findDirectoryById = (id) =>
+    this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
+
+  renderDirectoryById = (id, { isBeta } = {}) => {
+    const { addBasePath } = this.props;
+    const directory = this.findDirectoryById(id);
+
+    return directory ? (
+      <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
+        <Synopsis
+          onClick={createAppNavigationHandler(directory.path)}
+          description={directory.description}
+          iconType={directory.icon}
+          title={directory.title}
+          url={addBasePath(directory.path)}
+          wrapInPanel
+          isBeta={isBeta}
+        />
+      </EuiFlexItem>
+    ) : null;
   };
 
   renderNormal() {
-    const { apmUiEnabled, mlEnabled } = this.props;
+    const {
+      username, // TODO: pass in actual username
+      addBasePath,
+      canChangeHomeRoute = true,
+    } = this.props;
+
+    const isDarkMode = getServices().uiSettings.get('theme:darkMode');
+    const addDataGraphicURL = isDarkMode
+      ? addBasePath('/plugins/home/assets/add_data_graphic_dark_2x.png')
+      : addBasePath('/plugins/home/assets/add_data_graphic_light_2x.png');
 
     return (
       <EuiPage restrictWidth={1200} data-test-subj="homeApp">
@@ -148,71 +160,157 @@ export class Home extends Component {
               <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
+          <EuiSpacer />
+          <EuiPageHeader>
+            <EuiPageHeaderSection>
+              <EuiTitle size="m">
+                <h1>
+                  {username
+                    ? i18n.translate('home.pageHeaderUserTitle', {
+                        defaultMessage: 'Welcome, {username}!',
+                        values: { username },
+                      })
+                    : i18n.translate('home.pageHeaderNoUserTitle', {
+                        defaultMessage: 'Welcome to {elastic}!',
+                        values: { elastic: 'Elastic' },
+                      })}
+                </h1>
+              </EuiTitle>
+            </EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
+                    {i18n.translate('home.pageHeader.addDataButtonLabel', {
+                      defaultMessage: 'Add data',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty href="#/feature_directory" iconType="apps">
+                    {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
+                      defaultMessage: 'App directory',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    onClick={createAppNavigationHandler('/app/dev_tools')} // TODO: passing both causes EUI lint error, but providing an href allows the user to open the link in a new tab
+                    iconType="wrench"
+                  >
+                    {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                      defaultMessage: 'Dev tools',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    onClick={createAppNavigationHandler('/app/management')} // TODO: passing both causes EUI lint error, but providing an href allows the user to open the link in a new tab
+                    iconType="gear"
+                  >
+                    {i18n.translate('home.pageHeader.managementButtonLabel', {
+                      defaultMessage: 'Manage',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageHeaderSection>
+          </EuiPageHeader>
 
-          <AddData
-            apmUiEnabled={apmUiEnabled}
-            mlEnabled={mlEnabled}
-            isNewKibanaInstance={this.state.isNewKibanaInstance}
-          />
+          <EuiSpacer />
 
-          <EuiSpacer size="l" />
+          <EuiHorizontalRule />
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="home.directories.visualize.nameTitle"
-                      defaultMessage="Visualize and Explore Data"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2} gutterSize="s">
-                  {this.renderDirectories(FeatureCatalogueCategory.DATA)}
-                </EuiFlexGrid>
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel paddingSize="l">
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="home.directories.manage.nameTitle"
-                      defaultMessage="Manage and Administer the Elastic Stack"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
-                  {this.renderDirectories(FeatureCatalogueCategory.ADMIN)}
-                </EuiFlexGrid>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <div className="homSolutionsPanel">
+            <SolutionsPanel
+              addBasePath={addBasePath}
+              observability={this.findDirectoryById('observability')}
+              appSearch={this.findDirectoryById('app_search')}
+              securitySolution={this.findDirectoryById('securitySolution')}
+            />
 
-          <EuiSpacer size="l" />
+            <EuiHorizontalRule />
 
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} className="eui-textCenter">
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="home.directories.notFound.description"
-                    defaultMessage="Didn’t find what you were looking for?"
+            <div className="homAddData">
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('home.addData.sectionTitle', { defaultMessage: 'Add your data' })}
+                </h3>
+              </EuiTitle>
+
+              <EuiSpacer />
+
+              <EuiFlexGroup>
+                <EuiFlexItem grow={1}>
+                  <EuiFlexGrid columns={2}>
+                    {this.renderDirectoryById('ml_file_data_visualizer')}
+                    <EuiFlexItem>
+                      <Synopsis
+                        description={i18n.translate('home.addData.addIntegrationDescription', {
+                          defaultMessage: 'Add data from a variety of common sources.',
+                        })}
+                        iconType="indexOpen"
+                        title={i18n.translate('home.addData.addIntegrationTitle', {
+                          defaultMessage: 'Add an integration',
+                        })}
+                        url="#/tutorial_directory"
+                        wrapInPanel
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <Synopsis
+                        description={i18n.translate('home.addData.sampleDataDescription', {
+                          defaultMessage: 'Load a prefabricated data set to try Elastic Console.',
+                        })}
+                        iconType="documents"
+                        title={i18n.translate('home.addData.sampleDataTitle', {
+                          defaultMessage: 'Add sample data',
+                        })}
+                        url="#/tutorial_directory/sampleData"
+                        wrapInPanel
+                      />
+                    </EuiFlexItem>
+                    {this.renderDirectoryById('ingest_manager', { isBeta: true })}
+                  </EuiFlexGrid>
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <EuiImage
+                    className="homAddData__image"
+                    url={addDataGraphicURL}
+                    alt="Add data graphic"
                   />
-                </p>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiButton data-test-subj="allPlugins" href="#/feature_directory">
-                <FormattedMessage
-                  id="home.directories.notFound.viewFullButtonLabel"
-                  defaultMessage="View full directory of Kibana plugins"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+
+            <EuiHorizontalRule />
+
+            <div className="homManageData">
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('home.manageData.sectionTitle', {
+                    defaultMessage: 'Manage your data',
+                  })}
+                </h3>
+              </EuiTitle>
+
+              <EuiSpacer />
+
+              <EuiFlexGroup>
+                {this.renderDirectoryById('security')}
+                {this.renderDirectoryById('monitoring')}
+                {this.renderDirectoryById('snapshot_restore')}
+                {this.renderDirectoryById('index_lifecycle_management')}
+              </EuiFlexGroup>
+            </div>
+
+            {canChangeHomeRoute && (
+              <Fragment>
+                <EuiHorizontalRule />
+                <ChangeHomeRoute addBasePath={addBasePath} />
+              </Fragment>
+            )}
+          </div>
         </EuiPageBody>
       </EuiPage>
     );
@@ -262,11 +360,9 @@ Home.propTypes = {
       category: PropTypes.string.isRequired,
     })
   ),
-  apmUiEnabled: PropTypes.bool.isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
-  mlEnabled: PropTypes.bool.isRequired,
   telemetry: PropTypes.shape({
     telemetryService: PropTypes.any,
     telemetryNotifications: PropTypes.any,
