@@ -27,6 +27,10 @@ import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 
+/**
+ * Action context for {@link ACTION_GLOBAL_APPLY_FILTER}
+ * @public
+ */
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
