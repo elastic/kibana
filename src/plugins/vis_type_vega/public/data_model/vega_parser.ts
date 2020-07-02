@@ -654,20 +654,21 @@ export class VegaParser {
    * @private
    */
   _setDefaultValue(value: unknown, ...fields: string[]) {
+    if (!this.spec) return;
     let o = this.spec;
     for (let i = 0; i < fields.length - 1; i++) {
       const field = fields[i];
-      const subObj = o![field];
+      const subObj = o[field];
       if (subObj === undefined) {
-        o![field] = {};
+        o[field] = {};
       } else if (!_.isPlainObject(subObj)) {
         return;
       }
-      o = (o as VegaSpec)[field];
+      o = o[field];
     }
     const lastField = fields[fields.length - 1];
-    if ((o as VegaSpec)[lastField] === undefined) {
-      (o as VegaSpec)[lastField] = value;
+    if (o[lastField] === undefined) {
+      o[lastField] = value;
     }
   }
 
