@@ -13,7 +13,6 @@ import {
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
   INSPECT_QUERY,
   LOAD_MORE,
-  RESET_FIELDS,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 import { DRAGGABLE_HEADER } from '../../screens/timeline';
@@ -51,10 +50,6 @@ export const opensInspectQueryModal = () => {
     .should('exist')
     .trigger('mousemove', { force: true })
     .click({ force: true });
-};
-
-export const resetFields = () => {
-  cy.get(RESET_FIELDS).click({ force: true });
 };
 
 export const waitsForEventsToBeLoaded = () => {

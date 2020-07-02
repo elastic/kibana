@@ -307,6 +307,10 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
 export const flattenFields = (allFields: Fields): Fields => {
   const flatten = (fields: Fields): Fields =>
     fields.reduce<Field[]>((acc, field) => {
+      // if this is a group fields with no fields, skip the field
+      if (field.type === 'group' && !field.fields?.length) {
+        return acc;
+      }
       // recurse through nested fields
       if (field.type === 'group' && field.fields?.length) {
         // skip if field.enabled is not explicitly set to false

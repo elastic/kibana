@@ -78,7 +78,7 @@ exports[`TimeField should render a selected time field 1`] = `
       <EuiText
         size="xs"
       >
-        <ForwardRef
+        <EuiLink
           onClick={[Function]}
         >
           <FormattedMessage
@@ -86,7 +86,7 @@ exports[`TimeField should render a selected time field 1`] = `
             id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </EuiText>
     }
     labelType="label"
@@ -140,7 +140,7 @@ exports[`TimeField should render normally 1`] = `
       <EuiText
         size="xs"
       >
-        <ForwardRef
+        <EuiLink
           onClick={[Function]}
         >
           <FormattedMessage
@@ -148,7 +148,7 @@ exports[`TimeField should render normally 1`] = `
             id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </EuiText>
     }
     labelType="label"

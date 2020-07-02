@@ -242,9 +242,17 @@ export function initDashboardApp(app, deps) {
         },
       })
       .otherwise({
-        template: '<span></span>',
-        controller: function () {
-          deps.navigateToDefaultApp();
+        resolveRedirectTo: function ($rootScope) {
+          const path = window.location.hash.substr(1);
+          deps.restorePreviousUrl();
+          $rootScope.$applyAsync(() => {
+            const { navigated } = deps.navigateToLegacyKibanaUrl(path);
+            if (!navigated) {
+              deps.navigateToDefaultApp();
+            }
+          });
+          // prevent angular from completing the navigation
+          return new Promise(() => {});
         },
       });
   });

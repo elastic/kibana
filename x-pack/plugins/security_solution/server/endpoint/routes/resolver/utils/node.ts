@@ -7,10 +7,11 @@
 import {
   ResolverEvent,
   ResolverAncestry,
-  LifecycleNode,
+  ResolverLifecycleNode,
   ResolverRelatedEvents,
   ResolverTree,
-  ChildNode,
+  ResolverChildNode,
+  ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -29,11 +30,26 @@ export function createRelatedEvents(
 }
 
 /**
+ * Creates an alert object that the alerts handler would return
+ *
+ * @param entityID the entity_id for these related events
+ * @param alerts array of alerts
+ * @param nextAlert the cursor to retrieve the next alert
+ */
+export function createRelatedAlerts(
+  entityID: string,
+  alerts: ResolverEvent[] = [],
+  nextAlert: string | null = null
+): ResolverRelatedAlerts {
+  return { entityID, alerts, nextAlert };
+}
+
+/**
  * Creates a child node that would be used in the child handler response
  *
  * @param entityID the entity_id of the child
  */
-export function createChild(entityID: string): ChildNode {
+export function createChild(entityID: string): ResolverChildNode {
   const lifecycle = createLifecycle(entityID, []);
   return {
     ...lifecycle,
@@ -54,7 +70,10 @@ export function createAncestry(): ResolverAncestry {
  * @param id the entity_id that these lifecycle nodes should have
  * @param lifecycle an array of lifecycle events
  */
-export function createLifecycle(entityID: string, lifecycle: ResolverEvent[]): LifecycleNode {
+export function createLifecycle(
+  entityID: string,
+  lifecycle: ResolverEvent[]
+): ResolverLifecycleNode {
   return { entityID, lifecycle };
 }
 
@@ -73,6 +92,10 @@ export function createTree(entityID: string): ResolverTree {
     relatedEvents: {
       events: [],
       nextEvent: null,
+    },
+    relatedAlerts: {
+      alerts: [],
+      nextAlert: null,
     },
     lifecycle: [],
     ancestry: {

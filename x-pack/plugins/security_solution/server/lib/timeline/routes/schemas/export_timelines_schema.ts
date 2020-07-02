@@ -8,7 +8,6 @@ import * as rt from 'io-ts';
 
 export const exportTimelinesQuerySchema = rt.type({
   file_name: rt.string,
-  exclude_export_details: rt.union([rt.literal('true'), rt.literal('false')]),
 });
 
 export const exportTimelinesRequestBodySchema = rt.type({

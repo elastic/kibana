@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/Palette default 1`] = `
+<div
+  className="canvasContainerWrapper"
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <div
+      className="euiPopover__anchor"
+    >
+      <input
+        type="hidden"
+        value="paul_tor_14"
+      />
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <span
+            className="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            Select an option: 
+            <div
+              className="euiColorPalettePicker__itemGradient"
+              style={
+                Object {
+                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
+                }
+              }
+            />
+            , is selected
+          </span>
+          <button
+            aria-haspopup="true"
+            aria-labelledby="undefined generated-id"
+            aria-selected={true}
+            className="euiSuperSelectControl euiSuperSelectControl--compressed"
+            onClick={[Function]}
+            onKeyDown={[Function]}
+            readOnly={false}
+            role="option"
+            type="button"
+          >
+            <div
+              className="euiColorPalettePicker__itemGradient"
+              style={
+                Object {
+                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
+                }
+              }
+            />
+          </button>
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <div
+                aria-hidden="true"
+                className="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

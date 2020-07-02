@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore internal untyped
 import { fromExpression } from '@kbn/interpreter/common';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';

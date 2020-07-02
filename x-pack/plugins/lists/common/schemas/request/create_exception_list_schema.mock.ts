@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DESCRIPTION, LIST_ID, META, NAME, NAMESPACE_TYPE, TYPE } from '../../constants.mock';
+import { DESCRIPTION, ENDPOINT_TYPE, META, NAME, NAMESPACE_TYPE } from '../../constants.mock';
 
 import { CreateExceptionListSchema } from './create_exception_list_schema';
 
 export const getCreateExceptionListSchemaMock = (): CreateExceptionListSchema => ({
   _tags: [],
   description: DESCRIPTION,
-  list_id: LIST_ID,
+  list_id: undefined,
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
   tags: [],
-  type: TYPE,
+  type: ENDPOINT_TYPE,
 });

@@ -5,6 +5,7 @@
  */
 
 export const APP_ID = 'securitySolution';
+export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_PATH = `/app/security`;
@@ -32,6 +33,15 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
+export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+
+export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
+export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
+export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
+export const APP_NETWORK_PATH = `${APP_PATH}/network`;
+export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
+export const APP_CASES_PATH = `${APP_PATH}/cases`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -146,6 +156,12 @@ export const showAllOthersBucket: string[] = [
 
 /**
  * CreateTemplateTimelineBtn
+ * https://github.com/elastic/kibana/pull/66613
  * Remove the comment here to enable template timeline
  */
-export const disableTemplate = true;
+export const disableTemplate = false;
+
+/*
+ * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
+ */
+export const enableElasticFilter = false;

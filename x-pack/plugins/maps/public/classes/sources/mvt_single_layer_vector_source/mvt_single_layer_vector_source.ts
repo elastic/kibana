@@ -8,8 +8,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
-import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
@@ -116,8 +115,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     };
   }
 
-  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]> {
-    return [VECTOR_SHAPE_TYPES.POINT, VECTOR_SHAPE_TYPES.LINE, VECTOR_SHAPE_TYPES.POLYGON];
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
+    return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
   canFormatFeatureProperties() {

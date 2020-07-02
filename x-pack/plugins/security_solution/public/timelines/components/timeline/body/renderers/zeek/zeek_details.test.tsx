@@ -11,6 +11,8 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { ZeekDetails } from './zeek_details';
 
+jest.mock('../../../../../../common/components/link_to');
+
 describe('ZeekDetails', () => {
   const mount = useMountAppended();
 

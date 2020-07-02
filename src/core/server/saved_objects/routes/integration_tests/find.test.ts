@@ -79,6 +79,7 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
         },
         {
@@ -88,6 +89,7 @@ describe('GET /api/saved_objects/_find', () => {
           timeFieldName: '@timestamp',
           notExpandable: true,
           attributes: {},
+          score: 1,
           references: [],
         },
       ],

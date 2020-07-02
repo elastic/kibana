@@ -29,7 +29,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--optimize.enabled=false',
         '--telemetry.optIn=true',
         '--xpack.ingestManager.enabled=true',
-        '--xpack.securitySolution.alertResultListDefaultDateRange.from=2018-01-10T00:00:00.000Z',
+        '--xpack.ingestManager.fleet.pollingRequestTimeout=5000', // 5 seconds
       ],
     },
     esTestCluster: {

@@ -10,13 +10,13 @@ import { get, isEmpty } from 'lodash/fp';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
-import {
-  getHostsUrl,
-  getHostDetailsUrl,
-} from '../../../common/components/link_to/redirect_to_hosts';
+import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
 import { HostRouteSpyState } from '../../../common/utils/route/types';
+import { GetUrlForApp } from '../../../common/components/navigation/types';
+import { APP_ID } from '../../../../common/constants';
+import { SecurityPageName } from '../../../app/types';
 
 export const type = hostsModel.HostsType.details;
 
@@ -29,11 +29,17 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
-export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): ChromeBreadcrumb[] => {
+export const getBreadcrumbs = (
+  params: HostRouteSpyState,
+  search: string[],
+  getUrlForApp: GetUrlForApp
+): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: `${getHostsUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
+      href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        path: !isEmpty(search[0]) ? search[0] : '',
+      }),
     },
   ];
 
@@ -42,7 +48,9 @@ export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Chr
       ...breadcrumb,
       {
         text: params.detailName,
-        href: `${getHostDetailsUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
+        href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+          path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+        }),
       },
     ];
   }

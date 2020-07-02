@@ -5,3 +5,4 @@
  */
 
 export { ObservabilityLayerWizardConfig } from './observability_layer_wizard';
+export { APM_INDEX_PATTERN_TITLE } from './create_layer_descriptor';

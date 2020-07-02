@@ -6,7 +6,7 @@
 import {
   EPM_API_ROOT,
   EPM_API_ROUTES,
-  DATASOURCE_API_ROUTES,
+  PACKAGE_CONFIG_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
   DATA_STREAM_API_ROUTES,
   FLEET_SETUP_API_ROUTES,
@@ -44,25 +44,25 @@ export const epmRouteService = {
   },
 };
 
-export const datasourceRouteService = {
+export const packageConfigRouteService = {
   getListPath: () => {
-    return DATASOURCE_API_ROUTES.LIST_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.LIST_PATTERN;
   },
 
-  getInfoPath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.INFO_PATTERN.replace('{datasourceId}', datasourceId);
+  getInfoPath: (packageConfigId: string) => {
+    return PACKAGE_CONFIG_API_ROUTES.INFO_PATTERN.replace('{packageConfigId}', packageConfigId);
   },
 
   getCreatePath: () => {
-    return DATASOURCE_API_ROUTES.CREATE_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN;
   },
 
-  getUpdatePath: (datasourceId: string) => {
-    return DATASOURCE_API_ROUTES.UPDATE_PATTERN.replace('{datasourceId}', datasourceId);
+  getUpdatePath: (packageConfigId: string) => {
+    return PACKAGE_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{packageConfigId}', packageConfigId);
   },
 
   getDeletePath: () => {
-    return DATASOURCE_API_ROUTES.DELETE_PATTERN;
+    return PACKAGE_CONFIG_API_ROUTES.DELETE_PATTERN;
   },
 };
 
@@ -81,6 +81,10 @@ export const agentConfigRouteService = {
 
   getUpdatePath: (agentConfigId: string) => {
     return AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+
+  getCopyPath: (agentConfigId: string) => {
+    return AGENT_CONFIG_API_ROUTES.COPY_PATTERN.replace('{agentConfigId}', agentConfigId);
   },
 
   getDeletePath: () => {

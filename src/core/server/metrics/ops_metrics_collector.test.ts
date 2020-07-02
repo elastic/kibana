@@ -29,7 +29,7 @@ describe('OpsMetricsCollector', () => {
   let collector: OpsMetricsCollector;
 
   beforeEach(() => {
-    const hapiServer = httpServiceMock.createSetupContract().server;
+    const hapiServer = httpServiceMock.createInternalSetupContract().server;
     collector = new OpsMetricsCollector(hapiServer);
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');

@@ -7,10 +7,9 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -26,13 +25,14 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_PEW_PEW;
 
-  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
+  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField, metrics }) {
     return {
       type: ESPewPewSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       sourceGeoField,
       destGeoField,
+      metrics: metrics ? metrics : [],
     };
   }
 
@@ -60,7 +60,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   }
 
   async getSupportedShapeTypes() {
-    return [VECTOR_SHAPE_TYPES.LINE];
+    return [VECTOR_SHAPE_TYPE.LINE];
   }
 
   async getImmutableProperties() {

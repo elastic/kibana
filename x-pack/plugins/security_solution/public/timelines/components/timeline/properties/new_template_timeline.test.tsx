@@ -11,6 +11,8 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -24,7 +26,14 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 describe('NewTemplateTimeline', () => {
   const state: State = mockGlobalState;
-  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
   const mockClosePopover = jest.fn();
   const mockTitle = 'NEW_TIMELINE';
   let wrapper: ReactWrapper;
@@ -35,7 +44,7 @@ describe('NewTemplateTimeline', () => {
         services: {
           application: {
             capabilities: {
-              securitySolution: {
+              siem: {
                 crud: true,
               },
             },
@@ -76,7 +85,7 @@ describe('NewTemplateTimeline', () => {
         services: {
           application: {
             capabilities: {
-              securitySolution: {
+              siem: {
                 crud: false,
               },
             },

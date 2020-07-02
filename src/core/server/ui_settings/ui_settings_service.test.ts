@@ -49,7 +49,7 @@ describe('uiSettings', () => {
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
     coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
-    const httpSetup = httpServiceMock.createSetupContract();
+    const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
     savedObjectsClient = savedObjectsClientMock.create();

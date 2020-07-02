@@ -28,6 +28,7 @@ import {
   OnSelectAll,
   OnUpdateColumns,
 } from '../../events';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import {
   EventsTh,
   EventsThContent,
@@ -168,11 +169,26 @@ export const ColumnHeadersComponent = ({
       <EventsTrHeader>
         <EventsThGroupActions
           actionsColumnWidth={actionsColumnWidth}
-          justifyContent={showSelectAllCheckbox ? 'flexStart' : 'space-between'}
           data-test-subj="actions-container"
         >
+          {showSelectAllCheckbox && (
+            <EventsTh>
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EuiCheckbox
+                  data-test-subj="select-all-events"
+                  id={'select-all-events'}
+                  checked={isSelectAllChecked}
+                  onChange={handleSelectAllChange}
+                />
+              </EventsThContent>
+            </EventsTh>
+          )}
+
           <EventsTh>
-            <EventsThContent textAlign={showSelectAllCheckbox ? 'left' : 'center'}>
+            <EventsThContent
+              textAlign={showSelectAllCheckbox ? 'left' : 'center'}
+              width={DEFAULT_ICON_BUTTON_WIDTH}
+            >
               <StatefulFieldsBrowser
                 browserFields={browserFields}
                 columnHeaders={columnHeaders}
@@ -186,22 +202,11 @@ export const ColumnHeadersComponent = ({
               />
             </EventsThContent>
           </EventsTh>
+
           {showEventsSelect && (
             <EventsTh>
-              <EventsThContent textAlign="center">
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EventsSelect checkState="unchecked" timelineId={timelineId} />
-              </EventsThContent>
-            </EventsTh>
-          )}
-          {showSelectAllCheckbox && (
-            <EventsTh>
-              <EventsThContent textAlign="center">
-                <EuiCheckbox
-                  data-test-subj="select-all-events"
-                  id={'select-all-events'}
-                  checked={isSelectAllChecked}
-                  onChange={handleSelectAllChange}
-                />
               </EventsThContent>
             </EventsTh>
           )}

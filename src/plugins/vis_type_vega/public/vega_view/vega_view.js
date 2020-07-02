@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as vega from 'vega-lib';
+import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {

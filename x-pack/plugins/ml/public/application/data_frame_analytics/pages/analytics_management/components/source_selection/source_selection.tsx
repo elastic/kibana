@@ -26,12 +26,20 @@ interface Props {
 }
 
 export const SourceSelection: FC<Props> = ({ onClose }) => {
-  const { uiSettings, savedObjects } = useMlKibana().services;
+  const {
+    services: {
+      application: { navigateToUrl },
+      savedObjects,
+      uiSettings,
+    },
+  } = useMlKibana();
 
-  const onSearchSelected = (id: string, type: string) => {
-    window.location.href = `ml#/data_frame_analytics/new_job?${
-      type === 'index-pattern' ? 'index' : 'savedSearchId'
-    }=${encodeURIComponent(id)}`;
+  const onSearchSelected = async (id: string, type: string) => {
+    await navigateToUrl(
+      `ml#/data_frame_analytics/new_job?${
+        type === 'index-pattern' ? 'index' : 'savedSearchId'
+      }=${encodeURIComponent(id)}`
+    );
   };
 
   return (

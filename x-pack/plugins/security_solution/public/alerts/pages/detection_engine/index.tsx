@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { ManageUserInfo } from '../../components/user_info';
 import { CreateRulePage } from './rules/create';
@@ -14,34 +14,26 @@ import { EditRulePage } from './rules/edit';
 import { RuleDetailsPage } from './rules/details';
 import { RulesPage } from './rules';
 
-const detectionEnginePath = `/:pageName(detections)`;
-
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 const DetectionEngineContainerComponent: React.FC<Props> = () => (
   <ManageUserInfo>
     <Switch>
-      <Route exact path={`${detectionEnginePath}`} strict>
-        <DetectionEnginePage />
-      </Route>
-      <Route exact path={`${detectionEnginePath}/rules`}>
-        <RulesPage />
-      </Route>
-      <Route exact path={`${detectionEnginePath}/rules/create`}>
-        <CreateRulePage />
-      </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:detailName`}>
-        <RuleDetailsPage />
-      </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:detailName/edit`}>
+      <Route path="/rules/id/:detailName/edit">
         <EditRulePage />
       </Route>
-      <Route
-        path="/detections/"
-        render={({ location: { search = '' } }) => (
-          <Redirect from="/detections/" to={`/detections/${search}`} />
-        )}
-      />
+      <Route path="/rules/id/:detailName">
+        <RuleDetailsPage />
+      </Route>
+      <Route path="/rules/create">
+        <CreateRulePage />
+      </Route>
+      <Route path="/rules">
+        <RulesPage />
+      </Route>
+      <Route exact path="" strict>
+        <DetectionEnginePage />
+      </Route>
     </Switch>
   </ManageUserInfo>
 );

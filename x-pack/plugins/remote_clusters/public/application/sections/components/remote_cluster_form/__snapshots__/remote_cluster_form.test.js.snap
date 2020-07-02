@@ -703,7 +703,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                         values={
                           Object {
-                            "learnMoreLink": <ForwardRef
+                            "learnMoreLink": <EuiLink
                               target="_blank"
                             >
                               <FormattedMessage
@@ -711,7 +711,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                 id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
                                 values={Object {}}
                               />
-                            </ForwardRef>,
+                            </EuiLink>,
                           }
                         }
                       />
@@ -812,7 +812,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                               values={
                                 Object {
-                                  "learnMoreLink": <ForwardRef
+                                  "learnMoreLink": <EuiLink
                                     target="_blank"
                                   >
                                     <FormattedMessage
@@ -820,7 +820,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
                                       values={Object {}}
                                     />
-                                  </ForwardRef>,
+                                  </EuiLink>,
                                 }
                               }
                             >
@@ -976,7 +976,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                 values={
                   Object {
-                    "learnMoreLink": <ForwardRef
+                    "learnMoreLink": <EuiLink
                       target="_blank"
                     >
                       <FormattedMessage
@@ -984,7 +984,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                         values={Object {}}
                       />
-                    </ForwardRef>,
+                    </EuiLink>,
                     "optionName": <strong>
                       <FormattedMessage
                         defaultMessage="Skip if unavailable"
@@ -1069,7 +1069,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                               values={
                                 Object {
-                                  "learnMoreLink": <ForwardRef
+                                  "learnMoreLink": <EuiLink
                                     target="_blank"
                                   >
                                     <FormattedMessage
@@ -1077,7 +1077,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                                       values={Object {}}
                                     />
-                                  </ForwardRef>,
+                                  </EuiLink>,
                                   "optionName": <strong>
                                     <FormattedMessage
                                       defaultMessage="Skip if unavailable"

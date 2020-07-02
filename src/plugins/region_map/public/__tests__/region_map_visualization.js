@@ -52,10 +52,11 @@ import { ExprVis } from '../../../visualizations/public/expressions/vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { BaseVisType } from '../../../visualizations/public/vis_types/base_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../maps_legacy/public/kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../maps_legacy/public/map/service_settings';
-import { getBaseMapsVis } from '../../../maps_legacy/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseMapsVisualizationProvider } from '../../../maps_legacy/public/map/base_maps_visualization';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaMap } from '../../../maps_legacy/public/map/kibana_map';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -118,14 +119,6 @@ describe('RegionMapsVisualizationTests', function () {
           },
         },
       };
-      setInjectedVarFunc((injectedVar) => {
-        switch (injectedVar) {
-          case 'version':
-            return '123';
-          default:
-            return 'not found';
-        }
-      });
       const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
       const regionmapsConfig = {
         includeElasticMapsService: true,
@@ -142,7 +135,10 @@ describe('RegionMapsVisualizationTests', function () {
           getInjectedVar: () => {},
         },
       };
-      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
+      const BaseMapsVisualization = new BaseMapsVisualizationProvider(
+        (...args) => new KibanaMap(...args),
+        serviceSettings
+      );
 
       dependencies = {
         serviceSettings,

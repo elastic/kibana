@@ -12,12 +12,11 @@ import {
   policyDetailsForUpdate,
 } from './selectors';
 import {
-  sendGetDatasource,
+  sendGetPackageConfig,
   sendGetFleetAgentStatusForConfig,
-  sendPutDatasource,
+  sendPutPackageConfig,
 } from '../policy_list/services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
@@ -34,30 +33,13 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        policyItem = (await sendGetDatasource(http, id)).item;
+        policyItem = (await sendGetPackageConfig(http, id)).item;
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
           payload: error.body || error,
         });
         return;
-      }
-
-      // Until we get the Default configuration into the Endpoint package so that the datasource has
-      // the expected data structure, we will add it here manually.
-      if (!policyItem.inputs.length) {
-        policyItem.inputs = [
-          {
-            type: 'endpoint',
-            enabled: true,
-            streams: [],
-            config: {
-              policy: {
-                value: policyConfigFactory(),
-              },
-            },
-          },
-        ];
       }
 
       dispatch({
@@ -84,7 +66,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       let apiResponse: UpdatePolicyResponse;
       try {
-        apiResponse = await sendPutDatasource(http, id, updatedPolicyItem);
+        apiResponse = await sendPutPackageConfig(http, id, updatedPolicyItem);
       } catch (error) {
         dispatch({
           type: 'serverReturnedPolicyDetailsUpdateFailure',

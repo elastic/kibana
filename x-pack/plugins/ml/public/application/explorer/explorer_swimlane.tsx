@@ -22,7 +22,7 @@ import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
-import { DRAG_SELECT_ACTION } from './explorer_constants';
+import { DRAG_SELECT_ACTION, SwimlaneType } from './explorer_constants';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import {
@@ -58,7 +58,7 @@ export interface ExplorerSwimlaneProps {
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick?: Function;
   swimlaneData: OverallSwimlaneData;
-  swimlaneType: string;
+  swimlaneType: SwimlaneType;
   selection?: {
     lanes: any[];
     type: string;

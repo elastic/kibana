@@ -12,8 +12,7 @@ import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 function DeleteButton({ onClick, canDeleteCalendar }) {
   return (

@@ -59,6 +59,7 @@ export const StopAction: FC<StopActionProps> = ({ items, forceDisable }) => {
 
   const stopButton = (
     <EuiButtonEmpty
+      data-test-subj="transformActionStop"
       size="xs"
       color="text"
       disabled={forceDisable === true || !canStartStopTransform || stoppedTransform === true}

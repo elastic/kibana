@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -24,7 +25,6 @@ import {
   CUSTOM_TIME_RANGE,
   TimeRangeActionContext,
 } from './custom_time_range_action';
-
 import {
   CustomTimeRangeBadge,
   CUSTOM_TIME_RANGE_BADGE,
@@ -32,6 +32,9 @@ import {
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
+import { ILicense, LicensingPluginStart } from '../../licensing/public';
+import { createFlyoutManageDrilldowns } from './drilldowns';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -41,6 +44,7 @@ interface SetupDependencies {
 interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface SetupContract
@@ -49,7 +53,9 @@ export interface SetupContract
 
 export interface StartContract
   extends UiActionsStart,
-    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {}
+    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {
+  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -60,7 +66,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  private readonly enhancements = new UiActionsServiceEnhancements();
+  readonly licenceInfo = new BehaviorSubject<ILicense | undefined>(undefined);
+  private getLicenseInfo(): ILicense {
+    if (!this.licenceInfo.getValue()) {
+      throw new Error(
+        'AdvancedUiActionsPublicPlugin: Licence is not ready! Licence becomes available only after setup.'
+      );
+    }
+    return this.licenceInfo.getValue()!;
+  }
+  private readonly enhancements = new UiActionsServiceEnhancements({
+    getLicenseInfo: () => this.getLicenseInfo(),
+  });
+  private subs: Subscription[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -71,7 +89,9 @@ export class AdvancedUiActionsPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
+  public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
+    this.subs.push(licensing.license$.subscribe(this.licenceInfo));
+
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get(
       UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -94,8 +114,16 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements,
+      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+        actionFactories: this.enhancements.getActionFactories(),
+        storage: new Storage(window?.localStorage),
+        toastService: core.notifications.toasts,
+        docsLink: core.docLinks.links.dashboard.drilldowns,
+      }),
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.subs.forEach((s) => s.unsubscribe());
+  }
 }

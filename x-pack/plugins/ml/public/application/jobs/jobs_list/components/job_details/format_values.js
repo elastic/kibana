@@ -8,8 +8,8 @@ import numeral from '@elastic/numeral';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
+import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';
 
 function formatData(txt) {

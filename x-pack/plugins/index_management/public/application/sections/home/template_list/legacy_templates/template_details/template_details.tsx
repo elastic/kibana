@@ -30,7 +30,6 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
 } from '../../../../../../../common/constants';
-import { TemplateDeserialized } from '../../../../../../../common';
 import {
   TemplateDeleteModal,
   SectionLoading,
@@ -41,7 +40,8 @@ import { useLoadIndexTemplate } from '../../../../../services/api';
 import { decodePathFromReactRouter } from '../../../../../services/routing';
 import { SendRequestResponse } from '../../../../../../shared_imports';
 import { useServices } from '../../../../../app_context';
-import { TabSummary, TabMappings, TabSettings, TabAliases } from '../../template_details/tabs';
+import { TabAliases, TabMappings, TabSettings } from '../../../../../components/shared';
+import { TabSummary } from '../../template_details/tabs';
 
 interface Props {
   template: { name: string; isLegacy?: boolean };
@@ -82,15 +82,6 @@ const TABS = [
     }),
   },
 ];
-
-const tabToComponentMap: {
-  [key: string]: React.FunctionComponent<{ templateDetails: TemplateDeserialized }>;
-} = {
-  [SUMMARY_TAB_ID]: TabSummary,
-  [SETTINGS_TAB_ID]: TabSettings,
-  [MAPPINGS_TAB_ID]: TabMappings,
-  [ALIASES_TAB_ID]: TabAliases,
-};
 
 const tabToUiMetricMap: { [key: string]: string } = {
   [SUMMARY_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB,
@@ -144,7 +135,19 @@ export const LegacyTemplateDetails: React.FunctionComponent<Props> = ({
       />
     );
   } else if (templateDetails) {
-    const Content = tabToComponentMap[activeTab];
+    const {
+      template: { settings, mappings, aliases },
+    } = templateDetails;
+
+    const tabToComponentMap: Record<string, React.ReactNode> = {
+      [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,
+      [SETTINGS_TAB_ID]: <TabSettings settings={settings} />,
+      [MAPPINGS_TAB_ID]: <TabMappings mappings={mappings} />,
+      [ALIASES_TAB_ID]: <TabAliases aliases={aliases} />,
+    };
+
+    const tabContent = tabToComponentMap[activeTab];
+
     const managedTemplateCallout = isManaged ? (
       <Fragment>
         <EuiCallOut
@@ -188,7 +191,7 @@ export const LegacyTemplateDetails: React.FunctionComponent<Props> = ({
 
         <EuiSpacer size="l" />
 
-        <Content templateDetails={templateDetails} />
+        {tabContent}
       </Fragment>
     );
   }

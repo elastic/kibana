@@ -18,8 +18,7 @@
  */
 
 import _ from 'lodash';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
+import { vega, vegaLite } from '../lib/vega';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
@@ -32,15 +31,13 @@ import { i18n } from '@kbn/i18n';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor = VISUALIZATION_COLORS[0];
-
-const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
-
 const locToDirMap = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
   bottom: 'column',
 };
+const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER = 'elasticsearch';

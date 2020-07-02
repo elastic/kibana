@@ -28,10 +28,13 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const defaultFindTimeout = config.get('timeouts.find');
+  const panelActions = getService('dashboardPanelActions');
 
   return new (class PieChart {
-    async filterOnPieSlice(name?: string) {
-      log.debug(`PieChart.filterOnPieSlice(${name})`);
+    private readonly filterActionText = 'Apply filter to current view';
+
+    async clickOnPieSlice(name?: string) {
+      log.debug(`PieChart.clickOnPieSlice(${name})`);
       if (name) {
         await testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
       } else {
@@ -41,6 +44,16 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
           log.debug('Slices found:' + slices.length);
           return slices[0].click();
         });
+      }
+    }
+
+    async filterOnPieSlice(name?: string) {
+      log.debug(`PieChart.filterOnPieSlice(${name})`);
+      await this.clickOnPieSlice(name);
+      const hasUiActionsPopup = await testSubjects.exists('multipleActionsContextMenu');
+      if (hasUiActionsPopup) {
+        const actionElement = await panelActions.getActionWebElementByText(this.filterActionText);
+        await actionElement.click();
       }
     }
 

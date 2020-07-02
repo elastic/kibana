@@ -37,10 +37,10 @@ import {
   references,
   to,
   language,
-  listAndOrUndefined,
   query,
   id,
 } from '../common/schemas';
+import { listArrayOrUndefined } from '../types/lists';
 /* eslint-enable @typescript-eslint/camelcase */
 
 /**
@@ -80,7 +80,7 @@ export const patchRulesSchema = t.exact(
     references,
     note,
     version,
-    exceptions_list: listAndOrUndefined,
+    exceptions_list: listArrayOrUndefined,
   })
 );
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { convertEsError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 
@@ -46,7 +46,7 @@ export interface IndexAliasResponse {
  *  @return {Promise<IndexAliasResponse>}
  */
 export async function callIndexAliasApi(
-  callCluster: APICaller,
+  callCluster: LegacyAPICaller,
   indices: string[] | string
 ): Promise<IndicesAliasResponse> {
   try {
@@ -71,7 +71,7 @@ export async function callIndexAliasApi(
  *  @param  {Array<String>|String} indices
  *  @return {Promise<FieldCapsResponse>}
  */
-export async function callFieldCapsApi(callCluster: APICaller, indices: string[] | string) {
+export async function callFieldCapsApi(callCluster: LegacyAPICaller, indices: string[] | string) {
   try {
     return (await callCluster('fieldCaps', {
       index: indices,

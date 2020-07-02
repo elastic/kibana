@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type GenericCallback = (callback: () => void) => void;
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
-export interface RendererHandlers {
-  /** Handler to invoke when an element has finished rendering */
-  done: () => void;
+type GenericRendererCallback = (callback: () => void) => void;
+
+export interface RendererHandlers extends IInterpreterRenderHandlers {
+  /** Handler to invoke when an element should be destroyed. */
+  destroy: () => void;
   /** Get the id of the element being rendered.  Can be used as a unique ID in a render function */
   getElementId: () => string;
-  /** Handler to invoke when an element is deleted or changes to a different render type */
-  onDestroy: GenericCallback;
-  /** Handler to invoke when an element's dimensions have changed*/
-  onResize: GenericCallback;
   /** Retrieves the value of the filter property on the element object persisted on the workpad */
   getFilter: () => string;
-  /** Sets the value of the filter property on the element object persisted on the workpad */
-  setFilter: (filter: string) => void;
-  /** Handler to invoke when the input to a function has changed internally */
-  onEmbeddableInputChange: (expression: string) => void;
+  /** Handler to invoke when a renderer is considered complete */
+  onComplete: (fn: () => void) => void;
   /** Handler to invoke when a rendered embeddable is destroyed */
   onEmbeddableDestroyed: () => void;
+  /** Handler to invoke when the input to a function has changed internally */
+  onEmbeddableInputChange: (expression: string) => void;
+  /** Handler to invoke when an element's dimensions have changed*/
+  onResize: GenericRendererCallback;
+  /** Handler to invoke when an element should be resized. */
+  resize: (size: { height: number; width: number }) => void;
+  /** Sets the value of the filter property on the element object persisted on the workpad */
+  setFilter: (filter: string) => void;
 }
 
 export interface RendererSpec<RendererConfig = {}> {
