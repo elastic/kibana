@@ -27,9 +27,10 @@ export const EXPLORER_ACTION = {
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
   SET_SELECTED_CELLS: 'setSelectedCells',
   SET_SWIMLANE_CONTAINER_WIDTH: 'setSwimlaneContainerWidth',
-  SET_SWIMLANE_LIMIT: 'setSwimlaneLimit',
   SET_VIEW_BY_SWIMLANE_FIELD_NAME: 'setViewBySwimlaneFieldName',
   SET_VIEW_BY_SWIMLANE_LOADING: 'setViewBySwimlaneLoading',
+  SET_VIEW_BY_PER_PAGE: 'setViewByPerPage',
+  SET_VIEW_BY_FROM_PAGE: 'setViewByFromPage',
 };
 
 export const FILTER_ACTION = {
@@ -37,10 +38,12 @@ export const FILTER_ACTION = {
   REMOVE: '-',
 };
 
-export enum SWIMLANE_TYPE {
-  OVERALL = 'overall',
-  VIEW_BY = 'viewBy',
-}
+export const SWIMLANE_TYPE = {
+  OVERALL: 'overall',
+  VIEW_BY: 'viewBy',
+} as const;
+
+export type SwimlaneType = typeof SWIMLANE_TYPE[keyof typeof SWIMLANE_TYPE];
 
 export const CHART_TYPE = {
   EVENT_DISTRIBUTION: 'event_distribution',
@@ -49,9 +52,23 @@ export const CHART_TYPE = {
 };
 
 export const MAX_CATEGORY_EXAMPLES = 10;
+
+/**
+ * Maximum amount of top influencer to fetch.
+ */
 export const MAX_INFLUENCER_FIELD_VALUES = 10;
 export const MAX_INFLUENCER_FIELD_NAMES = 50;
 
 export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', {
   defaultMessage: 'job ID',
 });
+/**
+ * Hard limitation for the size of terms
+ * aggregations on influencers values.
+ */
+export const ANOMALY_SWIM_LANE_HARD_LIMIT = 1000;
+
+/**
+ * Default page size fot the anomaly swim lane.
+ */
+export const SWIM_LANE_DEFAULT_PAGE_SIZE = 10;

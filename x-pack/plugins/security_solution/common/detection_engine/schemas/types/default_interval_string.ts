@@ -14,7 +14,8 @@ import { Either } from 'fp-ts/lib/Either';
 export const DefaultIntervalString = new t.Type<string, string, unknown>(
   'DefaultIntervalString',
   t.string.is,
-  (input): Either<t.Errors, string> => (input == null ? t.success('5m') : t.string.decode(input)),
+  (input, context): Either<t.Errors, string> =>
+    input == null ? t.success('5m') : t.string.validate(input, context),
   t.identity
 );
 

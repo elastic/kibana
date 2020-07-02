@@ -14,24 +14,25 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { PLUGIN_ID } from '../common/constants';
+import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { registerDatasource } from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
+import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
 export { IngestManagerConfigType } from '../common/types';
 
-export type IngestManagerSetup = void;
+// We need to provide an object instead of void so that dependent plugins know when Ingest Manager
+// is disabled.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IngestManagerSetup {}
+
 /**
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerDatasource: typeof registerDatasource;
-  success: boolean;
-  error?: {
-    message: string;
-  };
+  registerPackageConfigComponent: typeof registerPackageConfigComponent;
+  success: Promise<true>;
 }
 
 export interface IngestManagerSetupDeps {
@@ -75,24 +76,34 @@ export class IngestManagerPlugin
         };
       },
     });
+
+    return {};
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
+    let successPromise: IngestManagerStart['success'];
     try {
-      const permissionsResponse = await core.http.get(appRoutesService.getCheckPermissionsPath());
-      if (permissionsResponse.success) {
-        const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
-        return { success, registerDatasource };
+      const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
+        appRoutesService.getCheckPermissionsPath()
+      );
+
+      if (permissionsResponse?.success) {
+        successPromise = core.http
+          .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+          .then(({ isInitialized }) =>
+            isInitialized ? Promise.resolve(true) : Promise.reject(new Error('Unknown setup error'))
+          );
       } else {
-        throw new Error(permissionsResponse.error);
+        throw new Error(permissionsResponse?.error || 'Unknown permissions error');
       }
     } catch (error) {
-      return {
-        success: false,
-        error: { message: error.body?.message || 'Unknown error' },
-        registerDatasource,
-      };
+      successPromise = Promise.reject(error);
     }
+
+    return {
+      success: successPromise,
+      registerPackageConfigComponent,
+    };
   }
 
   public stop() {}

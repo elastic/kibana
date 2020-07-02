@@ -254,16 +254,14 @@ describe('import_rules_route', () => {
         errors: [
           {
             error: {
-              // TODO: Change the formatter to do better than output [object Object]
-              message: '[object Object]',
+              message: 'Invalid value "undefined" supplied to "rule_id"',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              // TODO: Change the formatter to do better than output [object Object]
-              message: '[object Object]',
+              message: 'Invalid value "undefined" supplied to "rule_id"',
               status_code: 400,
             },
             rule_id: '(unknown id)',

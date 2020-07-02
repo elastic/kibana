@@ -9,16 +9,16 @@ import { compose, withProps } from 'recompose';
 import { set, get } from 'lodash';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { getAssets } from '../../state/selectors/assets';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { removeAsset, createAsset } from '../../state/actions/assets';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { encode } from '../../../common/lib/dataurl';
 import { getId } from '../../lib/get_id';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';

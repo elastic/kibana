@@ -66,10 +66,9 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/vis_type_vega/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../../plugins/maps_legacy/public/kibana_services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../../plugins/maps_legacy/public/map/service_settings';
-import { getKibanaMapFactoryProvider } from '../../../../../../plugins/maps_legacy/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaMap } from '../../../../../../plugins/maps_legacy/public/map/kibana_map';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -82,18 +81,7 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
   let vegaVisType;
 
-  const coreSetupMock = {
-    notifications: {
-      toasts: {},
-    },
-    uiSettings: {
-      get: () => {},
-    },
-    injectedMetadata: {
-      getInjectedVar: () => {},
-    },
-  };
-  setKibanaMapFactory(getKibanaMapFactoryProvider(coreSetupMock));
+  setKibanaMapFactory((...args) => new KibanaMap(...args));
   setInjectedVars({
     emsTileLayerId: {},
     enableExternalUrls: true,
@@ -139,30 +127,6 @@ describe('VegaVisualizations', () => {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(() => {
-      setInjectedVarFunc((injectedVar) => {
-        switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
-          case 'version':
-            return '123';
-          default:
-            return 'not found';
-        }
-      });
       const serviceSettings = new ServiceSettings(mockMapConfig, mockMapConfig.tilemap);
       vegaVisualizationDependencies = {
         serviceSettings,
@@ -333,7 +297,7 @@ describe('VegaVisualizations', () => {
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(
           `{
-            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "$schema": "https://vega.github.io/schema/vega/v5.json",
             "marks": [
               {
                 "type": "text",
@@ -366,11 +330,6 @@ describe('VegaVisualizations', () => {
         await vegaVis.render(vegaParser, vis.params, { data: true });
         const vegaView = vegaVis._vegaView._view;
         expect(vegaView.height()).to.be(250.00000001);
-
-        vegaView.height(250);
-        await vegaView.runAsync();
-        // as soon as this test fails, the workaround with the subpixel value can be removed.
-        expect(vegaView.height()).to.be(0);
       } finally {
         vegaVis.destroy();
       }

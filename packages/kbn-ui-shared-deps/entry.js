@@ -38,6 +38,7 @@ export const ReactDomServer = require('react-dom/server');
 export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
+export const StyledComponents = require('styled-components');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
@@ -59,6 +60,9 @@ if (window.__kbnThemeVersion__ === 'v7') {
   ElasticEuiLightTheme = require('@elastic/eui/dist/eui_theme_amsterdam_light.json');
   ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_amsterdam_dark.json');
 }
+
+import * as Theme from './theme.ts';
+export { Theme };
 
 // massive deps that we should really get rid of or reduce in size substantially
 export const ElasticsearchBrowser = require('elasticsearch-browser/elasticsearch.js');

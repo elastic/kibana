@@ -5,31 +5,41 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { useExportTimeline, ExportTimeline } from '.';
+import { shallow } from 'enzyme';
+import { EditTimelineActionsComponent } from '.';
 
-describe('useExportTimeline', () => {
-  describe('call with selected timelines', () => {
-    let exportTimelineRes: ExportTimeline;
-    const TestHook = () => {
-      exportTimelineRes = useExportTimeline();
-      return <div />;
+describe('EditTimelineActionsComponent', () => {
+  describe('render', () => {
+    const props = {
+      deleteTimelines: jest.fn(),
+      ids: ['id1'],
+      isEnableDownloader: false,
+      isDeleteTimelineModalOpen: false,
+      onComplete: jest.fn(),
+      title: 'mockTitle',
     };
 
-    beforeAll(() => {
-      mount(<TestHook />);
+    test('should render timelineDownloader', () => {
+      const wrapper = shallow(<EditTimelineActionsComponent {...props} />);
+
+      expect(wrapper.find('[data-test-subj="TimelineDownloader"]').exists()).toBeTruthy();
     });
 
-    test('Downloader should be disabled by default', () => {
-      expect(exportTimelineRes.isEnableDownloader).toBeFalsy();
+    test('Should render DeleteTimelineModalOverlay if deleteTimelines is given', () => {
+      const wrapper = shallow(<EditTimelineActionsComponent {...props} />);
+
+      expect(wrapper.find('[data-test-subj="DeleteTimelineModalOverlay"]').exists()).toBeTruthy();
     });
 
-    test('Should include disableExportTimelineDownloader in return value', () => {
-      expect(exportTimelineRes).toHaveProperty('disableExportTimelineDownloader');
-    });
-
-    test('Should include enableExportTimelineDownloader in return value', () => {
-      expect(exportTimelineRes).toHaveProperty('enableExportTimelineDownloader');
+    test('Should not render DeleteTimelineModalOverlay if deleteTimelines is not given', () => {
+      const newProps = {
+        ...props,
+        deleteTimelines: undefined,
+      };
+      const wrapper = shallow(<EditTimelineActionsComponent {...newProps} />);
+      expect(
+        wrapper.find('[data-test-subj="DeleteTimelineModalOverlay"]').exists()
+      ).not.toBeTruthy();
     });
   });
 });

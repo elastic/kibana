@@ -17,6 +17,7 @@ import {
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 import {
   EuiFlexGroup,
@@ -60,15 +61,13 @@ function replaceTokens(alert) {
   return text;
 }
 
-export function AlertsPanel({ alerts, changeUrl }) {
-  const goToAlerts = () => changeUrl('/alerts');
-
+export function AlertsPanel({ alerts }) {
   if (!alerts || !alerts.length) {
     // no-op
     return null;
   }
 
-  // enclosed component for accessing changeUrl
+  // enclosed component for accessing
   function TopAlertItem({ item, index }) {
     const severityIcon = mapSeverity(item.metadata.severity);
 
@@ -101,7 +100,6 @@ export function AlertsPanel({ alerts, changeUrl }) {
           suffix={item.suffix}
           message={item.message}
           metadata={item.metadata}
-          changeUrl={changeUrl}
         />
         <EuiText size="xs">
           <EuiSpacer size="m" />
@@ -183,7 +181,11 @@ export function AlertsPanel({ alerts, changeUrl }) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={goToAlerts} data-test-subj="viewAllAlerts">
+          <EuiButton
+            size="s"
+            href={getSafeForExternalLink('#/alerts')}
+            data-test-subj="viewAllAlerts"
+          >
             <FormattedMessage
               id="xpack.monitoring.cluster.overview.alertsPanel.viewAllButtonLabel"
               defaultMessage="View all alerts"

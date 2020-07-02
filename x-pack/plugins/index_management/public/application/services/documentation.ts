@@ -20,6 +20,10 @@ class DocumentationService {
     this.kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
   }
 
+  public getEsDocsBase() {
+    return this.esDocsBase;
+  }
+
   public getSettingsDocumentationLink() {
     return `${this.esDocsBase}/index-modules.html#index-modules-settings`;
   }

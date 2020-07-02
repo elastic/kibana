@@ -35,7 +35,7 @@ is automatically enabled in {kib}.
 NOTE: If you're using {security}, you must have the `manage_pipeline`
 permission to use the Grok Debugger.
 
-. In the side navigation, click *DevTools*, then open the *Grok Debugger*. 
+. Open the menu, go to *Dev Tools*, then click *Grok Debugger*.
 . In *Sample Data*, enter a message that is representative of the data that you
 want to parse. For example:
 +

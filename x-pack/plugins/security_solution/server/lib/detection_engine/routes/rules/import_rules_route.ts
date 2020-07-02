@@ -7,6 +7,7 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
+import { validate } from '../../../../../common/validate';
 import {
   importRulesQuerySchema,
   ImportRulesQuerySchemaDecoded,
@@ -39,7 +40,6 @@ import {
 } from '../utils';
 import { patchRules } from '../../rules/patch_rules';
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
-import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
@@ -134,6 +134,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                 }
                 const {
                   anomaly_threshold: anomalyThreshold,
+                  author,
+                  building_block_type: buildingBlockType,
                   description,
                   enabled,
                   false_positives: falsePositives,
@@ -141,6 +143,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   immutable,
                   query: queryOrUndefined,
                   language: languageOrUndefined,
+                  license,
                   machine_learning_job_id: machineLearningJobId,
                   output_index: outputIndex,
                   saved_id: savedId,
@@ -151,10 +154,14 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   interval,
                   max_signals: maxSignals,
                   risk_score: riskScore,
+                  risk_score_mapping: riskScoreMapping,
+                  rule_name_override: ruleNameOverride,
                   name,
                   severity,
+                  severity_mapping: severityMapping,
                   tags,
                   threat,
+                  timestamp_override: timestampOverride,
                   to,
                   type,
                   references,
@@ -184,6 +191,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                     await createRules({
                       alertsClient,
                       anomalyThreshold,
+                      author,
+                      buildingBlockType,
                       description,
                       enabled,
                       falsePositives,
@@ -191,6 +200,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       immutable,
                       query,
                       language,
+                      license,
                       machineLearningJobId,
                       outputIndex: signalsIndex,
                       savedId,
@@ -202,13 +212,17 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       index,
                       interval,
                       maxSignals,
-                      riskScore,
                       name,
+                      riskScore,
+                      riskScoreMapping,
+                      ruleNameOverride,
                       severity,
+                      severityMapping,
                       tags,
                       to,
                       type,
                       threat,
+                      timestampOverride,
                       references,
                       note,
                       version,
@@ -219,6 +233,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   } else if (rule != null && request.query.overwrite) {
                     await patchRules({
                       alertsClient,
+                      author,
+                      buildingBlockType,
                       savedObjectsClient,
                       description,
                       enabled,
@@ -226,6 +242,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       from,
                       query,
                       language,
+                      license,
                       outputIndex,
                       savedId,
                       timelineId,
@@ -237,9 +254,13 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       interval,
                       maxSignals,
                       riskScore,
+                      riskScoreMapping,
+                      ruleNameOverride,
                       name,
                       severity,
+                      severityMapping,
                       tags,
+                      timestampOverride,
                       to,
                       type,
                       threat,

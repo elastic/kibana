@@ -59,42 +59,22 @@ export function MachineLearningNavigationProvider({
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
-      await this.assertTabsExist('mlSubTab', [
-        'jobManagement',
-        'anomalyExplorer',
-        'singleMetricViewer',
-        'settings',
-      ]);
     },
 
     async navigateToDataFrameAnalytics() {
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
-      await this.assertTabsExist('mlSubTab', []);
     },
 
     async navigateToDataVisualizer() {
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
-      await this.assertTabsExist('mlSubTab', []);
     },
 
     async navigateToJobManagement() {
       await this.navigateToAnomalyDetection();
-      await this.navigateToArea('~mlSubTab & ~jobManagement', 'mlPageJobManagement');
-    },
-
-    async navigateToAnomalyExplorer() {
-      await this.navigateToAnomalyDetection();
-      await this.navigateToArea('~mlSubTab & ~anomalyExplorer', 'mlPageAnomalyExplorer');
-    },
-
-    async navigateToSingleMetricViewer() {
-      await this.navigateToAnomalyDetection();
-      await this.navigateToArea('~mlSubTab & ~singleMetricViewer', 'mlPageSingleMetricViewer');
     },
 
     async navigateToSettings() {
-      await this.navigateToAnomalyDetection();
-      await this.navigateToArea('~mlSubTab & ~settings', 'mlPageSettings');
+      await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
     },
   };
 }

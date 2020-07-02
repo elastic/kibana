@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -18,7 +19,7 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { getIdBulkError } from './utils';
-import { transformValidateBulkError, validate } from './validate';
+import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
@@ -56,12 +57,15 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
           const {
             actions: actionsRest,
             anomaly_threshold: anomalyThreshold,
+            author,
+            building_block_type: buildingBlockType,
             description,
             enabled,
             false_positives: falsePositives,
             from,
             query: queryOrUndefined,
             language: languageOrUndefined,
+            license,
             machine_learning_job_id: machineLearningJobId,
             output_index: outputIndex,
             saved_id: savedId,
@@ -75,13 +79,17 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             interval,
             max_signals: maxSignals,
             risk_score: riskScore,
+            risk_score_mapping: riskScoreMapping,
+            rule_name_override: ruleNameOverride,
             name,
             severity,
+            severity_mapping: severityMapping,
             tags,
             to,
             type,
             threat,
             throttle,
+            timestamp_override: timestampOverride,
             references,
             note,
             version,
@@ -116,12 +124,15 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             const rule = await updateRules({
               alertsClient,
               anomalyThreshold,
+              author,
+              buildingBlockType,
               description,
               enabled,
               falsePositives,
               from,
               query,
               language,
+              license,
               machineLearningJobId,
               outputIndex: finalIndex,
               savedId,
@@ -136,12 +147,16 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               interval,
               maxSignals,
               riskScore,
+              riskScoreMapping,
+              ruleNameOverride,
               name,
               severity,
+              severityMapping,
               tags,
               to,
               type,
               threat,
+              timestampOverride,
               references,
               note,
               version,

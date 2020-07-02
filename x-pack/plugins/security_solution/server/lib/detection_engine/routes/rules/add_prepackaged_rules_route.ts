@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesSchema,
   prePackagedRulesSchema,
@@ -18,7 +19,6 @@ import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { validate } from './validate';
 
 export const addPrepackedRulesRoute = (router: IRouter) => {
   router.put(

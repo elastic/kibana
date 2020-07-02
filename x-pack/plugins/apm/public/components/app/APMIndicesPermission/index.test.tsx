@@ -17,21 +17,23 @@ import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/M
 
 describe('APMIndicesPermission', () => {
   it('returns empty component when api status is loading', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.LOADING,
+      refetch: jest.fn(),
     });
     const component = shallow(<APMIndicesPermission />);
     expect(component.isEmptyRender()).toBeTruthy();
   });
   it('returns empty component when api status is pending', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.PENDING,
+      refetch: jest.fn(),
     });
     const component = shallow(<APMIndicesPermission />);
     expect(component.isEmptyRender()).toBeTruthy();
   });
   it('renders missing permission page', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
         has_all_requested: false,
@@ -39,6 +41,7 @@ describe('APMIndicesPermission', () => {
           'apm-*': { read: false },
         },
       },
+      refetch: jest.fn(),
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -53,12 +56,13 @@ describe('APMIndicesPermission', () => {
   });
 
   it('shows children component when no index is returned', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
         has_all_requested: false,
         index: {},
       },
+      refetch: jest.fn(),
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -72,12 +76,13 @@ describe('APMIndicesPermission', () => {
   });
 
   it('shows children component when indices have read privileges', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
         has_all_requested: true,
         index: {},
       },
+      refetch: jest.fn(),
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -91,7 +96,7 @@ describe('APMIndicesPermission', () => {
   });
 
   it('dismesses the warning by clicking on the escape hatch', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
         has_all_requested: false,
@@ -102,6 +107,7 @@ describe('APMIndicesPermission', () => {
           'apm-span-*': { read: true },
         },
       },
+      refetch: jest.fn(),
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -122,7 +128,10 @@ describe('APMIndicesPermission', () => {
   });
 
   it("shows children component when api doesn't return value", () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({});
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
     const component = render(
       <MockApmPluginContextWrapper>
         <APMIndicesPermission>

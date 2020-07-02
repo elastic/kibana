@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { validate } from '../../../../../common/validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
@@ -19,7 +20,7 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
-import { transformValidateBulkError, validate } from './validate';
+import { transformValidateBulkError } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
@@ -63,12 +64,15 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             const {
               actions: actionsRest,
               anomaly_threshold: anomalyThreshold,
+              author,
+              building_block_type: buildingBlockType,
               description,
               enabled,
               false_positives: falsePositives,
               from,
               query: queryOrUndefined,
               language: languageOrUndefined,
+              license,
               machine_learning_job_id: machineLearningJobId,
               output_index: outputIndex,
               saved_id: savedId,
@@ -79,11 +83,15 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               interval,
               max_signals: maxSignals,
               risk_score: riskScore,
+              risk_score_mapping: riskScoreMapping,
+              rule_name_override: ruleNameOverride,
               name,
               severity,
+              severity_mapping: severityMapping,
               tags,
               threat,
               throttle,
+              timestamp_override: timestampOverride,
               to,
               type,
               references,
@@ -138,6 +146,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               const createdRule = await createRules({
                 alertsClient,
                 anomalyThreshold,
+                author,
+                buildingBlockType,
                 description,
                 enabled,
                 falsePositives,
@@ -145,6 +155,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 immutable: false,
                 query,
                 language,
+                license,
                 machineLearningJobId,
                 outputIndex: finalIndex,
                 savedId,
@@ -156,13 +167,17 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 index,
                 interval,
                 maxSignals,
-                riskScore,
                 name,
+                riskScore,
+                riskScoreMapping,
+                ruleNameOverride,
                 severity,
+                severityMapping,
                 tags,
                 to,
                 type,
                 threat,
+                timestampOverride,
                 references,
                 note,
                 version,

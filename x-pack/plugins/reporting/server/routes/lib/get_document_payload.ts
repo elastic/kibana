@@ -10,7 +10,7 @@ import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { statuses } from '../../lib/esqueue/constants/statuses';
 import { ExportTypesRegistry } from '../../lib/export_types_registry';
-import { ExportTypeDefinition, JobDocOutput, JobSource } from '../../types';
+import { ExportTypeDefinition, JobSource, TaskRunResult } from '../../types';
 
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
 
@@ -18,7 +18,7 @@ interface ErrorFromPayload {
   message: string;
 }
 
-// A camelCase version of JobDocOutput
+// A camelCase version of TaskRunResult
 interface Payload {
   statusCode: number;
   content: string | Buffer | ErrorFromPayload;
@@ -31,7 +31,7 @@ const DEFAULT_TITLE = 'report';
 const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) => {
+const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeType) => {
   const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
@@ -55,7 +55,7 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     }
   }
 
-  function getCompleted(output: JobDocOutput, jobType: string, title: string): Payload {
+  function getCompleted(output: TaskRunResult, jobType: string, title: string): Payload {
     const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
@@ -73,7 +73,7 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
 
   // @TODO: These should be semantic HTTP codes as 500/503's indicate
   // error then these are really operating properly.
-  function getFailure(output: JobDocOutput): Payload {
+  function getFailure(output: TaskRunResult): Payload {
     return {
       statusCode: 500,
       content: {

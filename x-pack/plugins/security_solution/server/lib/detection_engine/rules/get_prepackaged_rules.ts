@@ -7,6 +7,7 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { formatErrors } from '../../../../common/format_errors';
 import { exactCheck } from '../../../../common/exact_check';
 import {
   addPrepackagedRulesSchema,
@@ -35,11 +36,9 @@ export const validateAllPrepackagedRules = (
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
           `to not work with pre-packaged rules until this rule is fixed ` +
-          `or the file is removed. Error is: ${errors.join()}, Full rule contents are:\n${JSON.stringify(
-            rule,
-            null,
-            2
-          )}`
+          `or the file is removed. Error is: ${formatErrors(
+            errors
+          ).join()}, Full rule contents are:\n${JSON.stringify(rule, null, 2)}`
       );
     };
 

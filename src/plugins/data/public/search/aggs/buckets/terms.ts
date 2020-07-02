@@ -30,7 +30,7 @@ import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
-import { IFieldFormat, FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
@@ -88,21 +88,17 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
         const params = agg.params;
         return agg.getFieldDisplayName() + ': ' + params.order.text;
       },
-      getFormat(bucket): IFieldFormat {
+      getSerializedFormat(agg) {
+        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
         return {
-          getConverterFor: (type: FieldFormatsContentType) => {
-            return (val: any) => {
-              if (val === '__other__') {
-                return bucket.params.otherBucketLabel;
-              }
-              if (val === '__missing__') {
-                return bucket.params.missingBucketLabel;
-              }
-
-              return bucket.params.field.format.convert(val, type);
-            };
+          id: 'terms',
+          params: {
+            id: format.id,
+            otherBucketLabel: agg.params.otherBucketLabel,
+            missingBucketLabel: agg.params.missingBucketLabel,
+            ...format.params,
           },
-        } as IFieldFormat;
+        };
       },
       createFilter: createFilterTerms,
       postFlightRequest: async (

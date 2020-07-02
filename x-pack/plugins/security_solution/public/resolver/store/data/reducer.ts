@@ -5,55 +5,84 @@
  */
 
 import { Reducer } from 'redux';
-import { DataState, ResolverAction } from '../../types';
+import { DataState } from '../../types';
+import { ResolverAction } from '../actions';
 
-function initialState(): DataState {
-  return {
-    results: [],
-    isLoading: false,
-    hasError: false,
-    resultsEnrichedWithRelatedEventInfo: new Map(),
-  };
-}
+const initialState: DataState = {
+  relatedEvents: new Map(),
+  relatedEventsReady: new Map(),
+};
 
-export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState(), action) => {
-  if (action.type === 'serverReturnedResolverData') {
-    return {
+export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
+  if (action.type === 'appReceivedNewExternalProperties') {
+    const nextState: DataState = {
       ...state,
-      results: action.payload,
-      isLoading: false,
-      hasError: false,
+      databaseDocumentID: action.payload.databaseDocumentID,
     };
-  } else if (action.type === 'userRequestedRelatedEventData') {
-    const resolverEvent = action.payload;
-    const currentStatsMap = new Map(state.resultsEnrichedWithRelatedEventInfo);
-    /**
-     * Set the waiting indicator for this event to indicate that related event results are pending.
-     * It will be replaced by the actual results from the API when they are returned.
-     */
-    currentStatsMap.set(resolverEvent, 'waitingForRelatedEventData');
-    return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
-  } else if (action.type === 'serverFailedToReturnRelatedEventData') {
-    const currentStatsMap = new Map(state.resultsEnrichedWithRelatedEventInfo);
-    const resolverEvent = action.payload;
-    currentStatsMap.set(resolverEvent, 'error');
-    return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
-  } else if (action.type === 'serverReturnedRelatedEventData') {
-    const relatedDataEntries = new Map([
-      ...state.resultsEnrichedWithRelatedEventInfo,
-      ...action.payload,
-    ]);
-    return { ...state, resultsEnrichedWithRelatedEventInfo: relatedDataEntries };
+    return nextState;
   } else if (action.type === 'appRequestedResolverData') {
+    // keep track of what we're requesting, this way we know when to request and when not to.
     return {
       ...state,
-      isLoading: true,
-      hasError: false,
+      pendingRequestDatabaseDocumentID: action.payload,
     };
+  } else if (action.type === 'appAbortedResolverDataRequest') {
+    if (action.payload === state.pendingRequestDatabaseDocumentID) {
+      // the request we were awaiting was aborted
+      return {
+        ...state,
+        pendingRequestDatabaseDocumentID: undefined,
+      };
+    } else {
+      return state;
+    }
+  } else if (action.type === 'serverReturnedResolverData') {
+    /** Only handle this if we are expecting a response */
+    const nextState: DataState = {
+      ...state,
+
+      /**
+       * Store the last received data, as well as the databaseDocumentID it relates to.
+       */
+      lastResponse: {
+        result: action.payload.result,
+        databaseDocumentID: action.payload.databaseDocumentID,
+        successful: true,
+      },
+
+      // This assumes that if we just received something, there is no longer a pending request.
+      // This cannot model multiple in-flight requests
+      pendingRequestDatabaseDocumentID: undefined,
+    };
+    return nextState;
   } else if (action.type === 'serverFailedToReturnResolverData') {
+    /** Only handle this if we are expecting a response */
+    if (state.pendingRequestDatabaseDocumentID !== undefined) {
+      const nextState: DataState = {
+        ...state,
+        pendingRequestDatabaseDocumentID: undefined,
+        lastResponse: {
+          databaseDocumentID: state.pendingRequestDatabaseDocumentID,
+          successful: false,
+        },
+      };
+      return nextState;
+    } else {
+      return state;
+    }
+  } else if (
+    action.type === 'userRequestedRelatedEventData' ||
+    action.type === 'appDetectedMissingEventData'
+  ) {
     return {
       ...state,
-      hasError: true,
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload, false]]),
+    };
+  } else if (action.type === 'serverReturnedRelatedEventData') {
+    return {
+      ...state,
+      relatedEventsReady: new Map([...state.relatedEventsReady, [action.payload.entityID, true]]),
+      relatedEvents: new Map([...state.relatedEvents, [action.payload.entityID, action.payload]]),
     };
   } else {
     return state;

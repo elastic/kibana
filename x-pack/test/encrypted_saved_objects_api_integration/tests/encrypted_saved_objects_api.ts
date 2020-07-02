@@ -12,6 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
   const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
@@ -499,6 +500,33 @@ export default function ({ getService }: FtrProviderContext) {
           () => `/s/${SPACE_ID}/api/saved_objects/`,
           (id, type) => generateRawId(id, type, SPACE_ID)
         );
+      });
+    });
+
+    describe('migrations', () => {
+      before(async () => {
+        await esArchiver.load('encrypted_saved_objects');
+      });
+
+      after(async () => {
+        await esArchiver.unload('encrypted_saved_objects');
+      });
+
+      it('migrates unencrypted fields on saved objects', async () => {
+        const { body: decryptedResponse } = await supertest
+          .get(
+            `/api/saved_objects/get-decrypted-as-internal-user/saved-object-with-migration/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+          )
+          .expect(200);
+
+        expect(decryptedResponse.attributes).to.eql({
+          // ensures the encrypted field can still be decrypted after the migration
+          encryptedAttribute: 'this is my secret api key',
+          // ensures the non-encrypted field has been migrated in 7.8.0
+          nonEncryptedAttribute: 'elastic-migrated',
+          // ensures the non-encrypted field has been migrated into a new encrypted field in 7.9.0
+          additionalEncryptedAttribute: 'elastic-migrated-encrypted',
+        });
       });
     });
   });

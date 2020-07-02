@@ -5,3 +5,4 @@
  */
 
 export * from './drilldown_definition';
+export * from './components';

@@ -31,16 +31,19 @@ it('returns a bundle for core and each plugin', () => {
           directory: '/repo/plugins/foo',
           id: 'foo',
           isUiPlugin: true,
+          extraPublicDirs: [],
         },
         {
           directory: '/repo/plugins/bar',
           id: 'bar',
           isUiPlugin: false,
+          extraPublicDirs: [],
         },
         {
           directory: '/outside/of/repo/plugins/baz',
           id: 'baz',
           isUiPlugin: true,
+          extraPublicDirs: [],
         },
       ],
       '/repo'
@@ -49,17 +52,21 @@ it('returns a bundle for core and each plugin', () => {
     Array [
       Object {
         "contextDir": <absolute path>/plugins/foo,
-        "entry": "./public/index",
         "id": "foo",
         "outputDir": <absolute path>/plugins/foo/target/public,
+        "publicDirNames": Array [
+          "public",
+        ],
         "sourceRoot": <absolute path>,
         "type": "plugin",
       },
       Object {
         "contextDir": "/outside/of/repo/plugins/baz",
-        "entry": "./public/index",
         "id": "baz",
         "outputDir": "/outside/of/repo/plugins/baz/target/public",
+        "publicDirNames": Array [
+          "public",
+        ],
         "sourceRoot": <absolute path>,
         "type": "plugin",
       },

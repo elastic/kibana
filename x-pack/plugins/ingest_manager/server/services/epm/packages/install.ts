@@ -19,7 +19,7 @@ import {
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
-import { getInstallation, getInstallationObject } from './index';
+import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
@@ -104,7 +104,8 @@ export async function installPackage(options: {
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
 
   const reinstall = pkgVersion === installedPkg?.attributes.version;
-  const { internal = false, removable = true } = registryPackageInfo;
+  const removable = !isRequiredPackage(pkgName);
+  const { internal = false } = registryPackageInfo;
 
   // delete the previous version's installation's SO kibana assets before installing new ones
   // in case some assets were removed in the new version

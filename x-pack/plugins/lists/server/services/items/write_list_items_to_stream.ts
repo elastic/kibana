@@ -7,7 +7,7 @@
 import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
@@ -20,7 +20,7 @@ export const SIZE = 100;
 
 export interface ExportListItemsToStreamOptions {
   listId: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -60,7 +60,7 @@ export const exportListItemsToStream = ({
 
 export interface WriteNextResponseOptions {
   listId: string;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -100,7 +100,7 @@ export const getSearchAfterFromResponse = <T>({
     : undefined;
 
 export interface GetResponseOptions {
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listId: string;
   searchAfter: undefined | string[];
   listItemIndex: string;

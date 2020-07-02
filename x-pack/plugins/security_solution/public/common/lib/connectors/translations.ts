@@ -58,14 +58,14 @@ export const PASSWORD_REQUIRED = i18n.translate(
 export const API_TOKEN_LABEL = i18n.translate(
   'xpack.securitySolution.case.connectors.common.apiTokenTextFieldLabel',
   {
-    defaultMessage: 'Api token',
+    defaultMessage: 'API token',
   }
 );
 
 export const API_TOKEN_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.connectors.common.requiredApiTokenTextField',
   {
-    defaultMessage: 'Api token is required',
+    defaultMessage: 'API token is required',
   }
 );
 

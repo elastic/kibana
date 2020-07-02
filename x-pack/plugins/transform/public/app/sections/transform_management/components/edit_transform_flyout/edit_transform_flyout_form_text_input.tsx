@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 interface EditTransformFlyoutFormTextInputProps {
+  dataTestSubj: string;
   errorMessages: string[];
   helpText?: string;
   label: string;
@@ -18,6 +19,7 @@ interface EditTransformFlyoutFormTextInputProps {
 }
 
 export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
+  dataTestSubj,
   errorMessages,
   helpText,
   label,
@@ -33,6 +35,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       error={errorMessages}
     >
       <EuiFieldText
+        data-test-subj={dataTestSubj}
         placeholder={placeholder}
         isInvalid={errorMessages.length > 0}
         value={value}

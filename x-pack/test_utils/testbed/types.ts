@@ -83,20 +83,24 @@ export interface TestBed<T = string> {
     /**
      * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
      * For the <EuiSuperSelect /> you need to mock it like this
-     * 
+     *
      ```typescript
-     jest.mock('@elastic/eui', () => ({
-        ...jest.requireActual('@elastic/eui'),
+    jest.mock('@elastic/eui', () => {
+      const original = jest.requireActual('@elastic/eui');
+
+      return {
+        ...original,
         EuiSuperSelect: (props: any) => (
           <input
             data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
             value={props.valueOfSelected}
-            onChange={e => {
+            onChange={(e) => {
               props.onChange(e.target.value);
             }}
           />
         ),
-      }));
+      };
+    });
      ```
      * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set

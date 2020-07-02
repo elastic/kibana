@@ -4,6 +4,8 @@
 
 ## ISearchOptions.signal property
 
+An `AbortSignal` that allows the caller of `search` to abort a search request.
+
 <b>Signature:</b>
 
 ```typescript

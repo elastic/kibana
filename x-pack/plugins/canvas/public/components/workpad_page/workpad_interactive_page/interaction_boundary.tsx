@@ -5,7 +5,7 @@
  */
 
 import React, { CSSProperties, PureComponent } from 'react';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { WORKPAD_CONTAINER_ID } from '../../../apps/workpad/workpad_app';
 
 interface State {

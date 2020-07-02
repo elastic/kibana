@@ -12,6 +12,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { Note } from '../../../../common/lib/note';
 
 import { NoteCards } from '.';
+import { TimelineStatus } from '../../../../../common/types/timeline';
 
 describe('NoteCards', () => {
   const noteIds = ['abc', 'def'];
@@ -38,18 +39,21 @@ describe('NoteCards', () => {
     },
   ];
 
+  const props = {
+    associateNote: jest.fn(),
+    getNotesByIds,
+    getNewNoteId: jest.fn(),
+    noteIds,
+    showAddNote: true,
+    status: TimelineStatus.active,
+    toggleShowAddNote: jest.fn(),
+    updateNote: jest.fn(),
+  };
+
   test('it renders the notes column when noteIds are specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NoteCards
-          associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
-          getNewNoteId={jest.fn()}
-          noteIds={noteIds}
-          showAddNote={true}
-          toggleShowAddNote={jest.fn()}
-          updateNote={jest.fn()}
-        />
+        <NoteCards {...props} />
       </ThemeProvider>
     );
 
@@ -57,17 +61,10 @@ describe('NoteCards', () => {
   });
 
   test('it does NOT render the notes column when noteIds are NOT specified', () => {
+    const testProps = { ...props, noteIds: [] };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NoteCards
-          associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
-          getNewNoteId={jest.fn()}
-          noteIds={[]}
-          showAddNote={true}
-          toggleShowAddNote={jest.fn()}
-          updateNote={jest.fn()}
-        />
+        <NoteCards {...testProps} />
       </ThemeProvider>
     );
 
@@ -77,15 +74,7 @@ describe('NoteCards', () => {
   test('renders note cards', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NoteCards
-          associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
-          getNewNoteId={jest.fn()}
-          noteIds={noteIds}
-          showAddNote={true}
-          toggleShowAddNote={jest.fn()}
-          updateNote={jest.fn()}
-        />
+        <NoteCards {...props} />
       </ThemeProvider>
     );
 
@@ -102,15 +91,7 @@ describe('NoteCards', () => {
   test('it shows controls for adding notes when showAddNote is true', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NoteCards
-          associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
-          getNewNoteId={jest.fn()}
-          noteIds={noteIds}
-          showAddNote={true}
-          toggleShowAddNote={jest.fn()}
-          updateNote={jest.fn()}
-        />
+        <NoteCards {...props} />
       </ThemeProvider>
     );
 
@@ -118,17 +99,11 @@ describe('NoteCards', () => {
   });
 
   test('it does NOT show controls for adding notes when showAddNote is false', () => {
+    const testProps = { ...props, showAddNote: false };
+
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <NoteCards
-          associateNote={jest.fn()}
-          getNotesByIds={getNotesByIds}
-          getNewNoteId={jest.fn()}
-          noteIds={noteIds}
-          showAddNote={false}
-          toggleShowAddNote={jest.fn()}
-          updateNote={jest.fn()}
-        />
+        <NoteCards {...testProps} />
       </ThemeProvider>
     );
 

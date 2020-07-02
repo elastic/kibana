@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 
 interface DeprecationLoggingStatus {
   isEnabled: boolean;
 }
 
 export async function getDeprecationLoggingStatus(
-  dataClient: IScopedClusterClient
+  dataClient: ILegacyScopedClusterClient
 ): Promise<DeprecationLoggingStatus> {
   const response = await dataClient.callAsCurrentUser('cluster.getSettings', {
     includeDefaults: true,
@@ -23,7 +23,7 @@ export async function getDeprecationLoggingStatus(
 }
 
 export async function setDeprecationLogging(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
   const response = await dataClient.callAsCurrentUser('cluster.putSettings', {

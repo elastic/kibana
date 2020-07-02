@@ -1107,11 +1107,7 @@ export class TimeSeriesExplorer extends React.Component {
     let hasEmptyFieldValues = false;
 
     return (
-      <TimeSeriesExplorerPage
-        dateFormatTz={dateFormatTz}
-        loading={loading}
-        resizeRef={this.resizeRef}
-      >
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
           <EuiCallOut
             className="single-metric-request-callout"

@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
+
+import {
+  OnUpdateHandlerArg,
+  OnUpdateHandler,
+  SerializeResult,
+} from '../pipeline_processors_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
@@ -30,8 +36,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   defaultValue = {
     name: '',
     description: '',
-    processors: '',
-    on_failure: '',
+    processors: [],
+    on_failure: [],
     version: '',
   },
   onSave,
@@ -44,10 +50,25 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
+  const processorStateRef = useRef<OnUpdateHandlerArg>();
+
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (isValid) {
-      onSave(formData as Pipeline);
+    let override: SerializeResult | undefined;
+
+    if (!isValid) {
+      return;
     }
+
+    if (processorStateRef.current) {
+      const processorsState = processorStateRef.current;
+      if (await processorsState.validate()) {
+        override = processorsState.getData();
+      } else {
+        return;
+      }
+    }
+
+    onSave({ ...formData, ...(override || {}) } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {
@@ -59,6 +80,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     defaultValue,
     onSubmit: handleSave,
   });
+
+  const onEditorFlyoutOpen = useCallback(() => {
+    setIsTestingPipeline(false);
+    setIsRequestVisible(false);
+  }, [setIsRequestVisible]);
 
   const saveButtonLabel = isSaving ? (
     <FormattedMessage
@@ -77,6 +103,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     />
   );
 
+  const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
+    (arg) => (processorStateRef.current = arg),
+    []
+  );
+
   return (
     <>
       <Form
@@ -86,14 +117,17 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         error={form.getErrors()}
       >
         {/* Request error */}
-        {saveError && <PipelineFormError errorMessage={saveError.message} />}
+        {saveError && <PipelineFormError error={saveError} />}
 
         {/* All form fields */}
         <PipelineFormFields
+          onEditorFlyoutOpen={onEditorFlyoutOpen}
+          initialProcessors={defaultValue.processors}
+          initialOnFailureProcessors={defaultValue.on_failure}
+          onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}
           onTestPipelineClick={handleTestPipelineClick}
-          hasOnFailure={Boolean(defaultValue.on_failure)}
           isEditing={isEditing}
         />
 
@@ -147,6 +181,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
           />
         ) : null}
@@ -154,6 +191,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* Test pipeline flyout */}
         {isTestingPipeline ? (
           <PipelineTestFlyout
+            readProcessors={() =>
+              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+            }
             closeFlyout={() => {
               setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
             }}

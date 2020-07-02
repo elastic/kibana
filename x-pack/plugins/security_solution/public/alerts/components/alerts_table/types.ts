@@ -6,6 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { inputsModel } from '../../../common/store';
@@ -22,23 +23,30 @@ export interface SetEventsDeletedProps {
 
 export interface UpdateAlertsStatusProps {
   alertIds: string[];
-  status: 'open' | 'closed';
+  status: Status;
+  selectedStatus: Status;
 }
 
 export type UpdateAlertsStatusCallback = (
   refetchQuery: inputsModel.Refetch,
-  { alertIds, status }: UpdateAlertsStatusProps
+  { alertIds, status, selectedStatus }: UpdateAlertsStatusProps
 ) => void;
-export type UpdateAlertsStatus = ({ alertIds, status }: UpdateAlertsStatusProps) => void;
+
+export type UpdateAlertsStatus = ({
+  alertIds,
+  status,
+  selectedStatus,
+}: UpdateAlertsStatusProps) => void;
 
 export interface UpdateAlertStatusActionProps {
   query?: string;
   alertIds: string[];
-  status: 'open' | 'closed';
+  status: Status;
+  selectedStatus: Status;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: string) => void;
-  onAlertStatusUpdateFailure: (status: string, error: Error) => void;
+  onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
+  onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
 }
 
 export interface SendAlertToTimelineActionProps {

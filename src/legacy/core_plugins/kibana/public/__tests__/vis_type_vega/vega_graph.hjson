@@ -1,7 +1,7 @@
 {
   // Adapted from Vega's https://vega.github.io/vega/examples/stacked-area-chart/
 
-  $schema: https://vega.github.io/schema/vega/v3.0.json
+  $schema: https://vega.github.io/schema/vega/v5.json
   data: [
     {
       name: table

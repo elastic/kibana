@@ -5,7 +5,7 @@
  */
 
 import { CombinedState } from 'redux';
-import { SiemPageName } from '../app/types';
+import { SecurityPageName } from '../app/types';
 import { PolicyListState, PolicyDetailsState } from './pages/policy/types';
 import { HostState } from './pages/endpoint_hosts/types';
 
@@ -33,7 +33,7 @@ export enum ManagementSubTab {
  * The URL route params for the Management Policy List section
  */
 export interface ManagementRoutePolicyListParams {
-  pageName: SiemPageName.management;
+  pageName: SecurityPageName.management;
   tabName: ManagementSubTab.policies;
 }
 

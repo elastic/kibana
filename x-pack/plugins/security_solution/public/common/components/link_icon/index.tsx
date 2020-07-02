@@ -18,9 +18,9 @@ interface LinkProps {
   ariaLabel?: string;
 }
 
-const Link = styled(({ iconSide, children, ...rest }) => <EuiLink {...rest}>{children}</EuiLink>)<
-  LinkProps
->`
+export const Link = styled(({ iconSide, children, ...rest }) => (
+  <EuiLink {...rest}>{children}</EuiLink>
+))<LinkProps>`
   ${({ iconSide, theme }) => css`
     align-items: center;
     display: inline-flex;

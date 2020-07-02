@@ -48,7 +48,7 @@ function isValidMoment(m: any): boolean {
   return m && 'isValid' in m && m.isValid();
 }
 
-export interface TimeBucketsConfig {
+export interface TimeBucketsConfig extends Record<string, any> {
   'histogram:maxBars': number;
   'histogram:barTarget': number;
   dateFormat: string;

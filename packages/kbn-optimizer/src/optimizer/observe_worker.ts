@@ -22,9 +22,9 @@ import { inspect } from 'util';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 
@@ -68,15 +68,11 @@ if (inspectFlagIndex !== -1) {
 
 function usingWorkerProc<T>(
   config: OptimizerConfig,
-  workerConfig: WorkerConfig,
-  bundles: Bundle[],
   fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map((b) => b.toSpec()))];
-
-      const proc = execa.node(require.resolve('../worker/run_worker'), args, {
+      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
         nodeOptions: [
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
@@ -126,6 +122,51 @@ function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
 }
 
 /**
+ * We used to pass configuration to the worker as JSON encoded arguments, but they
+ * grew too large for argv, especially on Windows, so we had to move to an async init
+ * where we send the args over IPC. To keep the logic simple we basically mock the
+ * argv behavior and don't use complicated messages or anything so that state can
+ * be initialized in the worker before most of the code is run.
+ */
+function initWorker(
+  proc: execa.ExecaChildProcess,
+  config: OptimizerConfig,
+  workerConfig: WorkerConfig,
+  bundles: Bundle[]
+) {
+  const msg$ = Rx.fromEvent<[unknown]>(proc, 'message').pipe(
+    // validate the initialization messages from the process
+    map(([msg]) => {
+      if (typeof msg === 'string') {
+        switch (msg) {
+          case 'init':
+            return 'init' as const;
+          case 'ready':
+            return 'ready' as const;
+        }
+      }
+
+      throw new Error(`unexpected message from worker while initializing: [${inspect(msg)}]`);
+    })
+  );
+
+  return Rx.concat(
+    msg$.pipe(first((msg) => msg === 'init')),
+    Rx.defer(() => {
+      proc.send({
+        args: [
+          JSON.stringify(workerConfig),
+          JSON.stringify(bundles.map((b) => b.toSpec())),
+          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+        ],
+      });
+      return [];
+    }),
+    msg$.pipe(first((msg) => msg === 'ready'))
+  ).pipe(ignoreElements());
+}
+
+/**
  * Start a worker process with the specified `workerConfig` and
  * `bundles` and return an observable of the events related to
  * that worker, including the messages sent to us by that worker
@@ -136,10 +177,11 @@ export function observeWorker(
   workerConfig: WorkerConfig,
   bundles: Bundle[]
 ): Rx.Observable<WorkerMsg | WorkerStatus> {
-  return usingWorkerProc(config, workerConfig, bundles, (proc) => {
-    let lastMsg: WorkerMsg;
+  return usingWorkerProc(config, (proc) => {
+    const init$ = initWorker(proc, config, workerConfig, bundles);
 
-    return Rx.merge(
+    let lastMsg: WorkerMsg;
+    const worker$: Rx.Observable<WorkerMsg | WorkerStatus> = Rx.merge(
       Rx.of({
         type: 'worker started',
         bundles,
@@ -197,5 +239,7 @@ export function observeWorker(
           )
         )
     );
+
+    return Rx.concat(init$, worker$);
   });
 }
