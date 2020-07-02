@@ -53,10 +53,17 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
       <EuiPageContent>
         <EuiTitle size="l">
           <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
-              defaultMessage="Create template"
-            />
+            {isLegacy ? (
+              <FormattedMessage
+                id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
+                defaultMessage="Create legacy template"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
+                defaultMessage="Create template"
+              />
+            )}
           </h1>
         </EuiTitle>
         <EuiSpacer size="l" />
