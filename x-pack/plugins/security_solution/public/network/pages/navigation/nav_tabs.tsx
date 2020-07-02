@@ -7,8 +7,9 @@
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
 import { NetworkNavTab, NetworkRouteType } from './types';
+import { SecurityPageName } from '../../../app/types';
 
-const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `#/network/${tabName}`;
+const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `/${tabName}`;
 
 export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => {
   const networkNavTabs = {
@@ -18,6 +19,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.flows),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
     [NetworkRouteType.dns]: {
       id: NetworkRouteType.dns,
@@ -25,6 +27,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.dns),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
     [NetworkRouteType.http]: {
       id: NetworkRouteType.http,
@@ -32,6 +35,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.http),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
     [NetworkRouteType.tls]: {
       id: NetworkRouteType.tls,
@@ -39,6 +43,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.tls),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
     [NetworkRouteType.anomalies]: {
       id: NetworkRouteType.anomalies,
@@ -46,6 +51,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.anomalies),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
     [NetworkRouteType.alerts]: {
       id: NetworkRouteType.alerts,
@@ -53,6 +59,7 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       href: getTabsOnNetworkUrl(NetworkRouteType.alerts),
       disabled: false,
       urlKey: 'network',
+      pageId: SecurityPageName.network,
     },
   };
 

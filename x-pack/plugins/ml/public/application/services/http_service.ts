@@ -37,6 +37,8 @@ function getFetchOptions(
 /**
  * Function for making HTTP requests to Kibana's backend.
  * Wrapper for Kibana's HttpHandler.
+ *
+ * @deprecated use {@link HttpService} instead
  */
 export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
   const { path, fetchOptions } = getFetchOptions(options);
@@ -46,6 +48,8 @@ export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
 /**
  * Function for making HTTP requests to Kibana's backend which returns an Observable
  * with request cancellation support.
+ *
+ * @deprecated use {@link HttpService} instead
  */
 export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
   const { path, fetchOptions } = getFetchOptions(options);
@@ -55,7 +59,7 @@ export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
 /**
  * Creates an Observable from Kibana's HttpHandler.
  */
-export function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
+function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
   return new Observable<T>((subscriber) => {
     const controller = new AbortController();
     const signal = controller.signal;

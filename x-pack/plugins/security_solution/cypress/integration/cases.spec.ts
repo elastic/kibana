@@ -44,7 +44,7 @@ import { backToCases, createNewCase } from '../tasks/create_new_case';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
-import { CASES } from '../urls/navigation';
+import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
   before(() => {
@@ -56,7 +56,7 @@ describe('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', () => {
-    loginAndWaitForPageWithoutDateRange(CASES);
+    loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     createNewCase(case1);
     backToCases();

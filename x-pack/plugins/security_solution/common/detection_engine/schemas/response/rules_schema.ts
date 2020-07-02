@@ -55,8 +55,17 @@ import {
   filters,
   meta,
   note,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
 } from '../common/schemas';
-import { ListsDefaultArray } from '../types/lists_default_array';
+import { DefaultListArray } from '../types/lists_default_array';
+import {
+  DefaultStringArray,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+} from '../types';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -64,6 +73,7 @@ import { ListsDefaultArray } from '../types/lists_default_array';
  * output schema.
  */
 export const requiredRulesSchema = t.type({
+  author: DefaultStringArray,
   description,
   enabled,
   false_positives,
@@ -75,9 +85,11 @@ export const requiredRulesSchema = t.type({
   output_index,
   max_signals,
   risk_score,
+  risk_score_mapping: DefaultRiskScoreMappingArray,
   name,
   references,
   severity,
+  severity_mapping: DefaultSeverityMappingArray,
   updated_by,
   tags,
   to,
@@ -87,7 +99,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
-  exceptions_list: ListsDefaultArray,
+  exceptions_list: DefaultListArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -120,9 +132,13 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  building_block_type,
+  license,
   throttle,
+  rule_name_override,
   status: job_status,
   status_date,
+  timestamp_override,
   last_success_at,
   last_success_message,
   last_failure_at,

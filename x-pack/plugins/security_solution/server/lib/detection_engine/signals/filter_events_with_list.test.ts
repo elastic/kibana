@@ -6,13 +6,20 @@
 
 import uuid from 'uuid';
 import { filterEventsAgainstList } from './filter_events_with_list';
+import { buildRuleMessageFactory } from './rule_messages';
 import { mockLogger, repeatedSearchResultsWithSortId } from './__mocks__/es_results';
 
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getListItemResponseMock } from '../../../../../lists/common/schemas/response/list_item_schema.mock';
 import { listMock } from '../../../../../lists/server/mocks';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
-
+const buildRuleMessage = buildRuleMessageFactory({
+  id: 'fake id',
+  ruleId: 'fake rule id',
+  index: 'fakeindex',
+  name: 'fake name',
+});
 describe('filterEventsAgainstList', () => {
   let listClient = listMock.getListClient();
   beforeEach(() => {
@@ -32,96 +39,48 @@ describe('filterEventsAgainstList', () => {
         '3.3.3.3',
         '7.7.7.7',
       ]),
+      buildRuleMessage,
     });
     expect(res.hits.hits.length).toEqual(4);
   });
 
-  it('should throw an error if malformed exception list present', async () => {
-    let message = '';
-    try {
-      await filterEventsAgainstList({
-        logger: mockLogger,
-        listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'excluded',
-            values_type: 'list',
-            values: undefined,
-          },
-        ],
-        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
-          '1.1.1.1',
-          '2.2.2.2',
-          '3.3.3.3',
-          '7.7.7.7',
-        ]),
-      });
-    } catch (exc) {
-      message = exc.message;
-    }
-    expect(message).toEqual(
-      'Failed to query lists index. Reason: Malformed exception list provided'
-    );
-  });
-
-  it('should throw an error if unsupported exception type', async () => {
-    let message = '';
-    try {
-      await filterEventsAgainstList({
-        logger: mockLogger,
-        listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'excluded',
-            values_type: 'list',
-            values: [
-              {
-                id: 'ci-badguys.txt',
-                name: 'unsupportedListPluginType',
-              },
-            ],
-          },
-        ],
-        eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
-          '1.1.1.1',
-          '2.2.2.2',
-          '3.3.3.3',
-          '7.7.7.7',
-        ]),
-      });
-    } catch (exc) {
-      message = exc.message;
-    }
-    expect(message).toEqual(
-      'Failed to query lists index. Reason: Unsupported list type used, please use one of ip,keyword'
-    );
-  });
-
-  describe('operator_type is includes', () => {
+  describe('operator_type is included', () => {
     it('should respond with same list if no items match value list', async () => {
+      const exceptionItem = getExceptionListItemSchemaMock();
+      exceptionItem.entries = [
+        {
+          field: 'source.ip',
+          operator: 'included',
+          type: 'list',
+          list: {
+            id: 'ci-badguys.txt',
+            type: 'ip',
+          },
+        },
+      ];
+
       const res = await filterEventsAgainstList({
         logger: mockLogger,
         listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'included',
-            values_type: 'list',
-            values: [
-              {
-                id: 'ci-badguys.txt',
-                name: 'ip',
-              },
-            ],
-          },
-        ],
+        exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+        buildRuleMessage,
       });
       expect(res.hits.hits.length).toEqual(4);
     });
     it('should respond with less items in the list if some values match', async () => {
+      const exceptionItem = getExceptionListItemSchemaMock();
+      exceptionItem.entries = [
+        {
+          field: 'source.ip',
+          operator: 'included',
+          type: 'list',
+          list: {
+            id: 'ci-badguys.txt',
+            type: 'ip',
+          },
+        },
+      ];
       listClient.getListItemByValues = jest.fn(({ value }) =>
         Promise.resolve(
           value.slice(0, 2).map((item) => ({
@@ -133,25 +92,14 @@ describe('filterEventsAgainstList', () => {
       const res = await filterEventsAgainstList({
         logger: mockLogger,
         listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'included',
-            values_type: 'list',
-            values: [
-              {
-                id: 'ci-badguys.txt',
-                name: 'ip',
-              },
-            ],
-          },
-        ],
+        exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
           '1.1.1.1',
           '2.2.2.2',
           '3.3.3.3',
           '7.7.7.7',
         ]),
+        buildRuleMessage,
       });
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(
@@ -162,27 +110,40 @@ describe('filterEventsAgainstList', () => {
   });
   describe('operator type is excluded', () => {
     it('should respond with empty list if no items match value list', async () => {
+      const exceptionItem = getExceptionListItemSchemaMock();
+      exceptionItem.entries = [
+        {
+          field: 'source.ip',
+          operator: 'excluded',
+          type: 'list',
+          list: {
+            id: 'ci-badguys.txt',
+            type: 'ip',
+          },
+        },
+      ];
       const res = await filterEventsAgainstList({
         logger: mockLogger,
         listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'excluded',
-            values_type: 'list',
-            values: [
-              {
-                id: 'ci-badguys.txt',
-                name: 'ip',
-              },
-            ],
-          },
-        ],
+        exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)),
+        buildRuleMessage,
       });
       expect(res.hits.hits.length).toEqual(0);
     });
     it('should respond with less items in the list if some values match', async () => {
+      const exceptionItem = getExceptionListItemSchemaMock();
+      exceptionItem.entries = [
+        {
+          field: 'source.ip',
+          operator: 'excluded',
+          type: 'list',
+          list: {
+            id: 'ci-badguys.txt',
+            type: 'ip',
+          },
+        },
+      ];
       listClient.getListItemByValues = jest.fn(({ value }) =>
         Promise.resolve(
           value.slice(0, 2).map((item) => ({
@@ -194,25 +155,14 @@ describe('filterEventsAgainstList', () => {
       const res = await filterEventsAgainstList({
         logger: mockLogger,
         listClient,
-        exceptionsList: [
-          {
-            field: 'source.ip',
-            values_operator: 'excluded',
-            values_type: 'list',
-            values: [
-              {
-                id: 'ci-badguys.txt',
-                name: 'ip',
-              },
-            ],
-          },
-        ],
+        exceptionsList: [exceptionItem],
         eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
           '1.1.1.1',
           '2.2.2.2',
           '3.3.3.3',
           '7.7.7.7',
         ]),
+        buildRuleMessage,
       });
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].type).toEqual('ip');
       expect((listClient.getListItemByValues as jest.Mock).mock.calls[0][0].listId).toEqual(

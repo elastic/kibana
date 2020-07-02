@@ -1,0 +1,41 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
+    "index": ".kibana_1",
+    "source": {
+      "alert": {
+        "actions": [
+        ],
+        "alertTypeId": "example.always-firing",
+        "apiKey": "QIUT8u0/kbOakEHSj50jDpVR90MrqOxanEscboYOoa8PxQvcA5jfHash+fqH3b+KNjJ1LpnBcisGuPkufY9j1e32gKzwGZV5Bfys87imHvygJvIM8uKiFF8bQ8Y4NTaxOJO9fAmZPrFy07ZcQMCAQz+DUTgBFqs=",
+        "apiKeyOwner": "elastic",
+        "consumer": "alerting",
+        "createdAt": "2020-06-17T15:35:38.497Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": [
+        ],
+        "name": "always-firing-alert",
+        "params": {
+        },
+        "schedule": {
+          "interval": "1m"
+        },
+        "scheduledTaskId": "329798f0-b0b0-11ea-9510-fdf248d5f2a4",
+        "tags": [
+        ],
+        "throttle": null,
+        "updatedBy": "elastic"
+      },
+      "migrationVersion": {
+        "alert": "7.8.0"
+      },
+      "references": [
+      ],
+      "type": "alert",
+      "updated_at": "2020-06-17T15:35:39.839Z"
+    }
+  }
+}

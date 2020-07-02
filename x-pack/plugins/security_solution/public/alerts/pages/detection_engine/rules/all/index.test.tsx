@@ -13,6 +13,19 @@ import { TestProviders } from '../../../../../common/mock';
 import { wait } from '../../../../../common/lib/helpers';
 import { AllRules } from './index';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      useHistory: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../../../common/components/link_to');
+
 jest.mock('./reducer', () => {
   return {
     allRulesReducer: jest.fn().mockReturnValue(() => ({

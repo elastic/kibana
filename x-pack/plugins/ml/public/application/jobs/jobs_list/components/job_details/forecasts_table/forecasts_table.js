@@ -21,6 +21,7 @@ import {
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
+import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,6 @@ import {
 } from '../../../../../../../common/util/job_utils';
 
 const MAX_FORECASTS = 500;
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
  * Table component for rendering the lists of forecasts run on an ML job.

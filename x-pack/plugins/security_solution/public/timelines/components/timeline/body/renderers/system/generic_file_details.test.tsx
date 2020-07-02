@@ -13,6 +13,18 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useHistory: () => ({
+      createHref: jest.fn(),
+      push: jest.fn(),
+    }),
+  };
+});
+
 describe('SystemGenericFileDetails', () => {
   const mount = useMountAppended();
 

@@ -5,7 +5,7 @@
  */
 
 import { CancellationToken } from '../../../common';
-import { JobParamPostPayload, JobDocPayload, ScrollConfig } from '../../types';
+import { JobParamPostPayload, ScheduledTaskParams, ScrollConfig } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
@@ -32,7 +32,7 @@ export interface JobParamsDiscoverCsv {
   post?: JobParamPostPayloadDiscoverCsv;
 }
 
-export interface JobDocPayloadDiscoverCsv extends JobDocPayload<JobParamsDiscoverCsv> {
+export interface ScheduledTaskParamsCSV extends ScheduledTaskParams<JobParamsDiscoverCsv> {
   basePath: string;
   searchRequest: any;
   fields: any;

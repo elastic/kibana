@@ -77,37 +77,33 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   },
 };
 
-export interface YState extends AxisConfig {
-  accessors: string[];
-}
+type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
-export interface XConfig extends AxisConfig {
-  accessor: string;
-}
-
-type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
-
-export const xConfig: ExpressionFunctionDefinition<
-  'lens_xy_xConfig',
+export const yAxisConfig: ExpressionFunctionDefinition<
+  'lens_xy_yConfig',
   null,
-  XConfig,
-  XConfigResult
+  YConfig,
+  YConfigResult
 > = {
-  name: 'lens_xy_xConfig',
+  name: 'lens_xy_yConfig',
   aliases: [],
-  type: 'lens_xy_xConfig',
-  help: `Configure the xy chart's x axis`,
+  type: 'lens_xy_yConfig',
+  help: `Configure the behavior of a xy chart's y axis metric`,
   inputTypes: ['null'],
   args: {
-    ...axisConfig,
-    accessor: {
+    forAccessor: {
       types: ['string'],
-      help: 'The column to display on the x axis.',
+      help: 'The accessor this configuration is for',
+    },
+    axisMode: {
+      types: ['string'],
+      options: ['auto', 'left', 'right'],
+      help: 'The axis mode of the metric',
     },
   },
-  fn: function fn(input: unknown, args: XConfig) {
+  fn: function fn(input: unknown, args: YConfig) {
     return {
-      type: 'lens_xy_xConfig',
+      type: 'lens_xy_yConfig',
       ...args,
     };
   },
@@ -166,6 +162,12 @@ export const layerConfig: ExpressionFunctionDefinition<
       help: 'The columns to display on the y axis.',
       multi: true,
     },
+    yConfig: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      types: ['lens_xy_yConfig' as any],
+      help: 'Additional configuration for y axes',
+      multi: true,
+    },
     columnToLabel: {
       types: ['string'],
       help: 'JSON key-value pairs of column ID to label',
@@ -188,11 +190,19 @@ export type SeriesType =
   | 'bar_horizontal_stacked'
   | 'area_stacked';
 
+export type YAxisMode = 'auto' | 'left' | 'right';
+
+export interface YConfig {
+  forAccessor: string;
+  axisMode?: YAxisMode;
+}
+
 export interface LayerConfig {
   hide?: boolean;
   layerId: string;
   xAccessor?: string;
   accessors: string[];
+  yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
 }

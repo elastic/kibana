@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
-import { mockMoment, toJson } from '../../../../utils/testHelpers';
+import {
+  mountWithTheme,
+  mockMoment,
+  toJson,
+} from '../../../../utils/testHelpers';
 import { Timeline } from '.';
 
 describe('Timeline', () => {
@@ -50,7 +53,7 @@ describe('Timeline', () => {
       ],
     };
 
-    const wrapper = mount(
+    const wrapper = mountWithTheme(
       <StickyContainer>
         <Timeline {...props} />
       </StickyContainer>
@@ -74,7 +77,7 @@ describe('Timeline', () => {
     };
 
     const mountTimeline = () =>
-      mount(
+      mountWithTheme(
         <StickyContainer>
           <Timeline {...props} />
         </StickyContainer>

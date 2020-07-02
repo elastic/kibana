@@ -8,7 +8,7 @@ export { getFlattenedObject } from '../../../../../../../src/core/public';
 
 export {
   agentConfigRouteService,
-  datasourceRouteService,
+  packageConfigRouteService,
   dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
@@ -18,8 +18,8 @@ export {
   outputRoutesService,
   settingsRoutesService,
   appRoutesService,
-  packageToConfigDatasourceInputs,
-  storedDatasourceToAgentDatasource,
+  packageToPackageConfigInputs,
+  storedPackageConfigsToAgentInputs,
   configToYaml,
   AgentStatusKueryHelper,
 } from '../../../../common';

@@ -29,8 +29,10 @@ jest.mock('ui/i18n', () => {
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 jest.mock('@kbn/i18n/react', () => {
+  const original = jest.requireActual('@kbn/i18n/react');
+
   return {
-    ...jest.requireActual('@kbn/i18n/react'),
+    ...original,
     FormattedDate: () => '',
     FormattedTime: () => '',
   };

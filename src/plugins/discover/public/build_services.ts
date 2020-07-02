@@ -42,6 +42,7 @@ import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './kibana_services';
+import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -57,6 +58,7 @@ export interface DiscoverServices {
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   share?: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
@@ -97,6 +99,7 @@ export async function buildServices(
       branch: context.env.packageInfo.branch,
     },
     share: plugins.share,
+    kibanaLegacy: plugins.kibanaLegacy,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,

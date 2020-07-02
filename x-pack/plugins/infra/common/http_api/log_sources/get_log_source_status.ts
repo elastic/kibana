@@ -42,7 +42,7 @@ export type LogIndexField = rt.TypeOf<typeof logIndexFieldRT>;
 
 const logSourceStatusRT = rt.strict({
   logIndexFields: rt.array(logIndexFieldRT),
-  logIndexNames: rt.array(rt.string),
+  logIndicesExist: rt.boolean,
 });
 
 export type LogSourceStatus = rt.TypeOf<typeof logSourceStatusRT>;

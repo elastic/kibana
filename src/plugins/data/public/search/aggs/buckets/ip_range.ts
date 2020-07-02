@@ -23,13 +23,8 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 import { createFilterIpRange } from './create_filter/ip_range';
-import {
-  convertIPRangeToString,
-  IpRangeKey,
-  RangeIpRangeAggKey,
-  CidrMaskIpRangeAggKey,
-} from './lib/ip_range';
-import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
+import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 
@@ -67,16 +62,11 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
         }
         return { type: 'range', from: bucket.from, to: bucket.to };
       },
-      getFormat(agg) {
-        const { fieldFormats } = getInternalStartServices();
-        const formatter = agg.fieldOwnFormatter(
-          TEXT_CONTEXT_TYPE,
-          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
-        );
-        const IpRangeFormat = FieldFormat.from(function (range: IpRangeKey) {
-          return convertIPRangeToString(range, formatter);
-        });
-        return new IpRangeFormat();
+      getSerializedFormat(agg) {
+        return {
+          id: 'ip_range',
+          params: agg.params.field ? agg.params.field.format.toJSON() : {},
+        };
       },
       makeLabel(aggConfig) {
         return i18n.translate('data.search.aggs.buckets.ipRangeLabel', {

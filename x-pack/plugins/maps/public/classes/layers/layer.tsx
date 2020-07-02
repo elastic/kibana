@@ -325,27 +325,28 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
+  _getMbSourceId() {
+    return this.getId();
+  }
+
   _requiresPrevSourceCleanup(mbMap: unknown) {
     return false;
   }
 
   _removeStaleMbSourcesAndLayers(mbMap: unknown) {
     if (this._requiresPrevSourceCleanup(mbMap)) {
-      // @ts-ignore
+      // @ts-expect-error
       const mbStyle = mbMap.getStyle();
-      // @ts-ignore
+      // @ts-expect-error
       mbStyle.layers.forEach((mbLayer) => {
-        // @ts-ignore
         if (this.ownsMbLayerId(mbLayer.id)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeLayer(mbLayer.id);
         }
       });
-      // @ts-ignore
       Object.keys(mbStyle.sources).some((mbSourceId) => {
-        // @ts-ignore
         if (this.ownsMbSourceId(mbSourceId)) {
-          // @ts-ignore
+          // @ts-expect-error
           mbMap.removeSource(mbSourceId);
         }
       });
@@ -429,7 +430,7 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbLayerId');
   }
 
-  ownsMbSourceId(sourceId: string): boolean {
+  ownsMbSourceId(mbSourceId: string): boolean {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 

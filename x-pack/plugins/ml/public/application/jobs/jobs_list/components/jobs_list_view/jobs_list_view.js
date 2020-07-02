@@ -112,6 +112,7 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       } else {
@@ -121,6 +122,7 @@ export class JobsListView extends Component {
             addYourself={this.addUpdateFunction}
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
+            refreshJobList={this.onRefreshClick}
           />
         );
       }
@@ -143,10 +145,13 @@ export class JobsListView extends Component {
                     addYourself={this.addUpdateFunction}
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
+                    refreshJobList={this.onRefreshClick}
                   />
                 );
               }
-              this.setState({ itemIdToExpandedRowMap });
+              this.setState({ itemIdToExpandedRowMap }, () => {
+                this.updateFunctions[jobId](job);
+              });
             });
           })
           .catch((error) => {
@@ -254,7 +259,7 @@ export class JobsListView extends Component {
         );
 
         Object.keys(this.updateFunctions).forEach((j) => {
-          this.updateFunctions[j].setState({ job: fullJobsList[j] });
+          this.updateFunctions[j](fullJobsList[j]);
         });
 
         jobs.forEach((job) => {

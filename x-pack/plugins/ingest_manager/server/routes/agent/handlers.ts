@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, KibanaRequest } from 'src/core/server';
+import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { AbortController } from 'abort-controller';
 import {
   GetAgentsResponse,
   GetOneAgentResponse,
@@ -31,13 +32,6 @@ import {
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-
-export function getInternalUserSOClient(request: KibanaRequest) {
-  // soClient as kibana internal users, be carefull on how you use it, security is not enabled
-  return appContextService.getSavedObjects().getScopedClient(request, {
-    excludedWrappers: ['security'],
-  });
-}
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -176,14 +170,19 @@ export const postAgentCheckinHandler: RequestHandler<
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
-    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+    const soClient = appContextService.getInternalUserSOClient(request);
+    const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      abortController.abort();
+    });
+    const signal = abortController.signal;
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
       request.body.events || [],
-      request.body.local_metadata
+      request.body.local_metadata,
+      { signal }
     );
     const body: PostAgentCheckinResponse = {
       action: 'checkin',
@@ -198,16 +197,24 @@ export const postAgentCheckinHandler: RequestHandler<
     };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
+  } catch (err) {
+    const logger = appContextService.getLogger();
+    if (err.isBoom) {
+      if (err.output.statusCode >= 500) {
+        logger.error(err);
+      }
+
+      return response.customError({
+        statusCode: err.output.statusCode,
+        body: { message: err.output.payload.message },
       });
     }
 
+    logger.error(err);
+
     return response.customError({
       statusCode: 500,
-      body: { message: e.message },
+      body: { message: err.message },
     });
   }
 };
@@ -218,7 +225,7 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const soClient = getInternalUserSOClient(request);
+    const soClient = appContextService.getInternalUserSOClient(request);
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
 

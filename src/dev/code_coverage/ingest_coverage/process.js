@@ -36,13 +36,17 @@ import {
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import readline from 'readline';
+import * as moment from 'moment';
 
 const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =
   process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, ROOT);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
-const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
+const format = 'YYYY-MM-DDTHH:mm:SS';
+// eslint-disable-next-line import/namespace
+const formatted = `${moment.utc().format(format)}Z`;
+const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP || formatted);
 const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 

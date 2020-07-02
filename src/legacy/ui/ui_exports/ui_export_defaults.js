@@ -24,7 +24,7 @@ export const UI_EXPORT_DEFAULTS = {
   webpackNoParseRules: [
     /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
     /node_modules[\/\\](mocha|moment)[\/\\]/,
-    /node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
+    /node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
   ],
 
   webpackAliases: {

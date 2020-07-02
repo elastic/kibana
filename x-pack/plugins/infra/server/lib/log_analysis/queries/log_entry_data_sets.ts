@@ -5,9 +5,13 @@
  */
 
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import {
+  createJobIdFilters,
+  createResultTypeFilters,
+  createTimeRangeFilters,
+  defaultRequestParameters,
+} from './common';
 
 export const createLogEntryDatasetsQuery = (
   logEntryAnalysisJobId: string,
@@ -21,21 +25,9 @@ export const createLogEntryDatasetsQuery = (
     query: {
       bool: {
         filter: [
-          {
-            range: {
-              timestamp: {
-                gte: startTime,
-                lt: endTime,
-              },
-            },
-          },
-          {
-            term: {
-              result_type: {
-                value: 'model_plot',
-              },
-            },
-          },
+          ...createJobIdFilters(logEntryAnalysisJobId),
+          ...createTimeRangeFilters(startTime, endTime),
+          ...createResultTypeFilters(['model_plot']),
         ],
       },
     },
@@ -58,7 +50,6 @@ export const createLogEntryDatasetsQuery = (
       },
     },
   },
-  index: getMlResultIndex(logEntryAnalysisJobId),
   size: 0,
 });
 

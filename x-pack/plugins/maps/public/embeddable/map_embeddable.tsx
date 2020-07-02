@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiLoadingSpinner } from '@elastic/eui';

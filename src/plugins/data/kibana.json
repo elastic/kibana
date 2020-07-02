@@ -7,5 +7,6 @@
     "expressions",
     "uiActions"
   ],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "extraPublicDirs": ["common", "common/utils/abort_utils"]
 }

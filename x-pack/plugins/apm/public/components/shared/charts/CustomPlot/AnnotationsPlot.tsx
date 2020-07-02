@@ -5,7 +5,6 @@
  */
 import React from 'react';
 import { VerticalGridLines } from 'react-vis';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   EuiIcon,
   EuiToolTip,
@@ -14,6 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTheme } from '../../../../hooks/useTheme';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
@@ -26,15 +26,14 @@ interface Props {
   overlay: Maybe<HTMLElement>;
 }
 
-const style = {
-  stroke: theme.euiColorSecondary,
-  strokeDasharray: 'none',
-};
-
-export function AnnotationsPlot(props: Props) {
-  const { plotValues, annotations } = props;
-
+export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
+  const theme = useTheme();
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
+
+  const style = {
+    stroke: theme.eui.euiColorSecondary,
+    strokeDasharray: 'none',
+  };
 
   return (
     <>
@@ -65,10 +64,10 @@ export function AnnotationsPlot(props: Props) {
               </EuiFlexGroup>
             }
           >
-            <EuiIcon type="dot" color={theme.euiColorSecondary} />
+            <EuiIcon type="dot" color={theme.eui.euiColorSecondary} />
           </EuiToolTip>
         </div>
       ))}
     </>
   );
-}
+};

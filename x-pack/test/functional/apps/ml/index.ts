@@ -22,14 +22,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteDashboards();
 
-      await ml.testResources.deleteIndexPattern('ft_farequote');
-      await ml.testResources.deleteIndexPattern('ft_ecommerce');
-      await ml.testResources.deleteIndexPattern('ft_categorization');
-      await ml.testResources.deleteIndexPattern('ft_event_rate_gen_trend_nanos');
-      await ml.testResources.deleteIndexPattern('ft_bank_marketing');
-      await ml.testResources.deleteIndexPattern('ft_ihp_outlier');
-      await ml.testResources.deleteIndexPattern('ft_egs_regression');
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteIndexPatternByTitle('ft_categorization');
+      await ml.testResources.deleteIndexPatternByTitle('ft_event_rate_gen_trend_nanos');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
 
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');

@@ -55,7 +55,7 @@ describe('pivotObjectArray', () => {
   });
 
   it('throws when given an invalid column list', () => {
-    // @ts-ignore testing potential calls from legacy code that should throw
+    // @ts-expect-error testing potential calls from legacy code that should throw
     const check = () => pivotObjectArray(rows, [{ name: 'price' }, { name: 'missing' }]);
     expect(check).toThrowError('Columns should be an array of strings');
   });

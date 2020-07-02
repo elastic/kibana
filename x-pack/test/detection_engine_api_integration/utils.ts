@@ -7,6 +7,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import {
+  Status,
+  SignalIds,
+} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
@@ -106,12 +110,24 @@ export const getSignalStatus = () => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
+export const getQueryAllSignals = () => ({
+  query: { match_all: {} },
+});
+
+export const getQuerySignalIds = (signalIds: SignalIds) => ({
+  query: {
+    terms: {
+      _id: signalIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
 }: {
-  signalIds: string[];
-  status: 'open' | 'closed';
+  signalIds: SignalIds;
+  status: Status;
 }) => ({
   signal_ids: signalIds,
   status,
@@ -163,6 +179,7 @@ export const binaryToString = (res: any, callback: any): void => {
  */
 export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
@@ -176,10 +193,12 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 1,
+  risk_score_mapping: [],
   name: 'Simple Rule Query',
   query: 'user.name: root or user.name: admin',
   references: [],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -291,6 +310,7 @@ export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -298,6 +318,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -324,6 +345,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -375,6 +397,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -383,6 +406,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -410,6 +434,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -457,3 +482,29 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
 });
+
+// Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
+export const waitFor = async (
+  functionToTest: () => Promise<boolean>,
+  maxTimeout: number = 5000,
+  timeoutWait: number = 10
+) => {
+  await new Promise(async (resolve, reject) => {
+    let found = false;
+    let numberOfTries = 0;
+    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      const itPasses = await functionToTest();
+      if (itPasses) {
+        found = true;
+      } else {
+        numberOfTries++;
+      }
+      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+    }
+    if (found) {
+      resolve();
+    } else {
+      reject(new Error('timed out waiting for function condition to be true'));
+    }
+  });
+};

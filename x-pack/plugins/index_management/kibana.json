@@ -10,7 +10,8 @@
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "ingestManager"
   ],
   "configPath": ["xpack", "index_management"]
 }

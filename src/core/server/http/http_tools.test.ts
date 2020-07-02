@@ -17,11 +17,14 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  // Hapi Inert patches native methods
-  ...jest.requireActual('fs'),
-  readFileSync: jest.fn(),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+  return {
+    // Hapi Inert patches native methods
+    ...original,
+    readFileSync: jest.fn(),
+  };
+});
 
 import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';
@@ -31,7 +34,7 @@ import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } 
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
 
 const emptyOutput = {
@@ -74,7 +77,7 @@ describe('defaultValidationErrorHandler', () => {
 });
 
 describe('timeouts', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   const server = new HttpServer(logger, 'foo');
   const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 

@@ -8,8 +8,8 @@ import React, { Fragment } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/kibana/public';
 import { ImportRetry } from '../types';
+import { ProcessedImportResponse } from '../../../../../../src/plugins/saved_objects_management/public';
 
 interface Props {
   copyInProgress: boolean;
