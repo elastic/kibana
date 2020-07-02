@@ -51,56 +51,21 @@ exports[`MonitorList component MonitorListPagination component renders a no item
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "list": Object {
+          "nextPagePagination": null,
+          "prevPagePagination": null,
+          "summaries": Array [],
+          "totalSummaryCount": 0,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": false,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "list": Object {
-            "nextPagePagination": null,
-            "prevPagePagination": null,
-            "summaries": Array [],
-            "totalSummaryCount": 0,
-          },
-          "loading": false,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;
 
@@ -155,118 +120,83 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "list": Object {
+          "nextPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}",
+          "prevPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}",
+          "summaries": Array [
+            Object {
+              "monitor_id": "foo",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 124,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "down",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.3",
+                      "status": "down",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 2,
+                  "up": 1,
+                },
+                "timestamp": "123",
+                "url": Object {},
+              },
+            },
+            Object {
+              "monitor_id": "bar",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "up",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 0,
+                  "up": 2,
+                },
+                "timestamp": "125",
+                "url": Object {},
+              },
+            },
+          ],
+          "totalSummaryCount": 2,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": false,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "list": Object {
-            "nextPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}",
-            "prevPagePagination": "{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}",
-            "summaries": Array [
-              Object {
-                "monitor_id": "foo",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 2,
-                    "up": 1,
-                  },
-                  "timestamp": "123",
-                  "url": Object {},
-                },
-              },
-              Object {
-                "monitor_id": "bar",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 0,
-                    "up": 2,
-                  },
-                  "timestamp": "125",
-                  "url": Object {},
-                },
-              },
-            ],
-            "totalSummaryCount": 2,
-          },
-          "loading": false,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;
 
@@ -321,56 +251,21 @@ exports[`MonitorList component renders a no items message when no data is provid
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "list": Object {
+          "nextPagePagination": null,
+          "prevPagePagination": null,
+          "summaries": Array [],
+          "totalSummaryCount": 0,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": true,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "list": Object {
-            "nextPagePagination": null,
-            "prevPagePagination": null,
-            "summaries": Array [],
-            "totalSummaryCount": 0,
-          },
-          "loading": true,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;
 
@@ -425,119 +320,84 @@ exports[`MonitorList component renders error list 1`] = `
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "error": [Error: foo message],
+        "list": Object {
+          "nextPagePagination": null,
+          "prevPagePagination": null,
+          "summaries": Array [
+            Object {
+              "monitor_id": "foo",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 124,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "down",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.3",
+                      "status": "down",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 2,
+                  "up": 1,
+                },
+                "timestamp": "123",
+                "url": Object {},
+              },
+            },
+            Object {
+              "monitor_id": "bar",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "up",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 0,
+                  "up": 2,
+                },
+                "timestamp": "125",
+                "url": Object {},
+              },
+            },
+          ],
+          "totalSummaryCount": 2,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": false,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "error": [Error: foo message],
-          "list": Object {
-            "nextPagePagination": null,
-            "prevPagePagination": null,
-            "summaries": Array [
-              Object {
-                "monitor_id": "foo",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 2,
-                    "up": 1,
-                  },
-                  "timestamp": "123",
-                  "url": Object {},
-                },
-              },
-              Object {
-                "monitor_id": "bar",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 0,
-                    "up": 2,
-                  },
-                  "timestamp": "125",
-                  "url": Object {},
-                },
-              },
-            ],
-            "totalSummaryCount": 2,
-          },
-          "loading": false,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;
 
@@ -592,118 +452,83 @@ exports[`MonitorList component renders loading state 1`] = `
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "list": Object {
+          "nextPagePagination": null,
+          "prevPagePagination": null,
+          "summaries": Array [
+            Object {
+              "monitor_id": "foo",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 124,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "down",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.3",
+                      "status": "down",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 2,
+                  "up": 1,
+                },
+                "timestamp": "123",
+                "url": Object {},
+              },
+            },
+            Object {
+              "monitor_id": "bar",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "up",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 0,
+                  "up": 2,
+                },
+                "timestamp": "125",
+                "url": Object {},
+              },
+            },
+          ],
+          "totalSummaryCount": 2,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": true,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "list": Object {
-            "nextPagePagination": null,
-            "prevPagePagination": null,
-            "summaries": Array [
-              Object {
-                "monitor_id": "foo",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 2,
-                    "up": 1,
-                  },
-                  "timestamp": "123",
-                  "url": Object {},
-                },
-              },
-              Object {
-                "monitor_id": "bar",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 0,
-                    "up": 2,
-                  },
-                  "timestamp": "125",
-                  "url": Object {},
-                },
-              },
-            ],
-            "totalSummaryCount": 2,
-          },
-          "loading": true,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;
 
@@ -1478,117 +1303,82 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
     }
   }
 >
-  <ContextProvider
-    value={
+  <MonitorListComponent
+    monitorList={
       Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+        "list": Object {
+          "nextPagePagination": null,
+          "prevPagePagination": null,
+          "summaries": Array [
+            Object {
+              "monitor_id": "foo",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 124,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "down",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.3",
+                      "status": "down",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 2,
+                  "up": 1,
+                },
+                "timestamp": "123",
+                "url": Object {},
+              },
+            },
+            Object {
+              "monitor_id": "bar",
+              "state": Object {
+                "checks": Array [
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.1",
+                      "status": "up",
+                    },
+                    "timestamp": 125,
+                  },
+                  Object {
+                    "monitor": Object {
+                      "ip": "127.0.0.2",
+                      "status": "up",
+                    },
+                    "timestamp": 126,
+                  },
+                ],
+                "summary": Object {
+                  "down": 0,
+                  "up": 2,
+                },
+                "timestamp": "125",
+                "url": Object {},
+              },
+            },
+          ],
+          "totalSummaryCount": 2,
         },
-        "push": [Function],
-        "replace": [Function],
+        "loading": false,
       }
     }
-  >
-    <MonitorListComponent
-      monitorList={
-        Object {
-          "list": Object {
-            "nextPagePagination": null,
-            "prevPagePagination": null,
-            "summaries": Array [
-              Object {
-                "monitor_id": "foo",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 2,
-                    "up": 1,
-                  },
-                  "timestamp": "123",
-                  "url": Object {},
-                },
-              },
-              Object {
-                "monitor_id": "bar",
-                "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
-                  "summary": Object {
-                    "down": 0,
-                    "up": 2,
-                  },
-                  "timestamp": "125",
-                  "url": Object {},
-                },
-              },
-            ],
-            "totalSummaryCount": 2,
-          },
-          "loading": false,
-        }
-      }
-      pageSize={10}
-      setPageSize={[MockFunction]}
-    />
-  </ContextProvider>
+    pageSize={10}
+    setPageSize={[MockFunction]}
+  />
 </ContextProvider>
 `;

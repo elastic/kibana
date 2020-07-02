@@ -10,7 +10,6 @@ import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
-import { EndpointAlerts } from './endpoint_alerts';
 import { Management } from './management';
 
 const alertsSubPlugin = new Alerts();
@@ -19,7 +18,6 @@ const hostsSubPlugin = new Hosts();
 const networkSubPlugin = new Network();
 const overviewSubPlugin = new Overview();
 const timelinesSubPlugin = new Timelines();
-const endpointAlertsSubPlugin = new EndpointAlerts();
 const managementSubPlugin = new Management();
 
 export {
@@ -29,6 +27,5 @@ export {
   networkSubPlugin,
   overviewSubPlugin,
   timelinesSubPlugin,
-  endpointAlertsSubPlugin,
   managementSubPlugin,
 };
