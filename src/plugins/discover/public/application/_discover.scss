@@ -103,3 +103,15 @@ discover-app {
   right: $euiSizeM;
   top: $euiSizeXS;
 }
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}

@@ -130,6 +130,13 @@ export class KibanaLegacyPlugin {
         await import('./font_awesome');
       },
       /**
+       * Loads legacy styles. Should be removed once everything is cleaned up or migrated to plugins
+       * @deprecated
+       */
+      loadStyles: async () => {
+        await import('./styles');
+      },
+      /**
        * @deprecated
        * Just exported for wiring up with legacy platform, should not be used.
        */

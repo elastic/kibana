@@ -259,6 +259,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+        pluginsStart.kibanaLegacy.loadStyles();
         this.currentHistory = params.history;
         appMounted();
         const {
