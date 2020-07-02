@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
@@ -26,6 +26,9 @@ import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
+import { EndpointNotice } from '../components/endpoint_notice';
+import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -39,8 +42,28 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   query = DEFAULT_QUERY,
   setAbsoluteRangeDatePicker,
 }) => {
-  const { indicesExist, indexPattern } = useWithSource();
+  const endpointMetadataIndex = useMemo<string[]>(() => {
+    return [ENDPOINT_METADATA_INDEX];
+  }, []);
+
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  const { indicesExist, indexPattern } = useWithSource();
+  const { indicesExist: metadataIndexExists } = useWithSource(
+    'default',
+    endpointMetadataIndex,
+    true
+  );
+  const { addMessage, hasMessage } = useMessagesStorage();
+  const hasDismissEndpointNoticeMessage: boolean = useMemo(
+    () => hasMessage('management', 'dismissEndpointNotice'),
+    [hasMessage]
+  );
+
+  const [dismissMessage, setDismissMessage] = useState<boolean>(hasDismissEndpointNoticeMessage);
+  const dismissEndpointNotice = () => {
+    setDismissMessage(true);
+    addMessage('management', 'dismissEndpointNotice');
+  };
 
   return (
     <>
@@ -51,6 +74,12 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
           </FiltersGlobal>
 
           <WrapperPage>
+            {!dismissMessage && !metadataIndexExists && (
+              <>
+                <EndpointNotice onDismiss={dismissEndpointNotice} />
+                <EuiSpacer size="l" />
+              </>
+            )}
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />

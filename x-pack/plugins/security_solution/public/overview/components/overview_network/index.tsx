@@ -41,14 +41,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   startDate,
   setQuery,
 }) => {
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
+  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const goToNetwork = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
         path: getNetworkUrl(urlSearch),
       });
     },
@@ -57,7 +57,11 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
 
   const networkPageButton = useMemo(
     () => (
-      <LinkButton onClick={goToNetwork} href={formatUrl(getNetworkUrl())}>
+      <LinkButton
+        data-test-subj="overview-network-go-to-network-page"
+        onClick={goToNetwork}
+        href={formatUrl(getNetworkUrl())}
+      >
         <FormattedMessage
           id="xpack.securitySolution.overview.networkAction"
           defaultMessage="View network"
