@@ -22,6 +22,7 @@ import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
 import { TriggerId, ActionType } from '../types';
+import { wait } from '@testing-library/dom';
 
 jest.mock('../context_menu');
 
@@ -57,6 +58,7 @@ const reset = () => {
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
+  jest.useFakeTimers();
 };
 beforeEach(reset);
 
@@ -74,6 +76,8 @@ test('executes a single action mapped to a trigger', async () => {
   const context = {};
   const start = doStart();
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+
+  jest.runAllTimers();
 
   expect(executeFn).toBeCalledTimes(1);
   expect(executeFn).toBeCalledWith(context);
@@ -117,6 +121,8 @@ test('does not execute an incompatible action', async () => {
   };
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
+  jest.runAllTimers();
+
   expect(executeFn).toBeCalledTimes(1);
 });
 
@@ -139,8 +145,12 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const context = {};
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
-  expect(executeFn).toBeCalledTimes(0);
-  expect(openContextMenu).toHaveBeenCalledTimes(1);
+  jest.runAllTimers();
+
+  await wait(() => {
+    expect(executeFn).toBeCalledTimes(0);
+    expect(openContextMenu).toHaveBeenCalledTimes(1);
+  });
 });
 
 test('passes whole action context to isCompatible()', async () => {
@@ -161,4 +171,5 @@ test('passes whole action context to isCompatible()', async () => {
 
   const context = { foo: 'bar' };
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+  jest.runAllTimers();
 });

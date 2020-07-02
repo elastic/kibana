@@ -17,8 +17,17 @@
  * under the License.
  */
 
-export { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './apply_filter_action';
+export {
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  ApplyGlobalFilterActionContext,
+} from './apply_filter_action';
 export { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 export { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-export { selectRangeAction } from './select_range_action';
-export { valueClickAction } from './value_click_action';
+export {
+  EmitApplyFilterTriggerActionContext,
+  ACTION_EMIT_APPLY_FILTER_TRIGGER,
+  createEmitApplyFilterTriggerAction,
+  isValueClickTriggerContext,
+  isRangeSelectTriggerContext,
+} from './emit_apply_filter_trigger_action';

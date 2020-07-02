@@ -20,8 +20,6 @@
 import { Trigger } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
-import { Action } from '../actions';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
@@ -43,33 +41,14 @@ export class TriggerInternal<T extends TriggerId> {
       );
     }
 
-    if (actions.length === 1) {
-      await this.executeSingleAction(actions[0], context);
-      return;
-    }
-
-    await this.executeMultipleActions(actions, context);
-  }
-
-  private async executeSingleAction(
-    action: Action<TriggerContextMapping[T]>,
-    context: TriggerContextMapping[T]
-  ) {
-    await action.execute(context);
-  }
-
-  private async executeMultipleActions(
-    actions: Array<Action<TriggerContextMapping[T]>>,
-    context: TriggerContextMapping[T]
-  ) {
-    const panel = await buildContextMenuForActions({
-      actions,
-      actionContext: context,
-      title: this.trigger.title,
-      closeMenu: () => session.close(),
-    });
-    const session = openContextMenu([panel], {
-      'data-test-subj': 'multipleActionsContextMenu',
-    });
+    await Promise.all([
+      actions.map((action) =>
+        this.service.executionService.execute({
+          action,
+          context,
+          trigger: this.trigger,
+        })
+      ),
+    ]);
   }
 }

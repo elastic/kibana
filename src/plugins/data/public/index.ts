@@ -442,6 +442,12 @@ export {
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
+export {
+  ApplyGlobalFilterActionContext,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
+} from './actions';
+
 export * from '../common/field_mapping';
 
 /*

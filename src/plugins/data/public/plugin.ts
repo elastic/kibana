@@ -69,30 +69,30 @@ import {
   createFilterAction,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
+  ApplyGlobalFilterActionContext,
+  ACTION_EMIT_APPLY_FILTER_TRIGGER,
+  EmitApplyFilterTriggerActionContext,
+  createEmitApplyFilterTriggerAction,
 } from './actions';
-import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
-import {
-  selectRangeAction,
-  SelectRangeActionContext,
-  ACTION_SELECT_RANGE,
-} from './actions/select_range_action';
-import {
-  valueClickAction,
-  ACTION_VALUE_CLICK,
-  ValueClickActionContext,
-} from './actions/value_click_action';
+
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
-    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
-    [ACTION_VALUE_CLICK]: ValueClickActionContext;
+    [ACTION_EMIT_APPLY_FILTER_TRIGGER]: EmitApplyFilterTriggerActionContext;
   }
 }
 
-export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
+export class DataPublicPlugin
+  implements
+    Plugin<
+      DataPublicPluginSetup,
+      DataPublicPluginStart,
+      DataSetupDependencies,
+      DataStartDependencies
+    > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly fieldFormatsService: FieldFormatsService;
@@ -110,13 +110,13 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
     { expressions, uiActions }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getInternalStartServices = (): InternalStartServices => {
-      const { core: coreStart, self }: any = startServices();
+      const { core: coreStart, self } = startServices();
       return {
         fieldFormats: self.fieldFormats,
         notifications: coreStart.notifications,
@@ -138,15 +138,12 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
-    uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
-      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
+    const emitApplyFilterTriggerAction = createEmitApplyFilterTriggerAction(() => ({
+      uiActions: startServices().plugins.uiActions,
+    }));
 
-    uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
-      valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
+    uiActions.addTriggerAction(SELECT_RANGE_TRIGGER, emitApplyFilterTriggerAction);
+    uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emitApplyFilterTriggerAction);
 
     return {
       autocomplete: this.autocomplete.setup(core),
