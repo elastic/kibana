@@ -18,8 +18,8 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { AgentStatus } from '../../../../../ingest_manager/common/types/models';
-import { findAllUnenrolledHostIds, findUnenrolledHostByHostId, HostId } from './support/unenroll';
+import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { findAllUnenrolledAgentIds } from './support/unenroll';
 
 interface HitSource {
   _source: HostMetadata;
@@ -70,8 +70,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const unenrolledHostIds = await findAllUnenrolledHostIds(
-          context.core.elasticsearch.legacy.client
+        const unenrolledAgentIds = await findAllUnenrolledAgentIds(
+          endpointAppContext.service.getAgentService(),
+          context.core.savedObjects.client
         );
 
         const queryParams = await kibanaRequestToMetadataListESQuery(
@@ -79,9 +80,10 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           endpointAppContext,
           metadataIndexPattern,
           {
-            unenrolledHostIds: unenrolledHostIds.map((host: HostId) => host.host.id),
+            unenrolledAgentIds,
           }
         );
+
         const response = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
           queryParams
@@ -138,13 +140,6 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const unenrolledHostId = await findUnenrolledHostByHostId(
-    metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client,
-    id
-  );
-  if (unenrolledHostId) {
-    throw Boom.badRequest('the requested endpoint is unenrolled');
-  }
   const query = getESQueryHostMetadataByID(id, metadataIndexPattern);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.legacy.client.callAsCurrentUser(
     'search',
@@ -155,7 +150,36 @@ export async function getHostData(
     return undefined;
   }
 
-  return enrichHostMetadata(response.hits.hits[0]._source, metadataRequestContext);
+  const hostMetadata: HostMetadata = response.hits.hits[0]._source;
+  const agent = await findAgent(metadataRequestContext, hostMetadata);
+
+  if (agent && !agent.active) {
+    throw Boom.badRequest('the requested endpoint is unenrolled');
+  }
+
+  return enrichHostMetadata(hostMetadata, metadataRequestContext);
+}
+
+async function findAgent(
+  metadataRequestContext: MetadataRequestContext,
+  hostMetadata: HostMetadata
+): Promise<Agent | undefined> {
+  const logger = metadataRequestContext.endpointAppContext.logFactory.get('metadata');
+  try {
+    return await metadataRequestContext.endpointAppContext.service
+      .getAgentService()
+      .getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        hostMetadata.elastic.agent.id
+      );
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      logger.warn(`agent with id ${hostMetadata.elastic.agent.id} not found`);
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
 }
 
 async function mapToHostResultList(

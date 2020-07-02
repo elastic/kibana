@@ -1,0 +1,44 @@
+{
+  "description": "Makes external events actionable within Elastic Security! 🎬",
+  "enabled": false,
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "risk_score": 50,
+  "severity": "high",
+  "name": "External alerts",
+  "query": "event.type: \"alert\"",
+  "type": "query",
+  "author": ["Elastic"],
+  "building_block_type": "default",
+  "license": "Elastic License",
+  "risk_score_mapping": [
+    {
+      "field": "event.risk_score",
+      "operator": "equals",
+      "value": "0"
+    }
+  ],
+  "rule_name_override": "event.message",
+  "severity_mapping":[
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "value": "low",
+      "severity": "low"
+    },
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "value": "medium",
+      "severity": "medium"
+    }
+  ],
+  "timestamp_override": "event.ingested"
+}
