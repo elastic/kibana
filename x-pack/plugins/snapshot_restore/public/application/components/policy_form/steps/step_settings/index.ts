@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useSwimlaneLimit, SelectLimit } from './select_limit';
+export { PolicyStepSettings } from './step_settings';

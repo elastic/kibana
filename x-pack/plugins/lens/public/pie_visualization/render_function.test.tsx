@@ -17,6 +17,9 @@ import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { createMockPaletteDefinition } from '../editor_frame_service/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -64,9 +67,8 @@ describe('PieVisualization component', () => {
       return {
         data,
         formatFactory: getFormatSpy,
-        isDarkMode: false,
-        chartTheme: {},
         onClickValue: jest.fn(),
+        chartsThemeService,
       };
     }
 
