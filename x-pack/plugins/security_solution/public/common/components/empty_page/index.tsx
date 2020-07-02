@@ -47,7 +47,7 @@ export const EmptyPage = React.memo<EmptyPageProps>(
     ...rest
   }) => (
     <EmptyPrompt
-      iconType="securityAnalyticsApp"
+      iconType="logoSecurity"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={

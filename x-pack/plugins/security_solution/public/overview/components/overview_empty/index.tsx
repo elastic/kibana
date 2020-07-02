@@ -40,12 +40,10 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage={i18nCommon.OVERVIEW_EMPTY_MESSAGE}
+            defaultMessage={i18nCommon.EMPTY_MESSAGE}
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
-            {i18n.translate('xpack.securitySolution.overview.gettingStartedGuide', {
-              defaultMessage: 'getting started guide.',
-            })}
+            {i18nCommon.EMPTY_ACTION_SECONDARY}
           </EuiLink>
         </>
       }
@@ -62,12 +60,10 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage={i18nCommon.OVERVIEW_EMPTY_MESSAGE}
+            defaultMessage={i18nCommon.EMPTY_MESSAGE}
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
-            {i18n.translate('xpack.securitySolution.overview.gettingStartedGuide', {
-              defaultMessage: 'getting started guide.',
-            })}
+            {i18nCommon.EMPTY_ACTION_SECONDARY}
           </EuiLink>
         </>
       }
