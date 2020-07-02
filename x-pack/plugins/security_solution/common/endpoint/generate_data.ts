@@ -391,6 +391,13 @@ export class EndpointDocGenerator {
       '@timestamp': ts,
       event: {
         created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'metric',
+        category: ['host'],
+        type: ['info'],
+        module: 'endpoint',
+        action: 'endpoint_metadata',
+        dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
     };
@@ -1027,6 +1034,13 @@ export class EndpointDocGenerator {
           enabled: true,
           streams: [],
           config: {
+            artifact_manifest: {
+              value: {
+                manifest_version: 'v0',
+                schema_version: '1.0.0',
+                artifacts: {},
+              },
+            },
             policy: {
               value: policyFactory(),
             },
@@ -1225,8 +1239,8 @@ export class EndpointDocGenerator {
         created: ts,
         id: this.seededUUIDv4(),
         kind: 'state',
-        category: 'host',
-        type: 'change',
+        category: ['host'],
+        type: ['change'],
         module: 'endpoint',
         action: 'endpoint_policy_response',
         dataset: 'endpoint.policy',

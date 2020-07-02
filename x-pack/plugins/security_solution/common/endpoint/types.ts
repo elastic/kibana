@@ -5,6 +5,7 @@
  */
 
 import { PackageConfig, NewPackageConfig } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -399,6 +400,13 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+    kind: string;
+    id: string;
+    category: string[];
+    type: string[];
+    module: string;
+    action: string;
+    dataset: string;
   };
   elastic: {
     agent: {
@@ -684,6 +692,9 @@ export type NewPolicyData = NewPackageConfig & {
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };
@@ -771,8 +782,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;
