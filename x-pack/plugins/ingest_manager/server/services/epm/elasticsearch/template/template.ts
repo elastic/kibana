@@ -37,13 +37,20 @@ const DEFAULT_IGNORE_ABOVE = 1024;
  *
  * @param indexPattern String with the index pattern
  */
-export function getTemplate(
-  type: string,
-  templateName: string,
-  mappings: IndexTemplateMappings,
-  pipelineName?: string | undefined
-): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings);
+export function getTemplate({
+  type,
+  templateName,
+  mappings,
+  pipelineName,
+  packageName,
+}: {
+  type: string;
+  templateName: string;
+  mappings: IndexTemplateMappings;
+  pipelineName?: string | undefined;
+  packageName: string;
+}): IndexTemplate {
+  const template = getBaseTemplate(type, templateName, mappings, packageName);
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -236,7 +243,8 @@ export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record
 function getBaseTemplate(
   type: string,
   templateName: string,
-  mappings: IndexTemplateMappings
+  mappings: IndexTemplateMappings,
+  packageName: string
 ): IndexTemplate {
   return {
     // This takes precedence over all index templates installed with the 'base' package
@@ -296,6 +304,12 @@ function getBaseTemplate(
     },
     data_stream: {
       timestamp_field: '@timestamp',
+    },
+    _meta: {
+      package: {
+        name: packageName,
+      },
+      managed_by: 'ingest-manager',
     },
   };
 }
