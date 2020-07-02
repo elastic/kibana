@@ -107,6 +107,7 @@ export const createAgentConfigHandler: RequestHandler<
   TypeOf<typeof CreateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
@@ -132,9 +133,14 @@ export const createAgentConfigHandler: RequestHandler<
     if (withSysMonitoring && newSysPackageConfig !== undefined && agentConfig !== undefined) {
       newSysPackageConfig.config_id = agentConfig.id;
       newSysPackageConfig.namespace = agentConfig.namespace;
-      const sysPackageConfig = await packageConfigService.create(soClient, newSysPackageConfig, {
-        user,
-      });
+      const sysPackageConfig = await packageConfigService.create(
+        soClient,
+        callCluster,
+        newSysPackageConfig,
+        {
+          user,
+        }
+      );
 
       if (sysPackageConfig) {
         agentConfig = await agentConfigService.assignPackageConfigs(soClient, agentConfig.id, [
