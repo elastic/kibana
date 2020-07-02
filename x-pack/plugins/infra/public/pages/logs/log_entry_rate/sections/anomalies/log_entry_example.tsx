@@ -120,14 +120,14 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
     return [
       {
         label: VIEW_IN_STREAM_LABEL,
-        onClick: viewInStreamLinkProps.onClick,
+        ...viewInStreamLinkProps,
       },
       {
         label: VIEW_ANOMALY_IN_ML_LABEL,
-        onClick: viewAnomalyInMachineLearningLinkProps.onClick,
+        ...viewAnomalyInMachineLearningLinkProps,
       },
     ];
-  }, [viewInStreamLinkProps.onClick, viewAnomalyInMachineLearningLinkProps.onClick]);
+  }, [viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
 
   return (
     <LogEntryRowWrapper

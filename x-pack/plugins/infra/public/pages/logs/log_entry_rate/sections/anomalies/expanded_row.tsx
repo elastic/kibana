@@ -40,10 +40,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     logEntryRateExamples,
   } = useLogEntryRateExamples({
     dataset: anomaly.partitionId,
-    endTime: anomaly.startTime + bucketSpan / 2,
+    endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
     sourceId,
-    startTime: anomaly.startTime - bucketSpan / 2,
+    startTime: anomaly.startTime,
   });
 
   useMount(() => {

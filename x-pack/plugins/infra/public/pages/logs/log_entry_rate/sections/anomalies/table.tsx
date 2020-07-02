@@ -64,21 +64,23 @@ const datasetColumnName = i18n.translate(
 );
 
 const moreThanExpectedAnomalyMessage = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableLessMoreExpectedAnomalyMessage',
+  'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
   {
     defaultMessage: 'More log messages in this dataset than expected',
   }
 );
 
-const lessThanExpectedAnomalyMessage = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableLessThanExpectedAnomalyMessage',
+const fewerThanExpectedAnomalyMessage = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
   {
-    defaultMessage: 'Less log messages in this dataset than expected',
+    defaultMessage: 'Fewer log messages in this dataset than expected',
   }
 );
 
 const getAnomalyMessage = (actualRate: number, typicalRate: number): string => {
-  return actualRate < typicalRate ? lessThanExpectedAnomalyMessage : moreThanExpectedAnomalyMessage;
+  return actualRate < typicalRate
+    ? fewerThanExpectedAnomalyMessage
+    : moreThanExpectedAnomalyMessage;
 };
 
 export const AnomaliesTable: React.FunctionComponent<{
