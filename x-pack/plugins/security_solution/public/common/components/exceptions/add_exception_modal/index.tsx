@@ -161,7 +161,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useCallback(() => {
-    if (alertData !== undefined && exceptionListType === 'endpoint' && ruleExceptionList) {
+    if (alertData !== undefined && ruleExceptionList) {
       return defaultEndpointExceptionItems(
         exceptionListType,
         ruleExceptionList.list_id,
@@ -267,7 +267,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilder
-                  exceptionListItems={initialExceptionItems()}
+                  exceptionListItems={
+                    exceptionListType === 'endpoint' ? initialExceptionItems() : []
+                  }
                   listType={exceptionListType}
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
