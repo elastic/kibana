@@ -585,7 +585,9 @@ export class AnnotationsTable extends Component {
       filters.push({
         type: 'is',
         field: 'current_series',
-        name: 'Current Series',
+        name: i18n.translate('xpack.ml.annotationsTable.seriesOnlyFilterName', {
+          defaultMessage: 'Filter to series',
+        }),
         value: this.props.chartDetails.entityData.entities[0].fieldValue,
       });
     }
