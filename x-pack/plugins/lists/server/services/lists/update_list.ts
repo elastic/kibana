@@ -5,7 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import {
   DescriptionOrUndefined,
@@ -20,7 +20,7 @@ import { getList } from '.';
 
 export interface UpdateListOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
   user: string;
   name: NameOrUndefined;

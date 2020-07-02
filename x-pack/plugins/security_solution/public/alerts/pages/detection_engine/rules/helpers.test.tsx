@@ -80,14 +80,18 @@ describe('rule helpers', () => {
         },
       };
       const aboutRuleStepData = {
+        author: [],
         description: '24/7',
         falsePositives: ['test'],
+        isBuildingBlock: false,
         isNew: false,
+        license: 'Elastic License',
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
-        riskScore: 21,
-        severity: 'low',
+        riskScore: { value: 21, mapping: [] },
+        ruleNameOverride: 'message',
+        severity: { value: 'low', mapping: [] },
         tags: ['tag1', 'tag2'],
         threat: [
           {
@@ -106,6 +110,7 @@ describe('rule helpers', () => {
             ],
           },
         ],
+        timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m', isNew: false };
       const ruleActionsStepData = {

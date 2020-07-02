@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'ingestManagerCreateDatasource',
+    'ingestManagerCreatePackageConfig',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
         await testSubjects.existOrFail('policyDetailsIdNotFoundMessage');
         expect(await testSubjects.getVisibleText('policyDetailsIdNotFoundMessage')).to.equal(
-          'Saved object [ingest-datasources/invalid-id] not found'
+          'Saved object [ingest-package-configs/invalid-id] not found'
         );
       });
     });
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       before(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       after(async () => {
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should display policy view', async () => {
         expect(await testSubjects.getVisibleText('pageViewHeaderLeftTitle')).to.equal(
-          policyInfo.datasource.name
+          policyInfo.packageConfig.name
         );
       });
     });
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       afterEach(async () => {
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Policy ${policyInfo.datasource.name} has been updated.`
+          `Policy ${policyInfo.packageConfig.name} has been updated.`
         );
       });
       it('should persist update on the screen', async () => {
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         await pageObjects.policy.navigateToPolicyList();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
 
         expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
           false
@@ -107,12 +107,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullConfig).to.eql({
           inputs: [
             {
-              id: policyInfo.datasource.id,
+              id: policyInfo.packageConfig.id,
               dataset: { namespace: 'default' },
               name: 'Protect East Coast',
-              package: {
-                name: 'endpoint',
-                version: policyInfo.packageInfo.version,
+              meta: {
+                package: {
+                  name: 'endpoint',
+                  version: policyInfo.packageInfo.version,
+                },
               },
               policy: {
                 linux: {
@@ -192,14 +194,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('when on Ingest Configurations Edit Datasource page', async () => {
+    describe('when on Ingest Configurations Edit Package Config page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.ingestManagerCreateDatasource.navigateToAgentConfigEditDatasource(
+        await pageObjects.ingestManagerCreatePackageConfig.navigateToAgentConfigEditPackageConfig(
           policyInfo.agentConfig.id,
-          policyInfo.datasource.id
+          policyInfo.packageConfig.id
         );
       });
       afterEach(async () => {

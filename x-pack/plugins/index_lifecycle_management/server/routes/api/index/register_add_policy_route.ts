@@ -5,13 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 async function addLifecyclePolicy(
-  callAsCurrentUser: APICaller,
+  callAsCurrentUser: LegacyAPICaller,
   indexName: string,
   policyName: string,
   alias: string
