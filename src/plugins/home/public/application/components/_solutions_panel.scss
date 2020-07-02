@@ -1,0 +1,100 @@
+.homSolutionsPanel {
+  margin-top: -$euiSizeXL;
+  min-height: $euiSize*16;
+  display: flex;
+
+  .homSolutionsPanel--restrictHalfWidth {
+    max-width: 50%;
+  }
+
+  .homSolutionsPanel__solutionPanel {
+    display: flex;
+    align-items: stretch;
+
+    .homSolutionsPanel__solutionTitle {
+      padding: $euiSize;
+
+      .euiToken {
+        padding: $euiSizeS;
+      }
+    }
+
+    .homSolutionsPanel__CTA {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: $euiSize;
+    }
+  }
+
+  .homSolutionsPanel__header {
+    border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    color: $euiColorEmptyShade;
+
+    img {
+      position: absolute;
+      width: auto;
+    }
+  }
+
+  .homSolutionsPanel__enterpriseSearch {
+    .homSolutionsPanel__enterpriseSearchHeader {
+      background-color: #017d73;
+
+      .homSolutionsPanel__enterpriseSearchTopLeftImage img {
+        top: $euiSizeS;
+        left: 0;
+        height: $euiSizeXL;
+      }
+
+      .homSolutionsPanel__enterpriseSearchBottomRightImage img {
+        right: $euiSizeS;
+        bottom: $euiSizeS;
+        height: $euiSizeXL;
+      }
+    }
+  }
+
+  .homSolutionsPanel__observability {
+    .homSolutionsPanel__observabilityHeader {
+      background-color: #c42373;
+
+      .homSolutionsPanel__observabilityTopRightImage img {
+        top: $euiSizeS;
+        right: $euiSizeS;
+        height: $euiSizeXL;
+      }
+    }
+  }
+
+  .homSolutionsPanel__securitySolution {
+    .homSolutionsPanel__securitySolutionHeader {
+      background-color: #343741;
+
+      .homSolutionsPanel__securitySolutionTopLeftImage img {
+        top: $euiSizeS;
+        left: $euiSizeS;
+        height: $euiSizeXXL;
+      }
+    }
+  }
+
+  .homSolutionsPanel__kibana {
+    .homSolutionsPanel__kibanaHeader {
+      background-color: #006bb4;
+
+      .homSolutionsPanel__kibanaTopLeftImage img {
+        top: 0;
+        left: 0;
+        height: $euiSizeXXL * 4;
+      }
+
+      .homSolutionsPanel__kibanaBottomRightImage img {
+        right: 0;
+        bottom: 0;
+        height: $euiSizeXXL * 4;
+      }
+    }
+  }
+}
