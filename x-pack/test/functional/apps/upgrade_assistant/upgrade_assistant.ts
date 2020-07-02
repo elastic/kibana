@@ -13,6 +13,7 @@ export default function upgradeAssistantFunctionalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const security = getService('security');
+  const log = getService('log');
 
   describe('Upgrade Checkup', function () {
     this.tags('includeFirefox');
@@ -35,11 +36,16 @@ export default function upgradeAssistantFunctionalTests({
 
     it('allows user to toggle deprecation logging', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
-      await PageObjects.common.sleep(50000);
+      log.debug('expect initial state to be ON');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
+      log.debug('Now toggle to off');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await PageObjects.common.sleep(5000);
+      log.debug('expect state to be OFF after toggle');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('Off');
       await PageObjects.upgradeAssistant.toggleDeprecationLogging();
+      await PageObjects.common.sleep(5000);
+      log.debug('expect state to be ON after toggle');
       await PageObjects.upgradeAssistant.expectDeprecationLoggingLabel('On');
     });
 
