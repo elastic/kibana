@@ -316,6 +316,9 @@ export function registerEncryptedSavedObjects(
       'config_newest_revision',
       'updated_at',
       'current_error_events',
+      'unenrolled_at',
+      'unenrollement_started_at',
+      'packages',
     ]),
   });
   encryptedSavedObjects.registerType({
