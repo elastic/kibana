@@ -23,7 +23,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
+import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -45,6 +45,7 @@ import {
   enrichExceptionItemsWithNamespace,
   defaultEndpointExceptionItems,
   entryHasListType,
+  entryHasNonEcsType,
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
 
@@ -73,11 +74,16 @@ const Modal = styled(EuiModal)`
   `}
 `;
 
-// TODO: truncate subtitle
 const ModalHeader = styled(EuiModalHeader)`
   ${({ theme }) => css`
     flex-direction: column;
     align-items: flex-start;
+  `}
+`;
+
+const ModalHeaderSubtitle = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiColorMediumShade};
   `}
 `;
 
@@ -91,7 +97,6 @@ const ModalBodySection = styled.section`
   `}
 `;
 
-// TODO: for endpoint exceptions add OS to each entry in the exception items
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
   ruleId,
@@ -108,15 +113,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const [, dispatchToaster] = useStateToaster();
-  const { loading: isSignalIndexLoading, signalIndexExists, signalIndexName } = useSignalIndex();
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
-  // TODO: fix this
-  // const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  // const [{ browserFields, isLoading: indexPatternLoading }] = useFetchIndexPatterns(
-  //   [signalIndexName] ?? []
-  // );
-
-  // console.log(browserFields);
+  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    signalIndexName !== null ? [signalIndexName] : []
+  );
 
   const onError = useCallback(
     (error: Error) => {
@@ -158,7 +159,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onError: onFetchOrCreateExceptionListError,
   });
 
-  // TODO: we can use useMemo here instead
   useEffect(() => {
     if (alertData !== undefined && exceptionListType === 'endpoint' && ruleExceptionList) {
       setExceptionItemsToAdd(
@@ -173,8 +173,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [alertData, exceptionListType, ruleExceptionList, ruleName, setExceptionItemsToAdd]);
 
   useEffect(() => {
-    setShouldDisableBulkClose(entryHasListType(exceptionItemsToAdd));
-  }, [setShouldDisableBulkClose, exceptionItemsToAdd]);
+    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+      setShouldDisableBulkClose(
+        entryHasListType(exceptionItemsToAdd) ||
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+      );
+    }
+  }, [
+    setShouldDisableBulkClose,
+    exceptionItemsToAdd,
+    indexPatternLoading,
+    isSignalIndexLoading,
+    indexPatterns,
+  ]);
 
   const onCommentChange = useCallback(
     (value: string) => {
@@ -235,9 +246,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.ADD_EXCEPTION}</EuiModalHeaderTitle>
-          <div className="eui-textTruncate" title={ruleName}>
+          <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
-          </div>
+          </ModalHeaderSubtitle>
         </ModalHeader>
 
         {fetchOrCreateListError === true && (
@@ -250,6 +261,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
+          !indexPatternLoading &&
           !isLoadingExceptionList &&
           ruleExceptionList && (
             <>
@@ -260,7 +272,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
-                  indexPatternConfig={[signalIndexName]}
+                  indexPatternConfig={
+                    exceptionListType === 'endpoint' ? [alertsIndexPattern] : [signalIndexName]
+                  }
                   isLoading={false}
                   isOrDisabled={false}
                   isAndDisabled={false}

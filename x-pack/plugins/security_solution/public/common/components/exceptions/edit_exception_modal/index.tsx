@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -20,6 +20,8 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
+import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
+import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
@@ -36,6 +38,8 @@ import {
   enrichExceptionItemsWithOS,
   enrichExceptionItemsWithNamespace,
   getOsTagValues,
+  entryHasListType,
+  entryHasNonEcsType,
 } from '../helpers';
 
 interface EditExceptionModalProps {
@@ -52,11 +56,16 @@ const Modal = styled(EuiModal)`
   `}
 `;
 
-// TODO: truncate subtitle
 const ModalHeader = styled(EuiModalHeader)`
   ${({ theme }) => css`
     flex-direction: column;
     align-items: flex-start;
+  `}
+`;
+
+const ModalHeaderSubtitle = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.eui.euiColorMediumShade};
   `}
 `;
 
@@ -82,7 +91,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<ExceptionListItemSchema[]>([]);
   const [, dispatchToaster] = useStateToaster();
-  const { loading: isSignalIndexLoading, signalIndexExists, signalIndexName } = useSignalIndex();
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+
+  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    signalIndexName !== null ? [signalIndexName] : []
+  );
 
   const onError = useCallback(
     (error) => {
@@ -104,6 +117,21 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   );
 
+  useEffect(() => {
+    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+      setShouldDisableBulkClose(
+        entryHasListType(exceptionItemsToAdd) ||
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+      );
+    }
+  }, [
+    setShouldDisableBulkClose,
+    exceptionItemsToAdd,
+    indexPatternLoading,
+    isSignalIndexLoading,
+    indexPatterns,
+  ]);
+
   // TODO: needs to store the whole object because we need to keep track of deteled items
   // not just newly created ones
   const handleBuilderOnChange = useCallback(
@@ -120,7 +148,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     [setComment]
   );
 
-  const onCloseAlertCheckboxChange = useCallback(
+  const onBulkCloseAlertCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setShouldBulkCloseAlert(event.currentTarget.checked);
     },
@@ -164,9 +192,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION}</EuiModalHeaderTitle>
-          <div className="eui-textTruncate" title={ruleName}>
+          <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
-          </div>
+          </ModalHeaderSubtitle>
         </ModalHeader>
 
         {!isSignalIndexLoading && (
@@ -184,7 +212,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 dataTestSubj="edit-exception-modal-builder"
                 idAria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
-                indexPatternConfig={[signalIndexName]}
+                indexPatternConfig={
+                  exceptionListType === 'endpoint' ? [alertsIndexPattern] : [signalIndexName]
+                }
               />
 
               <EuiSpacer />
@@ -209,7 +239,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   id="close-alert-on-add-add-exception-checkbox"
                   label={i18n.BULK_CLOSE_LABEL}
                   checked={shouldBulkCloseAlert}
-                  onChange={onCloseAlertCheckboxChange}
+                  onChange={onBulkCloseAlertCheckboxChange}
                 />
               </EuiFormRow>
             </ModalBodySection>
