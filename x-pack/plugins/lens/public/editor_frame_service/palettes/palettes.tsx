@@ -8,9 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/common';
 import {
   euiPaletteColorBlind,
-  euiPaletteComplimentary,
   euiPaletteCool,
-  euiPaletteForStatus,
   euiPaletteGray,
   euiPaletteNegative,
   euiPalettePositive,
@@ -130,16 +128,6 @@ export const buildPalettes: (
         defaultMessage: 'legacy',
       }),
       ...buildSyncedKibanaPalette(charts.colors),
-    },
-    status: {
-      title: i18n.translate('xpack.lens.palettes.statusLabel', { defaultMessage: 'status' }),
-      ...buildRoundRobinCategorical('status', euiPaletteForStatus),
-    },
-    complimentary: {
-      title: i18n.translate('xpack.lens.palettes.complimentaryLabel', {
-        defaultMessage: 'complimentary',
-      }),
-      ...buildRoundRobinCategorical('complimentary', euiPaletteComplimentary),
     },
     negative: {
       title: i18n.translate('xpack.lens.palettes.negativeLabel', { defaultMessage: 'negative' }),

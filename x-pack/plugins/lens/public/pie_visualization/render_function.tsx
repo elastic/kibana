@@ -8,7 +8,6 @@ import { uniq } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import {
   Chart,
   Datum,
@@ -44,7 +43,7 @@ export function PieComponent(
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartTheme, isDarkMode, onClickValue } = props;
+  const { chartTheme, onClickValue } = props;
   const {
     shape,
     groups,
@@ -80,7 +79,7 @@ export function PieComponent(
   });
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: false,
+    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
@@ -111,13 +110,7 @@ export function PieComponent(
         }
         return String(d);
       },
-      fillLabel:
-        isDarkMode &&
-        shape === 'treemap' &&
-        layerIndex < columnGroups.length - 1 &&
-        categoryDisplay !== 'hide'
-          ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
-          : fillLabel,
+      fillLabel,
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
