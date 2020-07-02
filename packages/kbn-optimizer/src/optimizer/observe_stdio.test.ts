@@ -17,16 +17,33 @@
  * under the License.
  */
 
-export * from './bundle';
-export * from './bundle_cache';
-export * from './bundle_refs';
-export * from './worker_config';
-export * from './worker_messages';
-export * from './compiler_messages';
-export * from './ts_helpers';
-export * from './rxjs_helpers';
-export * from './array_helpers';
-export * from './event_stream_helpers';
-export * from './disallowed_syntax_plugin';
-export * from './parse_path';
-export * from './theme_tags';
+import { Readable } from 'stream';
+
+import { toArray } from 'rxjs/operators';
+
+import { observeStdio$ } from './observe_stdio';
+
+it('notifies on every line, uncluding partial content at the end without a newline', async () => {
+  const chunks = [`foo\nba`, `r\nb`, `az`];
+
+  await expect(
+    observeStdio$(
+      new Readable({
+        read() {
+          this.push(chunks.shift()!);
+          if (!chunks.length) {
+            this.push(null);
+          }
+        },
+      })
+    )
+      .pipe(toArray())
+      .toPromise()
+  ).resolves.toMatchInlineSnapshot(`
+          Array [
+            "foo",
+            "bar",
+            "baz",
+          ]
+        `);
+});
