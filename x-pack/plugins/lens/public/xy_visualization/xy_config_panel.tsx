@@ -119,7 +119,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
   const legendMode =
-    props.state?.legend.isVisible && !props.state?.legend.showSingleMetric
+    props.state?.legend.isVisible && !props.state?.legend.showSingleSeries
       ? 'auto'
       : !props.state?.legend.isVisible
       ? 'hide'
@@ -203,17 +203,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 if (newMode === 'auto') {
                   props.setState({
                     ...props.state,
-                    legend: { ...props.state.legend, isVisible: true, showSingleMetric: false },
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: false },
                   });
                 } else if (newMode === 'show') {
                   props.setState({
                     ...props.state,
-                    legend: { ...props.state.legend, isVisible: true, showSingleMetric: true },
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: true },
                   });
                 } else if (newMode === 'hide') {
                   props.setState({
                     ...props.state,
-                    legend: { ...props.state.legend, isVisible: false, showSingleMetric: false },
+                    legend: { ...props.state.legend, isVisible: false, showSingleSeries: false },
                   });
                 }
               }}

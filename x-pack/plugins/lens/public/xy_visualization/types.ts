@@ -30,7 +30,7 @@ export interface LegendConfig {
   /**
    * Flag whether the legend should be shown even with just a single series
    */
-  showSingleMetric?: boolean;
+  showSingleSeries?: boolean;
 }
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -60,9 +60,9 @@ export const legendConfig: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the legend position.',
       }),
     },
-    showSingleMetric: {
+    showSingleSeries: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.showSingleMetric.help', {
+      help: i18n.translate('xpack.lens.xyChart.showSingleSeries.help', {
         defaultMessage: 'Specifies whether a legend with just a single entry should be shown',
       }),
     },

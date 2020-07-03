@@ -19,12 +19,11 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonGroup,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
-import { VisualizationLayerWidgetProps, VisualizationToolbarProps } from '../types';
+import { VisualizationToolbarProps } from '../types';
 import './toolbar.scss';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
