@@ -26,7 +26,7 @@ export async function getServiceNodeMetadata({
   serviceNodeName: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const query = mergeProjection(
     getServiceNodesProjection({
@@ -55,7 +55,7 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await client.search(query);
+  const response = await apmEventClient.search(query);
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,

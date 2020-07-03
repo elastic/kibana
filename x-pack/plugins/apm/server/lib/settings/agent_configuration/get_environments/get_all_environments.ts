@@ -19,7 +19,7 @@ export async function getAllEnvironments({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -28,7 +28,7 @@ export async function getAllEnvironments({
 
   const params = {
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.error,
         ProcessorEvent.metric,
@@ -52,7 +52,7 @@ export async function getAllEnvironments({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   const environments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string

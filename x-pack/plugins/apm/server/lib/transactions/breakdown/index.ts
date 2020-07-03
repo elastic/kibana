@@ -36,7 +36,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, start, end } = setup;
+  const { uiFiltersES, apmEventClient, start, end } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -92,7 +92,7 @@ export async function getTransactionBreakdown({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       size: 0,
@@ -111,7 +111,7 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const formatBucket = (
     aggs:

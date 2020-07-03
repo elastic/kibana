@@ -5,7 +5,6 @@
  */
 
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -32,11 +31,11 @@ export async function bucketFetcher(
   bucketSize: number,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction as const],
     },
     body: {
       size: 0,
@@ -86,7 +85,7 @@ export async function bucketFetcher(
     },
   };
 
-  const response = await client.search<Transaction, typeof params>(params);
+  const response = await apmEventClient.search(params);
 
   return response;
 }

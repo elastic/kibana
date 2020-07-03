@@ -22,7 +22,7 @@ export function getServicesProjection({
 
   return {
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.metric,
         ProcessorEvent.error,

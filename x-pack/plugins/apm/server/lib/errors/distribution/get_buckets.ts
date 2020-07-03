@@ -28,7 +28,7 @@ export async function getBuckets({
   bucketSize: number;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
@@ -41,7 +41,7 @@ export async function getBuckets({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.error],
+      events: [ProcessorEvent.error],
     },
     body: {
       size: 0,
@@ -66,7 +66,7 @@ export async function getBuckets({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
     (bucket) => ({

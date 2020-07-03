@@ -12,7 +12,6 @@ import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { ESSearchHit } from '../../../../typings/elasticsearch';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { APMUIDocumentType } from '../../helpers/get_es_client/document_types';
 
 export async function findExactConfiguration({
   service,
@@ -21,7 +20,7 @@ export async function findExactConfiguration({
   service: AgentConfiguration['service'];
   setup: Setup;
 }) {
-  const { internalClient } = setup;
+  const { internalClient, indices } = setup;
 
   const serviceNameFilter = service.name
     ? { term: { [SERVICE_NAME]: service.name } }
@@ -32,9 +31,7 @@ export async function findExactConfiguration({
     : { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } };
 
   const params = {
-    apm: {
-      types: [APMUIDocumentType.agentConfiguration],
-    },
+    index: indices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: { filter: [serviceNameFilter, environmentFilter] },

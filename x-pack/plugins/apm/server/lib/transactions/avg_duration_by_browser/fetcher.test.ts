@@ -15,7 +15,7 @@ describe('fetcher', () => {
   it('performs a search', async () => {
     const search = jest.fn();
     const setup = ({
-      client: { search },
+      apmEventClient: { search },
       indices: {},
       uiFiltersES: [],
     } as unknown) as Setup & SetupTimeRange & SetupUIFilters;

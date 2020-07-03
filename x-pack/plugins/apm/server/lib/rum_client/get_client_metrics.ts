@@ -45,9 +45,9 @@ export async function getClientMetrics({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
   const { backEnd, domInteractive, pageViews } = response.aggregations!;
 
   // Divide by 1000 to convert ms into seconds

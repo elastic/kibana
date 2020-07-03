@@ -29,11 +29,11 @@ export async function getServiceMapFromTraceIds({
   serviceName?: string;
   environment?: string;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const serviceMapParams = {
     apm: {
-      types: [ProcessorEvent.transaction, ProcessorEvent.span],
+      events: [ProcessorEvent.transaction, ProcessorEvent.span],
     },
     body: {
       size: 0,
@@ -217,7 +217,7 @@ export async function getServiceMapFromTraceIds({
     },
   };
 
-  const serviceMapResponse = await client.search(serviceMapParams);
+  const serviceMapResponse = await apmEventClient.search(serviceMapParams);
 
   const scriptResponse = serviceMapResponse.aggregations?.service_map.value as {
     paths: ConnectionNode[][];

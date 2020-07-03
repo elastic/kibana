@@ -111,9 +111,9 @@ async function getServicesData(options: IEnvOptions) {
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {

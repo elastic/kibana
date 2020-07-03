@@ -36,7 +36,7 @@ export function getRumOverviewProjection({
 
   return {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       query: {

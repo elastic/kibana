@@ -14,11 +14,11 @@ export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
 export async function getServiceNames({ setup }: { setup: Setup }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.error,
         ProcessorEvent.metric,
@@ -37,7 +37,7 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   const serviceNames =
     resp.aggregations?.services.buckets
       .map((bucket) => bucket.key as string)

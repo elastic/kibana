@@ -5,11 +5,17 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
-import { ESSearchRequest, ESFilter } from '../../../../typings/elasticsearch';
+import { OBSERVER_VERSION_MAJOR } from '../../../../../common/elasticsearch_fieldnames';
+import {
+  ESSearchRequest,
+  ESFilter,
+} from '../../../../../typings/elasticsearch';
+
+/*
+  Adds a range query to the ES request to exclude legacy data
+*/
 
 export function addFilterForLegacyData(
-  apmIndices: string[],
   params: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };
   },

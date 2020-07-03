@@ -42,7 +42,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const { bucketSize } = getBucketSize(start, end, 'auto');
 
@@ -105,7 +105,7 @@ export async function fetchAndTransformGcMetrics({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   const { aggregations } = response;
 

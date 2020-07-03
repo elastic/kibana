@@ -26,7 +26,7 @@ export async function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
@@ -40,7 +40,7 @@ export async function getLocalUIFilters({
         localUIFilterName: name,
       });
 
-      const response = await client.search(query);
+      const response = await apmEventClient.search(query);
 
       const filter = localUIFilters[name];
 

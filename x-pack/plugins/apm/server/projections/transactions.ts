@@ -52,7 +52,7 @@ export function getTransactionsProjection({
 
   return {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction as const],
     },
     body: {
       query: {

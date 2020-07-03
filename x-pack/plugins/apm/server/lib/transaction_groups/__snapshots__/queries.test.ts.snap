@@ -4,7 +4,7 @@ exports[`transaction group queries fetches top traces 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -88,7 +88,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -155,7 +155,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -227,7 +227,7 @@ exports[`transaction group queries fetches top transactions 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -299,7 +299,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -354,7 +354,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -409,7 +409,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },

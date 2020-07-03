@@ -34,7 +34,7 @@ export function timeseriesFetcher({
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
@@ -54,7 +54,7 @@ export function timeseriesFetcher({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction as const],
     },
     body: {
       size: 0,
@@ -96,5 +96,5 @@ export function timeseriesFetcher({
     },
   };
 
-  return client.search(params);
+  return apmEventClient.search(params);
 }

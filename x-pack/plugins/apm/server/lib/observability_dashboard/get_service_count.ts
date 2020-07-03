@@ -14,11 +14,11 @@ export async function getServiceCount({
 }: {
   setup: Setup & SetupTimeRange;
 }) {
-  const { client, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
   const params = {
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.error,
         ProcessorEvent.metric,
@@ -35,6 +35,6 @@ export async function getServiceCount({
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   return aggregations?.serviceCount.value || 0;
 }

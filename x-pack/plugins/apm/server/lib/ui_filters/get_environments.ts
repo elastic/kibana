@@ -18,7 +18,7 @@ export async function getEnvironments(
   setup: Setup & SetupTimeRange,
   serviceName?: string
 ) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
 
@@ -30,7 +30,7 @@ export async function getEnvironments(
 
   const params = {
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.metric,
         ProcessorEvent.error,
@@ -54,7 +54,7 @@ export async function getEnvironments(
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   const aggs = resp.aggregations;
   const environmentsBuckets = aggs?.environments.buckets || [];
 

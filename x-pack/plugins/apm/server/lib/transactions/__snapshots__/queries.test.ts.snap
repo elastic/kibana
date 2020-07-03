@@ -3,7 +3,7 @@
 exports[`transaction queries fetches a transaction 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -41,7 +41,7 @@ Object {
 exports[`transaction queries fetches breakdown data for transactions 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -175,7 +175,7 @@ Object {
 exports[`transaction queries fetches breakdown data for transactions for a transaction name 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -314,7 +314,7 @@ Object {
 exports[`transaction queries fetches transaction charts 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -408,7 +408,7 @@ Object {
 exports[`transaction queries fetches transaction charts for a transaction type 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -507,7 +507,7 @@ Object {
 exports[`transaction queries fetches transaction charts for a transaction type and transaction name 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -611,7 +611,7 @@ Object {
 exports[`transaction queries fetches transaction distribution 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },

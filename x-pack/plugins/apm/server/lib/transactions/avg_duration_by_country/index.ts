@@ -29,13 +29,13 @@ export async function getTransactionAvgDurationByCountry({
   serviceName: string;
   transactionName?: string;
 }) {
-  const { uiFiltersES, client, start, end } = setup;
+  const { uiFiltersES, apmEventClient, start, end } = setup;
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
     : [];
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,
@@ -67,7 +67,7 @@ export async function getTransactionAvgDurationByCountry({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   if (!resp.aggregations) {
     return [];

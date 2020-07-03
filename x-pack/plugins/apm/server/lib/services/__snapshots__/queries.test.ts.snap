@@ -3,7 +3,7 @@
 exports[`services queries fetches the agent status 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
       "metric",
       "sourcemap",
@@ -20,7 +20,7 @@ Object {
 exports[`services queries fetches the legacy data status 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -47,7 +47,7 @@ Object {
 exports[`services queries fetches the service agent name 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
       "transaction",
       "metric",
@@ -92,7 +92,7 @@ exports[`services queries fetches the service items 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -138,7 +138,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "metric",
         "error",
         "transaction",
@@ -188,7 +188,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -226,7 +226,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "error",
       ],
     },
@@ -264,7 +264,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "metric",
         "transaction",
         "error",
@@ -315,7 +315,7 @@ Array [
 exports[`services queries fetches the service transaction types 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },

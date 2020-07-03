@@ -16,7 +16,7 @@ import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
-import { APMESSearchRequest } from '../helpers/get_es_client/document_types';
+import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -28,7 +28,7 @@ type MetricsAggregationMap = Unionize<{
 type Aggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = Overwrite<
-  APMESSearchRequest,
+  APMEventESSearchRequest,
   {
     body: {
       aggs: {
@@ -65,7 +65,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const projection = getMetricsProjection({
     setup,
@@ -91,7 +91,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

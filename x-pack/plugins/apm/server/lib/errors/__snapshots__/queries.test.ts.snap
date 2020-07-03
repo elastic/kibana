@@ -3,7 +3,7 @@
 exports[`error queries fetches a single error group 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },
@@ -63,7 +63,7 @@ Object {
 exports[`error queries fetches multiple error groups 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },
@@ -133,7 +133,7 @@ Object {
 exports[`error queries fetches multiple error groups when sortField = latestOccurrenceAt 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },

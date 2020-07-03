@@ -20,11 +20,11 @@ export async function getTransactionCoordinates({
   setup: Setup & SetupTimeRange;
   bucketSize: string;
 }): Promise<Coordinates[]> {
-  const { client, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-  const { aggregations } = await client.search({
+  const { aggregations } = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,

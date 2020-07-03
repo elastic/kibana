@@ -21,7 +21,6 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { getSamples, getAvg, getSum, getPercentiles } from './get_metrics';
-import { APMESSearchRequest } from '../helpers/get_es_client/document_types';
 
 interface TopTransactionOptions {
   type: 'top_transactions';
@@ -39,7 +38,9 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = APMESSearchRequest & {
+export type TransactionGroupRequestBase = ReturnType<
+  typeof getTransactionGroupsProjection
+> & {
   body: {
     aggs: {
       transaction_groups: Unionize<

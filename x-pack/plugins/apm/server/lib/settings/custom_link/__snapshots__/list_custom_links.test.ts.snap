@@ -2,11 +2,6 @@
 
 exports[`List Custom Links fetches all custom links 1`] = `
 Object {
-  "apm": Object {
-    "types": Array [
-      "customLink",
-    ],
-  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -21,17 +16,13 @@ Object {
       },
     ],
   },
+  "index": "myIndex",
   "size": 500,
 }
 `;
 
 exports[`List Custom Links filters custom links 1`] = `
 Object {
-  "apm": Object {
-    "types": Array [
-      "customLink",
-    ],
-  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -93,6 +84,7 @@ Object {
       },
     ],
   },
+  "index": "myIndex",
   "size": 500,
 }
 `;

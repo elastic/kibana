@@ -53,7 +53,7 @@ export const getPageLoadDistBreakdown = async (
 
   const params = mergeProjection(projection, {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,
@@ -77,9 +77,9 @@ export const getPageLoadDistBreakdown = async (
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 

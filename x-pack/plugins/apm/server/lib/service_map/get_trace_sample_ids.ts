@@ -26,7 +26,7 @@ export async function getTraceSampleIds({
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client, config } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const rangeQuery = { range: rangeFilter(start, end) };
 
@@ -63,7 +63,7 @@ export async function getTraceSampleIds({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.span],
+      events: [ProcessorEvent.span],
     },
     body: {
       size: 0,
@@ -123,9 +123,7 @@ export async function getTraceSampleIds({
     },
   };
 
-  const tracesSampleResponse = await client.search<unknown, typeof params>(
-    params
-  );
+  const tracesSampleResponse = await apmEventClient.search(params);
 
   // make sure at least one trace per composite/connection bucket
   // is queried

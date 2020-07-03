@@ -10,12 +10,12 @@ import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,
@@ -27,7 +27,7 @@ export async function getLegacyDataStatus(setup: Setup) {
     },
   };
 
-  const resp = await client.search(params, { includeLegacyData: true });
+  const resp = await apmEventClient.search(params, { includeLegacyData: true });
   const hasLegacyData = resp.hits.total.value > 0;
   return hasLegacyData;
 }

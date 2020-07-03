@@ -21,7 +21,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
-  const { end, client, start, uiFiltersES } = options.setup;
+  const { end, apmEventClient, start, uiFiltersES } = options.setup;
   const { serviceName } = options;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
@@ -34,7 +34,7 @@ export function fetcher(options: Options) {
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,
@@ -74,5 +74,5 @@ export function fetcher(options: Options) {
     },
   };
 
-  return client.search(params);
+  return apmEventClient.search(params);
 }

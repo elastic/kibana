@@ -24,7 +24,7 @@ export async function getDerivedServiceAnnotations({
   environment?: string;
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
 
@@ -36,9 +36,9 @@ export async function getDerivedServiceAnnotations({
 
   const versions =
     (
-      await client.search({
+      await apmEventClient.search({
         apm: {
-          types: [ProcessorEvent.transaction],
+          events: [ProcessorEvent.transaction],
         },
         body: {
           size: 0,
@@ -63,9 +63,9 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await client.search({
+      const response = await apmEventClient.search({
         apm: {
-          types: [ProcessorEvent.transaction],
+          events: [ProcessorEvent.transaction],
         },
         body: {
           size: 0,

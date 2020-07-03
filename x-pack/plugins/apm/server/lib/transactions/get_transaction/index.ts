@@ -8,7 +8,6 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   Setup,
@@ -26,11 +25,11 @@ export async function getTransaction({
   traceId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
-  const params = {
+  const resp = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 1,
@@ -44,8 +43,7 @@ export async function getTransaction({
         },
       },
     },
-  };
+  });
 
-  const resp = await client.search<Transaction>(params);
   return resp.hits.hits[0]?._source;
 }

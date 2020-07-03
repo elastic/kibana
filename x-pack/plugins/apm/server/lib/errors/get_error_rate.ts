@@ -25,7 +25,7 @@ export async function getErrorRate({
   groupId?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -40,9 +40,9 @@ export async function getErrorRate({
   };
 
   const getTransactionBucketAggregation = async () => {
-    const resp = await client.search({
+    const resp = await apmEventClient.search({
       apm: {
-        types: [ProcessorEvent.transaction],
+        events: [ProcessorEvent.transaction],
       },
       body: {
         size: 0,
@@ -64,9 +64,9 @@ export async function getErrorRate({
     const groupIdFilter = groupId
       ? [{ term: { [ERROR_GROUP_ID]: groupId } }]
       : [];
-    const resp = await client.search({
+    const resp = await apmEventClient.search({
       apm: {
-        types: [ProcessorEvent.error],
+        events: [ProcessorEvent.error],
       },
       body: {
         size: 0,

@@ -8,18 +8,15 @@ import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { APMUIDocumentType } from '../../helpers/get_es_client/document_types';
 
 export type AgentConfigurationListAPIResponse = PromiseReturnType<
   typeof listConfigurations
 >;
 export async function listConfigurations({ setup }: { setup: Setup }) {
-  const { internalClient } = setup;
+  const { internalClient, indices } = setup;
 
   const params = {
-    apm: {
-      types: [APMUIDocumentType.agentConfiguration],
-    },
+    index: indices.apmAgentConfigurationIndex,
     size: 200,
   };
 

@@ -7,17 +7,17 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
 
 export async function hasData({ setup }: { setup: Setup }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
   try {
     const params = {
       apm: {
-        types: [ProcessorEvent.transaction],
+        events: [ProcessorEvent.transaction],
       },
       terminateAfter: 1,
       size: 0,
     };
 
-    const response = await client.search(params);
+    const response = await apmEventClient.search(params);
     return response.hits.total.value > 0;
   } catch (e) {
     return false;

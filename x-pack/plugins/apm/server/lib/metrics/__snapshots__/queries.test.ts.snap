@@ -3,7 +3,7 @@
 exports[`metrics queries with a service node name fetches cpu chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -101,7 +101,7 @@ Object {
 exports[`metrics queries with a service node name fetches heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -194,7 +194,7 @@ Object {
 exports[`metrics queries with a service node name fetches memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -294,7 +294,7 @@ Object {
 exports[`metrics queries with a service node name fetches non heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -387,7 +387,7 @@ Object {
 exports[`metrics queries with a service node name fetches thread count chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -470,7 +470,7 @@ Object {
 exports[`metrics queries with service_node_name_missing fetches cpu chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -574,7 +574,7 @@ Object {
 exports[`metrics queries with service_node_name_missing fetches heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -673,7 +673,7 @@ Object {
 exports[`metrics queries with service_node_name_missing fetches memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -779,7 +779,7 @@ Object {
 exports[`metrics queries with service_node_name_missing fetches non heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -878,7 +878,7 @@ Object {
 exports[`metrics queries with service_node_name_missing fetches thread count chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -967,7 +967,7 @@ Object {
 exports[`metrics queries without a service node name fetches cpu chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -1060,7 +1060,7 @@ Object {
 exports[`metrics queries without a service node name fetches heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -1148,7 +1148,7 @@ Object {
 exports[`metrics queries without a service node name fetches memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -1243,7 +1243,7 @@ Object {
 exports[`metrics queries without a service node name fetches non heap memory chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -1331,7 +1331,7 @@ Object {
 exports[`metrics queries without a service node name fetches thread count chart data 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },

@@ -56,9 +56,9 @@ export async function getPageViewTrends({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
 

@@ -5,7 +5,7 @@ Array [
   Array [
     Object {
       "apm": Object {
-        "types": Array [
+        "events": Array [
           "error",
         ],
       },

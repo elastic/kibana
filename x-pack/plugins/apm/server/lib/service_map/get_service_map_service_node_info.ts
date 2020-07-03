@@ -72,11 +72,11 @@ export async function getServiceMapServiceNodeInfo({
 }
 
 async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search({
+  const response = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.error],
+      events: [ProcessorEvent.error],
     },
     body: {
       size: 0,
@@ -105,11 +105,11 @@ async function getTransactionMetrics({
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
 }> {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search({
+  const response = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 1,
@@ -142,11 +142,11 @@ async function getCpuMetrics({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search({
+  const response = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       size: 0,
@@ -180,10 +180,10 @@ async function getMemoryMetrics({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
-  const { client } = setup;
-  const response = await client.search({
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       query: {

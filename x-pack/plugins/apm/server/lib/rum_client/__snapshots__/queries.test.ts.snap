@@ -3,7 +3,7 @@
 exports[`rum client dashboard queries fetches client metrics 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -65,7 +65,7 @@ Object {
 exports[`rum client dashboard queries fetches page load distribution 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -128,7 +128,7 @@ Object {
 exports[`rum client dashboard queries fetches page view trends 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
