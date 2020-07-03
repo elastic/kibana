@@ -7,33 +7,14 @@
 /* eslint-disable react/display-name */
 
 import { EuiFlexItem, EuiInMemoryTable } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { xorBy } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { RowRendererId } from '../../../../common/types/timeline';
+import { renderers, RowRendererOption } from './catalog';
 import { FieldBrowserProps } from './types';
-import {
-  AuditdExample,
-  AuditdFileExample,
-  NetflowExample,
-  SuricataExample,
-  SystemExample,
-  SystemDnsExample,
-  SystemEndgameProcessExample,
-  SystemFileExample,
-  SystemFimExample,
-  SystemSecurityEventExample,
-  SystemSocketExample,
-  ZeekExample,
-} from './examples';
-
-interface RowRendererOption {
-  id: RowRendererId;
-  name: string;
-  description: string;
-  example?: React.ReactNode;
-}
+import { OnTableChangeParams } from '../open_timeline/types';
 
 type Props = Pick<FieldBrowserProps, 'height' | 'timelineId'> & {
   excludedRowRendererIds: RowRendererId[];
@@ -78,83 +59,34 @@ const search = {
   },
 };
 
-export const renderers: RowRendererOption[] = [
-  {
-    id: RowRendererId.auditd,
-    name: 'Auditd',
-    description: 'Auditd Row Renderer',
-    example: AuditdExample,
-  },
-  {
-    id: RowRendererId.auditd_file,
-    name: 'Auditd File',
-    description: 'Auditd File Row Renderer',
-    example: AuditdFileExample,
-  },
-  {
-    id: RowRendererId.system,
-    name: 'System',
-    description: 'System Row Renderer',
-    example: SystemExample,
-  },
-  {
-    id: RowRendererId.system_endgame_process,
-    name: 'System Endgame Process',
-    description: 'Endgame Process Row Renderer',
-    example: SystemEndgameProcessExample,
-  },
-  {
-    id: RowRendererId.system_fin,
-    name: 'System FIM',
-    description: 'FIM Row Renderer',
-    example: SystemFimExample,
-  },
-  {
-    id: RowRendererId.system_file,
-    name: 'System File',
-    description: 'System File Row Renderer',
-    example: SystemFileExample,
-  },
-  {
-    id: RowRendererId.system_socket,
-    name: 'System Socket',
-    description: 'System Socket Row Renderer',
-    example: SystemSocketExample,
-  },
-  {
-    id: RowRendererId.system_security_event,
-    name: 'System Security Event',
-    description: 'System Security Event Row Renderer',
-    example: SystemSecurityEventExample,
-  },
-  {
-    id: RowRendererId.system_dns,
-    name: 'System DNS',
-    description: 'System DNS Row Renderer',
-    example: SystemDnsExample,
-  },
-  {
-    id: RowRendererId.suricata,
-    name: 'Suricata',
-    description: 'Suricata Row Renderer',
-    example: SuricataExample,
-  },
-  {
-    id: RowRendererId.zeek,
-    name: 'Zeek',
-    description: 'Zeek Row Renderer',
-    example: ZeekExample,
-  },
-  {
-    id: RowRendererId.netflow,
-    name: 'Netflow',
-    description: 'Netflow Row Renderer',
-    example: NetflowExample,
-  },
-];
+/**
+ * Since `searchableDescription` contains raw text to power the Search bar,
+ * this "noop" function ensures it's not actually rendered
+ */
+const renderSearchableDescriptionNoop = () => null;
 
 const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
   ({ excludedRowRendererIds = [], setExcludedRowRendererIds }, ref) => {
+    const [sortField, setSortField] = useState('name');
+    const [sortDirection, setSortDirection] = useState('asc');
+
+    const onTableChange = useCallback(
+      ({ page, sort }: OnTableChangeParams) => {
+        const { field, direction } = sort;
+        setSortDirection(direction);
+        setSortField(field);
+      },
+      [setSortField, setSortDirection]
+    );
+
+    const sort = useMemo(
+      () => ({
+        sortField,
+        sortDirection,
+      }),
+      [sortField, sortDirection]
+    );
+
     const columns = useMemo(
       () => [
         {
@@ -162,19 +94,25 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
           name: 'Name',
           sortable: true,
           truncateText: true,
-          width: '15%',
+          width: '10%',
         },
         {
           field: 'description',
           name: 'Description',
-          truncateText: true,
-          width: '20%',
+          width: '25%',
+          render: (description: React.ReactNode) => description,
         },
         {
           field: 'example',
           name: 'Example',
           width: '65%',
           render: ExampleWrapperComponent,
+        },
+        {
+          field: 'searchableDescription',
+          sortable: false,
+          width: '0px',
+          render: renderSearchableDescriptionNoop,
         },
       ],
       []
@@ -215,9 +153,10 @@ const FieldsBrowserComponent: React.FC<Props> = React.forwardRef(
         itemId="id"
         columns={columns}
         search={search}
-        sorting={true}
+        sorting={sort}
         isSelectable={true}
         selection={selectionValue}
+        onTableChange={onTableChange}
       />
     );
   }

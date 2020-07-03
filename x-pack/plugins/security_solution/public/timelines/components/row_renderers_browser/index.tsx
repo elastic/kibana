@@ -6,6 +6,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiText,
   EuiToolTip,
   EuiOverlayMask,
   EuiModal,
@@ -15,7 +16,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,7 +27,6 @@ import { RowRendererId } from '../../../../common/types/timeline';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
-import { FieldBrowserProps } from './types';
 
 const StyledEuiModal = styled(EuiModal)`
   margin: 0 auto;
@@ -129,7 +128,8 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
                 gutterSize="none"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiModalHeaderTitle>{'Customize Row Renderers'}</EuiModalHeaderTitle>
+                  <EuiModalHeaderTitle>{i18n.CUSTOMIZE_EVENT_RENDERERS_TITLE}</EuiModalHeaderTitle>
+                  <EuiText size="s">{i18n.CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup>

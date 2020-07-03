@@ -28,6 +28,21 @@ export const CUSTOMIZE_COLUMNS = i18n.translate(
   }
 );
 
+export const CUSTOMIZE_EVENT_RENDERERS_TITLE = i18n.translate(
+  'xpack.securitySolution.customizeEventRenderers.customizeEventRenderersTitle',
+  {
+    defaultMessage: 'Customize Event Renderers',
+  }
+);
+
+export const CUSTOMIZE_EVENT_RENDERERS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.customizeEventRenderers.customizeEventRenderersDescription',
+  {
+    defaultMessage:
+      'Event Renderers automatically convey the most relevant details in an event to reveal its story',
+  }
+);
+
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.fieldBrowser.descriptionLabel', {
   defaultMessage: 'Description',
 });
