@@ -33,5 +33,5 @@ In order to keep the count of the events, this collector uses 2 Saved Objects:
 1. `application_usage_transactional`: It stores each individually reported event (up to 90 days old). Grouped by `timestamp` and `appId`.
 2. `application_usage_totals`: It stores the sum of all the events older than 90 days old per `appId`.
 
-Both of them use the shared fields `appId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'` (`application_usage_transactional` also stores `timestamp: { type: 'date' }`),
+Both of them use the shared fields `appId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`. `application_usage_transactional` also stores `timestamp: { type: 'date' }`.
 but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)).
