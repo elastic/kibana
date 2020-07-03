@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -197,9 +198,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
      * Use getDocTableRows() to have the clean list of rows.
      */
     public async expandToggleDocTableRow(index: number) {
-      await find.clickByCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableExpandToggleColumn']`
+      const rows = await this.getDocTableRows();
+      // The index above was meant to work with CSS nth-child, but here we deal with JS arrays :)
+      const indexWithOffset = Math.max(0, index - 1);
+      const toggleEl = await testSubjects.findDescendant(
+        `docTableExpandToggleColumn`,
+        rows[indexWithOffset]
       );
+      await toggleEl.click();
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -207,7 +213,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
      * Mind that originalRowIndex here refers to the original table index.
      * Use getDocTableRows() to have the clean list of rows.
      */
-    public async getDocTableRowDetails(originalRowIndex: number) {
+    public async getDocTableRowDetails(originalRowIndex: number): Promise<WebElementWrapper> {
       const detailsEl = await find.byCssSelector(
         `tr.kbnDocTable__row:nth-child(${originalRowIndex}) + [data-test-subj='docTableDetailsRow']`
       );
@@ -234,7 +240,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async skipToEndOfDocTable() {
       // add the focus to the button to make it appear
-      const skipButton = await find.byCssSelector('.dscSkipButton');
+      const skipButton = await testSubjects.find('discoverSkipTableButton');
       // force focus on it, to make it interactable
       skipButton.focus();
       // now click it!
@@ -242,7 +248,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocTableFooter() {
-      return await find.byCssSelector('.dscTable__footer');
+      return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {

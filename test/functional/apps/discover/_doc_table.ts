@@ -83,12 +83,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should go the end of the table when using the accessible Skip button', async function () {
       // click the Skip to the end of the table
       await PageObjects.discover.skipToEndOfDocTable();
-      // now check the footer text
+      // now check the footer text content
       const footer = await PageObjects.discover.getDocTableFooter();
       log.debug(await footer.getVisibleText());
-      expect(await footer.getVisibleText()).to.be(
-        `These are the first ${rowsHardLimit} documents matching your search, refine your search to see others. Back to top.`
-      );
+      expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
     });
 
     describe('expand a document row', function () {
@@ -100,39 +98,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           await PageObjects.discover.expandToggleDocTableRow(1);
           const detailsEl = await PageObjects.discover.getDocTableRowDetails(1);
-          const defaultMessageEl = await detailsEl.findByCssSelector('h4');
-          expect(await defaultMessageEl.getVisibleText()).to.have.string('Expanded document');
+          const defaultMessageEl = await detailsEl.findByTestSubject('docTableRowDetailsTitle');
+          expect(defaultMessageEl).to.be.ok();
         });
       });
 
-      it('should show the surrounding documents', async function () {
+      it('should show the detail panel actions', async function () {
         await retry.try(async function () {
           await PageObjects.discover.expandToggleDocTableRow(1);
           const detailsEl = await PageObjects.discover.getDocTableRowDetails(1);
-          const [surroundingActionEl] = await detailsEl.findAllByTestSubject('docTableRowAction');
-          log.debug(
-            await surroundingActionEl.getTagName(),
-            await surroundingActionEl.getAttribute('class'),
-            await surroundingActionEl.getVisibleText()
+          const [surroundingActionEl, singleActionEl] = await detailsEl.findAllByTestSubject(
+            'docTableRowAction'
           );
-          expect(await surroundingActionEl.getVisibleText()).to.have.string(
-            'View surrounding documents'
-          );
-          // TODO: test something more meaninful here?
-        });
-      });
-
-      it('should show the single document', async function () {
-        await retry.try(async function () {
-          await PageObjects.discover.expandToggleDocTableRow(1);
-          const detailsEl = await PageObjects.discover.getDocTableRowDetails(1);
-          const [_, singleActionEl] = await detailsEl.findAllByTestSubject('docTableRowAction');
-          log.debug(
-            await singleActionEl.getTagName(),
-            await singleActionEl.getAttribute('class'),
-            await singleActionEl.getVisibleText()
-          );
-          expect(await singleActionEl.getVisibleText()).to.have.string('View single document');
+          expect(surroundingActionEl).to.be.ok();
+          expect(singleActionEl).to.be.ok();
           // TODO: test something more meaninful here?
         });
       });
