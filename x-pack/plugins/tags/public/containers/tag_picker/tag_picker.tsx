@@ -21,5 +21,9 @@ export const TagPicker: React.FC<TagPickerProps> = (props) => {
 
   if (initializing) return null;
 
+  if (!rawTags.length) {
+    return <div>Not tags setup! Go to mangement app to add tags.</div>;
+  }
+
   return <TagPickerUi {...props} tags={rawTags} />;
 };

@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { TagList } from '../tag_list';
-import { TagPicker } from '../tag_picker';
+import { TagPickerForResource } from '../tag_picker_for_resource';
 
 export interface TagListEditableProps {
   kid: string;
@@ -19,5 +19,7 @@ export const TagListEditable: React.FC<TagListEditableProps> = React.memo(({ kid
     return <TagList kid={kid} onEditClick={() => setEdit(true)} />;
   }
 
-  return <TagPicker selected={[]} onChange={() => {}} />;
+  return (
+    <TagPickerForResource kid={kid} onSave={() => setEdit(false)} onCancel={() => setEdit(false)} />
+  );
 });

@@ -24,8 +24,7 @@ export const TagListExample: React.FC = () => {
         <EuiTitle size="m">
           <h2>TagList</h2>
         </EuiTitle>
-        <TagList kid={'kid::data:ip:index_pattern/123'} />
-        <TagList kid={'kid::data:ip:index_pattern/123'} />
+        <TagList kid={'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f'} />
       </div>
 
       <div>
@@ -39,7 +38,9 @@ export const TagListExample: React.FC = () => {
         <EuiTitle size="m">
           <h2>TagListEditable</h2>
         </EuiTitle>
-        <TagListEditable kid={'kid::data:ip:index_pattern/123'} />
+        <TagListEditable
+          kid={'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f'}
+        />
       </div>
     </div>
   );

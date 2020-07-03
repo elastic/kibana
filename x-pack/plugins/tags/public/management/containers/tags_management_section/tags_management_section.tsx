@@ -18,8 +18,8 @@ export const TagsManagementSection: React.FC<Props> = ({ services }) => {
   //   services.params.tags.attachments.create({
   //     attachments: [
   //       {
-  //         tagId: '821e9250-bc3d-11ea-ad31-378b8af727f3',
-  //         kid: 'kid::data:ip:index_pattern/123',
+  //         tagId: 'a5cf7800-bd1d-11ea-b218-3176b6a06bb5',
+  //         kid: 'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f',
   //       },
   //     ],
   //   });

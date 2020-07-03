@@ -14,47 +14,51 @@ export interface PickerTagView extends TagView {
 }
 
 export interface TagPickerProps {
+  isDisabled?: boolean;
   tags: PickerTagView[];
   selected: string[];
   onChange: (selected: string[]) => void;
 }
 
-export const TagPicker: React.FC<TagPickerProps> = React.memo(({ tags, selected, onChange }) => {
-  const options = useMemo<Array<EuiComboBoxOptionOption<PickerTagView>>>(() => {
-    return tags.map((value) => ({
-      key: value.id,
-      label: value.title,
-      color: value.color,
-      value,
-    }));
-  }, [tags]);
+export const TagPicker: React.FC<TagPickerProps> = React.memo(
+  ({ isDisabled, tags, selected, onChange }) => {
+    const options = useMemo<Array<EuiComboBoxOptionOption<PickerTagView>>>(() => {
+      return tags.map((value) => ({
+        key: value.id,
+        label: value.title,
+        color: value.color,
+        value,
+      }));
+    }, [tags]);
 
-  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<PickerTagView>>>(() => {
-    return options.filter((option) => selected.indexOf(option.value!.id) > -1);
-  }, [options, selected]);
+    const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<PickerTagView>>>(() => {
+      return options.filter((option) => selected.indexOf(option.value!.id) > -1);
+    }, [options, selected]);
 
-  const handleChange = useCallback(
-    (newSelection: Array<EuiComboBoxOptionOption<PickerTagView>>) => {
-      onChange(newSelection.map(({ value }) => value!.id));
-    },
-    [onChange]
-  );
+    const handleChange = useCallback(
+      (newSelection: Array<EuiComboBoxOptionOption<PickerTagView>>) => {
+        onChange(newSelection.map(({ value }) => value!.id));
+      },
+      [onChange]
+    );
 
-  return (
-    <EuiComboBox<PickerTagView>
-      placeholder={txtPlaceholder}
-      options={options}
-      selectedOptions={selectedOptions}
-      onChange={handleChange}
-      renderOption={({ label, color }, searchValue, contentClassName) => {
-        return (
-          <EuiHealth color={color}>
-            <span className={contentClassName}>
-              <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-            </span>
-          </EuiHealth>
-        );
-      }}
-    />
-  );
-});
+    return (
+      <EuiComboBox<PickerTagView>
+        isDisabled={isDisabled}
+        placeholder={txtPlaceholder}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={handleChange}
+        renderOption={({ label, color }, searchValue, contentClassName) => {
+          return (
+            <EuiHealth color={color}>
+              <span className={contentClassName}>
+                <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+              </span>
+            </EuiHealth>
+          );
+        }}
+      />
+    );
+  }
+);
