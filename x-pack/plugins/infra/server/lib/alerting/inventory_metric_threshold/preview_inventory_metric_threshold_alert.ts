@@ -53,7 +53,7 @@ export const previewInventoryMetricThresholdAlert = async ({
     )
   );
 
-  const inventoryItems = Object.keys(first(results));
+  const inventoryItems = Object.keys(first(results) as any);
   const previewResults = inventoryItems.map((item) => {
     const isNoData = results.some((result) => result[item].isNoData);
     if (isNoData) {

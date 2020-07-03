@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isEqual, clone } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
 import { PhraseFilter, MatchAllFilter } from '../filters';
 
@@ -52,7 +52,7 @@ describe('migrateFilter', function () {
   });
 
   it('should not modify the original filter', function () {
-    const oldMatchPhraseFilterCopy = clone(oldMatchPhraseFilter, true);
+    const oldMatchPhraseFilterCopy = cloneDeep(oldMatchPhraseFilter);
 
     migrateFilter(oldMatchPhraseFilter, undefined);
 
