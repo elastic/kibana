@@ -21,12 +21,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     `${path.join(
       path.dirname(__filename),
       './apis/fixtures/package_registry_config.yml'
-    )}:/registry/config.yml`,
+    )}:/package-registry/config.yml`,
     '-v',
     `${path.join(
       path.dirname(__filename),
       './apis/fixtures/test_packages'
-    )}:/registry/packages/test-packages`,
+    )}:/packages/test-packages`,
   ];
 
   // Docker image to use for Ingest Manager API integration tests.
