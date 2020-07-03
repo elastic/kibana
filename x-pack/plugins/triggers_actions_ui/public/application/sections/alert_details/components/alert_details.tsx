@@ -28,7 +28,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
-import { hasSaveAlertsCapability, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -40,7 +40,6 @@ import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
-import { hasAllPrivilege } from '../../../lib/capabilities';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -72,7 +71,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dataPlugin,
   } = useAppDependencies();
 
-  const canSaveAlert = hasSaveAlertsCapability(capabilities);
+  const canSaveAlert = hasAllPrivilege(alert, alertType);
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
