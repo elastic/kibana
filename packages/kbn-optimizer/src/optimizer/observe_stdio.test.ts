@@ -17,8 +17,33 @@
  * under the License.
  */
 
-var hook = require('require-in-the-middle');
+import { Readable } from 'stream';
 
-hook(['child_process'], function (exports, name) {
-  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
+import { toArray } from 'rxjs/operators';
+
+import { observeStdio$ } from './observe_stdio';
+
+it('notifies on every line, uncluding partial content at the end without a newline', async () => {
+  const chunks = [`foo\nba`, `r\nb`, `az`];
+
+  await expect(
+    observeStdio$(
+      new Readable({
+        read() {
+          this.push(chunks.shift()!);
+          if (!chunks.length) {
+            this.push(null);
+          }
+        },
+      })
+    )
+      .pipe(toArray())
+      .toPromise()
+  ).resolves.toMatchInlineSnapshot(`
+          Array [
+            "foo",
+            "bar",
+            "baz",
+          ]
+        `);
 });

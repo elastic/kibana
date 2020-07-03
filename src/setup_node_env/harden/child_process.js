@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+var hook = require('require-in-the-middle');
 
 // Ensure, when spawning a new child process, that the `options` and the
 // `options.env` object passed to the child process function doesn't inherit
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
 // as described in CVE-2019-7609
-module.exports = function (cp) {
+hook(['child_process'], function (cp) {
   // The `exec` function is currently just a wrapper around `execFile`. So for
   // now there's no need to patch it. If this changes in the future, our tests
   // will fail and we can uncomment the line below.
@@ -36,7 +37,7 @@ module.exports = function (cp) {
   cp.spawnSync = new Proxy(cp.spawnSync, { apply: patchOptions(true) });
 
   return cp;
-};
+});
 
 function patchOptions(hasArgs) {
   return function apply(target, thisArg, args) {

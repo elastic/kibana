@@ -32,7 +32,7 @@ function getModule(context: RequestHandlerContext, moduleId: string) {
   }
 }
 
-function saveModuleItems(
+function setup(
   context: RequestHandlerContext,
   moduleId: string,
   prefix?: string,
@@ -47,8 +47,9 @@ function saveModuleItems(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
+
   const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
-  return dr.setupModuleItems(
+  return dr.setup(
     moduleId,
     prefix,
     groups,
@@ -426,7 +427,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           estimateModelMemory,
         } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
-        const result = await saveModuleItems(
+        const result = await setup(
           context,
           moduleId,
           prefix,
