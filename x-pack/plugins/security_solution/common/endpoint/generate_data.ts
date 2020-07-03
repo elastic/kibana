@@ -1054,7 +1054,6 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
-      version: 'xxxx',
     };
   }
 

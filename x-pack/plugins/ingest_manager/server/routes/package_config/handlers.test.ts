@@ -30,7 +30,6 @@ jest.mock('../../services/package_config', (): {
           ...newData,
           id: '1',
           revision: 1,
-          version: 'xxxx',
           updated_at: new Date().toISOString(),
           updated_by: 'elastic',
           created_at: new Date().toISOString(),

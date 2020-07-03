@@ -61,7 +61,6 @@ describe('policy details: ', () => {
             version: '',
           },
           revision: 1,
-          version: 'xxxx',
         },
       },
     });

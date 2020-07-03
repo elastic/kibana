@@ -21,7 +21,6 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     namespace: 'default',
     inputs: [],
     revision: 1,
-    version: '',
   };
 
   const mockInput: PackageConfigInput = {
