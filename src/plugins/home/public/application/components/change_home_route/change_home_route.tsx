@@ -20,7 +20,6 @@
 import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { createAppNavigationHandler } from '../app_navigation_handler';
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 import { getServices } from '../../kibana_services';
 
@@ -28,7 +27,7 @@ interface Props {
   defaultRoute?: string;
 }
 
-export const ChangeHomeRoute: FunctionComponent<Prop> = ({ defaultRoute }) => {
+export const ChangeHomeRoute: FunctionComponent<Props = ({ defaultRoute }) => {
   const { uiSettings } = getServices();
   const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
 
