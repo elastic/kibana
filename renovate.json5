@@ -427,6 +427,14 @@
         ],
       },
       {
+        groupSlug: 'hjson',
+        groupName: 'hjson related packages',
+        packageNames: [
+          'hjson',
+          '@types/hjson',
+        ],
+      },
+      {
         groupSlug: 'inquirer',
         groupName: 'inquirer related packages',
         packageNames: [
