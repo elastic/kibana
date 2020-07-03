@@ -66,11 +66,14 @@ export function getLogsOverviewDataFetcher(
       data
     );
 
+    const timeSpanInMinutes =
+      (Date.parse(params.endTime).valueOf() - Date.parse(params.startTime).valueOf()) / (1000 * 60);
+
     return {
       title: 'Log rate',
       appLink: 'TBD', // TODO: what format should this be in, relative I assume?
-      stats,
-      series,
+      stats: normalizeStats(stats, timeSpanInMinutes),
+      series: normalizeSeries(series),
     };
   };
 }
@@ -178,4 +181,37 @@ function processLogsOverviewAggregations(aggregations: {
     stats: processedStats,
     series: processedSeries,
   };
+}
+
+function normalizeStats(
+  stats: LogsFetchDataResponse['stats'],
+  timeSpanInMinutes: number
+): LogsFetchDataResponse['stats'] {
+  return Object.keys(stats).reduce<LogsFetchDataResponse['stats']>((normalized, key) => {
+    normalized[key] = {
+      ...stats[key],
+      value: stats[key].value / timeSpanInMinutes,
+    };
+    return normalized;
+  }, {});
+}
+
+function normalizeSeries(series: LogsFetchDataResponse['series']): LogsFetchDataResponse['series'] {
+  const seriesKeys = Object.keys(series);
+  const timestamps = seriesKeys.flatMap((key) => series[key].coordinates.map((c) => c.x));
+  const [first, second] = [...new Set(timestamps)].sort();
+  const timeSpanInMinutes = (second - first) / (1000 * 60);
+
+  return seriesKeys.reduce<LogsFetchDataResponse['series']>((normalized, key) => {
+    normalized[key] = {
+      ...series[key],
+      coordinates: series[key].coordinates.map((c) => {
+        if (c.y) {
+          return { ...c, y: c.y / timeSpanInMinutes };
+        }
+        return c;
+      }),
+    };
+    return normalized;
+  }, {});
 }
