@@ -133,8 +133,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
           total: elementsTotal,
           per_page: {
             avg: elementsTotal / elementCounts.length,
-            min: arrayMin(elementCounts),
-            max: arrayMax(elementCounts),
+            min: arrayMin(elementCounts) || 0,
+            max: arrayMax(elementCounts) || 0,
           },
         }
       : undefined;
@@ -145,8 +145,8 @@ export function summarizeWorkpads(workpadDocs: CanvasWorkpad[]): WorkpadTelemetr
           in_use: Array.from(functionSet),
           per_element: {
             avg: functionsTotal / functionCounts.length,
-            min: arrayMin(functionCounts),
-            max: arrayMax(functionCounts),
+            min: arrayMin(functionCounts) || 0,
+            max: arrayMax(functionCounts) || 0,
           },
         }
       : undefined;
@@ -170,7 +170,7 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, callCl
 
   const esResponse = await callCluster<WorkpadSearch>('search', searchParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
+  if (get(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map((hit) => hit._source[CANVAS_TYPE]);
     return summarizeWorkpads(workpads);
   }

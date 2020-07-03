@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { useMemo, useCallback, ReactNode } from 'react';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -58,9 +58,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
   } = useUrlParams();
 
   const renderedItems = useMemo(() => {
-    // TODO: Use _.orderBy once we upgrade to lodash 4+
     const sortedItems = sortItems
-      ? sortByOrder(items, sortField, sortDirection)
+      ? orderBy(items, sortField, sortDirection as 'asc' | 'desc')
       : items;
 
     return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
