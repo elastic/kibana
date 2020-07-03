@@ -275,7 +275,6 @@ class AgentConfigService {
       soClient,
       id,
       {
-        ...oldAgentConfig,
         package_configs: uniq(
           [...((oldAgentConfig.package_configs || []) as string[])].filter(
             (pkgConfigId) => !packageConfigIds.includes(pkgConfigId)
