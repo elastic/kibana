@@ -19,7 +19,7 @@ import {
   DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
 } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
-import { DataFrameAnalyticsListRow } from './common';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
@@ -343,7 +343,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   };
 }
 
-interface CloneActionProps {
+interface CloneButtonProps {
   item: DataFrameAnalyticsListRow;
   createAnalyticsForm: CreateAnalyticsFormProps;
 }
@@ -353,7 +353,7 @@ interface CloneActionProps {
  * Replace with {@link getCloneAction} as soon as all the actions are refactored
  * to support EuiContext with a valid DOM structure without nested buttons.
  */
-export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item }) => {
+export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item }) => {
   const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
 
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {

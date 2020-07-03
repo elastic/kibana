@@ -33,7 +33,7 @@ import {
   DataFrameAnalyticsListRow,
   DataFrameAnalyticsStats,
 } from './common';
-import { getActions } from './actions';
+import { useActions } from './use_actions';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -141,14 +141,14 @@ export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
   <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
 );
 
-export const getColumns = (
+export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
   createAnalyticsForm?: CreateAnalyticsFormProps
 ) => {
-  const actions = getActions(createAnalyticsForm!, isManagementTable);
+  const { actions, modals } = useActions(createAnalyticsForm!, isManagementTable);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -253,20 +253,6 @@ export const getColumns = (
       width: '100px',
       'data-test-subj': 'mlAnalyticsTableColumnStatus',
     },
-    // For now there is batch mode only so we hide this column for now.
-    /*
-    {
-      name: i18n.translate('xpack.ml.dataframe.analyticsList.mode', { defaultMessage: 'Mode' }),
-      sortable: (item: DataFrameAnalyticsListRow) => item.mode,
-      truncateText: true,
-      render(item: DataFrameAnalyticsListRow) {
-        const mode = item.mode;
-        const color = 'hollow';
-        return <EuiBadge color={color}>{mode}</EuiBadge>;
-      },
-      width: '100px',
-    },
-    */
     progressColumn,
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
@@ -293,5 +279,5 @@ export const getColumns = (
     }
   }
 
-  return columns;
+  return { columns, modals };
 };

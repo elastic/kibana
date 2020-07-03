@@ -8,7 +8,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
-import { DeleteAction } from './action_delete';
+import { DeleteButton } from './delete_button';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   coreMock as mockCoreServices,
@@ -41,14 +41,18 @@ describe('DeleteAction', () => {
   });
 
   test('When canDeleteDataFrameAnalytics permission is false, button should be disabled.', () => {
-    const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
+    const { getByTestId } = render(
+      <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
+    );
     expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 
   test('When canDeleteDataFrameAnalytics permission is true, button should not be disabled.', () => {
     const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
     mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
-    const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
+    const { getByTestId } = render(
+      <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
+    );
 
     expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');
 
@@ -57,11 +61,12 @@ describe('DeleteAction', () => {
 
   test('When job is running, delete button should be disabled.', () => {
     const { getByTestId } = render(
-      <DeleteAction
+      <DeleteButton
         item={{
           ...mockAnalyticsListItem,
           stats: { state: 'started' },
         }}
+        onClick={() => {}}
       />
     );
 
@@ -74,7 +79,7 @@ describe('DeleteAction', () => {
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
       const { getByTestId, queryByTestId } = render(
         <I18nProvider>
-          <DeleteAction item={mockAnalyticsListItem} />
+          <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
         </I18nProvider>
       );
       const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
