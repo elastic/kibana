@@ -225,108 +225,108 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
   securitySolution,
 }) => (
   <EuiFlexGroup>
-    {/* {appSearch || observability || securitySolution ? ( */}
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column">
-        {/* {appSearch ? ( */}
-        <EuiFlexItem className="homSolutionsPanel__appSearch">
-          <EuiPanel
-            className="homSolutionsPanel__solutionWrapper"
-            paddingSize="none"
-            onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
-          >
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem grow={1} className="homSolutionsPanel__appSearchHeader">
-                <EuiImage
-                  className="homSolutionsPanel__appSearchTopLeftImage"
-                  url={addBasePath(
-                    '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
-                  )}
-                  alt="Enterprise search top left background graphic"
-                />
-                <SolutionsTitle
-                  iconType="logoEnterpriseSearch"
-                  title="Enterprise Search"
-                  subtitle={i18n.translate('home.solutionsPanel.appSearchSubtitle', {
-                    defaultMessage: 'Search everything',
-                  })}
-                />
-                <EuiImage
-                  className="homSolutionsPanel__appSearchBottomRightImage"
-                  url={addBasePath(
-                    '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
-                  )}
-                  alt="Enterprise search bottom right background graphic"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                {getActionsText(solutionCTAs.appSearch)}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        {/* ) : null} */}
-        {observability ? (
-          <EuiFlexItem className="homSolutionsPanel__observability">
-            <EuiPanel
-              className="homSolutionsPanel__solutionWrapper"
-              paddingSize="none"
-              onClick={createAppNavigationHandler(observability.path)}
-            >
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={1} className="homSolutionsPanel__observabilityHeader">
-                  <EuiImage
-                    className="homSolutionsPanel__observabilityTopRightImage"
-                    url={addBasePath(
-                      '/plugins/home/assets/background_observability_top_right_2x.png'
-                    )}
-                    alt="Observability top right background graphic"
-                  />
-                  <SolutionsTitle
-                    iconType={observability.icon}
-                    title={observability.title}
-                    subtitle={observability.description}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                  {getActionsText(solutionCTAs.observability)}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : null}
-        {securitySolution ? (
-          <EuiFlexItem className="homSolutionsPanel__securitySolution">
-            <EuiPanel
-              className="homSolutionsPanel__solutionWrapper"
-              paddingSize="none"
-              onClick={createAppNavigationHandler(securitySolution.path)}
-            >
-              <EuiFlexGroup gutterSize="none">
-                <EuiFlexItem grow={1} className="homSolutionsPanel__securitySolutionHeader">
-                  <EuiImage
-                    className="homSolutionsPanel__securitySolutionTopLeftImage"
-                    url={addBasePath(
-                      '/plugins/home/assets/background_security_solution_top_left_2x.png'
-                    )}
-                    alt="Enterprise search top left background graphic"
-                  />
-                  <SolutionsTitle
-                    iconType={securitySolution.icon}
-                    title={securitySolution.title}
-                    subtitle={securitySolution.description}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                  {getActionsText(solutionCTAs.securitySolution)}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    {/* ) : null} */}
+    {appSearch || observability || securitySolution ? (
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column">
+          {appSearch ? (
+            <EuiFlexItem className="homSolutionsPanel__appSearch">
+              <EuiPanel
+                className="homSolutionsPanel__solutionWrapper"
+                paddingSize="none"
+                onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
+              >
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__appSearchHeader">
+                    <EuiImage
+                      className="homSolutionsPanel__appSearchTopLeftImage"
+                      url={addBasePath(
+                        '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
+                      )}
+                      alt="Enterprise search top left background graphic"
+                    />
+                    <SolutionsTitle
+                      iconType="logoEnterpriseSearch"
+                      title="Enterprise Search"
+                      subtitle={i18n.translate('home.solutionsPanel.appSearchSubtitle', {
+                        defaultMessage: 'Search everything',
+                      })}
+                    />
+                    <EuiImage
+                      className="homSolutionsPanel__appSearchBottomRightImage"
+                      url={addBasePath(
+                        '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
+                      )}
+                      alt="Enterprise search bottom right background graphic"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                    {getActionsText(solutionCTAs.appSearch)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+          {observability ? (
+            <EuiFlexItem className="homSolutionsPanel__observability">
+              <EuiPanel
+                className="homSolutionsPanel__solutionWrapper"
+                paddingSize="none"
+                onClick={createAppNavigationHandler(observability.path)}
+              >
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__observabilityHeader">
+                    <EuiImage
+                      className="homSolutionsPanel__observabilityTopRightImage"
+                      url={addBasePath(
+                        '/plugins/home/assets/background_observability_top_right_2x.png'
+                      )}
+                      alt="Observability top right background graphic"
+                    />
+                    <SolutionsTitle
+                      iconType={observability.icon}
+                      title={observability.title}
+                      subtitle={observability.description}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                    {getActionsText(solutionCTAs.observability)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+          {securitySolution ? (
+            <EuiFlexItem className="homSolutionsPanel__securitySolution">
+              <EuiPanel
+                className="homSolutionsPanel__solutionWrapper"
+                paddingSize="none"
+                onClick={createAppNavigationHandler(securitySolution.path)}
+              >
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__securitySolutionHeader">
+                    <EuiImage
+                      className="homSolutionsPanel__securitySolutionTopLeftImage"
+                      url={addBasePath(
+                        '/plugins/home/assets/background_security_solution_top_left_2x.png'
+                      )}
+                      alt="Enterprise search top left background graphic"
+                    />
+                    <SolutionsTitle
+                      iconType={securitySolution.icon}
+                      title={securitySolution.title}
+                      subtitle={securitySolution.description}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                    {getActionsText(solutionCTAs.securitySolution)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem className="homSolutionsPanel__kibana">
       <EuiPanel
         className="homSolutionsPanel__solutionWrapper"
