@@ -185,6 +185,41 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await docHeader.getVisibleText();
     }
 
+    public async getDocTableRows() {
+      await header.waitUntilLoadingHasFinished();
+      const rows = await testSubjects.findAll('docTableRow');
+      return rows;
+    }
+
+    /**
+     * Expanding a row has the side effect to increase the number of raw rows in the table.
+     * So be careful to manipulate the DOM here.
+     * Use getDocTableRows() to have the clean list of rows.
+     */
+    public async expandToggleDocTableRow(index: number) {
+      await find.clickByCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableExpandToggleColumn']`
+      );
+      await header.waitUntilLoadingHasFinished();
+    }
+
+    /**
+     * Mind that originalRowIndex here refers to the original table index.
+     * Use getDocTableRows() to have the clean list of rows.
+     */
+    public async getDocTableRowDetails(originalRowIndex: number) {
+      const detailsEl = await find.byCssSelector(
+        `tr.kbnDocTable__row:nth-child(${originalRowIndex}) + [data-test-subj='docTableDetailsRow']`
+      );
+      if (!detailsEl) {
+        // somebody forgot to expand the row? :)
+        await this.expandToggleDocTableRow(originalRowIndex);
+        // Try again!
+        return await this.getDocTableRowDetails(originalRowIndex);
+      }
+      return detailsEl;
+    }
+
     public async getDocTableIndex(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
@@ -195,6 +230,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
+    }
+
+    public async skipToEndOfDocTable() {
+      // add the focus to the button to make it appear
+      const skipButton = await find.byCssSelector('.dscSkipButton');
+      // force focus on it, to make it interactable
+      skipButton.focus();
+      // now click it!
+      return skipButton.click();
+    }
+
+    public async getDocTableFooter() {
+      return await find.byCssSelector('.dscTable__footer');
     }
 
     public async clickDocSortDown() {
@@ -246,9 +294,23 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
-    public async clickFieldListItemAdd(field: string) {
+    public async clickFieldListItemToggle(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
+    }
+
+    public async clickFieldListItemAdd(field: string) {
+      const availableList = await testSubjects.find('fieldList-unpopular');
+      if (await testSubjects.descendantExists(`field-${field}`, availableList)) {
+        await this.clickFieldListItemToggle(field);
+      }
+    }
+
+    public async clickFieldListItemRemove(field: string) {
+      const selectedList = await testSubjects.find('fieldList-selected');
+      if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
+        await this.clickFieldListItemToggle(field);
+      }
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {
