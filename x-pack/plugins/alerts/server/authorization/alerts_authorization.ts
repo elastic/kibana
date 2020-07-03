@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pluck, mapValues, remove, zipObject } from 'lodash';
+import { map, mapValues, remove, fromPairs } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
@@ -117,7 +117,7 @@ export class AlertsAuthorization {
           operation
         );
       } else {
-        const authorizedPrivileges = pluck(
+        const authorizedPrivileges = map(
           privileges.filter((privilege) => privilege.authorized),
           'privilege'
         );
@@ -395,5 +395,5 @@ function asAuthorizedConsumers(
   consumers: string[],
   hasPrivileges: HasPrivileges
 ): AuthorizedConsumers {
-  return zipObject(consumers.map((feature) => [feature, hasPrivileges]));
+  return fromPairs(consumers.map((feature) => [feature, hasPrivileges]));
 }
