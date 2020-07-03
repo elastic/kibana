@@ -89,6 +89,7 @@ export interface DashboardContainerOptions {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
+  getRenderBeforeDashboard: () => () => React.ReactNode;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;
@@ -115,6 +116,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       options.embeddable.getEmbeddableFactory,
       parent
     );
+
     this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
@@ -188,6 +190,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
+          {this.options.getRenderBeforeDashboard()(this)}
           <DashboardViewport
             renderEmpty={this.renderEmpty}
             container={this}

@@ -41,6 +41,7 @@ interface StartServices {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
+  getRenderBeforeDashboard: () => () => React.ReactNode;
 }
 
 export type DashboardContainerFactory = EmbeddableFactory<

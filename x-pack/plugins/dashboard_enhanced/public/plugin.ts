@@ -5,17 +5,21 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { createElement as h } from 'react';
 import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardDrilldownsService } from './services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { TagsPluginSetup, TagsPluginStart, TagListEditable } from '../../tags/public';
+import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
+  dashboard: DashboardSetup;
+  tags: TagsPluginSetup;
 }
 
 export interface StartDependencies {
@@ -24,6 +28,7 @@ export interface StartDependencies {
   embeddable: EmbeddableStart;
   share: SharePluginStart;
   dashboard: DashboardStart;
+  tags: TagsPluginStart;
 }
 
 // eslint-disable-next-line
@@ -42,6 +47,18 @@ export class DashboardEnhancedPlugin
     this.drilldowns.bootstrap(core, plugins, {
       enableDrilldowns: true,
     });
+
+    plugins.dashboard.setRenderBeforeDashboard((dashboard) =>
+      h(
+        plugins.tags.ui.Provider,
+        {},
+        h(
+          'div',
+          { style: { padding: 8 } },
+          h(TagListEditable, { kid: `kid:::so:saved_objects/dashboard/${dashboard.getInput().id}` })
+        )
+      )
+    );
 
     return {};
   }

@@ -36,6 +36,9 @@ export interface TagsPluginStartDependencies {
 
 export interface TagsPluginSetup {
   tags: TagsServiceSetup;
+  ui: {
+    Provider: React.ComponentType;
+  };
 }
 
 export interface TagsPluginStart {
@@ -92,8 +95,13 @@ export class TagsPlugin
       },
     });
 
+    const Provider = createTagsProvider(this.tagsService);
+
     return {
       tags,
+      ui: {
+        Provider,
+      },
     };
   }
 

@@ -73,6 +73,7 @@ import {
   RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  DashboardContainer,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -115,7 +116,9 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
-export type Setup = void;
+export interface DashboardSetup {
+  setRenderBeforeDashboard: (renderer: (dashboard: DashboardContainer) => React.ReactNode) => void;
+}
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
@@ -136,7 +139,7 @@ declare module '../../../plugins/ui_actions/public' {
 }
 
 export class DashboardPlugin
-  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
+  implements Plugin<DashboardSetup, DashboardStart, SetupDependencies, StartDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -146,10 +149,14 @@ export class DashboardPlugin
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
+  private renderBeforeDashboard: (dashboard: DashboardContainer) => React.ReactNode = () => null;
+  private getRenderBeforeDashboard: () => (dashboard: DashboardContainer) => React.ReactNode = () =>
+    this.renderBeforeDashboard;
+
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
-  ): Setup {
+  ): DashboardSetup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -203,6 +210,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        getRenderBeforeDashboard: this.getRenderBeforeDashboard,
       };
     };
 
@@ -296,6 +304,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           savedObjects,
           restorePreviousUrl,
+          renderBeforeDashboard: this.renderBeforeDashboard,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -354,6 +363,12 @@ export class DashboardPlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    return {
+      setRenderBeforeDashboard: (renderer) => {
+        this.renderBeforeDashboard = renderer;
+      },
+    };
   }
 
   private addEmbeddableToDashboard(

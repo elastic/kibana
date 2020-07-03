@@ -74,6 +74,7 @@ export interface RenderDeps {
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
+  renderBeforeDashboard: () => React.ReactNode;
 }
 
 let angularModuleInstance: IModule | null = null;
