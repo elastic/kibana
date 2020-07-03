@@ -18,6 +18,7 @@ export {
   Error,
   useAuthorizationContext,
   NotAuthorizedSection,
+  Forms,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 export { TabMappings, TabSettings, TabAliases } from '../shared';
