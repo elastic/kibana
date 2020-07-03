@@ -36,7 +36,7 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     namespaceType: 'agnostic',
     mappings: {
       // Not indexing any of its contents because we use them "as-is" and don't search by these fields
-      // for more info, check on the README.md in this same folder
+      // for more info, see the README.md for application_usage
       dynamic: false,
       properties: {},
     },
