@@ -108,6 +108,8 @@ def call(Map options = [:], Closure closure) {
 
 // If we sleep in a loop using Groovy code, Pipeline Steps is flooded with Sleep steps
 // So, instead, we just watch a file and `touch` it whenever something happens that could modify the queue
+// There's a 20 minute timeout just in case something goes wrong,
+//    in which case this method will get called again if the process is actually supposed to be waiting.
 def taskSleep() {
   sh(script: """#!/bin/bash
     TIMESTAMP=\$(date '+%s' -d "0 seconds ago")
@@ -118,6 +120,9 @@ def taskSleep() {
         break
       else
         sleep 5
+        if [[ \$i == 240 ]]; then
+          echo "Waited for new tasks for 20 minutes, exiting in case something went wrong"
+        fi
       fi
     done
   """, label: "Waiting for new tasks...")
