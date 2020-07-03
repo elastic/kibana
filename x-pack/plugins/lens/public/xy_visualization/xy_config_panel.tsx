@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiSuperSelect,
   EuiFormRow,
-  EuiIcon,
   EuiPopover,
   EuiText,
   htmlIdGenerator,
