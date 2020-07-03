@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  State,
-  reducer,
-  useProcessorsState,
-  ProcessorsDispatch,
-  Action,
-} from './processors_reducer';
+import React, { FunctionComponent } from 'react';
 
-export * from './constants';
+import { PipelineProcessorsEditor } from '../components';
 
-export { isChildPath, isOnFailureSelector } from './utils';
+export const ProcessorsEditor: FunctionComponent = () => {
+  return <PipelineProcessorsEditor stateSlice="processors" />;
+};
