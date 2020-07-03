@@ -32,8 +32,6 @@ export default function listActionTypesTests({ getService }: FtrProviderContext)
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.body).to.eql([]);
-              break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
