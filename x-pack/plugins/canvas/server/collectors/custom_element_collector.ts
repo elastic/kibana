@@ -6,7 +6,6 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
@@ -114,7 +113,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
 
   const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
 
-  if (get<SearchResponse<CustomElementSearch>, number>(esResponse, 'hits.hits.length') > 0) {
+  if (get(esResponse, 'hits.hits.length') > 0) {
     const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
