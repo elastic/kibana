@@ -267,7 +267,7 @@ describe('stackData method - data set with zeros in percentage mode', function (
     expect(chart.chartData.series).to.have.length(1);
     const series = chart.chartData.series[0].values;
     // with the interval set in seriesMonthlyInterval data, the point at x=1454309600000 does not exist
-    const point = _.find(series, 'x', 1454309600000);
+    const point = _.find(series, ['x', 1454309600000]);
     expect(point).to.not.be(undefined);
     expect(point.y).to.be(0);
   });
@@ -279,7 +279,7 @@ describe('stackData method - data set with zeros in percentage mode', function (
     const chart = vis.handler.charts[0];
     expect(chart.chartData.series).to.have.length(5);
     const series = chart.chartData.series[0].values;
-    const point = _.find(series, 'x', 1415826240000);
+    const point = _.find(series, ['x', 1415826240000]);
     expect(point).to.not.be(undefined);
     expect(point.y).to.be(0);
   });

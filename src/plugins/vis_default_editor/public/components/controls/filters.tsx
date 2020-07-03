@@ -43,7 +43,9 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   useMount(() => {
     // set parsed values into model after initialization
-    setValue(filters.map((filter) => omit({ ...filter, input: filter.input }, 'id')));
+    setValue(
+      filters.map((filter) => omit({ ...filter, input: filter.input }, 'id') as FilterValue)
+    );
   });
 
   useEffect(() => {
@@ -58,7 +60,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
-    setValue(updatedFilters.map((filter) => omit(filter, 'id')));
+    setValue(updatedFilters.map((filter) => omit(filter, 'id') as FilterValue));
     setFilters(updatedFilters);
   };
 
