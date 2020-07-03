@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { AgentConfig } from '../../../../types';
 import { useGetEnrollmentAPIKeys } from '../../../../hooks';
-import { AgentConfigDatasourceBadges } from '../agent_config_datasource_badges';
+import { AgentConfigPackageBadges } from '../agent_config_package_badges';
 
 interface Props {
   agentConfigs: AgentConfig[];
@@ -83,7 +83,7 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = ({ agentConfigs, onKey
       />
       <EuiSpacer size="m" />
       {selectedState.agentConfigId && (
-        <AgentConfigDatasourceBadges agentConfigId={selectedState.agentConfigId} />
+        <AgentConfigPackageBadges agentConfigId={selectedState.agentConfigId} />
       )}
       <EuiSpacer size="m" />
       <EuiButtonEmpty

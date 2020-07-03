@@ -11,10 +11,10 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
-
+export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning' | 'unenrolling';
+export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
 export interface NewAgentAction {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: AgentActionType;
   data?: any;
   sent_at?: string;
 }
@@ -26,7 +26,7 @@ export interface AgentAction extends NewAgentAction {
 }
 
 export interface AgentActionSOAttributes {
-  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  type: AgentActionType;
   sent_at?: string;
   timestamp?: string;
   created_at: string;
@@ -73,6 +73,8 @@ interface AgentBase {
   type: AgentType;
   active: boolean;
   enrolled_at: string;
+  unenrolled_at?: string;
+  unenrollment_started_at?: string;
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
@@ -90,8 +92,10 @@ export interface Agent extends AgentBase {
   current_error_events: AgentEvent[];
   access_api_key?: string;
   status?: string;
+  packages: string[];
 }
 
 export interface AgentSOAttributes extends AgentBase {
   current_error_events?: string;
+  packages?: string[];
 }

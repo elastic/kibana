@@ -116,6 +116,7 @@ import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/ser
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -1143,22 +1144,20 @@ export type PluginOpaqueId = symbol;
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
     legacy: false;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
 };
 
 // @public
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
     legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
 };
 
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

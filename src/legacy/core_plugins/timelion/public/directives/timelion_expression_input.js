@@ -78,7 +78,7 @@ export function TimelionExpInput($http, $timeout) {
       function init() {
         $http.get('../api/timelion/functions').then(function (resp) {
           Object.assign(functionReference, {
-            byName: _.indexBy(resp.data, 'name'),
+            byName: _.keyBy(resp.data, 'name'),
             list: resp.data,
           });
         });

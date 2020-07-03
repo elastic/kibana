@@ -41,6 +41,7 @@ export const mockQueryBar: FieldValueQueryBar = {
 
 export const mockRule = (id: string): Rule => ({
   actions: [],
+  author: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -58,6 +59,7 @@ export const mockRule = (id: string): Rule => ({
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 21,
+  risk_score_mapping: [],
   name: 'Home Grown!',
   query: '',
   references: [],
@@ -66,6 +68,7 @@ export const mockRule = (id: string): Rule => ({
   timeline_title: 'Untitled timeline',
   meta: { from: '0m' },
   severity: 'low',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -78,6 +81,7 @@ export const mockRule = (id: string): Rule => ({
 
 export const mockRuleWithEverything = (id: string): Rule => ({
   actions: [],
+  author: [],
   created_at: '2020-01-10T21:11:45.839Z',
   updated_at: '2020-01-10T21:11:45.839Z',
   created_by: 'elastic',
@@ -113,9 +117,12 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   interval: '5m',
   rule_id: 'b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea',
   language: 'kuery',
+  license: 'Elastic License',
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 21,
+  risk_score_mapping: [],
+  rule_name_override: 'message',
   name: 'Query with rule-id',
   query: 'user.name: root or user.name: admin',
   references: ['www.test.co'],
@@ -124,6 +131,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timeline_title: 'Titled timeline',
   meta: { from: '0m' },
   severity: 'low',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: ['tag1', 'tag2'],
   to: 'now',
@@ -146,16 +154,23 @@ export const mockRuleWithEverything = (id: string): Rule => ({
     },
   ],
   throttle: 'no_actions',
+  timestamp_override: 'event.ingested',
   note: '# this is some markdown documentation',
   version: 1,
 });
 
+// TODO: update types mapping
 export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   isNew,
+  author: ['Elastic'],
+  isBuildingBlock: false,
+  timestampOverride: '',
+  ruleNameOverride: '',
+  license: 'Elastic License',
   name: 'Query with rule-id',
   description: '24/7',
-  severity: 'low',
-  riskScore: 21,
+  severity: { value: 'low', mapping: [] },
+  riskScore: { value: 21, mapping: [] },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],

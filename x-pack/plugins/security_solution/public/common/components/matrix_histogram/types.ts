@@ -80,11 +80,12 @@ export interface MatrixHistogramQueryProps {
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
+  legendPosition?: Position;
   scaleType?: ScaleType;
-  yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
   showSpacer?: boolean;
-  legendPosition?: Position;
+  timelineId?: string;
+  yTickFormatter?: (value: number) => string;
 }
 
 export interface HistogramBucket {

@@ -28,8 +28,15 @@ import {
   Version,
   MetaOrUndefined,
   RuleId,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
-import { CallAPIOptions } from '../../../../../../src/core/server';
+import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { RuleType } from '../../../common/detection_engine/types';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
@@ -38,6 +45,8 @@ export type PartialFilter = Partial<Filter>;
 
 export interface RuleTypeParams {
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
   falsePositives: FalsePositives;
@@ -46,6 +55,7 @@ export interface RuleTypeParams {
   immutable: Immutable;
   index: IndexOrUndefined;
   language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
   outputIndex: OutputIndex;
   savedId: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
@@ -56,8 +66,12 @@ export interface RuleTypeParams {
   filters: PartialFilter[] | undefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   severity: Severity;
+  severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: RuleType;
   references: References;
@@ -69,7 +83,7 @@ export interface RuleTypeParams {
 export type CallWithRequest<T extends Record<string, any>, V> = (
   endpoint: string,
   params: T,
-  options?: CallAPIOptions
+  options?: LegacyCallAPIOptions
 ) => Promise<V>;
 
 export type RefreshTypes = false | 'wait_for';
