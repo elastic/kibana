@@ -21,7 +21,7 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (!agent.active) {
     return 'inactive';
   }
-  if (agent.unenrollement_started_at && !agent.unenrolled_at) {
+  if (agent.unenrollment_started_at && !agent.unenrolled_at) {
     return 'unenrolling';
   }
   if (agent.current_error_events.length > 0) {

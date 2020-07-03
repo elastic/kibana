@@ -55,7 +55,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
         unenrolled_at: { type: 'date' },
-        unenrollement_started_at: { type: 'date' },
+        unenrollment_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
@@ -317,7 +317,7 @@ export function registerEncryptedSavedObjects(
       'updated_at',
       'current_error_events',
       'unenrolled_at',
-      'unenrollement_started_at',
+      'unenrollment_started_at',
       'packages',
     ]),
   });

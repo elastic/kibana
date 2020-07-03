@@ -19,7 +19,7 @@ export async function unenrollAgent(soClient: SavedObjectsClientContract, agentI
     type: 'UNENROLL',
   });
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    unenrollement_started_at: now,
+    unenrollment_started_at: now,
   });
 }
 
