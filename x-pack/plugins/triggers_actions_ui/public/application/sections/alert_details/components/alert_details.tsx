@@ -5,7 +5,7 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
@@ -73,7 +73,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   const canSaveAlert = hasSaveAlertsCapability(capabilities);
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
-  const actionTypesByTypeId = indexBy(actionTypes, 'id');
+  const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
     // can the user save the alert
     canSaveAlert &&

@@ -29,7 +29,7 @@ export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  visibility: ${({ visible }) => (visible ? 'visible' : 'hidden')};
+  display: ${({ visible }) => (visible ? 'block' : 'none')};
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -204,6 +204,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
 }))<{ actionsColumnWidth: number }>`
+  align-items: center;
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;

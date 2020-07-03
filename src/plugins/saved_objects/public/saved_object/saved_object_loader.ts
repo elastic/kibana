@@ -51,14 +51,17 @@ export class SavedObjectLoader {
   }
 
   /**
-   * Retrieve a saved object by id. Returns a promise that completes when the object finishes
+   * Retrieve a saved object by id or create new one.
+   * Returns a promise that completes when the object finishes
    * initializing.
-   * @param id
+   * @param opts
    * @returns {Promise<SavedObject>}
    */
-  async get(id?: string) {
+  async get(opts?: Record<string, unknown> | string) {
+    // can accept object as argument in accordance to SavedVis class
+    // see src/plugins/saved_objects/public/saved_object/saved_object_loader.ts
     // @ts-ignore
-    const obj = new this.Class(id);
+    const obj = new this.Class(opts);
     return obj.init();
   }
 

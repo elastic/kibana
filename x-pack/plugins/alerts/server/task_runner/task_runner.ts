@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, mapValues, omit, without } from 'lodash';
+import { pickBy, mapValues, omit, without } from 'lodash';
 import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
@@ -18,12 +18,11 @@ import {
   IntervalSchedule,
   Services,
   AlertInfoParams,
-  RawAlertInstance,
   AlertTaskState,
+  RawAlertInstance,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
@@ -167,7 +166,7 @@ export class TaskRunner {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
+    const alertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
       alertRawInstances,
       (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
@@ -227,9 +226,8 @@ export class TaskRunner {
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
-      alertInstances,
-      (alertInstance: AlertInstance) => alertInstance.hasScheduledActions()
+    const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
+      alertInstance.hasScheduledActions()
     );
     const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
@@ -242,10 +240,7 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit<AlertInstances, AlertInstances>(
-        instancesWithScheduledActions,
-        ...mutedInstanceIds
-      );
+      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
 
       await Promise.all(
         Object.entries(enabledAlertInstances)
@@ -260,7 +255,7 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues<AlertInstance, RawAlertInstance>(
+      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(
         instancesWithScheduledActions,
         (alertInstance) => alertInstance.toRaw()
       ),

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from 'kibana/server';
+import { ILegacyClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
@@ -32,7 +32,7 @@ const registerPrivilegesWithClusterTest = (
   }
 ) => {
   const createExpectUpdatedPrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: jest.Mocked<ILegacyClusterClient>,
     mockLogger: jest.Mocked<Logger>,
     error: Error
   ) => {
@@ -67,7 +67,7 @@ const registerPrivilegesWithClusterTest = (
   };
 
   const createExpectDidntUpdatePrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: jest.Mocked<ILegacyClusterClient>,
     mockLogger: Logger,
     error: Error
   ) => {
