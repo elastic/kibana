@@ -22,8 +22,7 @@ import { Logger } from '../../logging';
 import { GetAuthHeaders, isRealRequest, Headers } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
-import { getClientFacade } from './get_client_facade';
-import { ClientFacade } from './client_facade';
+import { ElasticSearchClient } from './types';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
@@ -39,9 +38,9 @@ const noop = () => undefined;
  **/
 export interface IClusterClient {
   /**
-   * Returns a {@link ClientFacade | facade} to be used to query the ES cluster on behalf of the Kibana internal user
+   * Returns a {@link ElasticSearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
    */
-  asInternalUser: () => ClientFacade;
+  asInternalUser: () => ElasticSearchClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
    */
@@ -64,9 +63,8 @@ export interface ICustomClusterClient extends IClusterClient {
 /** @internal **/
 export class ClusterClient implements IClusterClient, ICustomClusterClient {
   private readonly internalClient: Client;
-  private readonly scopedClient: Client;
+  private readonly rootScopedClient: Client;
 
-  private readonly internalFacade: ClientFacade;
   private isClosed = false;
 
   constructor(
@@ -75,18 +73,19 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
     this.internalClient = configureClient(config, { logger });
-    this.internalFacade = getClientFacade(this.internalClient);
-    this.scopedClient = configureClient(config, { logger, scoped: true });
+    this.rootScopedClient = configureClient(config, { logger, scoped: true });
   }
 
   asInternalUser() {
-    return this.internalFacade;
+    return this.internalClient;
   }
 
   asScoped(request: ScopeableRequest) {
-    const headers = this.getScopedHeaders(request);
-    const scopedWrapper = getClientFacade(this.scopedClient, headers);
-    return new ScopedClusterClient(this.internalFacade, scopedWrapper);
+    const scopedHeaders = this.getScopedHeaders(request);
+    const scopedClient = this.rootScopedClient.child({
+      headers: scopedHeaders,
+    });
+    return new ScopedClusterClient(this.internalClient, scopedClient);
   }
 
   public close() {
@@ -96,16 +95,25 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
 
     this.isClosed = true;
     this.internalClient.close();
-    this.scopedClient.close();
+    this.rootScopedClient.close();
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
-    if (!isRealRequest(request)) {
-      return filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+    let scopedHeaders: Headers;
+    if (isRealRequest(request)) {
+      const authHeaders = this.getAuthHeaders(request);
+      const requestHeaders = ensureRawRequest(request).headers;
+      scopedHeaders = filterHeaders(
+        { ...requestHeaders, ...authHeaders },
+        this.config.requestHeadersWhitelist
+      );
+    } else {
+      scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
-    const authHeaders = this.getAuthHeaders(request);
-    const headers = ensureRawRequest(request).headers;
 
-    return filterHeaders({ ...headers, ...authHeaders }, this.config.requestHeadersWhitelist);
+    return {
+      ...this.config.customHeaders,
+      ...scopedHeaders,
+    };
   }
 }

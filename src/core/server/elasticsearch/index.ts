@@ -34,6 +34,6 @@ export {
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
-  ClientFacade,
+  ElasticSearchClient,
   IScopedClusterClient,
 } from './client';

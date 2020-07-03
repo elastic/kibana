@@ -21,8 +21,3 @@ export const configureClientMock = jest.fn();
 jest.doMock('./configure_client', () => ({
   configureClient: configureClientMock,
 }));
-
-export const getClientFacadeMock = jest.fn();
-jest.doMock('./get_client_facade', () => ({
-  getClientFacade: getClientFacadeMock,
-}));

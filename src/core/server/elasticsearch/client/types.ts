@@ -17,5 +17,26 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/generate_es_client');
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  ApiResponse,
+  TransportRequestOptions,
+  TransportRequestParams,
+} from '@elastic/elasticsearch/lib/Transport';
+
+/**
+ * Client used to query the elasticsearch cluster.
+ *
+ * @public
+ */
+export type ElasticSearchClient = Omit<
+  Client,
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
+> & {
+  transport: {
+    request(
+      params: TransportRequestParams,
+      options?: TransportRequestOptions
+    ): Promise<ApiResponse>;
+  };
+};

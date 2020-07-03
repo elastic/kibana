@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ClientFacade } from './client_facade';
+import { ElasticSearchClient } from './types';
 
 /**
  * Serves the same purpose as the normal {@link ClusterClient | cluster client} but exposes
@@ -29,22 +29,22 @@ import { ClientFacade } from './client_facade';
  **/
 export interface IScopedClusterClient {
   /**
-   * Returns a {@link ClientFacade | client facade} to be used to query the elasticsearch cluster
+   * Returns a {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the internal Kibana user.
    */
-  asInternalUser: () => ClientFacade;
+  asInternalUser: () => ElasticSearchClient;
   /**
-   * Returns a {@link ClientFacade | client facade} to be used to query the elasticsearch cluster
+   * Returns a {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the user that initiated the request to the Kibana server.
    */
-  asCurrentUser: () => ClientFacade;
+  asCurrentUser: () => ElasticSearchClient;
 }
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
-    private readonly internalClient: ClientFacade,
-    private readonly scopedClient: ClientFacade
+    private readonly internalClient: ElasticSearchClient,
+    private readonly scopedClient: ElasticSearchClient
   ) {}
 
   asInternalUser() {

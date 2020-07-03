@@ -22,8 +22,8 @@ import { ScopedClusterClient } from './scoped_cluster_client';
 
 describe('ScopedClusterClient', () => {
   it('uses the internal client passed in the constructor', () => {
-    const internalClient = elasticsearchClientMock.createFacade();
-    const scopedClient = elasticsearchClientMock.createFacade();
+    const internalClient = elasticsearchClientMock.createElasticSearchClient();
+    const scopedClient = elasticsearchClientMock.createElasticSearchClient();
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
@@ -31,8 +31,8 @@ describe('ScopedClusterClient', () => {
   });
 
   it('uses the scoped client passed in the constructor', () => {
-    const internalClient = elasticsearchClientMock.createFacade();
-    const scopedClient = elasticsearchClientMock.createFacade();
+    const internalClient = elasticsearchClientMock.createElasticSearchClient();
+    const scopedClient = elasticsearchClientMock.createElasticSearchClient();
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 

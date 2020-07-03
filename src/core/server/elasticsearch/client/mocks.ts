@@ -17,11 +17,55 @@
  * under the License.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import { clientFacadeMock } from './client_facade.mock';
+import { ElasticSearchClient } from './types';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
+
+const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
+  // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
+  const client = new Client({
+    node: 'http://localhost',
+  }) as any;
+
+  const blackListedProps = [
+    '_events',
+    '_eventsCount',
+    '_maxListeners',
+    'name',
+    'serializer',
+    'connectionPool',
+    'transport',
+    'helpers',
+  ];
+
+  const mockify = (obj: Record<string, any>, blacklist: string[] = []) => {
+    Object.keys(obj)
+      .filter((key) => !blacklist.includes(key))
+      .forEach((key) => {
+        const propType = typeof obj[key];
+        if (propType === 'function') {
+          obj[key] = jest.fn();
+        } else if (propType === 'object' && obj[key] != null) {
+          mockify(obj[key]);
+        }
+      });
+  };
+
+  mockify(client, blackListedProps);
+
+  client.transport = {
+    request: jest.fn(),
+  };
+  client.close = jest.fn();
+  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+
+  return (client as unknown) as DeeplyMockedKeys<Client>;
+};
+
+const createClientMock = (): DeeplyMockedKeys<ElasticSearchClient> =>
+  (createInternalClientMock() as unknown) as DeeplyMockedKeys<ElasticSearchClient>;
 
 const createScopedClusterClientMock = () => {
   const mock: jest.Mocked<IScopedClusterClient> = {
@@ -29,8 +73,8 @@ const createScopedClusterClientMock = () => {
     asCurrentUser: jest.fn(),
   };
 
-  mock.asInternalUser.mockReturnValue(clientFacadeMock.create());
-  mock.asCurrentUser.mockReturnValue(clientFacadeMock.create());
+  mock.asInternalUser.mockReturnValue(createClientMock());
+  mock.asCurrentUser.mockReturnValue(createClientMock());
 
   return mock;
 };
@@ -41,7 +85,7 @@ const createClusterClientMock = () => {
     asScoped: jest.fn(),
   };
 
-  mock.asInternalUser.mockReturnValue(clientFacadeMock.create());
+  mock.asInternalUser.mockReturnValue(createClientMock());
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
 
   return mock;
@@ -54,7 +98,7 @@ const createCustomClusterClientMock = () => {
     close: jest.fn(),
   };
 
-  mock.asInternalUser.mockReturnValue(clientFacadeMock.create());
+  mock.asInternalUser.mockReturnValue(createClientMock());
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
 
   return mock;
@@ -88,7 +132,8 @@ export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
-  createFacade: clientFacadeMock.create,
+  createElasticSearchClient: createClientMock,
+  createInternalClient: createInternalClientMock,
   createClientResponse: createMockedClientResponse,
   createClientError: createMockedClientError,
 };

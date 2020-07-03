@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -22,6 +22,7 @@ import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { Client } from 'elasticsearch';
+import { Client as Client_2 } from '@elastic/elasticsearch';
 import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
@@ -115,9 +116,6 @@ import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Request } from 'hapi';
-import { RequestBody } from '@elastic/elasticsearch/lib/Transport';
-import { RequestNDBody } from '@elastic/elasticsearch/lib/Transport';
-import * as RequestParams from '@elastic/elasticsearch/api/requestParams';
 import { ResponseObject } from 'hapi';
 import { ResponseToolkit } from 'hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
@@ -145,7 +143,6 @@ import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
