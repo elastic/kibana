@@ -64,7 +64,7 @@ export interface ExplorerSwimlaneProps {
     type: string;
     times: number[];
   };
-  setSelectedCells: Function;
+  onCellsSelection: Function;
   tooltipService: ChartTooltipService;
   'data-test-subj'?: string;
   /**
@@ -701,9 +701,9 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     // If selectedCells is an empty object we clear any existing selection,
     // otherwise we save the new selection in AppState and update the Explorer.
     if (Object.keys(selectedCellsUpdate).length === 0) {
-      this.props.setSelectedCells();
+      this.props.onCellsSelection();
     } else {
-      this.props.setSelectedCells(selectedCellsUpdate);
+      this.props.onCellsSelection(selectedCellsUpdate);
     }
   }
 

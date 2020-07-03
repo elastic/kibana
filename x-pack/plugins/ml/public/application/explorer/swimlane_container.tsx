@@ -49,7 +49,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * @constructor
  */
 export const SwimlaneContainer: FC<
-  Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService'> & {
+  Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService' | 'parentRef'> & {
     onResize: (width: number) => void;
     fromPage?: number;
     perPage?: number;

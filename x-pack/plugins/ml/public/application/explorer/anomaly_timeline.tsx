@@ -205,7 +205,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             swimlaneData={overallSwimlaneData as OverallSwimlaneData}
             swimlaneType={'overall'}
             selection={selectedCells}
-            setSelectedCells={setSelectedCells}
+            onCellsSelection={setSelectedCells}
             onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
             isLoading={loading}
             noDataWarning={<NoOverallData />}
@@ -228,7 +228,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
               swimlaneType={SWIMLANE_TYPE.VIEW_BY}
               selection={selectedCells}
-              setSelectedCells={setSelectedCells}
+              onCellsSelection={setSelectedCells}
               onResize={(width) => explorerService.setSwimlaneContainerWidth(width)}
               fromPage={viewByFromPage}
               perPage={viewByPerPage}
