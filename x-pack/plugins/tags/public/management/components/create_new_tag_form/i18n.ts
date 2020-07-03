@@ -18,6 +18,10 @@ export const txtDescription = i18n.translate('xpack.tags.creanteNewTagForm.descr
   defaultMessage: 'Description',
 });
 
-export const txtSave = i18n.translate('xpack.tags.creanteNewTagForm.save', {
-  defaultMessage: 'Save tag',
+export const txtCreate = i18n.translate('xpack.tags.creanteNewTagForm.create', {
+  defaultMessage: 'Create tag',
+});
+
+export const txtCancel = i18n.translate('xpack.tags.creanteNewTagForm.cancel', {
+  defaultMessage: 'Cancel',
 });

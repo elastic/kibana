@@ -14,7 +14,11 @@ import {
   EuiColorPicker,
   EuiTextArea,
 } from '@elastic/eui';
-import { txtTitle, txtColor, txtDescription, txtSave } from './i18n';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { Link } from 'react-router-dom';
+import { txtTitle, txtColor, txtDescription, txtCreate, txtCancel } from './i18n';
 
 export interface Props {
   title: string;
@@ -80,9 +84,26 @@ export const CreateNewTagForm: React.FC<Props> = ({
 
       <EuiSpacer />
 
-      <EuiButton type="submit" fill>
-        {txtSave}
-      </EuiButton>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="secondary"
+            iconType="check"
+            type="submit"
+            data-test-subj="submitButton"
+            disabled={disabled}
+            isLoading={disabled}
+          >
+            {txtCreate}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Link to={'/'}>
+            <EuiButtonEmpty color="primary">{txtCancel}</EuiButtonEmpty>
+          </Link>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiForm>
   );
 };
