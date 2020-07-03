@@ -1981,6 +1981,10 @@ export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
     // (undocumented)
+    dynamic?: false;
+    // (undocumented)
+    enabled?: boolean;
+    // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
     type?: string;
@@ -1990,8 +1994,6 @@ export interface SavedObjectsComplexFieldMapping {
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    enabled?: boolean;
     // (undocumented)
     fields?: {
         [subfield: string]: {

@@ -153,7 +153,7 @@ export interface SavedObjectsCoreFieldMapping {
  * @public
  */
 export interface SavedObjectsComplexFieldMapping {
-  dynamic: false;
+  dynamic?: false;
   enabled?: boolean;
   doc_values?: boolean;
   type?: string;
