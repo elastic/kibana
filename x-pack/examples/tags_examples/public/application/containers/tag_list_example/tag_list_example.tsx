@@ -41,6 +41,9 @@ export const TagListExample: React.FC = () => {
         <TagListEditable
           kid={'kid:::so:saved_object/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f'}
         />
+
+        <p>Face object</p>
+        <TagListEditable kid={'kid:::test:/test/722b74f0-b882-11e8-a6d9-xxxxxxxxx'} />
       </div>
     </div>
   );

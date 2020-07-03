@@ -11,6 +11,7 @@ import { getAllTags } from './routes/get_all_tags';
 import { deleteTag } from './routes/delete_tag';
 import { getResourceTags } from './routes/get_resource_tags';
 import { createAttachments } from './routes/create_attachments';
+import { setAttachments } from './routes/set_attachments';
 import { deleteAttachment } from './routes/delete_attachment';
 import { RouteParams } from './types';
 
@@ -22,5 +23,6 @@ export const setupRoutes = (params: RouteParams) => {
   getAllTags(params);
   getResourceTags(params);
   createAttachments(params);
+  setAttachments(params);
   deleteAttachment(params);
 };

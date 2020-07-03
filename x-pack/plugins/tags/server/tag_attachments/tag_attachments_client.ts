@@ -18,6 +18,8 @@ import {
   TagAttachmentClientDeleteParams,
   TagAttachmentClientFindResourcesParams,
   TagAttachmentClientFindResourcesResult,
+  TagAttachmentClientSetParams,
+  TagAttachmentClientSetResult,
 } from '../../common';
 import {
   validateTagId,
@@ -92,9 +94,51 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     return { attachments: results };
   }
 
-  public async del({ tagId, kid }: TagAttachmentClientDeleteParams): Promise<void> {
-    validateTagId(tagId);
+  public async set({
+    kid,
+    tagIds,
+  }: TagAttachmentClientSetParams): Promise<TagAttachmentClientSetResult> {
     validateKID(kid);
+    validateTagIds(tagIds);
+
+    const existingAttachments = await this.getAttachedTags({ kid });
+    const attachedTags: string[] = existingAttachments.tags.map((tag) => tag.id);
+
+    const tagsAlreadyAttached: string[] = [];
+    const tagsToAttach: string[] = [];
+    const tagsToDetach: string[] = [];
+
+    for (const tag of tagIds) {
+      const tagAlreadyAttached = attachedTags.indexOf(tag) > -1;
+      if (!tagAlreadyAttached) tagsToAttach.push(tag);
+    }
+
+    for (const tag of attachedTags) {
+      const tagPresentInNewSet = tagIds.indexOf(tag) > -1;
+      if (tagPresentInNewSet) tagsAlreadyAttached.push(tag);
+      else tagsToDetach.push(tag);
+    }
+
+    await Promise.all(tagsToDetach.map((tagId) => this.del({ kid, tagId })));
+    const { attachments: newAttachments } = await this.create({
+      attachments: tagsToAttach.map((tagId) => ({
+        kid,
+        tagId,
+      })),
+    });
+
+    const existingAttachmentsToKeep = existingAttachments.attachments.filter(
+      ({ tagId }) => tagsAlreadyAttached.indexOf(tagId) > -1
+    );
+
+    return {
+      attachments: [...existingAttachmentsToKeep, ...newAttachments],
+    };
+  }
+
+  public async del({ kid, tagId }: TagAttachmentClientDeleteParams): Promise<void> {
+    validateKID(kid);
+    validateTagId(tagId);
 
     const id = this.getId(tagId, kid);
     const { savedObjectsClient } = this.params;
