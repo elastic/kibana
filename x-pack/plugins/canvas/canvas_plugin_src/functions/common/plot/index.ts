@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-expect-error no @typed def
-import keyBy from 'lodash.keyby';
 import { set } from '@elastic/safer-lodash-set';
-import { groupBy, get, map, sortBy } from 'lodash';
+import { groupBy, get, keyBy, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
 // @ts-expect-error untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';

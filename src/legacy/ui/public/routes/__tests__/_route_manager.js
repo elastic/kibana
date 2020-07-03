@@ -46,7 +46,7 @@ describe('routes/route_manager', function () {
     })
   );
 
-  it('should have chainable methods: ' + _.pluck(chainableMethods, 'name').join(', '), function () {
+  it('should have chainable methods: ' + _.map(chainableMethods, 'name').join(', '), function () {
     chainableMethods.forEach(function (meth) {
       expect(routes[meth.name].apply(routes, _.clone(meth.args))).to.be(routes);
     });

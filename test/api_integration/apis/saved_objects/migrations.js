@@ -294,7 +294,7 @@ export default ({ getService }) => {
 
       // It only created the original and the dest
       assert.deepEqual(
-        _.pluck(
+        _.map(
           await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
           'index'
         ).sort(),

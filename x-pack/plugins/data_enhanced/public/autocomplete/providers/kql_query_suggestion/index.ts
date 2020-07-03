@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'kibana/public';
 import { $Keys } from 'utility-types';
-import { flatten, uniq } from 'lodash';
+import { flatten, uniqBy } from 'lodash';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
@@ -21,7 +21,7 @@ import {
 const cursorSymbol = '@kuery-cursor@';
 
 const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
-  uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
+  uniqBy(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
 
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
