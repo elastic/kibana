@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { clientFacadeMock } from './client_facade.mock';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
@@ -58,11 +60,35 @@ const createCustomClusterClientMock = () => {
   return mock;
 };
 
+type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
+  abort: jest.MockedFunction<() => undefined>;
+};
+
+const createMockedClientResponse = <T>(body: T): MockedTransportRequestPromise<ApiResponse<T>> => {
+  const response: ApiResponse<T> = {
+    body,
+    statusCode: 200,
+    warnings: [],
+    headers: {},
+    meta: {} as any,
+  };
+  const promise = Promise.resolve(response);
+  (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
+
+  return promise as MockedTransportRequestPromise<ApiResponse<T>>;
+};
+
+const createMockedClientError = (err: any): MockedTransportRequestPromise<never> => {
+  const promise = Promise.reject(err);
+  (promise as MockedTransportRequestPromise<never>).abort = jest.fn();
+  return promise as MockedTransportRequestPromise<never>;
+};
+
 export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
   createFacade: clientFacadeMock.create,
-  createClientResponse: clientFacadeMock.createApiResponse,
-  createClientError: clientFacadeMock.createApiError,
+  createClientResponse: createMockedClientResponse,
+  createClientError: createMockedClientError,
 };

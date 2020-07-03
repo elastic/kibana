@@ -17,29 +17,7 @@
  * under the License.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { ClientFacade } from './client_facade';
-
-const createApiResponse = <T>(body: T): TransportRequestPromise<ApiResponse<T>> => {
-  const response: ApiResponse<T> = {
-    body,
-    statusCode: 200,
-    warnings: [],
-    headers: {},
-    meta: {} as any,
-  };
-  const promise = Promise.resolve(response);
-  (promise as TransportRequestPromise<ApiResponse<T>>).abort = () => undefined;
-
-  return promise as TransportRequestPromise<ApiResponse<T>>;
-};
-
-const createApiError = (err: any): TransportRequestPromise<never> => {
-  const promise = Promise.reject(err);
-  (promise as TransportRequestPromise<never>).abort = () => undefined;
-  return promise as TransportRequestPromise<never>;
-};
 
 const createFacadeMock = () => {
   const mock: DeeplyMockedKeys<ClientFacade> = {
@@ -435,6 +413,4 @@ const createFacadeMock = () => {
 
 export const clientFacadeMock = {
   create: createFacadeMock,
-  createApiResponse,
-  createApiError,
 };
