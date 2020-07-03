@@ -73,7 +73,7 @@ describe('ML - validateModelMemoryLimit', () => {
     'ml.estimateModelMemory'?: ModelMemoryEstimate;
   }
 
-  // mock callWithRequest
+  // mock callAsCurrentUser
   // used in three places:
   // - to retrieve the info endpoint
   // - to search for cardinality of split field

@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning', function () {
-    this.tags('ciGroup3');
+    this.tags(['ciGroup3', 'james']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();

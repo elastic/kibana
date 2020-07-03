@@ -30,7 +30,8 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { callAsCurrentUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -435,6 +436,6 @@ export function resultsServiceProvider({ callAsCurrentUser }: ILegacyScopedClust
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callAsCurrentUser),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
   };
 }

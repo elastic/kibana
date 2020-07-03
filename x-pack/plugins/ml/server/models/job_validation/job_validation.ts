@@ -40,7 +40,6 @@ export async function validateJob(
   kbnVersion = 'current',
   isSecurityDisabled?: boolean
 ) {
-  const { callAsInternalUser } = mlClusterClient;
   const messages = getMessages();
 
   try {
@@ -88,13 +87,7 @@ export async function validateJob(
       });
 
       validationMessages.push(
-        ...(await validateBucketSpan(
-          mlClusterClient,
-          job,
-          duration,
-          callAsInternalUser,
-          isSecurityDisabled
-        ))
+        ...(await validateBucketSpan(mlClusterClient, job, duration, isSecurityDisabled))
       );
       validationMessages.push(...(await validateTimeRange(mlClusterClient, job, duration)));
 

@@ -61,13 +61,6 @@ export interface DeleteParams {
   id: string;
 }
 
-type annotationProviderParams = DeleteParams | GetParams | IndexParams;
-
-export type callWithRequestType = (
-  action: string,
-  params: annotationProviderParams
-) => Promise<any>;
-
 export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {

@@ -45,13 +45,7 @@ const pickBucketSpan = (bucketSpans) => {
   return bucketSpans[i];
 };
 
-export async function validateBucketSpan(
-  callWithRequest,
-  job,
-  duration,
-  callAsInternalUser,
-  isSecurityDisabled
-) {
+export async function validateBucketSpan(mlClusterClient, job, duration, isSecurityDisabled) {
   validateJobObject(job);
 
   // if there is no duration, do not run the estimate test
@@ -124,8 +118,7 @@ export async function validateBucketSpan(
     const estimations = estimatorConfigs.map((data) => {
       return new Promise((resolve) => {
         estimateBucketSpanFactory(
-          callWithRequest,
-          callAsInternalUser,
+          mlClusterClient,
           isSecurityDisabled
         )(data)
           .then(resolve)

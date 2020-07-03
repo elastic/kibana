@@ -10,8 +10,8 @@ import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
 
 const mlClusterClient = ({
-  // mock callWithRequest
-  callWithRequest: (method: string) => {
+  // mock callAsCurrentUser
+  callAsCurrentUser: (method: string) => {
     return new Promise((resolve) => {
       if (method === 'fieldCaps') {
         resolve({ fields: [] });
