@@ -11,9 +11,9 @@ export const txtTitle = i18n.translate('xpack.tags.landingPage.title', {
 });
 
 export const txtSubtitle = i18n.translate('xpack.tags.landingPage.subtitle', {
-  defaultMessage: 'Organize your visualizations, dashboards and other saved objects using tags.',
+  defaultMessage: 'Tags help you organize content throughout Kibana.',
 });
 
 export const txtCreateATag = i18n.translate('xpack.tags.landingPage.createATag', {
-  defaultMessage: 'Create a new tag',
+  defaultMessage: 'Create tag',
 });
