@@ -28,6 +28,8 @@ import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
 } from './create_execute_function';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionType } from '../common';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -57,6 +59,7 @@ interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
   request: KibanaRequest;
+  authorization: ActionsAuthorization;
 }
 
 interface UpdateOptions {
@@ -72,6 +75,7 @@ export class ActionsClient {
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
   private readonly request: KibanaRequest;
+  private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer;
 
   constructor({
@@ -83,6 +87,7 @@ export class ActionsClient {
     actionExecutor,
     executionEnqueuer,
     request,
+    authorization,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
@@ -92,13 +97,17 @@ export class ActionsClient {
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.request = request;
+    this.authorization = authorization;
   }
 
   /**
    * Create an action
    */
-  public async create({ action }: CreateOptions): Promise<ActionResult> {
-    const { actionTypeId, name, config, secrets } = action;
+  public async create({
+    action: { actionTypeId, name, config, secrets },
+  }: CreateOptions): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('create', actionTypeId);
+
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
@@ -125,6 +134,8 @@ export class ActionsClient {
    * Update action
    */
   public async update({ id, action }: UpdateOptions): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('update');
+
     if (
       this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
@@ -168,6 +179,8 @@ export class ActionsClient {
    * Get an action
    */
   public async get({ id }: { id: string }): Promise<ActionResult> {
+    await this.authorization.ensureAuthorized('get');
+
     const preconfiguredActionsList = this.preconfiguredActions.find(
       (preconfiguredAction) => preconfiguredAction.id === id
     );
@@ -194,6 +207,8 @@ export class ActionsClient {
    * Get all actions with preconfigured list
    */
   public async getAll(): Promise<FindActionResult[]> {
+    await this.authorization.ensureAuthorized('get');
+
     const savedObjectsActions = (
       await this.savedObjectsClient.find<RawAction>({
         perPage: MAX_ACTIONS_RETURNED,
@@ -221,6 +236,8 @@ export class ActionsClient {
    * Get bulk actions with preconfigured list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
+    await this.authorization.ensureAuthorized('get');
+
     const actionResults = new Array<ActionResult>();
     for (const actionId of ids) {
       const action = this.preconfiguredActions.find(
@@ -259,6 +276,8 @@ export class ActionsClient {
    * Delete action
    */
   public async delete({ id }: { id: string }) {
+    await this.authorization.ensureAuthorized('delete');
+
     if (
       this.preconfiguredActions.find((preconfiguredAction) => preconfiguredAction.id === id) !==
       undefined
@@ -280,11 +299,17 @@ export class ActionsClient {
     actionId,
     params,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult> {
+    await this.authorization.ensureAuthorized('execute');
     return this.actionExecutor.execute({ actionId, params, request: this.request });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
+    await this.authorization.ensureAuthorized('execute');
     return this.executionEnqueuer(this.savedObjectsClient, options);
+  }
+
+  public async listTypes(): Promise<ActionType[]> {
+    return this.actionTypeRegistry.list();
   }
 }
 

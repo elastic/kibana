@@ -40,7 +40,7 @@ import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
-import { hasAllPrivilege } from '../../lib/capabilities';
+import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -101,6 +101,7 @@ export const AlertForm = ({
     docLinks,
     capabilities,
   } = alertsContext;
+  const canShowActions = hasShowActionsCapability(capabilities);
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
@@ -262,7 +263,7 @@ export const AlertForm = ({
           />
         </Suspense>
       ) : null}
-      {defaultActionGroupId ? (
+      {canShowActions && defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}

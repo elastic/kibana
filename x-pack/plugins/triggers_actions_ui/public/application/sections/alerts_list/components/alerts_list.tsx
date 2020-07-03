@@ -33,6 +33,11 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
+import {
+  hasDeleteAlertsCapability,
+  hasSaveAlertsCapability,
+  hasExecuteActionsCapability,
+} from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -65,6 +70,8 @@ export const AlertsList: React.FunctionComponent = () => {
     charts,
     dataPlugin,
   } = useAppDependencies();
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -296,7 +303,8 @@ export const AlertsList: React.FunctionComponent = () => {
               <AlertQuickEditButtons
                 selectedItems={convertAlertsToTableItems(
                   filterAlertsById(alertsState.data, selectedIds),
-                  alertTypesState.data
+                  alertTypesState.data,
+                  canExecuteActions
                 )}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
@@ -345,7 +353,7 @@ export const AlertsList: React.FunctionComponent = () => {
         items={
           alertTypesState.isInitialized === false
             ? []
-            : convertAlertsToTableItems(alertsState.data, alertTypesState.data)
+            : convertAlertsToTableItems(alertsState.data, alertTypesState.data, canExecuteActions)
         }
         itemId="id"
         columns={alertsTableColumns}
@@ -375,7 +383,11 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
-  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+  const loadedItems = convertAlertsToTableItems(
+    alertsState.data,
+    alertTypesState.data,
+    canExecuteActions
+  );
 
   const isFilterApplied = !(
     isEmpty(searchText) &&
@@ -457,12 +469,18 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
-function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
+function convertAlertsToTableItems(
+  alerts: Alert[],
+  alertTypesIndex: AlertTypeIndex,
+  canExecuteActions: boolean
+) {
   return alerts.map((alert) => ({
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
-    isEditable: hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)),
+    isEditable:
+      hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
+      (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
   }));
 }
