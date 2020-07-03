@@ -180,7 +180,7 @@ it('uses cache on second run and exist cleanly', async () => {
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
       }),
       toArray()
@@ -226,7 +226,7 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-ignore @types/node is missing the brotli functions
+    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()
