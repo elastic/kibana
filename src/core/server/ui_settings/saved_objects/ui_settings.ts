@@ -25,10 +25,7 @@ export const uiSettingsType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: {
-    // we don't want to allow `true` in the public `SavedObjectsTypeMappingDefinition` type, however
-    // this is needed for the config that is kinda a special type. To avoid adding additional internal types
-    // just for this, we hardcast to any here.
-    dynamic: true as any,
+    dynamic: false,
     properties: {
       buildNum: {
         type: 'keyword',

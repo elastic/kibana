@@ -22,10 +22,17 @@ import { IAggConfig } from '../aggs';
 import { TabbedAggColumn } from './types';
 
 const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
+  let name = '';
+  try {
+    name = agg.makeLabel();
+  } catch (e) {
+    // skip the case when makeLabel throws an error (e.x. no appropriate field for an aggregation)
+  }
+
   return {
     aggConfig: agg,
     id: `col-${i}-${agg.id}`,
-    name: agg.makeLabel(),
+    name,
   };
 };
 
