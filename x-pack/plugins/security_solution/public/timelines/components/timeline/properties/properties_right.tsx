@@ -140,6 +140,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             id="timelineSettingsPopover"
             isOpen={showActions}
             closePopover={onClosePopover}
+            repositionOnScroll
           >
             <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
               {capabilitiesCanUserCRUD && (
