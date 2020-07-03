@@ -17,7 +17,7 @@ import {
   wrappedExceptionList,
   TranslatedEntryNestedEntry,
   translatedEntryNestedEntry,
-  translatedEntry,
+  translatedEntry as translatedEntryType,
   TranslatedEntryMatcher,
   translatedEntryMatchMatcher,
   translatedEntryMatchAnyMatcher,
@@ -92,24 +92,23 @@ export function translateToEndpointExceptions(
 ): TranslatedEntry[] {
   if (schemaVersion === '1.0.0') {
     return exc.data
-      .map(
-        (list): Array<TranslatedEntry | undefined> => {
-          return list.entries.map((entry: Entry | EntryNested): TranslatedEntry | undefined => {
-            return translateEntry(schemaVersion, entry);
-          });
+      .flatMap((list) => {
+        return list.entries;
+      })
+      .reduce((entries: TranslatedEntry[], entry) => {
+        const translatedEntry = translateEntry(schemaVersion, entry);
+        if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
+          entries.push(translatedEntry);
         }
-      )
-      .reduce((acc, it) => [...acc, ...it], [])
-      .filter((entry: TranslatedEntry | undefined): entry is TranslatedEntry => {
-        return entry !== undefined && translatedEntry.is(entry);
-      });
+        return entries;
+      }, []);
   } else {
     throw new Error('unsupported schemaVersion');
   }
 }
 
-function getMatcherFunction(field: string, any?: boolean): TranslatedEntryMatcher {
-  return any
+function getMatcherFunction(field: string, matchAny?: boolean): TranslatedEntryMatcher {
+  return matchAny
     ? field.endsWith('.text')
       ? 'exact_caseless_any'
       : 'exact_cased_any'
@@ -128,15 +127,16 @@ function translateEntry(
 ): TranslatedEntry | undefined {
   switch (entry.type) {
     case 'nested': {
-      const nestedEntries = entry.entries
-        .map((nestedEntry): TranslatedEntry | undefined => {
-          return translateEntry(schemaVersion, nestedEntry);
-        })
-        .filter(
-          (nestedEntry: TranslatedEntry | undefined): nestedEntry is TranslatedEntryNestedEntry => {
-            return nestedEntry !== undefined && translatedEntryNestedEntry.is(nestedEntry);
+      const nestedEntries = entry.entries.reduce(
+        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+          const translatedEntry = translateEntry(schemaVersion, nestedEntry);
+          if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
+            entries.push(translatedEntry);
           }
-        );
+          return entries;
+        },
+        []
+      );
       return {
         entries: nestedEntries,
         field: entry.field,
