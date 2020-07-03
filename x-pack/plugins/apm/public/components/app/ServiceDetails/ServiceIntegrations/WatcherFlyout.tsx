@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { padLeft, range } from 'lodash';
+import { padStart, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
@@ -288,7 +288,7 @@ export class WatcherFlyout extends Component<
 
     // Generate UTC hours for Daily Report select field
     const intervalHours = range(24).map((i) => {
-      const hour = padLeft(i.toString(), 2, '0');
+      const hour = padStart(i.toString(), 2, '0');
       return { value: `${hour}:00`, text: `${hour}:00 UTC` };
     });
 
