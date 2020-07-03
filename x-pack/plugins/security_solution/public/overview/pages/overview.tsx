@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
@@ -60,10 +60,10 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   );
 
   const [dismissMessage, setDismissMessage] = useState<boolean>(hasDismissEndpointNoticeMessage);
-  const dismissEndpointNotice = () => {
+  const dismissEndpointNotice = useCallback(() => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
-  };
+  }, [addMessage]);
 
   return (
     <>
