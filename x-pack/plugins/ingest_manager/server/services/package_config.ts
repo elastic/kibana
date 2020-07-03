@@ -145,10 +145,12 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
   ): Promise<{ items: PackageConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, kuery } = options;
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
     const packageConfigs = await soClient.find<PackageConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
       page,
       perPage,
       // To ensure users don't need to know about SO data structure...

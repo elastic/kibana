@@ -29,7 +29,7 @@ export async function listEnrollmentApiKeys(
     page,
     perPage,
     sortField: 'created_at',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     filter:
       kuery && kuery !== ''
         ? kuery.replace(
