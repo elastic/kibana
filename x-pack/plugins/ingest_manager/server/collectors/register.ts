@@ -46,17 +46,17 @@ export function registerIngestManagerUsageCollector(usageCollection?: UsageColle
         ],
       };
     },
-    schema: {
-      fleet_enabled: { type: 'boolean' },
-      agents: {
-        enrolled: { type: 'number' },
-      },
-      packages: {
-        name: { type: 'keyword' },
-        version: { type: 'keyword' },
-        enabled: { type: 'boolean' },
-      },
-    },
+    // schema: { // temporarily disabled because of type errors
+    //   fleet_enabled: { type: 'boolean' },
+    //   agents: {
+    //     enrolled: { type: 'number' },
+    //   },
+    //   packages: {
+    //     name: { type: 'keyword' },
+    //     version: { type: 'keyword' },
+    //     enabled: { type: 'boolean' },
+    //   },
+    // },
   });
 
   // register usage collector
