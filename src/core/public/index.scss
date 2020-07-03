@@ -1,7 +1,3 @@
-// This file is built by both the legacy and KP build systems so we need to
-// import this explicitly
-@import '../../legacy/ui/public/styles/_styling_constants';
-
 @import './core';
 @import './chrome/index';
 @import './overlays/index';
