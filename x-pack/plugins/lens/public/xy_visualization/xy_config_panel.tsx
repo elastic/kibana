@@ -106,7 +106,6 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           })}
           name="axisSide"
           buttonSize="compressed"
-          fullWidth
           className="eui-displayInlineBlock"
           options={[
             {
