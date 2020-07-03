@@ -9,7 +9,7 @@ import { createRoute } from '../create_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getAllEnvironments } from '../../lib/settings/agent_configuration/get_environments/get_all_environments';
+import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute(() => ({

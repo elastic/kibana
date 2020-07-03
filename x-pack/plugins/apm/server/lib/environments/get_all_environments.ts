@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getAllEnvironments({
   serviceName,
@@ -60,6 +59,5 @@ export async function getAllEnvironments({
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
     ) || [];
-  return [ALL_OPTION_VALUE, ...environments]; // TODO move this file out of agent_configuration dir into common dir
-  // TODO and move ALL_OPTION_VALUE to the agent_configuration implementation
+  return environments;
 }

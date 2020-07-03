@@ -8,6 +8,8 @@ import { Logger } from 'kibana/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import { AnomalyDetectionJobByEnv } from '../../../typings/anomaly_detection';
+import { SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
+import { ML_GROUP_NAME_APM } from './create_anomaly_detection_jobs';
 
 export type AnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof getAnomalyDetectionJobs
@@ -39,19 +41,17 @@ export async function getAnomalyDetectionJobs(
     return [];
   }
   try {
-    const { jobs } = await ml.anomalyDetectors.jobs('apm');
+    const { jobs } = await ml.anomalyDetectors.jobs(ML_GROUP_NAME_APM);
     return jobs.reduce((acc, anomalyDetectionJob) => {
       if (
-        anomalyDetectionJob.custom_settings?.job_tags?.['service.environment']
+        anomalyDetectionJob.custom_settings?.job_tags?.[SERVICE_ENVIRONMENT]
       ) {
         return [
           ...acc,
           {
             job_id: anomalyDetectionJob.job_id,
-            'service.environment':
-              anomalyDetectionJob.custom_settings.job_tags[
-                'service.environment'
-              ],
+            [SERVICE_ENVIRONMENT]:
+              anomalyDetectionJob.custom_settings.job_tags[SERVICE_ENVIRONMENT],
           },
         ];
       }

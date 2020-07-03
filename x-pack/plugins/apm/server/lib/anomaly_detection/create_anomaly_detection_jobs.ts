@@ -9,6 +9,14 @@ import uuid from 'uuid/v4';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import { JobResponse } from '../../../../ml/common/types/modules';
+import {
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_DURATION,
+  PROCESSOR_EVENT,
+} from '../../../common/elasticsearch_fieldnames';
+
+const ML_MODULE_ID_APM_TRANSACTION = 'apm_transaction';
+export const ML_GROUP_NAME_APM = 'apm';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -18,7 +26,7 @@ export async function createAnomalyDetectionJobs(
   environments: string[],
   logger: Logger
 ) {
-  const { ml } = setup;
+  const { ml, config } = setup;
   if (!ml) {
     return [];
   }
@@ -38,9 +46,10 @@ export async function createAnomalyDetectionJobs(
     `Creating ML anomaly detection jobs for environments: [${environments}].`
   );
 
+  const indexPatternName = config['apm_oss.transactionIndices']; // TODO [ML] - Do we want to use the config index name?
   const dataRecognizerConfigResponses = await Promise.all(
     environments.map((environment) =>
-      configureAnomalyDetectionJob({ ml, environment })
+      configureAnomalyDetectionJob({ ml, environment, indexPatternName })
     )
   );
   const newJobResponses = dataRecognizerConfigResponses.reduce(
@@ -75,24 +84,26 @@ export async function createAnomalyDetectionJobs(
 async function configureAnomalyDetectionJob({
   ml,
   environment,
+  indexPatternName = 'apm-*-transaction-*',
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
+  indexPatternName?: string | undefined;
 }) {
   const convertedEnvironmentName = convertToMLIdentifier(environment);
   const randomToken = uuid().substr(-4);
 
   return ml.modules.setup({
-    moduleId: 'apm_transaction',
-    prefix: `apm-${convertedEnvironmentName}-${randomToken}-`,
-    groups: ['apm', convertedEnvironmentName],
-    indexPatternName: 'apm-*-transaction-*',
+    moduleId: ML_MODULE_ID_APM_TRANSACTION,
+    prefix: `${ML_GROUP_NAME_APM}-${convertedEnvironmentName}-${randomToken}-`,
+    groups: [ML_GROUP_NAME_APM, convertedEnvironmentName],
+    indexPatternName,
     query: {
       bool: {
         filter: [
-          { term: { 'processor.event': 'transaction' } },
-          { exists: { field: 'transaction.duration.us' } },
-          { term: { 'service.environment': environment } },
+          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          { exists: { field: TRANSACTION_DURATION } },
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
         ],
       },
     },
@@ -101,7 +112,7 @@ async function configureAnomalyDetectionJob({
       {
         custom_settings: {
           job_tags: {
-            'service.environment': environment,
+            [SERVICE_ENVIRONMENT]: environment,
           },
         },
       },

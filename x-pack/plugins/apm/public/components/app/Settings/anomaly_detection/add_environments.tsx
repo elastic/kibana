@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
 
@@ -44,13 +43,11 @@ export const AddEnvironments = ({
     { preservePreviousData: false }
   );
 
-  const availableEnvironmentOptions = data
-    .filter((env) => env !== ALL_OPTION_VALUE)
-    .map((env) => ({
-      label: env,
-      value: env,
-      disabled: currentEnvironments.includes(env),
-    }));
+  const availableEnvironmentOptions = data.map((env) => ({
+    label: env,
+    value: env,
+    disabled: currentEnvironments.includes(env),
+  }));
 
   const [selectedOptions, setSelected] = useState<
     Array<EuiComboBoxOptionOption<string>>
