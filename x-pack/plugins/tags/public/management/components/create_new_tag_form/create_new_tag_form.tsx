@@ -18,7 +18,10 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { Link } from 'react-router-dom';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 import { txtTitle, txtColor, txtDescription, txtCreate, txtCancel } from './i18n';
+import { Tag } from '../../../components/tag';
 
 export interface Props {
   title: string;
@@ -49,40 +52,56 @@ export const CreateNewTagForm: React.FC<Props> = ({
         onSubmit();
       }}
     >
-      <EuiFormRow label={txtTitle}>
-        <EuiFieldText
-          name="first"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          autoFocus
-          aria-label={txtTitle}
-          disabled={disabled}
-        />
-      </EuiFormRow>
-
-      {!!onColorChange && (
-        <EuiFormRow label={txtColor}>
-          <EuiColorPicker
-            color={color}
-            onChange={(newColor) => onColorChange(newColor)}
-            aria-label={txtColor}
+      <EuiDescribedFormGroup
+        title={<h3>Display</h3>}
+        description={
+          <>
+            <div>This is how your tag will look like.</div>
+            <EuiSpacer size={'s'} />
+            {!!title && <Tag tag={{ title, color: color || 'transparent' }} />}
+          </>
+        }
+      >
+        <EuiFormRow label={txtTitle} helpText={'Use up to 256 characters'}>
+          <EuiFieldText
+            name="first"
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            autoFocus
+            aria-label={txtTitle}
             disabled={disabled}
           />
         </EuiFormRow>
-      )}
+
+        {!!onColorChange && (
+          <EuiFormRow label={txtColor}>
+            <EuiColorPicker
+              color={color}
+              onChange={(newColor) => onColorChange(newColor)}
+              aria-label={txtColor}
+              disabled={disabled}
+            />
+          </EuiFormRow>
+        )}
+      </EuiDescribedFormGroup>
 
       {!!onDescriptionChange && (
-        <EuiFormRow label={txtDescription}>
-          <EuiTextArea
-            value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-            aria-label={txtDescription}
-            disabled={disabled}
-          />
-        </EuiFormRow>
+        <EuiDescribedFormGroup
+          title={<h3>Extra</h3>}
+          description={<>Add extra description to your tag.</>}
+        >
+          <EuiFormRow label={txtDescription}>
+            <EuiTextArea
+              value={description}
+              onChange={(e) => onDescriptionChange(e.target.value)}
+              aria-label={txtDescription}
+              disabled={disabled}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
       )}
 
-      <EuiSpacer />
+      <EuiHorizontalRule />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -92,7 +111,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
             iconType="check"
             type="submit"
             data-test-subj="submitButton"
-            disabled={disabled}
+            disabled={disabled || !title}
             isLoading={disabled}
           >
             {txtCreate}
