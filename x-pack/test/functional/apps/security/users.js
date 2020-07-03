@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const config = getService('config');
@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show the default elastic and kibana_system users', async function () {
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
       if (config.get('servers.elasticsearch.hostname') === 'localhost') {
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.Lee.roles).to.eql(['kibana_admin']);
       expect(users.Lee.fullname).to.eql('LeeFirst LeeLast');
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
         save: true,
         roles: [],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.OptionalUser.roles).to.eql(['']);
       expect(users.OptionalUser.fullname).to.eql('');
@@ -77,14 +77,14 @@ export default function ({ getService, getPageObjects }) {
     it('should delete user', async function () {
       const alertMsg = await PageObjects.security.deleteUser('Lee');
       log.debug('alertMsg = %s', alertMsg);
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users).to.not.have.key('Lee');
     });
 
     it('should show the default roles', async function () {
       await PageObjects.security.clickElasticsearchRoles();
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       // This only contains the first page of alphabetically sorted results, so the assertions are only for the first handful of expected roles.
       expect(roles.apm_system.reserved).to.be(true);
