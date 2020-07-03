@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { testRunner } from './runner';
 

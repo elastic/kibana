@@ -12,7 +12,6 @@ import { FtrProviderContext } from './../functional/ftr_provider_context';
 
 export async function testRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
   const es = getService('es');
 
   const reporter = CiStatsReporter.fromEnv(log);
