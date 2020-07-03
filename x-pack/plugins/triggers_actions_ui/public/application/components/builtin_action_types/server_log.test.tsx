@@ -111,7 +111,7 @@ describe('ServerLogParamsFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="loggingLevelSelect"]').first().prop('value')
     ).toStrictEqual('info');
-    expect(wrapper.find('[data-test-subj="loggingMessageInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
   });
 
   test('params validation fails when message is not valid', () => {
