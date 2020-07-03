@@ -295,6 +295,7 @@ export class CreateIndexPatternWizard extends Component<
             goToPreviousStep={this.goToIndexPatternStep}
             createIndexPattern={this.createIndexPattern}
             indexPatternCreationType={this.state.indexPatternCreationType}
+            selectedTimeField={this.state.selectedTimeField}
           />
         </EuiPageContent>
       );

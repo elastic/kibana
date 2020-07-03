@@ -10,21 +10,11 @@ exports[`StatusMessage should render with exact matches 1`] = `
     <span>
        
       <FormattedMessage
-        defaultMessage="Your index pattern matches {strongIndices}."
+        defaultMessage="Your index pattern matches {sourceCount} sources."
         id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
         values={
           Object {
-            "strongIndices": <strong>
-              <FormattedMessage
-                defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
-                id="indexPatternManagement.createIndexPattern.step.status.successLabel.strongIndicesLabel"
-                values={
-                  Object {
-                    "indicesLength": 1,
-                  }
-                }
-              />
-            </strong>,
+            "sourceCount": 1,
           }
         }
       />
@@ -105,14 +95,11 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern can match any of your {strongIndices}, below."
+        defaultMessage="Your index pattern can match any of your {sourceCount} sources below."
         id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {
-            "strongIndices": <strong>
-              2
-               indices
-            </strong>,
+            "sourceCount": 2,
           }
         }
       />

@@ -22,6 +22,8 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const es = getService('legacyEs');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('"Create Index Pattern" wizard', function () {
@@ -47,6 +49,59 @@ export default function ({ getService, getPageObjects }) {
         const isEnabled = await btn.isEnabled();
         expect(isEnabled).to.be.ok();
       });
+    });
+
+    describe('can create data stream index patttern', async () => {
+      es.transport.request({
+        path: '/_index_template/generic-logs',
+        method: 'PUT',
+        body: ```{
+          "index_patterns": ["logs-*", "test_data_stream"],
+          "template": {
+              "mappings" : {
+                  "properties": {
+                      "@timestamp": {
+                          "type": "date"
+                      }
+                  }
+              }
+          },
+          "data_stream": {
+              "timestamp_field": "@timestamp"
+          }
+      }```,
+      });
+
+      es.transport.request({
+        path: '/_data_stream/test_data_stream',
+        method: 'PUT',
+      });
+
+      await PageObjects.settings.setIndexPatternField('test_data_stream');
+      await PageObjects.common.sleep(1000);
+      await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
+      await (await this.getCreateIndexPatternButton()).click();
+      expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
+    });
+
+    describe('can create alias index patttern', async () => {
+      es.transport.request({
+        path: '/blogs/_doc',
+        method: 'POST',
+        body: '{ "user" : "matt", "message" : 20 }',
+      });
+
+      es.transport.request({
+        path: '/_aliases',
+        method: 'POST',
+        body: '{ "actions" : [{ "add" : { "index" : "blogs", "alias" : "alias1" } }]}',
+      });
+
+      await PageObjects.settings.setIndexPatternField('alias1');
+      await PageObjects.common.sleep(1000);
+      await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
+      await (await this.getCreateIndexPatternButton()).click();
+      expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
     });
   });
 }

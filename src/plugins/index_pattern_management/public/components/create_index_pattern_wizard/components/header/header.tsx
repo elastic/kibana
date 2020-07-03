@@ -86,7 +86,7 @@ export const Header = ({
         <p>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.description"
-            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data souces, {star}."
             values={{
               multiple: <strong>multiple</strong>,
               single: <EuiCode>filebeat-4-3-22</EuiCode>,
