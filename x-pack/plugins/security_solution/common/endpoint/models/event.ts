@@ -60,6 +60,24 @@ export function ancestryArray(event: ResolverEvent): string[] | undefined {
   return event.process.Ext.ancestry;
 }
 
+export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {
+  if (!event) {
+    return [];
+  }
+
+  const ancestors = ancestryArray(event);
+  if (ancestors) {
+    return ancestors;
+  }
+
+  const parentID = parentEntityId(event);
+  if (parentID) {
+    return [parentID];
+  }
+
+  return [];
+}
+
 /**
  * @param event The event to get the category for
  */
