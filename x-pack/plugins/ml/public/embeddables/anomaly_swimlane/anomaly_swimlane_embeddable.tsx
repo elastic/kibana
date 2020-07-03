@@ -14,6 +14,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
+  IEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container';
@@ -47,6 +48,10 @@ export interface AnomalySwimlaneEmbeddableCustomInput {
   query: Query;
   refreshConfig: RefreshInterval;
   timeRange: TimeRange;
+}
+
+export interface EditSwimlanePanelContext {
+  embeddable: IEmbeddable<AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableOutput>;
 }
 
 export type AnomalySwimlaneEmbeddableInput = EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput;

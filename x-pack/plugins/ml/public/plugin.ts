@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorState } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -31,6 +31,7 @@ import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+import { MlUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -47,13 +48,30 @@ export interface MlSetupDependencies {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
-  share: SharePluginStart;
+  share: SharePluginSetup;
 }
+
+declare module 'src/plugins/share/public' {
+  export interface UrlGeneratorStateMapping {
+    [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
+  }
+}
+
+export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
+  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+    const baseUrl = core.http.basePath.prepend('/app/ml');
+
+    pluginsSetup.share.urlGenerators.registerUrlGenerator(
+      new MlUrlGenerator({
+        appBasePath: baseUrl,
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -113,6 +131,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
     return {};
   }
+
   public stop() {}
 }
 
