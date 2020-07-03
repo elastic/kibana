@@ -51,11 +51,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('can create data stream index patttern', async () => {
-      es.transport.request({
-        path: '/_index_template/generic-logs',
-        method: 'PUT',
-        body: ```{
+    describe('data streams', () => {
+      it('can be an index pattern', async () => {
+        await es.init();
+        await es.transport.request({
+          path: '/_index_template/generic-logs',
+          method: 'PUT',
+          body: ```{
           "index_patterns": ["logs-*", "test_data_stream"],
           "template": {
               "mappings" : {
@@ -70,38 +72,42 @@ export default function ({ getService, getPageObjects }) {
               "timestamp_field": "@timestamp"
           }
       }```,
-      });
+        });
 
-      es.transport.request({
-        path: '/_data_stream/test_data_stream',
-        method: 'PUT',
-      });
+        await es.transport.request({
+          path: '/_data_stream/test_data_stream',
+          method: 'PUT',
+        });
 
-      await PageObjects.settings.setIndexPatternField('test_data_stream');
-      await PageObjects.common.sleep(1000);
-      await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
-      await (await this.getCreateIndexPatternButton()).click();
-      expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
+        await PageObjects.settings.setIndexPatternField('test_data_stream');
+        await PageObjects.common.sleep(1000);
+        await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
+        await (await this.getCreateIndexPatternButton()).click();
+        expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
+      });
     });
 
-    describe('can create alias index patttern', async () => {
-      es.transport.request({
-        path: '/blogs/_doc',
-        method: 'POST',
-        body: '{ "user" : "matt", "message" : 20 }',
-      });
+    describe('index alias', () => {
+      it('can be an index pattern', async () => {
+        await es.init();
+        await es.transport.request({
+          path: '/blogs/_doc',
+          method: 'POST',
+          body: '{ "user" : "matt", "message" : 20 }',
+        });
 
-      es.transport.request({
-        path: '/_aliases',
-        method: 'POST',
-        body: '{ "actions" : [{ "add" : { "index" : "blogs", "alias" : "alias1" } }]}',
-      });
+        await es.transport.request({
+          path: '/_aliases',
+          method: 'POST',
+          body: '{ "actions" : [{ "add" : { "index" : "blogs", "alias" : "alias1" } }]}',
+        });
 
-      await PageObjects.settings.setIndexPatternField('alias1');
-      await PageObjects.common.sleep(1000);
-      await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
-      await (await this.getCreateIndexPatternButton()).click();
-      expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
+        await PageObjects.settings.setIndexPatternField('alias1');
+        await PageObjects.common.sleep(1000);
+        await (await PageObjects.settings.getCreateIndexPatternGoToStep2Button).click();
+        await (await this.getCreateIndexPatternButton()).click();
+        expect((await browser.getCurrentUrl()).match(/indexPatterns\/.+\?/)).equal(true);
+      });
     });
   });
 }
