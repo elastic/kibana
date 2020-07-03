@@ -64,7 +64,6 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { ALERTS_URL } from '../urls/navigation';
 
-// // Skipped as was causing failures on master
 describe('Detection rules, custom', () => {
   before(() => {
     esArchiverLoad('custom_rule_with_timeline');
