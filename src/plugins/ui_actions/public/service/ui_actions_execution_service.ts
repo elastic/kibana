@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 import { Action } from '../actions';
 import { BaseContext } from '../types';
 import { defer as createDefer, Defer } from '../../../kibana_utils/public';
@@ -83,7 +83,7 @@ export class UiActionsExecutionService {
      */
     setTimeout(() => {
       if (this.pendingTasks.size === 0) {
-        const tasks = uniq(this.batchingQueue, (t) => t.action.id);
+        const tasks = uniqBy(this.batchingQueue, (t) => t.action.id);
         if (tasks.length === 1) {
           this.executeSingleTask(tasks[0]);
         }
