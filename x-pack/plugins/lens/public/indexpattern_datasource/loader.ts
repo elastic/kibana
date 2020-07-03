@@ -96,7 +96,7 @@ export async function loadInitialState({
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
-  const requiredPatterns = _.unique(
+  const requiredPatterns = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
@@ -119,6 +119,7 @@ export async function loadInitialState({
       indexPatternRefs,
       indexPatterns,
       existingFields: {},
+      isFirstExistenceFetch: true,
     };
   }
 
@@ -128,6 +129,7 @@ export async function loadInitialState({
     indexPatterns,
     layers: {},
     existingFields: {},
+    isFirstExistenceFetch: true,
   };
 }
 
@@ -238,13 +240,19 @@ export async function syncExistingFields({
   dateRange,
   fetchJson,
   setState,
+  isFirstExistenceFetch,
+  currentIndexPatternTitle,
   dslQuery,
+  showNoDataPopover,
 }: {
   dateRange: DateRange;
   indexPatterns: Array<{ id: string; timeFieldName?: string | null }>;
   fetchJson: HttpSetup['post'];
   setState: SetState;
+  isFirstExistenceFetch: boolean;
+  currentIndexPatternTitle: string;
   dslQuery: object;
+  showNoDataPopover: () => void;
 }) {
   const emptinessInfo = await Promise.all(
     indexPatterns.map((pattern) => {
@@ -264,8 +272,18 @@ export async function syncExistingFields({
     })
   );
 
+  if (isFirstExistenceFetch) {
+    const fieldsCurrentIndexPattern = emptinessInfo.find(
+      (info) => info.indexPatternTitle === currentIndexPatternTitle
+    );
+    if (fieldsCurrentIndexPattern && fieldsCurrentIndexPattern.existingFieldNames.length === 0) {
+      showNoDataPopover();
+    }
+  }
+
   setState((state) => ({
     ...state,
+    isFirstExistenceFetch: false,
     existingFields: emptinessInfo.reduce((acc, info) => {
       acc[info.indexPatternTitle] = booleanMap(info.existingFieldNames);
       return acc;

@@ -164,13 +164,18 @@ describe('StepAboutRuleComponent', () => {
     wrapper.find('button[data-test-subj="about-continue"]').first().simulate('click').update();
     await wait();
     const expected: Omit<AboutStepRule, 'isNew'> = {
+      author: [],
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
       description: 'Test description text',
       falsePositives: [''],
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: 50,
-      severity: 'low',
+      riskScore: { value: 50, mapping: [] },
+      severity: { value: 'low', mapping: [] },
       tags: [],
       threat: [
         {
@@ -217,13 +222,18 @@ describe('StepAboutRuleComponent', () => {
     wrapper.find('[data-test-subj="about-continue"]').first().simulate('click').update();
     await wait();
     const expected: Omit<AboutStepRule, 'isNew'> = {
+      author: [],
+      isBuildingBlock: false,
+      license: '',
+      ruleNameOverride: '',
+      timestampOverride: '',
       description: 'Test description text',
       falsePositives: [''],
       name: 'Test name text',
       note: '',
       references: [''],
-      riskScore: 80,
-      severity: 'low',
+      riskScore: { value: 80, mapping: [] },
+      severity: { value: 'low', mapping: [] },
       tags: [],
       threat: [
         {
