@@ -437,6 +437,7 @@ export function XYChart({
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
+            stackAsPercentage: seriesType.includes('percentage'),
             timeZone,
             name(d) {
               const splitHint = table.columns.find((col) => col.id === splitAccessor)?.formatHint;
@@ -474,8 +475,10 @@ export function XYChart({
               return <LineSeries key={index} {...seriesProps} />;
             case 'bar':
             case 'bar_stacked':
+            case 'bar_percentage_stacked':
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
+            case 'bar_horizontal_percentage_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             default:
               return <AreaSeries key={index} {...seriesProps} />;

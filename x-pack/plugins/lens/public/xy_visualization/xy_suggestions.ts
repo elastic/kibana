@@ -231,7 +231,7 @@ function getSuggestionsForLayer({
     );
   }
 
-  if (seriesType !== 'line' && splitBy) {
+  if (seriesType !== 'line' && splitBy && !seriesType.includes('percentage')) {
     // flip between stacked/unstacked
     sameStateSuggestions.push(
       buildSuggestion({
@@ -244,6 +244,23 @@ function getSuggestionsForLayer({
           : i18n.translate('xpack.lens.xySuggestions.stackedChartTitle', {
               defaultMessage: 'Stacked',
             }),
+      })
+    );
+  }
+
+  if (
+    seriesType !== 'line' &&
+    seriesType.includes('stacked') &&
+    !seriesType.includes('percentage')
+  ) {
+    // flip between stacked/unstacked
+    sameStateSuggestions.push(
+      buildSuggestion({
+        ...options,
+        seriesType: asPercentageSeriesType(seriesType),
+        title: i18n.translate('xpack.lens.xySuggestions.asPercentageTitle', {
+          defaultMessage: 'Percentage',
+        }),
       })
     );
   }
@@ -275,6 +292,19 @@ function toggleStackSeriesType(oldSeriesType: SeriesType) {
       return 'bar_stacked';
     case 'bar_stacked':
       return 'bar';
+    default:
+      return oldSeriesType;
+  }
+}
+
+function asPercentageSeriesType(oldSeriesType: SeriesType) {
+  switch (oldSeriesType) {
+    case 'area_stacked':
+      return 'area_percentage_stacked';
+    case 'bar_stacked':
+      return 'bar_percentage_stacked';
+    case 'bar_horizontal_stacked':
+      return 'bar_horizontal_percentage_stacked';
     default:
       return oldSeriesType;
   }

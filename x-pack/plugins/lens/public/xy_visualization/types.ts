@@ -134,7 +134,15 @@ export const layerConfig: ExpressionFunctionDefinition<
     },
     seriesType: {
       types: ['string'],
-      options: ['bar', 'line', 'area', 'bar_stacked', 'area_stacked'],
+      options: [
+        'bar',
+        'line',
+        'area',
+        'bar_stacked',
+        'area_stacked',
+        'bar_percentage_stacked',
+        'area_percentage_stacked',
+      ],
       help: 'The type of chart to display.',
     },
     xScaleType: {
@@ -187,8 +195,11 @@ export type SeriesType =
   | 'line'
   | 'area'
   | 'bar_stacked'
+  | 'bar_percentage_stacked'
   | 'bar_horizontal_stacked'
-  | 'area_stacked';
+  | 'bar_horizontal_percentage_stacked'
+  | 'area_stacked'
+  | 'area_percentage_stacked';
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
@@ -258,11 +269,27 @@ export const visualizationTypes: VisualizationType[] = [
     }),
   },
   {
+    id: 'bar_percentage_stacked',
+    icon: 'visBarVerticalStacked',
+    largeIcon: chartBarStackedSVG,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
+      defaultMessage: 'Bar percentage',
+    }),
+  },
+  {
     id: 'bar_horizontal_stacked',
     icon: 'visBarHorizontalStacked',
     largeIcon: chartBarHorizontalStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'Stacked horizontal bar',
+    }),
+  },
+  {
+    id: 'bar_horizontal_percentage_stacked',
+    icon: 'visBarHorizontalStacked',
+    largeIcon: chartBarHorizontalStackedSVG,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
+      defaultMessage: 'Horizontal bar percentage',
     }),
   },
   {
@@ -287,6 +314,14 @@ export const visualizationTypes: VisualizationType[] = [
     largeIcon: chartAreaStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked area',
+    }),
+  },
+  {
+    id: 'area_percentage_stacked',
+    icon: 'visAreaStacked',
+    largeIcon: chartAreaStackedSVG,
+    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
+      defaultMessage: 'Area percentage',
     }),
   },
 ];
