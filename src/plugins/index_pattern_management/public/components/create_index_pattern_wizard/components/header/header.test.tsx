@@ -23,9 +23,7 @@ import { mount } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { mockManagementPlugin } from '../../../../mocks';
 import { DocLinksStart } from 'kibana/public';
-// import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-// links.indexPatterns
 const docLinks = { links: { indexPatterns: {} } } as DocLinksStart;
 
 describe('Header', () => {
