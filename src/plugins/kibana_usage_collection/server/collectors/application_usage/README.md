@@ -24,7 +24,7 @@ The final payload matches the following contract:
 Where `application_ID` matches the `id` registered when calling the method `core.application.register`.
 This collection occurs by default for every application registered via the mentioned method and there is no need to do anything else to enable it or _opt-in_ for your plugin.
 
-**Note to maintainers in the Kibana repo:** At the moment of writing, the `usageCollector.schema` is not updated automatically ([#70622](https://github.com/elastic/kibana/issues/70622)) so, if you are adding a new app to Kibana, you might want to give the Kibana Telemetry team a heads up to update the mappings in the Telemetry Cluster accordingly.
+**Note to maintainers in the Kibana repo:** At the moment of writing, the `usageCollector.schema` is not updated automatically ([#70622](https://github.com/elastic/kibana/issues/70622)) so, if you are adding a new app to Kibana, you'll need to give the Kibana Telemetry team a heads up to update the mappings in the Telemetry Cluster accordingly.
 
 ## Developer notes
 
