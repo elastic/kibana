@@ -63,7 +63,17 @@ export class TagManager {
   }
 
   public setAttachments$(kid: string, tagIds: string[]) {
-    return from(this.params.attachments.set({ kid, tagIds }));
+    const observable = from(this.params.attachments.set({ kid, tagIds })).pipe(share());
+
+    observable.subscribe(({ attachments }) => {
+      const data = this.attachments.add(attachments);
+      this.resources.set(
+        kid,
+        attachments.map(({ id }) => data[id])
+      );
+    });
+
+    return observable;
   }
 
   public useResource(kid: string): TagAttachment[] {
