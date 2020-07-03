@@ -28,6 +28,7 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
 import { Resources } from '../../components/app/resources';
 import { News } from '../../components/app/news';
+import { AlertsSection } from '../../components/app/section/alerts';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -79,11 +80,10 @@ export const OverviewPage = ({ routeParams }: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiHorizontalRule style={{ width: 'auto', margin: '24px -24px' }} />
 
       <EuiFlexGroup>
-        <EuiFlexItem grow={9}>
+        <EuiFlexItem grow={6}>
           <EuiFlexGroup direction="column">
             {hasData?.infra_logs && (
               <EuiFlexItem>
@@ -142,6 +142,10 @@ export const OverviewPage = ({ routeParams }: Props) => {
               </EuiFlexGrid>
             </EuiFlexItem>
           )}
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={3}>
+          <AlertsSection />
         </EuiFlexItem>
 
         <EuiFlexItem grow={1}>

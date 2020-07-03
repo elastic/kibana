@@ -12,9 +12,9 @@ import { ErrorPanel } from './error_panel';
 interface Props {
   title: string;
   subtitle: string;
-  minHeight: number;
   hasError: boolean;
   children: React.ReactNode;
+  minHeight?: number;
   appLink?: string;
 }
 const StyledEuiAccordion = styled(EuiAccordion)`
@@ -68,7 +68,7 @@ export const SectionContainer = ({
            * When a parent container sets min-height its children can't set height:100%
            * https://bugs.webkit.org/show_bug.cgi?id=26559
            */
-          height: '1px',
+          height: minHeight ? '1px' : undefined,
         }}
       >
         <EuiTitle size="xs">

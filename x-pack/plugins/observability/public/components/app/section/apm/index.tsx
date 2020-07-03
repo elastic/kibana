@@ -94,8 +94,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
             theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-            showLegend={true}
-            legendPosition="bottom"
+            showLegend={false}
             xDomain={{ min, max }}
           />
           {series?.transactions.coordinates && (

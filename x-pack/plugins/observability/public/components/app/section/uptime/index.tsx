@@ -104,8 +104,8 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
             theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
-            showLegend
-            legendPosition="bottom"
+            showLegend={false}
+            legendPosition={Position.Right}
             xDomain={{ min, max }}
           />
           <UptimeBarSeries
