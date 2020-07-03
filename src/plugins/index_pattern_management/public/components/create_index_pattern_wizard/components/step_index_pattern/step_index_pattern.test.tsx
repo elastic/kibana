@@ -242,22 +242,16 @@ describe('StepIndexPattern', () => {
       },
     };
 
-    expect(canPreselectTimeField([index]).canPreselect).toEqual(false);
-    expect(canPreselectTimeField([alias]).canPreselect).toEqual(false);
-    expect(canPreselectTimeField([index, alias, dataStream1]).canPreselect).toEqual(false);
+    expect(canPreselectTimeField([index])).toEqual(undefined);
+    expect(canPreselectTimeField([alias])).toEqual(undefined);
+    expect(canPreselectTimeField([index, alias, dataStream1])).toEqual(undefined);
 
-    expect(canPreselectTimeField([dataStream1])).toEqual({
-      canPreselect: true,
-      timeFieldName: 'timestamp_field',
-    });
+    expect(canPreselectTimeField([dataStream1])).toEqual('timestamp_field');
 
-    expect(canPreselectTimeField([dataStream1, dataStream2])).toEqual({
-      canPreselect: true,
-      timeFieldName: 'timestamp_field',
-    });
+    expect(canPreselectTimeField([dataStream1, dataStream2])).toEqual('timestamp_field');
 
-    expect(
-      canPreselectTimeField([dataStream1, dataStream2, differentDataStream]).canPreselect
-    ).toEqual(false);
+    expect(canPreselectTimeField([dataStream1, dataStream2, differentDataStream])).toEqual(
+      undefined
+    );
   });
 });

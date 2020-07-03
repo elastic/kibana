@@ -62,8 +62,8 @@ interface StepIndexPatternState {
   indexPatternName: string;
 }
 
-export const canPreselectTimeField = (indices: MatchedItem[]) =>
-  indices.reduce(
+export const canPreselectTimeField = (indices: MatchedItem[]) => {
+  const preselectStatus = indices.reduce(
     (
       { canPreselect, timeFieldName }: { canPreselect: boolean; timeFieldName?: string },
       matchedItem
@@ -84,6 +84,9 @@ export const canPreselectTimeField = (indices: MatchedItem[]) =>
       timeFieldName: undefined,
     }
   );
+
+  return preselectStatus.canPreselect ? preselectStatus.timeFieldName : undefined;
+};
 
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
@@ -330,9 +333,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const isInputInvalid = showingIndexPatternQueryErrors && containsErrors && errors.length > 0;
     const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
-    // if all are data streams with same time field then create index pattern
-    const { canPreselect, timeFieldName: matchingTimestamp } = canPreselectTimeField(indices);
-
     return (
       <Header
         data-test-subj="createIndexPatternStep1Header"
@@ -341,7 +341,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={() => goToNextStep(query, canPreselect ? matchingTimestamp : undefined)}
+        goToNextStep={() => goToNextStep(query, canPreselectTimeField(indices))}
         isNextStepDisabled={isNextStepDisabled}
       />
     );
