@@ -24,8 +24,7 @@ export default function ({ getService }) {
     updateTemplate,
   } = registerHelpers({ supertest });
 
-  // blocking es snapshot promotion: https://github.com/elastic/kibana/issues/70532
-  describe.skip('index templates', () => {
+  describe('index templates', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('get all', () => {
@@ -41,8 +40,9 @@ export default function ({ getService }) {
       it('should list all the index templates with the expected parameters', async () => {
         const { body: allTemplates } = await getAllTemplates().expect(200);
 
-        // Composable templates
-        expect(allTemplates.templates).to.eql([]);
+        // Composable index templates may have been created by other apps, e.g. Ingest Manager,
+        // so we don't make any assertion about these contents.
+        expect(allTemplates.templates).to.be.an('array');
 
         // Legacy templates
         const legacyTemplate = allTemplates.legacyTemplates.find(
