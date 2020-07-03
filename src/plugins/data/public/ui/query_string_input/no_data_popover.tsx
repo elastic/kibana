@@ -66,8 +66,8 @@ export function NoDataPopover({
       step={1}
       stepsTotal={1}
       isStepOpen={noDataPopoverVisible}
-      subtitle={i18n.translate('data.noDataPopover.title', { defaultMessage: 'Tip' })}
-      title=""
+      subtitle={i18n.translate('data.noDataPopover.subtitle', { defaultMessage: 'Tip' })}
+      title={i18n.translate('data.noDataPopover.title', { defaultMessage: 'Empty dataset' })}
       footerAction={
         <EuiButtonEmpty
           size="xs"
