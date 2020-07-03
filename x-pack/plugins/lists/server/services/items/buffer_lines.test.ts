@@ -84,4 +84,66 @@ describe('buffer_lines', () => {
       done();
     });
   });
+
+  test('it can read an example multi-part message', (done) => {
+    const input = new TestReadable();
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
+    input.push('127.0.0.1\n');
+    input.push('127.0.0.2\n');
+    input.push('127.0.0.3\n');
+    input.push('\n');
+    input.push('--boundary--\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ input });
+    let linesToTest: string[] = [];
+    bufferedLine.on('lines', (lines: string[]) => {
+      linesToTest = [...linesToTest, ...lines];
+    });
+    bufferedLine.on('close', () => {
+      expect(linesToTest).toEqual(['127.0.0.1', '127.0.0.2', '127.0.0.3']);
+      done();
+    });
+  });
+
+  test('it can read an empty multi-part message', (done) => {
+    const input = new TestReadable();
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
+    input.push('\n');
+    input.push('--boundary--\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ input });
+    let linesToTest: string[] = [];
+    bufferedLine.on('lines', (lines: string[]) => {
+      linesToTest = [...linesToTest, ...lines];
+    });
+    bufferedLine.on('close', () => {
+      expect(linesToTest).toEqual([]);
+      done();
+    });
+  });
+
+  test('it can read a fileName from a multipart message', (done) => {
+    const input = new TestReadable();
+    input.push('--boundary\n');
+    input.push('Content-type: text/plain\n');
+    input.push('Content-Disposition: form-data; name="fieldName"; filename="filename.text"\n');
+    input.push('\n');
+    input.push('--boundary--\n');
+    input.push(null);
+    const bufferedLine = new BufferLines({ input });
+    let fileNameToTest: string;
+    bufferedLine.on('fileName', (fileName: string) => {
+      fileNameToTest = fileName;
+    });
+    bufferedLine.on('close', () => {
+      expect(fileNameToTest).toEqual('filename.text');
+      done();
+    });
+  });
 });

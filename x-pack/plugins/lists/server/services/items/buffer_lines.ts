@@ -68,7 +68,7 @@ export class BufferLines extends Readable {
     return this;
   }
 
-  public emptyBuffer(): void {
+  private emptyBuffer(): void {
     const arrayFromSet = Array.from(this.set);
     if (arrayFromSet.length === 0) {
       this.emit('lines', []);
