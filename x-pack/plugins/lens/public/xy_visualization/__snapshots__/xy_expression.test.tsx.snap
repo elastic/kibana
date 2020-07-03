@@ -54,6 +54,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-a"
     key="0-0"
@@ -93,6 +98,11 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-b"
     key="0-1"
@@ -402,6 +412,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-a"
     key="0-0"
@@ -441,6 +456,11 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       ]
     }
     enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
     groupId="left"
     id="d-b"
     key="0-1"
