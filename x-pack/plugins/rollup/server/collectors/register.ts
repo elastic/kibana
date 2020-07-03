@@ -12,8 +12,6 @@ interface IdToFlagMap {
   [key: string]: boolean;
 }
 
-const ROLLUP_USAGE_TYPE = 'rollups';
-
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
 
@@ -50,7 +48,7 @@ async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: CallCl
 
   const esResponse = await callCluster('search', searchParams);
 
-  return get(esResponse, 'hits.hits', []).map((indexPattern) => {
+  return get(esResponse, 'hits.hits', []).map((indexPattern: any) => {
     const { _id: savedObjectId } = indexPattern;
     return getIdFromSavedObjectId(savedObjectId);
   });
@@ -83,7 +81,7 @@ async function fetchRollupSavedSearches(
   const savedSearches = get(esResponse, 'hits.hits', []);
 
   // Filter for ones with rollup index patterns.
-  return savedSearches.reduce((rollupSavedSearches, savedSearch) => {
+  return savedSearches.reduce((rollupSavedSearches: any, savedSearch: any) => {
     const {
       _id: savedObjectId,
       _source: {
@@ -138,7 +136,7 @@ async function fetchRollupVisualizations(
   let rollupVisualizations = 0;
   let rollupVisualizationsFromSavedSearches = 0;
 
-  visualizations.forEach((visualization) => {
+  visualizations.forEach((visualization: any) => {
     const {
       _source: {
         visualization: {
@@ -153,7 +151,7 @@ async function fetchRollupVisualizations(
 
     if (savedSearchRefName) {
       // This visualization depends upon a saved search.
-      const savedSearch = references.find((ref) => ref.name === savedSearchRefName);
+      const savedSearch = references.find((ref: any) => ref.name === savedSearchRefName);
       if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
         rollupVisualizations++;
         rollupVisualizationsFromSavedSearches++;
@@ -174,13 +172,42 @@ async function fetchRollupVisualizations(
   };
 }
 
+interface Usage {
+  index_patterns: {
+    total: number;
+  };
+  saved_searches: {
+    total: number;
+  };
+  visualizations: {
+    total: number;
+    saved_searches: {
+      total: number;
+    };
+  };
+}
+
 export function registerRollupUsageCollector(
   usageCollection: UsageCollectionSetup,
   kibanaIndex: string
 ): void {
-  const collector = usageCollection.makeUsageCollector({
-    type: ROLLUP_USAGE_TYPE,
+  const collector = usageCollection.makeUsageCollector<Usage>({
+    type: 'rollups',
     isReady: () => true,
+    schema: {
+      index_patterns: {
+        total: { type: 'long' },
+      },
+      saved_searches: {
+        total: { type: 'long' },
+      },
+      visualizations: {
+        saved_searches: {
+          total: { type: 'long' },
+        },
+        total: { type: 'long' },
+      },
+    },
     fetch: async (callCluster: CallCluster) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);

@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
@@ -201,7 +201,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
+    return orderBy(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {

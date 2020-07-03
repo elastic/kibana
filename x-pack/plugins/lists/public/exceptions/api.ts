@@ -176,7 +176,7 @@ export const updateExceptionListItem = async ({
 
   if (validatedRequest != null) {
     try {
-      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_URL, {
+      const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         body: JSON.stringify(listItem),
         method: 'PUT',
         signal,

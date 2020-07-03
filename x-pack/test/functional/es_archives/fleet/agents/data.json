@@ -212,16 +212,15 @@
         "namespace": "default",
         "description": "Config 1",
         "status": "active",
-        "datasources": [],
+        "package_configs": [],
         "is_default": true,
         "monitoring_enabled": [
           "logs",
           "metrics"
         ],
         "revision": 2,
-        "updated_on": "2020-05-07T19:34:42.533Z",
-        "updated_by": "system",
-        "id": "config1"
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
       }
     }
   }

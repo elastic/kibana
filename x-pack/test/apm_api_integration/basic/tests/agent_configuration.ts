@@ -8,13 +8,13 @@ import expect from '@kbn/expect';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestRead = getService('supertestAsApmReadUser');
+  const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
 
   function searchConfigurations(configuration: any) {
-    return supertest
+    return supertestRead
       .post(`/api/apm/settings/agent-configuration/search`)
       .send(configuration)
       .set('kbn-xsrf', 'foo');
@@ -22,7 +22,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   async function createConfiguration(config: AgentConfigurationIntake) {
     log.debug('creating configuration', config.service);
-    const res = await supertest
+    const res = await supertestWrite
       .put(`/api/apm/settings/agent-configuration`)
       .send(config)
       .set('kbn-xsrf', 'foo');
@@ -34,7 +34,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   async function updateConfiguration(config: AgentConfigurationIntake) {
     log.debug('updating configuration', config.service);
-    const res = await supertest
+    const res = await supertestWrite
       .put(`/api/apm/settings/agent-configuration?overwrite=true`)
       .send(config)
       .set('kbn-xsrf', 'foo');
@@ -46,7 +46,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   async function deleteConfiguration({ service }: AgentConfigurationIntake) {
     log.debug('deleting configuration', service);
-    const res = await supertest
+    const res = await supertestWrite
       .delete(`/api/apm/settings/agent-configuration`)
       .send({ service })
       .set('kbn-xsrf', 'foo');

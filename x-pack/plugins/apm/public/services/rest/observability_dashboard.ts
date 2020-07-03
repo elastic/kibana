@@ -5,12 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { sum } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FetchDataParams } from '../../../../observability/public/data_handler';
-import { ApmFetchDataResponse } from '../../../../observability/public/typings/fetch_data_response';
+import { mean } from 'lodash';
+import { Theme } from '@kbn/ui-shared-deps/theme';
+import {
+  ApmFetchDataResponse,
+  FetchDataParams,
+} from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
-import { Theme } from '../../utils/get_theme';
 
 interface Options {
   theme: Theme;
@@ -47,7 +48,12 @@ export const fetchLandingPageData = async (
           'xpack.apm.observabilityDashboard.stats.transactions',
           { defaultMessage: 'Transactions' }
         ),
-        value: sum(transactionCoordinates.map((coordinates) => coordinates.y)),
+        value:
+          mean(
+            transactionCoordinates
+              .map(({ y }) => y)
+              .filter((y) => y && isFinite(y))
+          ) || 0,
         color: theme.euiColorVis1,
       },
     },

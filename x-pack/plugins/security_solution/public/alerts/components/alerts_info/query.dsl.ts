@@ -10,6 +10,7 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
       bool: { should: [{ match: { 'signal.status': 'open' } }], minimum_should_match: 1 },
     },
   ];
+
   return {
     aggs: {
       lastSeen: { max: { field: '@timestamp' } },
@@ -30,7 +31,7 @@ export const buildLastAlertsQuery = (ruleId: string | undefined | null) => {
             : queryFilter,
       },
     },
-    size: 0,
+    size: 1,
     track_total_hits: true,
   };
 };

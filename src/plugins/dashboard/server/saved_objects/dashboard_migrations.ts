@@ -111,7 +111,7 @@ export const dashboardSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn<any, any>>(migrateMatchAllQuery),
-  '7.0.0': flow<SavedObjectMigrationFn<any, DashboardDoc700To720['attributes']>>(migrations700),
-  '7.3.0': flow<SavedObjectMigrationFn<any, any>>(migrations730),
+  '6.7.2': flow(migrateMatchAllQuery),
+  '7.0.0': flow(migrations700),
+  '7.3.0': flow(migrations730),
 };

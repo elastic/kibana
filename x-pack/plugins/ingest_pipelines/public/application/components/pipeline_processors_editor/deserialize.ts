@@ -22,12 +22,16 @@ const getProcessorType = (processor: Processor): string => {
    * See the definition of {@link ProcessorInternal} for why this works to extract the
    * processor type.
    */
-  return Object.keys(processor)[0]!;
+  const type: unknown = Object.keys(processor)[0];
+  if (typeof type !== 'string') {
+    throw new Error(`Invalid processor type. Received "${type}"`);
+  }
+  return type;
 };
 
 const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInternal => {
   const type = getProcessorType(processor);
-  const { on_failure: originalOnFailure, ...options } = processor[type];
+  const { on_failure: originalOnFailure, ...options } = processor[type] ?? {};
   const onFailure = originalOnFailure?.length
     ? convertProcessors(originalOnFailure)
     : (originalOnFailure as ProcessorInternal[] | undefined);
