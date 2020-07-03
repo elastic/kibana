@@ -3,22 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { EuiHorizontalRule } from '@elastic/eui';
 import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
+import { News } from '../../components/app/news';
+import { Resources } from '../../components/app/resources';
+import { AlertsSection } from '../../components/app/section/alerts';
 import { APMSection } from '../../components/app/section/apm';
 import { LogsSection } from '../../components/app/section/logs';
 import { MetricsSection } from '../../components/app/section/metrics';
 import { UptimeSection } from '../../components/app/section/uptime';
-import {
-  DatePicker,
-  TimePickerTime,
-  TimePickerRefreshInterval,
-} from '../../components/shared/data_picker';
+import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { fetchHasData } from '../../data_handler';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { UI_SETTINGS, useKibanaUISettings } from '../../hooks/use_kibana_ui_settings';
@@ -26,9 +24,6 @@ import { RouteParams } from '../../routes';
 import { getParsedDate } from '../../utils/date';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { emptySections } from './emptySection';
-import { Resources } from '../../components/app/resources';
-import { News } from '../../components/app/news';
-import { AlertsSection } from '../../components/app/section/alerts';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
@@ -40,15 +35,12 @@ export const OverviewPage = ({ routeParams }: Props) => {
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-  const timePickerRefreshInterval = useKibanaUISettings<TimePickerRefreshInterval>(
-    UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS
-  );
 
   const {
     rangeFrom = timePickerTime.from,
     rangeTo = timePickerTime.to,
-    refreshInterval = timePickerRefreshInterval.value,
-    refreshPaused = timePickerRefreshInterval.pause,
+    refreshInterval = 15000,
+    refreshPaused = true,
   } = routeParams.query;
 
   const startTime = getParsedDate(rangeFrom);

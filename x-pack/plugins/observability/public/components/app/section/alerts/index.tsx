@@ -72,9 +72,9 @@ export const AlertsSection = () => {
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{alert.alertTypeId}</EuiBadge>
                 </EuiFlexItem>
-                {alert.tags.map((tag, index) => {
+                {alert.tags.map((tag, idx) => {
                   return (
-                    <EuiFlexItem key={index} grow={false}>
+                    <EuiFlexItem key={idx} grow={false}>
                       <EuiBadge color="default">{tag}</EuiBadge>
                     </EuiFlexItem>
                   );
