@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Feature, GeoJsonProperties } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { IVectorSource } from '../../sources/vector_source';
 import {
@@ -17,6 +18,7 @@ import { IJoin } from '../../joins/join';
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type VectorLayerArguments = {
   source: IVectorSource;
@@ -31,6 +33,8 @@ export interface IVectorLayer extends ILayer {
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
   getStyle(): IVectorStyle;
+  getFeatureById(id: string | number): Feature | null;
+  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -75,4 +79,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
   getStyle(): IVectorStyle;
+  getFeatureById(id: string | number): Feature | null;
+  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
