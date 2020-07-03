@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -16,6 +17,11 @@ import {
   EuiPopover,
   EuiText,
   htmlIdGenerator,
+  EuiForm,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
@@ -23,7 +29,7 @@ import {
   VisualizationToolbarProps,
 } from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
-import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
 
@@ -156,70 +162,176 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 }
 const idPrefix = htmlIdGenerator()();
 
-export function DimensionEditor({
-  state,
-  setState,
-  layerId,
-  accessor,
-}: VisualizationDimensionEditorProps<State>) {
+export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
+  const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
   const axisMode =
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
+
+  return (
+    <EuiForm>
+      <ColorPicker {...props} />
+
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Axis side',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Axis side',
+          })}
+          name="axisSide"
+          buttonSize="compressed"
+          className="eui-displayInlineBlock"
+          options={[
+            {
+              id: `${idPrefix}auto`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
+                defaultMessage: 'Auto',
+              }),
+            },
+            {
+              id: `${idPrefix}left`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
+                defaultMessage: 'Left',
+              }),
+            },
+            {
+              id: `${idPrefix}right`,
+              label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
+                defaultMessage: 'Right',
+              }),
+            },
+          ]}
+          idSelected={`${idPrefix}${axisMode}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as YAxisMode;
+            const newYAxisConfigs = [...(layer.yConfig || [])];
+            const existingIndex = newYAxisConfigs.findIndex(
+              (yAxisConfig) => yAxisConfig.forAccessor === accessor
+            );
+            if (existingIndex !== -1) {
+              newYAxisConfigs[existingIndex].axisMode = newMode;
+            } else {
+              newYAxisConfigs.push({
+                forAccessor: accessor,
+                axisMode: newMode,
+              });
+            }
+            setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
+          }}
+        />
+      </EuiFormRow>
+    </EuiForm>
+  );
+}
+
+const tooltipContent = {
+  auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
+    defaultMessage: 'Lens automatically picks colors for you unless you specify a custom color.',
+  }),
+  custom: i18n.translate('xpack.lens.configPanel.color.tooltip.custom', {
+    defaultMessage: 'Clear the custom color to return to “Auto” mode.',
+  }),
+  disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
+    defaultMessage:
+      'Individual series cannot be custom colored when the layer includes a “Break down by“',
+  }),
+};
+
+const ColorPicker = ({
+  state,
+  setState,
+  layerId,
+  accessor,
+}: VisualizationDimensionEditorProps<State>) => {
+  const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index];
+  const disabled = !!layer.splitAccessor;
+
+  const [color, setColor] = useState(getSeriesColor(layer, accessor));
+
+  const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
+    setColor(text);
+    if (output.isValid || text === '') {
+      updateColorInState(text, output);
+    }
+  };
+
+  const updateColorInState: EuiColorPickerProps['onChange'] = React.useMemo(
+    () =>
+      debounce((text, output) => {
+        const newYConfigs = [...(layer.yConfig || [])];
+        const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
+        if (existingIndex !== -1) {
+          if (text === '') {
+            delete newYConfigs[existingIndex].color;
+          } else {
+            newYConfigs[existingIndex].color = output.hex;
+          }
+        } else {
+          newYConfigs.push({
+            forAccessor: accessor,
+            color: output.hex,
+          });
+        }
+        setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+      }, 256),
+    [state, layer, accessor, index]
+  );
+
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-        defaultMessage: 'Axis side',
-      })}
+      fullWidth
+      label={
+        <EuiToolTip
+          delay="long"
+          position="top"
+          content={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+        >
+          <span>
+            {i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+              defaultMessage: 'Series color',
+            })}{' '}
+            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      }
     >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
-          defaultMessage: 'Axis side',
-        })}
-        name="axisSide"
-        buttonSize="compressed"
-        className="eui-displayInlineBlock"
-        options={[
-          {
-            id: `${idPrefix}auto`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
-              defaultMessage: 'Auto',
-            }),
-          },
-          {
-            id: `${idPrefix}left`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.left', {
-              defaultMessage: 'Left',
-            }),
-          },
-          {
-            id: `${idPrefix}right`,
-            label: i18n.translate('xpack.lens.xyChart.axisSide.right', {
-              defaultMessage: 'Right',
-            }),
-          },
-        ]}
-        idSelected={`${idPrefix}${axisMode}`}
-        onChange={(id) => {
-          const newMode = id.replace(idPrefix, '') as YAxisMode;
-          const newYAxisConfigs = [...(layer.yConfig || [])];
-          const existingIndex = newYAxisConfigs.findIndex(
-            (yAxisConfig) => yAxisConfig.forAccessor === accessor
-          );
-          if (existingIndex !== -1) {
-            newYAxisConfigs[existingIndex].axisMode = newMode;
-          } else {
-            newYAxisConfigs.push({
-              forAccessor: accessor,
-              axisMode: newMode,
-            });
-          }
-          setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
-        }}
-      />
+      {disabled ? (
+        <EuiToolTip
+          position="top"
+          content={tooltipContent.disabled}
+          delay="long"
+          anchorClassName="eui-displayBlock"
+        >
+          <EuiColorPicker
+            compressed
+            onChange={handleColor}
+            color=""
+            disabled
+            aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+              defaultMessage: 'Series color',
+            })}
+          />
+        </EuiToolTip>
+      ) : (
+        <EuiColorPicker
+          compressed
+          onChange={handleColor}
+          color={color}
+          aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+            defaultMessage: 'Series color',
+          })}
+        />
+      )}
     </EuiFormRow>
   );
-}
+};
