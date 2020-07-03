@@ -116,9 +116,15 @@ interface StartDependencies {
   savedObjects: SavedObjectsStart;
 }
 
+export type TagPickerType = React.ComponentType<{
+  selected: string[];
+  onChange: (selected: string[]) => void;
+}>;
+
 export interface DashboardSetup {
   setRenderBeforeDashboard: (renderer: (dashboard: DashboardContainer) => React.ReactNode) => void;
   setRenderTags: (renderer: (kid: string) => React.ReactNode) => void;
+  setTagPicker: (TagPicker: TagPickerType) => void;
 }
 
 export interface DashboardStart {
@@ -155,6 +161,8 @@ export class DashboardPlugin
     this.renderBeforeDashboard;
 
   private renderTags: (kid: string) => React.ReactNode = (kid) => kid;
+
+  private TagPicker: TagPickerType = () => null;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -309,6 +317,7 @@ export class DashboardPlugin
           restorePreviousUrl,
           renderBeforeDashboard: this.renderBeforeDashboard,
           renderTags: this.renderTags,
+          getTagPicker: () => this.TagPicker,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -374,6 +383,9 @@ export class DashboardPlugin
       },
       setRenderTags: (renderer) => {
         this.renderTags = renderer;
+      },
+      setTagPicker: (TagPicker) => {
+        this.TagPicker = TagPicker;
       },
     };
   }

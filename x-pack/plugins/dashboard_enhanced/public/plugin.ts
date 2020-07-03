@@ -59,6 +59,7 @@ export class DashboardEnhancedPlugin
     );
 
     plugins.dashboard.setRenderTags((kid) => h(plugins.tags.ui.TagList, { kid }));
+    plugins.dashboard.setTagPicker(plugins.tags.ui.TagPicker);
 
     return {};
   }

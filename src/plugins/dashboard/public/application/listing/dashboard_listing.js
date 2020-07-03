@@ -42,6 +42,7 @@ export class DashboardListing extends React.Component {
     return (
       <I18nProvider>
         <TableListView
+          TagPicker={this.props.tagPicker}
           headingId="dashboardListingHeading"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
           findItems={this.props.findItems}
@@ -63,6 +64,9 @@ export class DashboardListing extends React.Component {
           })}
           toastNotifications={this.props.core.notifications.toasts}
           uiSettings={this.props.core.uiSettings}
+          onTags={() => {
+            // console.log('tags', tags);
+          }}
         />
       </I18nProvider>
     );
@@ -189,6 +193,7 @@ export class DashboardListing extends React.Component {
 DashboardListing.propTypes = {
   renderTags: PropTypes.func.isRequired,
   createItem: PropTypes.func.isRequired,
+  tagPicker: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,

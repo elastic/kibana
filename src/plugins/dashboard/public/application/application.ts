@@ -48,6 +48,7 @@ import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
 import { DashboardContainer } from './embeddable';
+import { TagPickerType } from '../plugin';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -77,6 +78,7 @@ export interface RenderDeps {
   restorePreviousUrl: () => void;
   renderBeforeDashboard: (dashboard: DashboardContainer) => React.ReactNode;
   renderTags: (kid: string) => React.ReactNode;
+  getTagPicker: () => TagPickerType;
 }
 
 let angularModuleInstance: IModule | null = null;

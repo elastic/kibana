@@ -42,6 +42,7 @@ export function initDashboardApp(app, deps) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
       ['renderTags', { watchDepth: 'reference' }],
+      ['tagPicker', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
       ['getViewUrl', { watchDepth: 'reference' }],
       ['editItem', { watchDepth: 'reference' }],
@@ -143,6 +144,7 @@ export function initDashboardApp(app, deps) {
             const kid = `kid:::so:saved_objects/dashboard/${data.id}`;
             return deps.renderTags(kid);
           };
+          $scope.tagPicker = deps.getTagPicker();
 
           $scope.$on('$destroy', () => {
             stopSyncingQueryServiceStateWithUrl();

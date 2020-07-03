@@ -70,6 +70,8 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  TagPicker?: React.FC<{ selected: string[]; onChange: (selected: string[]) => void }>;
+  onTags: (tags: string[]) => void;
 }
 
 export interface TableListViewState {
@@ -83,6 +85,7 @@ export interface TableListViewState {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  tags: string[];
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -112,6 +115,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      tags: [],
     };
   }
 
@@ -459,18 +463,30 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       />
     );
     return (
-      <EuiInMemoryTable
-        itemId="id"
-        items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
-        pagination={this.pagination}
-        loading={this.state.isFetchingItems}
-        message={noItemsMessage}
-        selection={selection}
-        search={search}
-        sorting={true}
-        data-test-subj="itemsInMemTable"
-      />
+      <>
+        {!!this.props.TagPicker && (
+          <this.props.TagPicker
+            selected={this.state.tags}
+            onChange={(tags) => {
+              this.setState({ tags }, () => {
+                if (this.props.onTags) this.props.onTags(this.state.tags);
+              });
+            }}
+          />
+        )}
+        <EuiInMemoryTable
+          itemId="id"
+          items={this.state.items}
+          columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+          pagination={this.pagination}
+          loading={this.state.isFetchingItems}
+          message={noItemsMessage}
+          selection={selection}
+          search={search}
+          sorting={true}
+          data-test-subj="itemsInMemTable"
+        />
+      </>
     );
   }
 
