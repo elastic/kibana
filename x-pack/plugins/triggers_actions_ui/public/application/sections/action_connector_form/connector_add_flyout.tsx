@@ -117,6 +117,7 @@ export const ConnectorAddFlyout = ({
         actionTypeRegistry={actionTypeRegistry}
         http={http}
         docLinks={docLinks}
+        capabilities={capabilities}
       />
     );
   }
