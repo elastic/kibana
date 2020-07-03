@@ -89,7 +89,7 @@ export interface DashboardContainerOptions {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
-  getRenderBeforeDashboard: () => () => React.ReactNode;
+  getRenderBeforeDashboard: () => (dashboard: DashboardContainer) => React.ReactNode;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;

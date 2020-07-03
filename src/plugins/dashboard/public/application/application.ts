@@ -47,6 +47,7 @@ import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/pub
 import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
+import { DashboardContainer } from './embeddable';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -74,7 +75,8 @@ export interface RenderDeps {
   scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
   restorePreviousUrl: () => void;
-  renderBeforeDashboard: () => React.ReactNode;
+  renderBeforeDashboard: (dashboard: DashboardContainer) => React.ReactNode;
+  renderTags: (kid: string) => React.ReactNode;
 }
 
 let angularModuleInstance: IModule | null = null;

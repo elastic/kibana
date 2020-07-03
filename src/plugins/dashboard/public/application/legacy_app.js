@@ -41,6 +41,7 @@ export function initDashboardApp(app, deps) {
   app.directive('dashboardListing', function (reactDirective) {
     return reactDirective(DashboardListing, [
       ['core', { watchDepth: 'reference' }],
+      ['renderTags', { watchDepth: 'reference' }],
       ['createItem', { watchDepth: 'reference' }],
       ['getViewUrl', { watchDepth: 'reference' }],
       ['editItem', { watchDepth: 'reference' }],
@@ -137,6 +138,11 @@ export function initDashboardApp(app, deps) {
           ]);
           addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
           $scope.core = deps.core;
+
+          $scope.renderTags = (data) => {
+            const kid = `kid:::so:saved_objects/dashboard/${data.id}`;
+            return deps.renderTags(kid);
+          };
 
           $scope.$on('$destroy', () => {
             stopSyncingQueryServiceStateWithUrl();

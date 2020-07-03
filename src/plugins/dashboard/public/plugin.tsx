@@ -118,6 +118,7 @@ interface StartDependencies {
 
 export interface DashboardSetup {
   setRenderBeforeDashboard: (renderer: (dashboard: DashboardContainer) => React.ReactNode) => void;
+  setRenderTags: (renderer: (kid: string) => React.ReactNode) => void;
 }
 
 export interface DashboardStart {
@@ -152,6 +153,8 @@ export class DashboardPlugin
   private renderBeforeDashboard: (dashboard: DashboardContainer) => React.ReactNode = () => null;
   private getRenderBeforeDashboard: () => (dashboard: DashboardContainer) => React.ReactNode = () =>
     this.renderBeforeDashboard;
+
+  private renderTags: (kid: string) => React.ReactNode = (kid) => kid + ' dfdfdfdfdfdf';
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -305,6 +308,7 @@ export class DashboardPlugin
           savedObjects,
           restorePreviousUrl,
           renderBeforeDashboard: this.renderBeforeDashboard,
+          renderTags: this.renderTags,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -367,6 +371,9 @@ export class DashboardPlugin
     return {
       setRenderBeforeDashboard: (renderer) => {
         this.renderBeforeDashboard = renderer;
+      },
+      setRenderTags: (renderer) => {
+        this.renderTags = renderer;
       },
     };
   }

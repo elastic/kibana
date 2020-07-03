@@ -38,6 +38,10 @@ export interface TagsPluginSetup {
   tags: TagsServiceSetup;
   ui: {
     Provider: React.ComponentType;
+    Tag: React.ComponentType<TagProps>;
+    TagList: React.ComponentType<TagListProps>;
+    TagPicker: React.ComponentType<TagPickerProps>;
+    TagListEditable: React.ComponentType<TagListEditableProps>;
   };
 }
 
@@ -101,6 +105,10 @@ export class TagsPlugin
       tags,
       ui: {
         Provider,
+        Tag: (props) => h(Provider, {}, h(Tag, props)),
+        TagList: (props) => h(Provider, {}, h(TagList, props)),
+        TagPicker: (props) => h(Provider, {}, h(TagPicker, props)),
+        TagListEditable: (props) => h(Provider, {}, h(TagListEditable, props)),
       },
     };
   }

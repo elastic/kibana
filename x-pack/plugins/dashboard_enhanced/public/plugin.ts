@@ -11,7 +11,7 @@ import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embedd
 import { DashboardDrilldownsService } from './services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../ui_actions_enhanced/public';
-import { TagsPluginSetup, TagsPluginStart, TagListEditable } from '../../tags/public';
+import { TagsPluginSetup, TagsPluginStart } from '../../tags/public';
 import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
@@ -50,15 +50,15 @@ export class DashboardEnhancedPlugin
 
     plugins.dashboard.setRenderBeforeDashboard((dashboard) =>
       h(
-        plugins.tags.ui.Provider,
-        {},
-        h(
-          'div',
-          { style: { padding: 8 } },
-          h(TagListEditable, { kid: `kid:::so:saved_objects/dashboard/${dashboard.getInput().id}` })
-        )
+        'div',
+        { style: { padding: 8 } },
+        h(plugins.tags.ui.TagListEditable, {
+          kid: `kid:::so:saved_objects/dashboard/${dashboard.getInput().id}`,
+        })
       )
     );
+
+    plugins.dashboard.setRenderTags((kid) => h(plugins.tags.ui.TagList, { kid }));
 
     return {};
   }

@@ -174,12 +174,20 @@ export class DashboardListing extends React.Component {
         dataType: 'string',
         sortable: true,
       },
+      {
+        name: 'Tags',
+        sortable: false,
+        render: (data) => {
+          return this.props.renderTags(data);
+        },
+      },
     ];
     return tableColumns;
   }
 }
 
 DashboardListing.propTypes = {
+  renderTags: PropTypes.func.isRequired,
   createItem: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
