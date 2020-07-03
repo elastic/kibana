@@ -63,6 +63,12 @@ export function createSavedDashboardClass(
       timeRestore: 'boolean',
       timeTo: 'keyword',
       timeFrom: 'keyword',
+      _tags: {
+        type: 'object',
+        properties: {
+          tagId: { type: 'keyword' },
+        },
+      },
       refreshInterval: {
         type: 'object',
         properties: {

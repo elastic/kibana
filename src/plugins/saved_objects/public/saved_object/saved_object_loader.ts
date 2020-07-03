@@ -129,11 +129,11 @@ export class SavedObjectLoader {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
         type: this.lowercaseType,
-        search: search ? `${search}*` : undefined,
+        search: search ? `${search}` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+        searchFields: ['title^3', 'description', '_tags.tagId'],
+        // defaultSearchOperator: 'AND',
         fields,
       } as SavedObjectsFindOptions)
       .then((resp) => {

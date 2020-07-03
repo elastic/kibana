@@ -29,6 +29,7 @@ import {
   validatePage,
 } from '../util/validators';
 import { TagsClient } from '../tags';
+import { parseKID } from '../../common/kid';
 
 export type TagAttachmentSavedObject = SavedObject<RawTagAttachment>;
 
@@ -131,8 +132,25 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
       ({ tagId }) => tagsAlreadyAttached.indexOf(tagId) > -1
     );
 
+    const attachments = [...existingAttachmentsToKeep, ...newAttachments];
+
+    const { path } = parseKID(kid);
+    const [, type, id] = path;
+
+    // TODO: this will be moved out of here, instead the `tags` plugin
+    // will emit "set_attachmets" event and other plugins will be able
+    // to subscribe to it.
+    try {
+      await this.params.savedObjectsClient.update(type, id, {
+        _tags: attachments.map(({ tagId }) => ({ tagId })),
+      });
+    } catch (error) {
+      // eslint-disable-next-line
+      console.error(error);
+    }
+
     return {
-      attachments: [...existingAttachmentsToKeep, ...newAttachments],
+      attachments,
     };
   }
 

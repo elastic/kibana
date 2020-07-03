@@ -154,7 +154,7 @@ export class DashboardPlugin
   private getRenderBeforeDashboard: () => (dashboard: DashboardContainer) => React.ReactNode = () =>
     this.renderBeforeDashboard;
 
-  private renderTags: (kid: string) => React.ReactNode = (kid) => kid + ' dfdfdfdfdfdf';
+  private renderTags: (kid: string) => React.ReactNode = (kid) => kid;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,

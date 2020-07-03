@@ -56,6 +56,12 @@ export const dashboardSavedObjectType: SavedObjectsType = {
           value: { type: 'integer' },
         },
       },
+      _tags: {
+        type: 'object',
+        properties: {
+          tagId: { type: 'keyword' },
+        },
+      },
       timeFrom: { type: 'keyword' },
       timeRestore: { type: 'boolean' },
       timeTo: { type: 'keyword' },
