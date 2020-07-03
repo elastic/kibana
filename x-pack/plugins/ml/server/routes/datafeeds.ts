@@ -168,6 +168,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         const resp = await context.ml!.mlClient.callAsInternalUser('ml.addDatafeed', {
           datafeedId,
           body: request.body,
+          headers: { authorization: request.headers.authorization },
         });
 
         return response.ok({
