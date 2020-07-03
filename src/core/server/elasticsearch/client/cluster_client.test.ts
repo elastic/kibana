@@ -299,25 +299,75 @@ describe('ClusterClient', () => {
   });
 
   describe('#close', () => {
-    it('closes both underlying clients', () => {
+    it('closes both underlying clients', async () => {
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
 
-      clusterClient.close();
+      await clusterClient.close();
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
     });
 
-    it('does nothing after the first call', () => {
+    it('waits for both clients to close', async (done) => {
+      expect.assertions(4);
+
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
 
-      clusterClient.close();
+      let internalClientClosed = false;
+      let scopedClientClosed = false;
+      let clusterClientClosed = false;
+
+      let closeInternalClient: () => void;
+      let closeScopedClient: () => void;
+
+      internalClient.close.mockReturnValue(
+        new Promise((resolve) => {
+          closeInternalClient = resolve;
+        }).then(() => {
+          expect(clusterClientClosed).toBe(false);
+          internalClientClosed = true;
+        })
+      );
+      scopedClient.close.mockReturnValue(
+        new Promise((resolve) => {
+          closeScopedClient = resolve;
+        }).then(() => {
+          expect(clusterClientClosed).toBe(false);
+          scopedClientClosed = true;
+        })
+      );
+
+      clusterClient.close().then(() => {
+        clusterClientClosed = true;
+        expect(internalClientClosed).toBe(true);
+        expect(scopedClientClosed).toBe(true);
+        done();
+      });
+
+      closeInternalClient!();
+      closeScopedClient!();
+    });
+
+    it('return a rejected promise is any client rejects', async () => {
+      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+
+      internalClient.close.mockRejectedValue(new Error('error closing client'));
+
+      expect(clusterClient.close()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"error closing client"`
+      );
+    });
+
+    it('does nothing after the first call', async () => {
+      const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
+
+      await clusterClient.close();
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
 
-      clusterClient.close();
-      clusterClient.close();
+      await clusterClient.close();
+      await clusterClient.close();
 
       expect(internalClient.close).toHaveBeenCalledTimes(1);
       expect(scopedClient.close).toHaveBeenCalledTimes(1);

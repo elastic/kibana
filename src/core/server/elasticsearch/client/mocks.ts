@@ -57,7 +57,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   client.transport = {
     request: jest.fn(),
   };
-  client.close = jest.fn();
+  client.close = jest.fn().mockReturnValue(Promise.resolve());
   client.child = jest.fn().mockImplementation(() => createInternalClientMock());
 
   return (client as unknown) as DeeplyMockedKeys<Client>;
@@ -108,6 +108,7 @@ const createCustomClusterClientMock = () => {
   };
 
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
+  mock.close.mockReturnValue(Promise.resolve());
 
   return mock;
 };

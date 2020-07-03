@@ -57,7 +57,7 @@ export interface ICustomClusterClient extends IClusterClient {
    * Closes the cluster client. After that client cannot be used and one should
    * create a new client instance to be able to interact with Elasticsearch API.
    */
-  close: () => void;
+  close: () => Promise<void>;
 }
 
 /** @internal **/
@@ -84,14 +84,12 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
     return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
 
-  public close() {
+  public async close() {
     if (this.isClosed) {
       return;
     }
-
     this.isClosed = true;
-    this.asInternalUser.close();
-    this.rootScopedClient.close();
+    await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
   }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
