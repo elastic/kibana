@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN, API_BASE_PATH, BASE_PATH } from './constants';
-
-export { getTemplateParameter } from './lib';
-
-export * from './types';
+export * from './create_button_popover';
+export * from './filter_list_button';
