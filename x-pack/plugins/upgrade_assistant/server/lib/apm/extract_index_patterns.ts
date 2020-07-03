@@ -6,18 +6,8 @@
 import { uniq, pick } from 'lodash';
 import { APMOSSConfig } from '../../../../../../src/plugins/apm_oss/server';
 
-type APMIndexConfig = Pick<
-  APMOSSConfig,
-  | 'sourcemapIndices'
-  | 'errorIndices'
-  | 'transactionIndices'
-  | 'spanIndices'
-  | 'metricsIndices'
-  | 'onboardingIndices'
->;
-
 export const extractIndexPatterns = (apmConfig: APMOSSConfig): string[] => {
-  const indexConfigs = pick<APMIndexConfig, APMOSSConfig>(apmConfig, [
+  const indexConfigs = pick(apmConfig, [
     'sourcemapIndices',
     'errorIndices',
     'transactionIndices',

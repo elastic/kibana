@@ -565,14 +565,14 @@ module.exports = require("path");
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 var tooling_log_1 = __webpack_require__(6);
-Object.defineProperty(exports, "ToolingLog", { enumerable: true, get: function () { return tooling_log_1.ToolingLog; } });
+exports.ToolingLog = tooling_log_1.ToolingLog;
 var tooling_log_text_writer_1 = __webpack_require__(110);
-Object.defineProperty(exports, "ToolingLogTextWriter", { enumerable: true, get: function () { return tooling_log_text_writer_1.ToolingLogTextWriter; } });
+exports.ToolingLogTextWriter = tooling_log_text_writer_1.ToolingLogTextWriter;
 var log_levels_1 = __webpack_require__(124);
-Object.defineProperty(exports, "pickLevelFromFlags", { enumerable: true, get: function () { return log_levels_1.pickLevelFromFlags; } });
-Object.defineProperty(exports, "parseLogLevel", { enumerable: true, get: function () { return log_levels_1.parseLogLevel; } });
+exports.pickLevelFromFlags = log_levels_1.pickLevelFromFlags;
+exports.parseLogLevel = log_levels_1.parseLogLevel;
 var tooling_log_collecting_writer_1 = __webpack_require__(125);
-Object.defineProperty(exports, "ToolingLogCollectingWriter", { enumerable: true, get: function () { return tooling_log_collecting_writer_1.ToolingLogCollectingWriter; } });
+exports.ToolingLogCollectingWriter = tooling_log_collecting_writer_1.ToolingLogCollectingWriter;
 
 
 /***/ }),
@@ -600,7 +600,6 @@ Object.defineProperty(exports, "ToolingLogCollectingWriter", { enumerable: true,
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolingLog = void 0;
 const tslib_1 = __webpack_require__(7);
 const Rx = tslib_1.__importStar(__webpack_require__(8));
 const tooling_log_text_writer_1 = __webpack_require__(110);
@@ -6590,7 +6589,6 @@ var ZipBufferIterator = /*@__PURE__*/ (function (_super) {
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolingLogTextWriter = void 0;
 const tslib_1 = __webpack_require__(7);
 const util_1 = __webpack_require__(111);
 const chalk_1 = tslib_1.__importDefault(__webpack_require__(112));
@@ -6608,7 +6606,7 @@ const MSG_PREFIXES = {
 const has = (obj, key) => obj.hasOwnProperty(key);
 function shouldWriteType(level, type) {
     if (type === 'write') {
-        return level.name !== 'silent';
+        return true;
     }
     return Boolean(level.flags[type === 'success' ? 'info' : type]);
 }
@@ -8656,7 +8654,6 @@ module.exports = (chalk, tmp) => {
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseLogLevel = exports.pickLevelFromFlags = void 0;
 const LEVELS = ['silent', 'error', 'warning', 'info', 'debug', 'verbose'];
 function pickLevelFromFlags(flags, options = {}) {
     if (flags.verbose)
@@ -8713,14 +8710,13 @@ exports.parseLogLevel = parseLogLevel;
  * under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToolingLogCollectingWriter = void 0;
 const tooling_log_text_writer_1 = __webpack_require__(110);
 class ToolingLogCollectingWriter extends tooling_log_text_writer_1.ToolingLogTextWriter {
-    constructor(level = 'verbose') {
+    constructor() {
         super({
-            level,
+            level: 'verbose',
             writeTo: {
-                write: (msg) => {
+                write: msg => {
                     // trim trailing new line
                     this.messages.push(msg.slice(0, -1));
                 },
