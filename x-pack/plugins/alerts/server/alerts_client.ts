@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, pluck, unique, pick } from 'lodash';
+import { omit, isEqual, map, uniq, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -295,7 +295,7 @@ export class AlertsClient {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
         return this.getAlertFromRaw(
           id,
-          fields ? pick(attributes, ...fields) : attributes,
+          fields ? (pick(attributes, fields) as RawAlert) : attributes,
           updated_at,
           references
         );
@@ -770,7 +770,7 @@ export class AlertsClient {
   private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
-    const availableAlertTypeActionGroups = new Set(pluck(alertTypeActionGroups, 'id'));
+    const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
     const invalidActionGroups = usedAlertActionGroups.filter(
       (group) => !availableAlertTypeActionGroups.has(group)
     );
@@ -822,6 +822,6 @@ export class AlertsClient {
   }
 
   private includeFieldsRequiredForAuthentication(fields: string[]): string[] {
-    return unique([...fields, 'alertTypeId', 'consumer']);
+    return uniq([...fields, 'alertTypeId', 'consumer']);
   }
 }
