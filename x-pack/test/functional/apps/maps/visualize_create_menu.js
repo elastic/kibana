@@ -13,12 +13,11 @@ export default function ({ getService, getPageObjects }) {
 
   describe('visualize create menu', () => {
     before(async () => {
-      await security.testUser.setRoles([
-        'test_logstash_reader',
-        'global_maps_all',
-        'geoshape_data_reader',
-        'global_visualize_all',
-      ]);
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_maps_all', 'geoshape_data_reader', 'global_visualize_all'],
+        false
+      );
+
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
