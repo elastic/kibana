@@ -324,19 +324,21 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                   />
                 </EuiButton>,
               ],
-        toolsRight: [
-          <EuiButton
-            data-test-subj="createActionButton"
-            key="create-action"
-            fill
-            onClick={() => setAddFlyoutVisibility(true)}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-              defaultMessage="Create connector"
-            />
-          </EuiButton>,
-        ],
+        toolsRight: canSave
+          ? [
+              <EuiButton
+                data-test-subj="createActionButton"
+                key="create-action"
+                fill
+                onClick={() => setAddFlyoutVisibility(true)}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
+                  defaultMessage="Create connector"
+                />
+              </EuiButton>,
+            ]
+          : [],
       }}
     />
   );

@@ -45,6 +45,7 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -87,6 +88,8 @@ export const ActionForm = ({
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
+  const canSave = hasSaveActionsCapability(capabilities);
+
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -254,6 +257,7 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
+                canSave &&
                 actionTypesIndex &&
                 actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
                   <EuiButtonEmpty
@@ -479,23 +483,27 @@ export const ActionForm = ({
                 />
               )
             }
-            actions={[
-              <EuiButton
-                color="primary"
-                fill
-                size="s"
-                data-test-subj="createActionConnectorButton"
-                onClick={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                  setAddModalVisibility(true);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                  defaultMessage="Create a connector"
-                />
-              </EuiButton>,
-            ]}
+            actions={
+              canSave
+                ? [
+                    <EuiButton
+                      color="primary"
+                      fill
+                      size="s"
+                      data-test-subj="createActionConnectorButton"
+                      onClick={() => {
+                        setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                        setAddModalVisibility(true);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                        defaultMessage="Create a connector"
+                      />
+                    </EuiButton>,
+                  ]
+                : []
+            }
           />
         </EuiAccordion>
         <EuiSpacer size="xs" />

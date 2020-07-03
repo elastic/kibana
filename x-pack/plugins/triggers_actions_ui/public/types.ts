@@ -32,6 +32,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   docLinks: DocLinksStart;
   http?: HttpSetup;
+  readOnly: boolean;
 }
 
 export interface ActionParamsProps<TParams> {
