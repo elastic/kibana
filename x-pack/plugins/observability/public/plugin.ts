@@ -11,8 +11,6 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { registerDataHandler } from './data_handler';
-// TODO: caue: remove it later
-import { fetchMetricsData } from './mock/metrics.mock';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -39,12 +37,6 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
 
         return renderApp(coreStart, params);
       },
-    });
-
-    registerDataHandler({
-      appName: 'infra_metrics',
-      fetchData: fetchMetricsData,
-      hasData: () => Promise.resolve(true),
     });
 
     return {

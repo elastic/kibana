@@ -52,12 +52,20 @@ export function useFetcher<TReturn>(
         error: undefined,
       }));
 
-      const data = await promise;
-      setResult({
-        data,
-        status: FETCH_STATUS.SUCCESS,
-        error: undefined,
-      } as FetcherResult<InferResponseType<TReturn>>);
+      try {
+        const data = await promise;
+        setResult({
+          data,
+          status: FETCH_STATUS.SUCCESS,
+          error: undefined,
+        } as FetcherResult<InferResponseType<TReturn>>);
+      } catch (e) {
+        setResult((prevResult) => ({
+          data: preservePreviousData ? prevResult.data : undefined,
+          status: FETCH_STATUS.FAILURE,
+          error: e,
+        }));
+      }
     }
 
     doFetch();
