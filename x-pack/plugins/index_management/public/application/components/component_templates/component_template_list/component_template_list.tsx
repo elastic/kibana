@@ -43,10 +43,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
 
-  if (data && data.length === 0) {
-    return <EmptyPrompt />;
-  }
-
   let content: React.ReactNode;
 
   if (isLoading) {
@@ -67,6 +63,8 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
         history={history as ScopedHistory}
       />
     );
+  } else if (data && data.length === 0) {
+    content = <EmptyPrompt />;
   } else if (error) {
     content = <LoadError onReloadClick={sendRequest} />;
   }
