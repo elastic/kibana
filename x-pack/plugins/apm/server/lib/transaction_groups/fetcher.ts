@@ -57,6 +57,46 @@ export type TransactionGroupRequestBase = ESSearchRequest & {
 
 export type TransactionGroupSetup = Setup & SetupTimeRange & SetupUIFilters;
 
+function getItemsWithRelativeImpact(
+  setup: TransactionGroupSetup,
+  items: Array<{
+    sum?: number | null;
+    key: string | Record<string, any>;
+    avg?: number | null;
+    count?: number | null;
+    p95?: number;
+    sample?: Transaction;
+  }>
+) {
+  const values = items
+    .map(({ sum }) => sum)
+    .filter((value) => value !== null) as number[];
+
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+
+  const duration = moment.duration(setup.end - setup.start);
+  const minutes = duration.asMinutes();
+
+  const itemsWithRelativeImpact: TransactionGroup[] = items
+    .map((item) => {
+      return {
+        key: item.key,
+        averageResponseTime: item.avg,
+        transactionsPerMinute: (item.count ?? 0) / minutes,
+        impact:
+          item.sum !== null && item.sum !== undefined
+            ? ((item.sum - min) / (max - min)) * 100 || 0
+            : 0,
+        p95: item.p95,
+        sample: item.sample!,
+      };
+    })
+    .filter((item) => item.sample);
+
+  return itemsWithRelativeImpact;
+}
+
 export async function transactionGroupsFetcher(
   options: Options,
   setup: TransactionGroupSetup,
@@ -125,31 +165,7 @@ export async function transactionGroupsFetcher(
 
   const items = joinByKey(stats, 'key');
 
-  const values = items
-    .map(({ sum }) => sum)
-    .filter((value) => value !== null) as number[];
-
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-
-  const duration = moment.duration(setup.end - setup.start);
-  const minutes = duration.asMinutes();
-
-  const itemsWithRelativeImpact: TransactionGroup[] = items
-    .map((item) => {
-      return {
-        key: item.key,
-        averageResponseTime: item.avg,
-        transactionsPerMinute: (item.count ?? 0) / minutes,
-        impact:
-          item.sum !== null && item.sum !== undefined
-            ? ((item.sum - min) / (max - min)) * 100 || 0
-            : 0,
-        p95: item.p95,
-        sample: item.sample!,
-      };
-    })
-    .filter((item) => item.sample);
+  const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
 
   return {
     items: take(
