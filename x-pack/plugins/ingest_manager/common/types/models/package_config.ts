@@ -56,13 +56,13 @@ export interface NewPackageConfig {
 }
 
 export interface UpdatePackageConfig extends NewPackageConfig {
-  version: string;
+  version?: string;
 }
 
 export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
   id: string;
   inputs: PackageConfigInput[];
-  version: string;
+  version?: string;
   revision: number;
   updated_at: string;
   updated_by: string;

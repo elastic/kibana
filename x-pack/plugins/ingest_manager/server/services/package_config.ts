@@ -166,7 +166,7 @@ class PackageConfigService {
     });
 
     return {
-      items: packageConfigs.saved_objects.map<PackageConfig>((packageConfigSO) => ({
+      items: packageConfigs.saved_objects.map((packageConfigSO) => ({
         id: packageConfigSO.id,
         version: packageConfigSO.version,
         ...packageConfigSO.attributes,
