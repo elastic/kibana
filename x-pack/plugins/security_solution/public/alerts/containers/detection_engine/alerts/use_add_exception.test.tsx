@@ -10,7 +10,14 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import * as alertsApi from './api';
 import * as listsApi from '../../../../../../lists/public/exceptions/api';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
 import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '../../../../../../lists/common/schemas';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -36,19 +43,17 @@ describe('useAddOrUpdateException', () => {
   const onError = jest.fn();
   const onSuccess = jest.fn();
   const alertIdToClose = 'idToClose';
-  const itemsToAdd = [
+  const itemsToAdd: CreateExceptionListItemSchema[] = [
     {
-      ...getExceptionListItemSchemaMock(),
-      id: undefined,
+      ...getCreateExceptionListItemSchemaMock(),
       name: 'item to add 1',
     },
     {
-      ...getExceptionListItemSchemaMock(),
-      id: undefined,
+      ...getCreateExceptionListItemSchemaMock(),
       name: 'item to add 2',
     },
   ];
-  const itemsToUpdate = [
+  const itemsToUpdate: ExceptionListItemSchema[] = [
     {
       ...getExceptionListItemSchemaMock(),
       name: 'item to update 1',
@@ -58,6 +63,22 @@ describe('useAddOrUpdateException', () => {
       name: 'item to update 2',
     },
   ];
+  const itemsToUpdateFormatted: UpdateExceptionListItemSchema[] = itemsToUpdate.map(
+    (item: ExceptionListItemSchema) => {
+      const formatted: UpdateExceptionListItemSchema = getUpdateExceptionListItemSchemaMock();
+      const newObj = (Object.keys(formatted) as Array<keyof UpdateExceptionListItemSchema>).reduce(
+        (acc, key) => {
+          return {
+            ...acc,
+            [key]: item[key],
+          };
+        },
+        {} as UpdateExceptionListItemSchema
+      );
+      return newObj;
+    }
+  );
+
   const itemsToAddOrUpdate = [...itemsToAdd, ...itemsToUpdate];
 
   const waitForAddOrUpdateFunc: (arg: {
@@ -162,7 +183,9 @@ describe('useAddOrUpdateException', () => {
         }
         await waitForNextUpdate();
         expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToUpdate[1]);
+        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
+          itemsToUpdateFormatted[1]
+        );
       });
     });
   });
@@ -215,7 +238,9 @@ describe('useAddOrUpdateException', () => {
         }
         await waitForNextUpdate();
         expect(updateExceptionListItem).toHaveBeenCalledTimes(2);
-        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(itemsToUpdate[1]);
+        expect(updateExceptionListItem.mock.calls[1][0].listItem).toEqual(
+          itemsToUpdateFormatted[1]
+        );
       });
     });
   });
