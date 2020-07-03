@@ -5,6 +5,7 @@
  */
 
 import { encode } from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 import {
@@ -42,7 +43,7 @@ export function getLogsHasDataFetcher(
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
-    return sourceStatus.data.logIndexNames.length > 0;
+    return sourceStatus.data.logIndicesExist;
   };
 }
 
@@ -71,7 +72,9 @@ export function getLogsOverviewDataFetcher(
       (Date.parse(params.endTime).valueOf() - Date.parse(params.startTime).valueOf()) / (1000 * 60);
 
     return {
-      title: 'Log rate',
+      title: i18n.translate('xpack.infra.logs.logOverview.logOverviewTitle', {
+        defaultMessage: 'Logs',
+      }),
       appLink: `/app/logs/stream?logPosition=(end:${encode(params.endTime)},start:${encode(
         params.startTime
       )})`,

@@ -41,7 +41,7 @@ describe('Logs UI Observability Homepage Functions', () => {
 
       // @ts-expect-error
       callFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexNames: ['filebeat'] },
+        data: { logIndexFields: [], logIndicesExist: true },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
@@ -56,7 +56,7 @@ describe('Logs UI Observability Homepage Functions', () => {
 
       // @ts-expect-error
       callFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndexNames: [] },
+        data: { logIndexFields: [], logIndicesExist: false },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
