@@ -8,7 +8,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
   PrePackagedRulesStatusSchema,
-  prePackagedRulesStatusSchema,
+  prePackagedRulesAndTimelinesStatusSchema,
 } from './prepackaged_rules_status_schema';
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
@@ -20,8 +20,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: 0,
       rules_not_updated: 0,
       rules_custom_installed: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -36,8 +39,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_updated: 0,
       rules_custom_installed: 0,
       invalid_field: 'invalid',
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -51,8 +57,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: 0,
       rules_not_updated: 0,
       rules_custom_installed: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -68,8 +77,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: -1,
       rules_not_updated: 0,
       rules_custom_installed: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -85,8 +97,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: 0,
       rules_not_updated: -1,
       rules_custom_installed: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -102,8 +117,11 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: 0,
       rules_not_updated: 0,
       rules_custom_installed: -1,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -119,9 +137,12 @@ describe('prepackaged_rules_schema', () => {
       rules_not_installed: 0,
       rules_not_updated: 0,
       rules_custom_installed: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     };
     delete payload.rules_installed;
-    const decoded = prePackagedRulesStatusSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 

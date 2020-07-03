@@ -40,7 +40,16 @@ export const getTimelinesRoute = (
           timelines = await getTimelines(frameworkRequest, id.split(','));
           error = timelines.error;
         } else {
-          timelines = await getAllTimeline(frameworkRequest, null, null, null, null, null);
+          timelines = await getAllTimeline(
+            frameworkRequest,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          );
         }
 
         return response.ok({

@@ -22,7 +22,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
-import { ImportTimelineResultSchema } from '../../../timeline/routes/schemas/import_timelines_schema';
+import { importTimelineResultSchema } from '../../../timeline/routes/schemas/import_timelines_schema';
 import { installPrepackagedTimelines } from '../../rules/install_prepacked_timelines';
 
 export const addPrepackedRulesRoute = (
@@ -72,8 +72,10 @@ export const addPrepackedRulesRoute = (
           installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex),
           installPrepackagedTimelines(config.maxTimelineImportExportSize, frameworkRequest, true),
         ]);
-        const prepackagedTimelinesResult =
-          typeof result[1] !== 'string' ? result[1] : ({} as ImportTimelineResultSchema);
+        const [prepackagedTimelinesResult, timelinesErrors] = validate(
+          result[1],
+          importTimelineResultSchema
+        );
         await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
 
         const prepackagedRulesOutput: PrePackagedRulesSchema = {
@@ -83,7 +85,7 @@ export const addPrepackedRulesRoute = (
           timelines_updated: prepackagedTimelinesResult?.timelines_updated ?? 0,
         };
         const [validated, rulesErrors] = validate(prepackagedRulesOutput, prePackagedRulesSchema);
-        if (rulesErrors != null) {
+        if (rulesErrors != null && timelinesErrors != null) {
           return siemResponse.error({
             statusCode: 500,
             body: rulesErrors,

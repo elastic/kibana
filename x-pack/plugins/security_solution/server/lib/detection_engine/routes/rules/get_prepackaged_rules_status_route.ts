@@ -7,7 +7,7 @@
 import { validate } from '../../../../../common/validate';
 import {
   PrePackagedRulesStatusSchema,
-  prePackagedRulesStatusSchema,
+  prePackagedRulesAndTimelinesStatusSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_status_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
@@ -20,7 +20,10 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-import { checkTimelinesStatus } from '../../rules/install_prepacked_timelines';
+import {
+  checkTimelinesStatus,
+  checkTimelineStatusRt,
+} from '../../rules/install_prepacked_timelines';
 
 export const getPrepackagedRulesStatusRoute = (
   router: IRouter,
@@ -59,22 +62,26 @@ export const getPrepackagedRulesStatusRoute = (
 
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
-        const {
-          timelinesToInstall,
-          timelinesToUpdate,
-          prepackagedTimelines,
-        } = await checkTimelinesStatus(frameworkRequest);
+        const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
+        const [validatedprepackagedTimelineStatus] = validate(
+          prepackagedTimelineStatus,
+          checkTimelineStatusRt
+        );
 
         const prepackagedRulesStatus: PrePackagedRulesStatusSchema = {
           rules_custom_installed: customRules.total,
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,
-          timelines_installed: prepackagedTimelines.length,
-          timelines_not_installed: timelinesToInstall.length,
-          timelines_not_updated: timelinesToUpdate.length,
+          timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
+          timelines_not_installed:
+            validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,
+          timelines_not_updated: validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0,
         };
-        const [validated, errors] = validate(prepackagedRulesStatus, prePackagedRulesStatusSchema);
+        const [validated, errors] = validate(
+          prepackagedRulesStatus,
+          prePackagedRulesAndTimelinesStatusSchema
+        );
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

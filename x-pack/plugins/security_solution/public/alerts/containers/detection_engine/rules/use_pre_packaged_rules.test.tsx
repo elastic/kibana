@@ -39,6 +39,9 @@ describe('usePersistRule', () => {
         rulesInstalled: null,
         rulesNotInstalled: null,
         rulesNotUpdated: null,
+        timelinesInstalled: null,
+        timelinesNotInstalled: null,
+        timelinesNotUpdated: null,
       });
     });
   });
@@ -66,6 +69,9 @@ describe('usePersistRule', () => {
         rulesInstalled: 12,
         rulesNotInstalled: 0,
         rulesNotUpdated: 0,
+        timelinesInstalled: 0,
+        timelinesNotInstalled: 0,
+        timelinesNotUpdated: 0,
       });
     });
   });
@@ -99,6 +105,9 @@ describe('usePersistRule', () => {
         rulesInstalled: 12,
         rulesNotInstalled: 0,
         rulesNotUpdated: 0,
+        timelinesInstalled: 0,
+        timelinesNotInstalled: 0,
+        timelinesNotUpdated: 0,
       });
     });
   });

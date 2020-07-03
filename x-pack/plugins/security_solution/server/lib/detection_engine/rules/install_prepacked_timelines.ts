@@ -7,17 +7,30 @@ import readline from 'readline';
 import fs from 'fs';
 import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
+import * as rt from 'io-ts';
+
 import { createListStream } from '../../../../../../../src/legacy/utils';
 import { importTimelines } from '../../timeline/routes/utils/import_timelines';
 import { FrameworkRequest } from '../../framework';
 import {
   ImportTimelineResultSchema,
-  ImportTimelinesSchema,
+  ImportTimelinesSchemaRt,
 } from '../../timeline/routes/schemas/import_timelines_schema';
 import { getTimelinesToInstall } from './get_timelines_to_install';
 import { getTimelinesToUpdate } from './get_timelines_to_update';
 import { getExistingPrepackagedTimelines } from '../../timeline/saved_object';
-import { TimelineSavedObject } from '../../../../common/types/timeline';
+import {
+  TimelineSavedObject,
+  TimelineSavedToReturnObjectRuntimeType,
+} from '../../../../common/types/timeline';
+
+export const checkTimelineStatusRt = rt.type({
+  timelinesToInstall: rt.array(ImportTimelinesSchemaRt),
+  timelinesToUpdate: rt.array(ImportTimelinesSchemaRt),
+  prepackagedTimelines: rt.array(TimelineSavedToReturnObjectRuntimeType),
+});
+
+export type CheckTimelineStatusRt = rt.TypeOf<typeof checkTimelineStatusRt>;
 
 export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {
@@ -40,10 +53,10 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
 
 const loadData = <T, U>(
   readStream: Readable,
-  bulkInsert: <V>(docs: V) => Promise<U | string>,
+  bulkInsert: <V>(docs: V) => Promise<U | Error>,
   encoding?: T,
   maxTimelineImportExportSize?: number | null
-): Promise<U | string> => {
+): Promise<U | Error> => {
   return new Promise((resolved, reject) => {
     let docs: string[] = [];
     let isPaused: boolean = false;
@@ -65,7 +78,7 @@ const loadData = <T, U>(
           return;
         }
       }
-      resolved('No data provided');
+      reject(new Error('No data provided'));
     };
 
     const closeWithError = (err: Error) => {
@@ -122,7 +135,7 @@ export const installPrepackagedTimelines = async (
   isImmutable: boolean,
   filePath?: string,
   fileName?: string
-): Promise<ImportTimelineResultSchema | string> => {
+): Promise<ImportTimelineResultSchema | Error> => {
   let readStream;
   const dir = resolve(join(__dirname, filePath ?? './prepackaged_timelines'));
   const file = fileName ?? 'index.ndjson';
@@ -146,30 +159,15 @@ export const installPrepackagedTimelines = async (
   return loadData<null, ImportTimelineResultSchema>(readStream, <T>(docs: T) =>
     docs instanceof Readable
       ? importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)
-      : Promise.resolve({
-          success: false,
-          success_count: 0,
-          timelines_installed: 0,
-          timelines_updated: 0,
-          errors: [
-            {
-              error: { message: `read prepackaged timelines error`, status_code: 500 },
-            },
-          ],
-        })
+      : Promise.reject(new Error(`read prepackaged timelines error`))
   );
 };
-interface CheckTimelinesStatus {
-  timelinesToInstall: ImportTimelinesSchema[];
-  timelinesToUpdate: ImportTimelinesSchema[];
-  prepackagedTimelines: TimelineSavedObject[];
-}
 
 export const checkTimelinesStatus = async (
   frameworkRequest: FrameworkRequest,
   filePath?: string,
   fileName?: string
-): Promise<CheckTimelinesStatus | string> => {
+): Promise<CheckTimelineStatusRt | Error> => {
   let readStream;
   let timeline: {
     totalCount: number;
@@ -190,7 +188,7 @@ export const checkTimelinesStatus = async (
     };
   }
 
-  return loadData<'utf-8', CheckTimelinesStatus>(
+  return loadData<'utf-8', CheckTimelineStatusRt>(
     readStream,
     <T>(timelinesFromFileSystem: T) => {
       if (Array.isArray(timelinesFromFileSystem)) {

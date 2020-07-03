@@ -33,7 +33,7 @@ export type ImportedTimeline = SavedTimeline & {
   eventNotes: NoteResult[];
 };
 
-type PromiseFromStreams = ImportedTimeline;
+export type PromiseFromStreams = ImportedTimeline;
 
 interface ImportRegular {
   timeline_id: string;
@@ -83,7 +83,7 @@ export const importTimelines = async (
   maxTimelineImportExportSize: number,
   frameworkRequest: FrameworkRequest,
   isImmutable?: boolean
-): Promise<ImportTimelineResultSchema | string> => {
+): Promise<ImportTimelineResultSchema | Error> => {
   const readStream = createTimelinesStreamFromNdJson(maxTimelineImportExportSize);
   const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([file, ...readStream]);
 
@@ -263,7 +263,7 @@ export const importTimelines = async (
   };
   const [validated, errors] = validate(importTimelinesRes, importTimelineResultSchema);
   if (errors != null || validated == null) {
-    return errors || 'Import timeline error';
+    return new Error(errors || 'Import timeline error');
   } else {
     return validated;
   }

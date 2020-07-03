@@ -6,8 +6,7 @@
 
 import uuid from 'uuid';
 import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
-
-import { PromiseFromStreams } from '../import_timelines_route';
+import { PromiseFromStreams } from './import_timelines';
 
 export const getTupleDuplicateErrorsAndUniqueTimeline = (
   timelines: PromiseFromStreams[],
