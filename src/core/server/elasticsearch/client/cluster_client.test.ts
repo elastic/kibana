@@ -78,7 +78,7 @@ describe('ClusterClient', () => {
     it('returns the internal client', () => {
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
 
-      expect(clusterClient.asInternalUser()).toBe(internalClient);
+      expect(clusterClient.asInternalUser).toBe(internalClient);
     });
   });
 
@@ -92,8 +92,8 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({ headers: expect.any(Object) });
 
-      expect(scopedClusterClient.asInternalUser()).toBe(clusterClient.asInternalUser());
-      expect(scopedClusterClient.asCurrentUser()).toBe(scopedClient.child.mock.results[0].value);
+      expect(scopedClusterClient.asInternalUser).toBe(clusterClient.asInternalUser);
+      expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
     });
 
     it('returns a distinct  scoped cluster client on each call', () => {
@@ -106,7 +106,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(2);
 
       expect(scopedClusterClient1).not.toBe(scopedClusterClient2);
-      expect(scopedClusterClient1.asInternalUser()).toBe(scopedClusterClient2.asInternalUser());
+      expect(scopedClusterClient1.asInternalUser).toBe(scopedClusterClient2.asInternalUser);
     });
 
     it('creates a scoped client with filtered request headers', () => {

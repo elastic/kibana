@@ -29,29 +29,21 @@ import { ElasticSearchClient } from './types';
  **/
 export interface IScopedClusterClient {
   /**
-   * Returns a {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
+   * A {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the internal Kibana user.
    */
-  asInternalUser: () => ElasticSearchClient;
+  readonly asInternalUser: ElasticSearchClient;
   /**
-   * Returns a {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
+   * A {@link ElasticSearchClient | client} to be used to query the elasticsearch cluster
    * on behalf of the user that initiated the request to the Kibana server.
    */
-  asCurrentUser: () => ElasticSearchClient;
+  readonly asCurrentUser: ElasticSearchClient;
 }
 
 /** @internal **/
 export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
-    private readonly internalClient: ElasticSearchClient,
-    private readonly scopedClient: ElasticSearchClient
+    public readonly asInternalUser: ElasticSearchClient,
+    public readonly asCurrentUser: ElasticSearchClient
   ) {}
-
-  asInternalUser() {
-    return this.internalClient;
-  }
-
-  asCurrentUser() {
-    return this.scopedClient;
-  }
 }

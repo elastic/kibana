@@ -261,9 +261,7 @@ describe('#start', () => {
     const startContract = await elasticsearchService.start();
     const client = startContract.client;
 
-    expect(client.asInternalUser).toHaveBeenCalledTimes(0);
-    client.asInternalUser();
-    expect(mockClusterClientInstance.asInternalUser).toHaveBeenCalledTimes(1);
+    expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
   });
 
   describe('#createClient', () => {

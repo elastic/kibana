@@ -27,7 +27,7 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
-    expect(scopedClusterClient.asInternalUser()).toBe(internalClient);
+    expect(scopedClusterClient.asInternalUser).toBe(internalClient);
   });
 
   it('uses the scoped client passed in the constructor', () => {
@@ -36,6 +36,6 @@ describe('ScopedClusterClient', () => {
 
     const scopedClusterClient = new ScopedClusterClient(internalClient, scopedClient);
 
-    expect(scopedClusterClient.asCurrentUser()).toBe(scopedClient);
+    expect(scopedClusterClient.asCurrentUser).toBe(scopedClient);
   });
 });

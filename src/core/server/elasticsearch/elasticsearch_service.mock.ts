@@ -19,8 +19,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
-import { IClusterClient, ICustomClusterClient } from './client';
-import { elasticsearchClientMock } from './client/mocks';
+import {
+  elasticsearchClientMock,
+  ClusterClientMock,
+  CustomClusterClientMock,
+} from './client/mocks';
 import { legacyClientMock } from './legacy/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
@@ -38,8 +41,8 @@ interface MockedElasticSearchServiceSetup {
 type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
 
 interface MockedInternalElasticSearchServiceStart extends MockedElasticSearchServiceStart {
-  client: jest.Mocked<IClusterClient>;
-  createClient: jest.Mock<ICustomClusterClient>;
+  client: ClusterClientMock;
+  createClient: jest.MockedFunction<() => CustomClusterClientMock>;
 }
 
 const createSetupContractMock = () => {

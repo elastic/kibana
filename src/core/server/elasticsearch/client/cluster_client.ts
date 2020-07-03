@@ -38,9 +38,9 @@ const noop = () => undefined;
  **/
 export interface IClusterClient {
   /**
-   * Returns a {@link ElasticSearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
+   * A {@link ElasticSearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user
    */
-  asInternalUser: () => ElasticSearchClient;
+  readonly asInternalUser: ElasticSearchClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}
    */
@@ -62,7 +62,7 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements IClusterClient, ICustomClusterClient {
-  private readonly internalClient: Client;
+  public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
 
   private isClosed = false;
@@ -72,12 +72,8 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
     logger: Logger,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
-    this.internalClient = configureClient(config, { logger });
+    this.asInternalUser = configureClient(config, { logger });
     this.rootScopedClient = configureClient(config, { logger, scoped: true });
-  }
-
-  asInternalUser() {
-    return this.internalClient;
   }
 
   asScoped(request: ScopeableRequest) {
@@ -85,7 +81,7 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
     const scopedClient = this.rootScopedClient.child({
       headers: scopedHeaders,
     });
-    return new ScopedClusterClient(this.internalClient, scopedClient);
+    return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
 
   public close() {
@@ -94,7 +90,7 @@ export class ClusterClient implements IClusterClient, ICustomClusterClient {
     }
 
     this.isClosed = true;
-    this.internalClient.close();
+    this.asInternalUser.close();
     this.rootScopedClient.close();
   }
 

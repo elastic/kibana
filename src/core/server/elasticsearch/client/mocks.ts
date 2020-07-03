@@ -20,8 +20,7 @@
 import { Client, ApiResponse } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { ElasticSearchClient } from './types';
-import { IScopedClusterClient } from './scoped_cluster_client';
-import { IClusterClient, ICustomClusterClient } from './cluster_client';
+import { ICustomClusterClient } from './cluster_client';
 
 const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   // we mimic 'reflection' on a concrete instance of the client to generate the mocked functions.
@@ -64,47 +63,56 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   return (client as unknown) as DeeplyMockedKeys<Client>;
 };
 
-const createClientMock = (): DeeplyMockedKeys<ElasticSearchClient> =>
-  (createInternalClientMock() as unknown) as DeeplyMockedKeys<ElasticSearchClient>;
+export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticSearchClient>;
+
+const createClientMock = (): ElasticSearchClientMock =>
+  (createInternalClientMock() as unknown) as ElasticSearchClientMock;
+
+interface ScopedClusterClientMock {
+  asInternalUser: ElasticSearchClientMock;
+  asCurrentUser: ElasticSearchClientMock;
+}
 
 const createScopedClusterClientMock = () => {
-  const mock: jest.Mocked<IScopedClusterClient> = {
-    asInternalUser: jest.fn(),
-    asCurrentUser: jest.fn(),
+  const mock: ScopedClusterClientMock = {
+    asInternalUser: createClientMock(),
+    asCurrentUser: createClientMock(),
   };
-
-  mock.asInternalUser.mockReturnValue(createClientMock());
-  mock.asCurrentUser.mockReturnValue(createClientMock());
 
   return mock;
 };
 
+export interface ClusterClientMock {
+  asInternalUser: ElasticSearchClientMock;
+  asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
+}
+
 const createClusterClientMock = () => {
-  const mock: jest.Mocked<IClusterClient> = {
-    asInternalUser: jest.fn(),
+  const mock: ClusterClientMock = {
+    asInternalUser: createClientMock(),
     asScoped: jest.fn(),
   };
 
-  mock.asInternalUser.mockReturnValue(createClientMock());
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
 
   return mock;
 };
 
+export type CustomClusterClientMock = jest.Mocked<ICustomClusterClient> & ClusterClientMock;
+
 const createCustomClusterClientMock = () => {
-  const mock: jest.Mocked<ICustomClusterClient> = {
-    asInternalUser: jest.fn(),
+  const mock: CustomClusterClientMock = {
+    asInternalUser: createClientMock(),
     asScoped: jest.fn(),
     close: jest.fn(),
   };
 
-  mock.asInternalUser.mockReturnValue(createClientMock());
   mock.asScoped.mockReturnValue(createScopedClusterClientMock());
 
   return mock;
 };
 
-type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
+export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
