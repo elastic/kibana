@@ -12,7 +12,6 @@ import {
   Chart,
   Datum,
   LayerValue,
-  PartialTheme,
   Partition,
   PartitionConfig,
   PartitionLayer,
