@@ -13,15 +13,19 @@ export class BufferLines extends Readable {
   private set = new Set<string>();
   private boundary: string | null = null;
   private readableText: boolean = false;
-  private readline: readLine.Interface;
   private paused: boolean = false;
 
   constructor({ input }: { input: NodeJS.ReadableStream }) {
     super({ encoding: 'utf-8' });
-    this.readline = readLine.createInterface({
+
+    const readline = readLine.createInterface({
       input,
     });
-    this.readline.on('line', (line) => {
+
+    // We are parsing multipart/form-data involving boundaries as fast as we can to get
+    // * The filename if it exists and emit it
+    // * The actual content within the multipart/form-data
+    readline.on('line', (line) => {
       if (this.boundary == null && line.startsWith('--')) {
         this.boundary = `${line}--`;
       } else if (this.boundary != null && !this.readableText && line.trim() !== '') {
@@ -47,7 +51,7 @@ export class BufferLines extends Readable {
       }
     });
 
-    this.readline.on('close', () => {
+    readline.on('close', () => {
       this.push(null);
     });
   }
@@ -64,6 +68,19 @@ export class BufferLines extends Readable {
     return this;
   }
 
+  public emptyBuffer(): void {
+    const arrayFromSet = Array.from(this.set);
+    if (arrayFromSet.length === 0) {
+      this.emit('lines', []);
+    } else {
+      while (arrayFromSet.length) {
+        const spliced = arrayFromSet.splice(0, BUFFER_SIZE);
+        this.emit('lines', spliced);
+      }
+    }
+    this.set.clear();
+  }
+
   public push(line: string | null): boolean {
     if (line != null) {
       this.set.add(line);
@@ -71,16 +88,9 @@ export class BufferLines extends Readable {
         return false;
       } else {
         if (this.set.size > BUFFER_SIZE) {
-          const arrayFromSet = Array.from(this.set);
-          while (arrayFromSet.length) {
-            const spliced = arrayFromSet.splice(0, BUFFER_SIZE);
-            this.emit('lines', spliced);
-          }
-          this.set.clear();
-          return true;
-        } else {
-          return true;
+          this.emptyBuffer();
         }
+        return true;
       }
     } else {
       if (this.paused) {
@@ -92,12 +102,7 @@ export class BufferLines extends Readable {
         }, 10);
         return false;
       } else {
-        const arrayFromSet = Array.from(this.set);
-        while (arrayFromSet.length) {
-          const spliced = arrayFromSet.splice(0, BUFFER_SIZE);
-          this.emit('lines', spliced);
-        }
-        this.set.clear();
+        this.emptyBuffer();
         this.emit('close');
         return true;
       }

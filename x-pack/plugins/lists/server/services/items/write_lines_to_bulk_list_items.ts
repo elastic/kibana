@@ -40,7 +40,6 @@ export const importListItemsToStream = ({
     const readBuffer = new BufferLines({ input: stream });
     let fileName: string | undefined;
     let list: ListSchema | null = null;
-
     readBuffer.on('fileName', async (fileNameEmitted: string) => {
       readBuffer.pause();
       fileName = fileNameEmitted;
