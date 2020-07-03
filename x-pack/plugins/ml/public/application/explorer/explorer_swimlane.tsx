@@ -67,6 +67,12 @@ export interface ExplorerSwimlaneProps {
   setSelectedCells: Function;
   tooltipService: ChartTooltipService;
   'data-test-subj'?: string;
+  /**
+   * We need to be aware of the parent element in order to set
+   * the height so the swim lane widget doesn't jump during loading
+   * or page changes.
+   */
+  parentRef: React.RefObject<HTMLDivElement>;
 }
 
 export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
@@ -408,9 +414,12 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const numBuckets = Math.round((endTime - startTime) / stepSecs);
     const cellHeight = 30;
     const height = (lanes.length + 1) * cellHeight - 10;
-    const laneLabelWidth = 170;
+    // Set  height for the wrapper element
+    if (this.props.parentRef.current) {
+      this.props.parentRef.current.style.height = `${height + 20}px`;
+    }
 
-    element.style('height', `${height + 20}px`);
+    const laneLabelWidth = 170;
     const swimlanes = element.select('.ml-swimlanes');
     swimlanes.html('');
 
@@ -725,7 +734,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
     return (
       <div
-        className="mlExplorerSwimlane euiText"
+        className="mlExplorerSwimlane"
         onMouseEnter={this.setSwimlaneSelectActive.bind(this, true)}
         onMouseLeave={this.setSwimlaneSelectActive.bind(this, false)}
         data-test-subj={this.props['data-test-subj'] ?? null}
