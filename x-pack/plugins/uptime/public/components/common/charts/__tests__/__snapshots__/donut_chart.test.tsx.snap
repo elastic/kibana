@@ -91,7 +91,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           },
           "background": Object {
-            "color": "#FFFFFF",
+            "color": "transparent",
           },
           "barSeriesStyle": Object {
             "displayValue": Object {
