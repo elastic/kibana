@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortBy, pick, identity } from 'lodash';
+import { sortBy, pickBy, identity } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
@@ -112,7 +112,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
             id: matchedServiceNodes[0][SERVICE_NAME],
           },
           ...matchedServiceNodes.map((serviceNode) =>
-            pick(serviceNode, identity)
+            pickBy(serviceNode, identity)
           )
         ),
       };

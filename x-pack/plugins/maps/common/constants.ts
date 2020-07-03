@@ -223,6 +223,11 @@ export enum SCALING_TYPES {
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
 
+export enum MVT_FIELD_TYPE {
+  STRING = 'String',
+  NUMBER = 'Number',
+}
+
 export const SPATIAL_FILTERS_LAYER_ID = 'SPATIAL_FILTERS_LAYER_ID';
 
 export enum INITIAL_LOCATION {

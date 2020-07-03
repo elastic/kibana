@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { uniq } from 'lodash';
+import _, { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
@@ -265,7 +265,7 @@ export class DashboardAppController {
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
-      panelIndexPatterns = uniq(panelIndexPatterns, 'id');
+      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
 
       if (panelIndexPatterns && panelIndexPatterns.length > 0) {
         $scope.$evalAsync(() => {
@@ -520,7 +520,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, 'filters')).forEach((key) => {
+      Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
