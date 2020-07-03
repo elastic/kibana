@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { encode } from 'rison-node';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 import {
@@ -71,7 +72,9 @@ export function getLogsOverviewDataFetcher(
 
     return {
       title: 'Log rate',
-      appLink: 'TBD', // TODO: what format should this be in, relative I assume?
+      appLink: `/app/logs/stream?logPosition=(end:${encode(params.endTime)},start:${encode(
+        params.startTime
+      )})`,
       stats: normalizeStats(stats, timeSpanInMinutes),
       series: normalizeSeries(series),
     };
