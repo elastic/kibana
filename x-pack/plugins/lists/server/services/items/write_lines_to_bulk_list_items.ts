@@ -8,14 +8,16 @@ import { Readable } from 'stream';
 
 import { LegacyAPICaller } from 'kibana/server';
 
-import { MetaOrUndefined, Type } from '../../../common/schemas';
+import { ListIdOrUndefined, ListSchema, MetaOrUndefined, Type } from '../../../common/schemas';
+import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
 
 import { BufferLines } from './buffer_lines';
 import { getListItemByValues } from './get_list_item_by_values';
 import { createListItemsBulk } from './create_list_items_bulk';
 
 export interface ImportListItemsToStreamOptions {
-  listId: string;
+  listId: ListIdOrUndefined;
+  listIndex: string;
   stream: Readable;
   callCluster: LegacyAPICaller;
   listItemIndex: string;
@@ -29,26 +31,60 @@ export const importListItemsToStream = ({
   stream,
   callCluster,
   listItemIndex,
+  listIndex,
   type,
   user,
   meta,
-}: ImportListItemsToStreamOptions): Promise<void> => {
-  return new Promise<void>((resolve) => {
+}: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
+  return new Promise<ListSchema | null>((resolve) => {
     const readBuffer = new BufferLines({ input: stream });
+    let fileName: string | undefined;
+    let list: ListSchema | null = null;
+
+    readBuffer.on('fileName', async (fileNameEmitted: string) => {
+      readBuffer.pause();
+      fileName = fileNameEmitted;
+      if (listId == null) {
+        list = await createListIfItDoesNotExist({
+          callCluster,
+          description: `File uploaded from file system of ${fileNameEmitted}`,
+          id: fileNameEmitted,
+          listIndex,
+          meta,
+          name: fileNameEmitted,
+          type,
+          user,
+        });
+      }
+      readBuffer.resume();
+    });
+
     readBuffer.on('lines', async (lines: string[]) => {
-      await writeBufferToItems({
-        buffer: lines,
-        callCluster,
-        listId,
-        listItemIndex,
-        meta,
-        type,
-        user,
-      });
+      if (listId != null) {
+        await writeBufferToItems({
+          buffer: lines,
+          callCluster,
+          listId,
+          listItemIndex,
+          meta,
+          type,
+          user,
+        });
+      } else if (fileName != null) {
+        await writeBufferToItems({
+          buffer: lines,
+          callCluster,
+          listId: fileName,
+          listItemIndex,
+          meta,
+          type,
+          user,
+        });
+      }
     });
 
     readBuffer.on('close', () => {
-      resolve();
+      resolve(list);
     });
   });
 };
