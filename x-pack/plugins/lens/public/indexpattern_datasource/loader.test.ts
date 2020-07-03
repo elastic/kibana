@@ -13,7 +13,7 @@ import {
   changeLayerIndexPattern,
   syncExistingFields,
 } from './loader';
-import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternField } from './types';
 import { documentField } from './document_field';
 
 jest.mock('./operations');
@@ -642,7 +642,11 @@ describe('loader', () => {
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
-        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+        indexPatterns: [
+          { id: 'a', title: 'a', fields: [] },
+          { id: 'b', title: 'a', fields: [] },
+          { id: 'c', title: 'a', fields: [] },
+        ],
         setState,
         dslQuery,
         showNoDataPopover: jest.fn(),
@@ -662,6 +666,7 @@ describe('loader', () => {
       expect(newState).toEqual({
         foo: 'bar',
         isFirstExistenceFetch: false,
+        existenceFetchFailed: false,
         existingFields: {
           a: { a_field_1: true, a_field_2: true },
           b: { b_field_1: true, b_field_2: true },
@@ -687,7 +692,11 @@ describe('loader', () => {
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         fetchJson,
-        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
+        indexPatterns: [
+          { id: 'a', title: 'a', fields: [] },
+          { id: 'b', title: 'a', fields: [] },
+          { id: 'c', title: 'a', fields: [] },
+        ],
         setState,
         dslQuery,
         showNoDataPopover: jest.fn(),
@@ -701,6 +710,46 @@ describe('loader', () => {
 
       await syncExistingFields({ ...args, isFirstExistenceFetch: true });
       expect(showNoDataPopover).not.toHaveBeenCalled();
+    });
+
+    it('should set all fields to available and existence error flag if the request fails', async () => {
+      const setState = jest.fn();
+      const fetchJson = (jest.fn((path: string) => {
+        return new Promise((resolve, reject) => {
+          reject(new Error());
+        });
+      }) as unknown) as HttpHandler;
+
+      const args = {
+        dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
+        fetchJson,
+        indexPatterns: [
+          {
+            id: 'a',
+            title: 'a',
+            fields: [{ name: 'field1' }, { name: 'field2' }] as IndexPatternField[],
+          },
+        ],
+        setState,
+        dslQuery,
+        showNoDataPopover: jest.fn(),
+        currentIndexPatternTitle: 'abc',
+        isFirstExistenceFetch: false,
+      };
+
+      await syncExistingFields(args);
+
+      const [fn] = setState.mock.calls[0];
+      const newState = fn({
+        foo: 'bar',
+        existingFields: {},
+      }) as IndexPatternPrivateState;
+
+      expect(newState.existenceFetchFailed).toEqual(true);
+      expect(newState.existingFields.a).toEqual({
+        field1: true,
+        field2: true,
+      });
     });
   });
 });

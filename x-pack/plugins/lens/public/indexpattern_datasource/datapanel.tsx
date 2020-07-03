@@ -104,6 +104,7 @@ export function IndexPatternDataPanel({
       id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
+      fields: indexPatterns[id].fields,
     }));
 
   const dslQuery = esQuery.buildEsQuery(
@@ -176,6 +177,7 @@ export function IndexPatternDataPanel({
           charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
+          existenceFetchFailed={state.existenceFetchFailed}
         />
       )}
     </>
@@ -210,6 +212,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
   indexPatterns,
+  existenceFetchFailed,
   query,
   dateRange,
   filters,
@@ -228,6 +231,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   charts: ChartsPluginSetup;
+  existenceFetchFailed?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -555,6 +559,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
+                showExistenceFetchError={existenceFetchFailed}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
