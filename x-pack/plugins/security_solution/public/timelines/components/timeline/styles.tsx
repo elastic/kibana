@@ -205,6 +205,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__tdGroupActions ${className}`,
 }))<{ actionsColumnWidth: number }>`
+  align-items: center;
   display: flex;
   flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
   min-width: 0;

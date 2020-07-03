@@ -96,7 +96,7 @@ export async function loadInitialState({
   const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
-  const requiredPatterns = _.unique(
+  const requiredPatterns = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
