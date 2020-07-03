@@ -56,10 +56,6 @@ export class ElasticsearchService
   private legacyClient?: LegacyClusterClient;
 
   private client?: ClusterClient;
-  private createCustomClient?: (
-    type: string,
-    clientConfig?: Partial<ElasticsearchClientConfig>
-  ) => ICustomClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -107,14 +103,18 @@ export class ElasticsearchService
 
     const config = await this.config$.pipe(first()).toPromise();
     this.client = this.createClusterClient('data', config);
-    this.createCustomClient = (type, clientConfig = {}) => {
+
+    const createClient = (
+      type: string,
+      clientConfig: Partial<ElasticsearchClientConfig> = {}
+    ): ICustomClusterClient => {
       const finalConfig = merge({}, config, clientConfig);
       return this.createClusterClient(type, finalConfig);
     };
 
     return {
       client: this.client,
-      createClient: this.createCustomClient,
+      createClient,
       legacy: {
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
