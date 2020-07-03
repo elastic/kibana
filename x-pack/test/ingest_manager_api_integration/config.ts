@@ -29,13 +29,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     )}:/registry/packages/test-packages`,
   ];
 
+  // Docker image to use for Ingest Manager API integration tests.
+  const dockerImage =
+    'docker.elastic.co/package-registry/distribution:184b85f19e8fd14363e36150173d338ff9659f01';
+
   return {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!registryPort,
-        image: 'docker.elastic.co/package-registry/package-registry:kibana-testing-1',
+        image: dockerImage,
         portInContainer: 8080,
         port: registryPort,
         args: dockerArgs,
