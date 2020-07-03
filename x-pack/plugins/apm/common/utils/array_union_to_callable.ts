@@ -7,8 +7,8 @@ import { ValuesType } from 'utility-types';
 
 // work around a TypeScript limitation described in https://stackoverflow.com/posts/49511416
 
-export const arrayUnionToCallable = <T extends any[] | undefined>(
+export const arrayUnionToCallable = <T extends any[]>(
   array: T
-): Array<ValuesType<Exclude<T, undefined>>> => {
-  return array ?? [];
+): Array<ValuesType<T>> => {
+  return array;
 };

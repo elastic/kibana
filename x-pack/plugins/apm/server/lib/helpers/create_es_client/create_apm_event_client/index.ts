@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, unique } from 'lodash';
+import { defaultsDeep, uniq } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
@@ -86,7 +86,7 @@ export function createApmEventClient({
     ): Promise<TypedSearchResponse<TParams>> {
       const { apm, ...esParams } = params;
 
-      const index = unique(
+      const index = uniq(
         apm.events.map((event) => indices[processorEventIndexMap[event]])
       );
 

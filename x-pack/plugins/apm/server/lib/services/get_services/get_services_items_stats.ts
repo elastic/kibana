@@ -35,11 +35,11 @@ export const getTransactionDurationAverages = async ({
 
   const response = await apmEventClient.search(
     mergeProjection(projection, {
-      size: 0,
       apm: {
         events: [ProcessorEvent.transaction],
       },
       body: {
+        size: 0,
         aggs: {
           services: {
             terms: {
