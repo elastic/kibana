@@ -137,17 +137,23 @@ async function fetchRollupVisualizations(
   let rollupVisualizationsFromSavedSearches = 0;
 
   visualizations.forEach((visualization) => {
-    const references = get(visualization, '_source.references', []);
-    const savedSearchRefName = get(visualization, '_source.visualization.savedSearchRefName');
-    const searchSourceJSON = get(
+    const references: Array<{ name: string; id: string }> | undefined = get(
+      visualization,
+      '_source.references'
+    );
+    const savedSearchRefName: string | undefined = get(
+      visualization,
+      '_source.visualization.savedSearchRefName'
+    );
+    const searchSourceJSON: string | undefined = get(
       visualization,
       '_source.visualization.kibanaSavedObjectMeta.searchSourceJSON'
     );
 
-    if (savedSearchRefName) {
+    if (savedSearchRefName && references?.length) {
       // This visualization depends upon a saved search.
-      const savedSearch = references.find((ref) => ref.name === savedSearchRefName);
-      if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
+      const savedSearch = references.find(({ name }) => name === savedSearchRefName);
+      if (savedSearch && rollupSavedSearchesToFlagMap[savedSearch.id]) {
         rollupVisualizations++;
         rollupVisualizationsFromSavedSearches++;
       }
