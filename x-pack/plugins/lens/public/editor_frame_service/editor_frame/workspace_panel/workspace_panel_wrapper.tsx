@@ -63,7 +63,7 @@ export function WorkspacePanelWrapper({
         clearStagedPreview: false,
       });
     },
-    [dispatch]
+    [dispatch, activeVisualization]
   );
   return (
     <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch" responsive={false}>
