@@ -64,9 +64,6 @@ export class DashboardListing extends React.Component {
           })}
           toastNotifications={this.props.core.notifications.toasts}
           uiSettings={this.props.core.uiSettings}
-          onTags={() => {
-            // console.log('tags', tags);
-          }}
         />
       </I18nProvider>
     );

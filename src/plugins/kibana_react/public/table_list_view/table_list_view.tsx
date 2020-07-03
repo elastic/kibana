@@ -71,7 +71,6 @@ export interface TableListViewProps {
    */
   headingId?: string;
   TagPicker?: React.FC<{ selected: string[]; onChange: (selected: string[]) => void }>;
-  onTags: (tags: string[]) => void;
 }
 
 export interface TableListViewState {
@@ -134,7 +133,14 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
   debouncedFetch = debounce(async (filter: string) => {
     try {
-      const response = await this.props.findItems(filter);
+      let tagFilter = '';
+      if (this.state.tags.length) {
+        tagFilter = `attributes._tags.tagId:("${this.state.tags.join('" | "')}")`;
+      }
+      const query = filter
+        ? `(title:(${filter}*) | description:(${filter}*)) + (${tagFilter})`
+        : tagFilter;
+      const response = await this.props.findItems(query);
 
       if (!this._isMounted) {
         return;
@@ -468,9 +474,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
           <this.props.TagPicker
             selected={this.state.tags}
             onChange={(tags) => {
-              this.setState({ tags }, () => {
-                if (this.props.onTags) this.props.onTags(this.state.tags);
-              });
+              this.setState({ tags }, this.fetchItems);
             }}
           />
         )}
