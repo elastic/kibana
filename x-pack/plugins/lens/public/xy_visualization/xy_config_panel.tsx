@@ -109,13 +109,14 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           panelClassName="lnsXyToolbar__popover"
           button={
             <EuiButtonEmpty
+              color="text"
               iconType="arrowDown"
               iconSide="right"
               onClick={() => {
                 setOpen(!open);
               }}
             >
-              <EuiIcon type="gear" />
+              {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
             </EuiButtonEmpty>
           }
           isOpen={open}
