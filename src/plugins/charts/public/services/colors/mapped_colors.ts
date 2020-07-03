@@ -57,8 +57,8 @@ export class MappedColors {
     return this.getConfigColorMapping()[key as any] || this._mapping[key];
   }
 
-  getConfigMapping(key: string | number) {
-    return this.getConfigColorMapping()[key];
+  getColorFromConfig(key: string | number) {
+    return this.getConfigColorMapping()[key as any];
   }
 
   flush() {

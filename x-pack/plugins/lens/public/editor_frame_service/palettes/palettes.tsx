@@ -26,7 +26,7 @@ function buildRoundRobinCategoricalWithMappedColors(
   colors: (n: number) => string[]
 ) {
   function getColor(series: SeriesLayer[]) {
-    const colorFromSettings = colorService.mappedColors.getConfigMapping(series[0].name);
+    const colorFromSettings = colorService.mappedColors.getColorFromConfig(series[0].name);
     const actualColors = colors(series[0].totalSeriesAtDepth);
     const outputColor =
       colorFromSettings || actualColors[series[0].rankAtDepth % actualColors.length];
