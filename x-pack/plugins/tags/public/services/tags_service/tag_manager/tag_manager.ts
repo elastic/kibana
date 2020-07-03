@@ -62,6 +62,10 @@ export class TagManager {
     return this.getResource$(kid).pipe(switchMap((resource) => resource.attachments$));
   }
 
+  public setAttachments$(kid: string, tagIds: string[]) {
+    return from(this.params.attachments.set({ kid, tagIds }));
+  }
+
   public useResource(kid: string): TagAttachment[] {
     const observable = useMemo(() => this.getResourceDataAttachments$(kid), [kid]);
     return useObservable(observable, []);

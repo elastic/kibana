@@ -57,6 +57,7 @@ export const TagPickerForResource: React.FC<TagPickerForResourceProps> = ({
   }
 
   const handleSave = () => {
+    manager!.setAttachments$(kid, selected);
     onSave(selected);
   };
 

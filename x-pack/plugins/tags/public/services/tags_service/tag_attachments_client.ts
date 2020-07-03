@@ -14,6 +14,8 @@ import {
   TagAttachmentClientDeleteParams,
   TagAttachmentClientFindResourcesParams,
   TagAttachmentClientFindResourcesResult,
+  TagAttachmentClientSetParams,
+  TagAttachmentClientSetResult,
 } from '../../../common';
 import { HttpSetup, HttpStart } from '../../../../../../src/core/public';
 
@@ -30,6 +32,12 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     params: TagAttachmentClientCreateParams
   ): Promise<TagAttachmentClientCreateResult> {
     return await this.params.http.post<TagAttachmentClientCreateResult>(`${this.path}/attachment`, {
+      body: JSON.stringify(params),
+    });
+  }
+
+  public async set(params: TagAttachmentClientSetParams): Promise<TagAttachmentClientSetResult> {
+    return await this.params.http.put<TagAttachmentClientSetResult>(`${this.path}/attachment`, {
       body: JSON.stringify(params),
     });
   }
