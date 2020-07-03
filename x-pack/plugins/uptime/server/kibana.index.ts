@@ -49,11 +49,8 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           'configureSettings',
           'show',
           'alerting:show',
-          'actions:show',
           'alerting:save',
-          'actions:save',
           'alerting:delete',
-          'actions:delete',
         ],
       },
       read: {
@@ -64,15 +61,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           all: ['alert'],
           read: [umDynamicSettings.name],
         },
-        ui: [
-          'show',
-          'alerting:show',
-          'actions:show',
-          'alerting:save',
-          'actions:save',
-          'alerting:delete',
-          'actions:delete',
-        ],
+        ui: ['show', 'alerting:show', 'alerting:save', 'alerting:delete'],
       },
     },
   });

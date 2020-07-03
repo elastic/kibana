@@ -666,32 +666,35 @@ export class AlertsClient {
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
-    const actionsClient = await this.getActionsClient();
-    const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
-    const actionResults = await actionsClient.getBulk(actionIds);
     const references: SavedObjectReference[] = [];
-    const actions = alertActions.map(({ id, ...alertAction }, i) => {
-      const actionResultValue = actionResults.find((action) => action.id === id);
-      if (actionResultValue) {
-        const actionRef = `action_${i}`;
-        references.push({
-          id,
-          name: actionRef,
-          type: 'action',
-        });
-        return {
-          ...alertAction,
-          actionRef,
-          actionTypeId: actionResultValue.actionTypeId,
-        };
-      } else {
-        return {
-          ...alertAction,
-          actionRef: '',
-          actionTypeId: '',
-        };
-      }
-    });
+    const actions: RawAlert['actions'] = [];
+    if (alertActions.length) {
+      const actionsClient = await this.getActionsClient();
+      const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
+      const actionResults = await actionsClient.getBulk(actionIds);
+      alertActions.forEach(({ id, ...alertAction }, i) => {
+        const actionResultValue = actionResults.find((action) => action.id === id);
+        if (actionResultValue) {
+          const actionRef = `action_${i}`;
+          references.push({
+            id,
+            name: actionRef,
+            type: 'action',
+          });
+          actions.push({
+            ...alertAction,
+            actionRef,
+            actionTypeId: actionResultValue.actionTypeId,
+          });
+        } else {
+          actions.push({
+            ...alertAction,
+            actionRef: '',
+            actionTypeId: '',
+          });
+        }
+      });
+    }
     return {
       actions,
       references,

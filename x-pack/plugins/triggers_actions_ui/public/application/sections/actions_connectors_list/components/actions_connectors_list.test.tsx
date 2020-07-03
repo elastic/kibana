@@ -62,10 +62,10 @@ describe('actions_connectors_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
@@ -165,10 +165,10 @@ describe('actions_connectors_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
@@ -248,10 +248,10 @@ describe('actions_connectors_list component empty with show only capability', ()
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
@@ -334,10 +334,10 @@ describe('actions_connectors_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
@@ -432,10 +432,10 @@ describe('actions_connectors_list component with disabled items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,

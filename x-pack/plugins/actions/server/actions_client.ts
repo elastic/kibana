@@ -309,14 +309,7 @@ export class ActionsClient {
   }
 
   public async listTypes(): Promise<ActionType[]> {
-    try {
-      await this.authorization.ensureAuthorized('list');
-      return this.actionTypeRegistry.list();
-    } catch {
-      // auditing will log this unauthorized attempt, so we'll return
-      // an empty list to align with the behaviour in the AlertsClient
-      return [];
-    }
+    return this.actionTypeRegistry.list();
   }
 }
 

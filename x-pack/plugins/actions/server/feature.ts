@@ -12,6 +12,7 @@ export const ACTIONS_FEATURE = {
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Actions',
   }),
+  icon: 'bell',
   navLinkId: 'actions',
   app: [],
   privileges: {
@@ -23,7 +24,7 @@ export const ACTIONS_FEATURE = {
         all: [ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
         read: [],
       },
-      ui: [],
+      ui: ['show', 'execute', 'save', 'delete'],
     },
     read: {
       app: [],
@@ -34,7 +35,7 @@ export const ACTIONS_FEATURE = {
         all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE],
         read: [ACTION_SAVED_OBJECT_TYPE],
       },
-      ui: [],
+      ui: ['show', 'execute'],
     },
   },
 };

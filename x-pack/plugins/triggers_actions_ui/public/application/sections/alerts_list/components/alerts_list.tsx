@@ -33,7 +33,11 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
+import {
+  hasDeleteAlertsCapability,
+  hasSaveAlertsCapability,
+  hasExecuteActionsCapability,
+} from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
@@ -66,6 +70,7 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -288,7 +293,8 @@ export const AlertsList: React.FunctionComponent = () => {
               <AlertQuickEditButtons
                 selectedItems={convertAlertsToTableItems(
                   filterAlertsById(alertsState.data, selectedIds),
-                  alertTypesState.data
+                  alertTypesState.data,
+                  { canDelete, canSave, canExecuteActions }
                 )}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
@@ -337,7 +343,11 @@ export const AlertsList: React.FunctionComponent = () => {
         items={
           alertTypesState.isInitialized === false
             ? []
-            : convertAlertsToTableItems(alertsState.data, alertTypesState.data)
+            : convertAlertsToTableItems(alertsState.data, alertTypesState.data, {
+                canDelete,
+                canSave,
+                canExecuteActions,
+              })
         }
         itemId="id"
         columns={alertsTableColumns}
@@ -354,15 +364,12 @@ export const AlertsList: React.FunctionComponent = () => {
           /* Don't display alert count until we have the alert types initialized */
           totalItemCount: alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
         }}
-        selection={
-          canDelete
-            ? {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
-                },
-              }
-            : undefined
-        }
+        selection={{
+          selectable: (alert: AlertTableItem) => alert.isEditable,
+          onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+            setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
+          },
+        }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPage(changedPage);
         }}
@@ -370,7 +377,11 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
-  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data, {
+    canDelete,
+    canSave,
+    canExecuteActions,
+  });
 
   const isFilterApplied = !(
     isEmpty(searchText) &&
@@ -452,11 +463,26 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
-function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
+interface Capabilities {
+  canDelete: boolean;
+  canSave: boolean;
+  canExecuteActions: boolean;
+}
+
+function convertAlertsToTableItems(
+  alerts: Alert[],
+  alertTypesIndex: AlertTypeIndex,
+  capabilities: Capabilities
+) {
   return alerts.map((alert) => ({
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
+    isEditable:
+      capabilities.canDelete &&
+      capabilities.canSave &&
+      (capabilities.canExecuteActions ||
+        (!capabilities.canExecuteActions && !alert.actions.length)),
   }));
 }

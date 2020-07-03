@@ -109,6 +109,7 @@ export type AlertWithoutId = Omit<Alert, 'id'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  isEditable: boolean;
 }
 
 export interface AlertTypeParamsExpressionProps<

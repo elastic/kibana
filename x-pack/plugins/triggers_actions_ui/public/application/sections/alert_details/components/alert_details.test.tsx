@@ -67,6 +67,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
+  hasExecuteActionsCapability: jest.fn(() => true),
 }));
 
 const mockAlertApis = {
@@ -587,6 +588,133 @@ describe('mute button', () => {
       checked: false,
       disabled: true,
     });
+  });
+});
+
+describe('edit button', () => {
+  const actionTypes: ActionType[] = [
+    {
+      id: '.server-log',
+      name: 'Server log',
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'basic',
+    },
+  ];
+
+  it('should render an edit button when alert and actions are editable', () => {
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
+  });
+
+  it('should not render an edit button when alert editable but actions arent', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [
+        {
+          group: 'default',
+          id: uuid.v4(),
+          params: {},
+          actionTypeId: '.server-log',
+        },
+      ],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeFalsy();
+  });
+
+  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    const alert = mockAlert({
+      enabled: true,
+      muteAll: false,
+      actions: [],
+    });
+
+    const alertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: 'alerting',
+    };
+
+    expect(
+      shallow(
+        <AlertDetails
+          alert={alert}
+          alertType={alertType}
+          actionTypes={actionTypes}
+          {...mockAlertApis}
+        />
+      )
+        .find(EuiButtonEmpty)
+        .find('[name="edit"]')
+        .first()
+        .exists()
+    ).toBeTruthy();
   });
 });
 

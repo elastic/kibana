@@ -12,7 +12,7 @@
 
 type Capabilities = Record<string, any>;
 
-const apps = ['apm', 'siem', 'uptime', 'infrastructure'];
+const apps = ['apm', 'siem', 'uptime', 'infrastructure', 'actions'];
 
 function hasCapability(capabilities: Capabilities, capability: string) {
   return apps.some((app) => capabilities[app]?.[capability]);
@@ -23,8 +23,12 @@ function createCapabilityCheck(capability: string) {
 }
 
 export const hasShowAlertsCapability = createCapabilityCheck('alerting:show');
-export const hasShowActionsCapability = createCapabilityCheck('actions:show');
 export const hasSaveAlertsCapability = createCapabilityCheck('alerting:save');
-export const hasSaveActionsCapability = createCapabilityCheck('actions:save');
 export const hasDeleteAlertsCapability = createCapabilityCheck('alerting:delete');
-export const hasDeleteActionsCapability = createCapabilityCheck('actions:delete');
+
+export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
+export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;
+export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.delete;
