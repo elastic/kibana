@@ -24,9 +24,12 @@ import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
@@ -324,7 +327,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -347,7 +350,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'line' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -398,7 +401,7 @@ describe('xy_expression', () => {
             }}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -434,7 +437,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -471,7 +474,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -509,7 +512,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -554,7 +557,7 @@ describe('xy_expression', () => {
             args={multiLayerArgs}
             formatFactory={getFormatSpy}
             timeZone="UTC"
-            chartTheme={{}}
+            chartsThemeService={chartsThemeService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -589,7 +592,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -606,7 +609,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -626,7 +629,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -646,7 +649,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_horizontal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -671,7 +674,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -721,7 +724,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -758,7 +761,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'bar_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -778,7 +781,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], seriesType: 'area_stacked' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -801,7 +804,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -822,7 +825,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="CEST"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -842,7 +845,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [firstLayer] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -869,7 +872,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -890,7 +893,7 @@ describe('xy_expression', () => {
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -990,6 +993,75 @@ describe('xy_expression', () => {
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
         const axes = component.find(Axis);
         expect(axes).toHaveLength(2);
+      });
+    });
+
+    describe('y series coloring', () => {
+      test('color is applied to chart for multiple series', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+                {
+                  forAccessor: 'b',
+                  color: '#FFFF00',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  color: '#FEECDF',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
+        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+      });
+      test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
       });
     });
 
@@ -1196,7 +1268,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], xScaleType: 'ordinal' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1215,7 +1287,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], yScaleType: 'sqrt' }] }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1234,7 +1306,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1252,7 +1324,7 @@ describe('xy_expression', () => {
           data={{ ...data }}
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           timeZone="UTC"
           onClickValue={onClickValue}
@@ -1274,7 +1346,7 @@ describe('xy_expression', () => {
           args={{ ...args }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1359,7 +1431,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1417,7 +1489,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1473,7 +1545,7 @@ describe('xy_expression', () => {
           args={args}
           formatFactory={getFormatSpy}
           timeZone="UTC"
-          chartTheme={{}}
+          chartsThemeService={chartsThemeService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}

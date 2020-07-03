@@ -377,29 +377,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public supportedTriggers() {
-    // TODO: Report a correct list of triggers for each vis_type.
-    switch (this.vis.type.name) {
-      case 'area':
-      case 'heatmap':
-      case 'histogram':
-      case 'horizontal_bar':
-      case 'line':
-      case 'pie':
-      case 'table':
-      case 'tagcloud':
-        return [VIS_EVENT_TO_TRIGGER.filter];
-      case 'gauge':
-      case 'goal':
-      case 'input_control_vis':
-      case 'markdown':
-      case 'metric':
-      case 'metrics':
-      case 'region_map':
-      case 'tile_map':
-      case 'timelion':
-      case 'vega':
-      default:
-        return [];
-    }
+    return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 }
