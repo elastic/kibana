@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '../../../../../../src/core/server';
 import { externalServiceMock, mapping, apiParams } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';

@@ -7,7 +7,6 @@
 import { curry } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-// import { config } from './config';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
