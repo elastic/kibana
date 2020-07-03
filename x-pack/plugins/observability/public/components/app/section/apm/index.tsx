@@ -68,6 +68,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
         defaultMessage: 'Summary',
       })}
       appLink={appLink}
+      hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -113,7 +114,7 @@ export const APMSection = ({ startTime, endTime, bucketSize }: Props) => {
                 id="y-axis"
                 position={Position.Left}
                 showGridLines
-                tickFormat={(value) => numeral(value).format('0.00a')}
+                tickFormat={(value) => `${numeral(value).format('0.00a')} tpm`}
               />
               <Axis id="x-axis" position={Position.Bottom} tickFormat={formatter} />
             </>

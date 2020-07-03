@@ -29,6 +29,7 @@ import { LogsFetchDataResponse } from '../../../../typings';
 import { formatStatValue } from '../../../../utils/format_stat_value';
 import { ChartContainer } from '../../chart_container';
 import { onBrushEnd } from '../helper';
+import { StyledStat } from '../../styled_stat';
 
 interface Props {
   startTime?: string;
@@ -53,6 +54,16 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   const { title = 'Logs', appLink, stats, series } = data || {};
 
+  const availableColors = euiPaletteColorBlind({
+    rotations: data ? Math.ceil(Object.keys(data.series).length / 10) : 1,
+  });
+  const colorsPerItem = stats
+    ? Object.keys(stats).reduce((acc: Record<string, string>, key, index) => {
+        acc[key] = availableColors[index];
+        return acc;
+      }, {})
+    : {};
+
   const customColors = {
     colors: {
       vizColors: euiPaletteColorBlind({
@@ -71,6 +82,7 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
         defaultMessage: 'Logs rate',
       })}
       appLink={appLink}
+      hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>
         {stats &&
@@ -78,11 +90,12 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
             const stat = stats[key as keyof LogsFetchDataResponse['stats']];
             return (
               <EuiFlexItem key={key} grow={false}>
-                <EuiStat
+                <StyledStat
                   title={formatStatValue(stat)}
                   description={stat.label}
                   titleSize="s"
                   isLoading={isLoading}
+                  color={colorsPerItem[key]}
                 />
               </EuiFlexItem>
             );
@@ -92,10 +105,11 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
         <Chart size={{ height: 177 }}>
           <Settings
             onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-            theme={[customColors, theme.darkMode ? DARK_THEME : LIGHT_THEME]}
+            theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
             showLegend
-            legendPosition="bottom"
+            legendPosition={Position.Right}
             xDomain={{ min, max }}
+            showLegendExtra
           />
           {series &&
             Object.keys(series).map((key) => {
@@ -115,6 +129,7 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
                     stackAccessors={['x']}
                     splitSeriesAccessors={['g']}
                     data={chartData}
+                    color={colorsPerItem[key]}
                   />
                   <Axis
                     id="x-axis"

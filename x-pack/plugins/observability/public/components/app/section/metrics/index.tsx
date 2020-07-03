@@ -70,6 +70,7 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
         defaultMessage: 'Summary',
       })}
       appLink={appLink}
+      hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>
         <EuiFlexItem>

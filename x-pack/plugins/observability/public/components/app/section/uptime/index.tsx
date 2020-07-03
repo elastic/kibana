@@ -66,6 +66,7 @@ export const UptimeSection = ({ startTime, endTime, bucketSize }: Props) => {
         defaultMessage: 'Summary',
       })}
       appLink={appLink}
+      hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>
         {/* Stats section */}

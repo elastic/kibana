@@ -7,13 +7,15 @@ import { EuiAccordion, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
+import { ErrorPanel } from './error_panel';
 
 interface Props {
   title: string;
   subtitle: string;
   minHeight: number;
-  appLink?: string;
+  hasError: boolean;
   children: React.ReactNode;
+  appLink?: string;
 }
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
@@ -27,7 +29,14 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-export const SectionContainer = ({ title, appLink, children, subtitle, minHeight }: Props) => {
+export const SectionContainer = ({
+  title,
+  appLink,
+  children,
+  subtitle,
+  minHeight,
+  hasError,
+}: Props) => {
   return (
     <StyledEuiAccordion
       initialIsOpen
@@ -50,12 +59,29 @@ export const SectionContainer = ({ title, appLink, children, subtitle, minHeight
         )
       }
     >
-      <EuiPanel hasShadow style={{ minHeight: `${minHeight}px` }}>
+      <EuiPanel
+        hasShadow
+        style={{
+          minHeight: `${minHeight}px`,
+          /*
+           * This is needed to centralize the error message in the panel.
+           * When a parent container sets min-height its children can't set height:100%
+           * https://bugs.webkit.org/show_bug.cgi?id=26559
+           */
+          height: '1px',
+        }}
+      >
         <EuiTitle size="xs">
           <h3>{subtitle}</h3>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        {children}
+        {hasError ? (
+          <ErrorPanel />
+        ) : (
+          <>
+            <EuiSpacer size="s" />
+            {children}
+          </>
+        )}
       </EuiPanel>
     </StyledEuiAccordion>
   );
