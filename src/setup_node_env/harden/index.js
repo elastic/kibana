@@ -17,7 +17,5 @@
  * under the License.
  */
 
-declare module 'lodash/internal/toPath' {
-  function toPath(value: string | string[]): string[];
-  export = toPath;
-}
+require('./child_process');
+require('./lodash_template');
