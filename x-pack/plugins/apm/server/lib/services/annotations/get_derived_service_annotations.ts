@@ -13,24 +13,29 @@ import {
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
 }) {
   const { start, end, client } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    ...transactionDurationSearchStrategy.documentTypeFilter,
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      useAggregatedTransactions
+    ),
   ];
 
   const environmentFilter = getEnvironmentUiFilterES(environment);
@@ -43,7 +48,11 @@ export async function getDerivedServiceAnnotations({
     (
       await client.search({
         apm: {
-          types: [transactionDurationSearchStrategy.type],
+          types: [
+            getProcessorEventForAggregatedTransactions(
+              useAggregatedTransactions
+            ),
+          ],
         },
         body: {
           size: 0,
@@ -70,7 +79,11 @@ export async function getDerivedServiceAnnotations({
     versions.map(async (version) => {
       const response = await client.search({
         apm: {
-          types: [transactionDurationSearchStrategy.type],
+          types: [
+            getProcessorEventForAggregatedTransactions(
+              useAggregatedTransactions
+            ),
+          ],
         },
         body: {
           size: 0,

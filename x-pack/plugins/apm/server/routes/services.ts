@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 import Boom from 'boom';
-import { unique } from 'lodash';
+import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -16,7 +16,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
-import { getTransactionDurationSearchStrategy } from '../lib/helpers/search_strategies/transaction_duration';
+import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -26,17 +26,16 @@ export const servicesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    const transactionDurationSearchStrategy = await getTransactionDurationSearchStrategy(
-      {
-        client: setup.client,
-        start: setup.start,
-        end: setup.end,
-      }
-    );
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      config: context.config,
+      client: setup.client,
+      start: setup.start,
+      end: setup.end,
+    });
 
     const services = await getServices({
       setup,
-      transactionDurationSearchStrategy,
+      useAggregatedTransactions,
     });
 
     return services;
@@ -72,13 +71,12 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
     return getServiceTransactionTypes({
       serviceName,
       setup,
-      transactionDurationSearchStrategy: await getTransactionDurationSearchStrategy(
-        {
-          start: setup.start,
-          end: setup.end,
-          client: setup.client,
-        }
-      ),
+      useAggregatedTransactions: await getUseAggregatedTransactions({
+        config: context.config,
+        start: setup.start,
+        end: setup.end,
+        client: setup.client,
+      }),
     });
   },
 }));
@@ -117,15 +115,13 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    const [
-      annotationsClient,
-      transactionDurationSearchStrategy,
-    ] = await Promise.all([
+    const [annotationsClient, useAggregatedTransactions] = await Promise.all([
       context.plugins.observability?.getScopedAnnotationsClient(
         context,
         request
       ),
-      getTransactionDurationSearchStrategy({
+      getUseAggregatedTransactions({
+        config: context.config,
         client: setup.client,
         start: setup.start,
         end: setup.end,
@@ -134,7 +130,7 @@ export const serviceAnnotationsRoute = createRoute(() => ({
 
     return getServiceAnnotations({
       setup,
-      transactionDurationSearchStrategy,
+      useAggregatedTransactions,
       serviceName,
       environment,
       annotationsClient,
@@ -194,7 +190,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
         ...body.service,
         name: path.serviceName,
       },
-      tags: unique(['apm'].concat(body.tags ?? [])),
+      tags: uniq(['apm'].concat(body.tags ?? [])),
     });
   },
 }));

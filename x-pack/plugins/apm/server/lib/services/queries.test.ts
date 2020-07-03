@@ -31,14 +31,20 @@ describe('services queries', () => {
 
   it('fetches the service transaction types', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceTransactionTypes('foo', setup)
+      getServiceTransactionTypes({
+        serviceName: 'foo',
+        setup,
+        useAggregatedTransactions: false,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) => getServicesItems(setup));
+    mock = await inspectSearchParams((setup) =>
+      getServicesItems({ setup, useAggregatedTransactions: false })
+    );
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);
 

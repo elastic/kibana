@@ -8,11 +8,10 @@ import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';
-import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
 
 export async function getServiceAnnotations({
   setup,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
   serviceName,
   environment,
   annotationsClient,
@@ -22,7 +21,7 @@ export async function getServiceAnnotations({
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
   annotationsClient?: ScopedAnnotationsClient;
   apiCaller: LegacyAPICaller;
   logger: Logger;
@@ -33,7 +32,7 @@ export async function getServiceAnnotations({
     setup,
     serviceName,
     environment,
-    transactionDurationSearchStrategy,
+    useAggregatedTransactions,
   });
 
   const storedAnnotations = annotationsClient

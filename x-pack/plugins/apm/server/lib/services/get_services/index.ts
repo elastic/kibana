@@ -14,19 +14,18 @@ import {
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
-import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 
 export async function getServices({
   setup,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
 }) {
   const [items, hasLegacyData] = await Promise.all([
-    getServicesItems({ setup, transactionDurationSearchStrategy }),
+    getServicesItems({ setup, useAggregatedTransactions }),
     getLegacyDataStatus(setup),
   ]);
 

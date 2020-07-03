@@ -9,29 +9,36 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { TransactionDurationSearchStrategy } from '../helpers/search_strategies/transaction_duration';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function getServiceTransactionTypes({
   setup,
   serviceName,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
 }) {
   const { start, end, client } = setup;
 
   const params = {
     apm: {
-      types: [transactionDurationSearchStrategy.type],
+      types: [
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+      ],
     },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            ...transactionDurationSearchStrategy.documentTypeFilter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              useAggregatedTransactions
+            ),
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },
           ],

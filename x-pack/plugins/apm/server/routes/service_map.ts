@@ -16,6 +16,7 @@ import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
 import { APM_SERVICE_MAPS_FEATURE_NAME } from '../feature';
+import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -41,7 +42,19 @@ export const serviceMapRoute = createRoute(() => ({
     const {
       query: { serviceName, environment },
     } = context.params;
-    return getServiceMap({ setup, serviceName, environment });
+
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      client: setup.client,
+      config: context.config,
+      start: setup.start,
+      end: setup.end,
+    });
+    return getServiceMap({
+      setup,
+      serviceName,
+      environment,
+      useAggregatedTransactions,
+    });
   },
 }));
 

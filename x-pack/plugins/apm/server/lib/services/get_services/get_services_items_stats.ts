@@ -15,7 +15,11 @@ import {
   ServicesItemsSetup,
   ServicesItemsProjection,
 } from './get_services_items';
-import { TransactionDurationSearchStrategy } from '../../helpers/search_strategies/transaction_duration';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -25,28 +29,32 @@ const getDeltaAsMinutes = (setup: ServicesItemsSetup) =>
 interface AggregationParams {
   setup: ServicesItemsSetup;
   projection: ServicesItemsProjection;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
 }
 
 export const getTransactionDurationAverages = async ({
   setup,
   projection,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: AggregationParams) => {
   const { client } = setup;
 
   const response = await client.search(
     mergeProjection(projection, {
-      size: 0,
       apm: {
-        types: [transactionDurationSearchStrategy.type],
+        types: [
+          getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        ],
       },
       body: {
+        size: 0,
         query: {
           bool: {
             filter: [
               ...projection.body.query.bool.filter,
-              ...transactionDurationSearchStrategy.documentTypeFilter,
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                useAggregatedTransactions
+              ),
             ],
           },
         },
@@ -59,8 +67,9 @@ export const getTransactionDurationAverages = async ({
             aggs: {
               average: {
                 avg: {
-                  field:
-                    transactionDurationSearchStrategy.transactionDurationField,
+                  field: getTransactionDurationFieldForAggregatedTransactions(
+                    useAggregatedTransactions
+                  ),
                 },
               },
             },
@@ -130,13 +139,15 @@ export const getAgentNames = async ({
 export const getTransactionRates = async ({
   setup,
   projection,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: AggregationParams) => {
   const { client } = setup;
   const response = await client.search(
     mergeProjection(projection, {
       apm: {
-        types: [transactionDurationSearchStrategy.type],
+        types: [
+          getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        ],
       },
       body: {
         size: 0,
@@ -144,7 +155,9 @@ export const getTransactionRates = async ({
           bool: {
             filter: [
               ...projection.body.query.bool.filter,
-              ...transactionDurationSearchStrategy.documentTypeFilter,
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                useAggregatedTransactions
+              ),
             ],
           },
         },
@@ -157,8 +170,9 @@ export const getTransactionRates = async ({
             aggs: {
               value_count: {
                 value_count: {
-                  field:
-                    transactionDurationSearchStrategy.transactionDurationField,
+                  field: getTransactionDurationFieldForAggregatedTransactions(
+                    useAggregatedTransactions
+                  ),
                 },
               },
             },

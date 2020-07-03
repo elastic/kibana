@@ -12,21 +12,21 @@ import {
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
-import { TransactionDurationSearchStrategy } from '../lib/helpers/search_strategies/transaction_duration';
+import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export function getServicesProjection({
   setup,
-  transactionDurationSearchStrategy,
+  useAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  transactionDurationSearchStrategy: TransactionDurationSearchStrategy;
+  useAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES } = setup;
 
   return {
     apm: {
       types: [
-        transactionDurationSearchStrategy.type,
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
         ProcessorEvent.metric,
         ProcessorEvent.error,
       ],

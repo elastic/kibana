@@ -30,7 +30,8 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumOverviewProjection } from '../projections/rum_overview';
-import { getTransactionDurationSearchStrategy } from '../lib/helpers/search_strategies/transaction_duration';
+import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { APMRequestHandlerContext } from './typings';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   path: '/api/apm/ui_filters/environments',
@@ -96,6 +97,7 @@ function createLocalFiltersRoute<
       const parsedUiFilters = JSON.parse(uiFilters);
       const projection = await getProjection({
         query,
+        context,
         setup: {
           ...setup,
           uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
@@ -114,16 +116,15 @@ function createLocalFiltersRoute<
 
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
-  getProjection: async ({ setup }) => {
-    const transactionDurationSearchStrategy = await getTransactionDurationSearchStrategy(
-      {
-        start: setup.start,
-        end: setup.end,
-        client: setup.client,
-      }
-    );
+  getProjection: async ({ context, setup }) => {
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      config: context.config,
+      start: setup.start,
+      end: setup.end,
+      client: setup.client,
+    });
 
-    return getServicesProjection({ setup, transactionDurationSearchStrategy });
+    return getServicesProjection({ setup, useAggregatedTransactions });
   },
   queryRt: t.type({}),
 });
@@ -248,7 +249,9 @@ type GetProjection<
 > = ({
   query,
   setup,
+  context,
 }: {
   query: t.TypeOf<TQueryRT>;
   setup: Setup & SetupUIFilters & SetupTimeRange;
+  context: APMRequestHandlerContext;
 }) => Promise<TProjection> | TProjection;
