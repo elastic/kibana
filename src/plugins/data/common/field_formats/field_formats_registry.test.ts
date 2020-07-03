@@ -163,22 +163,4 @@ describe('FieldFormatsRegistry', () => {
       expect(params).toHaveProperty('parsedUrl');
     });
   });
-
-  describe('setCustomParams', () => {
-    test('should provide custom setting to formatters: timezone', () => {
-      fieldFormatsRegistry = new FieldFormatsRegistry();
-      fieldFormatsRegistry.init(
-        getConfig,
-        {
-          parsedUrl: {
-            origin: '',
-            pathname: '',
-            basePath: '',
-          },
-        },
-        []
-      );
-      fieldFormatsRegistry.setCustomParams({ timezone: 'America/New_York' });
-    });
-  });
 });

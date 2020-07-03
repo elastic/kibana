@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../core/server/mocks';
-import { FIELD_FORMAT_IDS } from '../../common';
-import { DateFormat } from './converters/date_server';
 import { FieldFormatsService } from './field_formats_service';
+import { DateFormat } from './converters/date_server';
+import { coreMock } from '../../../../core/server/mocks';
 
 describe('FieldFormatService', () => {
   test('DateFormat is server version', async () => {
@@ -31,24 +30,5 @@ describe('FieldFormatService', () => {
     const DateFormatFromRegsitry = fieldFormatsRegistry.getTypeWithoutMetaParams('date');
 
     expect(DateFormatFromRegsitry).toEqual(DateFormat);
-  });
-});
-
-describe('DateFormat with custom timezone', () => {
-  test('should provide custom setting to formatters: timezone', async () => {
-    const service = new FieldFormatsService();
-    const fieldFormatsService = await service.start();
-    const uiSettings = coreMock.createStart().uiSettings.asScopedToClient({} as any);
-    const fieldFormatsRegistry = await fieldFormatsService.fieldFormatServiceFactory(uiSettings);
-
-    fieldFormatsRegistry.setCustomParams({ timezone: 'America/Phoenix' }); // set the timezone into the registry
-
-    const fieldFormats = fieldFormatsRegistry.getByFieldType(FIELD_FORMAT_IDS.DATE as any);
-    const DateFormatInstance = fieldFormats.find((F) => F.id === 'date');
-    expect(DateFormatInstance).toBeDefined();
-    if (DateFormatInstance) {
-      const formatter = new DateFormatInstance();
-      // how to call the formatter?
-    }
   });
 });
