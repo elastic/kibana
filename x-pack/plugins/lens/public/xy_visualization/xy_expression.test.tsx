@@ -15,6 +15,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  Fit,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -996,6 +997,75 @@ describe('xy_expression', () => {
       });
     });
 
+    describe('y series coloring', () => {
+      test('color is applied to chart for multiple series', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['a', 'b'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+                {
+                  forAccessor: 'b',
+                  color: '#FFFF00',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+              yConfig: [
+                {
+                  forAccessor: 'c',
+                  color: '#FEECDF',
+                },
+              ],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
+        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+      });
+      test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
+        const args = createArgsWithLayers();
+        const newArgs = {
+          ...args,
+          layers: [
+            {
+              ...args.layers[0],
+              accessors: ['a'],
+              yConfig: [
+                {
+                  forAccessor: 'a',
+                  color: '#550000',
+                },
+              ],
+            },
+            {
+              ...args.layers[0],
+              splitAccessor: undefined,
+              accessors: ['c'],
+            },
+          ],
+        } as XYArgs;
+
+        const component = getRenderedComponent(dataWithoutFormats, newArgs);
+        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
+        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
+      });
+    });
+
     describe('provides correct series naming', () => {
       const nameFnArgs = {
         seriesKeys: [],
@@ -1484,6 +1554,67 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should apply the fitting function to all non-bar series', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: createSampleDatatableWithRows([
+            { a: 1, b: 2, c: 'I', d: 'Foo' },
+            { a: 1, b: 5, c: 'J', d: 'Bar' },
+          ]),
+        },
+      };
+
+      const args: XYArgs = createArgsWithLayers([
+        { ...sampleLayer, accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'] },
+      ]);
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args, fittingFunction: 'Carry' }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
+      // stacked area series doesn't get the fit prop
+      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
+    });
+
+    test('it should apply None fitting function if not specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.layers[0].accessors = ['a'];
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
     });
   });
 });
