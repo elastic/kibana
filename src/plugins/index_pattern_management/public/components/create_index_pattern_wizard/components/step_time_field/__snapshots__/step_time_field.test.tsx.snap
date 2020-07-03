@@ -75,22 +75,33 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
 exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
 <EuiFlexGroup
   alignItems="center"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
 >
   <EuiFlexItem
     grow={false}
   >
-    <EuiLoadingSpinner />
+    <EuiTitle
+      size="s"
+    >
+      <h3
+        className="eui-textCenter"
+      >
+        <FormattedMessage
+          defaultMessage="Creating index pattern…"
+          id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
+          values={Object {}}
+        />
+      </h3>
+    </EuiTitle>
   </EuiFlexItem>
   <EuiFlexItem
     grow={false}
   >
-    <EuiText>
-      <FormattedMessage
-        defaultMessage="Creating index pattern…"
-        id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
-        values={Object {}}
-      />
-    </EuiText>
+    <EuiLoadingSpinner
+      size="l"
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

@@ -22,12 +22,14 @@ import React, { ReactElement, Component } from 'react';
 import {
   EuiGlobalToastList,
   EuiGlobalToastListToast,
-  EuiPanel,
+  EuiPageContent,
   EuiSwitchEvent,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -51,6 +53,7 @@ interface CreateIndexPatternWizardState {
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
+  docLinks: DocLinksStart;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -77,6 +80,7 @@ export class CreateIndexPatternWizard extends Component<
       isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
+      docLinks: context.services.docLinks,
     };
   }
 
@@ -224,11 +228,14 @@ export class CreateIndexPatternWizard extends Component<
     return (
       <Header
         prompt={this.state.indexPatternCreationType.renderPrompt()}
-        showSystemIndices={this.state.indexPatternCreationType.getShowSystemIndices()}
+        showSystemIndices={
+          this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
+        }
         isIncludingSystemIndices={isIncludingSystemIndices}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        docLinks={this.state.docLinks}
       />
     );
   }
@@ -257,30 +264,39 @@ export class CreateIndexPatternWizard extends Component<
       );
     }
 
+    const header = this.renderHeader();
+
     if (step === 1) {
       const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
       return (
-        <StepIndexPattern
-          allIndices={allIndices}
-          initialQuery={indexPattern || initialQuery}
-          isIncludingSystemIndices={isIncludingSystemIndices}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-          goToNextStep={this.goToTimeFieldStep}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepIndexPattern
+            allIndices={allIndices}
+            initialQuery={indexPattern || initialQuery}
+            isIncludingSystemIndices={isIncludingSystemIndices}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+            goToNextStep={this.goToTimeFieldStep}
+          />
+        </EuiPageContent>
       );
     }
 
     if (step === 2) {
       return (
-        <StepTimeField
-          indexPattern={indexPattern}
-          goToPreviousStep={this.goToIndexPatternStep}
-          createIndexPattern={this.createIndexPattern}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-          selectedTimeField={this.state.selectedTimeField}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepTimeField
+            indexPattern={indexPattern}
+            goToPreviousStep={this.goToIndexPatternStep}
+            createIndexPattern={this.createIndexPattern}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+          />
+        </EuiPageContent>
       );
     }
 
@@ -294,15 +310,11 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   render() {
-    const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div>
-          {header}
-          {content}
-        </div>
+      <>
+        {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={({ id }) => {
@@ -310,7 +322,7 @@ export class CreateIndexPatternWizard extends Component<
           }}
           toastLifeTimeMs={6000}
         />
-      </EuiPanel>
+      </>
     );
   }
 }

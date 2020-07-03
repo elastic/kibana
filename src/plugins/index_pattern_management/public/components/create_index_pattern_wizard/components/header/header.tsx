@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiBetaBadge,
   EuiSpacer,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
-  EuiTextColor,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiIcon,
-  EuiHorizontalRule,
+  EuiCode,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DocLinksStart } from 'kibana/public';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
@@ -45,6 +43,7 @@ export const Header = ({
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
   isBeta = false,
+  docLinks,
 }: {
   prompt?: React.ReactNode;
   indexPatternName: string;
@@ -52,6 +51,7 @@ export const Header = ({
   isIncludingSystemIndices: boolean;
   onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isBeta?: boolean;
+  docLinks: DocLinksStart;
 }) => {
   const changeTitle = useKibana<IndexPatternManagmentContext>().services.chrome.docTitle.change;
   const createIndexPatternHeader = i18n.translate(
@@ -62,19 +62,6 @@ export const Header = ({
     }
   );
 
-  const createIndexPatternLabel = i18n.translate('indexPatternManagement.createIndexPatternLabel', {
-    defaultMessage:
-      'An index pattern can match a single source, for example, filebeat-4-3-22, or multiple data sources, filebeat-*. {docsLink}',
-    values: {
-      docsLink:
-        '<a href="https://www.elastic.co/guide/en/kibana/current/tutorial-define-index.html" target="_blank" rel="noopener noreferrer">' +
-        i18n.translate('indexPatternManagement.indexPatternDocLink', {
-          defaultMessage: 'Read documentation',
-        }) +
-        '</a>',
-    },
-  });
-
   changeTitle(createIndexPatternHeader);
 
   return (
@@ -83,53 +70,61 @@ export const Header = ({
         <h1>
           {createIndexPatternHeader}
           {isBeta ? (
-            <Fragment>
+            <>
               {' '}
               <EuiBetaBadge
                 label={i18n.translate('indexPatternManagement.createIndexPattern.betaLabel', {
                   defaultMessage: 'Beta',
                 })}
               />
-            </Fragment>
+            </>
           ) : null}
         </h1>
       </EuiTitle>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <EuiTextColor
-              color="subdued"
-              dangerouslySetInnerHTML={{ __html: createIndexPatternLabel }}
+      <EuiSpacer size="s" />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.createIndexPattern.description"
+            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
+            values={{
+              multiple: <strong>multiple</strong>,
+              single: <EuiCode>filebeat-4-3-22</EuiCode>,
+              star: <EuiCode>filebeat-*</EuiCode>,
+            }}
+          />
+          <br />
+          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.documentation"
+              defaultMessage="Read documentation"
             />
-            <EuiIcon type="popout" size="s" />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiLink>
+        </p>
+      </EuiText>
       {showSystemIndices ? (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.includeSystemAAndHiddenIndicesToggleSwitchLabel"
-                  defaultMessage="Include system and hidden indices"
-                />
-              }
-              id="checkboxShowSystemIndices"
-              checked={isIncludingSystemIndices}
-              onChange={onChangeIncludingSystemIndices}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer />
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                defaultMessage="Include system and hidden indices"
+              />
+            }
+            id="checkboxShowSystemIndices"
+            checked={isIncludingSystemIndices}
+            onChange={onChangeIncludingSystemIndices}
+          />
+        </>
       ) : null}
 
       {prompt ? (
-        <Fragment>
-          <EuiSpacer size="s" />
+        <>
+          <EuiSpacer size="m" />
           {prompt}
-        </Fragment>
+        </>
       ) : null}
-      <EuiHorizontalRule />
     </div>
   );
 };

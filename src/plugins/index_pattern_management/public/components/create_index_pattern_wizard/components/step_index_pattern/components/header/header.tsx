@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
       </h2>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup>
       <EuiFlexItem>
         <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
@@ -77,18 +77,18 @@ export const Header: React.FC<HeaderProps> = ({
             isInvalid={isInputInvalid}
             error={errors}
             helpText={
-              <div>
-                <p>
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.step.indexPattern.allowDisallowLabel"
-                    defaultMessage="You can use a {asterisk} as a wildcard in your index pattern. You can't use spaces or the characters {characterList}."
-                    values={{
-                      asterisk: <strong>*</strong>,
-                      characterList: <strong>{characterList}</strong>,
-                    }}
-                  />
-                </p>
-              </div>
+              <>
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
+                  defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                  values={{ asterisk: <strong>*</strong> }}
+                />{' '}
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
+                  defaultMessage="Spaces and the characters {characterList} are not allowed."
+                  values={{ characterList: <strong>{characterList}</strong> }}
+                />
+              </>
             }
           >
             <EuiFieldText
@@ -109,17 +109,21 @@ export const Header: React.FC<HeaderProps> = ({
         </EuiForm>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          iconType="arrowRight"
-          onClick={() => goToNextStep(query)}
-          isDisabled={isNextStepDisabled}
-          data-test-subj="createIndexPatternGoToStep2Button"
-        >
-          <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.step.nextStepButton"
-            defaultMessage="Next step"
-          />
-        </EuiButton>
+        <EuiFormRow hasEmptyLabelSpace>
+          <EuiButton
+            fill
+            iconSide="right"
+            iconType="arrowRight"
+            onClick={() => goToNextStep(query)}
+            isDisabled={isNextStepDisabled}
+            data-test-subj="createIndexPatternGoToStep2Button"
+          >
+            <FormattedMessage
+              id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+              defaultMessage="Next step"
+            />
+          </EuiButton>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>

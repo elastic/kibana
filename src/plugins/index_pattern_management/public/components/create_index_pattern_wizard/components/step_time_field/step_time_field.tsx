@@ -22,7 +22,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
   EuiHorizontalRule,
@@ -185,17 +185,20 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
     if (isCreating) {
       return (
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner />
+            <EuiTitle size="s">
+              <h3 className="eui-textCenter">
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
+                  defaultMessage="Creating index pattern…"
+                />
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
-                defaultMessage="Creating index pattern…"
-              />
-            </EuiText>
+            <EuiLoadingSpinner size="l" />
           </EuiFlexItem>
         </EuiFlexGroup>
       );

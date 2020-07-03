@@ -16,11 +16,9 @@ exports[`Header should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiText
-    color="subdued"
-  >
+  <EuiText>
     <FormattedMessage
-      defaultMessage="You've defined {indexPattern} as your {indexPatternName}. Now you can specify some settings before we create it."
+      defaultMessage="Specify settings for your {indexPattern} {indexPatternName}."
       id="indexPatternManagement.createIndexPattern.stepTimeLabel"
       values={
         Object {
