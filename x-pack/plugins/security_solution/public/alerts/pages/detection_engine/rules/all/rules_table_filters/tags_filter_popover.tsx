@@ -61,6 +61,7 @@ export const TagsFilterPopoverComponent = ({
       isOpen={isTagPopoverOpen}
       closePopover={() => setIsTagPopoverOpen(!isTagPopoverOpen)}
       panelPaddingSize="none"
+      repositionOnScroll
     >
       <ScrollableDiv>
         {tags.map((tag, index) => (

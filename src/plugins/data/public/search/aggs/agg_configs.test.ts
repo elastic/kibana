@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
@@ -166,7 +166,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
       const sorted = ac.getRequestAggs();
-      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
+      const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.histogram);
@@ -189,7 +189,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
       const sorted = ac.getResponseAggs();
-      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
+      const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.date_histogram);
@@ -206,7 +206,7 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
       const sorted = ac.getResponseAggs();
-      const aggs = indexBy(ac.aggs, (agg) => agg.type.name);
+      const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
       expect(sorted.shift()).toBe(aggs.terms);
       expect(sorted.shift()).toBe(aggs.date_histogram);

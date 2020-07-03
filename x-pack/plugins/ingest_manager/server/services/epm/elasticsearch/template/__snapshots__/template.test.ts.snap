@@ -2,7 +2,7 @@
 
 exports[`tests loading base.yml: base.yml 1`] = `
 {
-  "priority": 1,
+  "priority": 200,
   "index_patterns": [
     "foo-*"
   ],
@@ -105,7 +105,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
 
 exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
-  "priority": 1,
+  "priority": 200,
   "index_patterns": [
     "foo-*"
   ],
@@ -208,7 +208,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 
 exports[`tests loading system.yml: system.yml 1`] = `
 {
-  "priority": 1,
+  "priority": 200,
   "index_patterns": [
     "whatsthis-*"
   ],
