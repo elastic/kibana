@@ -28,7 +28,7 @@ describe('EmailParamsFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="toEmailAddressInput"]').first().prop('selectedOptions')
     ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="subjectInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
   });
 });
