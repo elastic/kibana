@@ -98,12 +98,12 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * Used when looking a the Ingest create/edit package config pages. Finds the endpoint
      * custom configuaration component
      * @param onEditPage
      */
-    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    async findPackageConfigEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**

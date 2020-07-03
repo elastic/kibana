@@ -15,7 +15,7 @@ import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/vi
 
 interface Props {
   layerId: string;
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
   source: IEmsFileSource;
   tooltipFields: IField[];
 }
