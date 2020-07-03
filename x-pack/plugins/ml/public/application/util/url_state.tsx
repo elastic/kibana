@@ -5,7 +5,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -56,13 +56,14 @@ export function parseUrlState(search: string): Dictionary<any> {
 // - `history.push()` is the successor of `save`.
 // - The exposed state and set call make use of the above and make sure that
 //   different urlStates(e.g. `_a` / `_g`) don't overwrite each other.
-export const useUrlState = (defaultAccessor: string): UrlState => {
+// This uses a context to be able to maintain only one instance
+// of the url state. It gets passed down with `UrlStateProvider`
+// and can be used via `useUrlState`.
+export const urlStateStore = createContext({});
+const { Provider } = urlStateStore;
+export const UrlStateProvider = ({ children }) => {
   const history = useHistory();
   const { search: locationSearchString } = useLocation();
-
-  // Note that `accessor` is used like a factory/provider value,
-  // updates to it will not be considered.
-  const [accessor] = useState(defaultAccessor);
 
   // We maintain a local state of useLocation's search.
   // This allows us to use the callback variant of setSearch()
@@ -78,14 +79,9 @@ export const useUrlState = (defaultAccessor: string): UrlState => {
   }, [locationSearchString]);
 
   // Any change to the search string we maintain in our own state
-  // should trigger a possible URL update. However, we only
-  // push to history if something related to the accessor of this
-  // url state instance is affected (e.g. a change in '_g' should
-  // not trigger a push in the '_a' instance).
+  // should trigger a possible URL update.
   useEffect(() => {
-    if (
-      !isEqual(parseUrlState(locationSearchString)[accessor], parseUrlState(searchString)[accessor])
-    ) {
+    if (locationSearchString !== searchString) {
       history.push({ search: searchString });
     }
     // `locationSearchString` is not part of this comparator since we only want
@@ -95,7 +91,7 @@ export const useUrlState = (defaultAccessor: string): UrlState => {
   }, [searchString]);
 
   const setUrlState = useCallback(
-    (attribute: string | Dictionary<any>, value?: any) => {
+    (accessor: string, attribute: string | Dictionary<any>, value?: any) => {
       setSearchString((prevSearchString) => {
         const urlState = parseUrlState(prevSearchString);
         const parsedQueryString = parse(prevSearchString, { sort: false });
@@ -151,7 +147,15 @@ export const useUrlState = (defaultAccessor: string): UrlState => {
     [searchString]
   );
 
-  const urlState = useMemo(() => parseUrlState(searchString)[accessor], [searchString]);
+  const urlState = useMemo(() => parseUrlState(searchString), [searchString]);
 
-  return [urlState, setUrlState];
+  return <Provider value={{ urlState, setUrlState }}>{children}</Provider>;
+};
+
+export const useUrlState = (accessor: string) => {
+  const { urlState, setUrlState } = useContext(urlStateStore);
+  return [
+    typeof urlState !== 'object' ? undefined : urlState[accessor],
+    (attribute: string | Dictionary<any>, value?: any) => setUrlState(accessor, attribute, value),
+  ];
 };
