@@ -135,41 +135,32 @@ export const useWithSource = (
             },
           },
         });
-        if (!isSubscribed) {
-          return setState((prevState) => ({
-            ...prevState,
-            loading: false,
-          }));
-        }
 
-        setState({
-          loading: false,
-          indicesExist: indicesExistOrDataTemporarilyUnavailable(
-            get('data.source.status.indicesExist', result)
-          ),
-          browserFields: getBrowserFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          indexPattern: getIndexFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          errorMessage: null,
-        });
+        if (isSubscribed) {
+          setState({
+            loading: false,
+            indicesExist: indicesExistOrDataTemporarilyUnavailable(
+              get('data.source.status.indicesExist', result)
+            ),
+            browserFields: getBrowserFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            indexPattern: getIndexFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            errorMessage: null,
+          });
+        }
       } catch (error) {
-        if (!isSubscribed) {
-          return setState((prevState) => ({
+        if (isSubscribed) {
+          setState((prevState) => ({
             ...prevState,
             loading: false,
+            errorMessage: error.message,
           }));
         }
-
-        setState((prevState) => ({
-          ...prevState,
-          loading: false,
-          errorMessage: error.message,
-        }));
       }
     }
 
