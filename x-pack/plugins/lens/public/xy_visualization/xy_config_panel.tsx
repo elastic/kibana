@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiSuperSelect,
   EuiFormRow,
-  EuiIcon,
   EuiPopover,
   EuiText,
   EuiSelect,
@@ -43,6 +42,30 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
     layers: newLayers,
   };
 }
+
+const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+  {
+    id: `xy_legend_auto`,
+    value: 'auto',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
+      defaultMessage: 'auto',
+    }),
+  },
+  {
+    id: `xy_legend_show`,
+    value: 'show',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
+      defaultMessage: 'show',
+    }),
+  },
+  {
+    id: `xy_legend_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
+      defaultMessage: 'hide',
+    }),
+  },
+];
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -95,7 +118,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const hasNonBarSeries = props.state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
-  // props.state?.
   const legendMode =
     props.state?.legend.isVisible && !props.state?.legend.showSingleMetric
       ? 'auto'
@@ -174,29 +196,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               name="legendDisplay"
               buttonSize="compressed"
               className="eui-displayInlineBlock"
-              options={[
-                {
-                  id: `${idPrefix}auto`,
-                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
-                    defaultMessage: 'auto',
-                  }),
-                },
-                {
-                  id: `${idPrefix}show`,
-                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
-                    defaultMessage: 'show',
-                  }),
-                },
-                {
-                  id: `${idPrefix}hide`,
-                  label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
-                    defaultMessage: 'hide',
-                  }),
-                },
-              ]}
-              idSelected={`${idPrefix}${legendMode}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as 'auto' | 'hide' | 'show';
+              options={legendOptions}
+              idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
+              onChange={(optionId) => {
+                const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
                 if (newMode === 'auto') {
                   props.setState({
                     ...props.state,
@@ -223,6 +226,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             })}
           >
             <EuiSelect
+              disabled={legendMode === 'hide'}
+              compressed
               options={[
                 { value: Position.Top, text: 'Top' },
                 { value: Position.Left, text: 'Left' },

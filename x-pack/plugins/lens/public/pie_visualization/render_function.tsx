@@ -55,6 +55,7 @@ export function PieComponent(
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    legendPosition,
     nestedLegend,
     percentDecimals,
     hideLabels,
@@ -237,6 +238,7 @@ export function PieComponent(
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
           }
+          legendPosition={legendPosition || 'right'}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={(args) => {
             const context = getFilterContext(
