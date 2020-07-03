@@ -32,7 +32,7 @@ import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
-import { useAddOrUpdateException } from '../../../../alerts/containers/detection_engine/alerts/use_add_exception';
+import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,

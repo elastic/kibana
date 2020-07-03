@@ -5,19 +5,19 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { KibanaServices } from '../../../../common/lib/kibana';
+import { KibanaServices } from '../../../common/lib/kibana';
 
-import * as alertsApi from './api';
-import * as listsApi from '../../../../../../lists/public/exceptions/api';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
-import { getUpdateExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
+import * as alertsApi from '../../../alerts/containers/detection_engine/alerts/api';
+import * as listsApi from '../../../../../lists/public/exceptions/api';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
+import { createKibanaCoreStartMock } from '../../../common/mock/kibana_core';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../../../lists/common/schemas';
+} from '../../../lists_plugin_deps';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -27,7 +27,7 @@ import {
 
 const mockKibanaHttpService = createKibanaCoreStartMock().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });

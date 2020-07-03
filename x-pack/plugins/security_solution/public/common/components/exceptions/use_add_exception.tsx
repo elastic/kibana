@@ -5,17 +5,18 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
+  addExceptionListItem,
+  updateExceptionListItem,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../../../../lists/common/schemas';
-import { addExceptionListItem, updateExceptionListItem } from '../../../../lists_plugin_deps';
-import { updateAlertStatus } from './api';
-import { getUpdateAlertsQuery } from '../../../components/alerts_table/actions';
-import { formatExceptionItemForUpdate } from '../../../../common/components/exceptions/helpers';
+} from '../../../lists_plugin_deps';
+import { updateAlertStatus } from '../../../alerts/containers/detection_engine/alerts/api';
+import { getUpdateAlertsQuery } from '../../../alerts/components/alerts_table/actions';
+import { formatExceptionItemForUpdate } from './helpers';
 
 /**
  * Adds exception items to the list. Also optionally closes alerts.

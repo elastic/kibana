@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');
 
 describe('ExceptionsViewer', () => {
-  const ruleName = "test rule";
+  const ruleName = 'test rule';
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
