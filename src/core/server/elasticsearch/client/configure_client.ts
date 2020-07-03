@@ -38,7 +38,8 @@ const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (err, event) => {
     if (err) {
       logger.error(`${err.name}: ${err.message}`);
-    } else if (logQueries) {
+    }
+    if (event && logQueries) {
       const params = event.meta.request.params;
 
       // definition is wrong, `params.querystring` can be either a string or an object

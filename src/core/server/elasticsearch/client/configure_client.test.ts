@@ -179,6 +179,45 @@ describe('configureClient', () => {
       `);
     });
 
+    it('logs queries even in case of errors if `logQueries` is true', () => {
+      const client = configureClient(
+        createFakeConfig({
+          logQueries: true,
+        }),
+        { logger, scoped: false }
+      );
+
+      const response = createApiResponse({
+        statusCode: 500,
+        body: {
+          error: {
+            type: 'internal server error',
+          },
+        },
+        params: {
+          method: 'GET',
+          path: '/foo',
+          querystring: { hello: 'dolly' },
+        },
+      });
+      client.emit('response', new errors.ResponseError(response), response);
+
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "500
+        GET /foo
+        hello=dolly",
+            Object {
+              "tags": Array [
+                "query",
+              ],
+            },
+          ],
+        ]
+      `);
+    });
+
     it('does not log queries if `logQueries` is false', () => {
       const client = configureClient(
         createFakeConfig({
