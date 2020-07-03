@@ -275,7 +275,12 @@ export type To = t.TypeOf<typeof to>;
 export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
-export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
+export const type = t.keyof({
+  machine_learning: null,
+  query: null,
+  saved_query: null,
+  treshold: null,
+});
 export type Type = t.TypeOf<typeof type>;
 
 export const typeOrUndefined = t.union([type, t.undefined]);

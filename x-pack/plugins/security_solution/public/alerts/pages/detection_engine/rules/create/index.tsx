@@ -286,6 +286,8 @@ const CreateRulePageComponent: React.FC = () => {
     return null;
   }
 
+  console.error('aaa', stepsData);
+
   return (
     <>
       <WrapperPage restrictWidth>
