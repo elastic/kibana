@@ -22,5 +22,7 @@ export async function testRunner({ getService }: FtrProviderContext) {
   });
   const fieldCount = Object.keys(fields).length;
   log.debug('Saved Objects field count');
-  await reporter.metrics([{ group: 'Saved Objects field count', id: 'total', value: fieldCount }]);
+  await reporter.metrics([
+    { group: 'Saved Objects field count (see #43673)', id: 'total', value: fieldCount },
+  ]);
 }
