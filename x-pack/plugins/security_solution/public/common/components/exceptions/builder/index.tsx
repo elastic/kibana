@@ -43,7 +43,7 @@ interface OnChangeProps {
 }
 
 interface ExceptionBuilderProps {
-  exceptionListItems: ExceptionListItemSchema[];
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
   listType: 'detection' | 'endpoint';
   listId: string;
   listNamespaceType: NamespaceType;

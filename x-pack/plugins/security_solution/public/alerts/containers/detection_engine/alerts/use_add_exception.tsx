@@ -14,7 +14,6 @@ import {
 } from '../../../../../../lists/common/schemas';
 import { addExceptionListItem, updateExceptionListItem } from '../../../../lists_plugin_deps';
 import { updateAlertStatus } from './api';
-// TODO: move getUpdatedAlertsQuery to api.ts
 import { getUpdateAlertsQuery } from '../../../components/alerts_table/actions';
 import { formatExceptionItemForUpdate } from '../../../../common/components/exceptions/helpers';
 
@@ -76,10 +75,7 @@ export const useAddOrUpdateException = ({
         }
       );
 
-      console.log('exceptionItemsToAdd', toAdd);
-      console.log('exceptionItemToEdit', toUpdate);
       const promises: Array<Promise<ExceptionListItemSchema>> = [];
-      // TODO: use bulk api
       toAdd.forEach((item: CreateExceptionListItemSchema) => {
         promises.push(
           addExceptionListItem({
@@ -89,7 +85,6 @@ export const useAddOrUpdateException = ({
           })
         );
       });
-      // TODO: use bulk api
       toUpdate.forEach((item: UpdateExceptionListItemSchema) => {
         promises.push(
           updateExceptionListItem({

@@ -7,7 +7,6 @@ import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } fro
 import {
   ExceptionList,
   ExceptionListType,
-  ExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionIdentifiers,
   Pagination,

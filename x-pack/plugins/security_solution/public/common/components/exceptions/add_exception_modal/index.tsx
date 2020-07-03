@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useEffect, useState, useCallback } from 'react';
+import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -25,6 +25,7 @@ import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData } from '../../../../graphql/types';
@@ -45,19 +46,17 @@ import {
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules';
 
-// TODO: move somewhere else?
-// TODO: rename?
 export interface AddExceptionOnClick {
   ruleName: string;
   ruleId: string;
-  exceptionListType: 'endpoint' | 'detection';
+  exceptionListType: ExceptionListType;
   alertData: TimelineNonEcsData[] | undefined;
 }
 
 interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
-  exceptionListType: 'endpoint' | 'detection';
+  exceptionListType: ExceptionListType;
   alertData?: TimelineNonEcsData[];
   onCancel: () => void;
   onConfirm: () => void;
@@ -160,14 +159,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     onError: onFetchOrCreateExceptionListError,
   });
 
-  const initialExceptionItems = useCallback(() => {
-    if (alertData !== undefined && ruleExceptionList) {
+  const initialExceptionItems = useMemo(() => {
+    if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
       return defaultEndpointExceptionItems(
         exceptionListType,
         ruleExceptionList.list_id,
         ruleName,
         alertData
       );
+    } else {
+      return [];
     }
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
@@ -214,14 +215,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = alertData ? ['windows'] : ['windows', 'macos', 'linux']; // TODO: use alert data instead
+      const osTypes = alertData ? ['windows'] : ['windows', 'macos', 'linux'];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback(() => {
-    // TODO: if close checkbox is selected, refresh signals table
     if (addOrUpdateExceptionItems !== null) {
       addOrUpdateExceptionItems(enrichExceptionItems());
     }
@@ -267,10 +267,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilder
-                  exceptionListItems={
-                    exceptionListType === 'endpoint' ? initialExceptionItems() : []
-                  }
-                  listType={exceptionListType}
+                  exceptionListItems={initialExceptionItems}
+                  listType={exceptionListType as 'endpoint' | 'detection'}
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}

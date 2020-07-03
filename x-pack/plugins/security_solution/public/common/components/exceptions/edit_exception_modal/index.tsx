@@ -26,6 +26,7 @@ import { useSignalIndex } from '../../../../alerts/containers/detection_engine/a
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
@@ -44,7 +45,7 @@ import {
 interface EditExceptionModalProps {
   ruleName: string;
   exceptionItem: ExceptionListItemSchema;
-  exceptionListType: 'endpoint' | 'detection';
+  exceptionListType: ExceptionListType;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -134,8 +135,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     indexPatterns,
   ]);
 
-  // TODO: needs to store the whole object because we need to keep track of deteled items
-  // not just newly created ones
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
@@ -168,7 +167,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       ...(comment !== '' ? [{ comment }] : []),
     ]);
     if (exceptionListType === 'endpoint') {
-      // TODO: dont hardcode 'windows'
       const osTypes = exceptionItem._tags ? getOsTagValues(exceptionItem._tags) : ['windows'];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
@@ -203,7 +201,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection className="builder-section">
               <ExceptionBuilder
                 exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
+                listType={exceptionListType as 'endpoint' | 'detection'}
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}

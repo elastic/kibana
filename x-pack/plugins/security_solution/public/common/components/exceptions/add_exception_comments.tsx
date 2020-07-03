@@ -105,7 +105,7 @@ export const AddExceptionComments = memo(function AddExceptionComments({
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
           <MyAvatar
-            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''} // TODO: Still need to standardize this
+            name={currentUser !== null ? currentUser.username.toUpperCase() ?? '' : ''}
             size="l"
           />
         </EuiFlexItem>

@@ -7,7 +7,10 @@
 import { useEffect, useState } from 'react';
 import { HttpStart } from '../../../../../../../src/core/public';
 
-import { ExceptionListSchema } from '../../../../../lists/common/schemas';
+import {
+  ExceptionListSchema,
+  CreateExceptionListSchema,
+} from '../../../../../lists/common/schemas';
 import { Rule } from '../../../alerts/containers/detection_engine/rules/types';
 import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
 import { fetchRuleById, patchRule } from '../../../alerts/containers/detection_engine/rules/api';
@@ -48,14 +51,13 @@ export const useFetchOrCreateRuleExceptionList = ({
     const abortCtrl = new AbortController();
 
     async function createExceptionList(ruleResponse: Rule): Promise<ExceptionListSchema> {
-      const exceptionListToCreate = {
+      const exceptionListToCreate: CreateExceptionListSchema = {
         name: ruleResponse.name,
         description: ruleResponse.description,
         type: exceptionListType,
         namespace_type: exceptionListType === 'endpoint' ? 'agnostic' : 'single',
         _tags: undefined,
         tags: undefined,
-        // TODO: Make this a constant that's shared throughout the app
         list_id: exceptionListType === 'endpoint' ? 'endpoint_list' : undefined,
         meta: undefined,
       };
@@ -67,7 +69,6 @@ export const useFetchOrCreateRuleExceptionList = ({
         });
         return Promise.resolve(newExceptionList);
       } catch (error) {
-        // TODO: properly handle 409 conflict if exception list already exists
         return Promise.reject(error);
       }
     }
@@ -107,11 +108,8 @@ export const useFetchOrCreateRuleExceptionList = ({
     }
 
     async function fetchRuleExceptionLists(ruleResponse: Rule): Promise<ExceptionListSchema[]> {
-      // TODO: what happens if the user deleted the exception list but didn't update the reference in the rule?
-      // TODO: fix type
       const exceptionListReferences = ruleResponse.exceptions_list as ListArray;
       if (exceptionListReferences && exceptionListReferences.length > 0) {
-        // TODO: use bulk api
         const exceptionListPromises = exceptionListReferences.map(
           (exceptionListReference: List) => {
             return fetchExceptionListById({
@@ -137,7 +135,6 @@ export const useFetchOrCreateRuleExceptionList = ({
         let exceptionListToUse: ExceptionListSchema;
         const matchingList = exceptionLists.find((list) => {
           if (exceptionListType === 'endpoint') {
-            // TODO: use endpoint list_id constant
             return list.type === exceptionListType && list.list_id === 'endpoint_list';
           } else {
             return list.type === exceptionListType;

@@ -36,6 +36,7 @@ import {
   createExceptionListItemSchema,
   exceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../lists_plugin_deps';
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 
@@ -160,7 +161,7 @@ export const formatEntry = ({
 export const getOperatingSystems = (tags: string[]): string => {
   const osMatches = tags
     .filter((tag) => tag.startsWith('os:'))
-    .map((os) => capitalize(os.substring(3).trim())) // TODO: needs to change for macOS i believe
+    .map((os) => capitalize(os.substring(3).trim()))
     .join(', ');
 
   return osMatches;
@@ -308,7 +309,7 @@ export const getNewExceptionItem = ({
   namespaceType,
   ruleName,
 }: {
-  listType: 'detection' | 'endpoint';
+  listType: ExceptionListType;
   listId: string;
   namespaceType: NamespaceType;
   ruleName: string;
@@ -445,15 +446,12 @@ export const entryHasNonEcsType = (
   return false;
 };
 
-// TODO: abstract out types
-// TODO: should we use match or match_any for these default values?
-// TODO: check autocomplete or editing of text in builder
 export const defaultEndpointExceptionItems = (
-  listType: 'detection' | 'endpoint',
+  listType: ExceptionListType,
   listId: string,
   ruleName: string,
   alertData: TimelineNonEcsData[]
-): CreateExceptionListItemSchema[] => {
+): ExceptionsBuilderExceptionItem[] => {
   const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' }) ?? [];
   const [signatureSigner] =
     getMappedNonEcsValue({ data: alertData, fieldName: 'file.Ext.code_signature.subject_name' }) ??

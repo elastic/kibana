@@ -50,18 +50,12 @@ const initialState: State = {
   exceptionListTypeToEdit: null,
 };
 
-enum ModalAction {
-  CREATE = 'CREATE',
-  EDIT = 'EDIT',
-}
-
 interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
-  onAssociateList?: (listId: string) => void;
 }
 
 const ExceptionsViewerComponent = ({
@@ -69,7 +63,6 @@ const ExceptionsViewerComponent = ({
   ruleName,
   exceptionListsMeta,
   availableListTypes,
-  onAssociateList,
   commentsAccordionId,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();

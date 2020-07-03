@@ -34,9 +34,7 @@ describe('useAddOrUpdateException', () => {
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
   let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
   const onError = jest.fn();
-  const error = new Error('Something went wrong');
   const onSuccess = jest.fn();
-  const abortCtrl = new AbortController();
   const alertIdToClose = 'idToClose';
   const itemsToAdd = [
     {
