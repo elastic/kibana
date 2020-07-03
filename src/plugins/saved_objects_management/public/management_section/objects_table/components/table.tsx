@@ -164,7 +164,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
-        options: filterOptions,
+        options: [...filterOptions].sort((a, b) => (a.value > b.value ? 1 : -1)),
       },
       // Add this back in once we have tag support
       // {
