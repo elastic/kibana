@@ -25,8 +25,7 @@ export default function ({ getService }) {
     cleanUpTemplates,
   } = registerHelpers({ supertest });
 
-  // blocking es snapshot promotion: https://github.com/elastic/kibana/issues/70532
-  describe.skip('index templates', () => {
+  describe('index templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
     describe('get all', () => {
