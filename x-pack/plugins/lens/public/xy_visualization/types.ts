@@ -100,6 +100,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       options: ['auto', 'left', 'right'],
       help: 'The axis mode of the metric',
     },
+    color: {
+      types: ['string'],
+      help: 'The color of the series',
+    },
   },
   fn: function fn(input: unknown, args: YConfig) {
     return {
@@ -195,6 +199,7 @@ export type YAxisMode = 'auto' | 'left' | 'right';
 export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
+  color?: string;
 }
 
 export interface LayerConfig {
