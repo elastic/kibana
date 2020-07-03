@@ -68,29 +68,33 @@ export function WorkspacePanelWrapper({
   return (
     <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch" responsive={false}>
       <EuiFlexItem grow={false}>
-        <ChartSwitch
-          data-test-subj="lnsChartSwitcher"
-          visualizationMap={visualizationMap}
-          visualizationId={visualizationId}
-          visualizationState={visualizationState}
-          datasourceMap={datasourceMap}
-          datasourceStates={datasourceStates}
-          dispatch={dispatch}
-          framePublicAPI={framePublicAPI}
-        />
+        <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <ChartSwitch
+              data-test-subj="lnsChartSwitcher"
+              visualizationMap={visualizationMap}
+              visualizationId={visualizationId}
+              visualizationState={visualizationState}
+              datasourceMap={datasourceMap}
+              datasourceStates={datasourceStates}
+              dispatch={dispatch}
+              framePublicAPI={framePublicAPI}
+            />
+          </EuiFlexItem>
+          {activeVisualization && activeVisualization.renderToolbar && (
+            <EuiFlexItem grow>
+              <NativeRenderer
+                render={activeVisualization.renderToolbar}
+                nativeProps={{
+                  frame: framePublicAPI,
+                  state: visualizationState,
+                  setState: setVisualizationState,
+                }}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      {activeVisualization && activeVisualization.renderToolbar && (
-        <EuiFlexItem grow={false}>
-          <NativeRenderer
-            render={activeVisualization.renderToolbar}
-            nativeProps={{
-              frame: framePublicAPI,
-              state: visualizationState,
-              setState: setVisualizationState,
-            }}
-          />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem>
         <EuiPageContent className="lnsWorkspacePanelWrapper">
           {(!emptyExpression || title) && (

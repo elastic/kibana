@@ -15,6 +15,7 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   SeriesNameFn,
+  Fit,
 } from '@elastic/charts';
 import { xyChart, XYChart } from './xy_expression';
 import { LensMultiTable } from '../types';
@@ -1553,6 +1554,67 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should apply the fitting function to all non-bar series', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: createSampleDatatableWithRows([
+            { a: 1, b: 2, c: 'I', d: 'Foo' },
+            { a: 1, b: 5, c: 'J', d: 'Bar' },
+          ]),
+        },
+      };
+
+      const args: XYArgs = createArgsWithLayers([
+        { ...sampleLayer, accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'bar', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area', accessors: ['a'] },
+        { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'] },
+      ]);
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args, fittingFunction: 'Carry' }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(BarSeries).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(0).prop('fit')).toEqual({ type: Fit.Carry });
+      expect(component.find(AreaSeries).at(0).prop('stackAccessors')).toEqual([]);
+      // stacked area series doesn't get the fit prop
+      expect(component.find(AreaSeries).at(1).prop('fit')).toEqual(undefined);
+      expect(component.find(AreaSeries).at(1).prop('stackAccessors')).toEqual(['c']);
+    });
+
+    test('it should apply None fitting function if not specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.layers[0].accessors = ['a'];
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
     });
   });
 });
