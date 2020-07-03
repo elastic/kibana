@@ -88,6 +88,9 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     this.state.indexPatternType = props.indexPatternCreationType.getIndexPatternType() || '';
     this.state.indexPatternName = props.indexPatternCreationType.getIndexPatternName();
     this.state.selectedTimeField = props.selectedTimeField;
+    if (props.selectedTimeField) {
+      this.state.timeFieldSet = true;
+    }
   }
 
   mounted = false;
