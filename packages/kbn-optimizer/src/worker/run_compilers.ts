@@ -77,7 +77,7 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
-      // @ts-ignore not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
+      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
