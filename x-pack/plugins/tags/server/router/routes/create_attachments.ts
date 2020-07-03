@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
+import { handleBoomErrors } from './util/handle_boom_errors';
 import { RouteParams } from '../types';
 
 export const createAttachments = ({ router }: RouteParams) => {
@@ -24,9 +25,11 @@ export const createAttachments = ({ router }: RouteParams) => {
         }),
       },
     },
-    assertTagsContext(async ({ tags }, req, res) => {
-      const body = await tags.attachmentsClient.create(req.body);
-      return res.ok({ body });
-    })
+    handleBoomErrors(
+      assertTagsContext(async ({ tags }, req, res) => {
+        const body = await tags.attachmentsClient.create(req.body);
+        return res.ok({ body });
+      })
+    )
   );
 };

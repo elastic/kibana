@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
+import { handleBoomErrors } from './util/handle_boom_errors';
 
 export const deleteAttachment = ({ router }: RouteParams) => {
   router.delete(
@@ -20,13 +21,15 @@ export const deleteAttachment = ({ router }: RouteParams) => {
         }),
       },
     },
-    assertTagsContext(async ({ tags }, req, res) => {
-      const { tagId, kid } = req.params;
-      await tags.attachmentsClient.del({
-        tagId,
-        kid: Buffer.from(kid, 'base64').toString('utf8'),
-      });
-      return res.ok();
-    })
+    handleBoomErrors(
+      assertTagsContext(async ({ tags }, req, res) => {
+        const { tagId, kid } = req.params;
+        await tags.attachmentsClient.del({
+          tagId,
+          kid: Buffer.from(kid, 'base64').toString('utf8'),
+        });
+        return res.ok();
+      })
+    )
   );
 };

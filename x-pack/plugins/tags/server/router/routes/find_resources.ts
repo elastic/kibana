@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
+import { handleBoomErrors } from './util/handle_boom_errors';
 
 export const findResources = ({ router }: RouteParams) => {
   router.post(
@@ -22,9 +23,11 @@ export const findResources = ({ router }: RouteParams) => {
         }),
       },
     },
-    assertTagsContext(async ({ tags }, req, res) => {
-      const body = await tags.attachmentsClient.findResources(req.body);
-      return res.ok({ body });
-    })
+    handleBoomErrors(
+      assertTagsContext(async ({ tags }, req, res) => {
+        const body = await tags.attachmentsClient.findResources(req.body);
+        return res.ok({ body });
+      })
+    )
   );
 };

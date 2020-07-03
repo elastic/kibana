@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
+import { handleBoomErrors } from './util/handle_boom_errors';
 
 export const updateTag = ({ router }: RouteParams) => {
   router.post(
@@ -26,10 +27,12 @@ export const updateTag = ({ router }: RouteParams) => {
         }),
       },
     },
-    assertTagsContext(async ({ tags }, req, res) => {
-      const { id } = req.params;
-      const body = await tags.tagsClient.update({ patch: { ...req.body.patch, id } });
-      return res.ok({ body });
-    })
+    handleBoomErrors(
+      assertTagsContext(async ({ tags }, req, res) => {
+        const { id } = req.params;
+        const body = await tags.tagsClient.update({ patch: { ...req.body.patch, id } });
+        return res.ok({ body });
+      })
+    )
   );
 };

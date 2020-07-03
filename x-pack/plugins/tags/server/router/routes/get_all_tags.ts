@@ -7,6 +7,7 @@
 import { TAGS_API_PATH } from '../../../common/constants';
 import { assertTagsContext } from './util/assert_tags_context';
 import { RouteParams } from '../types';
+import { handleBoomErrors } from './util/handle_boom_errors';
 
 export const getAllTags = ({ router }: RouteParams) => {
   router.get(
@@ -14,9 +15,11 @@ export const getAllTags = ({ router }: RouteParams) => {
       path: `${TAGS_API_PATH}/tag`,
       validate: {},
     },
-    assertTagsContext(async ({ tags }, req, res) => {
-      const body = await tags.tagsClient.getAll();
-      return res.ok({ body });
-    })
+    handleBoomErrors(
+      assertTagsContext(async ({ tags }, req, res) => {
+        const body = await tags.tagsClient.getAll();
+        return res.ok({ body });
+      })
+    )
   );
 };
