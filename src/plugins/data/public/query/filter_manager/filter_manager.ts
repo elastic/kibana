@@ -65,7 +65,7 @@ export class FilterManager {
       }
 
       // matching filter in globalState, update global and don't add from appState
-      _.assign(match.meta, filter.meta);
+      _.assignIn(match.meta, filter.meta);
     });
 
     return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);

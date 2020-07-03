@@ -103,7 +103,7 @@ const getData = async (
   const { nodes } = await snapshot.getNodes(esClient, options);
 
   return nodes.reduce((acc, n) => {
-    const nodePathItem = last(n.path);
+    const nodePathItem = last(n.path) as any;
     const m = first(n.metrics);
     if (m && m.value && m.timeseries) {
       const { timeseries } = m;
