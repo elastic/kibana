@@ -205,6 +205,8 @@ export function LayerPanel(
                     });
                   }
 
+                  const selectedTab = tabs.find((t) => t.id === popoverState.tabId);
+
                   return (
                     <DragDrop
                       key={accessor}
@@ -262,17 +264,21 @@ export function LayerPanel(
                           />
                         }
                         panel={
-                          <EuiTabbedContent
-                            tabs={tabs}
-                            initialSelectedTab={tabs.find((t) => t.id === popoverState.tabId)}
-                            size="s"
-                            onTabClick={(tab) => {
-                              setPopoverState({
-                                ...popoverState,
-                                tabId: tab.id as typeof popoverState['tabId'],
-                              });
-                            }}
-                          />
+                          selectedTab ? (
+                            <EuiTabbedContent
+                              tabs={tabs}
+                              initialSelectedTab={selectedTab}
+                              size="s"
+                              onTabClick={(tab) => {
+                                setPopoverState({
+                                  ...popoverState,
+                                  tabId: tab.id as typeof popoverState['tabId'],
+                                });
+                              }}
+                            />
+                          ) : (
+                            <></>
+                          )
                         }
                       />
 
