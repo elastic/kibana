@@ -27,58 +27,51 @@ let activeSession: ContextMenuSession | null = null;
 
 const CONTAINER_ID = 'contextMenu-container';
 
-function createInteractionPositionTracker() {
+/**
+ * Tries to find best position for opening context menu using mousemove and click event
+ * Returned position is relative to document
+ */
+export function createInteractionPositionTracker() {
   let lastMouseX = 0;
   let lastMouseY = 0;
-  let lastClick: { el?: Element; pageX: number; pageY: number } | undefined;
+  const lastClicks: Array<{ el?: Element; mouseX: number; mouseY: number }> = [];
+  const MAX_LAST_CLICKS = 5;
 
   document.addEventListener('click', onClick, true);
   document.addEventListener('mousemove', onMouseUpdate, { passive: true });
   document.addEventListener('mouseenter', onMouseUpdate, { passive: true });
   function onClick(event: MouseEvent) {
-    lastClick = {
+    lastClicks.push({
       el: event.target as Element,
-      pageX: event.pageX,
-      pageY: event.pageY,
-    };
+      mouseX: event.clientX,
+      mouseY: event.clientY,
+    });
+    if (lastClicks.length > MAX_LAST_CLICKS) {
+      lastClicks.shift();
+    }
   }
   function onMouseUpdate(event: MouseEvent) {
-    lastMouseX = event.pageY;
-    lastMouseY = event.pageX;
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
   }
 
   return {
     resolveLastPosition: (): { x: number; y: number } => {
-      const scrollTop = document.body.scrollTop;
-      const scrollLeft = document.body.scrollLeft;
-
+      const lastClick = [...lastClicks]
+        .reverse()
+        .find(({ el }) => el && document.body.contains(el));
       if (!lastClick) {
         // fallback to last mouse position
         return {
-          x: lastMouseX + scrollLeft,
-          y: lastMouseY + scrollTop,
+          x: lastMouseX,
+          y: lastMouseY,
         };
       }
 
-      if (!lastClick.el) {
-        return {
-          x: lastClick.pageX + scrollLeft,
-          y: lastClick.pageY + scrollTop,
-        };
-      }
+      const { top, left, bottom, right } = lastClick.el!.getBoundingClientRect();
 
-      if (!document.body.contains(lastClick.el)) {
-        // target element no longer in DOM
-        // fallback to lastMouse position
-        return {
-          x: lastMouseX + scrollLeft,
-          y: lastMouseY + scrollTop,
-        };
-      }
-
-      const { top, left, bottom, right } = lastClick.el.getBoundingClientRect();
-      const mouseX = lastClick.pageX + scrollLeft;
-      const mouseY = lastClick.pageY + scrollTop;
+      const mouseX = lastClick.mouseX;
+      const mouseY = lastClick.mouseY;
 
       if (top <= mouseY && bottom >= mouseY && left <= mouseX && right >= mouseX) {
         // click was inside target element
@@ -93,11 +86,6 @@ function createInteractionPositionTracker() {
           y: bottom,
         };
       }
-
-      return {
-        x: window.innerWidth / 2 + scrollTop,
-        y: window.innerHeight / 2 + scrollLeft,
-      };
     },
   };
 }
@@ -105,7 +93,9 @@ function createInteractionPositionTracker() {
 const { resolveLastPosition } = createInteractionPositionTracker();
 function getOrCreateContainerElement() {
   let container = document.getElementById(CONTAINER_ID);
-  const { x, y } = resolveLastPosition();
+  let { x, y } = resolveLastPosition();
+  y = y + window.scrollY;
+  x = x + window.scrollX;
 
   if (!container) {
     container = document.createElement('div');
