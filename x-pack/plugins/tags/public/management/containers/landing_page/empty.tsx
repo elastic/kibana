@@ -14,7 +14,7 @@ export const Empty: React.FC = () => {
   return (
     <EuiEmptyPrompt
       data-test-subj="jobListEmptyPrompt"
-      iconType="indexRollupApp"
+      iconType="tag"
       title={<h1>Create your first tag</h1>}
       body={
         <>
