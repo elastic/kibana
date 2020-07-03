@@ -81,7 +81,7 @@ export default new Chainable('movingaverage', {
       }
 
       _position = _position || defaultPosition;
-      if (!_.contains(validPositions, _position)) {
+      if (!_.includes(validPositions, _position)) {
         throw new Error(
           i18n.translate(
             'timelion.serverSideErrors.movingaverageFunction.notValidPositionErrorMessage',
