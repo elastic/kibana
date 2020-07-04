@@ -6,11 +6,17 @@
 
 import React from 'react';
 import { LandinPage } from './pages/landing_page';
+import { TagsAppServices } from '../../services';
+import { TagsAppProvider } from '../../context';
 
 export interface Props {
-  services: any;
+  services: TagsAppServices;
 }
 
-export const TagsApp: React.FC<Props> = () => {
-  return <LandinPage />;
+export const TagsApp: React.FC<Props> = ({ services }) => {
+  return (
+    <TagsAppProvider services={services}>
+      <LandinPage />
+    </TagsAppProvider>
+  );
 };

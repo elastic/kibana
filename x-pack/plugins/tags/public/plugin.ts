@@ -21,13 +21,14 @@ import {
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
-import { TagsService, TagsServiceSetup, TagsServiceStart } from './services';
+import { TagsService, TagsServiceContract } from './services';
 import { Tag, TagProps } from './containers/tag';
 import { createTagsProvider } from './context';
 import { TagListProps, TagList } from './containers/tag_list';
 import { TagPickerProps, TagPicker } from './containers/tag_picker';
 import { TagListEditableProps, TagListEditable } from './containers/tag_list_editable';
 import { TagsApp } from './application';
+import { TagsAppServices } from './application/services';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -38,7 +39,7 @@ export interface TagsPluginStartDependencies {
 }
 
 export interface TagsPluginSetup {
-  tags: TagsServiceSetup;
+  tags: TagsServiceContract;
   ui: {
     Provider: React.ComponentType;
     Tag: React.ComponentType<TagProps>;
@@ -49,7 +50,7 @@ export interface TagsPluginSetup {
 }
 
 export interface TagsPluginStart {
-  tags: TagsServiceStart;
+  tags: TagsServiceContract;
   ui: {
     Provider: React.ComponentType;
     Tag: React.ComponentType<TagProps>;
@@ -102,7 +103,7 @@ export class TagsPlugin
       },
     });
 
-    const Provider = createTagsProvider(this.tagsService);
+    const Provider = createTagsProvider(tags);
 
     core.application.register({
       id: 'tags',
@@ -111,7 +112,8 @@ export class TagsPlugin
       order: 1,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async ({ element }: AppMountParameters) => {
-        render(h(TagsApp, { services: {} }), element);
+        const services = new TagsAppServices({ tags });
+        render(h(TagsApp, { services }), element);
         return () => {
           unmountComponentAtNode(element);
         };
@@ -131,10 +133,11 @@ export class TagsPlugin
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {
-    const Provider = createTagsProvider(this.tagsService);
+    const tags = this.tagsService;
+    const Provider = createTagsProvider(tags);
 
     return {
-      tags: this.tagsService.start(),
+      tags,
       ui: {
         Provider,
         Tag: (props) => h(Provider, {}, h(Tag, props)),

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PublicContract } from '@kbn/utility-types';
 import { TagsClientParams, TagsClient } from './tags_client';
 import { TagManager } from './tag_manager';
 import { TagAttachmentsClient } from './tag_attachments_client';
@@ -15,26 +16,13 @@ export class TagsService {
   public attachments?: TagAttachmentsClient;
   public manager?: TagManager;
 
-  setup(params: TagsServiceSetupParams) {
+  setup(params: TagsServiceSetupParams): TagsServiceContract {
     const tags = (this.tags = new TagsClient(params));
     const attachments = (this.attachments = new TagAttachmentsClient(params));
-    const manager = (this.manager = new TagManager({ tags, attachments }));
+    this.manager = new TagManager({ tags, attachments });
 
-    return {
-      tags,
-      attachments,
-      manager,
-    };
-  }
-
-  start() {
-    return {
-      tags: this.tags!,
-      attachments: this.attachments!,
-      manager: this.manager!,
-    };
+    return this;
   }
 }
 
-export type TagsServiceSetup = ReturnType<TagsService['setup']>;
-export type TagsServiceStart = ReturnType<TagsService['start']>;
+export type TagsServiceContract = PublicContract<Omit<TagsService, 'setup'>>;

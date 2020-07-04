@@ -5,9 +5,9 @@
  */
 
 import { createElement as h, createContext, useContext } from 'react';
-import { TagsService } from '../services';
+import { TagsServiceContract } from '../services';
 
-type ContextValue = TagsService;
+type ContextValue = TagsServiceContract;
 
 const context = createContext<ContextValue | undefined>(undefined);
 

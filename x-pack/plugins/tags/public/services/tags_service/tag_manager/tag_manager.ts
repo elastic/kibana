@@ -29,6 +29,12 @@ export class TagManager {
   public readonly useTags = this.tags.useData;
   public readonly useTag = this.tags.useTag;
 
+  public readonly useTagsList = () => {
+    const tagMap = this.useTags();
+    const tagList = useMemo(() => Object.values(tagMap), [tagMap]);
+    return tagList;
+  };
+
   public create$(params: TagsClientCreateParams): Observable<Tag> {
     const { tags: client } = this.params;
     return from(client.create(params)).pipe(

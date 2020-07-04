@@ -4,9 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Page } from '../../../../../components/page';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSideNav, EuiPanel } from '@elastic/eui';
+import { useTagsApp } from '../../../../context';
+import { Tag as TagUi } from '../../../../../containers/tag';
+import { Tag } from '../../../../../services/tags_service/tag_manager/tag';
 
 export const LandinPage: React.FC = () => {
-  return <Page title={'Tags app'} id={'TagsApp'} />;
+  const { manager } = useTagsApp();
+  const tags = manager.useTagsList();
+
+  const grouped = useMemo(() => {
+    const categories: Record<string, Tag[]> = {};
+    const remaining: Tag[] = [];
+    for (const tag of tags) {
+      if (tag.data.value) {
+        if (!categories[tag.data.key]) categories[tag.data.key] = [];
+        categories[tag.data.key].push(tag);
+      } else remaining.push(tag);
+    }
+    return { categories: Object.entries(categories), remaining };
+  }, [tags]);
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '32px auto' }}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiSideNav
+            style={{ width: 192 }}
+            items={grouped.categories.map(([name, tagsList]) => ({
+              name,
+              id: name,
+              items: tagsList.map((tag) => ({
+                name: tag.data.title,
+                id: tag.id,
+                renderItem: () => (
+                  <div style={{ padding: '4px 0' }}>
+                    <TagUi id={tag.id} />
+                  </div>
+                ),
+              })),
+            }))}
+          />
+          <EuiSideNav
+            style={{ width: 192 }}
+            items={[
+              {
+                name: '',
+                id: 'remainingTags',
+                items: grouped.remaining.map((tag) => ({
+                  name: tag.data.title,
+                  id: tag.id,
+                  renderItem: () => (
+                    <div style={{ padding: '4px 0' }}>
+                      <TagUi id={tag.id} />
+                    </div>
+                  ),
+                })),
+              },
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel paddingSize="l" hasShadow>
+            asdfasdf
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
 };
