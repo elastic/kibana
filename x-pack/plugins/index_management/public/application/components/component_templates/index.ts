@@ -15,3 +15,5 @@ export {
   ComponentTemplateEdit,
   ComponentTemplateClone,
 } from './component_template_wizard';
+
+export * from './component_template_selector';
