@@ -150,6 +150,10 @@ export function useMultiContent<T extends object>({
    * Validate the multi-content active content(s) in the DOM
    */
   const validate = useCallback(async () => {
+    if (Object.keys(contents.current).length === 0) {
+      return Boolean(validation.isValid);
+    }
+
     const updatedValidation = {} as { [key in keyof T]?: boolean | undefined };
 
     for (const [id, _content] of Object.entries(contents.current)) {
