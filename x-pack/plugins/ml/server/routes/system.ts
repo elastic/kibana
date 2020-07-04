@@ -60,9 +60,10 @@ export function systemRoutes(
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
+        const { callAsCurrentUser, callAsInternalUser } = context.ml!.mlClient;
         let upgradeInProgress = false;
         try {
-          const info = await context.ml!.mlClient.callAsInternalUser('ml.info');
+          const info = await callAsInternalUser('ml.info');
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
           upgradeInProgress = info.upgrade_mode === true;
@@ -90,7 +91,7 @@ export function systemRoutes(
           });
         } else {
           const body = request.body;
-          const resp = await context.ml!.mlClient.callAsInternalUser('ml.privilegeCheck', { body });
+          const resp = await callAsCurrentUser('ml.privilegeCheck', { body });
           resp.upgradeInProgress = upgradeInProgress;
           return response.ok({
             body: resp,
