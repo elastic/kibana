@@ -28,7 +28,7 @@ import {
   ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { useKibana } from '../../../lib/kibana';
 import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
@@ -50,14 +50,20 @@ export interface AddExceptionOnClick {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
-  alertData: TimelineNonEcsData[] | undefined;
+  alertData?: {
+    ecsData: Ecs;
+    nonEcsData: TimelineNonEcsData[];
+  };
 }
 
 interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
-  alertData?: TimelineNonEcsData[];
+  alertData?: {
+    ecsData: Ecs;
+    nonEcsData: TimelineNonEcsData[];
+  };
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -165,7 +171,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         exceptionListType,
         ruleExceptionList.list_id,
         ruleName,
-        alertData
+        alertData.nonEcsData
       );
     } else {
       return [];
@@ -223,9 +229,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      addOrUpdateExceptionItems(enrichExceptionItems());
+      if (shouldCloseAlert && alertData) {
+        addOrUpdateExceptionItems(enrichExceptionItems(), alertData.ecsData._id);
+      } else {
+        addOrUpdateExceptionItems(enrichExceptionItems());
+      }
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
+  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldCloseAlert, alertData]);
 
   const isSubmitButtonDisabled = useCallback(
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,

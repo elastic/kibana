@@ -314,7 +314,10 @@ export const getAlertActions = ({
             ruleName: ruleNameValue ? ruleNameValue[0] : '',
             ruleId: ruleId[0],
             exceptionListType: 'endpoint',
-            alertData: data,
+            alertData: {
+              ecsData,
+              nonEcsData: data,
+            },
           });
         }
       },
@@ -334,7 +337,10 @@ export const getAlertActions = ({
             ruleName: ruleNameValue ? ruleNameValue[0] : '',
             ruleId: ruleId[0],
             exceptionListType: 'detection',
-            alertData: data,
+            alertData: {
+              ecsData,
+              nonEcsData: data,
+            },
           });
         }
       },
