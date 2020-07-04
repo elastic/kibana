@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -20,8 +20,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { EuiDescribedFormGroup } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { txtTitle, txtColor, txtDescription, txtCreate, txtCancel } from './i18n';
 import { Tag } from '../../../components/tag';
+import { parseTag } from '../../../../common';
 
 export interface Props {
   title: string;
@@ -44,6 +46,8 @@ export const CreateNewTagForm: React.FC<Props> = ({
   onDescriptionChange,
   onSubmit,
 }) => {
+  const { key, value } = useMemo(() => parseTag(title), [title]);
+
   return (
     <EuiForm
       component="form"
@@ -58,11 +62,19 @@ export const CreateNewTagForm: React.FC<Props> = ({
           <>
             <div>This is how your tag will look like.</div>
             <EuiSpacer size={'s'} />
-            {!!title && <Tag tag={{ title, color: color || 'transparent' }} />}
+            {!!key && <Tag tag={{ title, key, value, color: color || 'transparent' }} />}
           </>
         }
       >
-        <EuiFormRow label={txtTitle} helpText={'Use up to 256 characters'}>
+        <EuiFormRow
+          label={txtTitle}
+          helpText={
+            <>
+              Use colon <EuiCode paddingSize={'s'}>:</EuiCode> to create a key-value tag. Max. 256
+              characters.
+            </>
+          }
+        >
           <EuiFieldText
             name="first"
             value={title}

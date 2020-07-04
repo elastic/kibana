@@ -8,12 +8,23 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { RawTagWithId } from '../../../common';
 
-export type TagView = Pick<RawTagWithId, 'color' | 'title'>;
+export type TagView = Pick<RawTagWithId, 'color' | 'title'> &
+  Partial<Pick<RawTagWithId, 'key' | 'value'>>;
 
 export interface Props {
   tag: TagView;
 }
 
 export const Tag: React.FC<Props> = React.memo(({ tag }) => {
-  return <EuiBadge color={tag.color}>{tag.title}</EuiBadge>;
+  const content = tag.key ? (
+    <>
+      {tag.key}
+      {!!tag.value ? ':' : null}
+      {!!tag.value ? <strong> {tag.value}</strong> : null}
+    </>
+  ) : (
+    tag.title
+  );
+
+  return <EuiBadge color={tag.color}>{content}</EuiBadge>;
 });

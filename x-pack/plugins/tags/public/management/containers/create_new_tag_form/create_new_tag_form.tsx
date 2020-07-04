@@ -13,7 +13,7 @@ import { RawTagWithId } from '../../../../common';
 import { txtTagCreated, txtCouldNotCreate } from './i18n';
 import { useUnmount$ } from '../../hooks/use_unmount';
 
-const defaultColor = '#27BAB1';
+const defaultColor = '#548034';
 
 export interface Props {
   onCreate?: (tag: RawTagWithId) => void;
