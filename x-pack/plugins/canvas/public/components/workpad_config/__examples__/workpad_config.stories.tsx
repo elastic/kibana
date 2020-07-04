@@ -8,25 +8,17 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-// @ts-expect-error untyped local
-import { getDefaultWorkpad } from '../../../../public/state/defaults';
 import { WorkpadConfig } from '../';
 import { WorkpadCSS } from '../workpad_css/workpad_css';
 import { WorkpadSize } from '../workpad_size/workpad_size';
+import { withCanvas, getAddonPanelParameters } from '../../../../storybook';
 
 storiesOf('components/WorkpadConfig', module)
-  .add('redux', () => (
-    <div style={{ width: 325 }}>
-      <WorkpadConfig />
-    </div>
-  ))
-  .add('WorkpadCSS', () => (
-    <div style={{ width: 325 }}>
-      <WorkpadCSS setWorkpadCSS={action('setWorkpadCSS')} />
-    </div>
-  ))
+  .addDecorator(withCanvas())
+  .addParameters(getAddonPanelParameters())
+  .addDecorator((story) => <div style={{ width: 325 }}>{story()}</div>)
+  .add('redux', () => <WorkpadConfig />)
+  .add('WorkpadCSS', () => <WorkpadCSS setWorkpadCSS={action('setWorkpadCSS')} />)
   .add('WorkpadSize', () => (
-    <div style={{ width: 325 }}>
-      <WorkpadSize setSize={action('setSize')} size={{ height: 600, width: 800 }} />
-    </div>
+    <WorkpadSize setSize={action('setSize')} size={{ height: 600, width: 800 }} />
   ));

@@ -13,6 +13,8 @@ import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-story
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
+import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
+
 // Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';
 global.$ = jquery;
@@ -53,7 +55,7 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 // Mock React Portal for components that use modals, tooltips, etc
-ReactDOM.createPortal = jest.fn(element => {
+ReactDOM.createPortal = jest.fn((element) => {
   return element;
 });
 
@@ -76,7 +78,6 @@ import { RenderedElement } from '../shareable_runtime/components/rendered_elemen
 jest.mock('../shareable_runtime/components/rendered_element');
 RenderedElement.mockImplementation(() => 'RenderedElement');
 
-import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
@@ -86,5 +87,5 @@ addSerializer(styleSheetSerializer);
 initStoryshots({
   configPath: path.resolve(__dirname, './../.storybook'),
   test: multiSnapshotWithOptions({}),
-  storyNameRegex:/^((?!.*?redux).)*$/,
+  storyNameRegex: /^((?!.*?redux).)*$/,
 });

@@ -7,8 +7,11 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+
 import { AssetType } from '../../../../types';
-import { AssetManager } from '../asset_manager';
+import { AssetManager } from '../asset_manager.component';
+import { AssetManager as ReduxComponent } from '../';
+import { withCanvas, getAddonPanelParameters } from '../../../../storybook';
 
 const AIRPLANE: AssetType = {
   '@created': '2018-10-13T16:44:44.648Z',
@@ -27,22 +30,16 @@ const MARKER: AssetType = {
 };
 
 storiesOf('components/Assets/AssetManager', module)
+  .addDecorator(withCanvas())
+  .addParameters(getAddonPanelParameters())
+  .add('redux', () => <ReduxComponent onClose={action('onClose')} />)
   .add('no assets', () => (
-    <AssetManager
-      onAddImageElement={action('onAddImageElement')}
-      onAssetAdd={action('onAssetAdd')}
-      onAssetCopy={action('onAssetCopy')}
-      onAssetDelete={action('onAssetDelete')}
-      onClose={action('onClose')}
-    />
+    <AssetManager assets={[]} onClose={action('onClose')} onAddAsset={action('onAddAsset')} />
   ))
   .add('two assets', () => (
     <AssetManager
-      assetValues={[AIRPLANE, MARKER]}
-      onAddImageElement={action('onAddImageElement')}
-      onAssetAdd={action('onAssetAdd')}
-      onAssetCopy={action('onAssetCopy')}
-      onAssetDelete={action('onAssetDelete')}
+      assets={[AIRPLANE, MARKER]}
       onClose={action('onClose')}
+      onAddAsset={action('onAddAsset')}
     />
   ));

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { Asset } from '../asset';
 import { AssetType } from '../../../../types';
+import { Asset } from '../asset.component';
+import { Asset as ReduxComponent } from '../asset';
+import { withCanvas, getAddonPanelParameters } from '../../../../storybook';
 
 const AIRPLANE: AssetType = {
   '@created': '2018-10-13T16:44:44.648Z',
@@ -28,19 +30,14 @@ const MARKER: AssetType = {
 
 storiesOf('components/Assets/Asset', module)
   .addDecorator((story) => <div style={{ width: '215px' }}>{story()}</div>)
+  .addDecorator(withCanvas({ assets: [AIRPLANE, MARKER] }))
+  .addParameters(getAddonPanelParameters())
+  .add('redux', () => {
+    return <ReduxComponent asset={AIRPLANE} />;
+  })
   .add('airplane', () => (
-    <Asset
-      asset={AIRPLANE}
-      onCreate={action('onCreate')}
-      onCopy={action('onCopy')}
-      onDelete={action('onDelete')}
-    />
+    <Asset asset={AIRPLANE} onCreate={action('onCreate')} onDelete={action('onDelete')} />
   ))
   .add('marker', () => (
-    <Asset
-      asset={MARKER}
-      onCreate={action('onCreate')}
-      onCopy={action('onCopy')}
-      onDelete={action('onDelete')}
-    />
+    <Asset asset={MARKER} onCreate={action('onCreate')} onDelete={action('onDelete')} />
   ));

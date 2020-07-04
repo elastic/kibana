@@ -1,0 +1,17 @@
+.panel__tree {
+  font-family: monospace;
+  font-size: 85%;
+}
+
+.panel__tree .euiTreeView {
+  padding-left: 12px;
+  font-size: 85%;
+}
+
+.panel__resizeableContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+}

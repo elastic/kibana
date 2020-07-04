@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const webpack = require('webpack');
 const path = require('path');
+const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const { DLL_NAME, DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
