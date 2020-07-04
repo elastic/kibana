@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 import { Breadcrumb } from '@elastic/eui';
-import { Page as PageUi, Props as PropsUi } from '../../components/page';
+import { Page as PageUi, Props as PropsUi } from '../../../components/page';
 import { useServices } from '../../context';
 
 const crumb: Breadcrumb = { text: 'Tags', href: '/' };

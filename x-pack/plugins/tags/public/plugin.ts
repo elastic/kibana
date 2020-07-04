@@ -12,6 +12,8 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  DEFAULT_APP_CATEGORIES,
+  AppMountParameters,
 } from '../../../../src/core/public';
 import {
   ManagementSetup,
@@ -25,6 +27,7 @@ import { createTagsProvider } from './context';
 import { TagListProps, TagList } from './containers/tag_list';
 import { TagPickerProps, TagPicker } from './containers/tag_picker';
 import { TagListEditableProps, TagListEditable } from './containers/tag_list_editable';
+import { TagsApp } from './application';
 
 export interface TagsPluginSetupDependencies {
   management: ManagementSetup;
@@ -100,6 +103,20 @@ export class TagsPlugin
     });
 
     const Provider = createTagsProvider(this.tagsService);
+
+    core.application.register({
+      id: 'tags',
+      title: 'Tags',
+      icon: 'tag',
+      order: 1,
+      category: DEFAULT_APP_CATEGORIES.management,
+      mount: async ({ element }: AppMountParameters) => {
+        render(h(TagsApp, { services: {} }), element);
+        return () => {
+          unmountComponentAtNode(element);
+        };
+      },
+    });
 
     return {
       tags,

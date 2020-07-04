@@ -22,8 +22,8 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { txtTitle, txtColor, txtDescription, txtCreate, txtCancel } from './i18n';
-import { Tag } from '../../../components/tag';
-import { parseTag } from '../../../../common';
+import { Tag } from '../../components/tag';
+import { parseTag } from '../../../common';
 
 export interface Props {
   title: string;

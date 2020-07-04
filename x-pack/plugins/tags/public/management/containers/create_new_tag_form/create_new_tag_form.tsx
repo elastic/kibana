@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { takeUntil } from 'rxjs/operators';
 import { useToasts } from '../../../../../../../src/plugins/kibana_react/public';
-import { CreateNewTagForm as CreateNewTagFormUi } from '../../components/create_new_tag_form';
+import { CreateNewTagForm as CreateNewTagFormUi } from '../../../components/create_new_tag_form';
 import { useServices } from '../../context';
 import { RawTagWithId } from '../../../../common';
 import { txtTagCreated, txtCouldNotCreate } from './i18n';
