@@ -5,7 +5,8 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';

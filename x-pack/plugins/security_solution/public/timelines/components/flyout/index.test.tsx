@@ -5,7 +5,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import { set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 
