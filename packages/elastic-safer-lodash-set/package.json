@@ -9,6 +9,9 @@
     "dependency-check": "^4.1.0",
     "tsd": "^0.11.0"
   },
+  "peerDependencies": {
+    "lodash": "4.x"
+  },
   "scripts": {
     "lint": "dependency-check --no-dev package.json set.js setWith.js",
     "test": "npm run lint && node test/patch_test.js && npm run test:types",

@@ -7,11 +7,11 @@
 
 /* eslint-disable */
 
-var assignValue = require('./_assignValue'),
-    castPath = require('./_castPath'),
-    isIndex = require('./_isIndex'),
-    isObject = require('./isObject'),
-    toKey = require('./_toKey');
+var assignValue = require('lodash/_assignValue'),
+    castPath = require('lodash/_castPath'),
+    isIndex = require('lodash/_isIndex'),
+    isObject = require('lodash/isObject'),
+    toKey = require('lodash/_toKey');
 
 /**
  * The base implementation of `_.set`.
