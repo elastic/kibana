@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { parseUrlState, useUrlState } from './url_state';
+import React, { FC } from 'react';
+import { render, act } from '@testing-library/react';
+import { parseUrlState, useUrlState, UrlStateProvider } from './url_state';
 
 const mockHistoryPush = jest.fn();
 
@@ -64,13 +65,19 @@ describe('useUrlState', () => {
   });
 
   test('pushes a properly encoded search string to history', () => {
-    const { result } = renderHook(() => useUrlState('_a'));
+    const TestComponent: FC = () => {
+      const [, setUrlState] = useUrlState('_a');
+      return <button onClick={() => setUrlState({ query: {} })}>ButtonText</button>;
+    };
+
+    const { getByText } = render(
+      <UrlStateProvider>
+        <TestComponent />
+      </UrlStateProvider>
+    );
 
     act(() => {
-      const [, setUrlState] = result.current;
-      setUrlState({
-        query: {},
-      });
+      getByText('ButtonText').click();
     });
 
     expect(mockHistoryPush).toHaveBeenCalledWith({

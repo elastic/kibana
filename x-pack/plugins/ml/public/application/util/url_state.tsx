@@ -5,7 +5,15 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  FC,
+} from 'react';
 import { isEqual } from 'lodash';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -14,8 +22,16 @@ import { Dictionary } from '../../../common/types/common';
 
 import { getNestedProperty } from './object_utils';
 
-export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
-export type UrlState = [Dictionary<any>, SetUrlState];
+type Accessor = '_a' | '_g';
+export type SetUrlState = (
+  accessor: Accessor,
+  attribute: string | Dictionary<any>,
+  value?: any
+) => void;
+export interface UrlState {
+  urlState: Dictionary<any>;
+  setUrlState: SetUrlState;
+}
 
 /**
  * Set of URL query parameters that require the rison serialization.
@@ -59,9 +75,9 @@ export function parseUrlState(search: string): Dictionary<any> {
 // This uses a context to be able to maintain only one instance
 // of the url state. It gets passed down with `UrlStateProvider`
 // and can be used via `useUrlState`.
-export const urlStateStore = createContext({});
+export const urlStateStore = createContext<UrlState>({ urlState: {}, setUrlState: () => {} });
 const { Provider } = urlStateStore;
-export const UrlStateProvider = ({ children }) => {
+export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: locationSearchString } = useLocation();
 
@@ -90,8 +106,8 @@ export const UrlStateProvider = ({ children }) => {
     // to have it here too.
   }, [searchString]);
 
-  const setUrlState = useCallback(
-    (accessor: string, attribute: string | Dictionary<any>, value?: any) => {
+  const setUrlState: SetUrlState = useCallback(
+    (accessor: Accessor, attribute: string | Dictionary<any>, value?: any) => {
       setSearchString((prevSearchString) => {
         const urlState = parseUrlState(prevSearchString);
         const parsedQueryString = parse(prevSearchString, { sort: false });
@@ -152,7 +168,7 @@ export const UrlStateProvider = ({ children }) => {
   return <Provider value={{ urlState, setUrlState }}>{children}</Provider>;
 };
 
-export const useUrlState = (accessor: string) => {
+export const useUrlState = (accessor: Accessor) => {
   const { urlState, setUrlState } = useContext(urlStateStore);
   return [
     typeof urlState !== 'object' ? undefined : urlState[accessor],
