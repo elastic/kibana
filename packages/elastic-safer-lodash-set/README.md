@@ -38,6 +38,23 @@ The APIs of these functions are identical to the equivalent Lodash
 [`set`] and [`setWith`] functions. Please refer to the Lodash
 documentation for the respective functions for details.
 
+### Functional Programming support (fp)
+
+This module also supports the `lodash/fp` api and hence exposes the
+following fp compatible functions:
+
+```js
+const { set, setWith } = require('@elastic/safer-lodash-set/fp');
+```
+
+Besides the main fp module, it's also possible to require each function
+individually:
+
+```js
+const set = require('@elastic/safer-lodash-set/fp/set');
+const setWith = require('@elastic/safer-lodash-set/fp/setWith');
+```
+
 ## Limitations
 
 The safety improvements in this module is achived by adding the

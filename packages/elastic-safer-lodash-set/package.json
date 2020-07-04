@@ -13,8 +13,8 @@
     "lodash": "4.x"
   },
   "scripts": {
-    "lint": "dependency-check --no-dev package.json set.js setWith.js",
-    "test": "npm run lint && node test/patch_test.js && npm run test:types",
+    "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*",
+    "test": "npm run lint && node test/patch_test.js && node test/fp_patch_test.js && npm run test:types",
     "test:types": "tsd",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"
