@@ -57,8 +57,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern can match any of your {strongIndices}, below."
-            values={{ strongIndices: <strong>{allIndicesLength} indices</strong> }}
+            defaultMessage="Your index pattern can match any of your {indicesCount} sources below."
+            values={{ indicesCount: allIndicesLength }}
           />
         </span>
       );
