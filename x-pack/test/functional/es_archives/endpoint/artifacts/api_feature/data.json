@@ -31,7 +31,7 @@
     "source": {
       "references": [
       ],
-      "endpoint:exceptions-manifest": {
+      "endpoint:user-artifact-manifest": {
         "created": 1593183699663,
         "ids": [
           "endpoint-exceptionlist-linux-1.0.0-a4e4586e895fcb46dd25a25358b446f9a425279452afa3ef9a98bca39c39122d",
