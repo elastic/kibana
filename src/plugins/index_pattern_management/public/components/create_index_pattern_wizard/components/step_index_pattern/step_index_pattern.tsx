@@ -361,11 +361,11 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     return (
       <>
         {this.renderHeader(matchedIndices)}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {this.renderLoadingState()}
         {this.renderIndexPatternExists()}
         {this.renderStatusMessage(matchedIndices)}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {this.renderList(matchedIndices)}
       </>
     );
