@@ -6,7 +6,7 @@
     "source": {
       "references": [
       ],
-      "endpoint:exceptions-artifact": {
+      "endpoint:user-artifact": {
         "body": "eyJleGNlcHRpb25zX2xpc3QiOltdfQ==",
         "created": 1593016187465,
         "compressionAlgorithm": "none",
