@@ -34,11 +34,14 @@ export async function buildArtifact(
 
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
-    sha256,
-    encoding: 'application/json',
+    compressionAlgorithm: 'none',
+    encryptionAlgorithm: 'none',
+    decompressedSha256: sha256,
+    compressedSha256: sha256,
+    decompressedSize: exceptionsBuffer.byteLength,
+    compressedSize: exceptionsBuffer.byteLength,
     created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
-    size: exceptionsBuffer.byteLength,
   };
 }
 
