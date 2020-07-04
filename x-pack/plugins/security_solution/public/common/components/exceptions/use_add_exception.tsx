@@ -16,6 +16,8 @@ import {
 } from '../../../lists_plugin_deps';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
+import { buildQueryExceptions } from '../../../../common/detection_engine/build_exceptions_query';
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { formatExceptionItemForUpdate } from './helpers';
 
 /**
@@ -23,11 +25,13 @@ import { formatExceptionItemForUpdate } from './helpers';
  *
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
+ * @param shouldBulkClose - optional boolean for whether to close alerts matching the exceptions query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  alertIdToClose?: string
+  alertIdToClose?: string,
+  shouldBulkClose?: boolean
 ) => Promise<void>;
 
 export type ReturnUseAddOrUpdateException = [
@@ -100,7 +104,8 @@ export const useAddOrUpdateException = ({
 
     const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
       exceptionItemsToAddOrUpdate,
-      alertIdToClose
+      alertIdToClose,
+      shouldBulkClose
     ) => {
       try {
         setIsLoading(true);
@@ -111,7 +116,33 @@ export const useAddOrUpdateException = ({
           });
         }
 
-        await addOrUpdateItems(exceptionItemsToAddOrUpdate);
+        console.log(shouldBulkClose);
+        if (shouldBulkClose === true) {
+          const filter = getQueryFilter(
+            '',
+            'kuery',
+            [],
+            ['.siem-signals'],
+            exceptionItemsToAddOrUpdate,
+            false
+          );
+          const queries = buildQueryExceptions({
+            query: '',
+            language: 'kuery',
+            lists: exceptionItemsToAddOrUpdate,
+            exclude: false,
+          });
+          console.log(queries);
+          console.log(filter);
+          /*
+          await updateAlertStatus({
+            query: queries,
+            status: 'closed',
+          });
+           */
+        }
+
+        // await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
         if (isSubscribed) {
           setIsLoading(false);

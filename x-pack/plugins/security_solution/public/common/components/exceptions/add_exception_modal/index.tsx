@@ -252,12 +252,22 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
       if (shouldCloseAlert && alertData) {
-        addOrUpdateExceptionItems(enrichExceptionItems(), alertData.ecsData._id);
+        addOrUpdateExceptionItems(
+          enrichExceptionItems(),
+          alertData.ecsData._id,
+          shouldBulkCloseAlert
+        );
       } else {
-        addOrUpdateExceptionItems(enrichExceptionItems());
+        addOrUpdateExceptionItems(enrichExceptionItems(), undefined, shouldBulkCloseAlert);
       }
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldCloseAlert, alertData]);
+  }, [
+    addOrUpdateExceptionItems,
+    enrichExceptionItems,
+    shouldCloseAlert,
+    shouldBulkCloseAlert,
+    alertData,
+  ]);
 
   const isSubmitButtonDisabled = useCallback(
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
