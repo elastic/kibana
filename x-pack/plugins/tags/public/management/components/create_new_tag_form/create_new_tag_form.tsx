@@ -100,7 +100,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
       {!!onDescriptionChange && (
         <EuiDescribedFormGroup
           title={<h3>Extra</h3>}
-          description={<>Add extra description to your tag.</>}
+          description={<>Describe how your tag should be used.</>}
         >
           <EuiFormRow label={txtDescription}>
             <EuiTextArea

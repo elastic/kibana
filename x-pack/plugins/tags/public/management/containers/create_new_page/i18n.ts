@@ -15,5 +15,5 @@ export const txtSubtitle = i18n.translate('xpack.tags.creanteNewPage.subtitle', 
 });
 
 export const txtGoBack = i18n.translate('xpack.tags.creanteNewPage.goBack', {
-  defaultMessage: 'Go back',
+  defaultMessage: 'Back to Tags',
 });
