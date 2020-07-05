@@ -81,37 +81,32 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 ### API integration tests
 
 Our tests are separated in two suites: one suite runs with a basic license, and the other
-with a trial license (the equivalent of gold+). This requires separate test servers and test runs.
+with a trial license (the equivalent of gold+). This requires separate test servers and test runners.
 
-**Start server**
-
-Basic:
+**Basic**
 
 ```
+# Start server
 node scripts/functional_tests_server --config x-pack/test/apm_api_integration/basic/config.ts
-```
 
-Trial:
-
-```
-node scripts/functional_tests_server --config x-pack/test/apm_api_integration/trial/config.ts
-```
-
-**Run tests**
-
-Basic:
-
-```
+# Run tests
 node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts
 ```
 
-Trial:
+The API tests tests for "basic" are located in `x-pack/test/apm_api_integration/basic/tests`.
+
+**Trial**
 
 ```
+# Start server
+node scripts/functional_tests_server --config x-pack/test/apm_api_integration/trial/config.ts
+
+# Run tests
 node scripts/functional_test_runner --config x-pack/test/apm_api_integration/trial/config.ts
 ```
 
-APM tests are located in `x-pack/test/apm_api_integration`.
+The API tests tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
+
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### Linting
