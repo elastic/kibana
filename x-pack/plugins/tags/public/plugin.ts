@@ -20,6 +20,10 @@ import {
   ManagementStart,
   ManagementSectionId,
 } from '../../../../src/plugins/management/public';
+import {
+  ExtensionsPluginSetup,
+  ExtensionsPluginStart,
+} from '../../../../src/plugins/extensions/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
 import { TagsService, TagsServiceContract } from './services';
 import { Tag, TagProps } from './containers/tag';
@@ -31,10 +35,12 @@ import { TagsApp } from './application';
 import { TagsAppServices } from './application/services';
 
 export interface TagsPluginSetupDependencies {
+  extensions: ExtensionsPluginSetup;
   management: ManagementSetup;
 }
 
 export interface TagsPluginStartDependencies {
+  extensions: ExtensionsPluginStart;
   management: ManagementStart;
 }
 
@@ -120,7 +126,7 @@ export class TagsPlugin
       },
     });
 
-    return {
+    const setup: TagsPluginSetup = {
       tags,
       ui: {
         Provider,
@@ -130,6 +136,10 @@ export class TagsPlugin
         TagListEditable: (props) => h(Provider, {}, h(TagListEditable, props)),
       },
     };
+
+    plugins.extensions.tags.TagListEditable = setup.ui.TagListEditable;
+
+    return setup;
   }
 
   public start(core: CoreStart, plugins: TagsPluginStartDependencies): TagsPluginStart {

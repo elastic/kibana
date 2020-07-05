@@ -1,0 +1,8 @@
+{
+  "id": "extensions",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}
