@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTags } from '../../context';
 import { Tag } from '../tag';
 
@@ -20,9 +20,13 @@ export const TagList: React.FC<TagListProps> = React.memo(({ kid, onEditClick })
 
   return (
     <>
-      {attachments.map(({ data }) => (
-        <Tag key={data.tagId} id={data.tagId} />
-      ))}
+      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+        {attachments.map(({ data }) => (
+          <EuiFlexItem key={data.id} grow={false}>
+            <Tag key={data.tagId} id={data.tagId} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       {!!onEditClick && (
         <EuiBadge onClick={onEditClick} onClickAriaLabel="Edit tags">
           {'...'}

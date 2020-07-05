@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Tag, TagView } from '../tag/tag';
 
 export interface Props {
@@ -13,10 +14,12 @@ export interface Props {
 
 export const TagList: React.FC<Props> = React.memo(({ tags }) => {
   return (
-    <>
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       {tags.map((tag) => (
-        <Tag tag={tag} />
+        <EuiFlexItem key={tag.title} grow={false}>
+          <Tag tag={tag} />
+        </EuiFlexItem>
       ))}
-    </>
+    </EuiFlexGroup>
   );
 });
