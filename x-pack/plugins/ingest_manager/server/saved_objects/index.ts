@@ -121,8 +121,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     },
     mappings: {
       properties: {
-        id: { type: 'keyword' },
-        name: { type: 'text' },
+        name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },

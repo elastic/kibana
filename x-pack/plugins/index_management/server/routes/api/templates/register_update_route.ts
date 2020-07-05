@@ -6,10 +6,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializeLegacyTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
+import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 const paramsSchema = schema.object({
@@ -26,7 +26,7 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       validate: { body: bodySchema, params: paramsSchema, query: querySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { name } = req.params as typeof paramsSchema.type;
       const { include_type_name } = req.query as TypeOf<typeof querySchema>;
       const template = req.body as TemplateDeserialized;
@@ -34,16 +34,8 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
         _kbnMeta: { isLegacy },
       } = template;
 
-      if (!isLegacy) {
-        return res.badRequest({ body: 'Only legacy index template can be edited.' });
-      }
-
-      const serializedTemplate = serializeLegacyTemplate(template);
-
-      const { order, index_patterns, version, settings, mappings, aliases } = serializedTemplate;
-
       // Verify the template exists (ES will throw 404 if not)
-      const doesExist = await callAsCurrentUser('indices.existsTemplate', { name });
+      const doesExist = await doesTemplateExist({ name, callAsCurrentUser, isLegacy });
 
       if (!doesExist) {
         return res.notFound();
@@ -51,17 +43,11 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
 
       try {
         // Next, update index template
-        const response = await callAsCurrentUser('indices.putTemplate', {
-          name,
-          order,
+        const response = await saveTemplate({
+          template,
+          callAsCurrentUser,
+          isLegacy,
           include_type_name,
-          body: {
-            index_patterns,
-            version,
-            settings,
-            mappings,
-            aliases,
-          },
         });
 
         return res.ok({ body: response });
