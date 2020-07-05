@@ -85,6 +85,51 @@ export class TagsPlugin
   ): TagsPluginSetup {
     const { http, notifications } = core;
 
+    this.kid.registerInfoProvider('so', async (kid) => {
+      if (kid.path.length === 3 && kid.path[0] === 'saved_objects') {
+        const [, type, id] = kid.path;
+        const [coreStart] = await core.getStartServices();
+        if (type === 'dashboard') {
+          const savedObject = await coreStart.savedObjects.client.get<{
+            title: string;
+            description: string;
+          }>(type, id);
+          return {
+            euiIcon: 'dashboardApp',
+            name: savedObject.attributes.title,
+            description: savedObject.attributes.description,
+            goto: () =>
+              coreStart.application.navigateToApp('dashboards', {
+                path: `/dashboards#/view/${savedObject.id}`,
+              }),
+          };
+        }
+        if (type === 'visualization') {
+          const savedObject = await coreStart.savedObjects.client.get<{
+            title: string;
+            description: string;
+          }>(type, id);
+          return {
+            euiIcon: 'visualizeApp',
+            name: savedObject.attributes.title,
+            description: savedObject.attributes.description,
+            goto: () =>
+              coreStart.application.navigateToApp('visualize', {
+                path: `/visualize#/edit/${savedObject.id}`,
+              }),
+          };
+        }
+        return {
+          name: 'Unknown',
+          euiIcon: 'empty',
+        };
+      }
+      return {
+        name: 'Unknown',
+        euiIcon: 'empty',
+      };
+    });
+
     const tags = this.tagsService.setup({ http });
 
     const kibanaSection = plugins.management.sections.getSection(ManagementSectionId.Kibana);
@@ -118,8 +163,8 @@ export class TagsPlugin
       icon: 'tag',
       order: 1,
       category: DEFAULT_APP_CATEGORIES.management,
-      mount: async ({ element }: AppMountParameters) => {
-        const services = new TagsAppServices({ tags, kid: this.kid });
+      mount: async ({ element, history }: AppMountParameters) => {
+        const services = new TagsAppServices({ tags, history, kid: this.kid });
         render(h(TagsApp, { services }), element);
         return () => {
           unmountComponentAtNode(element);
