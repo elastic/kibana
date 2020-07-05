@@ -18,6 +18,6 @@ export class TagsManagementServices {
   public readonly manager: TagManager;
 
   constructor(public readonly params: Params) {
-    this.manager = params.tags.manager;
+    this.manager = params.tags.manager!;
   }
 }

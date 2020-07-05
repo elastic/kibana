@@ -62,6 +62,7 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    getRenderBeforeDashboard: () => () => null,
   };
   const input = getSampleDashboardInput({
     panels: {

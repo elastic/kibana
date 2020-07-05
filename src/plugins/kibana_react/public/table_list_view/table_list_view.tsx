@@ -560,11 +560,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
   render() {
     return (
-      <EuiPage
-        data-test-subj={this.props.entityName + 'LandingPage'}
-        className="itemListing__page"
-        restrictWidth
-      >
+      <EuiPage data-test-subj={this.props.entityName + 'LandingPage'} className="itemListing__page">
         <EuiPageBody
           aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
         >
