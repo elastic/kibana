@@ -16,7 +16,7 @@ import {
 import { getFileUploadComponent } from '../../../kibana_services';
 import { GeojsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-// @ts-ignore
+// @ts-expect-error
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 

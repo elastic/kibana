@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { omit } from 'lodash';
+import { omitBy } from 'lodash';
 import {
   KBN_SCREENSHOT_HEADER_BLACKLIST,
   KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN,
@@ -16,7 +16,7 @@ export const omitBlacklistedHeaders = <ScheduledTaskParamsType>({
   job: ScheduledTaskParamsType;
   decryptedHeaders: Record<string, string>;
 }) => {
-  const filteredHeaders: Record<string, string> = omit(
+  const filteredHeaders: Record<string, string> = omitBy(
     decryptedHeaders,
     (_value, header: string) =>
       header &&
