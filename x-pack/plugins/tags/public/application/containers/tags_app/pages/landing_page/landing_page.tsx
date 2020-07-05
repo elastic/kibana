@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSideNav, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
 import { useTagsApp } from '../../../../context';
 import { Tag as TagUi } from '../../../../../containers/tag';
@@ -13,9 +13,12 @@ import { Tag } from '../../../../../services/tags_service/tag_manager/tag';
 import { ResultsList } from './results_list';
 
 export const LandinPage: React.FC = () => {
-  const { manager } = useTagsApp();
+  const { manager, useQueryParam } = useTagsApp();
   const tags = manager.useTagsList();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [uriTags, setUriTags] = useQueryParam('tags');
+  const selected = useMemo(() => (uriTags ? uriTags.split('_') : []), [uriTags]);
+  const setSelected = (newSelection: string[]) =>
+    newSelection.length ? setUriTags(newSelection.join('_')) : setUriTags(null);
 
   const grouped = useMemo(() => {
     const categories: Record<string, Tag[]> = {};
@@ -75,8 +78,10 @@ export const LandinPage: React.FC = () => {
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel paddingSize="l" hasShadow>
+          <div style={{ marginTop: -8, paddingBottom: 16 }}>
             <TagPicker fullWidth selected={selected} onChange={setSelected} />
+          </div>
+          <EuiPanel paddingSize="l" hasShadow>
             <ResultsList tagIds={selected} />
           </EuiPanel>
         </EuiFlexItem>

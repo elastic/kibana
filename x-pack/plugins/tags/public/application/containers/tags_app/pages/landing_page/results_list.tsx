@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useTagsApp } from '../../../../context';
 
@@ -40,10 +41,19 @@ export const ResultsList: React.FC<Props> = ({ tagIds }) => {
   if (error || !kids) return null;
 
   return (
-    <div>
-      {kids.map((resuldKid) => (
-        <kid.Card kid={resuldKid} />
-      ))}
-    </div>
+    <>
+      <EuiSpacer />
+      <EuiTitle size="m">
+        <h6>Dashboards</h6>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFlexGroup gutterSize="l">
+        {kids.map((resuldKid) => (
+          <EuiFlexItem key={resuldKid} style={{ maxWidth: 200 }}>
+            <kid.Card kid={resuldKid} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
   );
 };
