@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -17,7 +17,7 @@ import {
   ExceptionsCache,
   ManifestDiff,
 } from '../../../lib/artifacts';
-import { InternalArtifactSchema, InternalManifestSchema } from '../../../schemas/artifacts';
+import { InternalArtifactSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 
@@ -30,11 +30,11 @@ export interface ManifestManagerContext {
   cache: ExceptionsCache;
 }
 
-export interface ManifestRefreshOpts {
+export interface ManifestSnapshotOpts {
   initialize?: boolean;
 }
 
-export interface WrappedManifest {
+export interface ManifestSnapshot {
   manifest: Manifest;
   diffs: ManifestDiff[];
 }
@@ -56,58 +56,79 @@ export class ManifestManager {
     this.cache = context.cache;
   }
 
-  private getManifestClient(schemaVersion: string): ManifestClient {
+  /**
+   * Gets a ManifestClient for the provided schemaVersion.
+   *
+   * @param schemaVersion
+   */
+  private getManifestClient(schemaVersion: string) {
     return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
   }
 
-  private async buildExceptionListArtifacts(
-    schemaVersion: string
-  ): Promise<InternalArtifactSchema[]> {
-    const artifacts: InternalArtifactSchema[] = [];
-
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      const exceptionList = await getFullEndpointExceptionList(
-        this.exceptionListClient,
-        os,
-        schemaVersion
-      );
-      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-
-      artifacts.push(artifact);
-    }
-
-    return artifacts;
-  }
-
-  private async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
-    return this.getManifestClient(schemaVersion)
-      .getManifest()
-      .then(async (manifestSo: SavedObject<InternalManifestSchema>) => {
-        if (manifestSo.version === undefined) {
-          throw new Error('No version returned for manifest.');
-        }
-        const manifest = new Manifest(
-          new Date(manifestSo.attributes.created),
-          schemaVersion,
-          manifestSo.version
+  /**
+   * Builds an array of artifacts (one per supported OS) based on the current
+   * state of exception-list-agnostic SO's.
+   *
+   * @param schemaVersion
+   */
+  private async buildExceptionListArtifacts(schemaVersion: string) {
+    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce(
+      async (acc: Promise<InternalArtifactSchema[]>, os) => {
+        const exceptionList = await getFullEndpointExceptionList(
+          this.exceptionListClient,
+          os,
+          schemaVersion
         );
-
-        for (const id of manifestSo.attributes.ids) {
-          const artifactSo = await this.artifactClient.getArtifact(id);
-          manifest.addEntry(artifactSo.attributes);
-        }
-
-        return manifest;
-      })
-      .catch((err) => {
-        if (err.output.statusCode !== 404) {
-          throw err;
-        }
-        return null;
-      });
+        const artifacts = await acc;
+        const artifact = await buildArtifact(exceptionList, os, schemaVersion);
+        artifacts.push(artifact);
+        return Promise.resolve(artifacts);
+      },
+      Promise.resolve([])
+    );
   }
 
-  public async refresh(opts?: ManifestRefreshOpts): Promise<WrappedManifest | null> {
+  /**
+   * Returns the last dispatched manifest based on the current state of the
+   * user-artifact-manifest SO.
+   *
+   * @param schemaVersion
+   */
+  private async getLastDispatchedManifest(schemaVersion: string) {
+    try {
+      const manifestClient = await this.getManifestClient(schemaVersion);
+      const manifestSo = await manifestClient.getManifest();
+
+      if (manifestSo.version === undefined) {
+        throw new Error('No version returned for manifest.');
+      }
+
+      const manifest = new Manifest(
+        new Date(manifestSo.attributes.created),
+        schemaVersion,
+        manifestSo.version
+      );
+
+      manifestSo.attributes.ids.map(async (id) => {
+        const artifactSo = await this.artifactClient.getArtifact(id);
+        manifest.addEntry(artifactSo.attributes);
+      });
+
+      return manifest;
+    } catch (err) {
+      if (err.output.statusCode !== 404) {
+        throw err;
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Snapshots a manifest based on current state of exception-list-agnostic SOs.
+   *
+   * @param opts TODO
+   */
+  public async getSnapshot(opts?: ManifestSnapshotOpts) {
     let oldManifest: Manifest | null;
 
     // Get the last-dispatched manifest
@@ -133,25 +154,6 @@ export class ManifestManager {
     // Get diffs
     const diffs = newManifest.diff(oldManifest);
 
-    // Create new artifacts
-    for (const diff of diffs) {
-      if (diff.type === 'add') {
-        const artifact = newManifest.getArtifact(diff.id);
-        try {
-          await this.artifactClient.createArtifact(artifact);
-          // Cache the body of the artifact
-          this.cache.set(diff.id, artifact.body);
-        } catch (err) {
-          if (err.status === 409) {
-            // This artifact already existed...
-            this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
-          } else {
-            throw err;
-          }
-        }
-      }
-    }
-
     return {
       manifest: newManifest,
       diffs,
@@ -159,111 +161,125 @@ export class ManifestManager {
   }
 
   /**
-   * Dispatches the manifest by writing it to the endpoint packageConfig.
+   * Syncs artifacts based on provided snapshot.
    *
-   * @return {WrappedManifest | null} WrappedManifest if all dispatched, else null
+   * Creates artifacts that do not yet exist and cleans up old artifacts that have been
+   * superceded by this snapshot.
+   *
+   * Can be filtered to apply one or both operations.
+   *
+   * @param snapshot
+   * @param diffType
    */
-  public async dispatch(wrappedManifest: WrappedManifest | null): Promise<WrappedManifest | null> {
-    if (wrappedManifest === null) {
-      this.logger.debug('wrappedManifest was null, aborting dispatch');
-      return null;
-    }
-
-    function showDiffs(diffs: ManifestDiff[]) {
-      return diffs.map((diff) => {
-        const op = diff.type === 'add' ? '(+)' : '(-)';
-        return `${op}${diff.id}`;
-      });
-    }
-
-    if (wrappedManifest.diffs.length > 0) {
-      this.logger.info(`Dispatching new manifest with diffs: ${showDiffs(wrappedManifest.diffs)}`);
-
-      let paging = true;
-      let page = 1;
-      let success = true;
-
-      while (paging) {
-        const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
-          page,
-          perPage: 20,
-          kuery: 'ingest-package-configs.package.name:endpoint',
-        });
-
-        for (const packageConfig of items) {
-          const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
-
-          if (
-            newPackageConfig.inputs.length > 0 &&
-            newPackageConfig.inputs[0].config !== undefined
-          ) {
-            const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
-              value: {},
-            };
-            artifactManifest.value = wrappedManifest.manifest.toEndpointFormat();
-            newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
-
-            await this.packageConfigService
-              .update(this.savedObjectsClient, id, newPackageConfig)
-              .then((response) => {
-                this.logger.debug(`Updated package config ${id}`);
-              })
-              .catch((err) => {
-                success = false;
-                this.logger.debug(`Error updating package config ${id}`);
-                this.logger.error(err);
-              });
-          } else {
-            success = false;
-            this.logger.debug(`Package config ${id} has no config.`);
-          }
+  public async syncArtifacts(snapshot: ManifestSnapshot, diffType?: 'add' | 'delete') {
+    snapshot.diffs.map(async (diff) => {
+      try {
+        if (diff.type === 'add' && (diffType === undefined || diffType === 'add')) {
+          const artifact = snapshot.manifest.getArtifact(diff.id);
+          await this.artifactClient.createArtifact(artifact);
+          // Cache the body of the artifact
+          this.cache.set(diff.id, artifact.body);
+        } else if (diff.type === 'delete' && (diffType === undefined || diffType === 'delete')) {
+          await this.artifactClient.deleteArtifact(diff.id);
+          // TODO: should we delete the cache entry here?
+          this.logger.info(`Cleaned up artifact ${diff.id}`);
+        } else if (!['add', 'delete'].includes(diff.type)) {
+          // TODO: replace with io-ts schema
+          throw new Error(`Unsupported diff type: ${diff.type}`);
         }
-
-        paging = page * items.length < total;
-        page++;
+      } catch (err) {
+        if (diff.type === 'add' && err.status === 409) {
+          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
+        } else {
+          throw err;
+        }
       }
-
-      return success ? wrappedManifest : null;
-    } else {
-      this.logger.debug('No manifest diffs [no-op]');
-    }
-
-    return null;
+    });
   }
 
-  public async commit(wrappedManifest: WrappedManifest | null) {
-    if (wrappedManifest === null) {
-      this.logger.debug('wrappedManifest was null, aborting commit');
-      return;
+  /**
+   * Dispatches the manifest by writing it to the endpoint package config.
+   *
+   */
+  public async dispatch(manifest: Manifest) {
+    let paging = true;
+    let page = 1;
+    let success = true;
+
+    while (paging) {
+      const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
+        page,
+        perPage: 20,
+        kuery: 'ingest-package-configs.package.name:endpoint',
+      });
+
+      items.map(async (packageConfig) => {
+        const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
+        if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
+          const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
+            value: {},
+          };
+          artifactManifest.value = manifest.toEndpointFormat();
+          newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
+
+          try {
+            this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+            this.logger.debug(
+              `Updated package config ${id} with manifest version ${manifest.getVersion()}`
+            );
+          } catch (err) {
+            success = false;
+            this.logger.debug(`Error updating package config ${id}`);
+            this.logger.error(err);
+          }
+        } else {
+          success = false;
+          this.logger.debug(`Package config ${id} has no config.`);
+        }
+      });
+
+      paging = page * items.length < total;
+      page++;
     }
 
-    const manifestClient = this.getManifestClient(wrappedManifest.manifest.getSchemaVersion());
+    // TODO: revisit success logic
+    return success;
+  }
+
+  /**
+   * Commits a manifest to indicate that it has been dispatched.
+   *
+   * @param manifest
+   */
+  public async commit(manifest: Manifest) {
+    const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
     // Commit the new manifest
-    if (wrappedManifest.manifest.getVersion() === 'v0') {
-      await manifestClient.createManifest(wrappedManifest.manifest.toSavedObject());
+    if (manifest.getVersion() === 'v0') {
+      await manifestClient.createManifest(manifest.toSavedObject());
     } else {
-      const version = wrappedManifest.manifest.getVersion();
+      const version = manifest.getVersion();
       if (version === 'v0') {
         throw new Error('Updating existing manifest with baseline version. Bad state.');
       }
-      await manifestClient.updateManifest(wrappedManifest.manifest.toSavedObject(), {
+      await manifestClient.updateManifest(manifest.toSavedObject(), {
         version,
       });
     }
 
-    this.logger.info(`Commited manifest ${wrappedManifest.manifest.getVersion()}`);
+    this.logger.info(`Commited manifest ${manifest.getVersion()}`);
+  }
 
-    // Clean up old artifacts
-    for (const diff of wrappedManifest.diffs) {
-      try {
-        if (diff.type === 'delete') {
-          await this.artifactClient.deleteArtifact(diff.id);
-          this.logger.info(`Cleaned up artifact ${diff.id}`);
-        }
-      } catch (err) {
-        this.logger.error(err);
-      }
-    }
+  /**
+   * Confirms that a packageConfig exists with provided name.
+   */
+  public async confirmPackageConfigExists(name: string) {
+    // TODO: what if there are multiple results? uh oh.
+    const { total } = await this.packageConfigService.list(this.savedObjectsClient, {
+      page: 1,
+      perPage: 20,
+      kuery: `ingest-package-configs.name:${name}`,
+    });
+    return total > 0;
   }
 }
