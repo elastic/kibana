@@ -39,7 +39,11 @@ export const ResultsList: React.FC<Props> = ({ tagIds }) => {
       );
   }, [isMounted, tags.attachments, tagIds]);
 
-  const grouped = useMemo<{ dashboards: string[]; visualizations: []; other: [] }>(() => {
+  const grouped = useMemo<{
+    dashboards: string[];
+    visualizations: string[];
+    other: string[];
+  }>(() => {
     const dashboards: string[] = [];
     const visualizations: string[] = [];
     const other: string[] = [];

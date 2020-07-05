@@ -23,7 +23,11 @@ export const TagList: React.FC<TagListProps> = React.memo(({ kid, onEditClick })
       {attachments.map(({ data }) => (
         <Tag key={data.tagId} id={data.tagId} />
       ))}
-      {!!onEditClick && <EuiBadge onClick={onEditClick}>...</EuiBadge>}
+      {!!onEditClick && (
+        <EuiBadge onClick={onEditClick} onClickAriaLabel="Edit tags">
+          {'...'}
+        </EuiBadge>
+      )}
     </>
   );
 });
