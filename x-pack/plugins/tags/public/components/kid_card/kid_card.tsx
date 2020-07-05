@@ -15,10 +15,11 @@ export interface Props {
 export const KidCard: React.FC<Props> = ({ info }) => {
   return (
     <EuiCard
-      icon={info.euiIcon ? <EuiIcon size="xxl" type={info.euiIcon} /> : undefined}
+      titleSize={'xs'}
+      icon={info.euiIcon ? <EuiIcon size="l" type={info.euiIcon} /> : undefined}
       title={info.name || 'Untitled'}
       description={info.description || ''}
-      onClick={() => {}}
+      onClick={() => (info.goto ? info.goto() : undefined)}
     />
   );
 };

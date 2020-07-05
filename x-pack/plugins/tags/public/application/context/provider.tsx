@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Router } from 'react-router-dom';
 import { context } from './tags_app_context';
 import { TagsAppServices } from '../services';
 import { TagsProvider } from '../../context';
@@ -16,7 +17,9 @@ export interface Props {
 export const TagsAppProvider: React.FC<Props> = ({ services, children }) => {
   return (
     <context.Provider value={services}>
-      <TagsProvider value={services.tags}>{children}</TagsProvider>
+      <TagsProvider value={services.tags}>
+        <Router history={services.history}>{children}</Router>
+      </TagsProvider>
     </context.Provider>
   );
 };

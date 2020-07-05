@@ -17,6 +17,7 @@ export interface KidInfo {
   type?: string;
   editURL?: string;
   viewURL?: string;
+  goto?: () => void;
 }
 
 export type KidInfoProvider = (kid: KID) => Promise<KidInfo>;
