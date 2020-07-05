@@ -155,7 +155,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       const exactMatchedIndices = await ensureMinimumTime(
         getIndices(
           this.context.services.http,
-          indexPatternCreationType,
+          (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
           query,
           this.props.isIncludingSystemIndices
         )
@@ -171,13 +171,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
       getIndices(
         this.context.services.http,
-        indexPatternCreationType,
+        (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
         `${query}*`,
         this.props.isIncludingSystemIndices
       ),
       getIndices(
         this.context.services.http,
-        indexPatternCreationType,
+        (indexName: string) => indexPatternCreationType.getIndexTags(indexName),
         query,
         this.props.isIncludingSystemIndices
       ),

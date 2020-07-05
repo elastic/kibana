@@ -30,7 +30,7 @@ const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel',
 
 export async function getIndices(
   http: HttpStart,
-  indexPatternCreationType: IndexPatternCreationConfig,
+  getIndexTags: IndexPatternCreationConfig['getIndexTags'],
   rawPattern: string,
   showAllIndices: boolean
 ): Promise<MatchedItem[]> {
@@ -65,7 +65,7 @@ export async function getIndices(
       return [];
     }
 
-    return responseToItemArray(response, indexPatternCreationType);
+    return responseToItemArray(response, getIndexTags);
   } catch {
     return [];
   }
@@ -73,14 +73,14 @@ export async function getIndices(
 
 export const responseToItemArray = (
   response: ResolveIndexResponse,
-  indexPatternCreationType: IndexPatternCreationConfig
+  getIndexTags: IndexPatternCreationConfig['getIndexTags']
 ): MatchedItem[] => {
   const source: MatchedItem[] = [];
 
   (response.indices || []).forEach((index) => {
     source.push({
       name: index.name,
-      tags: indexPatternCreationType.getIndexTags(index.name),
+      tags: getIndexTags(index.name),
       item: index,
     });
   });

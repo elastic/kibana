@@ -40,8 +40,9 @@ import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { EmptyState } from './empty_state';
-import { MatchedIndex } from '../create_index_pattern_wizard/types';
+import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
 import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
+import { getIndices } from '../create_index_pattern_wizard/lib';
 
 const pagination = {
   initialPageSize: 10,
@@ -85,14 +86,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     chrome,
     docLinks,
     application,
+    http,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
-  const [sources, setSources] = useState<MatchedIndex[]>([]);
+  const [sources, setSources] = useState<MatchedItem[]>([]);
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
+  const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
+  const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
 
   setBreadcrumbs(getListBreadcrumbs());
-
   useEffect(() => {
     (async function () {
       const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
@@ -103,6 +106,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         uiSettings.get('defaultIndex'),
         indexPatternManagementStart
       );
+      setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
     })();
@@ -114,15 +118,27 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     savedObjects.client,
   ]);
 
+  const removeAliases = (item: MatchedItem) =>
+    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
+
   const loadSources = () => {
-    setSources([]);
-    setRemoteClustersExist(false);
+    getIndices(http, () => [], '*', false).then((dataSources) =>
+      setSources(dataSources.filter(removeAliases))
+    );
+    getIndices(http, () => [], '*:*', false).then((dataSources) =>
+      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+    );
   };
 
   useEffect(() => {
-    setSources([]);
-    setRemoteClustersExist(false);
-  }, []);
+    getIndices(http, () => [], '*', false).then((dataSources) => {
+      setSources(dataSources.filter(removeAliases));
+      setIsLoadingSources(false);
+    });
+    getIndices(http, () => [], '*:*', false).then((dataSources) =>
+      setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
+    );
+  }, [http, creationOptions]);
 
   chrome.docTitle.change(title);
 
@@ -169,11 +185,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     <></>
   );
 
-  // this needs
-  //   - a way to load indices
-  //     - use getIndices
-  const hasDataIndices = sources.some(({ name }: MatchedIndex) => !name.startsWith('.'));
-  if (!indexPatterns.length && !hasDataIndices && !remoteClustersExist) {
+  if (isLoadingSources || isLoadingIndexPatterns) {
+    return <></>;
+  }
+
+  const hasDataIndices = sources.some(({ name }: MatchedItem) => !name.startsWith('.'));
+
+  if (!indexPatterns.length) {
     if (!hasDataIndices && !remoteClustersExist) {
       return (
         <EmptyState

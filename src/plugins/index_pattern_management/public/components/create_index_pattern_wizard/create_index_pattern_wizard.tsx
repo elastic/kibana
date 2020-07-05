@@ -136,7 +136,7 @@ export class CreateIndexPatternWizard extends Component<
       this.catchAndWarn(
         getIndices(
           this.context.services.http,
-          this.state.indexPatternCreationType,
+          (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
           `*`,
           this.state.isIncludingSystemIndices
         ),
@@ -152,7 +152,7 @@ export class CreateIndexPatternWizard extends Component<
       // ['a'] is fallback value
       getIndices(
         this.context.services.http,
-        this.state.indexPatternCreationType,
+        (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
         `*:*`,
         this.state.isIncludingSystemIndices
       ),
