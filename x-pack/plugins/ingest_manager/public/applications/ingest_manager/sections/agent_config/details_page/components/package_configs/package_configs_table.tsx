@@ -118,6 +118,7 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
     (): EuiInMemoryTableProps<InMemoryPackageConfig>['columns'] => [
       {
         field: 'name',
+        sortable: true,
         name: i18n.translate(
           'xpack.ingestManager.configDetails.packageConfigsTable.nameColumnTitle',
           {
@@ -137,6 +138,7 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
       },
       {
         field: 'packageTitle',
+        sortable: true,
         name: i18n.translate(
           'xpack.ingestManager.configDetails.packageConfigsTable.packageNameColumnTitle',
           {

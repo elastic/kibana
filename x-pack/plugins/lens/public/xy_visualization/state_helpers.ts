@@ -5,7 +5,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { SeriesType, visualizationTypes } from './types';
+import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return seriesType === 'bar_horizontal' || seriesType === 'bar_horizontal_stacked';
@@ -24,3 +24,12 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 
   return (definition.icon as EuiIconType) || 'empty';
 }
+
+export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
+  if (layer.splitAccessor) {
+    return null;
+  }
+  return (
+    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+  );
+};

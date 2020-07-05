@@ -143,6 +143,7 @@ export const logRateModelPlotBucketRT = rt.type({
       hits: rt.type({
         hits: rt.array(
           rt.type({
+            _id: rt.string,
             _source: logRateMlRecordRT,
           })
         ),

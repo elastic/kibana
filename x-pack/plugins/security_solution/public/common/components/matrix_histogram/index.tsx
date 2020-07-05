@@ -53,6 +53,7 @@ export interface OwnProps extends QueryTemplateProps {
   showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
+  timelineId?: string;
   title: string | GetTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
 }
@@ -94,6 +95,7 @@ export const MatrixHistogramComponent: React.FC<
   stackByOptions,
   startDate,
   subtitle,
+  timelineId,
   title,
   titleSize,
   dispatchSetAbsoluteRangeDatePicker,
@@ -242,6 +244,7 @@ export const MatrixHistogramComponent: React.FC<
               barChart={barChartData}
               configs={barchartConfigs}
               stackByField={selectedStackByOption.value}
+              timelineId={timelineId}
             />
           )}
         </HistogramPanel>
