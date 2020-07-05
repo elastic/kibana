@@ -39,7 +39,11 @@ export class AbortError extends Error {
 export function toPromise(signal: AbortSignal): Promise<never> {
   return new Promise((resolve, reject) => {
     if (signal.aborted) reject(new AbortError());
-    signal.addEventListener('abort', () => reject(new AbortError()));
+    const abortHandler = () => {
+      signal.removeEventListener('abort', abortHandler);
+      reject(new AbortError());
+    };
+    signal.addEventListener('abort', abortHandler);
   });
 }
 

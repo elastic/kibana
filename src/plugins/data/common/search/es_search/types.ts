@@ -22,8 +22,6 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 export const ES_SEARCH_STRATEGY = 'es';
 
 export type ISearchRequestParams = {
-  body?: any;
-  index?: string;
   trackTotalHits?: boolean;
 } & SearchParams;
 
