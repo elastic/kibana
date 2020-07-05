@@ -24,14 +24,20 @@ import sinon from 'sinon';
 // @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { docLinksServiceMock } from '../../../../../../../core/public/mocks';
+import { docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 const docLinks = docLinksServiceMock.createStartContract();
+
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    createHref: jest.fn(),
+  }),
+}));
 
 describe('EmptyState', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState docLinks={docLinks} onRefresh={() => {}} prependBasePath={(x) => x} />
+      <EmptyState docLinks={docLinks} onRefresh={() => {}} navigateToApp={async () => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -43,7 +49,11 @@ describe('EmptyState', () => {
         const onRefreshHandler = sinon.stub();
 
         const component = mountWithIntl(
-          <EmptyState docLinks={docLinks} onRefresh={onRefreshHandler} prependBasePath={(x) => x} />
+          <EmptyState
+            docLinks={docLinks}
+            onRefresh={onRefreshHandler}
+            navigateToApp={async () => {}}
+          />
         );
 
         findTestSubject(component, 'refreshIndicesButton').simulate('click');

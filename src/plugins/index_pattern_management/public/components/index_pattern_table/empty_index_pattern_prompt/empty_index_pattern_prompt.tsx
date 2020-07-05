@@ -18,41 +18,29 @@
  */
 import './empty_index_pattern_prompt.scss';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { getListBreadcrumbs } from '../breadcrumbs';
-import { IndexPatternManagmentContext } from '../../types';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
-import { IndexPatternCreationOption } from '../types';
-import { CreateButton } from '../create_button';
-// @ts-ignore
+import { getListBreadcrumbs } from '../../breadcrumbs';
+import { IndexPatternManagmentContext } from '../../../types';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { IndexPatternCreationOption } from '../../types';
+import { CreateButton } from '../../create_button';
+// @ts-expect-error
 import { Illustration } from './assets/index_pattern_illustration';
 
-interface Props extends RouteComponentProps {
+interface Props {
   canSave: boolean;
+  creationOptions: IndexPatternCreationOption[];
 }
 
-export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
-  const { indexPatternManagementStart, setBreadcrumbs, docLinks } = useKibana<
-    IndexPatternManagmentContext
-  >().services;
-  const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
+export const EmptyIndexPatternPrompt = ({ canSave, creationOptions }: Props) => {
+  const { setBreadcrumbs, docLinks } = useKibana<IndexPatternManagmentContext>().services;
   setBreadcrumbs(getListBreadcrumbs());
-
-  useEffect(() => {
-    (async function () {
-      const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
-        history.push
-      );
-      setCreationOptions(options);
-    })();
-  }, [history.push, indexPatternManagementStart]);
 
   return (
     <EuiPageContent
@@ -117,5 +105,3 @@ export const EmptyIndexPatternPrompt = ({ canSave, history }: Props) => {
     </EuiPageContent>
   );
 };
-
-export const EmptyIndexPatternPromptWithRouter = withRouter(EmptyIndexPatternPrompt);

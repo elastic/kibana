@@ -33,7 +33,7 @@ import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
-import { EmptyState } from './components/empty_state';
+// import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
@@ -246,14 +246,15 @@ export class CreateIndexPatternWizard extends Component<
       isIncludingSystemIndices,
       step,
       indexPattern,
-      remoteClustersExist,
-      docLinks,
+      // remoteClustersExist,
+      // docLinks,
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
     }
 
+    /*
     const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
       return (
@@ -264,6 +265,7 @@ export class CreateIndexPatternWizard extends Component<
         />
       );
     }
+    */
 
     const header = this.renderHeader();
 

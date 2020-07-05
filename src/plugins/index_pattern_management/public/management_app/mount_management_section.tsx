@@ -32,7 +32,6 @@ import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
   CreateIndexPatternWizardWithRouter,
-  EmptyIndexPatternPromptWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
@@ -89,9 +88,6 @@ export async function mountManagementSection(
             </Route>
             <Route path={['/patterns/:id']}>
               <EditIndexPatternContainer />
-            </Route>
-            <Route path={['/empty']}>
-              <EmptyIndexPatternPromptWithRouter canSave={canSave} />
             </Route>
             <Route path={['/']}>
               <IndexPatternTableWithRouter canSave={canSave} />

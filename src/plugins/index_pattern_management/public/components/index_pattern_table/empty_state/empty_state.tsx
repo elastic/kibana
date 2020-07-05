@@ -21,9 +21,7 @@ import './empty_state.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-// import { getDocLink } from '../../../../../  legacy/ui/public/documentation_links';
-import { IBasePath, DocLinksStart } from 'kibana/public';
-
+import { DocLinksStart, ApplicationStart } from 'kibana/public';
 import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -39,14 +37,16 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate } from '../../../../../../plugins/kibana_react/public';
 
 export const EmptyState = ({
   onRefresh,
-  prependBasePath,
+  navigateToApp,
   docLinks,
 }: {
   onRefresh: () => void;
-  prependBasePath: IBasePath['prepend'];
+  navigateToApp: ApplicationStart['navigateToApp'];
   docLinks: DocLinksStart;
 }) => (
   <>
@@ -69,7 +69,7 @@ export const EmptyState = ({
           <EuiFlexItem>
             <EuiCard
               className="inpEmptyState__card"
-              href={prependBasePath('/app/home#/tutorial_directory')}
+              onClick={() => navigateToApp('home', { path: '#/tutorial_directory' })}
               icon={<EuiIcon size="xl" type="database" color="subdued" />}
               title={
                 <FormattedMessage
@@ -87,6 +87,7 @@ export const EmptyState = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
+              onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
               className="inpEmptyState__card"
               betaBadgeLabel={i18n.translate(
                 'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
@@ -119,7 +120,7 @@ export const EmptyState = ({
           <EuiFlexItem>
             <EuiCard
               className="inpEmptyState__card"
-              href={prependBasePath('/app/home#/tutorial_directory/sampleData')}
+              onClick={() => navigateToApp('home', { path: '#/tutorial_directory/sampleData' })}
               icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
               title={
                 <FormattedMessage
@@ -189,7 +190,9 @@ export const EmptyState = ({
     <EuiText color="subdued" textAlign="center" size="xs">
       {/* TODO: Hook up link below */}
       <p>
-        Some indices may be hidden. Try to <EuiLink>create an index pattern</EuiLink> anyway.
+        Some indices may be hidden. Try to{' '}
+        <EuiLink {...reactRouterNavigate(useHistory(), 'create')}>create an index pattern</EuiLink>{' '}
+        anyway.
       </p>
     </EuiText>
   </>

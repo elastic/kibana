@@ -17,7 +17,16 @@
  * under the License.
  */
 
-export {
-  EmptyIndexPatternPrompt,
-  EmptyIndexPatternPromptWithRouter,
-} from './empty_index_pattern_prompt';
+import React from 'react';
+import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+
+describe('EmptyIndexPatternPrompt', () => {
+  it.skip('should render normally', () => {
+    const component = shallowWithI18nProvider(
+      <EmptyIndexPatternPrompt canSave creationOptions={[{ text: 'default', onClick: () => {} }]} />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+});

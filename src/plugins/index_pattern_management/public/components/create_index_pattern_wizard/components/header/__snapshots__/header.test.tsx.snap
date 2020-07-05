@@ -51,7 +51,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -68,7 +68,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
             }
           >
             <span>
-              An index pattern can match a single index, for example, 
+              An index pattern can match a single source, for example, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -84,7 +84,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
               <strong>
                 multiple
               </strong>
-               indices, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -170,7 +170,7 @@ exports[`Header should render normally 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -187,7 +187,7 @@ exports[`Header should render normally 1`] = `
             }
           >
             <span>
-              An index pattern can match a single index, for example, 
+              An index pattern can match a single source, for example, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -203,7 +203,7 @@ exports[`Header should render normally 1`] = `
               <strong>
                 multiple
               </strong>
-               indices, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -279,7 +279,7 @@ exports[`Header should render without including system indices 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
             id="indexPatternManagement.createIndexPattern.description"
             values={
               Object {
@@ -296,7 +296,7 @@ exports[`Header should render without including system indices 1`] = `
             }
           >
             <span>
-              An index pattern can match a single index, for example, 
+              An index pattern can match a single source, for example, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}
@@ -312,7 +312,7 @@ exports[`Header should render without including system indices 1`] = `
               <strong>
                 multiple
               </strong>
-               indices, 
+               data sources, 
               <EuiCode>
                 <EuiCodeBlockImpl
                   inline={true}

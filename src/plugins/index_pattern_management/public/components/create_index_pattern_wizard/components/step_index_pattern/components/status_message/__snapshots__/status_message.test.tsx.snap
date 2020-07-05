@@ -105,14 +105,11 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your index pattern can match any of your {strongIndices}, below."
+        defaultMessage="Your index pattern can match any of your {indicesCount} sources below."
         id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {
-            "strongIndices": <strong>
-              2
-               indices
-            </strong>,
+            "indicesCount": 2,
           }
         }
       />

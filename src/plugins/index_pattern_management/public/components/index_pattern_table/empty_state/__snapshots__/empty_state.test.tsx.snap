@@ -39,7 +39,6 @@ exports[`EmptyState should render normally 1`] = `
                 values={Object {}}
               />
             }
-            href="/app/home#/tutorial_directory"
             icon={
               <EuiIcon
                 color="subdued"
@@ -47,6 +46,7 @@ exports[`EmptyState should render normally 1`] = `
                 type="database"
               />
             }
+            onClick={[Function]}
             title={
               <FormattedMessage
                 defaultMessage="Add integration"
@@ -76,6 +76,7 @@ exports[`EmptyState should render normally 1`] = `
               />
             }
             isDisabled={true}
+            onClick={[Function]}
             title={
               <FormattedMessage
                 defaultMessage="Upload a file"
@@ -95,7 +96,6 @@ exports[`EmptyState should render normally 1`] = `
                 values={Object {}}
               />
             }
-            href="/app/home#/tutorial_directory/sampleData"
             icon={
               <EuiIcon
                 color="subdued"
@@ -103,6 +103,7 @@ exports[`EmptyState should render normally 1`] = `
                 type="heatmap"
               />
             }
+            onClick={[Function]}
             title={
               <FormattedMessage
                 defaultMessage="Add sample data"
@@ -189,11 +190,15 @@ exports[`EmptyState should render normally 1`] = `
     textAlign="center"
   >
     <p>
-      Some indices may be hidden. Try to 
-      <EuiLink>
+      Some indices may be hidden. Try to
+       
+      <EuiLink
+        onClick={[Function]}
+      >
         create an index pattern
       </EuiLink>
-       anyway.
+       
+      anyway.
     </p>
   </EuiText>
 </Fragment>

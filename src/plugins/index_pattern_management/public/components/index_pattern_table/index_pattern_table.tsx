@@ -39,6 +39,9 @@ import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { EmptyState } from './empty_state';
+import { MatchedIndex } from '../create_index_pattern_wizard/types';
+import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 
 const pagination = {
   initialPageSize: 10,
@@ -80,9 +83,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     indexPatternManagementStart,
     chrome,
+    docLinks,
+    application,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
+  const [sources, setSources] = useState<MatchedIndex[]>([]);
+  const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
 
   setBreadcrumbs(getListBreadcrumbs());
 
@@ -106,6 +113,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     uiSettings,
     savedObjects.client,
   ]);
+
+  const loadSources = () => {
+    setSources([]);
+    setRemoteClustersExist(false);
+  };
+
+  useEffect(() => {
+    setSources([]);
+    setRemoteClustersExist(false);
+  }, []);
 
   chrome.docTitle.change(title);
 
@@ -151,6 +168,24 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   ) : (
     <></>
   );
+
+  // this needs
+  //   - a way to load indices
+  //     - use getIndices
+  const hasDataIndices = sources.some(({ name }: MatchedIndex) => !name.startsWith('.'));
+  if (!indexPatterns.length && !hasDataIndices && !remoteClustersExist) {
+    if (!hasDataIndices && !remoteClustersExist) {
+      return (
+        <EmptyState
+          onRefresh={loadSources}
+          docLinks={docLinks}
+          navigateToApp={application.navigateToApp}
+        />
+      );
+    } else {
+      return <EmptyIndexPatternPrompt canSave={canSave} creationOptions={creationOptions} />;
+    }
+  }
 
   return (
     <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
