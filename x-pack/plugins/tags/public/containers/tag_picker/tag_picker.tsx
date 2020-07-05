@@ -17,7 +17,13 @@ export const TagPicker: React.FC<TagPickerProps> = (props) => {
   const { manager } = useTags();
   const initializing = manager!.useInitializing();
   const tags = manager!.useTags();
-  const rawTags = useMemo(() => Object.values(tags).map(({ data }) => data), [tags]);
+  const rawTags = useMemo(
+    () =>
+      Object.values(tags)
+        .map(({ data }) => data)
+        .sort((a, b) => (a.title.toLowerCase() > b.title.toLowerCase() ? 1 : -1)),
+    [tags]
+  );
 
   if (initializing) return null;
 
