@@ -5,7 +5,13 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiHighlight, EuiHealth, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiHighlight,
+  EuiHealth,
+  EuiComboBox,
+  EuiComboBoxProps,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import { TagView } from '../tag/tag';
 import { txtPlaceholder } from './i18n';
 
@@ -13,7 +19,7 @@ export interface PickerTagView extends TagView {
   id: string;
 }
 
-export interface TagPickerProps {
+export interface TagPickerProps extends Pick<EuiComboBoxProps<PickerTagView>, 'fullWidth'> {
   isDisabled?: boolean;
   tags: PickerTagView[];
   selected: string[];
@@ -21,7 +27,7 @@ export interface TagPickerProps {
 }
 
 export const TagPicker: React.FC<TagPickerProps> = React.memo(
-  ({ isDisabled, tags, selected, onChange }) => {
+  ({ isDisabled, tags, selected, onChange, ...rest }) => {
     const options = useMemo<Array<EuiComboBoxOptionOption<PickerTagView>>>(() => {
       return tags.map((value) => ({
         key: value.id,
@@ -44,6 +50,7 @@ export const TagPicker: React.FC<TagPickerProps> = React.memo(
 
     return (
       <EuiComboBox<PickerTagView>
+        {...rest}
         isDisabled={isDisabled}
         placeholder={txtPlaceholder}
         options={options}

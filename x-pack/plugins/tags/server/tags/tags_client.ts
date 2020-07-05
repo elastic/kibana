@@ -22,6 +22,7 @@ import {
   TagsClientReadResult,
   TagsClientUpdateParams,
   TagsClientUpdateResult,
+  parseTag,
 } from '../../common';
 import {
   validateTagTitle,
@@ -60,14 +61,15 @@ export class TagsClient implements ITagsClient {
     const { savedObjectsClient, user } = this.params;
     const at = new Date().toISOString();
     const username = user ? user.username : null;
+    const { key, value } = parseTag(title);
 
     const rawTag: RawTag = {
       enabled: true,
       title,
       description,
       color,
-      key: '',
-      value: '',
+      key,
+      value,
       createdAt: at,
       updatedAt: at,
       createdBy: username,
