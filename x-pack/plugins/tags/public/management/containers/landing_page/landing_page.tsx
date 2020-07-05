@@ -12,6 +12,7 @@ import { TagTable } from '../tag_table';
 import { txtTitle, txtSubtitle, txtCreateATag } from './i18n';
 import { useServices } from '../../context';
 import { Empty } from './empty';
+import { Footer } from './footer';
 
 const callToAction = (
   <Link to={'/create'}>
@@ -28,14 +29,17 @@ export const LandingPage: React.FC = () => {
   const tags = useMemo(() => Object.values(tagMap).map(({ data }) => data), [tagMap]);
 
   return (
-    <Page
-      id={'TagTable'}
-      title={txtTitle}
-      subtitle={tags.length ? <p>{txtSubtitle}</p> : undefined}
-      callToAction={tags.length ? callToAction : undefined}
-    >
-      {!initializing && !!tags.length && <TagTable />}
-      {!initializing && !tags.length && <Empty />}
-    </Page>
+    <>
+      <Page
+        id={'TagTable'}
+        title={txtTitle}
+        subtitle={tags.length ? <p>{txtSubtitle}</p> : undefined}
+        callToAction={tags.length ? callToAction : undefined}
+      >
+        {!initializing && !!tags.length && <TagTable />}
+        {!initializing && !tags.length && <Empty />}
+      </Page>
+      <Footer />
+    </>
   );
 };
