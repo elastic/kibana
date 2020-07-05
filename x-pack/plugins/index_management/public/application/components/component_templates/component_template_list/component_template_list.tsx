@@ -74,7 +74,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       />
     );
   } else if (data && data.length === 0) {
-    content = <EmptyPrompt />;
+    content = <EmptyPrompt history={history} />;
   } else if (error) {
     content = <LoadError onReloadClick={sendRequest} />;
   }

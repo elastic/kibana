@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const StepLogisticsContainer = ({ isEditing = false }: Props) => {
-  const { defaultValue, updateContent } = Forms.useContent<WizardContent>('logistics');
+  const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'logistics'>('logistics');
 
   return (
     <StepLogistics defaultValue={defaultValue} onChange={updateContent} isEditing={isEditing} />
