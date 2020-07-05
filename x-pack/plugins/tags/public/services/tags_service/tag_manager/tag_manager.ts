@@ -53,7 +53,15 @@ export class TagManager {
         this.tags.add(response.tags);
         this.attachments.add(response.attachments);
         const attachments = this.attachments.getMany(response.attachments.map(({ id }) => id));
-        this.resources.set(kid, attachments);
+        this.resources.set(
+          kid,
+          attachments.sort((a, b) => {
+            const aTag = this.tags.tag(a.data.tagId);
+            const bTag = this.tags.tag(b.data.tagId);
+            if (!aTag || !bTag) return 0;
+            return aTag.data.title > bTag.data.title ? 1 : -1;
+          })
+        );
       })
     );
   }
@@ -75,7 +83,14 @@ export class TagManager {
       const data = this.attachments.add(attachments);
       this.resources.set(
         kid,
-        attachments.map(({ id }) => data[id])
+        attachments
+          .map(({ id }) => data[id])
+          .sort((a, b) => {
+            const aTag = this.tags.tag(a.data.tagId);
+            const bTag = this.tags.tag(b.data.tagId);
+            if (!aTag || !bTag) return 0;
+            return aTag.data.title > bTag.data.title ? 1 : -1;
+          })
       );
     });
 
