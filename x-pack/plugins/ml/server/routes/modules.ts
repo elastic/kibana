@@ -47,7 +47,6 @@ function setup(
   datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
   estimateModelMemory?: boolean
 ) {
-
   const dr = new DataRecognizer(context.ml!.mlClient, context.core.savedObjects.client);
   return dr.setup(
     moduleId,
