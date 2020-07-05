@@ -25,6 +25,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ensureMinimumTime, extractTimeFields } from '../../lib';
@@ -42,6 +43,7 @@ interface StepTimeFieldProps {
   goToPreviousStep: () => void;
   createIndexPattern: (selectedTimeField: string | undefined, indexPatternId: string) => void;
   indexPatternCreationType: IndexPatternCreationConfig;
+  selectedTimeField?: string;
 }
 
 interface StepTimeFieldState {
@@ -68,7 +70,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  state = {
+  state: StepTimeFieldState = {
     error: '',
     timeFields: [],
     selectedTimeField: undefined,
@@ -85,6 +87,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     super(props);
     this.state.indexPatternType = props.indexPatternCreationType.getIndexPatternType() || '';
     this.state.indexPatternName = props.indexPatternCreationType.getIndexPatternName();
+    this.state.selectedTimeField = props.selectedTimeField;
+    if (props.selectedTimeField) {
+      this.state.timeFieldSet = true;
+    }
   }
 
   mounted = false;
@@ -247,7 +253,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
-        <EuiSpacer size="s" />
+        <EuiHorizontalRule />
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}

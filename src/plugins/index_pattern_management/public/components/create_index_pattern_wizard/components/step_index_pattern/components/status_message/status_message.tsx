@@ -23,13 +23,13 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MatchedIndex } from '../../../../types';
+import { MatchedItem } from '../../../../types';
 
 interface StatusMessageProps {
   matchedIndices: {
-    allIndices: MatchedIndex[];
-    exactMatchedIndices: MatchedIndex[];
-    partialMatchedIndices: MatchedIndex[];
+    allIndices: MatchedItem[];
+    exactMatchedIndices: MatchedItem[];
+    partialMatchedIndices: MatchedItem[];
   };
   isIncludingSystemIndices: boolean;
   query: string;
@@ -57,8 +57,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern can match any of your {indicesCount} sources below."
-            values={{ indicesCount: allIndicesLength }}
+            defaultMessage="Your index pattern can match any of your {sourceCount} sources below."
+            values={{ sourceCount: allIndicesLength }}
           />
         </span>
       );
@@ -89,17 +89,9 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         &nbsp;
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
-          defaultMessage="Your index pattern matches {strongIndices}."
+          defaultMessage="Your index pattern matches {sourceCount} sources."
           values={{
-            strongIndices: (
-              <strong>
-                <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.step.status.successLabel.strongIndicesLabel"
-                  defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
-                  values={{ indicesLength: exactMatchedIndices.length }}
-                />
-              </strong>
-            ),
+            sourceCount: exactMatchedIndices.length,
           }}
         />
       </span>

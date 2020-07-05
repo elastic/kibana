@@ -17,9 +17,45 @@
  * under the License.
  */
 
-export interface MatchedIndex {
+export interface MatchedItem {
   name: string;
   tags: Tag[];
+  item:
+    | ResolveIndexResponseItemIndex
+    | ResolveIndexResponseItemAlias
+    | ResolveIndexResponseItemDataStream;
+}
+
+export interface ResolveIndexResponse {
+  indices?: ResolveIndexResponseItemIndex[];
+  aliases?: ResolveIndexResponseItemAlias[];
+  data_streams?: ResolveIndexResponseItemDataStream[];
+}
+
+export interface ResolveIndexResponseItem {
+  name: string;
+}
+
+export interface ResolveIndexResponseItemDataStream extends ResolveIndexResponseItem {
+  backing_indices: string[];
+  timestamp_field: string;
+}
+
+export interface ResolveIndexResponseItemAlias extends ResolveIndexResponseItem {
+  indices: string[];
+}
+
+export interface ResolveIndexResponseItemIndex extends ResolveIndexResponseItem {
+  aliases?: string[];
+  attributes?: ResolveIndexResponseItemIndexAttrs[];
+  data_stream?: string;
+}
+
+enum ResolveIndexResponseItemIndexAttrs {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  HIDDEN = 'hidden',
+  FROZEN = 'frozen',
 }
 
 export interface Tag {

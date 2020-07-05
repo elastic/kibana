@@ -395,7 +395,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
       isIncludingSystemIndices={false}
       onChangeIncludingSystemIndices={[Function]}
       prompt={null}
-      showSystemIndices={true}
+      showSystemIndices={false}
     />
     <EuiHorizontalRule />
     <StepTimeField

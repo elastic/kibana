@@ -17,17 +17,23 @@
  * under the License.
  */
 
-import { get, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
+import { HttpStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../../data/public';
-import { MatchedIndex } from '../types';
+import { MatchedItem, ResolveIndexResponse } from '../types';
+
+const aliasLabel = i18n.translate('indexPatternManagement.aliasLabel', { defaultMessage: 'Alias' });
+const dataStreamLabel = i18n.translate('indexPatternManagement.dataStreamLabel', {
+  defaultMessage: 'Data stream',
+});
 
 export async function getIndices(
-  es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
+  http: HttpStart,
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
-  limit: number
-): Promise<MatchedIndex[]> {
+  showAllIndices: boolean
+): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -48,54 +54,46 @@ export async function getIndices(
     return [];
   }
 
-  // We need to always provide a limit and not rely on the default
-  if (!limit) {
-    throw new Error('`getIndices()` was called without the required `limit` parameter.');
-  }
-
-  const params = {
-    ignoreUnavailable: true,
-    index: pattern,
-    ignore: [404],
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: limit,
-          },
-        },
-      },
-    },
-  };
+  const query = showAllIndices ? { expand_wildcards: 'all' } : undefined;
 
   try {
-    const response = await es.search(params);
-    if (!response || response.error || !response.aggregations) {
+    const response = await http.get<ResolveIndexResponse>(
+      `/api/index-pattern-management/resolve_index/${pattern}`,
+      { query }
+    );
+    if (!response) {
       return [];
     }
 
-    return sortBy(
-      response.aggregations.indices.buckets
-        .map((bucket: { key: string; doc_count: number }) => {
-          return bucket.key;
-        })
-        .map((indexName: string) => {
-          return {
-            name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName),
-          };
-        }),
-      'name'
-    );
-  } catch (err) {
-    const type = get(err, 'body.error.caused_by.type');
-    if (type === 'index_not_found_exception') {
-      // This happens in a CSS environment when the controlling node returns a 500 even though the data
-      // nodes returned a 404. Remove this when/if this is handled: https://github.com/elastic/elasticsearch/issues/27461
-      return [];
-    }
-    throw err;
+    return responseToItemArray(response, indexPatternCreationType);
+  } catch {
+    return [];
   }
 }
+
+export const responseToItemArray = (
+  response: ResolveIndexResponse,
+  indexPatternCreationType: IndexPatternCreationConfig
+): MatchedItem[] => {
+  const source: MatchedItem[] = [];
+
+  (response.indices || []).forEach((index) => {
+    source.push({
+      name: index.name,
+      tags: indexPatternCreationType.getIndexTags(index.name),
+      item: index,
+    });
+  });
+  (response.aliases || []).forEach((alias) => {
+    source.push({ name: alias.name, tags: [{ key: 'alias', name: aliasLabel }], item: alias });
+  });
+  (response.data_streams || []).forEach((dataStream) => {
+    source.push({
+      name: dataStream.name,
+      tags: [{ key: 'data_stream', name: dataStreamLabel }],
+      item: dataStream,
+    });
+  });
+
+  return sortBy(source, 'name');
+};

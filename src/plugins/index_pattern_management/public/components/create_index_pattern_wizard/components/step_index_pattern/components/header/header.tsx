@@ -67,6 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiFlexItem>
         <EuiForm isInvalid={isInputInvalid}>
           <EuiFormRow
+            fullWidth
             label={
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
@@ -104,6 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
               data-test-subj="createIndexPatternNameInput"
+              fullWidth
             />
           </EuiFormRow>
         </EuiForm>

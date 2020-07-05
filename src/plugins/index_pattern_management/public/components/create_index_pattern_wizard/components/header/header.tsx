@@ -25,8 +25,9 @@ import {
   EuiTitle,
   EuiText,
   EuiSwitch,
-  EuiLink,
+  EuiSwitchEvent,
   EuiCode,
+  EuiLink,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -48,7 +49,7 @@ export const Header = ({
   indexPatternName: string;
   showSystemIndices?: boolean;
   isIncludingSystemIndices: boolean;
-  onChangeIncludingSystemIndices: () => void;
+  onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isBeta?: boolean;
   docLinks: DocLinksStart;
 }) => {
@@ -108,7 +109,7 @@ export const Header = ({
             label={
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                defaultMessage="Include system indices"
+                defaultMessage="Include system and hidden indices"
               />
             }
             id="checkboxShowSystemIndices"

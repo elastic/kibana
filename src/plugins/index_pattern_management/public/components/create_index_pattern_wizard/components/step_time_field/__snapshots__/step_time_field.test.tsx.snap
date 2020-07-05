@@ -32,9 +32,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     onTimeFieldChanged={[Function]}
     timeFieldOptions={Array []}
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}
@@ -142,9 +140,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}
@@ -178,9 +174,7 @@ exports[`StepTimeField should render advanced options 1`] = `
     onTimeFieldChanged={[Function]}
     timeFieldOptions={Array []}
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}
@@ -214,9 +208,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
     onTimeFieldChanged={[Function]}
     timeFieldOptions={Array []}
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId="foobar"
     isVisible={false}
@@ -250,9 +242,7 @@ exports[`StepTimeField should render any error message 1`] = `
     onTimeFieldChanged={[Function]}
     timeFieldOptions={Array []}
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}
@@ -304,9 +294,7 @@ exports[`StepTimeField should render normally 1`] = `
     onTimeFieldChanged={[Function]}
     timeFieldOptions={Array []}
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}
@@ -357,9 +345,7 @@ exports[`StepTimeField should render timeFields 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiHorizontalRule />
   <AdvancedOptions
     indexPatternId=""
     isVisible={false}

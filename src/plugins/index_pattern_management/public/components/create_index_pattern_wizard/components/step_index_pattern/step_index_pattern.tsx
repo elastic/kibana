@@ -26,7 +26,6 @@ import {
   IndexPatternAttributes,
   UI_SETTINGS,
 } from '../../../../../../../plugins/data/public';
-import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
   containsIllegalCharacters,
@@ -40,20 +39,20 @@ import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { MatchedIndex } from '../../types';
+import { MatchedItem, ResolveIndexResponseItemDataStream } from '../../types';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
-  allIndices: MatchedIndex[];
+  allIndices: MatchedItem[];
   isIncludingSystemIndices: boolean;
   indexPatternCreationType: IndexPatternCreationConfig;
-  goToNextStep: (query: string) => void;
+  goToNextStep: (query: string, timestampField?: string) => void;
   initialQuery?: string;
 }
 
 interface StepIndexPatternState {
-  partialMatchedIndices: MatchedIndex[];
-  exactMatchedIndices: MatchedIndex[];
+  partialMatchedIndices: MatchedItem[];
+  exactMatchedIndices: MatchedItem[];
   isLoadingIndices: boolean;
   existingIndexPatterns: string[];
   indexPatternExists: boolean;
@@ -62,6 +61,32 @@ interface StepIndexPatternState {
   showingIndexPatternQueryErrors: boolean;
   indexPatternName: string;
 }
+
+export const canPreselectTimeField = (indices: MatchedItem[]) => {
+  const preselectStatus = indices.reduce(
+    (
+      { canPreselect, timeFieldName }: { canPreselect: boolean; timeFieldName?: string },
+      matchedItem
+    ) => {
+      const dataStreamItem = matchedItem.item as ResolveIndexResponseItemDataStream;
+      const dataStreamTimestampField = dataStreamItem.timestamp_field;
+      const isDataStream = !!dataStreamItem.timestamp_field;
+      const timestampFieldMatches =
+        timeFieldName === undefined || timeFieldName === dataStreamTimestampField;
+
+      return {
+        canPreselect: canPreselect && isDataStream && timestampFieldMatches,
+        timeFieldName: dataStreamTimestampField || timeFieldName,
+      };
+    },
+    {
+      canPreselect: true,
+      timeFieldName: undefined,
+    }
+  );
+
+  return preselectStatus.canPreselect ? preselectStatus.timeFieldName : undefined;
+};
 
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
@@ -129,10 +154,10 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
         getIndices(
-          this.context.services.data.search.__LEGACY.esClient,
+          this.context.services.http,
           indexPatternCreationType,
           query,
-          MAX_SEARCH_SIZE
+          this.props.isIncludingSystemIndices
         )
       );
       // If the search changed, discard this state
@@ -145,16 +170,16 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
       getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
+        this.context.services.http,
         indexPatternCreationType,
         `${query}*`,
-        MAX_SEARCH_SIZE
+        this.props.isIncludingSystemIndices
       ),
       getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
+        this.context.services.http,
         indexPatternCreationType,
         query,
-        MAX_SEARCH_SIZE
+        this.props.isIncludingSystemIndices
       ),
     ]);
 
@@ -208,9 +233,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderStatusMessage(matchedIndices: {
-    allIndices: MatchedIndex[];
-    exactMatchedIndices: MatchedIndex[];
-    partialMatchedIndices: MatchedIndex[];
+    allIndices: MatchedItem[];
+    exactMatchedIndices: MatchedItem[];
+    partialMatchedIndices: MatchedItem[];
   }) {
     const { indexPatternCreationType, isIncludingSystemIndices } = this.props;
     const { query, isLoadingIndices, indexPatternExists } = this.state;
@@ -233,8 +258,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     visibleIndices,
     allIndices,
   }: {
-    visibleIndices: MatchedIndex[];
-    allIndices: MatchedIndex[];
+    visibleIndices: MatchedItem[];
+    allIndices: MatchedItem[];
   }) {
     const { query, isLoadingIndices, indexPatternExists } = this.state;
 
@@ -274,7 +299,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
   }
 
-  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedIndex[] }) {
+  renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
     const { goToNextStep, indexPatternCreationType } = this.props;
     const {
       query,
@@ -322,7 +347,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={goToNextStep}
+        goToNextStep={() => goToNextStep(query, canPreselectTimeField(indices))}
         isNextStepDisabled={isNextStepDisabled}
       />
     );
