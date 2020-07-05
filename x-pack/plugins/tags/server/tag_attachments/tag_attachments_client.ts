@@ -193,7 +193,7 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
     page,
   }: TagAttachmentClientFindResourcesParams): Promise<TagAttachmentClientFindResourcesResult> {
     validateTagIds(tagIds);
-    validateKID(kidPrefix);
+    // validateKID(kidPrefix);
     validatePerPage(perPage);
     validatePage(page);
 
@@ -201,7 +201,7 @@ export class TagAttachmentsClient implements ITagAttachmentsClient {
 
     const { saved_objects } = await savedObjectsClient.find<RawTagAttachmentWithId>({
       type: this.type,
-      search: `attributes.tagId:(${tagIds.join(' OR ')}) AND attributes.kid:(${kidPrefix}*)`,
+      search: `attributes.tagId:("${tagIds.join('" & "')}") & attributes.kid:("${kidPrefix}*")`,
       perPage: 100,
       page: 1,
     });

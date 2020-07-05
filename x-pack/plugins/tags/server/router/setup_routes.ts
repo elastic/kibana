@@ -13,6 +13,7 @@ import { getResourceTags } from './routes/get_resource_tags';
 import { createAttachments } from './routes/create_attachments';
 import { setAttachments } from './routes/set_attachments';
 import { deleteAttachment } from './routes/delete_attachment';
+import { findResources } from './routes/find_resources';
 import { RouteParams } from './types';
 
 export const setupRoutes = (params: RouteParams) => {
@@ -25,4 +26,5 @@ export const setupRoutes = (params: RouteParams) => {
   createAttachments(params);
   setAttachments(params);
   deleteAttachment(params);
+  findResources(params);
 };

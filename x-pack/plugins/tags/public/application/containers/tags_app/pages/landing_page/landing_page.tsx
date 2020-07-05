@@ -10,6 +10,7 @@ import { useTagsApp } from '../../../../context';
 import { Tag as TagUi } from '../../../../../containers/tag';
 import { TagPicker } from '../../../../../containers/tag_picker';
 import { Tag } from '../../../../../services/tags_service/tag_manager/tag';
+import { ResultsList } from './results_list';
 
 export const LandinPage: React.FC = () => {
   const { manager } = useTagsApp();
@@ -25,7 +26,10 @@ export const LandinPage: React.FC = () => {
         categories[tag.data.key].push(tag);
       } else remaining.push(tag);
     }
-    return { categories: Object.entries(categories), remaining };
+    return {
+      categories: Object.entries(categories).sort((a, b) => (a[0] > b[0] ? 1 : -1)),
+      remaining,
+    };
   }, [tags]);
 
   return (
@@ -73,6 +77,7 @@ export const LandinPage: React.FC = () => {
         <EuiFlexItem>
           <EuiPanel paddingSize="l" hasShadow>
             <TagPicker fullWidth selected={selected} onChange={setSelected} />
+            <ResultsList tagIds={selected} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
