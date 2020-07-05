@@ -28,7 +28,7 @@ export const servicesRoute = createRoute(() => ({
 
     const useAggregatedTransactions = await getUseAggregatedTransactions({
       config: context.config,
-      client: setup.client,
+      apmEventClient: setup.apmEventClient,
       start: setup.start,
       end: setup.end,
     });
@@ -53,7 +53,13 @@ export const serviceAgentNameRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    return getServiceAgentName(serviceName, setup);
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+
+    return getServiceAgentName({
+      serviceName,
+      setup,
+      useAggregatedTransactions,
+    });
   },
 }));
 
@@ -75,7 +81,7 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
         config: context.config,
         start: setup.start,
         end: setup.end,
-        client: setup.client,
+        apmEventClient: setup.apmEventClient,
       }),
     });
   },
@@ -122,7 +128,7 @@ export const serviceAnnotationsRoute = createRoute(() => ({
       ),
       getUseAggregatedTransactions({
         config: context.config,
-        client: setup.client,
+        apmEventClient: setup.apmEventClient,
         start: setup.start,
         end: setup.end,
       }),

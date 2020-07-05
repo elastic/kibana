@@ -9,9 +9,9 @@ import {
   AggregationOptionsByType,
   AggregationInputMap,
 } from '../../typings/elasticsearch/aggregations';
-import { APMESSearchRequest } from '../../server/lib/helpers/get_es_client/document_types';
+import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
-export type Projection = Omit<APMESSearchRequest, 'body'> & {
+export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
   body: Omit<ESSearchBody, 'aggs'> & {
     aggs?: {
       [key: string]: {

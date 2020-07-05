@@ -27,7 +27,7 @@ export function getErrorGroupsProjection({
 
   return {
     apm: {
-      types: [ProcessorEvent.error],
+      events: [ProcessorEvent.error as const],
     },
     body: {
       query: {

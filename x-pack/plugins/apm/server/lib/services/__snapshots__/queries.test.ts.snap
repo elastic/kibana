@@ -3,7 +3,7 @@
 exports[`services queries fetches the agent status 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
       "metric",
       "sourcemap",
@@ -20,7 +20,7 @@ Object {
 exports[`services queries fetches the legacy data status 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },
@@ -47,7 +47,7 @@ Object {
 exports[`services queries fetches the service agent name 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
       "transaction",
       "metric",
@@ -92,7 +92,7 @@ exports[`services queries fetches the service items 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -134,14 +134,13 @@ Array [
       },
       "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
+        "transaction",
         "metric",
         "error",
-        "transaction",
       ],
     },
     "body": Object {
@@ -188,13 +187,20 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -226,7 +232,7 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "error",
       ],
     },
@@ -264,9 +270,9 @@ Array [
   },
   Object {
     "apm": Object {
-      "types": Array [
-        "metric",
+      "events": Array [
         "transaction",
+        "metric",
         "error",
       ],
     },
@@ -315,7 +321,7 @@ Array [
 exports[`services queries fetches the service transaction types 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
     ],
   },

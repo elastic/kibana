@@ -10,31 +10,39 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
-  TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Options } from '.';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
-  const { end, client, start, uiFiltersES } = options.setup;
-  const { serviceName } = options;
+  const { end, apmEventClient, start, uiFiltersES } = options.setup;
+  const { serviceName, useAggregatedTransactions } = options;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      useAggregatedTransactions
+    ),
     ...uiFiltersES,
   ];
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+      ],
     },
     body: {
       size: 0,
@@ -63,7 +71,9 @@ export function fetcher(options: Options) {
               aggs: {
                 avg_duration: {
                   avg: {
-                    field: TRANSACTION_DURATION,
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      useAggregatedTransactions
+                    ),
                   },
                 },
               },
@@ -74,5 +84,5 @@ export function fetcher(options: Options) {
     },
   };
 
-  return client.search(params);
+  return apmEventClient.search(params);
 }

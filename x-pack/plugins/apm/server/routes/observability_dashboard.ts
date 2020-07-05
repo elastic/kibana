@@ -10,6 +10,7 @@ import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
 import { getServiceCount } from '../lib/observability_dashboard/get_service_count';
 import { getTransactionCoordinates } from '../lib/observability_dashboard/get_transaction_coordinates';
+import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export const observabilityDashboardHasDataRoute = createRoute(() => ({
   path: '/api/apm/observability_dashboard/has_data',
@@ -27,14 +28,15 @@ export const observabilityDashboardDataRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { bucketSize } = context.params.query;
-    const serviceCountPromise = getServiceCount({ setup });
-    const transactionCoordinatesPromise = getTransactionCoordinates({
-      setup,
-      bucketSize,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+
     const [serviceCount, transactionCoordinates] = await Promise.all([
-      serviceCountPromise,
-      transactionCoordinatesPromise,
+      getServiceCount({ setup, useAggregatedTransactions }),
+      getTransactionCoordinates({
+        setup,
+        bucketSize,
+        useAggregatedTransactions,
+      }),
     ]);
     return { serviceCount, transactionCoordinates };
   },

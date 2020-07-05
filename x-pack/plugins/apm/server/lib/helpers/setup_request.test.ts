@@ -7,8 +7,8 @@ import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { APMESSearchRequest } from './get_es_client/document_types';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({
@@ -97,11 +97,11 @@ function getMockRequest() {
 describe('setupRequest', () => {
   it('should call callWithRequest with default args', async () => {
     const { mockContext, mockRequest } = getMockRequest();
-    const { client } = await setupRequest(mockContext, mockRequest);
-    await client.search({
-      apm: { types: [ProcessorEvent.transaction] },
+    const { apmEventClient } = await setupRequest(mockContext, mockRequest);
+    await apmEventClient.search({
+      apm: { events: [ProcessorEvent.transaction] },
       body: { foo: 'bar' },
-    } as any);
+    });
     expect(
       mockContext.core.elasticsearch.legacy.client.callAsCurrentUser
     ).toHaveBeenCalledWith('search', {
@@ -125,7 +125,7 @@ describe('setupRequest', () => {
     const { mockContext, mockRequest } = getMockRequest();
     const { internalClient } = await setupRequest(mockContext, mockRequest);
     await internalClient.search({
-      apm: { types: [ProcessorEvent.transaction] },
+      index: ['apm-*'],
       body: { foo: 'bar' },
     } as any);
     expect(
@@ -134,85 +134,89 @@ describe('setupRequest', () => {
       index: ['apm-*'],
       body: {
         foo: 'bar',
-        query: {
-          bool: {
-            filter: [
-              { terms: { 'processor.event': ['transaction'] } },
-              { range: { 'observer.version_major': { gte: 7 } } },
-            ],
-          },
-        },
       },
-      ignore_throttled: true,
     });
   });
 
   describe('observer.version_major filter', () => {
-    describe('if index is apm-*', () => {
-      it('should merge `observer.version_major` filter with existing boolean filters', async () => {
-        const { mockContext, mockRequest } = getMockRequest();
-        const { client } = await setupRequest(mockContext, mockRequest);
-        await client.search({
+    it('should merge `observer.version_major` filter with existing boolean filters', async () => {
+      const { mockContext, mockRequest } = getMockRequest();
+      const { apmEventClient } = await setupRequest(mockContext, mockRequest);
+      await apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
+        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
+      });
+      const params =
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
+          .calls[0][1];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
+              { range: { 'observer.version_major': { gte: 7 } } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should add `observer.version_major` filter if none exists', async () => {
+      const { mockContext, mockRequest } = getMockRequest();
+      const { apmEventClient } = await setupRequest(mockContext, mockRequest);
+      await apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.error],
+        },
+      });
+      const params =
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
+          .calls[0][1];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { terms: { [PROCESSOR_EVENT]: ['error'] } },
+              { range: { 'observer.version_major': { gte: 7 } } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should not add `observer.version_major` filter if `includeLegacyData=true`', async () => {
+      const { mockContext, mockRequest } = getMockRequest();
+      const { apmEventClient } = await setupRequest(mockContext, mockRequest);
+      await apmEventClient.search(
+        {
           apm: {
-            types: [],
+            events: [ProcessorEvent.error],
           },
           body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
-        });
-        const params =
-          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-            .calls[0][1];
-        expect(params.body).toEqual({
-          query: {
-            bool: {
-              filter: [
-                { term: 'someTerm' },
-                { range: { 'observer.version_major': { gte: 7 } } },
-              ],
-            },
+        },
+        {
+          includeLegacyData: true,
+        }
+      );
+      const params =
+        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
+          .calls[0][1];
+      expect(params.body).toEqual({
+        query: {
+          bool: {
+            filter: [
+              { term: 'someTerm' },
+              {
+                terms: {
+                  [PROCESSOR_EVENT]: ['error'],
+                },
+              },
+            ],
           },
-        });
-      });
-
-      it('should add `observer.version_major` filter if none exists', async () => {
-        const { mockContext, mockRequest } = getMockRequest();
-        const { client } = await setupRequest(mockContext, mockRequest);
-        await client.search({
-          apm: {
-            types: [],
-          },
-        });
-        const params =
-          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-            .calls[0][1];
-        expect(params.body).toEqual({
-          query: {
-            bool: {
-              filter: [{ range: { 'observer.version_major': { gte: 7 } } }],
-            },
-          },
-        });
-      });
-
-      it('should not add `observer.version_major` filter if `includeLegacyData=true`', async () => {
-        const { mockContext, mockRequest } = getMockRequest();
-        const { client } = await setupRequest(mockContext, mockRequest);
-        await client.search(
-          {
-            apm: {
-              types: [],
-            },
-            body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
-          },
-          {
-            includeLegacyData: true,
-          }
-        );
-        const params =
-          mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-            .calls[0][1];
-        expect(params.body).toEqual({
-          query: { bool: { filter: [{ term: 'someTerm' }] } },
-        });
+        },
       });
     });
   });
@@ -224,13 +228,13 @@ describe('setupRequest', () => {
       // mock includeFrozen to return false
       mockContext.core.uiSettings.client.get.mockResolvedValue(false);
 
-      const { client } = await setupRequest(mockContext, mockRequest);
+      const { apmEventClient } = await setupRequest(mockContext, mockRequest);
 
-      await client.search({
+      await apmEventClient.search({
         apm: {
-          types: [],
+          events: [],
         },
-      } as APMESSearchRequest);
+      });
 
       const params =
         mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
@@ -244,9 +248,11 @@ describe('setupRequest', () => {
       // mock includeFrozen to return true
       mockContext.core.uiSettings.client.get.mockResolvedValue(true);
 
-      const { client } = await setupRequest(mockContext, mockRequest);
+      const { apmEventClient } = await setupRequest(mockContext, mockRequest);
 
-      await client.search({ apm: { types: [] } } as APMESSearchRequest);
+      await apmEventClient.search({
+        apm: { events: [] },
+      });
 
       const params =
         mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock

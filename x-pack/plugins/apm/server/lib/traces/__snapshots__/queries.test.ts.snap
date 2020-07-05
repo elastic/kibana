@@ -3,7 +3,7 @@
 exports[`trace queries fetches a trace 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },

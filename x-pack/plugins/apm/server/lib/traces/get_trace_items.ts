@@ -13,8 +13,6 @@ import {
   TRANSACTION_ID,
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -28,13 +26,13 @@ export async function getTraceItems(
   traceId: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, config } = setup;
+  const { start, end, apmEventClient, config } = setup;
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const errorResponsePromise = client.search({
+  const errorResponsePromise = apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.error],
+      events: [ProcessorEvent.error],
     },
     body: {
       size: maxTraceItems,
@@ -60,9 +58,9 @@ export async function getTraceItems(
     },
   });
 
-  const traceResponsePromise = client.search({
+  const traceResponsePromise = apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.span, ProcessorEvent.transaction],
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
       size: maxTraceItems,
@@ -94,17 +92,13 @@ export async function getTraceItems(
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
 
-  const items = (traceResponse.hits.hits as Array<{
-    _source: Transaction | Span;
-  }>).map((hit) => hit._source);
+  const items = traceResponse.hits.hits.map((hit) => hit._source);
 
   const errorFrequencies: {
     errorsPerTransaction: ErrorsPerTransaction;
     errorDocs: APMError[];
   } = {
-    errorDocs: errorResponse.hits.hits.map(
-      ({ _source }) => _source as APMError
-    ),
+    errorDocs: errorResponse.hits.hits.map(({ _source }) => _source),
     errorsPerTransaction:
       errorResponse.aggregations?.by_transaction_id.buckets.reduce(
         (acc, current) => {

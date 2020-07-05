@@ -25,10 +25,10 @@ export function getServicesProjection({
 
   return {
     apm: {
-      types: [
+      events: [
         getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
-        ProcessorEvent.metric,
-        ProcessorEvent.error,
+        ProcessorEvent.metric as const,
+        ProcessorEvent.error as const,
       ],
     },
     body: {

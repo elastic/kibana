@@ -26,6 +26,7 @@ export async function getTransactionCharts(options: {
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  useAggregatedTransactions: boolean;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

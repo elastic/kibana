@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, sortByOrder, last } from 'lodash';
+import { flatten, orderBy, last } from 'lodash';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
@@ -36,7 +36,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, start, end } = setup;
+  const { uiFiltersES, apmEventClient, start, end } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -92,7 +92,7 @@ export async function getTransactionBreakdown({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       size: 0,
@@ -111,7 +111,7 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const formatBucket = (
     aggs:
@@ -139,13 +139,13 @@ export async function getTransactionBreakdown({
   };
 
   const visibleKpis = resp.aggregations
-    ? sortByOrder(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
+    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
         0,
         MAX_KPIS
       )
     : [];
 
-  const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
+  const kpis = orderBy(visibleKpis, 'name').map((kpi, index) => {
     return {
       ...kpi,
       color: getVizColorForIndex(index),
@@ -187,8 +187,8 @@ export async function getTransactionBreakdown({
     // is drawn correctly.
     // If we set all values to 0, the chart always displays null values as 0,
     // and the chart looks weird.
-    const hasAnyValues = lastValues.some((value) => value.y !== null);
-    const hasNullValues = lastValues.some((value) => value.y === null);
+    const hasAnyValues = lastValues.some((value) => value?.y !== null);
+    const hasNullValues = lastValues.some((value) => value?.y === null);
 
     if (hasAnyValues && hasNullValues) {
       Object.values(updatedSeries).forEach((series) => {

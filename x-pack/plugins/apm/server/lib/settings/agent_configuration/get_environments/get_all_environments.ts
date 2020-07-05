@@ -11,15 +11,21 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../../../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function getAllEnvironments({
   serviceName,
   setup,
+  useAggregatedTransactions,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  useAggregatedTransactions: boolean;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -28,8 +34,8 @@ export async function getAllEnvironments({
 
   const params = {
     apm: {
-      types: [
-        ProcessorEvent.transaction,
+      events: [
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -38,7 +44,12 @@ export async function getAllEnvironments({
       size: 0,
       query: {
         bool: {
-          filter: serviceNameFilter,
+          filter: [
+            ...serviceNameFilter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              useAggregatedTransactions
+            ),
+          ],
         },
       },
       aggs: {
@@ -52,10 +63,11 @@ export async function getAllEnvironments({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   const environments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
     ) || [];
+
   return [ALL_OPTION_VALUE, ...environments];
 }

@@ -12,6 +12,7 @@ import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getErrorRate } from '../lib/errors/get_error_rate';
+import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export const errorsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors',
@@ -101,6 +102,13 @@ export const errorRateRoute = createRoute(() => ({
     const { params } = context;
     const { serviceName } = params.path;
     const { groupId } = params.query;
-    return getErrorRate({ serviceName, groupId, setup });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+
+    return getErrorRate({
+      serviceName,
+      groupId,
+      setup,
+      useAggregatedTransactions,
+    });
   },
 }));

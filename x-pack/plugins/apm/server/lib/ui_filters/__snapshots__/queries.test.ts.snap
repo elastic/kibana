@@ -3,7 +3,7 @@
 exports[`ui filter queries fetches environments 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
       "metric",
       "error",
@@ -46,7 +46,7 @@ Object {
 exports[`ui filter queries fetches environments without a service name 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "transaction",
       "metric",
       "error",

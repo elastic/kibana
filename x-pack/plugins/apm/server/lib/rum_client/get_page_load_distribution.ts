@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -21,26 +22,23 @@ export async function getPageLoadDistribution({
   minPercentile?: string;
   maxPercentile?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         minDuration: {
           min: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             missing: 0,
           },
         },
         durPercentiles: {
           percentiles: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             percents: [50, 75, 90, 95, 99],
           },
         },
@@ -48,12 +46,12 @@ export async function getPageLoadDistribution({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const {
     aggregations,
     hits: { total },
-  } = await client.search(params);
+  } = await apmEventClient.search(params);
 
   if (total.value === 0) {
     return null;
@@ -67,7 +65,12 @@ export async function getPageLoadDistribution({
 
   const maxPerc = maxPercentile ? +maxPercentile : maxPercQuery;
 
-  const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
+  const pageDist = await getPercentilesDistribution({
+    setup,
+    minDuration: minPerc,
+    maxDuration: maxPerc,
+  });
+
   return {
     pageLoadDistribution: pageDist,
     percentiles: aggregations?.durPercentiles.values,
@@ -76,31 +79,32 @@ export async function getPageLoadDistribution({
   };
 }
 
-const getPercentilesDistribution = async (
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  minDuration: number,
-  maxDuration: number
-) => {
+const getPercentilesDistribution = async ({
+  setup,
+  minDuration,
+  maxDuration,
+}: {
+  setup: Setup & SetupTimeRange & SetupUIFilters;
+  minDuration: number;
+  maxDuration: number;
+}) => {
   const stepValue = (maxDuration - minDuration) / 50;
   const stepValues = [];
   for (let i = 1; i < 51; i++) {
     stepValues.push((stepValue * i + minDuration).toFixed(2));
   }
 
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
 
   const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         loadDistribution: {
           percentile_ranks: {
-            field: 'transaction.duration.us',
+            field: TRANSACTION_DURATION,
             values: stepValues,
             keyed: false,
           },
@@ -109,9 +113,9 @@ const getPercentilesDistribution = async (
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
 
   const pageDist = aggregations?.loadDistribution.values ?? [];
 

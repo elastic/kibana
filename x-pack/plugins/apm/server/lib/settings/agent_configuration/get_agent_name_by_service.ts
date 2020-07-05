@@ -16,12 +16,12 @@ export async function getAgentNameByService({
   serviceName: string;
   setup: Setup;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
     apm: {
-      types: [
+      events: [
         ProcessorEvent.transaction,
         ProcessorEvent.error,
         ProcessorEvent.metric,
@@ -42,7 +42,7 @@ export async function getAgentNameByService({
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   const agentName = aggregations?.agent_names.buckets[0]?.key;
   return agentName as string | undefined;
 }

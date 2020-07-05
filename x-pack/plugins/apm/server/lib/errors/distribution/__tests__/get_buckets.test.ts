@@ -29,7 +29,7 @@ describe('timeseriesFetcher', () => {
       setup: {
         start: 1528113600000,
         end: 1528977600000,
-        client: {
+        apmEventClient: {
           search: clientSpy,
         } as any,
         internalClient: {
@@ -66,6 +66,6 @@ describe('timeseriesFetcher', () => {
 
   it('should limit query results to error documents', () => {
     const query = clientSpy.mock.calls[0][0];
-    expect(query.apm.types).toEqual([ProcessorEvent.error]);
+    expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });

@@ -11,7 +11,6 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { APMUIDocumentType } from '../../helpers/get_es_client/document_types';
 
 export async function searchConfigurations({
   service,
@@ -20,7 +19,7 @@ export async function searchConfigurations({
   service: AgentConfiguration['service'];
   setup: Setup;
 }) {
-  const { internalClient } = setup;
+  const { internalClient, indices } = setup;
 
   // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring).
   // Additionally a boost has been added to service.name to ensure it scores higher.
@@ -48,9 +47,7 @@ export async function searchConfigurations({
     : [];
 
   const params = {
-    apm: {
-      types: [APMUIDocumentType.agentConfiguration],
-    },
+    index: indices.apmAgentConfigurationIndex,
     body: {
       query: {
         bool: {

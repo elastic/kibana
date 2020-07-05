@@ -49,7 +49,7 @@ export function getMetricsProjection({
 
   return {
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       query: {

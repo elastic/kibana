@@ -11,7 +11,6 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   Setup,
@@ -32,11 +31,11 @@ export async function getErrorGroup({
   groupId: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
     apm: {
-      types: [ProcessorEvent.error],
+      events: [ProcessorEvent.error as const],
     },
     body: {
       size: 1,
@@ -58,7 +57,7 @@ export async function getErrorGroup({
     },
   };
 
-  const resp = await client.search<APMError>(params);
+  const resp = await apmEventClient.search(params);
   const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;

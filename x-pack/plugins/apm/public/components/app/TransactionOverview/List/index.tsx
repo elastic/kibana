@@ -8,7 +8,6 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
@@ -17,9 +16,9 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailRedirectLink } from '../../../shared/Links/apm/TransactionDetailRedirect';
 
-const TransactionNameLink = styled(TransactionDetailLink)`
+const TransactionNameLink = styled(TransactionDetailRedirectLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -39,20 +38,17 @@ export function TransactionList({ items, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (_, { sample }: TransactionGroup) => {
+        render: (_, { serviceName, transactionName }: TransactionGroup) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
-              content={sample.transaction.name || NOT_AVAILABLE_LABEL}
+              content={transactionName}
             >
               <TransactionNameLink
-                serviceName={sample.service.name}
-                transactionId={sample.transaction.id}
-                traceId={sample.trace.id}
-                transactionName={sample.transaction.name}
-                transactionType={sample.transaction.type}
+                serviceName={serviceName}
+                transactionName={transactionName}
               >
-                {sample.transaction.name || NOT_AVAILABLE_LABEL}
+                {transactionName}
               </TransactionNameLink>
             </EuiToolTip>
           );

@@ -37,12 +37,12 @@ export const getTransactionDurationAverages = async ({
   projection,
   useAggregatedTransactions,
 }: AggregationParams) => {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        types: [
+        events: [
           getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
         ],
       },
@@ -95,8 +95,8 @@ export const getAgentNames = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
       body: {
         size: 0,
@@ -128,11 +128,7 @@ export const getAgentNames = async ({
 
   return aggregations.services.buckets.map((bucket) => ({
     serviceName: bucket.key as string,
-    agentName: (bucket.agent_name.hits.hits[0]?._source as {
-      agent: {
-        name: string;
-      };
-    }).agent.name,
+    agentName: bucket.agent_name.hits.hits[0]?._source.agent.name,
   }));
 };
 
@@ -141,11 +137,11 @@ export const getTransactionRates = async ({
   projection,
   useAggregatedTransactions,
 }: AggregationParams) => {
-  const { client } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        types: [
+        events: [
           getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
         ],
       },
@@ -168,7 +164,7 @@ export const getTransactionRates = async ({
               size: MAX_NUMBER_OF_SERVICES,
             },
             aggs: {
-              value_count: {
+              count: {
                 value_count: {
                   field: getTransactionDurationFieldForAggregatedTransactions(
                     useAggregatedTransactions
@@ -191,7 +187,7 @@ export const getTransactionRates = async ({
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
   return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
-    const transactionsPerMinute = bucket.value_count.value / deltaAsMinutes;
+    const transactionsPerMinute = bucket.count.value / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
       transactionsPerMinute,
@@ -203,11 +199,11 @@ export const getErrorRates = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
-        types: [ProcessorEvent.error],
+        events: [ProcessorEvent.error],
       },
       body: {
         size: 0,
@@ -244,8 +240,8 @@ export const getEnvironments = async ({
   setup,
   projection,
 }: AggregationParams) => {
-  const { client } = setup;
-  const response = await client.search(
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search(
     mergeProjection(projection, {
       body: {
         size: 0,

@@ -29,7 +29,7 @@ export async function getDerivedServiceAnnotations({
   setup: Setup & SetupTimeRange;
   useAggregatedTransactions: boolean;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -46,9 +46,9 @@ export async function getDerivedServiceAnnotations({
 
   const versions =
     (
-      await client.search({
+      await apmEventClient.search({
         apm: {
-          types: [
+          events: [
             getProcessorEventForAggregatedTransactions(
               useAggregatedTransactions
             ),
@@ -77,9 +77,9 @@ export async function getDerivedServiceAnnotations({
   }
   const annotations = await Promise.all(
     versions.map(async (version) => {
-      const response = await client.search({
+      const response = await apmEventClient.search({
         apm: {
-          types: [
+          events: [
             getProcessorEventForAggregatedTransactions(
               useAggregatedTransactions
             ),

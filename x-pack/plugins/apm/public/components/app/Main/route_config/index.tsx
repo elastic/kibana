@@ -27,6 +27,7 @@ import {
   EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
+import { TransactionOverviewRedirectPage } from '../../TransactionOverviewRedirectPage';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics',
@@ -218,7 +219,13 @@ export const routes: BreadcrumbRoute[] = [
     breadcrumb: null,
     name: RouteName.LINK_TO_TRACE,
   },
-
+  {
+    exact: true,
+    path: '/link-to/transaction-group',
+    component: TransactionOverviewRedirectPage,
+    breadcrumb: null,
+    name: RouteName.LINK_TO_TRACE,
+  },
   {
     exact: true,
     path: '/service-map',
@@ -254,6 +261,15 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/rum-overview',
     component: () => <Home tab="rum-overview" />,
+    breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
+      defaultMessage: 'Real User Monitoring',
+    }),
+    name: RouteName.RUM_OVERVIEW,
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/rum-overview',
+    component: () => <ServiceDetails tab="rum-overview" />,
     breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
       defaultMessage: 'Real User Monitoring',
     }),

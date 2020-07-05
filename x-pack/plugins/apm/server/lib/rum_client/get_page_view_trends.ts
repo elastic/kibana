@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { BreakdownItem } from '../../../typings/ui_filters';
 
 export async function getPageViewTrends({
@@ -21,13 +20,17 @@ export async function getPageViewTrends({
   setup: Setup & SetupTimeRange & SetupUIFilters;
   breakdowns?: string;
 }) {
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
   });
-  const breakdownAggs: AggregationInputMap = {};
+
+  const breakdownAggs: Record<
+    string,
+    Pick<AggregationOptionsByType, 'terms'>
+  > = {};
   if (breakdowns) {
     const breakdownList: BreakdownItem[] = JSON.parse(breakdowns);
-    breakdownList.forEach(({ name, type, fieldName }) => {
+    breakdownList.forEach(({ name, fieldName }) => {
       breakdownAggs[name] = {
         terms: {
           field: fieldName,
@@ -56,9 +59,9 @@ export async function getPageViewTrends({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
 
@@ -69,18 +72,18 @@ export async function getPageViewTrends({
       y: bCount,
     };
 
-    Object.keys(breakdownAggs).forEach((bKey) => {
-      const categoryBuckets = (bucket[bKey] as any).buckets;
-      categoryBuckets.forEach(
-        ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+    Object.keys(breakdownAggs)
+      .filter((bKey) => bKey === 'count')
+      .forEach((bKey) => {
+        const categoryBuckets = bucket[bKey].buckets;
+        categoryBuckets.forEach(({ key, doc_count: docCount }) => {
           if (key === 'Other') {
             res[key + `(${bKey})`] = docCount;
           } else {
             res[key] = docCount;
           }
-        }
-      );
-    });
+        });
+      });
 
     return res;
   });

@@ -9,12 +9,12 @@ import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
     apm: {
-      types: [
+      events: [
         ProcessorEvent.error,
         ProcessorEvent.metric,
         ProcessorEvent.sourcemap,
@@ -26,7 +26,6 @@ export async function hasHistoricalAgentData(setup: Setup) {
     },
   };
 
-  const resp = await client.search(params);
-  const hasHistorialAgentData = resp.hits.total.value > 0;
-  return hasHistorialAgentData;
+  const resp = await apmEventClient.search(params);
+  return resp.hits.total.value > 0;
 }

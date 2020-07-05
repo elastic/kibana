@@ -70,7 +70,7 @@ export const previewMetricThresholdAlert: (
   // Get a date histogram using the bucket interval and the lookback interval
   try {
     const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
-    const groups = Object.keys(first(alertResults));
+    const groups = Object.keys(first(alertResults) as any);
 
     // Now determine how to interpolate this histogram based on the alert interval
     const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
@@ -90,7 +90,7 @@ export const previewMetricThresholdAlert: (
         // buckets would have fired the alert. If the alert interval and bucket interval are the same,
         // this will be a 1:1 evaluation of the alert results. If these are different, the interpolation
         // will skip some buckets or read some buckets more than once, depending on the differential
-        const numberOfResultBuckets = first(alertResults)[group].shouldFire.length;
+        const numberOfResultBuckets = (first(alertResults) as any)[group].shouldFire.length;
         const numberOfExecutionBuckets = Math.floor(
           numberOfResultBuckets / alertResultsPerExecution
         );
@@ -118,7 +118,8 @@ export const previewMetricThresholdAlert: (
         ? await evaluateAlert(callCluster, params, config)
         : [];
       const numberOfGroups =
-        precalculatedNumberOfGroups ?? Math.max(Object.keys(first(currentAlertResults)).length, 1);
+        precalculatedNumberOfGroups ??
+        Math.max(Object.keys(first(currentAlertResults) as any).length, 1);
       const estimatedTotalBuckets =
         (lookbackIntervalInSeconds / bucketIntervalInSeconds) * numberOfGroups;
       // The minimum number of slices is 2. In case we underestimate the total number of buckets
@@ -156,7 +157,7 @@ export const previewMetricThresholdAlert: (
             return a + b;
           })
       );
-      return zippedResult;
+      return zippedResult as any;
     } else throw e;
   }
 };

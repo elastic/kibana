@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
 import {
   ESSearchResponse,
   ESSearchRequest,
@@ -68,7 +70,7 @@ export const response = ({
     },
   },
 } as unknown) as ESSearchResponse<
-  unknown,
+  APMBaseDoc | Transaction,
   ESSearchRequest,
   { restTotalHitsAsInt: false }
 >;

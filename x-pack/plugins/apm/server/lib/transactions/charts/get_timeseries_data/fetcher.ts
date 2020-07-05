@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
@@ -21,6 +19,11 @@ import {
   SetupTimeRange,
   SetupUIFilters,
 } from '../../../helpers/setup_request';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+  getDocumentTypeFilterForAggregatedTransactions,
+} from '../../../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -28,18 +31,23 @@ export function timeseriesFetcher({
   transactionType,
   transactionName,
   setup,
+  useAggregatedTransactions,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  useAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      useAggregatedTransactions
+    ),
     ...uiFiltersES,
   ];
 
@@ -54,7 +62,9 @@ export function timeseriesFetcher({
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+      ],
     },
     body: {
       size: 0,
@@ -68,17 +78,31 @@ export function timeseriesFetcher({
             extended_bounds: { min: start, max: end },
           },
           aggs: {
-            avg: { avg: { field: TRANSACTION_DURATION } },
+            avg: {
+              avg: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  useAggregatedTransactions
+                ),
+              },
+            },
             pct: {
               percentiles: {
-                field: TRANSACTION_DURATION,
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  useAggregatedTransactions
+                ),
                 percents: [95, 99],
                 hdr: { number_of_significant_value_digits: 2 },
               },
             },
           },
         },
-        overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
+        overall_avg_duration: {
+          avg: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              useAggregatedTransactions
+            ),
+          },
+        },
         transaction_results: {
           terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
@@ -89,6 +113,15 @@ export function timeseriesFetcher({
                 min_doc_count: 0,
                 extended_bounds: { min: start, max: end },
               },
+              aggs: {
+                count: {
+                  value_count: {
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      useAggregatedTransactions
+                    ),
+                  },
+                },
+              },
             },
           },
         },
@@ -96,5 +129,5 @@ export function timeseriesFetcher({
     },
   };
 
-  return client.search(params);
+  return apmEventClient.search(params);
 }

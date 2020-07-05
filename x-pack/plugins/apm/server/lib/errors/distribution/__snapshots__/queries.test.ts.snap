@@ -3,7 +3,7 @@
 exports[`error distribution queries fetches an error distribution 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },
@@ -54,7 +54,7 @@ Object {
 exports[`error distribution queries fetches an error distribution with a group id 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "error",
     ],
   },

@@ -6,32 +6,32 @@
 
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { ESClient } from '../get_es_client';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
+import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
-async function hasAggregatedTransactions({
+export async function getHasAggregatedTransactions({
   start,
   end,
-  client,
+  apmEventClient,
 }: {
-  start: number;
-  end: number;
-  client: ESClient;
+  start?: number;
+  end?: number;
+  apmEventClient: APMEventClient;
 }) {
-  const response = await client.search({
+  const response = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.metric],
+      events: [ProcessorEvent.metric],
     },
     body: {
       query: {
         bool: {
           filter: [
             { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-            { range: rangeFilter(start, end) },
+            ...(start && end ? [{ range: rangeFilter(start, end) }] : []),
           ],
         },
       },
@@ -50,34 +50,38 @@ export async function getUseAggregatedTransactions({
   config,
   start,
   end,
-  client,
+  apmEventClient,
 }: {
   config: APMConfig;
-  start: number;
-  end: number;
-  client: ESClient;
+  start?: number;
+  end?: number;
+  apmEventClient: APMEventClient;
 }): Promise<boolean> {
   return config['xpack.apm.useAggregatedTransactions']
-    ? await hasAggregatedTransactions({ start, end, client })
+    ? await getHasAggregatedTransactions({ start, end, apmEventClient })
     : false;
 }
 
 export function getTransactionDurationFieldForAggregatedTransactions(
-  useMetrics: boolean
+  useAggregatedTransactions: boolean
 ) {
-  return useMetrics ? TRANSACTION_DURATION_HISTOGRAM : TRANSACTION_DURATION;
+  return useAggregatedTransactions
+    ? TRANSACTION_DURATION_HISTOGRAM
+    : TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForAggregatedTransactions(
-  useMetrics: boolean
+  useAggregatedTransactions: boolean
 ) {
-  return useMetrics
+  return useAggregatedTransactions
     ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
     : [];
 }
 
 export function getProcessorEventForAggregatedTransactions(
-  useMetrics: boolean
-) {
-  return useMetrics ? ProcessorEvent.metric : ProcessorEvent.transaction;
+  useAggregatedTransactions: boolean
+): ProcessorEvent.metric | ProcessorEvent.transaction {
+  return useAggregatedTransactions
+    ? ProcessorEvent.metric
+    : ProcessorEvent.transaction;
 }

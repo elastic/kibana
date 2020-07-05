@@ -16,6 +16,7 @@ import { transformer } from './transformer';
 export interface Options {
   serviceName: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  useAggregatedTransactions: boolean;
 }
 
 export type AvgDurationByBrowserAPIResponse = Array<{

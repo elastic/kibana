@@ -15,17 +15,23 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { rangeFilter } from '../../../common/utils/range_filter';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function getErrorRate({
   serviceName,
   groupId,
   setup,
+  useAggregatedTransactions,
 }: {
   serviceName: string;
   groupId?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  useAggregatedTransactions: boolean;
 }) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -40,9 +46,11 @@ export async function getErrorRate({
   };
 
   const getTransactionBucketAggregation = async () => {
-    const resp = await client.search({
+    const resp = await apmEventClient.search({
       apm: {
-        types: [ProcessorEvent.transaction],
+        events: [
+          getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        ],
       },
       body: {
         size: 0,
@@ -51,12 +59,26 @@ export async function getErrorRate({
             filter,
           },
         },
-        aggs,
+        aggs: {
+          ...aggs,
+          response_times: {
+            ...aggs.response_times,
+            aggs: {
+              count: {
+                value_count: {
+                  field: getTransactionDurationFieldForAggregatedTransactions(
+                    useAggregatedTransactions
+                  ),
+                },
+              },
+            },
+          },
+        },
       },
     });
 
     return {
-      totalHits: resp.hits.total.value,
+      noHits: resp.hits.total.value === 0,
       responseTimeBuckets: resp.aggregations?.response_times.buckets,
     };
   };
@@ -64,9 +86,9 @@ export async function getErrorRate({
     const groupIdFilter = groupId
       ? [{ term: { [ERROR_GROUP_ID]: groupId } }]
       : [];
-    const resp = await client.search({
+    const resp = await apmEventClient.search({
       apm: {
-        types: [ProcessorEvent.error],
+        events: [ProcessorEvent.error],
       },
       body: {
         size: 0,
@@ -87,9 +109,9 @@ export async function getErrorRate({
   ]);
 
   const transactionCountByTimestamp: Record<number, number> = {};
-  if (transactions?.responseTimeBuckets) {
+  if (transactions.responseTimeBuckets) {
     transactions.responseTimeBuckets.forEach((bucket) => {
-      transactionCountByTimestamp[bucket.key] = bucket.doc_count;
+      transactionCountByTimestamp[bucket.key] = bucket.count.value;
     });
   }
 
@@ -100,7 +122,7 @@ export async function getErrorRate({
   });
 
   return {
-    noHits: transactions?.totalHits === 0,
+    noHits: transactions.noHits,
     errorRates,
   };
 }

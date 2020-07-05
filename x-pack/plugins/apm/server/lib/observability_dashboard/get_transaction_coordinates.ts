@@ -11,20 +11,27 @@
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Coordinates } from '../../../../observability/public';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function getTransactionCoordinates({
   setup,
   bucketSize,
+  useAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
   bucketSize: string;
+  useAggregatedTransactions: boolean;
 }): Promise<Coordinates[]> {
-  const { client, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-  const { aggregations } = await client.search({
+  const { aggregations } = await apmEventClient.search({
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [
+        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+      ],
     },
     body: {
       size: 0,
@@ -40,6 +47,15 @@ export async function getTransactionCoordinates({
             fixed_interval: bucketSize,
             min_doc_count: 0,
           },
+          aggs: {
+            count: {
+              value_count: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  useAggregatedTransactions
+                ),
+              },
+            },
+          },
         },
       },
     },
@@ -50,7 +66,7 @@ export async function getTransactionCoordinates({
   return (
     aggregations?.distribution.buckets.map((bucket) => ({
       x: bucket.key,
-      y: bucket.doc_count / deltaAsMinutes,
+      y: bucket.count.value / deltaAsMinutes,
     })) || []
   );
 }

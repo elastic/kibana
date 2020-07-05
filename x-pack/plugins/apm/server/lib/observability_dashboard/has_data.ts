@@ -5,20 +5,30 @@
  */
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
+import { getHasAggregatedTransactions } from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export async function hasData({ setup }: { setup: Setup }) {
-  const { client } = setup;
+  const { apmEventClient, config } = setup;
   try {
-    const params = {
-      apm: {
-        types: [ProcessorEvent.transaction],
-      },
-      terminateAfter: 1,
-      size: 0,
+    const getHasTransactionDocuments = async () => {
+      const response = await apmEventClient.search({
+        apm: {
+          events: [ProcessorEvent.transaction],
+        },
+        terminateAfter: 1,
+      });
+
+      return response.hits.total.value > 0;
     };
 
-    const response = await client.search(params);
-    return response.hits.total.value > 0;
+    const [hasMetricDocuments, hasTransactionDocuments] = await Promise.all([
+      config['xpack.apm.useAggregatedTransactions']
+        ? getHasAggregatedTransactions({ apmEventClient })
+        : undefined,
+      getHasTransactionDocuments(),
+    ]);
+
+    return hasMetricDocuments || hasTransactionDocuments;
   } catch (e) {
     return false;
   }

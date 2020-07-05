@@ -25,6 +25,7 @@ export enum RouteName {
   INDICES = 'indices',
   SERVICE_NODES = 'nodes',
   LINK_TO_TRACE = 'link_to_trace',
+  LINK_TO_TRANSACTION_GROUP = 'link_to_transaction_group',
   CUSTOMIZE_UI = 'customize_ui',
   RUM_OVERVIEW = 'rum_overview',
 }

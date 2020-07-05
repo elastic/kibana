@@ -23,11 +23,11 @@ export async function getServiceTransactionTypes({
   setup: Setup & SetupTimeRange;
   useAggregatedTransactions: boolean;
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient } = setup;
 
   const params = {
     apm: {
-      types: [
+      events: [
         getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
       ],
     },
@@ -52,7 +52,7 @@ export async function getServiceTransactionTypes({
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   const transactionTypes =
     aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };

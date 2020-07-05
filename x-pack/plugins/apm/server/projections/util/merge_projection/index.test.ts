@@ -11,17 +11,17 @@ describe('mergeProjection', () => {
     expect(
       mergeProjection(
         {
-          apm: { types: [] },
+          apm: { events: [] },
           body: { query: { bool: { must: [{ terms: ['a'] }] } } },
         },
         {
-          apm: { types: [] },
+          apm: { events: [] },
           body: { query: { bool: { must: [{ term: 'b' }] } } },
         }
       )
     ).toEqual({
       apm: {
-        types: [],
+        events: [],
       },
       body: {
         query: {
@@ -41,10 +41,10 @@ describe('mergeProjection', () => {
     const termsAgg = { terms: { field: 'bar' } };
     expect(
       mergeProjection(
-        { apm: { types: [] }, body: { query: {}, aggs: { foo: termsAgg } } },
+        { apm: { events: [] }, body: { query: {}, aggs: { foo: termsAgg } } },
         {
           apm: {
-            types: [],
+            events: [],
           },
           body: {
             aggs: {
@@ -55,7 +55,7 @@ describe('mergeProjection', () => {
       )
     ).toEqual({
       apm: {
-        types: [],
+        events: [],
       },
       body: {
         query: {},

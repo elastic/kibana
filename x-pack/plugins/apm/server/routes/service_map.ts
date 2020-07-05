@@ -44,7 +44,7 @@ export const serviceMapRoute = createRoute(() => ({
     } = context.params;
 
     const useAggregatedTransactions = await getUseAggregatedTransactions({
-      client: setup.client,
+      apmEventClient: setup.apmEventClient,
       config: context.config,
       start: setup.start,
       end: setup.end,
@@ -85,10 +85,13 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
       path: { serviceName },
     } = context.params;
 
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+
     return getServiceMapServiceNodeInfo({
       setup,
       serviceName,
       environment,
+      useAggregatedTransactions,
     });
   },
 }));

@@ -16,12 +16,14 @@ export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
 export async function getEnvironments({
   serviceName,
   setup,
+  useAggregatedTransactions,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  useAggregatedTransactions: boolean;
 }) {
   const [allEnvironments, existingEnvironments] = await Promise.all([
-    getAllEnvironments({ serviceName, setup }),
+    getAllEnvironments({ serviceName, setup, useAggregatedTransactions }),
     getExistingEnvironmentsForService({ serviceName, setup }),
   ]);
 

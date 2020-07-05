@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cloneDeep, sortByOrder } from 'lodash';
+import { cloneDeep, orderBy } from 'lodash';
 import { UIFilters } from '../../../../typings/ui_filters';
 import { Projection } from '../../../projections/typings';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
@@ -26,7 +26,7 @@ export async function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const projectionWithoutAggs = cloneDeep(projection);
 
@@ -40,7 +40,7 @@ export async function getLocalUIFilters({
         localUIFilterName: name,
       });
 
-      const response = await client.search(query);
+      const response = await apmEventClient.search(query);
 
       const filter = localUIFilters[name];
 
@@ -48,7 +48,7 @@ export async function getLocalUIFilters({
 
       return {
         ...filter,
-        options: sortByOrder(
+        options: orderBy(
           buckets.map((bucket) => {
             return {
               name: bucket.key as string,

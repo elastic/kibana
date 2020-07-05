@@ -112,6 +112,8 @@ exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
@@ -250,6 +252,8 @@ exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
+exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
+
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
@@ -387,6 +391,8 @@ exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
+
+exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 

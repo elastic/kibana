@@ -26,7 +26,7 @@ const getServiceNodes = async ({
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
 }) => {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const projection = getServiceNodesProjection({ setup, serviceName });
 
@@ -66,7 +66,7 @@ const getServiceNodes = async ({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   if (!response.aggregations) {
     return [];

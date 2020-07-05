@@ -28,6 +28,7 @@ describe('agent configuration queries', () => {
         getAllEnvironments({
           serviceName: 'foo',
           setup,
+          useAggregatedTransactions: false,
         })
       );
 
@@ -53,6 +54,7 @@ describe('agent configuration queries', () => {
       mock = await inspectSearchParams((setup) =>
         getServiceNames({
           setup,
+          useAggregatedTransactions: false,
         })
       );
 

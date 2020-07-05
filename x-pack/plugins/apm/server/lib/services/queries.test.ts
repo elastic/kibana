@@ -23,7 +23,11 @@ describe('services queries', () => {
 
   it('fetches the service agent name', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceAgentName('foo', setup)
+      getServiceAgentName({
+        serviceName: 'foo',
+        setup,
+        useAggregatedTransactions: false,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();

@@ -4,7 +4,7 @@ exports[`transaction group queries fetches top traces 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -12,9 +12,9 @@ Array [
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "sample": Object {
-              "top_hits": Object {
-                "size": 1,
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
               },
             },
           },
@@ -64,31 +64,14 @@ Array [
               },
             },
           ],
-          "should": Array [
-            Object {
-              "term": Object {
-                "transaction.sampled": true,
-              },
-            },
-          ],
         },
       },
-      "sort": Array [
-        Object {
-          "_score": "desc",
-        },
-        Object {
-          "@timestamp": Object {
-            "order": "desc",
-          },
-        },
-      ],
+      "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -150,12 +133,12 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -217,8 +200,8 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "size": 0,
   },
 ]
 `;
@@ -227,7 +210,7 @@ exports[`transaction group queries fetches top transactions 1`] = `
 Array [
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -235,9 +218,9 @@ Array [
       "aggs": Object {
         "transaction_groups": Object {
           "aggs": Object {
-            "sample": Object {
-              "top_hits": Object {
-                "size": 1,
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
               },
             },
           },
@@ -275,31 +258,14 @@ Array [
               },
             },
           ],
-          "should": Array [
-            Object {
-              "term": Object {
-                "transaction.sampled": true,
-              },
-            },
-          ],
         },
       },
-      "sort": Array [
-        Object {
-          "_score": "desc",
-        },
-        Object {
-          "@timestamp": Object {
-            "order": "desc",
-          },
-        },
-      ],
+      "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -349,12 +315,12 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -404,12 +370,12 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "size": 0,
   },
   Object {
     "apm": Object {
-      "types": Array [
+      "events": Array [
         "transaction",
       ],
     },
@@ -465,8 +431,8 @@ Array [
           ],
         },
       },
+      "size": 0,
     },
-    "size": 0,
   },
 ]
 `;

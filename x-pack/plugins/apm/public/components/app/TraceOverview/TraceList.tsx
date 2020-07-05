@@ -14,11 +14,11 @@ import { fontSizes, truncate } from '../../../style/variables';
 import { asMillisecondDuration } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
+import { TransactionDetailRedirectLink } from '../../shared/Links/apm/TransactionDetailRedirect';
 
-const StyledTransactionLink = styled(TransactionDetailLink)`
+const StyledTransactionLink = styled(TransactionDetailRedirectLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -36,25 +36,19 @@ const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (_: string, { sample }: TransactionGroup) => (
-      <EuiToolTip
-        id="trace-transaction-link-tooltip"
-        content={sample.transaction.name}
-      >
+    render: (_: string, { serviceName, transactionName }: TransactionGroup) => (
+      <EuiToolTip id="trace-transaction-link-tooltip" content={transactionName}>
         <StyledTransactionLink
-          serviceName={sample.service.name}
-          transactionId={sample.transaction.id}
-          traceId={sample.trace.id}
-          transactionName={sample.transaction.name}
-          transactionType={sample.transaction.type}
+          serviceName={serviceName}
+          transactionName={transactionName}
         >
-          {sample.transaction.name}
+          {transactionName}
         </StyledTransactionLink>
       </EuiToolTip>
     ),
   },
   {
-    field: 'sample.service.name',
+    field: 'serviceName',
     name: i18n.translate(
       'xpack.apm.tracesTable.originatingServiceColumnLabel',
       {

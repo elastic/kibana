@@ -3,7 +3,7 @@
 exports[`service node queries fetches metadata for a service node 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -65,7 +65,7 @@ Object {
 exports[`service node queries fetches metadata for unidentified service nodes 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },
@@ -133,7 +133,7 @@ Object {
 exports[`service node queries fetches services nodes 1`] = `
 Object {
   "apm": Object {
-    "types": Array [
+    "events": Array [
       "metric",
     ],
   },

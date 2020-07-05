@@ -29,7 +29,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../projections/service_nodes';
-import { getRumOverviewProjection } from '../projections/rum_overview';
+import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 import { APMRequestHandlerContext } from './typings';
 
@@ -46,7 +46,14 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    return getEnvironments(setup, serviceName);
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      config: context.config,
+      start: setup.start,
+      end: setup.end,
+      apmEventClient: setup.apmEventClient,
+    });
+
+    return getEnvironments({ setup, serviceName, useAggregatedTransactions });
   },
 }));
 
@@ -121,7 +128,7 @@ export const servicesLocalFiltersRoute = createLocalFiltersRoute({
       config: context.config,
       start: setup.start,
       end: setup.end,
-      client: setup.client,
+      apmEventClient: setup.apmEventClient,
     });
 
     return getServicesProjection({ setup, useAggregatedTransactions });
@@ -131,8 +138,16 @@ export const servicesLocalFiltersRoute = createLocalFiltersRoute({
 
 export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/transactionGroups',
-  getProjection: ({ setup, query }) => {
+  getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
+
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      config: context.config,
+      start: setup.start,
+      end: setup.end,
+      apmEventClient: setup.apmEventClient,
+    });
+
     return getTransactionGroupsProjection({
       setup,
       options: {
@@ -140,6 +155,7 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
         transactionType,
         serviceName,
         transactionName,
+        useAggregatedTransactions,
       },
     });
   },
@@ -156,10 +172,17 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
 
 export const tracesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/traces',
-  getProjection: ({ setup }) => {
+  getProjection: async ({ setup, context }) => {
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      start: setup.start,
+      end: setup.end,
+      apmEventClient: setup.apmEventClient,
+      config: context.config,
+    });
+
     return getTransactionGroupsProjection({
       setup,
-      options: { type: 'top_traces' },
+      options: { type: 'top_traces', useAggregatedTransactions },
     });
   },
   queryRt: t.type({}),
@@ -167,13 +190,22 @@ export const tracesLocalFiltersRoute = createLocalFiltersRoute({
 
 export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/transactions',
-  getProjection: ({ setup, query }) => {
+  getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
+
+    const useAggregatedTransactions = await getUseAggregatedTransactions({
+      start: setup.start,
+      end: setup.end,
+      apmEventClient: setup.apmEventClient,
+      config: context.config,
+    });
+
     return getTransactionsProjection({
       setup,
       transactionType,
       serviceName,
       transactionName,
+      useAggregatedTransactions,
     });
   },
   queryRt: t.type({
@@ -233,8 +265,8 @@ export const serviceNodesLocalFiltersRoute = createLocalFiltersRoute({
 
 export const rumOverviewLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/rumOverview',
-  getProjection: ({ setup }) => {
-    return getRumOverviewProjection({
+  getProjection: async ({ setup }) => {
+    return getRumPageLoadTransactionsProjection({
       setup,
     });
   },

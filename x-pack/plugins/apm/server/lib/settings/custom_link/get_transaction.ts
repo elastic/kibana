@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { filterOptionsRt } from './custom_link_types';
@@ -17,7 +16,7 @@ export async function getTransaction({
   setup: Setup;
   filters?: t.TypeOf<typeof filterOptionsRt>;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   const esFilters = Object.entries(filters)
     // loops through the filters splitting the value by comma and removing white spaces
@@ -32,7 +31,7 @@ export async function getTransaction({
   const params = {
     terminateAfter: 1,
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction as const],
     },
     size: 1,
     body: {
@@ -43,6 +42,6 @@ export async function getTransaction({
       },
     },
   };
-  const resp = await client.search<Transaction>(params);
+  const resp = await apmEventClient.search(params);
   return resp.hits.hits[0]?._source;
 }

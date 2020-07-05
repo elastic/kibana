@@ -23,11 +23,11 @@ export async function getDistributionMax(
   transactionType: string,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
     apm: {
-      types: [ProcessorEvent.transaction],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       size: 0,
@@ -60,6 +60,6 @@ export async function getDistributionMax(
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   return resp.aggregations ? resp.aggregations.stats.max : null;
 }
