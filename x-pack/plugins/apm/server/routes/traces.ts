@@ -19,12 +19,7 @@ export const tracesRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
-      start: setup.start,
-      end: setup.end,
-      config: context.config,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
     return getTransactionGroupList(
       { type: 'top_traces', useAggregatedTransactions },
       setup

@@ -46,12 +46,7 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      config: context.config,
-      start: setup.start,
-      end: setup.end,
-      apmEventClient: setup.apmEventClient,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
 
     return getEnvironments({ setup, serviceName, useAggregatedTransactions });
   },
@@ -124,12 +119,7 @@ function createLocalFiltersRoute<
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
   getProjection: async ({ context, setup }) => {
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      config: context.config,
-      start: setup.start,
-      end: setup.end,
-      apmEventClient: setup.apmEventClient,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
 
     return getServicesProjection({ setup, useAggregatedTransactions });
   },
@@ -141,12 +131,7 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      config: context.config,
-      start: setup.start,
-      end: setup.end,
-      apmEventClient: setup.apmEventClient,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
 
     return getTransactionGroupsProjection({
       setup,
@@ -173,12 +158,7 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
 export const tracesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/traces',
   getProjection: async ({ setup, context }) => {
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      start: setup.start,
-      end: setup.end,
-      apmEventClient: setup.apmEventClient,
-      config: context.config,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
 
     return getTransactionGroupsProjection({
       setup,
@@ -193,12 +173,7 @@ export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions({
-      start: setup.start,
-      end: setup.end,
-      apmEventClient: setup.apmEventClient,
-      config: context.config,
-    });
+    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
 
     return getTransactionsProjection({
       setup,
