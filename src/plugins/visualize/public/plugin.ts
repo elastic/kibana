@@ -31,6 +31,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
+import { ExtensionsPluginSetup, ExtensionsPluginStart } from 'src/plugins/extensions/public';
 import { Storage, createKbnUrlTracker, createKbnUrlStateStorage } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -52,12 +53,14 @@ export interface VisualizePluginStartDependencies {
   embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
+  extensions: ExtensionsPluginSetup;
 }
 
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
+  extensions: ExtensionsPluginStart;
 }
 
 export interface FeatureFlagConfig {
@@ -75,7 +78,7 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, data, extensions }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -146,6 +149,7 @@ export class VisualizePlugin
 
         const services: VisualizeServices = {
           ...coreStart,
+          extensions,
           history,
           kbnUrlStateStorage: createKbnUrlStateStorage({
             history,

@@ -80,6 +80,13 @@ export const VisualizeEditor = () => {
 
   return (
     <div className={`app-container visEditor visEditor--${savedVisInstance?.vis.type.name}`}>
+      <div style={{ padding: 8 }}>
+        {!!services.extensions.tags.TagListEditable && (
+          <services.extensions.tags.TagListEditable
+            kid={`kid:::so:saved_objects/visualization/${visualizationIdFromUrl}`}
+          />
+        )}
+      </div>
       {savedVisInstance && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}

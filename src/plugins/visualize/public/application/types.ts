@@ -44,6 +44,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
+import { ExtensionsPluginSetup } from 'src/plugins/extensions/public';
 import { ConfigSchema } from '../../config';
 
 export type PureVisState = SavedVisState;
@@ -93,6 +94,7 @@ export interface EditorRenderProps {
 
 export interface VisualizeServices extends CoreStart {
   embeddable: EmbeddableStart;
+  extensions: ExtensionsPluginSetup;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   kibanaLegacy: KibanaLegacyStart;
