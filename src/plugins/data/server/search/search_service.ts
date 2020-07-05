@@ -42,12 +42,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
     core.savedObjects.registerType(searchSavedObjectType);
 
-    core.getStartServices().then(([coreStart]) => {
-      this.registerSearchStrategy(
-        ES_SEARCH_STRATEGY,
-        esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
-      );
-    });
+    this.registerSearchStrategy(
+      ES_SEARCH_STRATEGY,
+      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
+    );
 
     registerSearchRoute(core);
 
