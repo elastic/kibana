@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ApplicationStart } from 'kibana/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
+import { ExtensionsPluginSetup } from 'src/plugins/extensions/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -80,7 +81,11 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
   return icon;
 };
 
-export const getTableColumns = (application: ApplicationStart, history: History) => [
+export const getTableColumns = (
+  application: ApplicationStart,
+  history: History,
+  extensions: ExtensionsPluginSetup
+) => [
   {
     field: 'title',
     name: i18n.translate('visualize.listing.table.titleColumnName', {
@@ -116,6 +121,20 @@ export const getTableColumns = (application: ApplicationStart, history: History)
       </span>
     ),
   },
+  ...(extensions.tags.TagList
+    ? [
+        {
+          field: '',
+          name: 'Tags',
+          sortable: false,
+          render: (record: VisualizationListItem) =>
+            !!extensions.tags.TagList ? (
+              <extensions.tags.TagList kid={`kid:::so:saved_objects/visualization/${record.id}`} />
+            ) : null,
+        },
+      ]
+    : ([] as any)),
+  ,
   {
     field: 'description',
     name: i18n.translate('visualize.listing.table.descriptionColumnName', {

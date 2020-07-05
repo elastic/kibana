@@ -21,6 +21,7 @@ import React from 'react';
 import { Plugin } from 'kibana/public';
 
 export interface ExtensionsTags {
+  TagList?: React.ComponentType<{ kid: string }>;
   TagListEditable?: React.ComponentType<{ kid: string }>;
 }
 

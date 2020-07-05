@@ -43,6 +43,7 @@ export const VisualizeListing = () => {
       savedObjectsPublic,
       uiSettings,
       visualizeCapabilities,
+      extensions,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -95,7 +96,11 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history), [application, history]);
+  const tableColumns = useMemo(() => getTableColumns(application, history, extensions), [
+    application,
+    history,
+    extensions,
+  ]);
 
   const fetchItems = useCallback(
     (filter) => {

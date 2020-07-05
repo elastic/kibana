@@ -137,6 +137,7 @@ export class TagsPlugin
       },
     };
 
+    plugins.extensions.tags.TagList = setup.ui.TagList;
     plugins.extensions.tags.TagListEditable = setup.ui.TagListEditable;
 
     return setup;
