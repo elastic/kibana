@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, uniq } from 'lodash';
+import { defaultsDeep, uniq, cloneDeep } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
@@ -92,7 +92,7 @@ export function createApmEventClient({
 
       const nextParams: ESSearchRequest & {
         body: { query: { bool: { filter: ESFilter[] } } };
-      } = defaultsDeep(esParams, {
+      } = defaultsDeep(cloneDeep(esParams), {
         body: {
           query: {
             bool: {
