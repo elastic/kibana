@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { pick, isEmpty } from 'lodash';
+import { pickBy, isEmpty } from 'lodash';
 import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -63,13 +63,13 @@ export const getSections = ({
   const uptimeLink = url.format({
     pathname: basePath.prepend('/app/uptime'),
     search: `?${fromQuery(
-      pick(
+      pickBy(
         {
           dateRangeStart: urlParams.rangeFrom,
           dateRangeEnd: urlParams.rangeTo,
           search: `url.domain:"${transaction.url?.domain}"`,
         },
-        (val: string) => !isEmpty(val)
+        (val) => !isEmpty(val)
       )
     )}`,
   });

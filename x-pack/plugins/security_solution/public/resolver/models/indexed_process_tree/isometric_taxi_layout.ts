@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as vector2 from '../../lib/vector2';
+import * as vector2 from '../../models/vector2';
 import {
   IndexedProcessTree,
   Vector2,

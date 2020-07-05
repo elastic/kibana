@@ -8868,7 +8868,7 @@ const BootstrapCommand = {
     }
 
     if (cachedProjectCount > 0) {
-      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`${cachedProjectCount} bootsrap builds are cached`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].success(`${cachedProjectCount} bootstrap builds are cached`);
     }
 
     await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async project => {

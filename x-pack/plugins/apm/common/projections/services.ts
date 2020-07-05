@@ -16,25 +16,37 @@ import { rangeFilter } from '../utils/range_filter';
 
 export function getServicesProjection({
   setup,
+  noEvents,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  noEvents?: boolean;
 }) {
   const { start, end, uiFiltersES, indices } = setup;
 
   return {
-    index: [
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    ...(noEvents
+      ? {}
+      : {
+          index: [
+            indices['apm_oss.metricsIndices'],
+            indices['apm_oss.errorIndices'],
+            indices['apm_oss.transactionIndices'],
+          ],
+        }),
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
-            },
+            ...(noEvents
+              ? []
+              : [
+                  {
+                    terms: {
+                      [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'],
+                    },
+                  },
+                ]),
             { range: rangeFilter(start, end) },
             ...uiFiltersES,
           ],
