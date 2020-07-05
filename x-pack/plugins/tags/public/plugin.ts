@@ -25,7 +25,7 @@ import {
   ExtensionsPluginStart,
 } from '../../../../src/plugins/extensions/public';
 import { TagsManagementServices, TagsManagementSection } from './management';
-import { TagsService, TagsServiceContract } from './services';
+import { TagsService, TagsServiceContract, KidService } from './services';
 import { Tag, TagProps } from './containers/tag';
 import { createTagsProvider } from './context';
 import { TagListProps, TagList } from './containers/tag_list';
@@ -75,6 +75,7 @@ export class TagsPlugin
       TagsPluginStartDependencies
     > {
   private readonly tagsService = new TagsService();
+  private readonly kid = new KidService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -118,7 +119,7 @@ export class TagsPlugin
       order: 1,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async ({ element }: AppMountParameters) => {
-        const services = new TagsAppServices({ tags });
+        const services = new TagsAppServices({ tags, kid: this.kid });
         render(h(TagsApp, { services }), element);
         return () => {
           unmountComponentAtNode(element);

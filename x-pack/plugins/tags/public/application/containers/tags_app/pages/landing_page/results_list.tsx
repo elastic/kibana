@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useTagsApp } from '../../../../context';
 
@@ -13,8 +13,10 @@ export interface Props {
 }
 
 export const ResultsList: React.FC<Props> = ({ tagIds }) => {
-  const { tags } = useTagsApp();
+  const { tags, kid } = useTagsApp();
   const isMounted = useMountedState();
+  const [kids, setKids] = useState<string[] | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   useEffect(() => {
     tags
       .attachments!.findResources({
@@ -26,17 +28,21 @@ export const ResultsList: React.FC<Props> = ({ tagIds }) => {
       .then(
         (response) => {
           if (!isMounted()) return;
+          setKids(response.attachments.map((item) => item.kid));
         },
-        (error) => {
+        (newError) => {
           if (!isMounted()) return;
+          setError(newError);
         }
       );
   }, [isMounted, tags.attachments, tagIds]);
 
+  if (error || !kids) return null;
+
   return (
     <div>
-      {tagIds.map((id) => (
-        <div key={id}>{id}</div>
+      {kids.map((resuldKid) => (
+        <kid.Card kid={resuldKid} />
       ))}
     </div>
   );

@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagsServiceContract, TagManager } from '../../services';
+import { TagsServiceContract, TagManager, KidService } from '../../services';
 
 export interface Params {
   readonly tags: TagsServiceContract;
+  readonly kid: KidService;
 }
 
 export class TagsAppServices {
   public readonly tags: TagsServiceContract;
   public readonly manager: TagManager;
+  public readonly kid: KidService;
 
   constructor(params: Params) {
     this.tags = params.tags;
     this.manager = params.tags.manager!;
+    this.kid = params.kid;
   }
 }
