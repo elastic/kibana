@@ -6,26 +6,16 @@
 
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { Link } from 'react-router-dom';
-import { txtSubtitle, txtCreateATag } from './i18n';
 
 export const Empty: React.FC = () => {
   return (
     <EuiEmptyPrompt
       iconType="tag"
-      title={<h1>Create your first tag</h1>}
+      title={<h1>Find resources by tag</h1>}
       body={
         <>
-          <p>{txtSubtitle}</p>
+          <p>Select tags on the left to find attached resources</p>
         </>
-      }
-      actions={
-        <Link to={'/create'}>
-          <EuiButton fill iconType="plusInCircle">
-            {txtCreateATag}
-          </EuiButton>
-        </Link>
       }
     />
   );

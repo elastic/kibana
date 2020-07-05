@@ -9,9 +9,13 @@ import { EuiHorizontalRule, EuiText, EuiLink } from '@elastic/eui';
 import { useServices } from '../../context';
 
 const defaultTags: Array<{ color: string; title: string; description: string }> = [
-  { color: '#B44B6E', title: 'Env:Production', description: 'Production environment.' },
-  { color: '#B44B6E', title: 'Env:Staging', description: 'Staging environment.' },
-  { color: '#B44B6E', title: 'Env:QA', description: 'Testing and qulity assurance environment.' },
+  { color: '#B44B6E', title: 'Environment:Production', description: 'Production environment.' },
+  { color: '#B44B6E', title: 'Environment:Staging', description: 'Staging environment.' },
+  {
+    color: '#B44B6E',
+    title: 'Environment:QA',
+    description: 'Testing and qulity assurance environment.',
+  },
   { color: '#378400', title: 'Feature:Landing page', description: '' },
   { color: '#378400', title: 'Feature:Load balancer', description: '' },
   { color: '#378400', title: 'Feature:GraphQL', description: '' },

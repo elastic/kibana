@@ -81,7 +81,7 @@ export const LandinPage: React.FC = () => {
           <div style={{ marginTop: -8, paddingBottom: 16 }}>
             <TagPicker fullWidth selected={selected} onChange={setSelected} />
           </div>
-          <EuiPanel paddingSize="l" hasShadow>
+          <EuiPanel paddingSize="l">
             <ResultsList tagIds={selected} />
           </EuiPanel>
         </EuiFlexItem>
