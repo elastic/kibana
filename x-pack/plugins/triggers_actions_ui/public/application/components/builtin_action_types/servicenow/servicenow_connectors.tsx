@@ -15,20 +15,11 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
-import { IErrorObject, ActionConnectorFieldsProps } from '../../../../types';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector, CasesConfigurationMapping } from './types';
 import { connectorConfiguration } from './config';
 import { FieldMapping } from './case_mappings/field_mapping';
-
-export interface ConnectorFlyoutFormProps<T> {
-  errors: IErrorObject;
-  action: T;
-  onChangeSecret: (key: string, value: string) => void;
-  onBlurSecret: (key: string) => void;
-  onChangeConfig: (key: string, value: string) => void;
-  onBlurConfig: (key: string) => void;
-}
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector

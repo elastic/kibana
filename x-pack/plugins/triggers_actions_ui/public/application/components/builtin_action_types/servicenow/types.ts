@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// to remove
-import { CaseField, ThirdPartyField, ActionType } from '../../../../../../case/common/api';
-
 export interface ServiceNowActionConnector {
   config: ServiceNowConfig;
   secrets: ServiceNowSecrets;
@@ -43,7 +40,7 @@ interface ServiceNowSecrets {
 
 // to remove
 export interface CasesConfigurationMapping {
-  source: CaseField;
-  target: ThirdPartyField;
-  actionType: ActionType;
+  source: string;
+  target: string;
+  actionType: string;
 }

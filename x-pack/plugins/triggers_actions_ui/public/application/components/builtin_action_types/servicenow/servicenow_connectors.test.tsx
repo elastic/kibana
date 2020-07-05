@@ -33,7 +33,6 @@ describe('ServiceNowActionConnectorFields renders', () => {
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        editActionProperty={() => {}}
         docLinks={deps!.docLinks}
       />
     );
@@ -72,7 +71,6 @@ describe('ServiceNowActionConnectorFields renders', () => {
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        editActionProperty={() => {}}
         docLinks={deps!.docLinks}
       />
     );

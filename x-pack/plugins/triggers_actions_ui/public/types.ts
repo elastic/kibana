@@ -29,7 +29,6 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
-  editActionProperty?: (property: string, value: any) => void;
   errors: IErrorObject;
   docLinks: DocLinksStart;
   http?: HttpSetup;
@@ -77,7 +76,6 @@ export interface ActionConnector {
   referencedByCount?: number;
   config: Record<string, any>;
   isPreconfigured: boolean;
-  consumer?: string | null;
 }
 
 export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;

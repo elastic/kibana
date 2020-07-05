@@ -8,15 +8,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiSuperSelectOption } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { CaseField, ActionType, ThirdPartyField } from '../../../../../../../case/common/api';
 import { FieldMappingRow } from './field_mapping_row';
 import * as i18n from './translations';
 
 import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
-import {
-  ThirdPartyField as ConnectorConfigurationThirdPartyField,
-  AllThirdPartyFields,
-} from './types';
+import { ThirdPartyField as ConnectorConfigurationThirdPartyField } from './types';
 import { CasesConfigurationMapping } from '../types';
 import { connectorConfiguration } from '../config';
 import { createDefaultMapping } from '../servicenow_connectors';
@@ -26,7 +22,7 @@ const FieldRowWrapper = styled.div`
   font-size: 14px;
 `;
 
-const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
+const actionTypeOptions: Array<EuiSuperSelectOption<string>> = [
   {
     value: 'nothing',
     inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_NOTHING}</>,
@@ -45,12 +41,10 @@ const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
 ];
 
 const getThirdPartyOptions = (
-  caseField: CaseField,
+  caseField: string,
   thirdPartyFields: Record<string, ConnectorConfigurationThirdPartyField>
-): Array<EuiSuperSelectOption<AllThirdPartyFields>> =>
-  (Object.keys(thirdPartyFields) as AllThirdPartyFields[]).reduce<
-    Array<EuiSuperSelectOption<AllThirdPartyFields>>
-  >(
+): Array<EuiSuperSelectOption<string>> =>
+  (Object.keys(thirdPartyFields) as string[]).reduce<Array<EuiSuperSelectOption<string>>>(
     (acc, key) => {
       if (thirdPartyFields[key].validSourceFields.includes(caseField)) {
         return [
@@ -87,7 +81,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   connectorActionTypeId,
 }) => {
   const onChangeActionType = useCallback(
-    (caseField: CaseField, newActionType: ActionType) => {
+    (caseField: string, newActionType: string) => {
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setActionTypeToMapping(caseField, newActionType, myMapping));
     },
@@ -96,7 +90,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   );
 
   const onChangeThirdParty = useCallback(
-    (caseField: CaseField, newThirdPartyField: ThirdPartyField) => {
+    (caseField: string, newThirdPartyField: string) => {
       const myMapping = mapping ?? defaultMapping;
       onChangeMapping(setThirdPartyToMapping(caseField, newThirdPartyField, myMapping));
     },

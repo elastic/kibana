@@ -170,7 +170,6 @@ export const ActionConnectorForm = ({
             errors={errors}
             editActionConfig={setActionConfigProperty}
             editActionSecrets={setActionSecretsProperty}
-            editActionProperty={setActionProperty}
             http={http}
             docLinks={docLinks}
             consumer={consumer}

@@ -14,19 +14,17 @@ import {
 } from '@elastic/eui';
 
 import { capitalize } from 'lodash';
-import { CaseField, ActionType, ThirdPartyField } from '../../../../../../../case/common/api/cases';
-import { AllThirdPartyFields } from './types';
 
 export interface RowProps {
   id: string;
   disabled: boolean;
-  securitySolutionField: CaseField;
-  thirdPartyOptions: Array<EuiSuperSelectOption<AllThirdPartyFields>>;
-  actionTypeOptions: Array<EuiSuperSelectOption<ActionType>>;
-  onChangeActionType: (caseField: CaseField, newActionType: ActionType) => void;
-  onChangeThirdParty: (caseField: CaseField, newThirdPartyField: ThirdPartyField) => void;
-  selectedActionType: ActionType;
-  selectedThirdParty: ThirdPartyField;
+  securitySolutionField: string;
+  thirdPartyOptions: Array<EuiSuperSelectOption<string>>;
+  actionTypeOptions: Array<EuiSuperSelectOption<string>>;
+  onChangeActionType: (caseField: string, newActionType: string) => void;
+  onChangeThirdParty: (caseField: string, newThirdPartyField: string) => void;
+  selectedActionType: string;
+  selectedThirdParty: string;
 }
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({

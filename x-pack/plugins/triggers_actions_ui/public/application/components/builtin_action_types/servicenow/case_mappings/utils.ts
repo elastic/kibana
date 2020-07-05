@@ -3,13 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ActionType, ThirdPartyField } from '../../../../../../../case/common/api';
-import { CaseField } from './types';
 import { CasesConfigurationMapping } from '../types';
 
 export const setActionTypeToMapping = (
-  caseField: CaseField,
-  newActionType: ActionType,
+  caseField: string,
+  newActionType: string,
   mapping: CasesConfigurationMapping[]
 ): CasesConfigurationMapping[] => {
   const findItemIndex = mapping.findIndex((item) => item.source === caseField);
@@ -26,8 +24,8 @@ export const setActionTypeToMapping = (
 };
 
 export const setThirdPartyToMapping = (
-  caseField: CaseField,
-  newThirdPartyField: ThirdPartyField,
+  caseField: string,
+  newThirdPartyField: string,
   mapping: CasesConfigurationMapping[]
 ): CasesConfigurationMapping[] =>
   mapping.map((item) => {
