@@ -67,6 +67,9 @@ export const getPageLoadDistBreakdown = async (
                 field: 'transaction.duration.us',
                 values: stepValues,
                 keyed: false,
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
               },
             },
           },

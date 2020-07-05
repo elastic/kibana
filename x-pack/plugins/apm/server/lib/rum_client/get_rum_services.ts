@@ -44,5 +44,5 @@ export async function getRumServices({
 
   const result = response.aggregations?.services.buckets ?? [];
 
-  return result.map(({ key }) => key);
+  return result.map(({ key }) => key as string);
 }

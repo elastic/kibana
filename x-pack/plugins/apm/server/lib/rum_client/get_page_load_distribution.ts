@@ -42,6 +42,9 @@ export async function getPageLoadDistribution({
           percentiles: {
             field: 'transaction.duration.us',
             percents: [50, 75, 90, 95, 99],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },
@@ -81,9 +84,9 @@ const getPercentilesDistribution = async (
   minDuration: number,
   maxDuration: number
 ) => {
-  const stepValue = (maxDuration - minDuration) / 50;
+  const stepValue = (maxDuration - minDuration) / 100;
   const stepValues = [];
-  for (let i = 1; i < 51; i++) {
+  for (let i = 1; i < 101; i++) {
     stepValues.push((stepValue * i + minDuration).toFixed(2));
   }
 
@@ -103,6 +106,9 @@ const getPercentilesDistribution = async (
             field: 'transaction.duration.us',
             values: stepValues,
             keyed: false,
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },
