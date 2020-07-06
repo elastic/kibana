@@ -41,7 +41,7 @@ export function getModulesProvider({
       savedObjectsClient: SavedObjectsClientContract
     ) {
       const hasMlCapabilities = getHasMlCapabilities(request);
-      const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient);
+      const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient, request);
       return {
         async recognize(...args) {
           isFullLicense();
@@ -87,7 +87,8 @@ export function getModulesProvider({
 
 function dataRecognizerFactory(
   mlClusterClient: ILegacyScopedClusterClient,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest
 ) {
-  return new DataRecognizer(mlClusterClient, savedObjectsClient);
+  return new DataRecognizer(mlClusterClient, savedObjectsClient, request.headers.authorization);
 }
