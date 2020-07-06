@@ -25,7 +25,7 @@ import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
 import { ContextMenu } from './context_menu';
-import { editorItemMessages } from './messages';
+import { i18nTexts } from './i18n_texts';
 import { ProcessorInfo } from '../processors_tree';
 
 export interface Handlers {
@@ -52,7 +52,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     renderOnFailureHandlers,
   }) => {
     const {
-      state: { editor, processorsDispatch },
+      state: { editor, processors },
     } = usePipelineProcessorsContext();
 
     const isDisabled = editor.mode.id !== 'idle';
@@ -115,7 +115,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                         description: nextDescription,
                       };
                     }
-                    processorsDispatch({
+                    processors.dispatch({
                       type: 'updateProcessor',
                       payload: {
                         processor: {
@@ -126,17 +126,17 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                       },
                     });
                   }}
-                  ariaLabel={editorItemMessages.processorTypeLabel({ type: processor.type })}
+                  ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
                   text={description}
-                  placeholder={editorItemMessages.descriptionPlaceholder}
+                  placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && (
-                  <EuiToolTip content={editorItemMessages.editButtonLabel}>
+                  <EuiToolTip content={i18nTexts.editButtonLabel}>
                     <EuiButtonIcon
                       disabled={isDisabled}
-                      aria-label={editorItemMessages.editButtonLabel}
+                      aria-label={i18nTexts.editButtonLabel}
                       iconType="pencil"
                       size="s"
                       onClick={() => {
@@ -151,12 +151,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && (
-                  <EuiToolTip content={editorItemMessages.moveButtonLabel}>
+                  <EuiToolTip content={i18nTexts.moveButtonLabel}>
                     <EuiButtonIcon
                       data-test-subj="moveItemButton"
                       size="s"
                       disabled={isDisabled}
-                      aria-label={editorItemMessages.moveButtonLabel}
+                      aria-label={i18nTexts.moveButtonLabel}
                       onClick={onMove}
                       iconType="sortable"
                     />
@@ -165,7 +165,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
                 <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
-                  {editorItemMessages.cancelMoveButtonLabel}
+                  {i18nTexts.cancelMoveButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -183,7 +183,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 editor.setMode({ id: 'removingProcessor', arg: { selector } });
               }}
               onDuplicate={() => {
-                processorsDispatch({
+                processors.dispatch({
                   type: 'duplicateProcessor',
                   payload: {
                     source: selector,
