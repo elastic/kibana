@@ -28,6 +28,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
@@ -39,7 +40,6 @@ import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
-import { hasAllPrivilege } from '../../../lib/capabilities';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -71,12 +71,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dataPlugin,
   } = useAppDependencies();
 
-  const canSave = hasAllPrivilege(alert, alertType);
+  const canSaveAlert = hasAllPrivilege(alert, alertType);
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
-    canSave && alertTypeRegistry.has(alert.alertTypeId)
+    // can the user save the alert
+    canSaveAlert &&
+    // if the alert has actions, can the user save the alert's action params
+    (canExecuteActions || (!canExecuteActions && alert.actions.length === 0)) &&
+    // is this alert type editable from within Alerts Management
+    (alertTypeRegistry.has(alert.alertTypeId)
       ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
-      : false;
+      : false);
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
@@ -124,6 +130,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                         data-test-subj="openEditAlertFlyoutButton"
                         iconType="pencil"
                         onClick={() => setEditFlyoutVisibility(true)}
+                        name="edit"
                       >
                         <FormattedMessage
                           id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
@@ -204,7 +211,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
                       name="disable"
-                      disabled={!canSave}
+                      disabled={!canSaveAlert}
                       checked={!isEnabled}
                       data-test-subj="disableSwitch"
                       onChange={async () => {
@@ -229,7 +236,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <EuiSwitch
                       name="mute"
                       checked={isMuted}
-                      disabled={!canSave || !isEnabled}
+                      disabled={!canSaveAlert || !isEnabled}
                       data-test-subj="muteSwitch"
                       onChange={async () => {
                         if (isMuted) {

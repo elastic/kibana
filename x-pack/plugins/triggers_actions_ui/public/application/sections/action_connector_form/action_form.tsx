@@ -45,6 +45,7 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -87,6 +88,8 @@ export const ActionForm = ({
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
+  const canSave = hasSaveActionsCapability(capabilities);
+
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -254,6 +257,7 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
+                canSave &&
                 actionTypesIndex &&
                 actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
                   <EuiButtonEmpty
@@ -403,6 +407,16 @@ export const ActionForm = ({
       : actionItem.actionTypeId;
     const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
+
+    const noConnectorsLabel = (
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
+        defaultMessage="No {actionTypeName} connectors."
+        values={{
+          actionTypeName,
+        }}
+      />
+    );
     return (
       <Fragment key={index}>
         <EuiAccordion
@@ -457,46 +471,54 @@ export const ActionForm = ({
           }
           paddingSize="l"
         >
-          <EuiEmptyPrompt
-            title={
-              emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
+          {canSave ? (
+            <EuiEmptyPrompt
+              title={
+                emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
+                  noConnectorsLabel
+                ) : (
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
+                      {
+                        defaultMessage: 'Unable to load connector.',
+                      }
+                    )}
+                    color="warning"
+                  />
+                )
+              }
+              actions={[
+                <EuiButton
+                  color="primary"
+                  fill
+                  size="s"
+                  data-test-subj="createActionConnectorButton"
+                  onClick={() => {
+                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                    setAddModalVisibility(true);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                    defaultMessage="Create a connector"
+                  />
+                </EuiButton>,
+              ]}
+            />
+          ) : (
+            <EuiCallOut title={noConnectorsLabel}>
+              <p>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-                  defaultMessage="No {actionTypeName} connectors."
+                  id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
+                  defaultMessage="There are no {actionTypeName} connectors available, but they could be configured by an authorized user. Please contact your administrator for assistance."
                   values={{
                     actionTypeName,
                   }}
                 />
-              ) : (
-                <EuiCallOut
-                  title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
-                    {
-                      defaultMessage: 'Unable to load connector.',
-                    }
-                  )}
-                  color="warning"
-                />
-              )
-            }
-            actions={[
-              <EuiButton
-                color="primary"
-                fill
-                size="s"
-                data-test-subj="createActionConnectorButton"
-                onClick={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                  setAddModalVisibility(true);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                  defaultMessage="Create a connector"
-                />
-              </EuiButton>,
-            ]}
-          />
+              </p>
+            </EuiCallOut>
+          )}
         </EuiAccordion>
         <EuiSpacer size="xs" />
       </Fragment>

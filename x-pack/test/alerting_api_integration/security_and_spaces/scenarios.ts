@@ -50,6 +50,7 @@ const GlobalRead: User = {
           actions: ['read'],
           alertsFixture: ['read'],
           alertsRestrictedFixture: ['read'],
+          actionsSimulators: ['read'],
         },
         spaces: ['*'],
       },
@@ -78,6 +79,7 @@ const Space1All: User = {
         feature: {
           actions: ['all'],
           alertsFixture: ['all'],
+          actionsSimulators: ['all'],
         },
         spaces: ['space1'],
       },

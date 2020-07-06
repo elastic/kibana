@@ -151,12 +151,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: ['securitySolution', 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all'],
+          api: ['securitySolution'],
           savedObject: {
             all: [
               'alert',
-              'action',
-              'action_task_params',
               'cases',
               'cases-comments',
               'cases-configure',
@@ -182,9 +180,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: ['securitySolution', 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all'],
+          api: ['securitySolution'],
           savedObject: {
-            all: ['alert', 'action', 'action_task_params'],
+            all: ['alert'],
             read: [
               'config',
               'cases',

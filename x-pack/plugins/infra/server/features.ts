@@ -23,9 +23,9 @@ export const METRICS_FEATURE = {
     all: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all'],
+      api: ['infra'],
       savedObject: {
-        all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
+        all: ['infrastructure-ui-source'],
         read: ['index-pattern'],
       },
       alerting: {
@@ -46,9 +46,9 @@ export const METRICS_FEATURE = {
     read: {
       app: ['infra', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all'],
+      api: ['infra'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: [],
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
       alerting: {
