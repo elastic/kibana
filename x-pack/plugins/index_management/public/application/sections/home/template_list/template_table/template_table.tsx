@@ -7,7 +7,14 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiBadge } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiBadge,
+  EuiIcon,
+} from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
@@ -99,6 +106,14 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+    },
+    {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
+        defaultMessage: 'Data stream',
+      }),
+      truncateText: true,
+      render: (template: TemplateListItem) =>
+        template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {
