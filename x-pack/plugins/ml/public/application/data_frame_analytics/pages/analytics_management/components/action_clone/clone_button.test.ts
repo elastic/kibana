@@ -131,7 +131,7 @@ describe('Analytics job clone action', () => {
         },
         analyzed_fields: {
           includes: [],
-          excludes: [],
+          excludes: ['excluded_field'],
         },
         model_memory_limit: '350mb',
         allow_lazy_start: false,
