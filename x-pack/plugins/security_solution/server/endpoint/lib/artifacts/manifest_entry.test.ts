@@ -33,13 +33,17 @@ describe('manifest_entry', () => {
     });
 
     test('Correct sha256 is returned', () => {
-      expect(manifestEntry.getSha256()).toEqual(
+      expect(manifestEntry.getCompressedSha256()).toEqual(
+        '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
+      );
+      expect(manifestEntry.getDecompressedSha256()).toEqual(
         '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c'
       );
     });
 
     test('Correct size is returned', () => {
-      expect(manifestEntry.getSize()).toEqual(268);
+      expect(manifestEntry.getCompressedSize()).toEqual(268);
+      expect(manifestEntry.getDecompressedSize()).toEqual(268);
     });
 
     test('Correct url is returned', () => {
@@ -54,9 +58,13 @@ describe('manifest_entry', () => {
 
     test('Correct record is returned', () => {
       expect(manifestEntry.getRecord()).toEqual({
-        sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
-        size: 268,
-        url:
+        compression_algorithm: 'none',
+        encryption_algorithm: 'none',
+        precompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+        postcompress_sha256: '70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
+        precompress_size: 268,
+        postcompress_size: 268,
+        relative_url:
           '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-1.0.0/70d2e0ee5db0073b242df9af32e64447b932b73c3e66de3a922c61a4077b1a9c',
       });
     });
