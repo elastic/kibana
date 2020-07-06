@@ -64,17 +64,10 @@ export const TimeExpressionSelect: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    // should only skip if `isEnabled` is explicitly set to false
-    if (isEnabled !== false) {
-      const timerangeUnit =
-        timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-      setAlertParams('timerangeUnit', timerangeUnit);
-      setAlertParams('timerangeCount', numUnits);
-    } else {
-      setAlertParams('timerangeUnit', undefined);
-      setAlertParams('timerangeCount', undefined);
-    }
-  }, [isEnabled, numUnits, timerangeUnitOptions, setAlertParams]);
+    const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
+    setAlertParams('timerangeUnit', timerangeUnit);
+    setAlertParams('timerangeCount', numUnits);
+  }, [numUnits, timerangeUnitOptions, setAlertParams]);
 
   return (
     <EuiFlexGroup gutterSize="s">

@@ -25,13 +25,8 @@ export const DownNoExpressionSelect: React.FC<Props> = ({
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
 
   useEffect(() => {
-    // should only skip if `isEnabled` is explicitly set to false
-    if (isEnabled !== false) {
-      setAlertParams('numTimes', numTimes);
-    } else {
-      setAlertParams('numTimes', undefined);
-    }
-  }, [isEnabled, numTimes, setAlertParams]);
+    setAlertParams('numTimes', numTimes);
+  }, [numTimes, setAlertParams]);
 
   return (
     <AlertExpressionPopover
