@@ -50,7 +50,12 @@ export const EmptyState = ({
   docLinks: DocLinksStart;
 }) => (
   <>
-    <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
+    <EuiPageContent
+      className="inpEmptyState"
+      grow={false}
+      horizontalPosition="center"
+      data-test-subj="emptyState"
+    >
       <EuiPageContentHeader>
         <EuiPageContentHeaderSection>
           <EuiTitle>
