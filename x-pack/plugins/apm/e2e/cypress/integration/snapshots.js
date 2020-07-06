@@ -2,17 +2,17 @@ module.exports = {
   "__version": "4.9.0",
   "RUM Dashboard": {
     "Client metrics": {
-      "1": "62 ",
-      "2": "0.07 sec",
+      "1": "55 ",
+      "2": "0.08 sec",
       "3": "0.01 sec"
     },
     "Rum page filters (example #1)": {
-      "1": "15 ",
-      "2": "0.07 sec",
+      "1": "8 ",
+      "2": "0.08 sec",
       "3": "0.01 sec"
     },
     "Rum page filters (example #2)": {
-      "1": "35 ",
+      "1": "28 ",
       "2": "0.07 sec",
       "3": "0.01 sec"
     },
@@ -24,6 +24,11 @@ module.exports = {
     },
     "Page load distribution chart legends": {
       "1": "Overall"
+    },
+    "Service name filter": {
+      "1": "7 ",
+      "2": "0.07 sec",
+      "3": "0.01 sec"
     }
   }
 }
