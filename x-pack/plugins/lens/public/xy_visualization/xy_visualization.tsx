@@ -11,7 +11,7 @@ import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
-import { DimensionEditor, LayerContextMenu } from './xy_config_panel';
+import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
@@ -259,6 +259,15 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     render(
       <I18nProvider>
         <LayerContextMenu {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
+  renderToolbar(domElement, props) {
+    render(
+      <I18nProvider>
+        <XyToolbar {...props} />
       </I18nProvider>,
       domElement
     );
