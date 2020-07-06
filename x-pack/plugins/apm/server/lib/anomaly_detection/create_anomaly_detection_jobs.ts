@@ -26,7 +26,7 @@ export async function createAnomalyDetectionJobs(
   environments: string[],
   logger: Logger
 ) {
-  const { ml, config } = setup;
+  const { ml, indices } = setup;
   if (!ml) {
     logger.warn('Anomaly detection plugin is not available.');
     return [];
@@ -46,7 +46,7 @@ export async function createAnomalyDetectionJobs(
     `Creating ML anomaly detection jobs for environments: [${environments}].`
   );
 
-  const indexPatternName = config['apm_oss.transactionIndices']; // TODO [ML] - Do we want to use the config index name?
+  const indexPatternName = indices['apm_oss.transactionIndices'];
   const responses = await Promise.all(
     environments.map((environment) =>
       createAnomalyDetectionJob({ ml, environment, indexPatternName })
