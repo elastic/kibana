@@ -49,7 +49,7 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ item, onClick }) => {
             ? i18n.translate(
                 'xpack.ml.dataframe.analyticsList.deleteActionDisabledToolTipContent',
                 {
-                  defaultMessage: 'Stop the data frame analytics in order to delete it.',
+                  defaultMessage: 'Stop the data frame analytics job in order to delete it.',
                 }
               )
             : createPermissionFailureMessage('canStartStopDataFrameAnalytics')
