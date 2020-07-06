@@ -51,7 +51,7 @@ export const checkAccess = async ({
     try {
       const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
-        .globally(security.authz.actions.ui.get('enterprise_search', 'app_search'));
+        .globally(security.authz.actions.ui.get('enterprise_search', 'all'));
       return hasAllRequested;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {
