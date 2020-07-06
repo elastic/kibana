@@ -344,11 +344,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     let monitorsByLocation: GetMonitorStatusResult[] = [];
 
     // old alert versions are missing this field so it must default to true
-    if ((isRight(StatusCheckParamsType.decode(params)) && params?.shouldCheckStatus) ?? true) {
+    const verifiedParams = StatusCheckParamsType.decode(params!);
+    if (isRight(verifiedParams) && (verifiedParams.right?.shouldCheckStatus ?? true)) {
       monitorsByLocation = await libs.requests.getMonitorStatus({
         callES: options.services.callCluster,
         dynamicSettings,
-        ...params,
+        ...verifiedParams.right,
       });
     }
 

@@ -29,7 +29,7 @@ interface AvailabilityDoc {
     value: number;
   };
   ratio: {
-    value: number;
+    value: number | null;
   };
 }
 

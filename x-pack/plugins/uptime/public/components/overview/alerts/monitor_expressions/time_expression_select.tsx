@@ -5,8 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
@@ -98,7 +97,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
               aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
               data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
               headlineText={timeExpLabels.SELECT_TIME_RANGE_HEADLINE}
-              onChange={(newOptions: TimeRangeOption[]) => {
+              onChange={(newOptions: Array<Pick<TimeRangeOption, 'checked'>>) => {
                 if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
                   setTimerangeUnitOptions(newOptions);
                 }
