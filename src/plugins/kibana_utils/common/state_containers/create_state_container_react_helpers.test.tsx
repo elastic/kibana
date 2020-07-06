@@ -99,7 +99,7 @@ test('context receives stateContainer', () => {
   ReactDOM.render(
     /* eslint-disable no-shadow */
     <Provider value={stateContainer}>
-      <context.Consumer>{stateContainer => stateContainer.get().foo}</context.Consumer>
+      <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
     </Provider>,
     /* eslint-enable no-shadow */
     container
@@ -305,21 +305,21 @@ describe('hooks', () => {
         container
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
         stateContainer.set({ a: 'c', foo: 'bar' });
       });
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
         stateContainer.set({ a: 'd', foo: 'bar 2' });
       });
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(2);
     });
 
@@ -341,21 +341,21 @@ describe('hooks', () => {
         container
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
         stateContainer.set({ foo: { bar: 'baz' } });
       });
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
         stateContainer.set({ foo: { bar: 'qux' } });
       });
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(2);
     });
 
@@ -383,14 +383,14 @@ describe('hooks', () => {
         container
       );
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
 
       act(() => {
         stateContainer.set({ foo: { bar: 'baz' } });
       });
 
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
     });
 

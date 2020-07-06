@@ -1,7 +1,7 @@
 {
   "id": "siem_packetbeat",
   "title": "SIEM Packetbeat",
-  "description": "Detect suspicious network activity in Packetbeat data (beta)",
+  "description": "Detect suspicious network activity in Packetbeat data (beta).",
   "type": "Packetbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "packetbeat-*",

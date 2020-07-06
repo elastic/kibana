@@ -69,19 +69,31 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
+import {
+  uniqueId,
+  uniq,
+  extend,
+  pick,
+  difference,
+  omit,
+  setWith,
+  isObject,
+  keys,
+  isFunction,
+} from 'lodash';
 import { map } from 'rxjs/operators';
-import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
+import { FetchOptions, RequestFailure, handleResponse, getSearchParamsFromRequest } from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
+import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
+import { extractReferences } from './extract_references';
 import { ISearchStartLegacy } from '../types';
 
 export interface SearchSourceDependencies {
@@ -203,13 +215,12 @@ export class SearchSource {
    */
   private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
     const { search, injectedMetadata, uiSettings } = this.dependencies;
-    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
-    const searchParams = getSearchParams(uiSettings, esShardTimeout);
-    const params = {
-      index: searchRequest.index.title || searchRequest.index,
-      body: searchRequest.body,
-      ...searchParams,
-    };
+
+    const params = getSearchParamsFromRequest(searchRequest, {
+      injectedMetadata,
+      uiSettings,
+    });
+
     return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
       map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
     );
@@ -249,7 +260,7 @@ export class SearchSource {
     this.history = [searchRequest];
 
     let response;
-    if (uiSettings.get('courier:batchSearches')) {
+    if (uiSettings.get(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
       response = this.fetch$(searchRequest, options.abortSignal).toPromise();
@@ -307,7 +318,7 @@ export class SearchSource {
       }
     }
 
-    return Promise.all(handlers.map(fn => fn(this, options)));
+    return Promise.all(handlers.map((fn) => fn(this, options)));
   }
 
   /**
@@ -363,7 +374,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          uiSettings.get('sort:options')
+          uiSettings.get(UI_SETTINGS.SORT_OPTIONS)
         );
         return addToBody(key, sort);
       default:
@@ -421,7 +432,10 @@ export class SearchSource {
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, uiSettings.get('metaFields'));
+      const filter = fieldWildcardFilter(
+        body._source.excludes,
+        uiSettings.get(UI_SETTINGS.META_FIELDS)
+      );
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -436,18 +450,39 @@ export class SearchSource {
       // request the remaining fields from both stored_fields and _source
       const remainingFields = difference(fields, keys(body.script_fields));
       body.stored_fields = remainingFields;
-      set(body, '_source.includes', remainingFields);
+      setWith(body, '_source.includes', remainingFields, (nsValue) =>
+        isObject(nsValue) ? {} : nsValue
+      );
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, uiSettings.get('doc_table:highlight'));
+      body.highlight = getHighlightRequest(body.query, uiSettings.get(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 
     return searchRequest;
+  }
+
+  public getSerializedFields() {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
+      'sort',
+      'size',
+    ]);
+    let serializedSearchSourceFields: SearchSourceFields = {
+      ...searchSourceFields,
+      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
+    };
+    if (originalFilters) {
+      const filters = this.getFilters(originalFilters);
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        filter: filters,
+      };
+    }
+    return serializedSearchSourceFields;
   }
 
   /**
@@ -461,57 +496,8 @@ export class SearchSource {
    * Using `createSearchSource`, the instance can be re-created.
    * @public */
   public serialize() {
-    const references: SavedObjectReference[] = [];
-
-    const {
-      filter: originalFilters,
-      ...searchSourceFields
-    }: Omit<SearchSourceFields, 'sort' | 'size'> = omit(this.getFields(), ['sort', 'size']);
-    let serializedSearchSourceFields: Omit<SearchSourceFields, 'sort' | 'size' | 'filter'> & {
-      indexRefName?: string;
-      filter?: Array<Omit<Filter, 'meta'> & { meta: Filter['meta'] & { indexRefName?: string } }>;
-    } = searchSourceFields;
-    if (searchSourceFields.index) {
-      const indexId = searchSourceFields.index.id!;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-      references.push({
-        name: refName,
-        type: 'index-pattern',
-        id: indexId,
-      });
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        indexRefName: refName,
-        index: undefined,
-      };
-    }
-    if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        filter: filters.map((filterRow, i) => {
-          if (!filterRow.meta || !filterRow.meta.index) {
-            return filterRow;
-          }
-          const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-          references.push({
-            name: refName,
-            type: 'index-pattern',
-            id: filterRow.meta.index,
-          });
-          return {
-            ...filterRow,
-            meta: {
-              ...filterRow.meta,
-              indexRefName: refName,
-              index: undefined,
-            },
-          };
-        }),
-      };
-    }
-
-    return { searchSourceJSON: JSON.stringify(serializedSearchSourceFields), references };
+    const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
+    return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
   }
 
   private getFilters(filterField: SearchSourceFields['filter']): Filter[] {

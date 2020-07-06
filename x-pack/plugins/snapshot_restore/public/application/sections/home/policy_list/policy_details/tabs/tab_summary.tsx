@@ -25,12 +25,14 @@ import { useServices } from '../../../../../app_context';
 import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
 import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   policy: SlmPolicy;
 }
 
 export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
-  const { i18n } = useServices();
+  const { i18n, history } = useServices();
 
   const {
     version,
@@ -180,7 +182,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToSnapshots(undefined, name)}>{snapshotName}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToSnapshots(undefined, name))}>
+                {snapshotName}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
 
@@ -193,7 +197,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToRepository(repository)}>{repository}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToRepository(repository))}>
+                {repository}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -230,8 +236,8 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiFlexItem data-test-subj="indices">
             <EuiDescriptionListTitle data-test-subj="title">
               <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.indicesLabel"
-                defaultMessage="Indices"
+                id="xpack.snapshotRestore.policyDetails.dataStreamsAndIndicesLabel"
+                defaultMessage="Data streams and indices"
               />
             </EuiDescriptionListTitle>
 

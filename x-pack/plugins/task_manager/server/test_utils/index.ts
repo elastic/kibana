@@ -33,7 +33,7 @@ interface Resolvable {
  */
 export function resolvable(): PromiseLike<void> & Resolvable {
   let resolve: () => void;
-  return Object.assign(new Promise<void>(r => (resolve = r)), {
+  return Object.assign(new Promise<void>((r) => (resolve = r)), {
     resolve() {
       return nativeTimeout(resolve, 0);
     },
@@ -46,5 +46,5 @@ export function resolvable(): PromiseLike<void> & Resolvable {
  * @param {number} ms
  */
 export async function sleep(ms: number) {
-  return new Promise(r => nativeTimeout(r, ms));
+  return new Promise((r) => nativeTimeout(r, ms));
 }

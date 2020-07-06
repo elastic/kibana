@@ -14,8 +14,8 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 // @ts-ignore
 import { LogstashLicenseService } from './services';
@@ -32,27 +32,25 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
-      map(license => new LogstashLicenseService(license))
+      map((license) => new LogstashLicenseService(license))
     );
-    const section = plugins.management.sections.register({
-      id: 'logstash',
-      title: 'Logstash',
-      order: 30,
-      euiIconType: 'logoLogstash',
-    });
-    const managementApp = section.registerApp({
-      id: 'pipelines',
-      title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
-        defaultMessage: 'Pipelines',
-      }),
-      order: 10,
-      mount: async params => {
-        const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
 
-        return renderApp(coreStart, params, logstashLicense$);
-      },
-    });
+    const managementApp = plugins.management.sections
+      .getSection(ManagementSectionId.Ingest)
+      .registerApp({
+        id: 'pipelines',
+        title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
+          defaultMessage: 'Logstash Pipelines',
+        }),
+        order: 1,
+        mount: async (params) => {
+          const [coreStart] = await core.getStartServices();
+          const { renderApp } = await import('./application');
+          const isMonitoringEnabled = 'monitoring' in plugins;
+
+          return renderApp(coreStart, params, isMonitoringEnabled, logstashLicense$);
+        },
+      });
 
     this.licenseSubscription = logstashLicense$.subscribe((license: any) => {
       if (license.enableLinks) {
@@ -73,7 +71,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
               defaultMessage: 'Create, delete, update, and clone data ingestion pipelines.',
             }),
             icon: 'pipelineApp',
-            path: '/app/kibana#/management/logstash/pipelines',
+            path: '/app/management/ingest/pipelines',
             showOnHomePage: true,
             category: FeatureCatalogueCategory.ADMIN,
           });

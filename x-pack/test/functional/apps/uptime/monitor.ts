@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
-  describe('monitor page', function() {
+  describe('monitor page', function () {
     this.tags(['skipFirefox']);
     const dateStart = 'Sep 10, 2019 @ 12:40:08.078';
     const dateEnd = 'Sep 11, 2019 @ 19:40:08.078';

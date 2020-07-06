@@ -10,12 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
-import { AGG_TYPE } from '../../common/constants';
+import { DEFAULT_METRIC } from '../classes/sources/es_agg_source';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
   function renderMetrics() {
-    return metrics.map((metric, index) => {
-      const onMetricChange = metric => {
+    // There was a bug in 7.8 that initialized metrics to [].
+    // This check is needed to handle any saved objects created before the bug was patched.
+    const nonEmptyMetrics = metrics.length === 0 ? [DEFAULT_METRIC] : metrics;
+    return nonEmptyMetrics.map((metric, index) => {
+      const onMetricChange = (metric) => {
         onChange([...metrics.slice(0, index), metric, ...metrics.slice(index + 1)]);
       };
 
@@ -100,6 +103,6 @@ MetricsEditor.propTypes = {
 };
 
 MetricsEditor.defaultProps = {
-  metrics: [{ type: AGG_TYPE.COUNT }],
+  metrics: [DEFAULT_METRIC],
   allowMultipleMetrics: true,
 };

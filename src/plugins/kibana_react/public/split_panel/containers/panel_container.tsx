@@ -121,7 +121,7 @@ export function PanelsContainer({
         className={className}
         ref={containerRef}
         style={{ display: 'flex', height: '100%', width: '100%' }}
-        onMouseMove={event => {
+        onMouseMove={(event) => {
           if (state.isDragging) {
             const { clientX: x } = event;
             const { current: registry } = registryRef;

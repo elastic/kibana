@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraLogs']);
   const retry = getService('retry');
 
-  describe('Logs Source Configuration', function() {
+  describe('Logs Source Configuration', function () {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

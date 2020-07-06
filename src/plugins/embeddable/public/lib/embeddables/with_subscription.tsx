@@ -68,12 +68,7 @@ export const withEmbeddableSubscription = <
 
     render() {
       return (
-        <WrappedComponent
-          input={this.state.input}
-          output={this.state.output}
-          embeddable={this.props.embeddable}
-          {...this.props}
-        />
+        <WrappedComponent input={this.state.input} output={this.state.output} {...this.props} />
       );
     }
   };

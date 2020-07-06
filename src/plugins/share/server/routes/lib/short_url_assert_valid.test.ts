@@ -55,7 +55,7 @@ describe('shortUrlAssertValid()', () => {
     '/app/some?with=query#and-a-hash',
   ];
 
-  valid.forEach(url => {
+  valid.forEach((url) => {
     it(`allows ${url}`, () => {
       shortUrlAssertValid(url);
     });

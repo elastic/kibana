@@ -20,7 +20,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
     it('should return 200 when creating a builtin server-log action', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A server.log action',
@@ -40,7 +40,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
+        .get(`/api/actions/action/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -54,7 +54,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
     it('should handle firing the action', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${serverLogActionId}/_execute`)
+        .post(`/api/actions/action/${serverLogActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

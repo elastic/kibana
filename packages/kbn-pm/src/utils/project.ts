@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
 import fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
@@ -190,16 +189,20 @@ export class Project {
   }
 
   public async runScript(scriptName: string, args: string[] = []) {
-    log.write(
-      chalk.bold(
-        `\n\nRunning script [${chalk.green(scriptName)}] in [${chalk.green(this.name)}]:\n`
-      )
-    );
+    log.info(`Running script [${scriptName}] in [${this.name}]:`);
     return runScriptInPackage(scriptName, args, this);
   }
 
-  public runScriptStreaming(scriptName: string, args: string[] = []) {
-    return runScriptInPackageStreaming(scriptName, args, this);
+  public runScriptStreaming(
+    scriptName: string,
+    options: { args?: string[]; debug?: boolean } = {}
+  ) {
+    return runScriptInPackageStreaming({
+      script: scriptName,
+      args: options.args || [],
+      pkg: this,
+      debug: options.debug,
+    });
   }
 
   public hasDependencies() {
@@ -207,8 +210,12 @@ export class Project {
   }
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
-    log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
+    log.info(`[${this.name}] running yarn`);
+
+    log.write('');
     await installInDir(this.path, extraArgs);
+    log.write('');
+
     await this.removeExtraneousNodeModules();
   }
 
@@ -229,17 +236,17 @@ export class Project {
     // check for any cross-project dependency
     for (const name of Object.keys(workspacesInfo)) {
       const workspace = workspacesInfo[name];
-      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+      workspace.workspaceDependencies.forEach((w) => unusedWorkspaces.delete(w));
     }
 
-    unusedWorkspaces.forEach(name => {
+    unusedWorkspaces.forEach((name) => {
       const { dependencies, devDependencies } = this.json;
       const nodeModulesPath = Path.resolve(this.nodeModulesLocation, name);
       const isDependency = dependencies && dependencies.hasOwnProperty(name);
       const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
 
       if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
-        log.write(`No dependency on ${name}, removing link in node_modules`);
+        log.debug(`No dependency on ${name}, removing link in node_modules`);
         fs.unlinkSync(nodeModulesPath);
       }
     });

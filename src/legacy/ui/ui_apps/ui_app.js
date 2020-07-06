@@ -109,7 +109,7 @@ export class UiApp {
     const pluginId = this._pluginId;
     const { plugins } = this._kbnServer;
 
-    return pluginId ? plugins.find(plugin => plugin.id === pluginId) : undefined;
+    return pluginId ? plugins.find((plugin) => plugin.id === pluginId) : undefined;
   }
 
   toJSON() {

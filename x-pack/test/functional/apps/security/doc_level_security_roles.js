@@ -5,9 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -15,19 +15,21 @@ export default function({ getService, getPageObjects }) {
   const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
-  describe('dls', function() {
+  // Skipped as failing on ES Promotion: https://github.com/elastic/kibana/issues/70818
+  describe.skip('dls', function () {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
       await browser.setWindowSize(1600, 1000);
 
+      await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
     });
 
-    it('should add new role myroleEast', async function() {
+    it('should add new role myroleEast', async function () {
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
           indices: [
@@ -42,14 +44,14 @@ export default function({ getService, getPageObjects }) {
           global: ['all'],
         },
       });
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('myroleEast');
       expect(roles.myroleEast.reserved).to.be(false);
       screenshot.take('Security_Roles');
     });
 
-    it('should add new user userEAST ', async function() {
+    it('should add new user userEAST ', async function () {
       await PageObjects.security.clickElasticsearchUsers();
       await PageObjects.security.addUser({
         username: 'userEast',
@@ -60,13 +62,13 @@ export default function({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin', 'myroleEast'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.userEast.roles).to.eql(['kibana_admin', 'myroleEast']);
       expect(users.userEast.reserved).to.be(false);
     });
 
-    it('user East should only see EAST doc', async function() {
+    it('user East should only see EAST doc', async function () {
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('userEast', 'changeme');
       await PageObjects.common.navigateToApp('discover');

@@ -24,7 +24,13 @@ import {
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
+interface LogEntryCategoriesResultsContentProps {
+  onOpenSetup: () => void;
+}
+
+export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryCategoriesResultsContentProps> = ({
+  onOpenSetup,
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 
@@ -68,6 +74,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
         title: loadDataErrorTitle,
       });
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [services.notifications]
   );
 
@@ -89,7 +96,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
-      setCategoryQueryTimeRange(previousQueryParameters => ({
+      setCategoryQueryTimeRange((previousQueryParameters) => ({
         ...previousQueryParameters,
         timeRange: stringToNumericTimeRange({ startTime, endTime }),
         lastChangedTime: Date.now(),
@@ -122,12 +129,25 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     [setAutoRefresh]
   );
 
+  const viewSetupFlyoutForReconfiguration = useCallback(() => {
+    viewSetupForReconfiguration();
+    onOpenSetup();
+  }, [onOpenSetup, viewSetupForReconfiguration]);
+
+  const viewSetupFlyoutForUpdate = useCallback(() => {
+    viewSetupForUpdate();
+    onOpenSetup();
+  }, [onOpenSetup, viewSetupForUpdate]);
+
   const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
     topLogEntryCategories.length,
   ]);
 
   const isFirstUse = useMemo(
-    () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
+    () =>
+      ((setupStatus.type === 'skipped' && !!setupStatus.newlyCreated) ||
+        setupStatus.type === 'succeeded') &&
+      !hasResults,
     [hasResults, setupStatus]
   );
 
@@ -183,8 +203,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
             hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
             hasStoppedJobs={hasStoppedJobs}
             isFirstUse={isFirstUse}
-            onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-            onRecreateMlJobForUpdate={viewSetupForUpdate}
+            onRecreateMlJobForReconfiguration={viewSetupFlyoutForReconfiguration}
+            onRecreateMlJobForUpdate={viewSetupFlyoutForUpdate}
             qualityWarnings={categoryQualityWarnings}
           />
         </EuiFlexItem>
@@ -196,7 +216,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
               isLoadingTopCategories={isLoadingTopLogEntryCategories}
               jobId={jobIds['log-entry-categories-count']}
               onChangeDatasetSelection={setCategoryQueryDatasets}
-              onRequestRecreateMlJob={viewSetupForReconfiguration}
+              onRequestRecreateMlJob={viewSetupFlyoutForReconfiguration}
               selectedDatasets={categoryQueryDatasets}
               sourceId={sourceId}
               timeRange={categoryQueryTimeRange.timeRange}

@@ -54,7 +54,18 @@ export class SavedObjectTypeRegistry {
   }
 
   /**
-   * Return all {@link SavedObjectsType | types} currently registered.
+   * Returns all visible {@link SavedObjectsType | types}.
+   *
+   * A visible type is a type that doesn't explicitly define `hidden=true` during registration.
+   */
+  public getVisibleTypes() {
+    return [...this.types.values()].filter((type) => !this.isHidden(type.name));
+  }
+
+  /**
+   * Return all {@link SavedObjectsType | types} currently registered, including the hidden ones.
+   *
+   * To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
    */
   public getAllTypes() {
     return [...this.types.values()];
@@ -64,7 +75,7 @@ export class SavedObjectTypeRegistry {
    * Return all {@link SavedObjectsType | types} currently registered that are importable/exportable.
    */
   public getImportableAndExportableTypes() {
-    return this.getAllTypes().filter(type => this.isImportableAndExportable(type.name));
+    return this.getAllTypes().filter((type) => this.isImportableAndExportable(type.name));
   }
 
   /**

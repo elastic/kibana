@@ -26,6 +26,7 @@ export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
+  readonly extraPublicDirs: string[];
 }
 
 /**
@@ -36,18 +37,29 @@ export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
     .sync(
       Array.from(
         new Set([
-          ...scanDirs.map(dir => `${dir}/*/kibana.json`),
-          ...paths.map(path => `${path}/kibana.json`),
+          ...scanDirs.map(nestedScanDirPaths).reduce((dirs, current) => [...dirs, ...current], []),
+          ...paths.map((path) => `${path}/kibana.json`),
         ])
       ),
       {
         absolute: true,
       }
     )
-    .map(path =>
+    .map((path) =>
       // absolute paths returned from globby are using normalize or something so the path separators are `/` even on windows, Path.resolve solves this
       readKibanaPlatformPlugin(Path.resolve(path))
     );
+}
+
+function nestedScanDirPaths(dir: string): string[] {
+  // down to 5 level max
+  return [
+    `${dir}/*/kibana.json`,
+    `${dir}/*/*/kibana.json`,
+    `${dir}/*/*/*/kibana.json`,
+    `${dir}/*/*/*/*/kibana.json`,
+    `${dir}/*/*/*/*/*/kibana.json`,
+  ];
 }
 
 function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
@@ -64,9 +76,24 @@ function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
     throw new TypeError('expected new platform plugin manifest to have a string id');
   }
 
+  let extraPublicDirs: string[] | undefined;
+  if (manifest.extraPublicDirs) {
+    if (
+      !Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((p) => typeof p === 'string')
+    ) {
+      throw new TypeError(
+        'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
+      );
+    }
+
+    extraPublicDirs = manifest.extraPublicDirs as string[];
+  }
+
   return {
     directory: Path.dirname(manifestPath),
     id: manifest.id,
     isUiPlugin: !!manifest.ui,
+    extraPublicDirs: extraPublicDirs || [],
   };
 }

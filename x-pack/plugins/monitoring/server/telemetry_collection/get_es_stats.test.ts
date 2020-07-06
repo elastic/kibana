@@ -22,8 +22,8 @@ describe('get_es_stats', () => {
       ],
     },
   };
-  const expectedClusters = response.hits.hits.map(hit => hit._source);
-  const clusterUuids = expectedClusters.map(cluster => cluster.cluster_uuid);
+  const expectedClusters = response.hits.hits.map((hit) => hit._source);
+  const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const maxBucketSize = 1;
 
   describe('getElasticsearchStats', () => {

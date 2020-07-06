@@ -8,7 +8,7 @@ import { Cookie, cookie } from 'request';
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.now).to.be.a('number');
         expect(body.idleTimeoutExpiration).to.be.a('number');
         expect(body.lifespanExpiration).to.be(null);
-        expect(body.provider).to.be('basic');
+        expect(body.provider).to.eql({ type: 'basic', name: 'basic' });
       });
 
       it('should not extend the session', async () => {

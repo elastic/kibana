@@ -23,6 +23,11 @@ import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
 
+export interface EmbeddableError {
+  name: string;
+  message: string;
+}
+
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
@@ -36,9 +41,9 @@ export interface EmbeddableInput {
   hidePanelTitles?: boolean;
 
   /**
-   * Reserved key for `ui_actions` events.
+   * Reserved key for enhancements added by other plugins.
    */
-  events?: unknown;
+  enhancements?: unknown;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -54,6 +59,10 @@ export interface EmbeddableInput {
 }
 
 export interface EmbeddableOutput {
+  // Whether the embeddable is actively loading.
+  loading?: boolean;
+  // Whether the embeddable finshed loading with an error.
+  error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;
   editPath?: string;
@@ -90,6 +99,19 @@ export interface IEmbeddable<
    * Panel States to a child embeddable instance.
    **/
   readonly id: string;
+
+  /**
+   * Unique ID an embeddable is assigned each time it is initialized. This ID
+   * is different for different instances of the same embeddable. For example,
+   * if the same dashboard is rendered twice on the screen, all embeddable
+   * instances will have a unique `runtimeId`.
+   */
+  readonly runtimeId?: number;
+
+  /**
+   * Extra abilities added to Embeddable by `*_enhanced` plugins.
+   */
+  enhancements?: object;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

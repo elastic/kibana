@@ -15,21 +15,13 @@ import {
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
-  UPDATE_INDEXING_STAGE,
-} from '../actions/ui_actions';
+} from '../actions';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
   LAYER_PANEL = 'LAYER_PANEL',
   ADD_LAYER_WIZARD = 'ADD_LAYER_WIZARD',
   MAP_SETTINGS_PANEL = 'MAP_SETTINGS_PANEL',
-}
-
-export enum INDEXING_STAGE {
-  READY = 'READY',
-  TRIGGERED = 'TRIGGERED',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
 }
 
 export type MapUiState = {
@@ -39,12 +31,11 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isSetViewOpen: boolean;
   openTOCDetails: string[];
-  importIndexingStage: INDEXING_STAGE | null;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
   isReadOnly: false,
@@ -53,11 +44,10 @@ const INITIAL_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
-  importIndexingStage: null,
 };
 
 // Reducer
-export function ui(state: MapUiState = INITIAL_STATE, action: any) {
+export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
   switch (action.type) {
     case UPDATE_FLYOUT:
       return { ...state, flyoutDisplay: action.display };
@@ -81,12 +71,10 @@ export function ui(state: MapUiState = INITIAL_STATE, action: any) {
     case HIDE_TOC_DETAILS:
       return {
         ...state,
-        openTOCDetails: state.openTOCDetails.filter(layerId => {
+        openTOCDetails: state.openTOCDetails.filter((layerId) => {
           return layerId !== action.layerId;
         }),
       };
-    case UPDATE_INDEXING_STAGE:
-      return { ...state, importIndexingStage: action.stage };
     default:
       return state;
   }

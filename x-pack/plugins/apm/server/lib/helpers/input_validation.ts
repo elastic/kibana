@@ -17,6 +17,6 @@ export const withDefaultValidators = (
     start: dateValidation,
     end: dateValidation,
     uiFilters: Joi.string(),
-    ...validators
+    ...validators,
   });
 };

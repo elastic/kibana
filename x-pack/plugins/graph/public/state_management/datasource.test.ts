@@ -12,7 +12,7 @@ import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
-const waitForPromise = () => new Promise(r => setTimeout(r));
+const waitForPromise = () => new Promise((r) => setTimeout(r));
 
 describe('datasource saga', () => {
   let env: MockedGraphEnvironment;

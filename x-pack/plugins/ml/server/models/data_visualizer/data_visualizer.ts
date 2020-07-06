@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions, IScopedClusterClient } from 'kibana/server';
+import { LegacyCallAPIOptions, LegacyAPICaller } from 'kibana/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -110,10 +110,10 @@ export class DataVisualizer {
   callAsCurrentUser: (
     endpoint: string,
     clientParams: Record<string, any>,
-    options?: CallAPIOptions
+    options?: LegacyCallAPIOptions
   ) => Promise<any>;
 
-  constructor(callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']) {
+  constructor(callAsCurrentUser: LegacyAPICaller) {
     this.callAsCurrentUser = callAsCurrentUser;
   }
 
@@ -142,8 +142,8 @@ export class DataVisualizer {
     // To avoid checking for the existence of too many aggregatable fields in one request,
     // split the check into multiple batches (max 200 fields per request).
     const batches: string[][] = [[]];
-    _.each(aggregatableFields, field => {
-      let lastArray: string[] = _.last(batches);
+    _.each(aggregatableFields, (field) => {
+      let lastArray: string[] = _.last(batches) as string[];
       if (lastArray.length === AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE) {
         lastArray = [];
         batches.push(lastArray);
@@ -152,7 +152,7 @@ export class DataVisualizer {
     });
 
     await Promise.all(
-      batches.map(async fields => {
+      batches.map(async (fields) => {
         const batchStats = await this.checkAggregatableFieldsExist(
           indexPatternTitle,
           query,
@@ -173,7 +173,7 @@ export class DataVisualizer {
     );
 
     await Promise.all(
-      nonAggregatableFields.map(async field => {
+      nonAggregatableFields.map(async (field) => {
         const existsInDocs = await this.checkNonAggregatableFieldExists(
           indexPatternTitle,
           query,
@@ -217,7 +217,7 @@ export class DataVisualizer {
     // Batch up fields by type, getting stats for multiple fields at a time.
     const batches: Field[][] = [];
     const batchedFields: { [key: string]: Field[][] } = {};
-    _.each(fields, field => {
+    _.each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
         // getDocumentCountStats requires timeField - don't add to batched requests if not defined
@@ -229,7 +229,7 @@ export class DataVisualizer {
         if (batchedFields[fieldType] === undefined) {
           batchedFields[fieldType] = [[]];
         }
-        let lastArray: Field[] = _.last(batchedFields[fieldType]);
+        let lastArray: Field[] = _.last(batchedFields[fieldType]) as Field[];
         if (lastArray.length === FIELDS_REQUEST_BATCH_SIZE) {
           lastArray = [];
           batchedFields[fieldType].push(lastArray);
@@ -238,13 +238,13 @@ export class DataVisualizer {
       }
     });
 
-    _.each(batchedFields, lists => {
+    _.each(batchedFields, (lists) => {
       batches.push(...lists);
     });
 
     let results: BatchStats[] = [];
     await Promise.all(
-      batches.map(async batch => {
+      batches.map(async (batch) => {
         let batchStats: BatchStats[] = [];
         const first = batch[0];
         switch (first.type) {
@@ -313,7 +313,7 @@ export class DataVisualizer {
             // Use an exists filter on the the field name to get
             // examples of the field, so cannot batch up.
             await Promise.all(
-              batch.map(async field => {
+              batch.map(async (field) => {
                 const stats = await this.getFieldExamples(
                   indexPatternTitle,
                   query,
@@ -342,8 +342,8 @@ export class DataVisualizer {
     aggregatableFields: string[],
     samplerShardSize: number,
     timeFieldName: string,
-    earliestMs: number,
-    latestMs: number
+    earliestMs?: number,
+    latestMs?: number
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -492,7 +492,7 @@ export class DataVisualizer {
       ['aggregations', 'eventRate', 'buckets'],
       []
     );
-    _.each(dataByTimeBucket, dataForTime => {
+    _.each(dataByTimeBucket, (dataForTime) => {
       const time = dataForTime.key;
       buckets[time] = dataForTime.doc_count;
     });
@@ -867,7 +867,7 @@ export class DataVisualizer {
         [...aggsPath, `${safeFieldName}_values`, 'buckets'],
         []
       );
-      _.each(valueBuckets, bucket => {
+      _.forEach(valueBuckets, (bucket) => {
         stats[`${bucket.key_as_string}Count`] = bucket.doc_count;
       });
 
@@ -958,7 +958,7 @@ export class DataVisualizer {
 
       // Look ahead to the last percentiles and process these too if
       // they don't add more than 50% to the value range.
-      const lastValue = _.last(percentileBuckets).value;
+      const lastValue = (_.last(percentileBuckets) as any).value;
       const upperBound = lowerBound + 1.5 * (lastValue - lowerBound);
       const filteredLength = percentileBuckets.length;
       for (let i = filteredLength; i < percentiles.length; i++) {
@@ -979,7 +979,7 @@ export class DataVisualizer {
 
       // Add in 0-5 and 95-100% if they don't add more
       // than 25% to the value range at either end.
-      const lastValue: number = _.last(percentileBuckets).value;
+      const lastValue: number = (_.last(percentileBuckets) as any).value;
       const maxDiff = 0.25 * (lastValue - lowerBound);
       if (lowerBound - dataMin < maxDiff) {
         percentileBuckets.splice(0, 0, percentiles[0]);

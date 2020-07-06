@@ -48,7 +48,7 @@ export const SplitCards: FC<Props> = memo(
 
       if (animate === true) {
         setTimeout(() => {
-          panels.forEach(p => (p.panel.style.marginBottom = `${p.marginBottom}px`));
+          panels.forEach((p) => (p.panel.style.marginBottom = `${p.marginBottom}px`));
         }, 100);
       }
 
@@ -68,7 +68,7 @@ export const SplitCards: FC<Props> = memo(
           ...(animate ? { transition: 'margin 0.5s' } : {}),
         };
         return (
-          <div key={fieldName} ref={ref => storePanels(ref, marginBottom)} style={style}>
+          <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} style={style}>
             <EuiPanel
               paddingSize="m"
               style={{ paddingTop: '4px' }}

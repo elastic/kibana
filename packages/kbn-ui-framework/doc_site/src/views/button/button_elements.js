@@ -29,7 +29,7 @@ export default () => (
     <br />
 
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         window.alert('Submit');
       }}
@@ -40,7 +40,7 @@ export default () => (
     <br />
 
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         window.alert('Submit');
       }}

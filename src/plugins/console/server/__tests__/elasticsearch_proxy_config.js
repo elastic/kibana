@@ -31,9 +31,9 @@ const getDefaultElasticsearchConfig = () => {
   };
 };
 
-describe('plugins/console', function() {
-  describe('#getElasticsearchProxyConfig', function() {
-    it('sets timeout', function() {
+describe('plugins/console', function () {
+  describe('#getElasticsearchProxyConfig', function () {
+    it('sets timeout', function () {
       const value = 1000;
       const proxyConfig = getElasticsearchProxyConfig({
         ...getDefaultElasticsearchConfig(),
@@ -42,7 +42,7 @@ describe('plugins/console', function() {
       expect(proxyConfig.timeout).to.be(value);
     });
 
-    it(`uses https.Agent when url's protocol is https`, function() {
+    it(`uses https.Agent when url's protocol is https`, function () {
       const { agent } = getElasticsearchProxyConfig({
         ...getDefaultElasticsearchConfig(),
         hosts: ['https://localhost:9200'],
@@ -50,21 +50,21 @@ describe('plugins/console', function() {
       expect(agent).to.be.a(https.Agent);
     });
 
-    it(`uses http.Agent when url's protocol is http`, function() {
+    it(`uses http.Agent when url's protocol is http`, function () {
       const { agent } = getElasticsearchProxyConfig(getDefaultElasticsearchConfig());
       expect(agent).to.be.a(http.Agent);
     });
 
-    describe('ssl', function() {
+    describe('ssl', function () {
       let config;
-      beforeEach(function() {
+      beforeEach(function () {
         config = {
           ...getDefaultElasticsearchConfig(),
           hosts: ['https://localhost:9200'],
         };
       });
 
-      it('sets rejectUnauthorized to false when verificationMode is none', function() {
+      it('sets rejectUnauthorized to false when verificationMode is none', function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'none' },
@@ -72,7 +72,7 @@ describe('plugins/console', function() {
         expect(agent.options.rejectUnauthorized).to.be(false);
       });
 
-      it('sets rejectUnauthorized to true when verificationMode is certificate', function() {
+      it('sets rejectUnauthorized to true when verificationMode is certificate', function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'certificate' },
@@ -80,7 +80,7 @@ describe('plugins/console', function() {
         expect(agent.options.rejectUnauthorized).to.be(true);
       });
 
-      it('sets checkServerIdentity to not check hostname when verificationMode is certificate', function() {
+      it('sets checkServerIdentity to not check hostname when verificationMode is certificate', function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'certificate' },
@@ -99,7 +99,7 @@ describe('plugins/console', function() {
         expect(result).to.be(undefined);
       });
 
-      it('sets rejectUnauthorized to true when verificationMode is full', function() {
+      it('sets rejectUnauthorized to true when verificationMode is full', function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'full' },
@@ -108,7 +108,7 @@ describe('plugins/console', function() {
         expect(agent.options.rejectUnauthorized).to.be(true);
       });
 
-      it(`doesn't set checkServerIdentity when verificationMode is full`, function() {
+      it(`doesn't set checkServerIdentity when verificationMode is full`, function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, verificationMode: 'full' },
@@ -117,7 +117,7 @@ describe('plugins/console', function() {
         expect(agent.options.checkServerIdentity).to.be(undefined);
       });
 
-      it(`sets ca when certificateAuthorities are specified`, function() {
+      it(`sets ca when certificateAuthorities are specified`, function () {
         const { agent } = getElasticsearchProxyConfig({
           ...config,
           ssl: { ...config.ssl, certificateAuthorities: ['content-of-some-path'] },
@@ -127,7 +127,7 @@ describe('plugins/console', function() {
       });
 
       describe('when alwaysPresentCertificate is false', () => {
-        it(`doesn't set cert and key when certificate and key paths are specified`, function() {
+        it(`doesn't set cert and key when certificate and key paths are specified`, function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
@@ -142,7 +142,7 @@ describe('plugins/console', function() {
           expect(agent.options.key).to.be(undefined);
         });
 
-        it(`doesn't set passphrase when certificate, key and keyPassphrase are specified`, function() {
+        it(`doesn't set passphrase when certificate, key and keyPassphrase are specified`, function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
@@ -159,7 +159,7 @@ describe('plugins/console', function() {
       });
 
       describe('when alwaysPresentCertificate is true', () => {
-        it(`sets cert and key when certificate and key are specified`, async function() {
+        it(`sets cert and key when certificate and key are specified`, async function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
@@ -174,7 +174,7 @@ describe('plugins/console', function() {
           expect(agent.options.key).to.be('content-of-another-path');
         });
 
-        it(`sets passphrase when certificate, key and keyPassphrase are specified`, function() {
+        it(`sets passphrase when certificate, key and keyPassphrase are specified`, function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
@@ -189,7 +189,7 @@ describe('plugins/console', function() {
           expect(agent.options.passphrase).to.be('secret');
         });
 
-        it(`doesn't set cert when only certificate path is specified`, async function() {
+        it(`doesn't set cert when only certificate path is specified`, async function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {
@@ -204,7 +204,7 @@ describe('plugins/console', function() {
           expect(agent.options.key).to.be(undefined);
         });
 
-        it(`doesn't set key when only key path is specified`, async function() {
+        it(`doesn't set key when only key path is specified`, async function () {
           const { agent } = getElasticsearchProxyConfig({
             ...config,
             ssl: {

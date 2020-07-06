@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import request from 'request';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -29,10 +29,7 @@ export default function({ getService }) {
     });
 
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
+      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
 
     it('should reject login with wrong credentials', async () => {
@@ -146,10 +143,7 @@ export default function({ getService }) {
       it('should allow access to the API', async () => {
         // There is no session cookie provided and no server side session should have
         // been established, so request should be rejected.
-        await supertest
-          .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
-          .expect(401);
+        await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
 
         const apiResponse = await supertest
           .get('/internal/security/me')

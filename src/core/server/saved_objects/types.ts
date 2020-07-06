@@ -83,6 +83,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
   aggs?: string;
+  /** An optional ES preference value to be used for the query **/
+  preference?: string;
 }
 
 /**

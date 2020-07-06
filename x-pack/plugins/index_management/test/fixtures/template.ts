@@ -5,7 +5,7 @@
  */
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
+import { TemplateDeserialized } from '../../common';
 
 export const getTemplate = ({
   name = getRandomString(),
@@ -14,10 +14,11 @@ export const getTemplate = ({
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
   isManaged = false,
-  templateFormatVersion = DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+  isLegacy = false,
 }: Partial<
   TemplateDeserialized & {
-    templateFormatVersion?: 1 | 2;
+    isLegacy?: boolean;
+    isManaged: boolean;
   }
 > = {}): TemplateDeserialized => ({
   name,
@@ -29,8 +30,8 @@ export const getTemplate = ({
     mappings,
     settings,
   },
-  isManaged,
   _kbnMeta: {
-    formatVersion: templateFormatVersion,
+    isManaged,
+    isLegacy,
   },
 });

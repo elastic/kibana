@@ -85,7 +85,7 @@ export const JobItem: FC<JobItemProps> = memo(
           </EuiText>
 
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {jobGroups.map(group => (
+            {jobGroups.map((group) => (
               <EuiFlexItem grow={false} key={group}>
                 <EuiBadge color={tabColor(group)}>{group}</EuiBadge>
               </EuiFlexItem>

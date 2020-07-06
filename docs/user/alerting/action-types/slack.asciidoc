@@ -14,6 +14,24 @@ Name::      The name of the connector. The name is used to identify a  connector
 Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted.
 
 [float]
+[[Preconfigured-slack-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-slack:
+   name: preconfigured-slack-action-type
+   actionTypeId: .slack
+   config:
+     webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+--
+
+`config` defines the action type specific to the configuration.
+`config` contains
+`webhookUrl`, a string that corresponds to *Webhook URL*.
+
+
+[float]
 [[slack-action-configuration]]
 ==== Action configuration
 

@@ -22,19 +22,16 @@ import { Source } from '../../containers/source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
-import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { SourceLoadingPage } from '../source_loading_page';
 import { Prompt } from '../../utils/navigation_warning_prompt';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
-  displaySettings: 'metrics' | 'logs';
 }
 
 export const SourceConfigurationSettings = ({
   shouldAllowEdit,
-  displaySettings,
 }: SourceConfigurationSettingsProps) => {
   const {
     createSourceConfiguration,
@@ -45,16 +42,8 @@ export const SourceConfigurationSettings = ({
     updateSourceConfiguration,
   } = useContext(Source.Context);
 
-  const availableFields = useMemo(
-    () => (source && source.status ? source.status.indexFields.map(field => field.name) : []),
-    [source]
-  );
-
   const {
-    addLogColumn,
-    moveLogColumn,
     indicesConfigurationProps,
-    logColumnConfigurationProps,
     errors,
     resetForm,
     isFormDirty,
@@ -119,10 +108,8 @@ export const SourceConfigurationSettings = ({
           <EuiPanel paddingSize="l">
             <IndicesConfigurationPanel
               isLoading={isLoading}
-              logAliasFieldProps={indicesConfigurationProps.logAlias}
               metricAliasFieldProps={indicesConfigurationProps.metricAlias}
               readOnly={!isWriteable}
-              displaySettings={displaySettings}
             />
           </EuiPanel>
           <EuiSpacer />
@@ -133,23 +120,10 @@ export const SourceConfigurationSettings = ({
               isLoading={isLoading}
               podFieldProps={indicesConfigurationProps.podField}
               readOnly={!isWriteable}
-              tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
               timestampFieldProps={indicesConfigurationProps.timestampField}
-              displaySettings={displaySettings}
             />
           </EuiPanel>
           <EuiSpacer />
-          {displaySettings === 'logs' && (
-            <EuiPanel paddingSize="l">
-              <LogColumnsConfigurationPanel
-                addLogColumn={addLogColumn}
-                moveLogColumn={moveLogColumn}
-                availableFields={availableFields}
-                isLoading={isLoading}
-                logColumnConfiguration={logColumnConfigurationProps}
-              />
-            </EuiPanel>
-          )}
           {errors.length > 0 ? (
             <>
               <EuiCallOut color="danger">

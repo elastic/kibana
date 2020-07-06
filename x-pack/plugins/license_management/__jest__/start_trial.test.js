@@ -7,7 +7,11 @@
 import { StartTrial } from '../public/application/sections/license_dashboard/start_trial';
 import { createMockLicense, getComponent } from './util';
 
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('StartTrial component when trial is allowed', () => {
   test('display for basic license', () => {

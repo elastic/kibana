@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './field_select.scss';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +27,6 @@ export interface FieldChoice {
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
-  showEmptyFields: boolean;
   fieldMap: Record<string, IndexPatternField>;
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
@@ -39,7 +39,6 @@ export interface FieldSelectProps {
 
 export function FieldSelect({
   currentIndexPattern,
-  showEmptyFields,
   fieldMap,
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
@@ -65,12 +64,16 @@ export function FieldSelect({
 
     const [specialFields, normalFields] = _.partition(
       fields,
-      field => fieldMap[field].type === 'document'
+      (field) => fieldMap[field].type === 'document'
     );
+
+    const containsData = (field: string) =>
+      fieldMap[field].type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field);
 
     function fieldNamesToOptions(items: string[]) {
       return items
-        .map(field => ({
+        .map((field) => ({
           label: field,
           value: {
             type: 'field',
@@ -81,12 +84,9 @@ export function FieldSelect({
                 ? selectedColumnOperationType
                 : undefined,
           },
-          exists:
-            fieldMap[field].type === 'document' ||
-            fieldExists(existingFields, currentIndexPattern.title, field),
+          exists: containsData(field),
           compatible: isCompatibleWithCurrentOperation(field),
         }))
-        .filter(field => showEmptyFields || field.exists)
         .sort((a, b) => {
           if (a.compatible && !b.compatible) {
             return -1;
@@ -107,18 +107,33 @@ export function FieldSelect({
         }));
     }
 
-    const fieldOptions: unknown[] = fieldNamesToOptions(specialFields);
+    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
 
-    if (fields.length > 0) {
-      fieldOptions.push({
-        label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
-          defaultMessage: 'Individual fields',
-        }),
-        options: fieldNamesToOptions(normalFields),
-      });
-    }
+    const constructFieldsOptions = (fieldsArr: string[], label: string) =>
+      fieldsArr.length > 0 && {
+        label,
+        options: fieldNamesToOptions(fieldsArr),
+      };
 
-    return fieldOptions;
+    const availableFieldsOptions = constructFieldsOptions(
+      availableFields,
+      i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+        defaultMessage: 'Available fields',
+      })
+    );
+
+    const emptyFieldsOptions = constructFieldsOptions(
+      emptyFields,
+      i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+        defaultMessage: 'Empty fields',
+      })
+    );
+
+    return [
+      ...fieldNamesToOptions(specialFields),
+      availableFieldsOptions,
+      emptyFieldsOptions,
+    ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
@@ -126,7 +141,6 @@ export function FieldSelect({
     operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
-    showEmptyFields,
   ]);
 
   return (
@@ -153,7 +167,7 @@ export function FieldSelect({
           : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}
-      onChange={choices => {
+      onChange={(choices) => {
         if (choices.length === 0) {
           onDeleteColumn();
           return;

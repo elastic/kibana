@@ -48,4 +48,4 @@ const statuses = [
 
 export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });
 export const jobCount = statuses.length;
-export const getJobs = () => statuses.map(status => getJob({ status, id: getRandomString() }));
+export const getJobs = () => statuses.map((status) => getJob({ status, id: getRandomString() }));

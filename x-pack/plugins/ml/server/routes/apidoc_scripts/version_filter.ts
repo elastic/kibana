@@ -13,7 +13,7 @@ const API_VERSION = '7.8.0';
  * Updates api version of the endpoints.
  */
 export function postFilter(parsedFiles: any[]) {
-  parsedFiles.forEach(parsedFile => {
+  parsedFiles.forEach((parsedFile) => {
     parsedFile.forEach((block: Block) => {
       block.local.version = API_VERSION;
     });

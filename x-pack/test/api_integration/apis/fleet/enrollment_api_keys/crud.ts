@@ -11,7 +11,7 @@ import { setupIngest, getEsClientForAPIKey } from '../agents/services';
 
 const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const es = getService('es');
@@ -25,6 +25,7 @@ export default function(providerContext: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });
+
     describe('GET /fleet/enrollment-api-keys', async () => {
       it('should list existing api keys', async () => {
         const { body: apiResponse } = await supertest
@@ -54,7 +55,7 @@ export default function(providerContext: FtrProviderContext) {
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'policy1',
+            config_id: 'config1',
           })
           .expect(200);
         keyId = apiResponse.item.id;
@@ -89,12 +90,22 @@ export default function(providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should allow to create an enrollment api key with a policy', async () => {
+      it('should not allow to create an enrollment api key for a non existing agent config', async () => {
+        await supertest
+          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            config_id: 'idonotexistsconfig',
+          })
+          .expect(400);
+      });
+
+      it('should allow to create an enrollment api key with an agent config', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'policy1',
+            config_id: 'config1',
           })
           .expect(200);
 
@@ -107,7 +118,7 @@ export default function(providerContext: FtrProviderContext) {
           .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            config_id: 'policy1',
+            config_id: 'config1',
           })
           .expect(200);
         expect(apiResponse.success).to.eql(true);

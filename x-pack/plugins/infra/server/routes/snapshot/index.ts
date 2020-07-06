@@ -13,6 +13,7 @@ import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
+import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../../lib/adapters/framework';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -34,10 +35,11 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           nodeType,
           groupBy,
           sourceId,
-          metric,
+          metrics,
           timerange,
           accountId,
           region,
+          includeTimeseries,
         } = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
@@ -54,10 +56,17 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           nodeType,
           groupBy,
           sourceConfiguration: source.configuration,
-          metric,
+          metrics,
           timerange,
+          includeTimeseries,
         };
-        const nodesWithInterval = await libs.snapshot.getNodes(requestContext, options);
+
+        const searchES = <Hit = {}, Aggregation = undefined>(
+          opts: CallWithRequestParams
+        ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+          framework.callWithRequest(requestContext, 'search', opts);
+
+        const nodesWithInterval = await libs.snapshot.getNodes(searchES, options);
         return response.ok({
           body: SnapshotNodeResponseRT.encode(nodesWithInterval),
         });

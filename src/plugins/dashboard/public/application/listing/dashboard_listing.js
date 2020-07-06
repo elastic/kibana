@@ -50,6 +50,7 @@ export class DashboardListing extends React.Component {
           tableColumns={this.getTableColumns()}
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
+          initialPageSize={this.props.initialPageSize}
           noItemsFragment={this.getNoItemsMessage()}
           entityName={i18n.translate('dashboard.listing.table.entityName', {
             defaultMessage: 'dashboard',
@@ -112,7 +113,13 @@ export class DashboardListing extends React.Component {
                   defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
-                      <EuiLink href="#/home/tutorial_directory/sampleData">
+                      <EuiLink
+                        onClick={() =>
+                          this.props.core.application.navigateTo('home', {
+                            path: '#/tutorial_directory/sampleData',
+                          })
+                        }
+                      >
                         <FormattedMessage
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           defaultMessage="Install some sample data"
@@ -181,6 +188,7 @@ DashboardListing.propTypes = {
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
+  initialPageSize: PropTypes.number.isRequired,
 };
 
 DashboardListing.defaultProps = {

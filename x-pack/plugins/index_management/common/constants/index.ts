@@ -9,7 +9,6 @@ export { BASE_PATH } from './base_path';
 export { API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
-export { DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from './index_templates';
 
 export {
   UIM_APP_NAME,

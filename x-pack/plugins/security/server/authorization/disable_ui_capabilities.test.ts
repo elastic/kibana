@@ -7,7 +7,7 @@
 import { Actions } from '.';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
-import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 import { Feature } from '../../../features/server';
 
@@ -20,15 +20,15 @@ const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
   const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
-  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+  mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
-    return jest.fn().mockImplementation(checkActions => {
+    return jest.fn().mockImplementation((checkActions) => {
       if ('rejectCheckPrivileges' in options) {
         throw options.rejectCheckPrivileges;
       }
 
-      const expected = options.resolveCheckPrivileges.privileges.map(x => x.privilege);
+      const expected = options.resolveCheckPrivileges.privileges.map((x) => x.privilege);
       expect(checkActions).toEqual(expected);
       return options.resolveCheckPrivileges;
     });
@@ -42,7 +42,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 401, message: 'super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -50,7 +50,7 @@ describe('usingPrivileges', () => {
           new Feature({
             id: 'fooFeature',
             name: 'Foo Feature',
-            app: [],
+            app: ['fooApp'],
             navLinkId: 'foo',
             privileges: null,
           }),
@@ -63,6 +63,7 @@ describe('usingPrivileges', () => {
         Object.freeze({
           navLinks: {
             foo: true,
+            fooApp: true,
             bar: true,
           },
           management: {
@@ -85,6 +86,7 @@ describe('usingPrivileges', () => {
       expect(result).toEqual({
         navLinks: {
           foo: false,
+          fooApp: false,
           bar: true,
         },
         management: {
@@ -103,7 +105,7 @@ describe('usingPrivileges', () => {
         },
       });
 
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 401: super informative message",
@@ -116,7 +118,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: { statusCode: 403, message: 'even more super informative message' },
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -176,7 +178,7 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
-      expect(loggingServiceMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Disabling all uiCapabilities because we received a 403: even more super informative message",
@@ -189,7 +191,7 @@ describe('usingPrivileges', () => {
       const mockAuthz = createMockAuthz({
         rejectCheckPrivileges: new Error('something else entirely'),
       });
-      const mockLoggers = loggingServiceMock.create();
+      const mockLoggers = loggingSystemMock.create();
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
@@ -212,7 +214,7 @@ describe('usingPrivileges', () => {
           catalogue: {},
         })
       ).rejects.toThrowErrorMatchingSnapshot();
-      expect(loggingServiceMock.collect(mockLoggers)).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(mockLoggers)).toMatchInlineSnapshot(`
         Object {
           "debug": Array [],
           "error": Array [],
@@ -261,7 +263,7 @@ describe('usingPrivileges', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -347,7 +349,7 @@ describe('usingPrivileges', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 
@@ -412,7 +414,7 @@ describe('all', () => {
           privileges: null,
         }),
       ],
-      loggingServiceMock.create().get(),
+      loggingSystemMock.create().get(),
       mockAuthz
     );
 

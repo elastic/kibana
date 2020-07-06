@@ -11,7 +11,7 @@ exports[`LayerPanel is rendered 1`] = `
         "get": [Function],
         "remove": [Function],
         "set": [Function],
-        "store": undefined,
+        "store": Storage {},
       },
     }
   }
@@ -32,17 +32,9 @@ exports[`LayerPanel is rendered 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiButtonIcon
-            aria-label="Fit to bounds"
-            iconType="vector"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Fit"
-              id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-              values={Object {}}
-            />
-          </EuiButtonIcon>
+          <EuiIcon
+            type="vector"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle
@@ -97,7 +89,19 @@ exports[`LayerPanel is rendered 1`] = `
         className="mapLayerPanel__bodyOverflow"
       >
         <LayerErrors />
-        <LayerSettings />
+        <LayerSettings
+          layer={
+            Object {
+              "getDisplayName": [Function],
+              "getId": [Function],
+              "getImmutableSourceProperties": [Function],
+              "getLayerTypeIconName": [Function],
+              "isJoinable": [Function],
+              "renderSourceSettingsEditor": [Function],
+              "supportsElasticsearchFilters": [Function],
+            }
+          }
+        />
         <div>
           mockSourceSettings
         </div>

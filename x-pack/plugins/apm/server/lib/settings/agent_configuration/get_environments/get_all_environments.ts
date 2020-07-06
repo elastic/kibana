@@ -8,13 +8,13 @@ import { Setup } from '../../../helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export async function getAllEnvironments({
   serviceName,
-  setup
+  setup,
 }: {
   serviceName: string | undefined;
   setup: Setup;
@@ -30,7 +30,7 @@ export async function getAllEnvironments({
     index: [
       indices['apm_oss.metricsIndices'],
       indices['apm_oss.errorIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
@@ -38,27 +38,27 @@ export async function getAllEnvironments({
         bool: {
           filter: [
             {
-              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] }
+              terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] },
             },
-            ...serviceNameFilter
-          ]
-        }
+            ...serviceNameFilter,
+          ],
+        },
       },
       aggs: {
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            size: 100
-          }
-        }
-      }
-    }
+            size: 100,
+          },
+        },
+      },
+    },
   };
 
   const resp = await client.search(params);
   const environments =
     resp.aggregations?.environments.buckets.map(
-      bucket => bucket.key as string
+      (bucket) => bucket.key as string
     ) || [];
   return [ALL_OPTION_VALUE, ...environments];
 }

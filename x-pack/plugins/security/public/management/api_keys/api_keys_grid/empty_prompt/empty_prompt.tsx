@@ -5,6 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { ApplicationStart } from 'kibana/public';
+
 import { EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocumentationLinksService } from '../../documentation_links';
@@ -12,9 +14,14 @@ import { DocumentationLinksService } from '../../documentation_links';
 interface Props {
   isAdmin: boolean;
   docLinks: DocumentationLinksService;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin, docLinks }) => (
+export const EmptyPrompt: React.FunctionComponent<Props> = ({
+  isAdmin,
+  docLinks,
+  navigateToApp,
+}) => (
   <EuiEmptyPrompt
     iconType="managementApp"
     title={
@@ -53,7 +60,11 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin, docLinks 
       </Fragment>
     }
     actions={
-      <EuiButton type="primary" href="#/dev_tools" data-test-subj="goToConsoleButton">
+      <EuiButton
+        type="primary"
+        onClick={() => navigateToApp('dev_tools')}
+        data-test-subj="goToConsoleButton"
+      >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
           defaultMessage="Go to Console"

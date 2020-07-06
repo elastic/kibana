@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { InstallTemplateFunction } from './types';
 
-const PROJECT_ROOT = resolve(__dirname, '../../../../');
-export const macosInstallTemplate: InstallTemplateFunction = variables => `#!/bin/sh
+export const macosInstallTemplate: InstallTemplateFunction = (variables) => {
+  const artifact = `elastic-agent-${variables.kibanaVersion}-darwin-x86_64`;
 
-eval "node ${PROJECT_ROOT}/scripts/dev_agent --enrollmentApiKey=$API_KEY --kibanaUrl=${variables.kibanaUrl}"
+  return `#!/bin/sh
 
+set -e
+curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/${artifact}.tar.gz
+tar -xzvf ${artifact}.tar.gz
+cd ${artifact}
+./elastic-agent enroll ${variables.kibanaUrl} $API_KEY --force
+./elastic-agent run
 `;
+};

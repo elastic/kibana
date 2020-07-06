@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 
 export function sortNodes(nodes, sort) {
   if (!sort || !sort.field) {
     return nodes;
   }
 
-  return sortByOrder(nodes, node => node[sort.field], sort.direction);
+  return orderBy(nodes, (node) => node[sort.field], sort.direction);
 }

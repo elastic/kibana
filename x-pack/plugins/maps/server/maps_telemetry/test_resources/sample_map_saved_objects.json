@@ -1,0 +1,47 @@
+[
+  {
+    "type": "gis-map",
+    "id": "37b08d60-25b0-11e9-9858-0f3a1e60d007",
+    "attributes": {
+      "title": "Italy Map",
+      "description": "",
+      "mapStateJSON": "{\"zoom\":4.82,\"center\":{\"lon\":11.41545,\"lat\":42.0865},\"timeFilters\":{\"from\":\"now-15w\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"lucene\",\"query\":\"\"}}",
+      "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"csq5v\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.65,\"visible\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"},{\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"italy_provinces\"},\"id\":\"0oye8\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#0c1f70\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}}},\"type\":\"VECTOR\"},{\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"id\":\"053fe296-f5ae-4cb0-9e73-a5752cb9ba74\",\"indexPatternId\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"geoField\":\"DestLocation\",\"requestType\":\"point\",\"resolution\":\"COARSE\"},\"id\":\"1gx22\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Greens\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}}},\"type\":\"VECTOR\"}]",
+      "uiStateJSON": "{}"
+    },
+    "references": [
+    ],
+    "updated_at": "2019-01-31T23:30:39.030Z",
+    "version": 1
+  },
+  {
+    "type": "gis-map",
+    "id": "5c061dc0-25af-11e9-9858-0f3a1e60d007",
+    "attributes": {
+      "title": "France Map",
+      "description": "",
+      "mapStateJSON": "{\"zoom\":3.43,\"center\":{\"lon\":-16.30411,\"lat\":42.88411},\"timeFilters\":{\"from\":\"now-15w\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"lucene\"}}",
+      "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"csq5v\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.65,\"visible\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"},{\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"france_departments\"},\"id\":\"65xbw\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.25,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#19c1e6\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}}},\"type\":\"VECTOR\"},{\"sourceDescriptor\":{\"id\":\"240125db-e612-4001-b853-50107e55d984\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"geoField\":\"geoip.location\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[]},\"id\":\"mdae9\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#1ce619\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}}},\"type\":\"VECTOR\"}]",
+      "uiStateJSON": "{}"
+    },
+    "references": [
+    ],
+    "updated_at": "2019-01-31T23:24:30.492Z",
+    "version": 1
+  },
+  {
+    "type": "gis-map",
+    "id": "b853d5f0-25ae-11e9-9858-0f3a1e60d007",
+    "attributes": {
+      "title": "Canada Map",
+      "description": "",
+      "mapStateJSON": "{\"zoom\":2.12,\"center\":{\"lon\":-88.67592,\"lat\":34.23257},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"lucene\"}}",
+      "layerListJSON": "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"id\":\"csq5v\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.65,\"visible\":true,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\"},{\"sourceDescriptor\":{\"type\":\"EMS_FILE\",\"id\":\"canada_provinces\"},\"id\":\"kt086\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#60895e\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}}},\"type\":\"VECTOR\"}]",
+      "uiStateJSON": "{}"
+    },
+    "references": [
+    ],
+    "updated_at": "2019-01-31T23:19:55.855Z",
+    "version": 1
+  }
+]

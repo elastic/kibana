@@ -42,8 +42,8 @@ export default new Chainable('log', {
   }),
   fn: function logFn(args) {
     const config = args.byName;
-    return alter(args, function(eachSeries) {
-      const data = _.map(eachSeries.data, function(point) {
+    return alter(args, function (eachSeries) {
+      const data = _.map(eachSeries.data, function (point) {
         return [point[0], Math.log(point[1]) / Math.log(config.base || 10)];
       });
       eachSeries.data = data;

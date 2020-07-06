@@ -46,7 +46,7 @@ describe('Router validator', () => {
 
   it('should validate and infer the type from a function that does not use the resolver', () => {
     const validator = RouteValidator.from({
-      params: data => {
+      params: (data) => {
         if (typeof data.foo === 'string') {
           return { value: { foo: data.foo as string } };
         }
@@ -112,7 +112,7 @@ describe('Router validator', () => {
 
   it('should catch the errors thrown by the validate function', () => {
     const validator = RouteValidator.from({
-      params: data => {
+      params: (data) => {
         throw new Error('Something went terribly wrong');
       },
     });

@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import { CoreStart, SavedObjectReference } from 'kibana/public';
-import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
+import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
-
-export interface ISearchContext {
-  core: CoreStart;
-  getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
-}
 
 /**
  * Search strategy interface contains a search method that takes in
@@ -39,26 +33,22 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
 }
 
 export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: TSearchStrategyProvider<any>;
+  [K in TStrategyTypes]?: ISearchStrategy<any>;
 };
-
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProvider<T extends TStrategyTypes> = (
-  context: ISearchContext
-) => ISearchStrategy<T>;
 
 /**
  * Extension point exposed for other plugins to register their own search
  * strategies.
  */
-export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
+export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
   name: T,
-  searchStrategyProvider: TSearchStrategyProvider<T>
+  searchStrategy: ISearchStrategy<T>
 ) => void;
+
+/**
+ * Used if a plugin needs access to an already registered search strategy.
+ */
+export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
@@ -74,19 +64,22 @@ export interface ISearchSetup {
    * Extension point exposed for other plugins to register their own search
    * strategies.
    */
-  registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
+  registerSearchStrategy: TRegisterSearchStrategy;
 }
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
+
+  /**
+   * Used if a plugin needs access to an already registered search strategy.
+   */
+  getSearchStrategy: TGetSearchStrategy;
+
   search: ISearchGeneric;
   searchSource: {
-    create: (fields?: SearchSourceFields) => ISearchSource;
-    fromJSON: (
-      searchSourceJson: string,
-      references: SavedObjectReference[]
-    ) => Promise<ISearchSource>;
+    create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+    createEmpty: () => ISearchSource;
   };
-  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
+  __LEGACY: ISearchStartLegacy;
 }

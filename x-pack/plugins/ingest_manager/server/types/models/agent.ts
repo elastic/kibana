@@ -49,8 +49,13 @@ export const AckEventSchema = schema.object({
   ...{ action_id: schema.string() },
 });
 
+export const NewAgentEventSchema = schema.object({
+  ...AgentEventBase,
+});
+
 export const AgentEventSchema = schema.object({
   ...AgentEventBase,
+  id: schema.string(),
 });
 
 export const NewAgentActionSchema = schema.object({

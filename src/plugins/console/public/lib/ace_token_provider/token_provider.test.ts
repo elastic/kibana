@@ -74,7 +74,7 @@ describe('Ace (legacy) token provider', () => {
     };
 
     describe('base cases', () => {
-      test('case 1 - only url', done => {
+      test('case 1 - only url', (done) => {
         runTest({
           input: `GET http://somehost/_search`,
           expectedTokens: [
@@ -92,7 +92,7 @@ describe('Ace (legacy) token provider', () => {
         });
       });
 
-      test('case 2 - basic auth in host name', done => {
+      test('case 2 - basic auth in host name', (done) => {
         runTest({
           input: `GET http://test:user@somehost/`,
           expectedTokens: [
@@ -109,7 +109,7 @@ describe('Ace (legacy) token provider', () => {
         });
       });
 
-      test('case 3 - handles empty lines', done => {
+      test('case 3 - handles empty lines', (done) => {
         runTest({
           input: `POST abc
 
@@ -128,7 +128,7 @@ describe('Ace (legacy) token provider', () => {
     });
 
     describe('with newlines', () => {
-      test('case 1 - newlines base case', done => {
+      test('case 1 - newlines base case', (done) => {
         runTest({
           input: `GET http://test:user@somehost/
 {
@@ -148,7 +148,7 @@ describe('Ace (legacy) token provider', () => {
     });
 
     describe('edge cases', () => {
-      test('case 1 - getting token outside of document', done => {
+      test('case 1 - getting token outside of document', (done) => {
         runTest({
           input: `GET http://test:user@somehost/
 {
@@ -160,7 +160,7 @@ describe('Ace (legacy) token provider', () => {
         });
       });
 
-      test('case 2 - empty lines', done => {
+      test('case 2 - empty lines', (done) => {
         runTest({
           input: `GET http://test:user@somehost/
 
@@ -193,7 +193,7 @@ describe('Ace (legacy) token provider', () => {
     };
 
     describe('base cases', () => {
-      it('case 1 - gets a token from the url', done => {
+      it('case 1 - gets a token from the url', (done) => {
         const input = `GET http://test:user@somehost/`;
         runTest({
           input,
@@ -219,7 +219,7 @@ describe('Ace (legacy) token provider', () => {
     });
 
     describe('special cases', () => {
-      it('case 1 - handles input outside of range', done => {
+      it('case 1 - handles input outside of range', (done) => {
         runTest({
           input: `GET abc`,
           expectedToken: null,

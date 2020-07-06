@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo, memo, FunctionComponent } from 'react';
+import React, { useState, useMemo, useEffect, memo, FunctionComponent } from 'react';
 import { debounce } from 'lodash';
 
 /**
@@ -17,7 +17,11 @@ export function debouncedComponent<TProps>(component: FunctionComponent<TProps>,
 
   return (props: TProps) => {
     const [cachedProps, setCachedProps] = useState(props);
-    const delayRender = useMemo(() => debounce(setCachedProps, delay), []);
+    const debouncePropsChange = debounce(setCachedProps, delay);
+    const delayRender = useMemo(() => debouncePropsChange, []);
+
+    // cancel debounced prop change if component has been unmounted in the meantime
+    useEffect(() => () => debouncePropsChange.cancel(), []);
 
     delayRender(props);
 

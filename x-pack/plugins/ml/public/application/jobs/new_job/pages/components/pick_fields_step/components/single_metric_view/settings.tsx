@@ -40,7 +40,7 @@ export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
           <EuiButtonEmpty onClick={convertToMultiMetric}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.pickFieldsStep.singleMetricView.convertToMultiMetricButton"
-              defaultMessage="Convert to multi metric job"
+              defaultMessage="Convert to multi-metric job"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

@@ -17,37 +17,34 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-
-import {
-  // @ts-ignore
-  EuiHeaderSectionItem,
-} from '@elastic/eui';
-
-import { HeaderExtension } from './header_extension';
+import { EuiHeaderSectionItem } from '@elastic/eui';
+import React from 'react';
+import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
 import { ChromeNavControl } from '../../nav_controls';
+import { HeaderExtension } from './header_extension';
 
 interface Props {
-  navControls: readonly ChromeNavControl[];
+  navControls$: Observable<readonly ChromeNavControl[]>;
   side: 'left' | 'right';
 }
 
-export class HeaderNavControls extends Component<Props> {
-  public render() {
-    const { navControls } = this.props;
+export function HeaderNavControls({ navControls$, side }: Props) {
+  const navControls = useObservable(navControls$, []);
 
-    if (!navControls) {
-      return null;
-    }
-
-    return navControls.map(this.renderNavControl);
+  if (!navControls) {
+    return null;
   }
 
   // It should be performant to use the index as the key since these are unlikely
   // to change while Kibana is running.
-  private renderNavControl = (navControl: ChromeNavControl, index: number) => (
-    <EuiHeaderSectionItem key={index} border={this.props.side === 'left' ? 'right' : 'left'}>
-      <HeaderExtension extension={navControl.mount} />
-    </EuiHeaderSectionItem>
+  return (
+    <>
+      {navControls.map((navControl: ChromeNavControl, index: number) => (
+        <EuiHeaderSectionItem key={index} border={side === 'left' ? 'right' : 'left'}>
+          <HeaderExtension extension={navControl.mount} />
+        </EuiHeaderSectionItem>
+      ))}
+    </>
   );
 }

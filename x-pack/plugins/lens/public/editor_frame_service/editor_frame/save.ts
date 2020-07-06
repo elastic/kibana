@@ -48,13 +48,14 @@ export function getSavedObjectFormat({
   return {
     id: state.persistedId,
     title: state.title,
+    description: state.description,
     type: 'lens',
     visualizationType: state.visualization.activeId,
     expression: expression ? toExpression(expression) : '',
     state: {
       datasourceStates,
       datasourceMetaData: {
-        filterableIndexPatterns: _.uniq(filterableIndexPatterns, 'id'),
+        filterableIndexPatterns: _.uniqBy(filterableIndexPatterns, 'id'),
       },
       visualization: visualization.getPersistableState(state.visualization.state),
       query: framePublicAPI.query,

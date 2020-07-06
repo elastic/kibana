@@ -146,7 +146,7 @@ function testInitialState(): IndexPatternPrivateState {
         },
       },
     },
-    showEmptyFields: false,
+    isFirstExistenceFetch: false,
   };
 }
 
@@ -184,6 +184,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id2: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id3: expect.objectContaining({
                       operationType: 'count',
@@ -304,7 +305,7 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -388,6 +389,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id2: expect.objectContaining({
                       operationType: 'count',
@@ -508,7 +510,7 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -779,7 +781,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
-      it('appends a terms column on string field', () => {
+      it('appends a terms column with default size on string field', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'dest',
@@ -800,6 +802,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'dest',
+                      params: expect.objectContaining({ size: 3 }),
                     }),
                   },
                 }),
@@ -1046,7 +1049,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns no suggestions if there are no columns', () => {
       expect(
         getDatasourceSuggestionsFromCurrentState({
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatternRefs: [],
           existingFields: {},
           indexPatterns: expectedIndexPatterns,
@@ -1305,7 +1308,7 @@ describe('IndexPattern Data Source suggestions', () => {
         ...state,
         indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
       });
-      suggestions.forEach(suggestion => expect(suggestion.table.columns.length).toBe(1));
+      suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
 
     it('returns simplified versions of table with more than 2 columns', () => {
@@ -1352,7 +1355,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1472,7 +1475,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1526,7 +1529,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1549,6 +1552,62 @@ describe('IndexPattern Data Source suggestions', () => {
       expect(suggestions[0].table.columns.length).toBe(1);
       expect(suggestions[0].table.columns[0].operation.label).toBe('Sum of field1');
     });
+
+    it('contains a reordering suggestion when there are exactly 2 buckets', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        currentIndexPatternId: '1',
+        indexPatterns: expectedIndexPatterns,
+        isFirstExistenceFetch: false,
+        layers: {
+          first: {
+            ...initialState.layers.first,
+            columns: {
+              id1: {
+                label: 'Date histogram',
+                dataType: 'date',
+                isBucketed: true,
+
+                operationType: 'date_histogram',
+                sourceField: 'field2',
+                params: {
+                  interval: 'd',
+                },
+              },
+              id2: {
+                label: 'Top 5',
+                dataType: 'string',
+                isBucketed: true,
+
+                operationType: 'terms',
+                sourceField: 'field1',
+                params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
+              },
+              id3: {
+                label: 'Average of field1',
+                dataType: 'number',
+                isBucketed: false,
+
+                operationType: 'avg',
+                sourceField: 'field1',
+              },
+            },
+            columnOrder: ['id1', 'id2', 'id3'],
+          },
+        },
+      };
+
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          table: expect.objectContaining({
+            changeType: 'reorder',
+          }),
+        })
+      );
+    });
   });
 });
 
@@ -1557,9 +1616,9 @@ function isTableWithBucketColumns(
   columnIds: string[],
   numBuckets: number
 ) {
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
   expect(
-    suggestion.table.columns.slice(0, numBuckets).every(column => column.operation.isBucketed)
+    suggestion.table.columns.slice(0, numBuckets).every((column) => column.operation.isBucketed)
   ).toBeTruthy();
 }
 
@@ -1568,6 +1627,6 @@ function isTableWithMetricColumns(
   columnIds: string[]
 ) {
   expect(suggestion.table.isMultiRow).toEqual(false);
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
-  expect(suggestion.table.columns.every(column => !column.operation.isBucketed)).toBeTruthy();
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.every((column) => !column.operation.isBucketed)).toBeTruthy();
 }

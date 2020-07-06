@@ -16,15 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TriggerContextMapping } from '../../../ui_actions/public';
 
 export interface VisualizationListItem {
   editUrl: string;
+  editApp?: string;
   icon: string;
   id: string;
   stage: 'experimental' | 'beta' | 'production';
   savedObjectType: string;
   title: string;
+  description?: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   typeTitle: string;
+  image?: string;
 }
 
 export interface VisualizationsAppExtension {
@@ -43,12 +48,14 @@ export interface VisTypeAliasPromotion {
 }
 
 export interface VisTypeAlias {
-  aliasUrl: string;
+  aliasPath: string;
+  aliasApp: string;
   name: string;
   title: string;
   icon: string;
   promotion?: VisTypeAliasPromotion;
   description: string;
+  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   stage: 'experimental' | 'beta' | 'production';
 
   appExtensions?: {
@@ -66,8 +73,8 @@ interface VisTypeAliasRegistry {
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
-  add: newVisTypeAlias => {
-    if (registry.find(visTypeAlias => visTypeAlias.name === newVisTypeAlias.name)) {
+  add: (newVisTypeAlias) => {
+    if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }
     registry.push(newVisTypeAlias);

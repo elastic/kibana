@@ -16,7 +16,7 @@ import {
   AlertNavigation,
   AlertStateNavigation,
   AlertUrlNavigation,
-} from '../../../../../../alerting/common';
+} from '../../../../../../alerts/common';
 import { Alert } from '../../../../types';
 
 export interface ViewInAppProps {
@@ -28,7 +28,7 @@ const NO_NAVIGATION = false;
 type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
-  const { navigateToApp, alerting: maybeAlerting } = useAppDependencies();
+  const { navigateToApp, alerts: maybeAlerting } = useAppDependencies();
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {
@@ -40,13 +40,14 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) =>
          * navigation isn't supported
          */
         () => setAlertNavigation(NO_NAVIGATION),
-        alerting =>
-          alerting
+        (alerts) => {
+          return alerts
             .getNavigation(alert.id)
-            .then(nav => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
+            .then((nav) => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
             .catch(() => {
               setAlertNavigation(NO_NAVIGATION);
-            })
+            });
+        }
       )
     );
   }, [alert.id, maybeAlerting]);

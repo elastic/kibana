@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import { KibanaRequest } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization, JobServiceRouteDeps } from '../types';
+import { RouteInitialization } from '../types';
 import {
   categorizationFieldExamplesSchema,
   chartSchema,
@@ -19,7 +17,10 @@ import {
   lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
+  revertModelSnapshotSchema,
 } from './schemas/job_service_schema';
+
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
@@ -27,19 +28,7 @@ import { categorizationExamplesProvider } from '../models/job_service/new_job';
 /**
  * Routes for job service
  */
-export function jobServiceRoutes(
-  { router, mlLicense }: RouteInitialization,
-  { resolveMlCapabilities }: JobServiceRouteDeps
-) {
-  async function hasPermissionToCreateJobs(request: KibanaRequest) {
-    const mlCapabilities = await resolveMlCapabilities(request);
-    if (mlCapabilities === null) {
-      throw new Error('resolveMlCapabilities is not defined');
-    }
-
-    return mlCapabilities.canCreateJob;
-  }
-
+export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
@@ -54,6 +43,9 @@ export function jobServiceRoutes(
       path: '/api/ml/jobs/force_start_datafeeds',
       validate: {
         body: forceStartDatafeedSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -86,6 +78,9 @@ export function jobServiceRoutes(
       validate: {
         body: datafeedIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -116,6 +111,9 @@ export function jobServiceRoutes(
       path: '/api/ml/jobs/delete_jobs',
       validate: {
         body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -148,12 +146,49 @@ export function jobServiceRoutes(
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canCloseJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { closeJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobIds } = request.body;
         const resp = await closeJobs(jobIds);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/force_stop_and_close_job Force stop and close job
+   * @apiName ForceStopAndCloseJob
+   * @apiDescription Force stops the datafeed and then force closes the anomaly detection job specified by job ID
+   *
+   * @apiSchema (body) jobIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/force_stop_and_close_job',
+      validate: {
+        body: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canCloseJob', 'access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { forceStopAndCloseJob } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { jobId } = request.body;
+        const resp = await forceStopAndCloseJob(jobId);
 
         return response.ok({
           body: resp,
@@ -183,6 +218,9 @@ export function jobServiceRoutes(
       path: '/api/ml/jobs/jobs_summary',
       validate: {
         body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -215,6 +253,9 @@ export function jobServiceRoutes(
       validate: {
         body: schema.object(jobsWithTimerangeSchema),
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -245,6 +286,9 @@ export function jobServiceRoutes(
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -272,6 +316,9 @@ export function jobServiceRoutes(
     {
       path: '/api/ml/jobs/groups',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -302,6 +349,9 @@ export function jobServiceRoutes(
       validate: {
         body: schema.object(updateGroupsSchema),
       },
+      options: {
+        tags: ['access:ml:canUpdateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -329,6 +379,9 @@ export function jobServiceRoutes(
     {
       path: '/api/ml/jobs/deleting_jobs_tasks',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -359,6 +412,9 @@ export function jobServiceRoutes(
       validate: {
         body: jobIdsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -388,6 +444,9 @@ export function jobServiceRoutes(
       validate: {
         params: schema.object({ indexPattern: schema.string() }),
         query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -421,6 +480,9 @@ export function jobServiceRoutes(
       path: '/api/ml/jobs/new_job_line_chart',
       validate: {
         body: schema.object(chartSchema),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -474,6 +536,9 @@ export function jobServiceRoutes(
       validate: {
         body: schema.object(chartSchema),
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -522,6 +587,9 @@ export function jobServiceRoutes(
     {
       path: '/api/ml/jobs/all_jobs_and_group_ids',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -551,6 +619,9 @@ export function jobServiceRoutes(
       path: '/api/ml/jobs/look_back_progress',
       validate: {
         body: schema.object(lookBackProgressSchema),
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -583,17 +654,12 @@ export function jobServiceRoutes(
       validate: {
         body: schema.object(categorizationFieldExamplesSchema),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        // due to the use of the _analyze endpoint which is called by the kibana user,
-        // basic job creation privileges are required to use this endpoint
-        if ((await hasPermissionToCreateJobs(request)) === false) {
-          throw Boom.forbidden(
-            'Insufficient privileges, the machine_learning_admin role is required.'
-          );
-        }
-
         const { validateCategoryExamples } = categorizationExamplesProvider(
           context.ml!.mlClient.callAsCurrentUser,
           context.ml!.mlClient.callAsInternalUser
@@ -644,12 +710,63 @@ export function jobServiceRoutes(
       validate: {
         body: schema.object(topCategoriesSchema),
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { topCategories } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const { jobId, count } = request.body;
         const resp = await topCategories(jobId, count);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/revert_model_snapshot Revert model snapshot
+   * @apiName RevertModelSnapshot
+   * @apiDescription Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges
+   *
+   * @apiSchema (body) revertModelSnapshotSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/revert_model_snapshot',
+      validate: {
+        body: revertModelSnapshotSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob', 'access:ml:canStartStopDatafeed'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { revertModelSnapshot } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const {
+          jobId,
+          snapshotId,
+          replay,
+          end,
+          deleteInterveningResults,
+          calendarEvents,
+        } = request.body;
+        const resp = await revertModelSnapshot(
+          jobId,
+          snapshotId,
+          replay,
+          end,
+          deleteInterveningResults,
+          calendarEvents
+        );
 
         return response.ok({
           body: resp,

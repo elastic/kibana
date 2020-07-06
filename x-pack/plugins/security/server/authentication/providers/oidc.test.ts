@@ -11,8 +11,8 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
 import {
-  ElasticsearchErrorHelpers,
-  IClusterClient,
+  LegacyElasticsearchErrorHelpers,
+  ILegacyClusterClient,
   KibanaRequest,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
@@ -21,7 +21,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<IClusterClient>,
+  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
@@ -353,7 +353,7 @@ describe('OIDCAuthenticationProvider', () => {
             state: {
               state: 'statevalue',
               nonce: 'noncevalue',
-              nextURL: '/base-path/s/foo/some-path',
+              nextURL: '/mock-server-basepath/s/foo/some-path',
               realm: 'oidc1',
             },
           }
@@ -464,11 +464,11 @@ describe('OIDCAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'valid-refresh-token' };
 
-      mockOptions.client.asScoped.mockImplementation(scopeableRequest => {
+      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-            ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
           );
           return mockScopedClusterClient;
         }
@@ -516,7 +516,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -556,7 +556,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -575,7 +575,7 @@ describe('OIDCAuthenticationProvider', () => {
             state: {
               state: 'statevalue',
               nonce: 'noncevalue',
-              nextURL: '/base-path/s/foo/some-path',
+              nextURL: '/mock-server-basepath/s/foo/some-path',
               realm: 'oidc1',
             },
           }
@@ -604,7 +604,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -633,7 +633,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -702,7 +702,7 @@ describe('OIDCAuthenticationProvider', () => {
       });
     });
 
-    it('redirects to /logged_out if `redirect` field in OpenID Connect logout response is null.', async () => {
+    it('redirects to `loggedOut` URL if `redirect` field in OpenID Connect logout response is null.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const accessToken = 'x-oidc-token';
       const refreshToken = 'x-oidc-refresh-token';
@@ -711,9 +711,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       await expect(
         provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
-      ).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
-      );
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut));
 
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcLogout', {

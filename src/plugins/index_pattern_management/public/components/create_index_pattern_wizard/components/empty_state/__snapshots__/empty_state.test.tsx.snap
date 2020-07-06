@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should render normally 1`] = `
+<div>
+  <EuiCallOut
+    color="warning"
+    title={
+      <FormattedMessage
+        defaultMessage="Couldn't find any Elasticsearch data"
+        id="indexPatternManagement.createIndexPattern.emptyStateHeader"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
+        id="indexPatternManagement.createIndexPattern.emptyStateLabel.emptyStateDetail"
+        values={
+          Object {
+            "getStartedLink": <EuiLink
+              href="/app/home#/tutorial_directory/sampleData"
+            >
+              <FormattedMessage
+                defaultMessage="get started with some sample data sets."
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.getStartedLink"
+                values={Object {}}
+              />
+            </EuiLink>,
+            "learnHowLink": <EuiLink
+              href="/app/home#/tutorial_directory"
+            >
+              <FormattedMessage
+                defaultMessage="Learn how"
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.learnHowLink"
+                values={Object {}}
+              />
+            </EuiLink>,
+            "needToIndex": <EuiTextColor
+              color="subdued"
+            >
+              <FormattedMessage
+                defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.needToIndexLabel"
+                values={Object {}}
+              />
+            </EuiTextColor>,
+          }
+        }
+      />
+    </p>
+    <EuiButton
+      color="warning"
+      data-test-subj="refreshIndicesButton"
+      iconType="refresh"
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Check for new data"
+        id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiCallOut>
+</div>
+`;

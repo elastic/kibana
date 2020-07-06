@@ -17,21 +17,23 @@ import {
 } from '@elastic/eui';
 import { MetadataForm } from './metadata_form';
 import { Agent } from '../../../../types';
+import { flattenMetadata } from './helper';
 
 interface Props {
   agent: Agent;
   flyout: { hide: () => void };
 }
+
 export const AgentMetadataFlyout: React.FunctionComponent<Props> = ({ agent, flyout }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
-    return Object.keys(obj || {}).map(key => ({
+    return Object.keys(obj || {}).map((key) => ({
       title: key,
       description: obj ? obj[key] : '',
     }));
   };
 
-  const localItems = mapMetadata(agent.local_metadata);
-  const userProvidedItems = mapMetadata(agent.user_provided_metadata);
+  const localItems = mapMetadata(flattenMetadata(agent.local_metadata));
+  const userProvidedItems = mapMetadata(flattenMetadata(agent.user_provided_metadata));
 
   return (
     <EuiFlyout onClose={() => flyout.hide()} size="s" aria-labelledby="flyoutTitle">

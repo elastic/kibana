@@ -5,7 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AckEventSchema, AgentEventSchema, AgentTypeSchema, NewAgentActionSchema } from '../models';
+import {
+  AckEventSchema,
+  NewAgentEventSchema,
+  AgentTypeSchema,
+  NewAgentActionSchema,
+} from '../models';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({
@@ -28,7 +33,7 @@ export const PostAgentCheckinRequestSchema = {
   }),
   body: schema.object({
     local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    events: schema.maybe(schema.arrayOf(AgentEventSchema)),
+    events: schema.maybe(schema.arrayOf(NewAgentEventSchema)),
   }),
 };
 
@@ -65,6 +70,11 @@ export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };
 
 export const PutAgentReassignRequestSchema = {

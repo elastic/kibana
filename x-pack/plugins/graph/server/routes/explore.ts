@@ -32,7 +32,9 @@ export function registerExploreRoute({
         {
           core: {
             elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
+              legacy: {
+                client: { callAsCurrentUser: callCluster },
+              },
             },
           },
         },
@@ -57,7 +59,7 @@ export function registerExploreRoute({
             error,
             'body.error.root_cause',
             [] as Array<{ type: string; reason: string }>
-          ).find(cause => {
+          ).find((cause: { type: string; reason: string }) => {
             return (
               cause.reason.includes('Fielddata is disabled on text fields') ||
               cause.reason.includes('No support for examining floating point') ||

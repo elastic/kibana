@@ -26,14 +26,16 @@ import {
   setSavedObjects,
   setInjectedVars,
   setUISettings,
+  setKibanaMapFactory,
+  setMapsLegacyConfig,
+  setInjectedMetadata,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { IServiceSettings } from '../../maps_legacy/public';
-import { ConfigSchema } from '../config';
-
 import './index.scss';
+import { ConfigSchema } from '../config';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -75,6 +77,8 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
+    setKibanaMapFactory(mapsLegacy.getKibanaMapFactoryProvider);
+    setMapsLegacyConfig(mapsLegacy.config);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -93,5 +97,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     setNotifications(core.notifications);
     setSavedObjects(core.savedObjects);
     setData(data);
+    setInjectedMetadata(core.injectedMetadata);
   }
 }

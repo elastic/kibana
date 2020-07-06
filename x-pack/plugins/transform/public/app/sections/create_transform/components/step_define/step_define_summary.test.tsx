@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
 import {
   PivotAggsConfig,
@@ -16,7 +15,7 @@ import {
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineExposedState } from './step_define_form';
+import { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../../shared_imports');
@@ -24,7 +23,7 @@ jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const searchItems = {
       indexPattern: {

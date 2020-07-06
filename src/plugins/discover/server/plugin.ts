@@ -17,26 +17,21 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { uiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
+import { searchSavedObjectType } from './saved_objects';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
   public setup(core: CoreSetup) {
-    this.logger.debug('discover: Setup');
-
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.uiSettings.register(uiSettings);
+    core.savedObjects.registerType(searchSavedObjectType);
 
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('discover: Started');
     return {};
   }
 

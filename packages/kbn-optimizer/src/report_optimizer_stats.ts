@@ -21,21 +21,32 @@ import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
 import { CiStatsReporter } from '@kbn/dev-utils';
 
 import { OptimizerUpdate$ } from './run_optimizer';
-import { OptimizerState } from './optimizer';
+import { OptimizerState, OptimizerConfig } from './optimizer';
 import { pipeClosure } from './common';
 
-export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
+export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     let lastState: OptimizerState | undefined;
     return update$.pipe(
       materialize(),
-      mergeMap(async n => {
+      mergeMap(async (n) => {
         if (n.kind === 'N' && n.value?.state) {
           lastState = n.value?.state;
         }
 
         if (n.kind === 'C' && lastState) {
-          await reporter.metric('@kbn/optimizer build time', name, lastState.durSec);
+          await reporter.metrics(
+            config.bundles.map((bundle) => {
+              // make the cache read from the cache file since it was likely updated by the worker
+              bundle.cache.refresh();
+
+              return {
+                group: `@kbn/optimizer bundle module count`,
+                id: bundle.id,
+                value: bundle.cache.getModuleCount() || 0,
+              };
+            })
+          );
         }
 
         return n;

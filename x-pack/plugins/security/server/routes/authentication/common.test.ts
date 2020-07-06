@@ -12,6 +12,7 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
+import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import {
   Authentication,
   AuthenticationResult,
@@ -28,11 +29,13 @@ import { routeDefinitionParamsMock } from '../index.mock';
 describe('Common authentication routes', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
+  let license: jest.Mocked<SecurityLicense>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     authc = routeParamsMock.authc;
+    license = routeParamsMock.license;
 
     mockContext = ({
       licensing: {
@@ -430,6 +433,63 @@ describe('Common authentication routes', () => {
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(request, {
         provider: { name: 'some-name' },
+      });
+    });
+  });
+
+  describe('acknowledge access agreement', () => {
+    let routeHandler: RequestHandler<any, any, any>;
+    let routeConfig: RouteConfig<any, any, any, any>;
+    beforeEach(() => {
+      const [acsRouteConfig, acsRouteHandler] = router.post.mock.calls.find(
+        ([{ path }]) => path === '/internal/security/access_agreement/acknowledge'
+      )!;
+
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
+      } as SecurityLicenseFeatures);
+
+      routeConfig = acsRouteConfig;
+      routeHandler = acsRouteHandler;
+    });
+
+    it('correctly defines route.', () => {
+      expect(routeConfig.options).toBeUndefined();
+      expect(routeConfig.validate).toBe(false);
+    });
+
+    it(`returns 403 if current license doesn't allow access agreement acknowledgement.`, async () => {
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 403,
+        payload: { message: `Current license doesn't support access agreement.` },
+        options: { body: { message: `Current license doesn't support access agreement.` } },
+      });
+    });
+
+    it('returns 500 if acknowledge throws unhandled exception.', async () => {
+      const unhandledException = new Error('Something went wrong.');
+      authc.acknowledgeAccessAgreement.mockRejectedValue(unhandledException);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 500,
+        payload: 'Internal Error',
+        options: {},
+      });
+    });
+
+    it('returns 204 if successfully acknowledged.', async () => {
+      authc.acknowledgeAccessAgreement.mockResolvedValue(undefined);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 204,
+        options: {},
       });
     });
   });

@@ -12,7 +12,7 @@ describe('View routes', () => {
   it('does not register Login routes if both `basic` and `token` providers are disabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'basic' && provider !== 'token'
+      (provider) => provider !== 'basic' && provider !== 'token'
     );
 
     defineViewRoutes(routeParamsMock);
@@ -20,21 +20,24 @@ describe('View routes', () => {
     expect(routeParamsMock.httpResources.register.mock.calls.map(([{ path }]) => path))
       .toMatchInlineSnapshot(`
       Array [
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
         "/security/overwritten_session",
       ]
     `);
-    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(
-      `Array []`
-    );
+    expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
+      Array [
+        "/internal/security/access_agreement/state",
+      ]
+    `);
   });
 
   it('registers Login routes if `basic` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'token'
+      (provider) => provider !== 'token'
     );
 
     defineViewRoutes(routeParamsMock);
@@ -43,6 +46,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -52,6 +56,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -59,7 +64,7 @@ describe('View routes', () => {
   it('registers Login routes if `token` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'basic'
+      (provider) => provider !== 'basic'
     );
 
     defineViewRoutes(routeParamsMock);
@@ -68,6 +73,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -77,6 +83,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });
@@ -93,6 +100,7 @@ describe('View routes', () => {
       .toMatchInlineSnapshot(`
       Array [
         "/login",
+        "/security/access_agreement",
         "/security/account",
         "/security/logged_out",
         "/logout",
@@ -102,6 +110,7 @@ describe('View routes', () => {
     expect(routeParamsMock.router.get.mock.calls.map(([{ path }]) => path)).toMatchInlineSnapshot(`
       Array [
         "/internal/security/login_state",
+        "/internal/security/access_agreement/state",
       ]
     `);
   });

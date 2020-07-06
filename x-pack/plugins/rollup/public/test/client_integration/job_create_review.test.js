@@ -10,7 +10,10 @@ import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: (fn) => fn,
+}));
 
 jest.mock('../../kibana_services', () => {
   const services = require.requireActual('../../kibana_services');
@@ -75,8 +78,8 @@ describe('Create Rollup Job, step 6: Review', () => {
   });
 
   describe('tabs', () => {
-    const getTabsText = () => find('stepReviewTab').map(tab => tab.text());
-    const selectFirstField = step => {
+    const getTabsText = () => find('stepReviewTab').map((tab) => tab.text());
+    const selectFirstField = (step) => {
       find('rollupJobShowFieldChooserButton').simulate('click');
 
       // Select the first term field
@@ -149,7 +152,7 @@ describe('Create Rollup Job, step 6: Review', () => {
         actions.clickSave();
         // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
-        await new Promise(res => setTimeout(res, 750));
+        await new Promise((res) => setTimeout(res, 750));
 
         expect(startMock.http.put).toHaveBeenCalledWith(jobCreateApiPath, expect.anything()); // It has been called!
         expect(startMock.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // It has still not been called!
@@ -173,7 +176,7 @@ describe('Create Rollup Job, step 6: Review', () => {
         actions.clickSave();
         // Given the following anti-jitter sleep x-pack/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
-        await new Promise(res => setTimeout(res, 750));
+        await new Promise((res) => setTimeout(res, 750));
 
         expect(startMock.http.post).toHaveBeenCalledWith(jobStartApiPath, expect.anything()); // It has been called!
       });

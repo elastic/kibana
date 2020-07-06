@@ -47,13 +47,13 @@ export class TooltipControl extends React.Component {
   };
 
   _getLayerByMbLayerId(mbLayerId) {
-    return this.props.layerList.find(layer => {
+    return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
       return mbLayerIds.indexOf(mbLayerId) > -1;
     });
   }
 
-  _getIdsForFeatures(mbFeatures) {
+  _getTooltipFeatures(mbFeatures) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -72,16 +72,25 @@ export class TooltipControl extends React.Component {
         }
       }
       if (!match) {
+        // "tags" (aka properties) are optional in .mvt tiles.
+        // It's not entirely clear how mapbox-gl handles those.
+        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
+        // - As undefined value
+        // - As empty object literal
+        // To avoid ambiguity, normalize properties to empty object literal.
+        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
+        //This keeps track of first properties (assuming these will be identical for features in different tiles
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
+          mbProperties,
         });
       }
     }
     return uniqueFeatures;
   }
 
-  _lockTooltip = e => {
+  _lockTooltip = (e) => {
     if (this.props.isDrawingFilter) {
       // ignore click events when in draw mode
       return;
@@ -89,7 +98,7 @@ export class TooltipControl extends React.Component {
 
     this._updateHoverTooltipState.cancel(); //ignore any possible moves
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       // No features at click location so there is no tooltip to open
       return;
@@ -98,20 +107,20 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getIdsForFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures);
     this.props.openOnClickTooltip({
-      features: features,
+      features,
       location: popupAnchorLocation,
     });
   };
 
-  _updateHoverTooltipState = _.debounce(e => {
+  _updateHoverTooltipState = _.debounce((e) => {
     if (this.props.isDrawingFilter || this.props.hasLockedTooltips) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
     }
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;
@@ -127,7 +136,7 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getIdsForFeatures(mbFeatures);
+    const features = this._getTooltipFeatures(mbFeatures);
     this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
@@ -144,12 +153,12 @@ export class TooltipControl extends React.Component {
     //For example:
     //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
     //during that data-fetch window, the app should not query for layers that do not exist.
-    return mbLayerIds.filter(mbLayerId => {
+    return mbLayerIds.filter((mbLayerId) => {
       return !!this.props.mbMap.getLayer(mbLayerId);
     });
   }
 
-  _getFeaturesUnderPointer(mbLngLatPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint) {
     if (!this.props.mbMap) {
       return [];
     }

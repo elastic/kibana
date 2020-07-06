@@ -82,7 +82,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.toExpressionAst = config.toExpressionAst;
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
-      config.modifyAggConfigOnSearchRequestStart || function() {};
+      config.modifyAggConfigOnSearchRequestStart || function () {};
     this.valueType = config.valueType || config.type;
   }
 }

@@ -17,18 +17,19 @@
  * under the License.
  */
 
+// @ts-ignore
+import { PluginInitializerContext } from 'kibana/public';
+// @ts-ignore
+import { L } from './leaflet';
 import { MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
 // @ts-ignore
 import { convertToGeoJson } from './map/convert_to_geojson';
 // @ts-ignore
 import { scaleBounds, getPrecision, geoContains } from './map/decode_geo_hash';
-// @ts-ignore
 import {
   VectorLayer,
   FileLayerField,
@@ -36,9 +37,21 @@ import {
   TmsLayer,
   IServiceSettings,
 } from './map/service_settings';
+// @ts-ignore
+import { mapTooltipProvider } from './tooltip_provider';
 
-export function plugin() {
-  return new MapsLegacyPlugin();
+import './map/index.scss';
+
+export interface MapsLegacyConfigType {
+  regionmap: any;
+  emsTileLayerId: string;
+  includeElasticMapsService: boolean;
+  proxyElasticMapsServiceInMaps: boolean;
+  tilemap: any;
+}
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MapsLegacyPlugin(initializerContext);
 }
 
 /** @public */
@@ -49,13 +62,19 @@ export {
   colorUtil,
   convertToGeoJson,
   IServiceSettings,
-  KibanaMap,
   KibanaMapLayer,
   VectorLayer,
   FileLayerField,
   FileLayer,
   TmsLayer,
+  mapTooltipProvider,
+  L,
 };
+
+export * from './common/types';
+export { ORIGIN } from './common/constants/origin';
+
+export { WmsOptions } from './components/wms_options';
 
 export type MapsLegacyPluginSetup = ReturnType<MapsLegacyPlugin['setup']>;
 export type MapsLegacyPluginStart = ReturnType<MapsLegacyPlugin['start']>;

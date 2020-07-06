@@ -23,7 +23,7 @@ import { SavedObjectsType } from '../../types';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       namespaceType: 'single',

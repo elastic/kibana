@@ -34,4 +34,5 @@ export interface DimensionPopoverState {
   isOpen: boolean;
   openId: string | null;
   addingToGroupId: string | null;
+  tabId: 'datasource' | 'visualization' | null;
 }

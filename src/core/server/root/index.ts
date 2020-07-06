@@ -21,7 +21,7 @@ import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
 import { Env, RawConfigurationProvider } from '../config';
-import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
+import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
 import { Server } from '../server';
 
 /**
@@ -30,7 +30,7 @@ import { Server } from '../server';
 export class Root {
   public readonly logger: LoggerFactory;
   private readonly log: Logger;
-  private readonly loggingService: LoggingService;
+  private readonly loggingSystem: LoggingSystem;
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
 
@@ -39,10 +39,10 @@ export class Root {
     env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
-    this.loggingService = new LoggingService();
-    this.logger = this.loggingService.asLoggerFactory();
+    this.loggingSystem = new LoggingSystem();
+    this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(rawConfigProvider, env, this.logger);
+    this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
   public async setup() {
@@ -86,7 +86,7 @@ export class Root {
       this.loggingConfigSubscription.unsubscribe();
       this.loggingConfigSubscription = undefined;
     }
-    await this.loggingService.stop();
+    await this.loggingSystem.stop();
 
     if (this.onShutdown !== undefined) {
       this.onShutdown(reason);
@@ -99,10 +99,10 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
-      map(config => this.loggingService.upgrade(config)),
+      map((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console
-      tap({ error: err => console.error('Configuring logger failed:', err) }),
+      tap({ error: (err) => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;
 
@@ -112,7 +112,7 @@ export class Root {
 
     // Send subsequent update failures to this.shutdown(), stopped via loggingConfigSubscription.
     this.loggingConfigSubscription = update$.subscribe({
-      error: err => this.shutdown(err),
+      error: (err) => this.shutdown(err),
     });
 
     // Add subscription we got from `connect` so that we can dispose both of them

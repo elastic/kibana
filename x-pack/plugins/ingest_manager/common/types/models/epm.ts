@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
+export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -32,9 +32,10 @@ export enum KibanaAssetType {
 }
 
 export enum ElasticsearchAssetType {
-  ingestPipeline = 'ingest-pipeline',
-  indexTemplate = 'index-template',
-  ilmPolicy = 'ilm-policy',
+  componentTemplate = 'component_template',
+  ingestPipeline = 'ingest_pipeline',
+  indexTemplate = 'index_template',
+  ilmPolicy = 'ilm_policy',
 }
 
 export enum AgentAssetType {
@@ -57,10 +58,9 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
-  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
-  datasources?: RegistryDatasource[];
+  config_templates?: RegistryConfigTemplate[];
   download: string;
   path: string;
 }
@@ -74,7 +74,7 @@ interface RegistryImage {
   size?: string;
   type?: string;
 }
-export interface RegistryDatasource {
+export interface RegistryConfigTemplate {
   name: string;
   title: string;
   description: string;
@@ -86,16 +86,15 @@ export interface RegistryInput {
   title: string;
   description?: string;
   vars?: RegistryVarsEntry[];
-  streams: RegistryStream[];
 }
 
 export interface RegistryStream {
   input: string;
-  dataset: string;
   title: string;
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template_path: string;
 }
 
 export type RequirementVersion = string;
@@ -121,7 +120,7 @@ export type RegistrySearchResult = Pick<
   | 'download'
   | 'path'
   | 'datasets'
-  | 'datasources'
+  | 'config_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -168,15 +167,14 @@ export type ElasticsearchAssetTypeToParts = Record<
 >;
 
 export interface Dataset {
-  title: string;
-  path: string;
-  id: string;
-  release: string;
-  ingest_pipeline: string;
-  vars?: RegistryVarsEntry[];
   type: string;
+  name: string;
+  title: string;
+  release: string;
   streams?: RegistryStream[];
   package: string;
+  path: string;
+  ingest_pipeline: string;
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -202,7 +200,9 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
+  removable?: boolean;
 }
 
 // Managers public HTTP response types
@@ -243,16 +243,13 @@ export type AssetReference = Pick<SavedObjectReference, 'id'> & {
  * Types of assets which can be installed/removed
  */
 export enum IngestAssetType {
-  DataFrameTransform = 'data-frame-transform',
-  IlmPolicy = 'ilm-policy',
-  IndexTemplate = 'index-template',
-  IngestPipeline = 'ingest-pipeline',
-  MlJob = 'ml-job',
-  RollupJob = 'rollup-job',
+  IlmPolicy = 'ilm_policy',
+  IndexTemplate = 'index_template',
+  ComponentTemplate = 'component_template',
+  IngestPipeline = 'ingest_pipeline',
 }
 
 export enum DefaultPackages {
-  base = 'base',
   system = 'system',
   endpoint = 'endpoint',
 }
@@ -261,12 +258,21 @@ export interface IndexTemplateMappings {
   properties: any;
 }
 
+// This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
+// until "proper" documentation of the new format is available.
+// Ingest Manager does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
-  order: number;
+  priority: number;
   index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
+  template: {
+    settings: any;
+    mappings: any;
+    aliases: object;
+  };
+  data_stream: {
+    timestamp_field: string;
+  };
+  _meta: object;
 }
 
 export interface TemplateRef {

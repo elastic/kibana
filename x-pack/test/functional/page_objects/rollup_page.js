@@ -110,7 +110,7 @@ export function RollupPageProvider({ getService, getPageObjects }) {
 
     async getJobList() {
       const jobs = await testSubjects.findAll('jobTableRow');
-      return mapAsync(jobs, async job => {
+      return mapAsync(jobs, async (job) => {
         const jobNameElement = await job.findByTestSubject('jobTableCell-id');
         const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
         const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');

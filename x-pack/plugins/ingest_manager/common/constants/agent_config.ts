@@ -12,8 +12,9 @@ export const DEFAULT_AGENT_CONFIG = {
   namespace: 'default',
   description: 'Default agent configuration created by Kibana',
   status: AgentConfigStatus.Active,
-  datasources: [],
+  package_configs: [],
   is_default: true,
+  monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 
 export const DEFAULT_AGENT_CONFIGS_PACKAGES = [DefaultPackages.system];

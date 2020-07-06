@@ -19,6 +19,7 @@ import {
   ECS_VERSION,
   EventSchema,
 } from './types';
+import { SAVED_OBJECT_REL_PRIMARY } from './types';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -118,6 +119,8 @@ const RequiredEventSchema = schema.object({
   action: schema.string({ minLength: 1 }),
 });
 
+const ValidSavedObjectRels = new Set([undefined, SAVED_OBJECT_REL_PRIMARY]);
+
 function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
   if (event?.event == null) {
     throw new Error(`no "event" property`);
@@ -137,7 +140,17 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
   }
 
   // could throw an error
-  return EventSchema.validate(event);
+  const result = EventSchema.validate(event);
+
+  if (result?.kibana?.saved_objects?.length) {
+    for (const so of result?.kibana?.saved_objects) {
+      if (!ValidSavedObjectRels.has(so.rel)) {
+        throw new Error(`invalid rel property in saved_objects: "${so.rel}"`);
+      }
+    }
+  }
+
+  return result;
 }
 
 export const EVENT_LOGGED_PREFIX = `event logged: `;

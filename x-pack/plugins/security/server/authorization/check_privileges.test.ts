@@ -333,7 +333,7 @@ describe('#atSpaces', () => {
         applications: [
           {
             application,
-            resources: options.spaceIds.map(spaceId => `space:${spaceId}`),
+            resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
             privileges: uniq([
               mockActions.version,
               mockActions.login,

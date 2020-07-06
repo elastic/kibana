@@ -12,19 +12,22 @@
 import { isEqual } from 'lodash';
 
 import { from, isObservable, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, flatMap, map, scan } from 'rxjs/operators';
+import { distinctUntilChanged, flatMap, map, scan, shareReplay } from 'rxjs/operators';
 
 import { DeepPartial } from '../../../common/types/common';
 
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
-import { EXPLORER_ACTION } from './explorer_constants';
+import { DRAG_SELECT_ACTION, EXPLORER_ACTION } from './explorer_constants';
 import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 
-export const dragSelect$ = new Subject();
+export const dragSelect$ = new Subject<{
+  action: typeof DRAG_SELECT_ACTION[keyof typeof DRAG_SELECT_ACTION];
+  elements?: any[];
+}>();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();
@@ -46,7 +49,9 @@ const explorerFilteredAction$ = explorerAction$.pipe(
 
 // applies action and returns state
 const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
-  scan(explorerReducer, getExplorerDefaultState())
+  scan(explorerReducer, getExplorerDefaultState()),
+  // share the last emitted value among new subscribers
+  shareReplay(1)
 );
 
 interface ExplorerAppState {
@@ -56,6 +61,8 @@ interface ExplorerAppState {
     selectedTimes?: number[];
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
+    viewByPerPage?: number;
+    viewByFromPage?: number;
   };
   mlExplorerFilter: {
     influencersFilterQuery?: unknown;
@@ -83,6 +90,14 @@ const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
 
       if (state.viewBySwimlaneFieldName !== undefined) {
         appState.mlExplorerSwimlane.viewByFieldName = state.viewBySwimlaneFieldName;
+      }
+
+      if (state.viewByFromPage !== undefined) {
+        appState.mlExplorerSwimlane.viewByFromPage = state.viewByFromPage;
+      }
+
+      if (state.viewByPerPage !== undefined) {
+        appState.mlExplorerSwimlane.viewByPerPage = state.viewByPerPage;
       }
 
       if (state.filterActive) {
@@ -150,13 +165,16 @@ export const explorerService = {
       payload,
     });
   },
-  setSwimlaneLimit: (payload: number) => {
-    explorerAction$.next({ type: EXPLORER_ACTION.SET_SWIMLANE_LIMIT, payload });
-  },
   setViewBySwimlaneFieldName: (payload: string) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_FIELD_NAME, payload });
   },
   setViewBySwimlaneLoading: (payload: any) => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_SWIMLANE_LOADING, payload });
+  },
+  setViewByFromPage: (payload: number) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_FROM_PAGE, payload });
+  },
+  setViewByPerPage: (payload: number) => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
   },
 };

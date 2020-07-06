@@ -33,7 +33,7 @@ describe('KuiButtonIcon', () => {
 
   describe('Props', () => {
     describe('type', () => {
-      ICON_TYPES.forEach(type => {
+      ICON_TYPES.forEach((type) => {
         describe(`${type}`, () => {
           test(`renders the ${type} class`, () => {
             const $buttonIcon = render(<KuiButtonIcon type={type} />);

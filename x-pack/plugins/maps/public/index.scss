@@ -1,8 +1,5 @@
 /* GIS plugin styles */
 
-// Import the EUI global scope so we can use EUI constants
-@import 'src/legacy/ui/public/styles/_styling_constants';
-
 // Prefix all styles with "map" to avoid conflicts.
 // Examples
 //   mapChart
@@ -14,4 +11,4 @@
 @import 'mapbox_hacks';
 @import 'connected_components/index';
 @import 'components/index';
-@import 'layers/index';
+@import 'classes/index';

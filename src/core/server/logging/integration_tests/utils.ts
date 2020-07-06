@@ -55,7 +55,7 @@ export async function getPlatformLogsFromFile(path: string) {
   const fileContent = await readFile(path, 'utf-8');
   return fileContent
     .split('\n')
-    .map(s => normalizePlatformLogging(s))
+    .map((s) => normalizePlatformLogging(s))
     .join('\n');
 }
 
@@ -63,6 +63,6 @@ export async function getLegacyPlatformLogsFromFile(path: string) {
   const fileContent = await readFile(path, 'utf-8');
   return fileContent
     .split('\n')
-    .map(s => normalizeLegacyPlatformLogging(s))
+    .map((s) => normalizeLegacyPlatformLogging(s))
     .join('\n');
 }

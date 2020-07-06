@@ -26,7 +26,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) 
     return;
   }
 
-  ES_ARCHIVER_LOAD_METHODS.forEach(method => {
+  ES_ARCHIVER_LOAD_METHODS.forEach((method) => {
     const originalMethod = esArchiver[method];
 
     esArchiver[method] = async (...args) => {

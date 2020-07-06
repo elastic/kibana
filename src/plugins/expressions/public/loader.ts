@@ -19,6 +19,7 @@
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { defaults } from 'lodash';
 import { Adapters } from '../../inspector/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
@@ -56,7 +57,7 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
-      filter(_ => _ === true),
+      filter((_) => _ === true),
       map(() => void 0)
     );
 
@@ -67,14 +68,14 @@ export class ExpressionLoader {
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
 
-    this.update$.subscribe(value => {
+    this.update$.subscribe((value) => {
       if (value) {
         const { newExpression, newParams } = value;
         this.update(newExpression, newParams);
       }
     });
 
-    this.data$.subscribe(data => {
+    this.data$.subscribe((data) => {
       this.render(data);
     });
 
@@ -168,7 +169,7 @@ export class ExpressionLoader {
     }
 
     if (params.searchContext) {
-      this.params.searchContext = _.defaults(
+      this.params.searchContext = defaults(
         {},
         params.searchContext,
         this.params.searchContext || {}

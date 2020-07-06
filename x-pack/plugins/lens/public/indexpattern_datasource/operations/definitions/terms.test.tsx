@@ -34,7 +34,7 @@ describe('terms', () => {
       indexPatterns: {},
       existingFields: {},
       currentIndexPatternId: '1',
-      showEmptyFields: false,
+      isFirstExistenceFetch: false,
       layers: {
         first: {
           indexPatternId: '1',
@@ -100,7 +100,7 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find(i => i.name === 'dest')!;
+      const newDateField = indexPattern.fields.find((i) => i.name === 'dest')!;
 
       const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
       expect(column).toHaveProperty('sourceField', 'dest');

@@ -37,7 +37,7 @@ interface Options {
  */
 export function assertLicensesValid({ packages, validLicenses }: Options) {
   const invalidMsgs = packages.reduce((acc, pkg) => {
-    const invalidLicenses = pkg.licenses.filter(license => !validLicenses.includes(license));
+    const invalidLicenses = pkg.licenses.filter((license) => !validLicenses.includes(license));
 
     if (pkg.licenses.length && !invalidLicenses.length) {
       return acc;
@@ -57,7 +57,7 @@ export function assertLicensesValid({ packages, validLicenses }: Options) {
       `Non-conforming licenses:\n${invalidMsgs
         .join('\n')
         .split('\n')
-        .map(l => `  ${l}`)
+        .map((l) => `  ${l}`)
         .join('\n')}`
     );
   }

@@ -6,10 +6,10 @@
 
 import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
+import { SessionInfo } from '../../common/types';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
 import { ISessionExpired } from './session_expired';
-import { SessionInfo } from '../types';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -127,7 +127,7 @@ export class SessionTimeout implements ISessionTimeout {
     this.sessionInfo = sessionInfo;
     // save the provider name in session storage, we will need it when we log out
     const key = `${this.tenant}/session_provider`;
-    sessionStorage.setItem(key, sessionInfo.provider);
+    sessionStorage.setItem(key, sessionInfo.provider.name);
 
     const { timeout, isLifespanTimeout } = this.getTimeout();
     if (timeout == null) {

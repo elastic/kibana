@@ -29,7 +29,7 @@ export enum ENTITY_FIELD_TYPE {
 export interface EntityField {
   fieldName: string;
   fieldValue: string | number | undefined;
-  fieldType: ENTITY_FIELD_TYPE;
+  fieldType?: ENTITY_FIELD_TYPE;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

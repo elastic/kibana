@@ -1,0 +1,24 @@
+{
+  "anomaly_threshold": 50,
+  "description": "A machine learning job detected a rare and unusual user agent indicating web browsing activity by an unusual process other than a web browser. This can be due to persistence, command-and-control, or exfiltration activity. Uncommon user agents coming from remote sources to local destinations are often the result of scanners, bots, and web scrapers, which are part of common Internet background traffic. Much of this is noise, but more targeted attacks on websites using tools like Burp or SQLmap can sometimes be discovered by spotting uncommon user agents. Uncommon user agents in traffic from local sources to remote destinations can be any number of things, including harmless programs like weather monitoring or stock-trading programs. However, uncommon user agents from local sources can also be due to malware or scanning activity.",
+  "false_positives": [
+    "Web activity that is uncommon, like security scans, may trigger this signal and may need to be excluded. A new or rarely used program that calls web services may trigger this signal."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "machine_learning_job_id": "packetbeat_rare_user_agent",
+  "name": "Unusual Web User Agent",
+  "references": [
+    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "91f02f01-969f-4167-8d77-07827ac4cee0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "ML",
+    "Packetbeat"
+  ],
+  "type": "machine_learning",
+  "version": 1
+}

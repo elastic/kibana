@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Subscription } from 'rxjs';
-import { ICustomClusterClient } from 'kibana/server';
+import { ILegacyCustomClusterClient } from 'kibana/server';
 import { ILicense, LicenseFeature } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { MonitoringConfig } from './config';
@@ -13,7 +13,7 @@ import { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
-  monitoringClient: ICustomClusterClient;
+  monitoringClient: ILegacyCustomClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }
@@ -31,7 +31,7 @@ export class LicenseService {
     );
 
     let rawLicense: Readonly<ILicense> | undefined;
-    let licenseSubscription: Subscription | undefined = license$.subscribe(nextRawLicense => {
+    let licenseSubscription: Subscription | undefined = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
     });
 

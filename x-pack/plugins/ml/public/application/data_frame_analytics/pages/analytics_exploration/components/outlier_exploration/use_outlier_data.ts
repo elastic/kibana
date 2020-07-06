@@ -16,12 +16,16 @@ import {
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
+  fetchChartsData,
   getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { ml } from '../../../../../services/ml_api_service';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
@@ -55,8 +59,12 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
   );
+
+  useEffect(() => {
+    dataGrid.resetPagination();
+  }, [JSON.stringify(searchQuery)]);
 
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {
@@ -70,6 +78,34 @@ export const useOutlierData = (
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
+
+  const fetchColumnChartsData = async function () {
+    try {
+      if (jobConfig !== undefined) {
+        const columnChartsData = await fetchChartsData(
+          jobConfig.dest.index,
+          ml.esSearch,
+          searchQuery,
+          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        );
+        dataGrid.setColumnCharts(columnChartsData);
+      }
+    } catch (e) {
+      showDataGridColumnChartErrorMessageToast(e, getToastNotifications());
+    }
+  };
+
+  useEffect(() => {
+    if (dataGrid.chartsVisible) {
+      fetchColumnChartsData();
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    dataGrid.chartsVisible,
+    jobConfig?.dest.index,
+    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+  ]);
 
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
@@ -103,7 +139,7 @@ export const useOutlierData = (
 
       if (backgroundColor !== undefined) {
         setCellProps({
-          style: { backgroundColor },
+          style: { backgroundColor: String(backgroundColor) },
         });
       }
     }
@@ -111,7 +147,6 @@ export const useOutlierData = (
 
   return {
     ...dataGrid,
-    columns,
     renderCellValue,
   };
 };

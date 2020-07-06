@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }) {
   describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
 
-    before(async function() {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickHeatmapChart');
@@ -44,18 +44,18 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       // this is only the first page of the tabular data.
       const expectedChartData = [
         ['2015-09-20 00:00', '37'],
@@ -85,13 +85,13 @@ export default function({ getService, getPageObjects }) {
       await inspector.close();
     });
 
-    it('should show 4 color ranges as default colorNumbers param', async function() {
+    it('should show 4 color ranges as default colorNumbers param', async function () {
       const legends = await PageObjects.visChart.getLegendEntries();
       const expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
       expect(legends).to.eql(expectedLegends);
     });
 
-    it('should show 6 color ranges if changed on options', async function() {
+    it('should show 6 color ranges if changed on options', async function () {
       await PageObjects.visEditor.clickOptionsTab();
       await PageObjects.visEditor.changeHeatmapColorNumbers(6);
       await PageObjects.visEditor.clickGo();
@@ -108,7 +108,7 @@ export default function({ getService, getPageObjects }) {
       ];
       expect(legends).to.eql(expectedLegends);
     });
-    it('should show 6 custom color ranges', async function() {
+    it('should show 6 custom color ranges', async function () {
       await PageObjects.visEditor.clickOptionsTab();
       await PageObjects.visEditor.clickEnableCustomRanges();
       await PageObjects.visEditor.clickAddRange();

@@ -25,7 +25,7 @@ export default class TimelionFunction {
   constructor(name, config) {
     this.name = name;
     this.args = config.args || [];
-    this.argsByName = _.indexBy(this.args, 'name');
+    this.argsByName = _.keyBy(this.args, 'name');
     this.help = config.help || '';
     this.aliases = config.aliases || [];
     this.extended = config.extended || false;
@@ -33,17 +33,17 @@ export default class TimelionFunction {
     // WTF is this? How could you not have a fn? Wtf would the thing be used for?
     const originalFunction =
       config.fn ||
-      function(input) {
+      function (input) {
         return input;
       };
 
     // Currently only re-fits the series.
     this.originalFn = originalFunction;
 
-    this.fn = function(args, tlConfig) {
+    this.fn = function (args, tlConfig) {
       const config = _.clone(tlConfig);
-      return Promise.resolve(originalFunction(args, config)).then(function(seriesList) {
-        seriesList.list = _.map(seriesList.list, function(series) {
+      return Promise.resolve(originalFunction(args, config)).then(function (seriesList) {
+        seriesList.list = _.map(seriesList.list, function (series) {
           const target = tlConfig.getTargetSeries();
 
           // Don't fit if the series are already the same

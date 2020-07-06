@@ -49,8 +49,7 @@ export function runFailedTestsReporterCli() {
         }
 
         const isPr = !!process.env.ghprbPullId;
-        const isMasterOrVersion =
-          branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
+        const isMasterOrVersion = branch === 'master' || branch.match(/^\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
           log.info('Failure issues only created on master/version branch jobs');
           updateGithub = false;
@@ -100,7 +99,7 @@ export function runFailedTestsReporterCli() {
           }
 
           let existingIssue: GithubIssueMini | undefined = await githubApi.findFailedTestIssue(
-            i =>
+            (i) =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
               getIssueMetadata(i.body, 'test.name') === failure.name
           );

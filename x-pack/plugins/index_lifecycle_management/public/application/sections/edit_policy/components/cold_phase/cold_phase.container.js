@@ -12,7 +12,7 @@ import { PHASE_COLD, PHASE_HOT, PHASE_ROLLOVER_ENABLED } from '../../../../const
 import { ColdPhase as PresentationComponent } from './cold_phase';
 
 export const ColdPhase = connect(
-  state => ({
+  (state) => ({
     phaseData: getPhase(state, PHASE_COLD),
     hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
   }),

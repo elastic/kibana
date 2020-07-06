@@ -5,9 +5,11 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { CoreStart } from '../../../../../src/core/public';
+import { ScopedHistory } from 'kibana/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { CoreStart } from '../../../../../src/core/public';
+import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
@@ -17,9 +19,11 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 export interface AppDependencies {
   core: {
     fatalErrors: CoreStart['fatalErrors'];
+    getUrlForApp: CoreStart['application']['getUrlForApp'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
+    ingestManager?: IngestManagerSetup;
   };
   services: {
     uiMetricService: UiMetricService<IndexMgmtMetricsType>;
@@ -27,6 +31,7 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  history: ScopedHistory;
 }
 
 export const AppContextProvider = ({

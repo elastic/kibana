@@ -8,7 +8,7 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { Logger, CoreStart, KibanaRequest } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
@@ -21,7 +21,7 @@ import {
 export interface TaskRunnerContext {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
@@ -52,7 +52,7 @@ export class TaskRunnerFactory {
     const { actionExecutor } = this;
     const {
       logger,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getBasePath,
       getScopedSavedObjectsClient,
@@ -65,7 +65,7 @@ export class TaskRunnerFactory {
 
         const {
           attributes: { actionId, params, apiKey },
-        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
+        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
           'action_task_params',
           actionTaskParamsId,
           { namespace }

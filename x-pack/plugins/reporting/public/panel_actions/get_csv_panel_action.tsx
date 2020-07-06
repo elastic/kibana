@@ -5,6 +5,7 @@
  */
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
@@ -12,10 +13,10 @@ import { LicensingPluginSetup } from '../../../licensing/public';
 import { checkLicense } from '../lib/license_check';
 
 import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-
-// @TODO: These import paths will need to be updated once discovery moves to non-legacy dir
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
-import { ISearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
+import {
+  ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
+} from '../../../../../src/plugins/discover/public';
 
 import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
 
@@ -40,7 +41,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     this.isDownloading = false;
     this.core = core;
 
-    license$.subscribe(license => {
+    license$.subscribe((license) => {
       const results = license.check('reporting', 'basic');
       const { showLinks } = checkLicense(results);
       this.canDownloadCSV = showLinks;
@@ -57,7 +58,7 @@ export class GetCsvReportPanelAction implements Action<ActionContext> {
     });
   }
 
-  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};

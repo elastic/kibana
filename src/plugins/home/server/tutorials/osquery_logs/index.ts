@@ -37,7 +37,7 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
       defaultMessage: 'Osquery logs',
     }),
-    category: TutorialsCategory.SIEM,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by osqueryd.',
     }),
@@ -65,7 +65,7 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/osquery_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/osquery_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

@@ -17,10 +17,11 @@ export const DisplayedAssets: ServiceNameToAssetTypes = {
 
 export const AssetTitleMap: Record<AssetType, string> = {
   dashboard: 'Dashboard',
-  'ilm-policy': 'ILM Policy',
-  'ingest-pipeline': 'Ingest Pipeline',
+  ilm_policy: 'ILM Policy',
+  ingest_pipeline: 'Ingest Pipeline',
   'index-pattern': 'Index Pattern',
-  'index-template': 'Index Template',
+  index_template: 'Index Template',
+  component_template: 'Component Template',
   search: 'Saved Search',
   visualization: 'Visualization',
   input: 'Agent input',

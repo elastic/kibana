@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const getActiveSeries = panel => {
+export const getActiveSeries = (panel) => {
   const shouldNotApplyFilter = ['gauge', 'markdown'].includes(panel.type);
 
-  return (panel.series || []).filter(series => !series.hidden || shouldNotApplyFilter);
+  return (panel.series || []).filter((series) => !series.hidden || shouldNotApplyFilter);
 };

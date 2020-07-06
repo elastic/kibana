@@ -15,7 +15,7 @@ describe('Custom link API helper', () => {
       expect(splitFilterValueByComma('foo , bar ,  baz,  ')).toEqual([
         'foo',
         'bar',
-        'baz'
+        'baz',
       ]);
     });
     it('doesnt slipt when comma is not found', () => {
@@ -33,14 +33,14 @@ describe('Custom link API helper', () => {
           id: '123',
           '@timestamp': 455,
           label: 'foo',
-          url: 'bar'
+          url: 'bar',
         })
       ).toEqual({
         id: '123',
         '@timestamp': 455,
         label: 'foo',
         url: 'bar',
-        filters: []
+        filters: [],
       });
     });
     it('converts with filters', () => {
@@ -51,7 +51,7 @@ describe('Custom link API helper', () => {
           label: 'foo',
           url: 'bar',
           'service.name': ['baz'],
-          'transaction.name': ['quz', 'qux', 'quux']
+          'transaction.name': ['quz', 'qux', 'quux'],
         })
       ).toEqual({
         id: '123',
@@ -60,8 +60,8 @@ describe('Custom link API helper', () => {
         url: 'bar',
         filters: [
           { key: 'service.name', value: 'baz' },
-          { key: 'transaction.name', value: 'quz,qux,quux' }
-        ]
+          { key: 'transaction.name', value: 'quz,qux,quux' },
+        ],
       });
     });
     it('returns empty string when any filter value is provided', () => {
@@ -72,7 +72,7 @@ describe('Custom link API helper', () => {
           label: 'foo',
           url: 'bar',
           'service.name': [],
-          'transaction.name': ['quz', 'qux', 'quux']
+          'transaction.name': ['quz', 'qux', 'quux'],
         })
       ).toEqual({
         id: '123',
@@ -81,8 +81,8 @@ describe('Custom link API helper', () => {
         url: 'bar',
         filters: [
           { key: 'service.name', value: '' },
-          { key: 'transaction.name', value: 'quz,qux,quux' }
-        ]
+          { key: 'transaction.name', value: 'quz,qux,quux' },
+        ],
       });
     });
   });
@@ -92,11 +92,11 @@ describe('Custom link API helper', () => {
       expect(
         toESFormat({
           label: 'foo',
-          url: 'bar'
+          url: 'bar',
         })
       ).toEqual({
         label: 'foo',
-        url: 'bar'
+        url: 'bar',
       });
     });
     it('converts with filters', () => {
@@ -106,14 +106,14 @@ describe('Custom link API helper', () => {
           url: 'bar',
           filters: [
             { key: 'service.name', value: 'baz' },
-            { key: 'transaction.name', value: 'quz,qux,quux' }
-          ]
+            { key: 'transaction.name', value: 'quz,qux,quux' },
+          ],
         })
       ).toEqual({
         label: 'foo',
         url: 'bar',
         'service.name': ['baz'],
-        'transaction.name': ['quz', 'qux', 'quux']
+        'transaction.name': ['quz', 'qux', 'quux'],
       });
     });
     it('removes filters without key or value', () => {
@@ -124,13 +124,13 @@ describe('Custom link API helper', () => {
           filters: [
             { key: '', value: 'baz' },
             { key: 'service.name', value: '' },
-            { key: 'transaction.name', value: 'quz,qux,quux' }
-          ]
+            { key: 'transaction.name', value: 'quz,qux,quux' },
+          ],
         })
       ).toEqual({
         label: 'foo',
         url: 'bar',
-        'transaction.name': ['quz', 'qux', 'quux']
+        'transaction.name': ['quz', 'qux', 'quux'],
       });
     });
   });

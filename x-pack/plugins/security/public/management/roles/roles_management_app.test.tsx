@@ -14,12 +14,14 @@ jest.mock('./edit_role', () => ({
   EditRolePage: (props: any) => `Role Edit Page: ${JSON.stringify(props)}`,
 }));
 
+import { ScopedHistory } from 'src/core/public';
+
 import { rolesManagementApp } from './roles_management_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
 
-async function mountApp(basePath: string) {
+async function mountApp(basePath: string, pathname: string) {
   const { fatalErrors } = coreMock.createSetup();
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
@@ -34,7 +36,12 @@ async function mountApp(basePath: string) {
         .fn()
         .mockResolvedValue([coreMock.createStart(), { data: {}, features: featuresStart }]),
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({
+      basePath,
+      element: container,
+      setBreadcrumbs,
+      history: (scopedHistoryMock.create({ pathname }) as unknown) as ScopedHistory,
+    });
 
   return { unmount, container, setBreadcrumbs };
 }
@@ -60,16 +67,13 @@ describe('rolesManagementApp', () => {
   });
 
   it('mount() works for the `grid` page', async () => {
-    const basePath = '/some-base-path/roles';
-    window.location.hash = basePath;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Roles' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}}}
+        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
       </div>
     `);
 
@@ -79,19 +83,13 @@ describe('rolesManagementApp', () => {
   });
 
   it('mount() works for the `create role` page', async () => {
-    const basePath = '/some-base-path/roles';
-    window.location.hash = `${basePath}/edit`;
-
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', '/edit');
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Roles' },
-      { text: 'Create' },
-    ]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}}}
+        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -101,20 +99,18 @@ describe('rolesManagementApp', () => {
   });
 
   it('mount() works for the `edit role` page', async () => {
-    const basePath = '/some-base-path/roles';
     const roleName = 'someRoleName';
-    window.location.hash = `${basePath}/edit/${roleName}`;
 
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${roleName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Roles' },
-      { href: `#/some-base-path/roles/edit/${roleName}`, text: roleName },
+      { href: `/`, text: 'Roles' },
+      { href: `/edit/${roleName}`, text: roleName },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}}}
+        Role Edit Page: {"action":"edit","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someRoleName","search":"","hash":""}}}
       </div>
     `);
 
@@ -124,20 +120,15 @@ describe('rolesManagementApp', () => {
   });
 
   it('mount() works for the `clone role` page', async () => {
-    const basePath = '/some-base-path/roles';
     const roleName = 'someRoleName';
-    window.location.hash = `${basePath}/clone/${roleName}`;
 
-    const { setBreadcrumbs, container, unmount } = await mountApp(basePath);
+    const { setBreadcrumbs, container, unmount } = await mountApp('/', `/clone/${roleName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Roles' },
-      { text: 'Create' },
-    ]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Roles' }, { text: 'Create' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}}}
+        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"indicesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{"_isScalar":false}},"docLinks":{"esDocBasePath":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/"},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}}}
       </div>
     `);
 
@@ -147,17 +138,15 @@ describe('rolesManagementApp', () => {
   });
 
   it('mount() properly encodes role name in `edit role` page link in breadcrumbs', async () => {
-    const basePath = '/some-base-path/roles';
     const roleName = 'some 安全性 role';
-    window.location.hash = `${basePath}/edit/${roleName}`;
 
-    const { setBreadcrumbs } = await mountApp(basePath);
+    const { setBreadcrumbs } = await mountApp('/', `/edit/${roleName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `#${basePath}`, text: 'Roles' },
+      { href: `/`, text: 'Roles' },
       {
-        href: '#/some-base-path/roles/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role',
+        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role',
         text: roleName,
       },
     ]);

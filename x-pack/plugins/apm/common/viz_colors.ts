@@ -17,7 +17,7 @@ function getVizColorsForTheme(theme = lightTheme) {
     theme.euiColorVis6,
     theme.euiColorVis7,
     theme.euiColorVis8,
-    theme.euiColorVis9
+    theme.euiColorVis9,
   ];
 }
 

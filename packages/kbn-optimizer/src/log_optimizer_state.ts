@@ -24,7 +24,7 @@ import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure } from './common';
+import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -33,16 +33,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
     let loggedInit = false;
 
     return update$.pipe(
-      tap(update => {
+      tap((update) => {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
-          const chunk = event.chunk.toString('utf8');
-          log.warning(
-            `worker`,
-            event.stream,
-            chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
-          );
+          log.warning(`worker`, event.stream, event.line);
         }
 
         if (event?.type === 'bundle not cached') {
@@ -76,6 +71,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           if (!loggedInit) {
             loggedInit = true;
             log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            if (config.themeTags.length !== ALL_THEMES.length) {
+              log.warning(
+                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+              );
+            }
           }
           return;
         }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import {
@@ -38,7 +37,7 @@ export function ChangeIndexPattern({
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
 
-  const createTrigger = function() {
+  const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
       <EuiButtonEmpty
@@ -84,7 +83,7 @@ export function ChangeIndexPattern({
               value: id,
               checked: id === indexPatternId ? 'on' : undefined,
             }))}
-            onChange={choices => {
+            onChange={(choices) => {
               const choice = (choices.find(({ checked }) => checked) as unknown) as {
                 value: string;
               };

@@ -22,7 +22,10 @@ export const setApiError = ({ error, scope }) => ({
   payload: { error, scope },
 });
 
-export const clearApiError = scope => ({ type: t.API_ERROR_SET, payload: { error: null, scope } });
+export const clearApiError = (scope) => ({
+  type: t.API_ERROR_SET,
+  payload: { error: null, scope },
+});
 
 export const sendApiRequest = ({
   label,

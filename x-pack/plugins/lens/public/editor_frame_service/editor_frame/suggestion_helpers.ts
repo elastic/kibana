@@ -44,6 +44,7 @@ export function getSuggestions({
   datasourceStates,
   visualizationMap,
   activeVisualizationId,
+  subVisualizationId,
   visualizationState,
   field,
 }: {
@@ -57,6 +58,7 @@ export function getSuggestions({
   >;
   visualizationMap: Record<string, Visualization>;
   activeVisualizationId: string | null;
+  subVisualizationId?: string;
   visualizationState: unknown;
   field?: unknown;
 }): Suggestion[] {
@@ -71,7 +73,7 @@ export function getSuggestions({
       return (field
         ? datasource.getDatasourceSuggestionsForField(datasourceState, field)
         : datasource.getDatasourceSuggestionsFromCurrentState(datasourceState)
-      ).map(suggestion => ({ ...suggestion, datasourceId }));
+      ).map((suggestion) => ({ ...suggestion, datasourceId }));
     })
   );
 
@@ -80,7 +82,7 @@ export function getSuggestions({
   return _.flatten(
     Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
       _.flatten(
-        datasourceTableSuggestions.map(datasourceSuggestion => {
+        datasourceTableSuggestions.map((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
@@ -89,7 +91,8 @@ export function getSuggestions({
             table,
             visualizationId,
             datasourceSuggestion,
-            currentVisualizationState
+            currentVisualizationState,
+            subVisualizationId
           );
         })
       )
@@ -108,13 +111,15 @@ function getVisualizationSuggestions(
   table: TableSuggestion,
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
-  currentVisualizationState: unknown
+  currentVisualizationState: unknown,
+  subVisualizationId?: string
 ) {
   return visualization
     .getSuggestions({
       table,
       state: currentVisualizationState,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
+      subVisualizationId,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,

@@ -58,7 +58,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
                   />
                 </p>
                 <ul>
-                  {usersToDelete.map(username => (
+                  {usersToDelete.map((username) => (
                     <li key={username}>{username}</li>
                   ))}
                 </ul>
@@ -79,7 +79,7 @@ export class ConfirmDeleteUsers extends Component<Props, unknown> {
   private deleteUsers = () => {
     const { usersToDelete, callback, userAPIClient, notifications } = this.props;
     const errors: string[] = [];
-    usersToDelete.forEach(async username => {
+    usersToDelete.forEach(async (username) => {
       try {
         await userAPIClient.deleteUser(username);
         notifications.toasts.addSuccess(

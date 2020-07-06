@@ -41,7 +41,7 @@ describe('build query', () => {
         { query: 'foo:bar', language: 'lucene' },
         { query: 'bar:baz', language: 'lucene' },
       ] as unknown) as Query[];
-      const expectedESQueries = queries.map(query => {
+      const expectedESQueries = queries.map((query) => {
         return decorateQuery(luceneStringToDsl(query.query), {});
       });
 
@@ -64,7 +64,7 @@ describe('build query', () => {
       { query: 'bar:baz', language: 'lucene' },
     ] as unknown) as Query[];
     const dateFormatTZ = 'America/Phoenix';
-    const expectedESQueries = queries.map(query => {
+    const expectedESQueries = queries.map((query) => {
       return decorateQuery(luceneStringToDsl(query.query), {}, dateFormatTZ);
     });
     const result = buildQueryFromLucene(queries, {}, dateFormatTZ);

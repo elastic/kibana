@@ -28,7 +28,7 @@ export class AttributionControl extends React.Component {
   }
 
   _loadAttributions = async () => {
-    const attributionPromises = this.props.layerList.map(async layer => {
+    const attributionPromises = this.props.layerList.map(async (layer) => {
       try {
         return await layer.getAttributions();
       } catch (error) {
@@ -44,7 +44,7 @@ export class AttributionControl extends React.Component {
     for (let i = 0; i < attributions.length; i++) {
       for (let j = 0; j < attributions[i].length; j++) {
         const testAttr = attributions[i][j];
-        const attr = uniqueAttributions.find(added => {
+        const attr = uniqueAttributions.find((added) => {
           return added.url === testAttr.url && added.label === testAttr.label;
         });
         if (!attr) {

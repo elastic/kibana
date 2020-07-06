@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
@@ -124,7 +124,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                             one {type}
                             other {types}
                           } found"
-                          values={{ resultCount: visTypes.filter(type => type.highlighted).length }}
+                          values={{
+                            resultCount: visTypes.filter((type) => type.highlighted).length,
+                          }}
                         />
                       )}
                     </span>
@@ -153,7 +155,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   </EuiTitle>
                   <EuiSpacer size="m" />
                   <NewVisHelp
-                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
+                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter((t) => t.promotion)}
                     onPromotionClicked={this.props.onVisTypeSelected}
                   />
                 </React.Fragment>
@@ -169,7 +171,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     visTypes: TypesStart,
     query: string
   ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
-    const types = visTypes.all().filter(type => {
+    const types = visTypes.all().filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -187,10 +189,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
     let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
     if (!query) {
-      entries = allTypes.map(type => ({ ...type, highlighted: false }));
+      entries = allTypes.map((type) => ({ ...type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
-      entries = allTypes.map(type => {
+      entries = allTypes.map((type) => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
@@ -199,13 +201,13 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       });
     }
 
-    return sortByOrder(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
+    return orderBy(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
   }
 
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
     let stage = {};
     let highlightMsg;
-    if (!('aliasUrl' in visType) && visType.stage === 'experimental') {
+    if (!('aliasPath' in visType) && visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -219,7 +221,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         defaultMessage:
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
-    } else if ('aliasUrl' in visType) {
+    } else if ('aliasPath' in visType) {
       if (visType.stage === 'beta') {
         const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
           defaultMessage:
@@ -272,7 +274,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         onBlur={() => this.setHighlightType(null)}
         className="visNewVisDialog__type"
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasUrl' in visType) ? visType.stage : 'alias'}
+        data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
         role="menuitem"
@@ -280,7 +282,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       >
         <VisTypeIcon
           icon={visType.icon}
-          image={!('aliasUrl' in visType) ? visType.image : undefined}
+          image={!('aliasPath' in visType) ? visType.image : undefined}
         />
       </EuiKeyPadMenuItem>
     );

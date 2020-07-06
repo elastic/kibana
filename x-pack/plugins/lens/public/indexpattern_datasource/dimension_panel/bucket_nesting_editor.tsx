@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiHorizontalRule, EuiRadio, EuiSelect, htmlIdGenerator } from '@elastic/eui';
@@ -14,7 +13,7 @@ import { hasField } from '../utils';
 const generator = htmlIdGenerator('lens-nesting');
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
-  const result = columnOrder.filter(c => c !== inner);
+  const result = columnOrder.filter((c) => c !== inner);
   const outerPosition = result.indexOf(outer);
 
   result.splice(outerPosition + 1, 0, inner);
@@ -127,10 +126,10 @@ export function BucketNestingEditor({
                 defaultMessage: 'Entire data set',
               }),
             },
-            ...aggColumns,
+            ...aggColumns.map(({ value, text }) => ({ value, text })),
           ]}
           value={prevColumn}
-          onChange={e => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
+          onChange={(e) => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}
         />
       </EuiFormRow>
     </>

@@ -1,7 +1,7 @@
 # This graph creates a single rectangle for the whole graph on top of a map
 # Note that the actual map tiles are not loaded
 {
-  $schema: https://vega.github.io/schema/vega/v3.0.json
+  $schema: https://vega.github.io/schema/vega/v5.json
   config: {
     kibana: {type: "map", mapStyle: false}
   }

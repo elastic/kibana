@@ -63,7 +63,7 @@ function SelectOption<ParamName extends string, ValidParamValues extends string 
         disabled={disabled}
         options={availableOptions}
         value={value === undefined ? emptyValue.value : value}
-        onChange={ev => setValue(paramName, ev.target.value as ValidParamValues)}
+        onChange={(ev) => setValue(paramName, ev.target.value as ValidParamValues)}
         fullWidth={true}
         data-test-subj={dataTestSubj}
       />

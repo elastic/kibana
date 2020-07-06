@@ -21,9 +21,9 @@ import { noop } from 'lodash';
 import { Collector } from './collector';
 import { CollectorSet } from './collector_set';
 import { UsageCollector } from './usage_collector';
-import { loggingServiceMock } from '../../../../core/server/mocks';
+import { loggingSystemMock } from '../../../../core/server/mocks';
 
-const logger = loggingServiceMock.createLogger();
+const logger = loggingSystemMock.createLogger();
 
 const loggerSpies = {
   debug: jest.spyOn(logger, 'debug'),
@@ -144,7 +144,7 @@ describe('CollectorSet', () => {
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => ({ test: 1 }),
-          formatForBulkUpload: result => ({
+          formatForBulkUpload: (result) => ({
             type: 'MY_TEST_COLLECTOR',
             payload: { test: result.test * 2 },
           }),

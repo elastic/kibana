@@ -44,7 +44,7 @@ export type Action =
   | { type: 'updateSettings'; payload: DevToolsSettings };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
-  produce<Store>(state, draft => {
+  produce<Store>(state, (draft) => {
     if (action.type === 'setInputEditor') {
       if (action.payload) {
         draft.ready = true;

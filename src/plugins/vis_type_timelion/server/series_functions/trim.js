@@ -52,12 +52,12 @@ export default new Chainable('trim', {
     if (config.start == null) config.start = 1;
     if (config.end == null) config.end = 1;
 
-    return alter(args, function(eachSeries) {
-      _.times(config.start, function(i) {
+    return alter(args, function (eachSeries) {
+      _.times(config.start, function (i) {
         eachSeries.data[i][1] = null;
       });
 
-      _.times(config.end, function(i) {
+      _.times(config.end, function (i) {
         eachSeries.data[eachSeries.data.length - 1 - i][1] = null;
       });
 

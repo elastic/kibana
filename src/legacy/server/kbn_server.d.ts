@@ -113,7 +113,6 @@ export interface KibanaCore {
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
-    uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
   env: {
@@ -153,6 +152,7 @@ export default class KbnServer {
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
+  public uiBundles: any;
 
   constructor(
     settings: Record<string, any>,

@@ -50,7 +50,7 @@ function find(rules, check) {
     return moment.duration(ms, 'ms');
   }
 
-  return function(buckets, duration) {
+  return function (buckets, duration) {
     const interval = pick(buckets, duration);
     if (interval) {
       return moment.duration(interval._data);

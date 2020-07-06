@@ -20,16 +20,16 @@
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
-const mockLoggerFactory = loggingServiceMock.create();
+const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       namespaceType: 'single',
@@ -73,7 +73,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
-          bar: doc => doc,
+          bar: (doc) => doc,
         },
       }),
       validateDoc: _.noop,
@@ -131,7 +131,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'user',
         migrations: {
-          '1.2.3': doc => {
+          '1.2.3': (doc) => {
             _.set(doc, 'attributes.name', 'Mike');
             return doc;
           },
@@ -293,7 +293,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dog: '10.2.0' },
       })
     ).toThrow(
-      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \(10\.2\.0\)/i
+      /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
     );
   });
 
@@ -315,7 +315,7 @@ describe('DocumentMigrator', () => {
         migrationVersion: { dawg: '1.2.4' },
       })
     ).toThrow(
-      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \(1\.2\.4\)/i
+      /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
     );
   });
 
@@ -572,7 +572,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
+      const warning = loggingSystemMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
@@ -601,8 +601,8 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(loggingServiceMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
-    expect(loggingServiceMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
+    expect(loggingSystemMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
@@ -639,10 +639,10 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'aaa',
         migrations: {
-          '2.3.4': d => _.set(d, 'attributes.counter', 42),
+          '2.3.4': (d) => _.set(d, 'attributes.counter', 42),
         },
       }),
-      validateDoc: d => {
+      validateDoc: (d) => {
         if ((d.attributes as any).counter === 42) {
           throw new Error('Meaningful!');
         }

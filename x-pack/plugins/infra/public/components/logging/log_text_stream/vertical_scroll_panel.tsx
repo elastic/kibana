@@ -262,7 +262,7 @@ const ScrollPanelWrapper = euiStyled.div<ScrollPanelWrapperProps>`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;
-  padding-right: ${props => props.scrollbarOffset || 0}px;
+  padding-right: ${(props) => props.scrollbarOffset || 0}px;
 
   & * {
     overflow-anchor: none;

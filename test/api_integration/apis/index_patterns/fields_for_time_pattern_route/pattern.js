@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -35,7 +35,7 @@ export default function({ getService }) {
           look_back: 2,
         })
         .expect(200)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body).to.eql({
             fields: [
               {
@@ -74,7 +74,7 @@ export default function({ getService }) {
           look_back: 1,
         })
         .expect(200)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body).to.eql({
             fields: [
               {
@@ -106,7 +106,7 @@ export default function({ getService }) {
           meta_fields: JSON.stringify(['meta1', 'meta2']),
         })
         .expect(200)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body).to.eql({
             fields: [
               {

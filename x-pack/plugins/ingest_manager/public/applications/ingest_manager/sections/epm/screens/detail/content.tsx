@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { DataSourcesPanel } from './data_sources_panel';
+import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
@@ -50,7 +49,7 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { panel, name, version, assets, title, removable } = props;
+  const { panel, name, version, assets, title, removable, latestVersion } = props;
   switch (panel) {
     case 'settings':
       return (
@@ -60,10 +59,11 @@ export function ContentPanel(props: ContentPanelProps) {
           assets={assets}
           title={title}
           removable={removable}
+          latestVersion={latestVersion}
         />
       );
-    case 'data-sources':
-      return <DataSourcesPanel name={name} version={version} />;
+    case 'usages':
+      return <PackageConfigsPanel name={name} version={version} />;
     case 'overview':
     default:
       return <OverviewPanel {...props} />;
@@ -72,17 +72,11 @@ export function ContentPanel(props: ContentPanelProps) {
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
-  const { assets, requirement, panel } = props;
+  const { assets, panel } = props;
   switch (panel) {
     case 'overview':
       return (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <Requirements requirements={requirement} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xl" />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>

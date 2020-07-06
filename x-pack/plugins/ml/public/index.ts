@@ -19,6 +19,7 @@ export const plugin: PluginInitializer<
   MlPluginStart,
   MlSetupDependencies,
   MlStartDependencies
-> = (context: PluginInitializerContext) => new MlPlugin(context);
+> = (initializerContext: PluginInitializerContext) => new MlPlugin(initializerContext);
 
 export { MlPluginSetup, MlPluginStart };
+export * from './shared';

@@ -17,8 +17,6 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { VegaView } from './vega_view/vega_view';
-import { VegaMapView } from './vega_view/vega_map_view';
 import { getNotifications, getData, getSavedObjects } from './services';
 
 export const createVegaVisualization = ({ serviceSettings }) =>
@@ -117,8 +115,10 @@ export const createVegaVisualization = ({ serviceSettings }) =>
 
         if (vegaParser.useMap) {
           const services = { toastService: getNotifications().toasts };
+          const { VegaMapView } = await import('./vega_view/vega_map_view');
           this._vegaView = new VegaMapView(vegaViewParams, services);
         } else {
+          const { VegaView } = await import('./vega_view/vega_view');
           this._vegaView = new VegaView(vegaViewParams);
         }
         await this._vegaView.init();

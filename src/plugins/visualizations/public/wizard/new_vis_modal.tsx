@@ -23,11 +23,13 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
+import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { EmbeddableStateTransfer } from '../../../embeddable/public';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -38,6 +40,10 @@ interface TypeSelectionProps {
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
+  application: ApplicationStart;
+  outsideVisualizeApp?: boolean;
+  stateTransfer?: EmbeddableStateTransfer;
+  originatingApp?: string;
 }
 
 interface TypeSelectionState {
@@ -47,7 +53,8 @@ interface TypeSelectionState {
 
 // TODO: redirect logic is specific to visualise & dashboard
 // but it is likely should be decoupled. e.g. handled by the container instead
-const baseUrl = `#/visualize/create?`;
+const basePath = `/create?`;
+const baseUrl = `/app/visualize#${basePath}`;
 
 class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
@@ -61,7 +68,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = props.uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
 
     this.state = {
       showSearchVisModal: false,
@@ -121,7 +128,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private onVisTypeSelected = (visType: VisType | VisTypeAlias) => {
-    if (!('aliasUrl' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+    if (!('aliasPath' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
@@ -141,13 +148,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     let params;
-    if ('aliasUrl' in visType) {
-      params = this.props.addBasePath(visType.aliasUrl);
-      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
-        params = `${params}?addToDashboard`;
-      }
+    if ('aliasPath' in visType) {
+      params = visType.aliasPath;
       this.props.onClose();
-      window.location.assign(params);
+      this.navigate(visType.aliasApp, visType.aliasPath);
       return;
     }
 
@@ -159,7 +163,24 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     params = params.concat(this.props.editorParams!);
 
     this.props.onClose();
-    location.assign(`${baseUrl}${params.join('&')}`);
+    if (this.props.outsideVisualizeApp) {
+      this.navigate('visualize', `#${basePath}${params.join('&')}`);
+    } else {
+      location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));
+    }
+  }
+
+  private navigate(appId: string, params: string) {
+    if (this.props.stateTransfer && this.props.originatingApp) {
+      this.props.stateTransfer.navigateToEditor(appId, {
+        path: params,
+        state: { originatingApp: this.props.originatingApp },
+      });
+    } else {
+      this.props.application.navigateToApp(appId, {
+        path: params,
+      });
+    }
   }
 }
 

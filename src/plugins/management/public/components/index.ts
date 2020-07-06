@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ManagementSidebarNav } from './management_sidebar_nav';
-export { ManagementChrome } from './management_chrome';
+export { ManagementApp } from './management_app';
+export { managementSections } from './management_sections';

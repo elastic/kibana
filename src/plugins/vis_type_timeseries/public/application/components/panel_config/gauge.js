@@ -101,7 +101,7 @@ class GaugePanelConfigUi extends Component {
       },
     ];
     const htmlId = htmlIdGenerator();
-    const selectedGaugeStyleOption = styleOptions.find(option => {
+    const selectedGaugeStyleOption = styleOptions.find((option) => {
       return model.gauge_style === option.value;
     });
     let view;
@@ -155,7 +155,7 @@ class GaugePanelConfigUi extends Component {
                       language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={filter => this.props.onChange({ filter })}
+                    onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>

@@ -28,30 +28,30 @@ import { version } from '../../../../../core/server/utils/package_json';
 
 const xsrfHeader = 'kbn-version';
 
-describe('chrome xsrf apis', function() {
+describe('chrome xsrf apis', function () {
   const sandbox = sinon.createSandbox();
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore();
   });
 
-  describe('jQuery support', function() {
-    it('adds a global jQuery prefilter', function() {
+  describe('jQuery support', function () {
+    it('adds a global jQuery prefilter', function () {
       sandbox.stub($, 'ajaxPrefilter');
       $setupXsrfRequestInterceptor(version);
       expect($.ajaxPrefilter.callCount).to.be(1);
     });
 
-    describe('jQuery prefilter', function() {
+    describe('jQuery prefilter', function () {
       let prefilter;
 
-      beforeEach(function() {
+      beforeEach(function () {
         sandbox.stub($, 'ajaxPrefilter');
         $setupXsrfRequestInterceptor(version);
         prefilter = $.ajaxPrefilter.args[0][0];
       });
 
-      it(`sets the ${xsrfHeader} header`, function() {
+      it(`sets the ${xsrfHeader} header`, function () {
         const setHeader = sinon.stub();
         prefilter({}, {}, { setRequestHeader: setHeader });
 
@@ -59,24 +59,24 @@ describe('chrome xsrf apis', function() {
         expect(setHeader.args[0]).to.eql([xsrfHeader, version]);
       });
 
-      it('can be canceled by setting the kbnXsrfToken option', function() {
+      it('can be canceled by setting the kbnXsrfToken option', function () {
         const setHeader = sinon.stub();
         prefilter({ kbnXsrfToken: false }, {}, { setRequestHeader: setHeader });
         expect(setHeader.callCount).to.be(0);
       });
     });
 
-    describe('Angular support', function() {
+    describe('Angular support', function () {
       let $http;
       let $httpBackend;
 
-      beforeEach(function() {
+      beforeEach(function () {
         sandbox.stub($, 'ajaxPrefilter');
         ngMock.module($setupXsrfRequestInterceptor(version));
       });
 
       beforeEach(
-        ngMock.inject(function($injector) {
+        ngMock.inject(function ($injector) {
           $http = $injector.get('$http');
           $httpBackend = $injector.get('$httpBackend');
 
@@ -84,14 +84,14 @@ describe('chrome xsrf apis', function() {
         })
       );
 
-      afterEach(function() {
+      afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
       });
 
-      it(`injects a ${xsrfHeader} header on every request`, function() {
+      it(`injects a ${xsrfHeader} header on every request`, function () {
         $httpBackend
-          .expectPOST('/api/test', undefined, function(headers) {
+          .expectPOST('/api/test', undefined, function (headers) {
             return headers[xsrfHeader] === version;
           })
           .respond(200, '');
@@ -100,9 +100,9 @@ describe('chrome xsrf apis', function() {
         $httpBackend.flush();
       });
 
-      it('skips requests with the kbnXsrfToken set falsy', function() {
+      it('skips requests with the kbnXsrfToken set falsy', function () {
         $httpBackend
-          .expectPOST('/api/test', undefined, function(headers) {
+          .expectPOST('/api/test', undefined, function (headers) {
             return !(xsrfHeader in headers);
           })
           .respond(200, '');
@@ -128,10 +128,10 @@ describe('chrome xsrf apis', function() {
         $httpBackend.flush();
       });
 
-      it('treats the kbnXsrfToken option as boolean-y', function() {
+      it('treats the kbnXsrfToken option as boolean-y', function () {
         const customToken = `custom:${version}`;
         $httpBackend
-          .expectPOST('/api/test', undefined, function(headers) {
+          .expectPOST('/api/test', undefined, function (headers) {
             return headers[xsrfHeader] === version;
           })
           .respond(200, '');

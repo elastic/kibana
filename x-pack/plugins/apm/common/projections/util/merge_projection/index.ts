@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge, isPlainObject, cloneDeep } from 'lodash';
+import { mergeWith, isPlainObject, cloneDeep } from 'lodash';
 import { DeepPartial } from 'utility-types';
 import { AggregationInputMap } from '../../../../typings/elasticsearch/aggregations';
 import {
   ESSearchRequest,
-  ESSearchBody
+  ESSearchBody,
 } from '../../../../typings/elasticsearch';
 import { Projection } from '../../typings';
 
@@ -35,7 +35,7 @@ export function mergeProjection<
   T extends Projection,
   U extends SourceProjection
 >(target: T, source: U): DeepMerge<T, U> {
-  return merge({}, cloneDeep(target), source, (a, b) => {
+  return mergeWith({}, cloneDeep(target), source, (a, b) => {
     if (isPlainObject(a) && isPlainObject(b)) {
       return undefined;
     }

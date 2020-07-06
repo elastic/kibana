@@ -23,7 +23,7 @@ import { DashboardPlugin } from './plugin';
 export {
   DashboardContainer,
   DashboardContainerInput,
-  DashboardContainerFactory,
+  DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
   // Types below here can likely be made private when dashboard app moved into this NP plugin.
   DEFAULT_PANEL_WIDTH,
@@ -31,8 +31,11 @@ export {
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { DashboardStart } from './plugin';
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
+export { DashboardStart, DashboardUrlGenerator } from './plugin';
+export { DASHBOARD_APP_URL_GENERATOR, createDashboardUrlGenerator } from './url_generator';
+export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
+export { SavedObjectDashboard } from './saved_dashboards';
+export { SavedDashboardPanel } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

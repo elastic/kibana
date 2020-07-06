@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup } from 'kibana/public';
 import { first } from 'rxjs/operators';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
@@ -17,11 +17,17 @@ import { PLUGIN } from '../common/constants';
 import { PluginDependencies } from './types';
 import { getLinks } from './links';
 import { LanguageService } from './services';
+import { ILicense } from '../../licensing/common/types';
+
+const checkLicenseStatus = (license: ILicense) => {
+  const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
+  return state === 'valid' ? { valid: true } : { valid: false, message };
+};
 
 export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencies> {
   languageService = new LanguageService();
 
-  async setup(
+  public setup(
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
   ) {
@@ -34,12 +40,12 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         defaultMessage: 'Simulate and debug painless code.',
       }),
       icon: '',
-      path: '/app/kibana#/dev_tools/painless_lab',
+      path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    devTools.register({
+    const devTool = devTools.register({
       id: 'painless_lab',
       order: 7,
       title: (
@@ -64,7 +70,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       ) as any,
       enableRouting: false,
       disabled: false,
-      mount: async (ctx, { element }) => {
+      mount: async ({ element }) => {
         const [core] = await getStartServices();
 
         const {
@@ -77,14 +83,10 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         this.languageService.setup();
 
         const license = await licensing.license$.pipe(first()).toPromise();
-        const { state, message: invalidLicenseMessage } = license.check(
-          PLUGIN.id,
-          PLUGIN.minimumLicenseType
-        );
-        const isValidLicense = state === 'valid';
+        const licenseStatus = checkLicenseStatus(license);
 
-        if (!isValidLicense) {
-          notifications.toasts.addDanger(invalidLicenseMessage as string);
+        if (!licenseStatus.valid) {
+          notifications.toasts.addDanger(licenseStatus.message!);
           window.location.hash = '/dev_tools';
           return () => {};
         }
@@ -103,11 +105,19 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         };
       },
     });
+
+    licensing.license$.subscribe((license) => {
+      if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
+        devTool.disable();
+      } else if (devTool.isDisabled()) {
+        devTool.enable();
+      }
+    });
   }
 
-  async start(core: CoreStart, plugins: any) {}
+  public start() {}
 
-  async stop() {
+  public stop() {
     this.languageService.stop();
   }
 }

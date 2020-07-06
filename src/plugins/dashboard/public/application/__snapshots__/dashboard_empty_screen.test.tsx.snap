@@ -301,7 +301,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
                           className="euiImage "
@@ -309,7 +309,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
                             style={Object {}}
                           />
                         </figure>
@@ -995,7 +995,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     >
                       <EuiImage
                         alt=""
-                        url="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                        url="/plugins/home/assets/welcome_graphic_light_2x.png"
                       >
                         <figure
                           className="euiImage "
@@ -1003,7 +1003,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                           <img
                             alt=""
                             className="euiImage__img"
-                            src="/plugins/kibana/home/assets/welcome_graphic_light_2x.png"
+                            src="/plugins/home/assets/welcome_graphic_light_2x.png"
                             style={Object {}}
                           />
                         </figure>

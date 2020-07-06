@@ -16,7 +16,7 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Service } from '../../../types';
@@ -53,7 +53,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
+      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
       service.logger.warn(
         `route ${path} error getting aliases from pattern "${pattern}": ${err.message}`
@@ -62,7 +62,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.dataClient, pattern);
+      indices = await getIndicesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
       service.logger.warn(
         `route ${path} error getting indices from pattern "${pattern}": ${err.message}`
@@ -84,7 +84,7 @@ function uniqueCombined(list1: string[], list2: string[], limit: number) {
 }
 
 async function getIndicesFromPattern(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   pattern: string
 ): Promise<string[]> {
   const params = {
@@ -110,11 +110,11 @@ async function getIndicesFromPattern(
     return [];
   }
 
-  return (response.aggregations as IndiciesAggregation).indices.buckets.map(bucket => bucket.key);
+  return (response.aggregations as IndiciesAggregation).indices.buckets.map((bucket) => bucket.key);
 }
 
 async function getAliasesFromPattern(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   pattern: string
 ): Promise<string[]> {
   const params = {

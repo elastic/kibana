@@ -38,7 +38,7 @@ jest.mock('../../../services/ml_api_service', () => ({
 jest.mock('./utils', () => ({
   getCalendarSettingsData: jest.fn().mockImplementation(
     () =>
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolve({
           jobIds: ['test-job-one', 'test-job-2'],
           groupIds: ['test-group-one', 'test-group-two'],
@@ -48,7 +48,7 @@ jest.mock('./utils', () => ({
   ),
 }));
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));
@@ -117,7 +117,7 @@ describe('NewCalendar', () => {
   test('Import modal shown on Import Events button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="ml_import_events"]');
+    const importButton = wrapper.find('[data-test-subj="mlImportEvents"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -127,7 +127,7 @@ describe('NewCalendar', () => {
   test('New event modal shown on New event button click', () => {
     const wrapper = mountWithIntl(<NewCalendar {...props} />);
 
-    const importButton = wrapper.find('[data-test-subj="ml_new_event"]');
+    const importButton = wrapper.find('[data-test-subj="mlNewEvent"]');
     const button = importButton.find('EuiButton');
     button.simulate('click');
 
@@ -154,7 +154,7 @@ describe('NewCalendar', () => {
 
     const wrapper = mountWithIntl(<NewCalendar {...noCreateProps} />);
 
-    const buttons = wrapper.find('[data-test-subj="ml_save_calendar_button"]');
+    const buttons = wrapper.find('[data-test-subj="mlSaveCalendarButton"]');
     const saveButton = buttons.find('EuiButton');
 
     expect(saveButton.prop('isDisabled')).toBe(true);

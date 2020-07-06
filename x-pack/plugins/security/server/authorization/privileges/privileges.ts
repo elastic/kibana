@@ -6,11 +6,10 @@
 
 import { uniq } from 'lodash';
 import { SecurityLicense } from '../../../common/licensing';
-import { Feature } from '../../../../features/server';
+import { Feature, PluginSetupContract as FeaturesPluginSetup } from '../../../../features/server';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import { FeaturesService } from '../../plugin';
 import {
   featurePrivilegeIterator,
   subFeaturePrivilegeIterator,
@@ -22,7 +21,7 @@ export interface PrivilegesService {
 
 export function privilegesFactory(
   actions: Actions,
-  featuresService: FeaturesService,
+  featuresService: FeaturesPluginSetup,
   licenseService: Pick<SecurityLicense, 'getFeatures'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
@@ -31,12 +30,14 @@ export function privilegesFactory(
     get() {
       const features = featuresService.getFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
+      const basePrivilegeFeatures = features.filter(
+        (feature) => !feature.excludeFromBasePrivileges
+      );
 
       let allActions: string[] = [];
       let readActions: string[] = [];
 
-      basePrivilegeFeatures.forEach(feature => {
+      basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
@@ -110,7 +111,7 @@ export function privilegesFactory(
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
           if (feature.reserved) {
-            feature.reserved.privileges.forEach(reservedPrivilege => {
+            feature.reserved.privileges.forEach((reservedPrivilege) => {
               acc[reservedPrivilege.id] = [
                 actions.version,
                 ...uniq(featurePrivilegeBuilder.getActions(reservedPrivilege.privilege, feature)),

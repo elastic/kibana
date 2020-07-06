@@ -29,7 +29,7 @@ describe('RequestAdapter', () => {
 
   describe('getRequests()', () => {
     function requestNames(requests: Request[]) {
-      return requests.map(req => req.name);
+      return requests.map((req) => req.name);
     }
 
     it('should return all started requests', () => {

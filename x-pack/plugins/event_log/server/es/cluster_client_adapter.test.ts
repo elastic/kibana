@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { LegacyClusterClient, Logger } from '../../../../../src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
 import moment from 'moment';
 import { findOptionsSchema } from '../event_log_client';
 
-type EsClusterClient = Pick<jest.Mocked<ClusterClient>, 'callAsInternalUser' | 'asScoped'>;
+type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 
 let logger: Logger;
 let clusterClient: EsClusterClient;
 let clusterClientAdapter: IClusterClientAdapter;
 
 beforeEach(() => {
-  logger = loggingServiceMock.createLogger();
+  logger = loggingSystemMock.createLogger();
   clusterClient = elasticsearchServiceMock.createClusterClient();
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
@@ -51,7 +51,7 @@ describe('doesIlmPolicyExist', () => {
     await clusterClientAdapter.doesIlmPolicyExist('foo');
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'GET',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
     });
   });
 
@@ -78,7 +78,7 @@ describe('createIlmPolicy', () => {
     await clusterClientAdapter.createIlmPolicy('foo', { args: true });
     expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
       method: 'PUT',
-      path: '_ilm/policy/foo',
+      path: '/_ilm/policy/foo',
       body: { args: true },
     });
   });
@@ -226,7 +226,7 @@ describe('queryEventsBySavedObject', () => {
       body: {
         from: 0,
         size: 10,
-        sort: { 'event.start': { order: 'asc' } },
+        sort: { '@timestamp': { order: 'asc' } },
         query: {
           bool: {
             must: [
@@ -236,6 +236,13 @@ describe('queryEventsBySavedObject', () => {
                   query: {
                     bool: {
                       must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
                         {
                           term: {
                             'kibana.saved_objects.type': {
@@ -294,9 +301,7 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
+    const start = moment().subtract(1, 'days').toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
@@ -321,6 +326,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -340,7 +352,7 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
@@ -360,12 +372,8 @@ describe('queryEventsBySavedObject', () => {
       },
     });
 
-    const start = moment()
-      .subtract(1, 'days')
-      .toISOString();
-    const end = moment()
-      .add(1, 'days')
-      .toISOString();
+    const start = moment().subtract(1, 'days').toISOString();
+    const end = moment().add(1, 'days').toISOString();
 
     await clusterClientAdapter.queryEventsBySavedObject(
       'index-name',
@@ -390,6 +398,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -409,14 +424,14 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
               },
               {
                 range: {
-                  'event.end': {
+                  '@timestamp': {
                     lte: end,
                   },
                 },

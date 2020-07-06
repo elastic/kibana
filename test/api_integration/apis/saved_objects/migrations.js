@@ -56,12 +56,12 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': doc => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          '1.0.0': (doc) => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
         bar: {
-          '1.0.0': doc => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': doc => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': doc => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          '1.0.0': (doc) => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+          '1.3.0': (doc) => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+          '1.9.0': (doc) => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
         },
       };
 
@@ -172,12 +172,12 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': doc => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
+          '1.0.0': (doc) => _.set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
         bar: {
-          '1.0.0': doc => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
-          '1.3.0': doc => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
-          '1.9.0': doc => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          '1.0.0': (doc) => _.set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+          '1.3.0': (doc) => _.set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+          '1.9.0': (doc) => _.set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
         },
       };
 
@@ -187,8 +187,8 @@ export default ({ getService }) => {
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
       mappingProperties.bar.properties.name = { type: 'keyword' };
-      migrations.foo['2.0.1'] = doc => _.set(doc, 'attributes.name', `${doc.attributes.name}v2`);
-      migrations.bar['2.3.4'] = doc => _.set(doc, 'attributes.name', `NAME ${doc.id}`);
+      migrations.foo['2.0.1'] = (doc) => _.set(doc, 'attributes.name', `${doc.attributes.name}v2`);
+      migrations.bar['2.3.4'] = (doc) => _.set(doc, 'attributes.name', `NAME ${doc.id}`);
 
       await migrateIndex({ callCluster, index, migrations, mappingProperties });
 
@@ -267,7 +267,7 @@ export default ({ getService }) => {
 
       const migrations = {
         foo: {
-          '1.0.0': doc => _.set(doc, 'attributes.name', 'LOTR'),
+          '1.0.0': (doc) => _.set(doc, 'attributes.name', 'LOTR'),
         },
       };
 
@@ -284,7 +284,7 @@ export default ({ getService }) => {
       assert.deepEqual(
         result
           .map(({ status, destIndex }) => ({ status, destIndex }))
-          .sort(a => (a.destIndex ? 0 : 1)),
+          .sort((a) => (a.destIndex ? 0 : 1)),
         [
           { status: 'migrated', destIndex: '.migration-c_2' },
           { status: 'skipped', destIndex: undefined },
@@ -293,7 +293,7 @@ export default ({ getService }) => {
 
       // It only created the original and the dest
       assert.deepEqual(
-        _.pluck(
+        _.map(
           await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
           'index'
         ).sort(),
@@ -354,7 +354,7 @@ async function migrateIndex({
 }) {
   const typeRegistry = new SavedObjectTypeRegistry();
   const types = migrationsToTypes(migrations);
-  types.forEach(type => typeRegistry.registerType(type));
+  types.forEach((type) => typeRegistry.registerType(type));
 
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
@@ -394,7 +394,7 @@ async function fetchDocs({ callCluster, index }) {
     hits: { hits },
   } = await callCluster('search', { index });
   return hits
-    .map(h => ({
+    .map((h) => ({
       ...h._source,
       id: h._id,
     }))

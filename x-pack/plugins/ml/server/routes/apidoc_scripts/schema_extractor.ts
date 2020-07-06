@@ -67,7 +67,7 @@ export function extractDocumentation(
       return collection;
     }
 
-    members.forEach(member => {
+    members.forEach((member) => {
       collection.push(serializeProperty(member));
     });
 
@@ -138,7 +138,7 @@ export function extractDocumentation(
           ? `${symbol.getName()}[]`
           : symbol.getName();
 
-      members.forEach(member => {
+      members.forEach((member) => {
         nestedEntries.push(serializeProperty(member));
       });
     }

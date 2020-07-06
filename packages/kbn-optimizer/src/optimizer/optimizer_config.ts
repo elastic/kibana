@@ -20,7 +20,14 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  CacheableWorkerConfig,
+  ThemeTag,
+  ThemeTags,
+  parseThemeTags,
+} from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
@@ -32,6 +39,16 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
+}
+
+function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
+  const result: any = {};
+  for (const [key, value] of Object.entries(obj) as any) {
+    if (!keys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -63,6 +80,18 @@ interface Options {
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
+
+  /**
+   * style themes that sass files will be converted to, the correct style will be
+   * loaded in the browser automatically by checking the global `__kbnThemeTag__`.
+   * Specifying additional styles increases build time.
+   *
+   * Defaults:
+   *  - "*" when building the dist
+   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEMES` env var
+   *  - "k7light"
+   */
+  themes?: ThemeTag | '*' | ThemeTag[];
 }
 
 interface ParsedOptions {
@@ -76,6 +105,7 @@ interface ParsedOptions {
   pluginScanDirs: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
+  themeTags: ThemeTags;
 }
 
 export class OptimizerConfig {
@@ -106,7 +136,7 @@ export class OptimizerConfig {
       ...(examples ? [Path.resolve('examples'), Path.resolve('x-pack/examples')] : []),
       Path.resolve(repoRoot, '../kibana-extra'),
     ];
-    if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
+    if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
     }
 
@@ -118,7 +148,7 @@ export class OptimizerConfig {
     }
 
     const pluginPaths = options.pluginPaths || [];
-    if (!pluginPaths.every(s => Path.isAbsolute(s))) {
+    if (!pluginPaths.every((s) => Path.isAbsolute(s))) {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
@@ -128,6 +158,10 @@ export class OptimizerConfig {
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }
+
+    const themeTags = parseThemeTags(
+      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEMES)
+    );
 
     return {
       watch,
@@ -140,6 +174,7 @@ export class OptimizerConfig {
       pluginPaths,
       inspectWorkers,
       includeCoreBundle,
+      themeTags,
     };
   }
 
@@ -152,7 +187,7 @@ export class OptimizerConfig {
             new Bundle({
               type: 'entry',
               id: 'core',
-              entry: './public/entry_point',
+              publicDirNames: ['public', 'public/utils'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.repoRoot, 'src/core/target/public'),
@@ -171,7 +206,8 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack
+      options.profileWebpack,
+      options.themeTags
     );
   }
 
@@ -184,7 +220,8 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean
+    public readonly profileWebpack: boolean,
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -195,7 +232,18 @@ export class OptimizerConfig {
       repoRoot: this.repoRoot,
       watch: this.watch,
       optimizerCacheKey,
+      themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
+  }
+
+  getCacheableWorkerConfig(): CacheableWorkerConfig {
+    return omit(this.getWorkerConfig('♻'), [
+      // these config options don't change the output of the bundles, so
+      // should not invalidate caches when they change
+      'watch',
+      'profileWebpack',
+      'cache',
+    ]);
   }
 }

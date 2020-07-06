@@ -7,11 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  IInterpreterRenderHandlers,
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -37,6 +47,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
   }) => void;
+  showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
   mount: (element: Element, props: EditorFrameProps) => void;
@@ -103,9 +114,16 @@ export interface TableSuggestion {
  * * `unchanged` means the table is the same in the currently active configuration
  * * `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)
  * * `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)
+ * * `reorder` means the table columns have changed order, which change the data as well
  * * `layers` means the change is a change to the layer structure, not to the table
  */
-export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'layers';
+export type TableChangeType =
+  | 'initial'
+  | 'unchanged'
+  | 'reduced'
+  | 'extended'
+  | 'reorder'
+  | 'layers';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -169,6 +187,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
   dragDropContext: DragContextState;
   setState: StateSetter<T>;
+  showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   query: Query;
   dateRange: DateRange;
@@ -273,6 +292,18 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
+export interface VisualizationToolbarProps<T = unknown> {
+  setState: (newState: T) => void;
+  frame: FramePublicAPI;
+  state: T;
+}
+
+export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
+  groupId: string;
+  accessor: string;
+  setState: (newState: T) => void;
+};
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
@@ -283,6 +314,12 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
   dataTestSubj?: string;
+
+  /**
+   * When the dimension editor is enabled for this group, all dimensions in the group
+   * will render the extra tab for the dimension editor
+   */
+  enableDimensionEditor?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -312,6 +349,10 @@ export interface SuggestionRequest<T = unknown> {
    * The visualization needs to know which table is being suggested
    */
   keptLayerIds: string[];
+  /**
+   * Different suggestions can be generated for each subtype of the visualization
+   */
+  subVisualizationId?: string;
 }
 
 /**
@@ -389,6 +430,11 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   visualizationTypes: VisualizationType[];
   /**
+   * Return the ID of the current visualization. Used to highlight
+   * the active subtype of the visualization.
+   */
+  getVisualizationTypeId: (state: T) => string;
+  /**
    * If the visualization has subtypes, update the subtype in state.
    */
   switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
@@ -417,6 +463,11 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
   /**
+   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
+   * settings for the visualization.
+   */
+  renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
+  /**
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
    */
@@ -432,6 +483,15 @@ export interface Visualization<T = unknown, P = unknown> {
    * look at its internal state to determine which dimension is being affected.
    */
   removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
+
+  /**
+   * Additional editor that gets rendered inside the dimension popover.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditor?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => void;
 
   /**
    * The frame will call this function on all visualizations at different times. The
@@ -450,4 +510,30 @@ export interface Visualization<T = unknown, P = unknown> {
    * If there is no expression provided, the preview icon is used.
    */
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+}
+
+export interface LensFilterEvent {
+  name: 'filter';
+  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+}
+export interface LensBrushEvent {
+  name: 'brush';
+  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+  return event.name === 'filter';
+}
+
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+  return event.name === 'brush';
+}
+
+/**
+ * Expression renderer handlers specifically for lens renderers. This is a narrowed down
+ * version of the general render handlers, specifying supported event types. If this type is
+ * used, dispatched events will be handled correctly.
+ */
+export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
+  event: (event: LensFilterEvent | LensBrushEvent) => void;
 }

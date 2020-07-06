@@ -87,24 +87,8 @@ describe('lens_merge_tables', () => {
       {} as any
     );
 
-    expect(
-      moment
-        .duration(
-          moment()
-            .startOf('week')
-            .diff(dateRange!.fromDate)
-        )
-        .asDays()
-    ).toEqual(0);
+    expect(moment.duration(moment().startOf('week').diff(dateRange!.fromDate)).asDays()).toEqual(0);
 
-    expect(
-      moment
-        .duration(
-          moment()
-            .endOf('week')
-            .diff(dateRange!.toDate)
-        )
-        .asDays()
-    ).toEqual(0);
+    expect(moment.duration(moment().endOf('week').diff(dateRange!.toDate)).asDays()).toEqual(0);
   });
 });

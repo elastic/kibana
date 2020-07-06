@@ -8,12 +8,12 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_THREAD_COUNT,
-  AGENT_NAME
+  AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -21,26 +21,26 @@ import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 const series = {
   threadCount: {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
-      defaultMessage: 'Avg. count'
+      defaultMessage: 'Avg. count',
     }),
-    color: theme.euiColorVis0
+    color: theme.euiColorVis0,
   },
   threadCountMax: {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCountMax', {
-      defaultMessage: 'Max count'
+      defaultMessage: 'Max count',
     }),
-    color: theme.euiColorVis1
-  }
+    color: theme.euiColorVis1,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.threadCountChartTitle', {
-    defaultMessage: 'Thread Count'
+    defaultMessage: 'Thread Count',
   }),
   key: 'thread_count_line_chart',
   type: 'linemark',
   yUnit: 'number',
-  series
+  series,
 };
 
 export async function getThreadCountChart(
@@ -55,8 +55,8 @@ export async function getThreadCountChart(
     chartBase,
     aggs: {
       threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
-      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } }
+      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
     },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }]
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
   });
 }

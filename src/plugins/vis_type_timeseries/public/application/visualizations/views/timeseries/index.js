@@ -38,7 +38,7 @@ import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constan
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
-import { getTheme, getChartClasses } from './utils/theme';
+import { getBaseTheme, getChartClasses } from './utils/theme';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -49,18 +49,18 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = formatter => ({ value }) => formatter(value);
+const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
-const handleCursorUpdate = cursor => {
+const handleCursorUpdate = (cursor) => {
   eventBus.trigger(ACTIVE_CURSOR, cursor);
 };
 
 export const TimeSeries = ({
-  darkMode,
   backgroundColor,
   showGrid,
   legend,
   legendPosition,
+  tooltipMode,
   xAxisLabel,
   series,
   yAxis,
@@ -87,18 +87,26 @@ export const TimeSeries = ({
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
-  const hasBarChart = series.some(({ bars }) => bars.show);
+  const hasBarChart = series.some(({ bars }) => bars?.show);
 
-  // compute the theme based on the bg color
-  const theme = getTheme(darkMode, backgroundColor);
   // apply legend style change if bgColor is configured
   const classes = classNames('tvbVisTimeSeries', getChartClasses(backgroundColor));
 
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors } = getChartsSetup();
+  const { colors, theme: themeService } = getChartsSetup();
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
+
+  const onBrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
+    onBrush(min, max);
+  };
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -106,10 +114,10 @@ export const TimeSeries = ({
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
-        onBrushEnd={onBrush}
+        onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
-        theme={
+        theme={[
           hasBarChart
             ? {}
             : {
@@ -118,12 +126,17 @@ export const TimeSeries = ({
                     fill: '#F00',
                   },
                 },
-              }
-        }
-        baseTheme={theme}
+              },
+          {
+            background: {
+              color: backgroundColor,
+            },
+          },
+        ]}
+        baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: TooltipType.VerticalCursor,
+          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
       />
@@ -172,7 +185,7 @@ export const TimeSeries = ({
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
 
-          if (bars.show) {
+          if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
@@ -197,7 +210,7 @@ export const TimeSeries = ({
             );
           }
 
-          if (lines.show) {
+          if (lines?.show) {
             return (
               <AreaSeriesDecorator
                 key={key}
@@ -260,7 +273,6 @@ TimeSeries.defaultProps = {
 };
 
 TimeSeries.propTypes = {
-  darkMode: PropTypes.bool,
   backgroundColor: PropTypes.string,
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,

@@ -54,7 +54,7 @@ export const useLogEntryCategoriesResults = ({
       onResolve: ({ data: { categories } }) => {
         setTopLogEntryCategories(categories);
       },
-      onReject: error => {
+      onReject: (error) => {
         if (
           error instanceof Error &&
           !(error instanceof CanceledPromiseError) &&
@@ -76,7 +76,7 @@ export const useLogEntryCategoriesResults = ({
       onResolve: ({ data: { datasets } }) => {
         setLogEntryCategoryDatasets(datasets);
       },
-      onReject: error => {
+      onReject: (error) => {
         if (
           error instanceof Error &&
           !(error instanceof CanceledPromiseError) &&

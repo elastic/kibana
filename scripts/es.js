@@ -32,7 +32,7 @@ kbnEs
     'base-path': resolve(__dirname, '../.es'),
     ssl: false,
   })
-  .catch(function(e) {
+  .catch(function (e) {
     console.error(e);
     process.exitCode = 1;
   });

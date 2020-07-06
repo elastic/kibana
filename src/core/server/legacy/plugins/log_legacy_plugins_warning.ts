@@ -22,9 +22,10 @@ import { LegacyPluginSpec } from '../types';
 
 const internalPaths = ['/src/legacy/core_plugins', '/x-pack'];
 
-const breakingChangesUrl =
-  'https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html';
-const migrationGuideUrl = 'https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md';
+// Use shortened URLs so destinations can be updated if/when documentation moves
+// All platform team members have access to edit these
+const breakingChangesUrl = 'https://ela.st/kibana-breaking-changes-8-0';
+const migrationGuideUrl = 'https://ela.st/kibana-platform-migration';
 
 export const logLegacyThirdPartyPluginDeprecationWarning = ({
   specs,
@@ -35,7 +36,7 @@ export const logLegacyThirdPartyPluginDeprecationWarning = ({
 }) => {
   const thirdPartySpecs = specs.filter(isThirdPartyPluginSpec);
   if (thirdPartySpecs.length > 0) {
-    const pluginIds = thirdPartySpecs.map(spec => spec.getId());
+    const pluginIds = thirdPartySpecs.map((spec) => spec.getId());
     log.warn(
       `Some installed third party plugin(s) [${pluginIds.join(
         ', '
@@ -48,5 +49,5 @@ export const logLegacyThirdPartyPluginDeprecationWarning = ({
 
 const isThirdPartyPluginSpec = (spec: LegacyPluginSpec): boolean => {
   const pluginPath = spec.getPack().getPath();
-  return !internalPaths.some(internalPath => pluginPath.indexOf(internalPath) > -1);
+  return !internalPaths.some((internalPath) => pluginPath.indexOf(internalPath) > -1);
 };

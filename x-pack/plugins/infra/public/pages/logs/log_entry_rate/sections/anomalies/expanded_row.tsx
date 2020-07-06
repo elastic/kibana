@@ -4,83 +4,129 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-
+import React from 'react';
+import { useMount } from 'react-use';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
-import { LogEntryRateResults } from '../../use_log_entry_rate_results';
-import {
-  getAnnotationsForPartition,
-  getLogEntryRateSeriesForPartition,
-  getTotalNumberOfLogEntriesForPartition,
-} from '../helpers/data_formatters';
-import { AnomaliesChart } from './chart';
+import { AnomalyRecord } from '../../use_log_entry_rate_results';
+import { useLogEntryRateModuleContext } from '../../use_log_entry_rate_module';
+import { useLogEntryRateExamples } from '../../use_log_entry_rate_examples';
+import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
+import { LogEntryRateExampleMessage, LogEntryRateExampleMessageHeaders } from './log_entry_example';
+import { euiStyled } from '../../../../../../../observability/public';
+
+const EXAMPLE_COUNT = 5;
+
+const examplesTitle = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExamplesTitle', {
+  defaultMessage: 'Example log entries',
+});
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
-  partitionId: string;
-  results: LogEntryRateResults;
-  setTimeRange: (timeRange: TimeRange) => void;
+  anomaly: AnomalyRecord;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
-  const logEntryRateSeries = useMemo(
-    () =>
-      results?.histogramBuckets ? getLogEntryRateSeriesForPartition(results, partitionId) : [],
-    [results, partitionId]
-  );
-  const anomalyAnnotations = useMemo(
-    () =>
-      results?.histogramBuckets
-        ? getAnnotationsForPartition(results, partitionId)
-        : {
-            warning: [],
-            minor: [],
-            major: [],
-            critical: [],
-          },
-    [results, partitionId]
-  );
-  const totalNumberOfLogEntries = useMemo(
-    () =>
-      results?.histogramBuckets
-        ? getTotalNumberOfLogEntriesForPartition(results, partitionId)
-        : undefined,
-    [results, partitionId]
-  );
+}> = ({ anomaly, timeRange, jobId }) => {
+  const {
+    sourceConfiguration: { sourceId },
+  } = useLogEntryRateModuleContext();
+
+  const {
+    getLogEntryRateExamples,
+    hasFailedLoadingLogEntryRateExamples,
+    isLoadingLogEntryRateExamples,
+    logEntryRateExamples,
+  } = useLogEntryRateExamples({
+    dataset: anomaly.partitionId,
+    endTime: anomaly.startTime + anomaly.duration,
+    exampleCount: EXAMPLE_COUNT,
+    sourceId,
+    startTime: anomaly.startTime,
+  });
+
+  useMount(() => {
+    getLogEntryRateExamples();
+  });
+
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={8}>
-        <AnomaliesChart
-          chartId={`${partitionId}-anomalies`}
-          timeRange={timeRange}
-          setTimeRange={setTimeRange}
-          series={logEntryRateSeries}
-          annotations={anomalyAnnotations}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiStat
-          title={numeral(totalNumberOfLogEntries).format('0.00a')}
-          titleSize="m"
-          description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
-            {
-              defaultMessage: 'Number of log entries',
-            }
-          )}
-          reverse
-        />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <ExpandedContentWrapper direction="column">
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{examplesTitle}</h3>
+          </EuiTitle>
+          <LogEntryExampleMessages
+            isLoading={isLoadingLogEntryRateExamples}
+            hasFailedLoading={hasFailedLoadingLogEntryRateExamples}
+            hasResults={logEntryRateExamples.length > 0}
+            exampleCount={EXAMPLE_COUNT}
+            onReload={getLogEntryRateExamples}
+          >
+            {logEntryRateExamples.length > 0 ? (
+              <>
+                <LogEntryRateExampleMessageHeaders dateTime={logEntryRateExamples[0].timestamp} />
+                {logEntryRateExamples.map((example, exampleIndex) => (
+                  <LogEntryRateExampleMessage
+                    key={exampleIndex}
+                    id={example.id}
+                    dataset={example.dataset}
+                    message={example.message}
+                    timestamp={example.timestamp}
+                    tiebreaker={example.tiebreaker}
+                    timeRange={timeRange}
+                    jobId={jobId}
+                  />
+                ))}
+              </>
+            ) : null}
+          </LogEntryExampleMessages>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                title={`${numeral(anomaly.typicalLogEntryRate).format('0.00a')} ${i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
+                  {
+                    defaultMessage: '{typicalCount, plural, one {message} other {messages}}',
+                    values: { typicalCount: anomaly.typicalLogEntryRate },
+                  }
+                )}`}
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateDescription',
+                  {
+                    defaultMessage: 'Typical',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleSize="s"
+                title={`${numeral(anomaly.actualLogEntryRate).format('0.00a')} ${i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
+                  {
+                    defaultMessage: '{actualCount, plural, one {message} other {messages}}',
+                    values: { actualCount: anomaly.actualLogEntryRate },
+                  }
+                )}`}
+                description={i18n.translate(
+                  'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateDescription',
+                  {
+                    defaultMessage: 'Actual',
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </ExpandedContentWrapper>
+    </>
   );
 };
+
+const ExpandedContentWrapper = euiStyled(EuiFlexGroup)`
+  overflow: hidden;
+`;

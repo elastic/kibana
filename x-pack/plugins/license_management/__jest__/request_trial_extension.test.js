@@ -6,7 +6,11 @@
 
 import { RequestTrialExtension } from '../public/application/sections/license_dashboard/request_trial_extension';
 import { createMockLicense, getComponent } from './util';
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('RequestTrialExtension component', () => {
   test('should not display when license is active and trial has not been used', () => {

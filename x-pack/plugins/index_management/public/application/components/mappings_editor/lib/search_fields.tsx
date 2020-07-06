@@ -160,7 +160,7 @@ const getSearchMetadata = (searchData: SearchData, fieldData: FieldData): Search
     // Execute all the regEx and sort them with the one that has the most
     // characters match first.
     const arrayMatch = searchRegexArray
-      .map(regex => regex.exec(fieldData.path))
+      .map((regex) => regex.exec(fieldData.path))
       .filter(Boolean)
       .sort((a, b) => b![0].length - a![0].length);
 
@@ -239,7 +239,7 @@ export const searchFields = (term: string, fields: NormalizedFields['byId']): Se
   }
 
   return Object.values(fields)
-    .map(field => ({
+    .map((field) => ({
       field,
       metadata: getSearchMetadata(searchData, {
         name: field.source.name,

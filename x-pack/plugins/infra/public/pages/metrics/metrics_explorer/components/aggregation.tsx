@@ -26,6 +26,9 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     ['avg']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.avg', {
       defaultMessage: 'Average',
     }),
+    ['sum']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.sum', {
+      defaultMessage: 'Sum',
+    }),
     ['max']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.max', {
       defaultMessage: 'Max',
     }),
@@ -38,13 +41,19 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     ['rate']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.rate', {
       defaultMessage: 'Rate',
     }),
+    ['p95']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p95', {
+      defaultMessage: '95th Percentile',
+    }),
+    ['p99']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p99', {
+      defaultMessage: '99th Percentile',
+    }),
     ['count']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.count', {
       defaultMessage: 'Document count',
     }),
   };
 
   const handleChange = useCallback(
-    e => {
+    (e) => {
       const aggregation =
         (metricsExplorerAggregationRT.is(e.target.value) && e.target.value) || 'avg';
       onChange(aggregation);
@@ -62,7 +71,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
       placeholder={placeholder}
       fullWidth
       value={options.aggregation}
-      options={METRIC_EXPLORER_AGGREGATIONS.map(k => ({
+      options={METRIC_EXPLORER_AGGREGATIONS.map((k) => ({
         text: AGGREGATION_LABELS[k as MetricsExplorerAggregation],
         value: k,
       }))}

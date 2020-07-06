@@ -108,7 +108,7 @@ export class WarmPhase extends PureComponent {
                 }
                 id={`${PHASE_WARM}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={e => {
+                onChange={(e) => {
                   setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="warmPhaseContent"
@@ -127,7 +127,7 @@ export class WarmPhase extends PureComponent {
                       label={moveToWarmPhaseOnRolloverLabel}
                       id={`${PHASE_WARM}-${WARM_PHASE_ON_ROLLOVER}`}
                       checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
                       }}
                     />
@@ -184,7 +184,7 @@ export class WarmPhase extends PureComponent {
                       <EuiFieldNumber
                         id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
                         value={phaseData[PHASE_REPLICA_COUNT]}
-                        onChange={e => {
+                        onChange={(e) => {
                           setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         }}
                         min={0}
@@ -225,7 +225,7 @@ export class WarmPhase extends PureComponent {
                 <EuiSwitch
                   data-test-subj="shrinkSwitch"
                   checked={phaseData[PHASE_SHRINK_ENABLED]}
-                  onChange={e => {
+                  onChange={(e) => {
                     setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   }}
                   label={shrinkLabel}
@@ -254,7 +254,7 @@ export class WarmPhase extends PureComponent {
                             <EuiFieldNumber
                               id={`${PHASE_WARM}-${PHASE_PRIMARY_SHARD_COUNT}`}
                               value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
-                              onChange={e => {
+                              onChange={(e) => {
                                 setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
                               }}
                               min={1}
@@ -294,7 +294,7 @@ export class WarmPhase extends PureComponent {
                 label={forcemergeLabel}
                 aria-label={forcemergeLabel}
                 checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
-                onChange={e => {
+                onChange={(e) => {
                   setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
                 }}
                 aria-controls="forcemergeContent"
@@ -318,7 +318,7 @@ export class WarmPhase extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
                       value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
-                      onChange={e => {
+                      onChange={(e) => {
                         setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
                       }}
                       min={1}

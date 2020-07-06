@@ -26,7 +26,7 @@ import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
 export const uiToReactComponent = <Props extends object>(
   Comp: UiComponent<Props>,
   as: string = 'div'
-): FC<Props> => props => {
+): FC<Props> => (props) => {
   const ref = useRef<HTMLDivElement>();
   const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
 

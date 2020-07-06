@@ -24,6 +24,11 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsStdDeviation extends BaseAggParams {
+  field: string;
+}
 
 interface ValProp {
   valProp: string[];
@@ -111,7 +116,7 @@ export const getStdDeviationMetricAgg = ({
       },
 
       getValue(agg, bucket) {
-        return get(bucket[agg.parentId], agg.valProp());
+        return get(bucket[agg.parentId], agg.valProp() as any);
       },
     },
     {

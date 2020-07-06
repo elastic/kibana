@@ -38,7 +38,7 @@ const formatBuckets = async (
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
-      ...locations.map(location => ({
+      ...locations.map((location) => ({
         term: {
           'observer.geo.name': location,
         },

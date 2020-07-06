@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 export function watchMultiDecorator($provide) {
-  $provide.decorator('$rootScope', function($delegate) {
+  $provide.decorator('$rootScope', function ($delegate) {
     /**
      * Watch multiple expressions with a single callback. Along
      * with making code simpler it also merges all of the watcher
@@ -49,7 +49,7 @@ export function watchMultiDecorator($provide) {
      * @param  {Function} fn - the callback function
      * @return {Function} - an unwatch function, just like the return value of $watch
      */
-    $delegate.constructor.prototype.$watchMulti = function(expressions, fn) {
+    $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
       if (!Array.isArray(expressions)) {
         throw new TypeError('expected an array of expressions to watch');
       }
@@ -65,14 +65,14 @@ export function watchMultiDecorator($provide) {
       const neededInits = expressions.length;
 
       // first, register all of the multi-watchers
-      const unwatchers = expressions.map(function(expr, i) {
+      const unwatchers = expressions.map(function (expr, i) {
         expr = normalizeExpression($scope, expr);
         if (!expr) return;
 
         return expr.fn.call(
           $scope,
           expr.get,
-          function(newVal, oldVal) {
+          function (newVal, oldVal) {
             if (newVal === oldVal) {
               init += 1;
             }
@@ -90,7 +90,7 @@ export function watchMultiDecorator($provide) {
       let flip = false;
       unwatchers.push(
         $scope.$watch(
-          function() {
+          function () {
             if (init < neededInits) return init;
 
             if (fire) {
@@ -99,19 +99,19 @@ export function watchMultiDecorator($provide) {
             }
             return flip;
           },
-          function() {
+          function () {
             if (init < neededInits) return false;
 
             fn(vals.slice(0), prev.slice(0));
-            vals.forEach(function(v, i) {
+            vals.forEach(function (v, i) {
               prev[i] = v;
             });
           }
         )
       );
 
-      return function() {
-        unwatchers.forEach(listener => listener());
+      return function () {
+        unwatchers.forEach((listener) => listener());
       };
     };
 

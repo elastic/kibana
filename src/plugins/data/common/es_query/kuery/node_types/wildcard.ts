@@ -46,10 +46,7 @@ export function buildNode(value: string): WildcardTypeBuildNode | KueryNode {
 
 export function test(node: any, str: string): boolean {
   const { value } = node;
-  const regex = value
-    .split(wildcardSymbol)
-    .map(escapeRegExp)
-    .join('[\\s\\S]*');
+  const regex = value.split(wildcardSymbol).map(escapeRegExp).join('[\\s\\S]*');
   const regexp = new RegExp(`^${regex}$`);
   return regexp.test(str);
 }
@@ -61,10 +58,7 @@ export function toElasticsearchQuery(node: any): string {
 
 export function toQueryStringQuery(node: any): string {
   const { value } = node;
-  return value
-    .split(wildcardSymbol)
-    .map(escapeQueryString)
-    .join('*');
+  return value.split(wildcardSymbol).map(escapeQueryString).join('*');
 }
 
 export function hasLeadingWildcard(node: any): boolean {

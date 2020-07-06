@@ -26,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { AppContextConsumer, AppDependencies } from '../../../app_context';
-import { TelemetryPluginSetup, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
+import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 interface Props {
   loadTrialStatus: () => void;
   startLicenseTrial: () => void;
-  telemetry?: TelemetryPluginSetup;
+  telemetry?: TelemetryPluginStart;
   shouldShowStartTrial: boolean;
 }
 
@@ -266,7 +266,7 @@ export class StartTrial extends Component<Props, State> {
     );
     return (
       <AppContextConsumer>
-        {dependencies => (
+        {(dependencies) => (
           <EuiFlexItem>
             {this.acknowledgeModal(dependencies!.docLinks)}
             <EuiCard

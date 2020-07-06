@@ -12,7 +12,7 @@ the <<cluster-overview-page, Overview>>, <<nodes-page, Nodes>>,
 *Stack Monitoring* page.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-elasticsearch.jpg["Monitoring clusters"]
+image::user/monitoring/images/monitoring-elasticsearch.png["Monitoring clusters"]
 
 See also {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
@@ -35,7 +35,7 @@ information about any shards that are being recovered. If you use {filebeat} to
 collect log data from this cluster, you can also see its recent logs.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-overview.jpg["Elasticsearch Cluster Overview"]
+image::user/monitoring/images/monitoring-overview.png["Elasticsearch Cluster Overview"]
 
 TIP: Not sure what a chart is showing? Click the info button for a description
 of the metrics.
@@ -50,7 +50,7 @@ To view node metrics, click **Nodes**. The Nodes section shows the status
 of each node in your cluster.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-nodes.jpg["Elasticsearch Nodes"]
+image::user/monitoring/images/monitoring-nodes.png["Elasticsearch Nodes"]
 
 [float]
 [[nodes-page-overview]]
@@ -62,7 +62,7 @@ health. If you use {filebeat} to collect log data from this node, you can also
 see its recent logs.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-node.jpg["Elasticsearch Node Overview"]
+image::user/monitoring/images/monitoring-node.png["Elasticsearch Node Overview"]
 
 [float]
 [[nodes-page-advanced]]
@@ -73,7 +73,7 @@ To view advanced node metrics, click the **Advanced** tab for a node. The
 statistics reported by the selected {es} node.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-node-advanced.jpg["Elasticsearch Node Advanced"]
+image::user/monitoring/images/monitoring-node-advanced.png["Elasticsearch Node Advanced"]
 
 You can use the advanced node view to diagnose issues that generally involve
 more advanced knowledge of {es}, such as poor garbage collection performance.
@@ -87,7 +87,7 @@ To view index metrics, click **Indices**. The Indices section shows the same
 overall index and search metrics as the Overview and a table of your indices.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-indices.jpg["Elasticsearch Indices"]
+image::user/monitoring/images/monitoring-indices.png["Elasticsearch Indices"]
 
 [float]
 [[indices-page-overview]]
@@ -97,7 +97,7 @@ From the Indices listing, you can view data for a particular index. To drill
 down into the data for a particular index, click its name in the Indices table.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-index.jpg["Elasticsearch Index Overview"]
+image::user/monitoring/images/monitoring-index.png["Elasticsearch Index Overview"]
 
 [float]
 [[indices-page-advanced]]
@@ -109,7 +109,7 @@ about the {es} index. If the index has more than one shard, then its shards
 might live on more than one node.
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-index-advanced.jpg["Elasticsearch Index Advanced"]
+image::user/monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Advanced"]
 
 The Advanced index view can be used to diagnose issues that generally involve
 more advanced knowledge of {es}, such as wasteful index memory usage.
@@ -160,7 +160,7 @@ If you click *Logs*, you can see the most recent logs for the cluster. For
 example:
 
 [role="screenshot"]
-image::user/monitoring/images/monitoring-elasticsearch-logs.jpg["Recent {es} logs"]
+image::user/monitoring/images/monitoring-elasticsearch-logs.png["Recent {es} logs"]
 
 TIP: By default, up to 10 log entries are shown. You can show up to 50 log
 entries by changing the

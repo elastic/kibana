@@ -60,7 +60,7 @@ describe('ratios(req, panel, series)', () => {
   });
 
   test('returns filter ratio aggs', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = ratios(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {
@@ -119,7 +119,7 @@ describe('ratios(req, panel, series)', () => {
 
   test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = ratios(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {

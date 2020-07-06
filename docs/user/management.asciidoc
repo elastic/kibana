@@ -1,116 +1,170 @@
 [[management]]
-= Management
+= Stack Management
 
 [partintro]
 --
-*Management* is home to UIs for managing all things Elastic Stack&mdash;
+*Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
 [float]
-[[manage-Elasticsearch]]
-== Manage {es}
+[[manage-ingest]]
+== Ingest
 
 [cols="50, 50"]
 |===
 
-a| <<managing-cross-cluster-replication, *Cross-Cluster Replication*>>
+| <<ingest-node-pipelines, Ingest Node Pipelines>>
+| Create and manage {es}
+pipelines that enable you to perform common transformations and
+enrichments on your data.
 
-Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
-This is important for
-disaster recovery. It also keeps data local for faster queries.
+| {logstash-ref}/logstash-centralized-pipeline-management.html[Logstash Pipelines]
+| Create, edit, and delete your Logstash pipeline configurations.
 
-| <<index-lifecycle-policies, *Index Lifecycle Policies*>>
+| <<managing-beats, Beats Central Management>>
+| Manage your Beats configurations in a central location and
+quickly deploy configuration changes to all Beats running across your enterprise.
 
-Create a policy for defining the lifecycle of an index as it ages
+
+|===
+
+[float]
+[[manage-data]]
+== Data
+
+[cols="50, 50"]
+|===
+
+a| <<managing-indices, Index Management>>
+| View index settings, mappings, and statistics and perform operations, such as refreshing,
+flushing, and clearing the cache. Practicing good index management ensures
+that your data is stored cost effectively.
+
+| <<index-lifecycle-policies, Index Lifecycle Policies>>
+|Create a policy for defining the lifecycle of an index as it ages
 through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
 because you can put data in different resource tiers.
 
-a| <<managing-indices, *Index Management*>>
+| <<snapshot-repositories, Snapshot and Restore>>
+|Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
+have backups of your cluster in case something goes wrong.
 
-View index settings, mappings, and statistics and perform operations, such as refreshing,
-flushing, and clearing the cache. Practicing good index management ensures
-that your data is stored cost effectively.
-
-| <<managing-licenses, *License Management*>>
-
-View the status of your license, start a trial, or install a new license. For
-the full list of features that are included in your license,
-see the https://www.elastic.co/subscriptions[subscription page].
-
-| <<working-remote-clusters, *Remote Clusters*>>
-
-Manage your remote clusters for use with cross-cluster search and cross-cluster replication.
-You can add and remove remote clusters, and check their connectivity.
-
-| <<data-rollups, *Rollup Jobs*>>
-
-Create a job that periodically aggregates data from one or more indices, and then
+| <<data-rollups, Rollup Jobs>>
+|Create a job that periodically aggregates data from one or more indices, and then
 rolls it into a new, compact index. Rollup indices are a good way to store months or
 years of historical data in combination with your raw data.
 
-| <<snapshot-repositories, *Snapshot and Restore*>>
+| {ref}/transforms.html[Transforms]
+|Use transforms to pivot existing {es} indices into summarized or entity-centric indices.
 
-Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
-have backups of your cluster in case something goes wrong.
+| <<managing-cross-cluster-replication, Cross-Cluster Replication>>
+|Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
+This is important for
+disaster recovery. It also keeps data local for faster queries.
 
-| {ref}/transforms.html[*Transforms*]
+| <<working-remote-clusters, Remote Clusters>>
+|Manage your remote clusters for use with cross-cluster search and cross-cluster replication.
+You can add and remove remote clusters, and check their connectivity.
+|===
 
-Use transforms to pivot existing {es} indices into summarized or entity-centric indices.
+[float]
+[[manage-alerts-insights]]
+== Alerts and Insights
 
-| <<upgrade-assistant, *Upgrade Assistant*>>
+[cols="50, 50"]
+|===
 
-Identify the issues that you need to address before upgrading to the
-next major version of {es}, and then reindex, if needed.
+| <<managing-alerts-and-actions, Alerts&nbsp;and Actions>>
+| Centrally manage your alerts across {kib}. Create and manage reusable
+connectors for triggering actions.
 
-| <<watcher-ui, *Watcher*>>
+| <<reporting-getting-started, Reporting>>
+| Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
+A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
-Detect changes in your data by creating, managing, and monitoring alerts.
-For example, create an alert when the maximum total CPU usage on a machine goes
+| {ml-docs}/ml-jobs.html[Machine Learning Jobs]
+| View your {anomaly-jobs} and {dfanalytics-jobs}. Open the Single Metric
+Viewer or Anomaly Explorer to see your {ml} results.
+
+| <<watcher-ui, Watcher>>
+| Detect changes in your data by creating, managing, and monitoring alerts.
+For example, you might create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
 
 |===
 
 [float]
-[[manage-kibana]]
-== Manage {kib}
+[[manage-security]]
+== Security
 
 [cols="50, 50"]
 |===
 
-a| <<advanced-options, *Advanced Settings*>>
+a| <<xpack-security, Users>>
+|View the users that have been defined on your cluster.
+Add or delete users and assign roles that give users
+specific privileges.
 
-Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
-set the timespan for notification messages, and much more.
+| <<xpack-kibana-role-management, Roles>>
+|View the roles that exist on your cluster. Customize
+the actions that a user with the role can perform, on a cluster, index, and space level.
 
-| <<managing-alerts-and-actions, *Alerts and Actions*>>
+| <<api-keys, API Keys>>
+| Create secondary credentials so that you can send requests on behalf of the user.
+Secondary credentials have the same or lower access rights.
 
-Centrally manage your alerts across {kib}. Create and manage reusable 
-connectors for triggering actions.
+| <<role-mappings, Role Mappings>>
+| Assign roles to your users using a set of rules. Role mappings are required
+when authenticating via an external identity provider, such as Active Directory,
+Kerberos, PKI, OIDC, and SAML.
 
-| <<managing-fields, *Index Patterns*>>
+|===
 
-Create and manage the index patterns that help you retrieve your data from {es}.
+[float]
+[[manage-kibana]]
+== {kib}
 
-| <<reporting-getting-started, *Reporting*>>
+[cols="50, 50"]
+|===
 
-Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
-A report can contain a dashboard, visualization, saved search, or Canvas workpad.
+a| <<managing-fields, Index Patterns>>
+|Create and manage the index patterns that retrieve your data from {es}.
 
-| <<managing-saved-objects, *Saved Objects*>>
-
-Copy, edit, delete, import, and export your saved objects.
+| <<managing-saved-objects, Saved Objects>>
+| Copy, edit, delete, import, and export your saved objects.
 These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
 
-| <<xpack-spaces, *Spaces*>>
-
-Create spaces to organize your dashboards and other saved objects into categories.
+| <<xpack-spaces, Spaces>>
+| Create spaces to organize your dashboards and other saved objects into categories.
 A space is isolated from all other spaces,
 so you can tailor it to your needs without impacting others.
 
-| &nbsp;
+a| <<advanced-options, Advanced Settings>>
+| Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
+set the timespan for notification messages, and much more.
 
 |===
+
+[float]
+[[manage-stack]]
+== Stack
+
+[cols="50, 50"]
+|===
+
+| <<managing-licenses, License Management>>
+| View the status of your license, start a trial, or install a new license. For
+the full list of features that are included in your license,
+see the https://www.elastic.co/subscriptions[subscription page].
+
+| <<upgrade-assistant, Upgrade Assistant>>
+| Identify the issues that you need to address before upgrading to the
+next major version of {es}, and then reindex, if needed.
+
+|===
+
+
 
 --
 
@@ -139,6 +193,8 @@ include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.
 include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-indices.asciidoc[]
+
+include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 

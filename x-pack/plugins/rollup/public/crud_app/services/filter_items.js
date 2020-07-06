@@ -6,9 +6,9 @@
 
 export const filterItems = (fields, filter = '', items = []) => {
   const normalizedFilter = filter.toLowerCase();
-  return items.filter(item => {
+  return items.filter((item) => {
     const actualFields = fields || Object.keys(item);
-    const indexOfMatch = actualFields.findIndex(field => {
+    const indexOfMatch = actualFields.findIndex((field) => {
       const normalizedField = String(item[field]).toLowerCase();
       return normalizedField.includes(normalizedFilter);
     });

@@ -8,10 +8,8 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, each, get, union, uniq } from 'lodash';
+import { chain, get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -20,13 +18,14 @@ import {
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import {
   isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
@@ -35,12 +34,11 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
-import { getSwimlaneContainerWidth } from './legacy_utils';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
 export function createJobs(jobs) {
-  return jobs.map(job => {
+  return jobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
     return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan.asSeconds() };
   });
@@ -50,6 +48,7 @@ export function getClearedSelectedAnomaliesState() {
   return {
     selectedCells: undefined,
     viewByLoadedForTimeFormatted: null,
+    swimlaneLimit: undefined,
   };
 }
 
@@ -77,7 +76,7 @@ export async function loadFilteredTopInfluencers(
 
   // Add the specified influencer(s) to ensure they are used in the filter
   // even if their influencer score for the selected time range is zero.
-  influencers.forEach(influencer => {
+  influencers.forEach((influencer) => {
     const fieldName = influencer.fieldName;
     if (recordInfluencersByName[influencer.fieldName] === undefined) {
       recordInfluencersByName[influencer.fieldName] = [];
@@ -86,9 +85,9 @@ export async function loadFilteredTopInfluencers(
   });
 
   // Add the influencers from the top scoring anomalies.
-  records.forEach(record => {
+  records.forEach((record) => {
     const influencersByName = record.influencers || [];
-    influencersByName.forEach(influencer => {
+    influencersByName.forEach((influencer) => {
       const fieldName = influencer.influencer_field_name;
       const fieldValues = influencer.influencer_field_values;
       if (recordInfluencersByName[fieldName] === undefined) {
@@ -99,15 +98,15 @@ export async function loadFilteredTopInfluencers(
   });
 
   const uniqValuesByName = {};
-  Object.keys(recordInfluencersByName).forEach(fieldName => {
+  Object.keys(recordInfluencersByName).forEach((fieldName) => {
     const fieldValues = recordInfluencersByName[fieldName];
     uniqValuesByName[fieldName] = uniq(fieldValues);
   });
 
   const filterInfluencers = [];
-  Object.keys(uniqValuesByName).forEach(fieldName => {
+  Object.keys(uniqValuesByName).forEach((fieldName) => {
     // Find record influencers with the same field name as the clicked on cell(s).
-    const matchingFieldName = influencers.find(influencer => {
+    const matchingFieldName = influencers.find((influencer) => {
       return influencer.fieldName === fieldName;
     });
 
@@ -116,7 +115,7 @@ export async function loadFilteredTopInfluencers(
       filterInfluencers.push(...influencers);
     } else {
       // For other field names, add values from all records.
-      uniqValuesByName[fieldName].forEach(fieldValue => {
+      uniqValuesByName[fieldName].forEach((fieldValue) => {
         filterInfluencers.push({ fieldName, fieldValue });
       });
     }
@@ -134,7 +133,7 @@ export async function loadFilteredTopInfluencers(
 
 export function getInfluencers(selectedJobs = []) {
   const influencers = [];
-  selectedJobs.forEach(selectedJob => {
+  selectedJobs.forEach((selectedJob) => {
     const job = mlJobService.getJob(selectedJob.id);
     if (job !== undefined && job.analysis_config && job.analysis_config.influencers) {
       influencers.push(...job.analysis_config.influencers);
@@ -211,7 +210,7 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
   ) {
-    return selectedCells.lanes.map(laneLabel => ({ fieldName, fieldValue: laneLabel }));
+    return selectedCells.lanes.map((laneLabel) => ({ fieldName, fieldValue: laneLabel }));
   }
 
   return [];
@@ -227,7 +226,7 @@ export function getSelectionJobIds(selectedCells, selectedJobs) {
     return selectedCells.lanes;
   }
 
-  return selectedJobs.map(d => d.id);
+  return selectedJobs.map((d) => d.id);
 }
 
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
@@ -235,7 +234,7 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   // and the max bucket span for the jobs shown in the chart.
   const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
 
@@ -266,58 +265,6 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   return buckets.getInterval();
 }
 
-export function loadViewByTopFieldValuesForSelectedTime(
-  earliestMs,
-  latestMs,
-  selectedJobs,
-  viewBySwimlaneFieldName,
-  swimlaneLimit,
-  noInfluencersConfigured
-) {
-  const selectedJobIds = selectedJobs.map(d => d.id);
-
-  // Find the top field values for the selected time, and then load the 'view by'
-  // swimlane over the full time range for those specific field values.
-  return new Promise(resolve => {
-    if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
-      mlResultsService
-        .getTopInfluencers(selectedJobIds, earliestMs, latestMs, swimlaneLimit)
-        .then(resp => {
-          if (resp.influencers[viewBySwimlaneFieldName] === undefined) {
-            resolve([]);
-          }
-
-          const topFieldValues = [];
-          const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
-          if (Array.isArray(topInfluencers)) {
-            topInfluencers.forEach(influencerData => {
-              if (influencerData.maxAnomalyScore > 0) {
-                topFieldValues.push(influencerData.influencerFieldValue);
-              }
-            });
-          }
-          resolve(topFieldValues);
-        });
-    } else {
-      mlResultsService
-        .getScoresByBucket(
-          selectedJobIds,
-          earliestMs,
-          latestMs,
-          getSwimlaneBucketInterval(
-            selectedJobs,
-            getSwimlaneContainerWidth(noInfluencersConfigured)
-          ).asSeconds() + 's',
-          swimlaneLimit
-        )
-        .then(resp => {
-          const topFieldValues = Object.keys(resp.results);
-          resolve(topFieldValues);
-        });
-    }
-  });
-}
-
 // Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
 export function getViewBySwimlaneOptions({
   currentViewBySwimlaneFieldName,
@@ -327,19 +274,19 @@ export function getViewBySwimlaneOptions({
   selectedCells,
   selectedJobs,
 }) {
-  const selectedJobIds = selectedJobs.map(d => d.id);
+  const selectedJobIds = selectedJobs.map((d) => d.id);
 
   // Unique influencers for the selected job(s).
   const viewByOptions = chain(
     mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-      if (selectedJobIds.some(jobId => jobId === job.job_id)) {
+      if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
         return reducedViewByOptions.concat(job.analysis_config.influencers || []);
       }
       return reducedViewByOptions;
     }, [])
   )
     .uniq()
-    .sortBy(fieldName => fieldName.toLowerCase())
+    .sortBy((fieldName) => fieldName.toLowerCase())
     .value();
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
@@ -359,12 +306,12 @@ export function getViewBySwimlaneOptions({
     } else if (mlJobService.jobs.length > 0 && selectedJobIds.length > 0) {
       // For a single job, default to the first partition, over,
       // by or influencer field of the first selected job.
-      const firstSelectedJob = mlJobService.jobs.find(job => {
+      const firstSelectedJob = mlJobService.jobs.find((job) => {
         return job.job_id === selectedJobIds[0];
       });
 
       const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
-      firstSelectedJob.analysis_config.detectors.forEach(detector => {
+      firstSelectedJob.analysis_config.detectors.forEach((detector) => {
         if (
           detector.partition_field_name !== undefined &&
           firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
@@ -415,7 +362,7 @@ export function getViewBySwimlaneOptions({
     Array.isArray(viewBySwimlaneOptions) &&
     Array.isArray(filteredFields)
   ) {
-    const filteredOptions = viewBySwimlaneOptions.filter(option => {
+    const filteredOptions = viewBySwimlaneOptions.filter((option) => {
       return (
         filteredFields.includes(option) ||
         option === VIEW_BY_JOB_LABEL ||
@@ -434,113 +381,14 @@ export function getViewBySwimlaneOptions({
   };
 }
 
-export function processOverallResults(scoresByTime, searchBounds, interval) {
-  const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', {
-    defaultMessage: 'Overall',
-  });
-  const dataset = {
-    laneLabels: [overallLabel],
-    points: [],
-    interval,
-    earliest: searchBounds.min.valueOf() / 1000,
-    latest: searchBounds.max.valueOf() / 1000,
-  };
-
-  if (Object.keys(scoresByTime).length > 0) {
-    // Store the earliest and latest times of the data returned by the ES aggregations,
-    // These will be used for calculating the earliest and latest times for the swimlane charts.
-    each(scoresByTime, (score, timeMs) => {
-      const time = timeMs / 1000;
-      dataset.points.push({
-        laneLabel: overallLabel,
-        time,
-        value: score,
-      });
-
-      dataset.earliest = Math.min(time, dataset.earliest);
-      dataset.latest = Math.max(time + dataset.interval, dataset.latest);
-    });
-  }
-
-  return dataset;
-}
-
-export function processViewByResults(
-  scoresByInfluencerAndTime,
-  sortedLaneValues,
-  bounds,
-  viewBySwimlaneFieldName,
-  interval
-) {
-  // Processes the scores for the 'view by' swimlane.
-  // Sorts the lanes according to the supplied array of lane
-  // values in the order in which they should be displayed,
-  // or pass an empty array to sort lanes according to max score over all time.
-  const dataset = {
-    fieldName: viewBySwimlaneFieldName,
-    points: [],
-    interval,
-  };
-
-  // Set the earliest and latest to be the same as the overall swimlane.
-  dataset.earliest = bounds.earliest;
-  dataset.latest = bounds.latest;
-
-  const laneLabels = [];
-  const maxScoreByLaneLabel = {};
-
-  each(scoresByInfluencerAndTime, (influencerData, influencerFieldValue) => {
-    laneLabels.push(influencerFieldValue);
-    maxScoreByLaneLabel[influencerFieldValue] = 0;
-
-    each(influencerData, (anomalyScore, timeMs) => {
-      const time = timeMs / 1000;
-      dataset.points.push({
-        laneLabel: influencerFieldValue,
-        time,
-        value: anomalyScore,
-      });
-      maxScoreByLaneLabel[influencerFieldValue] = Math.max(
-        maxScoreByLaneLabel[influencerFieldValue],
-        anomalyScore
-      );
-    });
-  });
-
-  const sortValuesLength = sortedLaneValues.length;
-  if (sortValuesLength === 0) {
-    // Sort lanes in descending order of max score.
-    // Note the keys in scoresByInfluencerAndTime received from the ES request
-    // are not guaranteed to be sorted by score if they can be parsed as numbers
-    // (e.g. if viewing by HTTP response code).
-    dataset.laneLabels = laneLabels.sort((a, b) => {
-      return maxScoreByLaneLabel[b] - maxScoreByLaneLabel[a];
-    });
-  } else {
-    // Sort lanes according to supplied order
-    // e.g. when a cell in the overall swimlane has been selected.
-    // Find the index of each lane label from the actual data set,
-    // rather than using sortedLaneValues as-is, just in case they differ.
-    dataset.laneLabels = laneLabels.sort((a, b) => {
-      let aIndex = sortedLaneValues.indexOf(a);
-      let bIndex = sortedLaneValues.indexOf(b);
-      aIndex = aIndex > -1 ? aIndex : sortValuesLength;
-      bIndex = bIndex > -1 ? bIndex : sortValuesLength;
-      return aIndex - bIndex;
-    });
-  }
-
-  return dataset;
-}
-
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
     selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
+      : selectedJobs.map((d) => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     ml.annotations
       .getAnnotations({
         jobIds,
@@ -549,13 +397,13 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
       .toPromise()
-      .then(resp => {
+      .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           return resolve([]);
         }
 
         const annotationsData = [];
-        jobIds.forEach(jobId => {
+        jobIds.forEach((jobId) => {
           const jobAnnotations = resp.annotations[jobId];
           if (jobAnnotations !== undefined) {
             annotationsData.push(...jobAnnotations);
@@ -573,7 +421,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
             })
         );
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log('Error loading list of annotations for jobs list:', resp);
         // Silently fail and just return an empty array for annotations to not break the UI.
         return resolve([]);
@@ -612,10 +460,10 @@ export async function loadAnomaliesTableData(
         influencersFilterQuery
       )
       .toPromise()
-      .then(resp => {
+      .then((resp) => {
         const anomalies = resp.anomalies;
         const detectorsByJob = mlJobService.detectorsByJob;
-        anomalies.forEach(anomaly => {
+        anomalies.forEach((anomaly) => {
           // Add a detector property to each anomaly.
           // Default to functionDescription if no description available.
           // TODO - when job_service is moved server_side, move this to server endpoint.
@@ -636,7 +484,10 @@ export async function loadAnomaliesTableData(
           // TODO - when job_service is moved server_side, move this to server endpoint.
           const job = mlJobService.getJob(jobId);
           let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
-          if (isChartable === false) {
+          if (
+            isChartable === false &&
+            isModelPlotChartableForDetector(job, anomaly.detectorIndex)
+          ) {
             // Check if model plot is enabled for this job.
             // Need to check the entity fields for the record in case the model plot config has a terms list.
             // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.
@@ -658,7 +509,7 @@ export async function loadAnomaliesTableData(
           jobIds,
         });
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log('Explorer - error loading data for anomalies table:', resp);
         reject();
       });
@@ -676,7 +527,7 @@ export async function loadDataForCharts(
   selectedCells,
   influencersFilterQuery
 ) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     // Just skip doing the request when this function
     // is called without the minimum required data.
     if (
@@ -701,7 +552,7 @@ export async function loadDataForCharts(
         500,
         influencersFilterQuery
       )
-      .then(resp => {
+      .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
         if (newRequestCount < requestCount) {
           resolve([]);
@@ -711,146 +562,11 @@ export async function loadDataForCharts(
           (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
           influencersFilterQuery !== undefined
         ) {
-          console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
         }
 
         resolve([]);
       });
-  });
-}
-
-export function loadOverallData(selectedJobs, interval, bounds) {
-  return new Promise(resolve => {
-    // Loads the overall data components i.e. the overall swimlane and influencers list.
-    if (selectedJobs === null) {
-      resolve({
-        loading: false,
-        hasResuts: false,
-      });
-      return;
-    }
-
-    // Ensure the search bounds align to the bucketing interval used in the swimlane so
-    // that the first and last buckets are complete.
-    const searchBounds = getBoundsRoundedToInterval(bounds, interval, false);
-    const selectedJobIds = selectedJobs.map(d => d.id);
-
-    // Load the overall bucket scores by time.
-    // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-    // which wouldn't be the case if e.g. '1M' was used.
-    // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
-    // to ensure the search is inclusive of end time.
-    const overallBucketsBounds = getBoundsRoundedToInterval(bounds, interval, true);
-    mlResultsService
-      .getOverallBucketScores(
-        selectedJobIds,
-        // Note there is an optimization for when top_n == 1.
-        // If top_n > 1, we should test what happens when the request takes long
-        // and refactor the loading calls, if necessary, to avoid delays in loading other components.
-        1,
-        overallBucketsBounds.min.valueOf(),
-        overallBucketsBounds.max.valueOf(),
-        interval.asSeconds() + 's'
-      )
-      .then(resp => {
-        const overallSwimlaneData = processOverallResults(
-          resp.results,
-          searchBounds,
-          interval.asSeconds()
-        );
-
-        console.log('Explorer overall swimlane data set:', overallSwimlaneData);
-        resolve({
-          loading: false,
-          overallSwimlaneData,
-        });
-      });
-  });
-}
-
-export function loadViewBySwimlane(
-  fieldValues,
-  bounds,
-  selectedJobs,
-  viewBySwimlaneFieldName,
-  swimlaneLimit,
-  influencersFilterQuery,
-  noInfluencersConfigured
-) {
-  return new Promise(resolve => {
-    const finish = resp => {
-      if (resp !== undefined) {
-        const viewBySwimlaneData = processViewByResults(
-          resp.results,
-          fieldValues,
-          bounds,
-          viewBySwimlaneFieldName,
-          getSwimlaneBucketInterval(
-            selectedJobs,
-            getSwimlaneContainerWidth(noInfluencersConfigured)
-          ).asSeconds()
-        );
-        console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
-
-        resolve({
-          viewBySwimlaneData,
-          viewBySwimlaneDataLoading: false,
-        });
-      } else {
-        resolve({ viewBySwimlaneDataLoading: false });
-      }
-    };
-
-    if (selectedJobs === undefined || viewBySwimlaneFieldName === undefined) {
-      finish();
-      return;
-    } else {
-      // Ensure the search bounds align to the bucketing interval used in the swimlane so
-      // that the first and last buckets are complete.
-      const timefilter = getTimefilter();
-      const timefilterBounds = timefilter.getActiveBounds();
-      const searchBounds = getBoundsRoundedToInterval(
-        timefilterBounds,
-        getSwimlaneBucketInterval(selectedJobs, getSwimlaneContainerWidth(noInfluencersConfigured)),
-        false
-      );
-      const selectedJobIds = selectedJobs.map(d => d.id);
-
-      // load scores by influencer/jobId value and time.
-      // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-      // which wouldn't be the case if e.g. '1M' was used.
-      const interval = `${getSwimlaneBucketInterval(
-        selectedJobs,
-        getSwimlaneContainerWidth(noInfluencersConfigured)
-      ).asSeconds()}s`;
-      if (viewBySwimlaneFieldName !== VIEW_BY_JOB_LABEL) {
-        mlResultsService
-          .getInfluencerValueMaxScoreByTime(
-            selectedJobIds,
-            viewBySwimlaneFieldName,
-            fieldValues,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            interval,
-            swimlaneLimit,
-            influencersFilterQuery
-          )
-          .then(finish);
-      } else {
-        const jobIds =
-          fieldValues !== undefined && fieldValues.length > 0 ? fieldValues : selectedJobIds;
-        mlResultsService
-          .getScoresByBucket(
-            jobIds,
-            searchBounds.min.valueOf(),
-            searchBounds.max.valueOf(),
-            interval,
-            swimlaneLimit
-          )
-          .then(finish);
-      }
-    }
   });
 }
 
@@ -862,7 +578,7 @@ export async function loadTopInfluencers(
   noInfluencersConfigured,
   influencersFilterQuery
 ) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (noInfluencersConfigured !== true) {
       mlResultsService
         .getTopInfluencers(
@@ -870,12 +586,13 @@ export async function loadTopInfluencers(
           earliestMs,
           latestMs,
           MAX_INFLUENCER_FIELD_VALUES,
+          10,
+          1,
           influencers,
           influencersFilterQuery
         )
-        .then(resp => {
+        .then((resp) => {
           // TODO - sort the influencers keys so that the partition field(s) are first.
-          console.log('Explorer top influencers data set:', resp.influencers);
           resolve(resp.influencers);
         });
     } else {

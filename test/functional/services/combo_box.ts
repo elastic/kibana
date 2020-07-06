@@ -200,7 +200,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBox.parseDomContent();
       return $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
     }
 
     /**
@@ -283,7 +283,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBoxElement.parseDomContent();
       const selectedOptions = $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       return selectedOptions.length === 1 && selectedOptions[0] === value;
     }
 

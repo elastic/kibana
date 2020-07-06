@@ -5,7 +5,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ManagementApp } from '../../../../../src/plugins/management/public';
+import {
+  ManagementApp,
+  ManagementSetup,
+  ManagementStart,
+} from '../../../../../src/plugins/management/public';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
 import { usersManagementApp } from './users';
@@ -17,6 +21,8 @@ import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 
+const mockSection = { registerApp: jest.fn() };
+
 describe('ManagementService', () => {
   describe('setup()', () => {
     it('properly registers security section and its applications', () => {
@@ -24,12 +30,10 @@ describe('ManagementService', () => {
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
 
-      const mockSection = { registerApp: jest.fn() };
-      const managementSetup = {
+      const managementSetup: ManagementSetup = {
         sections: {
-          getSection: jest.fn(),
-          getAllSections: jest.fn(),
-          register: jest.fn().mockReturnValue(mockSection),
+          register: jest.fn(),
+          getSection: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -40,14 +44,6 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
-      });
-
-      expect(managementSetup.sections.register).toHaveBeenCalledTimes(1);
-      expect(managementSetup.sections.register).toHaveBeenCalledWith({
-        id: 'security',
-        title: 'Security',
-        order: 100,
-        euiIconType: 'securityApp',
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -89,18 +85,20 @@ describe('ManagementService', () => {
       license.features$ = licenseSubject;
 
       const service = new ManagementService();
+
+      const managementSetup: ManagementSetup = {
+        sections: {
+          register: jest.fn(),
+          getSection: jest.fn().mockReturnValue(mockSection),
+        },
+      };
+
       service.setup({
         getStartServices: getStartServices as any,
         license,
         fatalErrors,
         authc: securityMock.createSetup().authc,
-        management: {
-          sections: {
-            getSection: jest.fn(),
-            getAllSections: jest.fn(),
-            register: jest.fn().mockReturnValue({ registerApp: jest.fn() }),
-          },
-        },
+        management: managementSetup,
       });
 
       const getMockedApp = () => {
@@ -125,17 +123,18 @@ describe('ManagementService', () => {
         [roleMappingsManagementApp.id, getMockedApp()],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
 
-      service.start({
-        management: {
-          sections: {
-            getSection: jest
-              .fn()
-              .mockReturnValue({ getApp: jest.fn().mockImplementation(id => mockApps.get(id)) }),
-            getAllSections: jest.fn(),
-            navigateToApp: jest.fn(),
-          },
-          legacy: undefined,
+      const managementStart: ManagementStart = {
+        sections: {
+          getSection: jest
+            .fn()
+            .mockReturnValue({ getApp: jest.fn().mockImplementation((id) => mockApps.get(id)) }),
+          getAllSections: jest.fn(),
+          getSectionsEnabled: jest.fn(),
         },
+      };
+
+      service.start({
+        management: managementStart,
       });
 
       return {

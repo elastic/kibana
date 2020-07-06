@@ -18,7 +18,7 @@
  */
 
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
-import { ExpressionFunction } from '../../public';
+import { ExpressionFunction } from '../../common';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression

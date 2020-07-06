@@ -19,7 +19,7 @@ export function setupSavedObjects(core: CoreSetup) {
       importableAndExportable: true,
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
       getInAppUrl: (obj: { id: string }) => ({
-        path: getEditPath(obj.id),
+        path: `/app/lens${getEditPath(obj.id)}`,
         uiCapabilitiesPath: 'visualize.show',
       }),
     },
@@ -27,6 +27,9 @@ export function setupSavedObjects(core: CoreSetup) {
     mappings: {
       properties: {
         title: {
+          type: 'text',
+        },
+        description: {
           type: 'text',
         },
         visualizationType: {

@@ -20,11 +20,11 @@
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import { set } from 'lodash';
+import { overwrite } from '../../helpers';
 
-export const filter = metric => metric.type === 'positive_rate';
+export const filter = (metric) => metric.type === 'positive_rate';
 
-export const createPositiveRate = (doc, intervalString, aggRoot) => metric => {
+export const createPositiveRate = (doc, intervalString, aggRoot) => (metric) => {
   const maxFn = bucketTransform.max;
   const derivativeFn = bucketTransform.derivative;
   const positiveOnlyFn = bucketTransform.positive_only;
@@ -48,13 +48,17 @@ export const createPositiveRate = (doc, intervalString, aggRoot) => metric => {
   const derivativeBucket = derivativeFn(derivativeMetric, fakeSeriesMetrics, intervalString);
   const positiveOnlyBucket = positiveOnlyFn(positiveOnlyMetric, fakeSeriesMetrics, intervalString);
 
-  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-max`, maxBucket);
-  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-derivative`, derivativeBucket);
-  set(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, positiveOnlyBucket);
+  overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-max`, maxBucket);
+  overwrite(
+    doc,
+    `${aggRoot}.timeseries.aggs.${metric.id}-positive-rate-derivative`,
+    derivativeBucket
+  );
+  overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}`, positiveOnlyBucket);
 };
 
 export function positiveRate(req, panel, series, esQueryConfig, indexPatternObject, capabilities) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval, capabilities);
     if (series.metrics.some(filter)) {

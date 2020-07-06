@@ -24,7 +24,7 @@ import { Provider } from 'react-redux';
 jest.mock('ui/new_platform');
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
-const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
+const waitForIndexPatternFetch = () => new Promise((r) => setTimeout(r));
 
 function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
   const services = {

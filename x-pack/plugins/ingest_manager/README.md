@@ -3,12 +3,23 @@
 ## Plugin
 
 - The plugin is disabled by default. See the TypeScript type for the [the available plugin configuration options](https://github.com/elastic/kibana/blob/master/x-pack/plugins/ingest_manager/common/types/index.ts#L9-L27)
-- Setting `xpack.ingestManager.enabled=true` enables the plugin including the EPM and Fleet features. It also adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
+- Setting `xpack.ingestManager.enabled=true` enables the plugin including the EPM and Fleet features. It also adds the `PACKAGE_CONFIG_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
 - Adding `--xpack.ingestManager.epm.enabled=false` will disable the EPM API & UI
 - Adding `--xpack.ingestManager.fleet.enabled=false` will disable the Fleet API & UI
   - [code for adding the routes](https://github.com/elastic/kibana/blob/1f27d349533b1c2865c10c45b2cf705d7416fb36/x-pack/plugins/ingest_manager/server/plugin.ts#L115-L133)
   - [Integration tests](server/integration_tests/router.test.ts)
 - Both EPM and Fleet require `ingestManager` be enabled. They are not standalone features.
+
+## Fleet Requirements
+
+Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.ingestManager.fleet.tlsCheckDisabled=false`)
+
+Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
+
+```
+--xpack.ingestManager.fleet.elasticsearch.host=http://localhost:9200
+--xpack.ingestManager.fleet.kibana.host=http://localhost:5601
+```
 
 ## Development
 
@@ -28,7 +39,7 @@ One common development workflow is:
   ```
 - Start Kibana in another shell
   ```
-  yarn start --xpack.ingestManager.enabled=true --no-base-path --xpack.endpoint.enabled=true
+  yarn start --xpack.ingestManager.enabled=true --no-base-path
   ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
@@ -41,12 +52,12 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
 1. In one terminal, change to the `x-pack` directory and start the test server with
 
    ```
-   node scripts/functional_tests_server.js --config test/api_integration/config.js
+   node scripts/functional_tests_server.js --config test/api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
    ```
-   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.js
+   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
    ```
 
 #### EPM

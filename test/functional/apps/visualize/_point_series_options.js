@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -27,12 +27,10 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'visualize',
     'header',
-    'pointSeries',
     'timePicker',
     'visEditor',
     'visChart',
   ]);
-  const pointSeriesVis = PageObjects.pointSeries;
   const inspector = getService('inspector');
 
   async function initChart() {
@@ -60,11 +58,11 @@ export default function({ getService, getPageObjects }) {
     await PageObjects.visEditor.clickMetricsAndAxes();
     // add another value axis
     log.debug('adding axis');
-    await pointSeriesVis.clickAddAxis();
+    await PageObjects.visEditor.clickAddAxis();
     // set average count to use second value axis
     await PageObjects.visEditor.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
-    await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
+    await PageObjects.visEditor.setSeriesAxis(1, 'ValueAxis-2');
     await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     await PageObjects.visEditor.clickGo();
   }
@@ -72,8 +70,8 @@ export default function({ getService, getPageObjects }) {
   describe('point series', function describeIndexTests() {
     before(initChart);
 
-    describe('secondary value axis', function() {
-      it('should show correct chart', async function() {
+    describe('secondary value axis', function () {
+      it('should show correct chart', async function () {
         const expectedChartValues = [
           [
             37,
@@ -150,53 +148,85 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('should put secondary axis on the right', async function() {
-        const length = await pointSeriesVis.getRightValueAxes();
+      it('should put secondary axis on the right', async function () {
+        const length = await PageObjects.visChart.getRightValueAxes();
         expect(length).to.be(1);
       });
     });
 
-    describe('multiple chart types', function() {
-      it('should change average series type to histogram', async function() {
-        await pointSeriesVis.setSeriesType(1, 'histogram');
+    describe('multiple chart types', function () {
+      it('should change average series type to histogram', async function () {
+        await PageObjects.visEditor.setSeriesType(1, 'histogram');
         await PageObjects.visEditor.clickGo();
-        const length = await pointSeriesVis.getHistogramSeries();
+        const length = await PageObjects.visChart.getHistogramSeries();
         expect(length).to.be(1);
       });
     });
 
-    describe('grid lines', function() {
-      before(async function() {
+    describe('grid lines', function () {
+      before(async function () {
         await PageObjects.visEditor.clickOptionsTab();
       });
 
-      it('should show category grid lines', async function() {
-        await pointSeriesVis.toggleGridCategoryLines();
+      it('should show category grid lines', async function () {
+        await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
-        const gridLines = await pointSeriesVis.getGridLines();
+        const gridLines = await PageObjects.visChart.getGridLines();
         expect(gridLines.length).to.be(9);
-        gridLines.forEach(gridLine => {
+        gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
         });
       });
 
-      it('should show value axis grid lines', async function() {
-        await pointSeriesVis.setGridValueAxis('ValueAxis-2');
-        await pointSeriesVis.toggleGridCategoryLines();
+      it('should show value axis grid lines', async function () {
+        await PageObjects.visEditor.setGridValueAxis('ValueAxis-2');
+        await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
-        const gridLines = await pointSeriesVis.getGridLines();
+        const gridLines = await PageObjects.visChart.getGridLines();
         expect(gridLines.length).to.be(9);
-        gridLines.forEach(gridLine => {
+        gridLines.forEach((gridLine) => {
           expect(gridLine.x).to.be(0);
         });
       });
     });
 
-    describe('custom labels and axis titles', function() {
+    describe('show values on chart', () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        log.debug('Bucket = X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Aggregation = Terms');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        log.debug('Field = geo.src');
+        await PageObjects.visEditor.selectField('geo.src');
+        await PageObjects.visEditor.clickGo();
+        log.debug('Open Options tab');
+        await PageObjects.visEditor.clickOptionsTab();
+      });
+
+      it('should show values on bar chart', async () => {
+        await PageObjects.visEditor.toggleValuesOnChart();
+        await PageObjects.visEditor.clickGo();
+        const values = await PageObjects.visChart.getChartValues();
+        expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
+      });
+
+      it('should hide values on bar chart', async () => {
+        await PageObjects.visEditor.toggleValuesOnChart();
+        await PageObjects.visEditor.clickGo();
+        const values = await PageObjects.visChart.getChartValues();
+        expect(values.length).to.be(0);
+      });
+    });
+
+    describe('custom labels and axis titles', function () {
       const visName = 'Visualization Point Series Test';
       const customLabel = 'myLabel';
       const axisTitle = 'myTitle';
-      before(async function() {
+      before(async function () {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
@@ -206,19 +236,19 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickYAxisOptions('ValueAxis-1');
       });
 
-      it('should render a custom label when one is set', async function() {
+      it('should render a custom label when one is set', async function () {
         const title = await PageObjects.visChart.getYAxisTitle();
         expect(title).to.be(customLabel);
       });
 
-      it('should render a custom axis title when one is set, overriding the custom label', async function() {
-        await pointSeriesVis.setAxisTitle(axisTitle);
+      it('should render a custom axis title when one is set, overriding the custom label', async function () {
+        await PageObjects.visEditor.setAxisTitle(axisTitle);
         await PageObjects.visEditor.clickGo();
         const title = await PageObjects.visChart.getYAxisTitle();
         expect(title).to.be(axisTitle);
       });
 
-      it('should preserve saved axis titles after a vis is saved and reopened', async function() {
+      it('should preserve saved axis titles after a vis is saved and reopened', async function () {
         await PageObjects.visualize.saveVisualizationExpectSuccess(visName);
         await PageObjects.visChart.waitForVisualization();
         await PageObjects.visualize.loadSavedVisualization(visName);
@@ -234,16 +264,16 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('timezones', function() {
+    describe('timezones', function () {
       const expectedLabels = ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'];
 
-      it('should show round labels in default timezone', async function() {
+      it('should show round labels in default timezone', async function () {
         await initChart();
         const labels = await PageObjects.visChart.getXAxisLabels();
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
-      it('should show round labels in different timezone', async function() {
+      it('should show round labels in different timezone', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
@@ -254,7 +284,7 @@ export default function({ getService, getPageObjects }) {
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
-      it('should show different labels in different timezone', async function() {
+      it('should show different labels in different timezone', async function () {
         const fromTime = 'Sep 22, 2015 @ 09:05:47.415';
         const toTime = 'Sep 22, 2015 @ 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
@@ -342,6 +372,17 @@ export default function({ getService, getPageObjects }) {
         await inspector.expectTableData(expectedTableData2);
         log.debug('close inspector');
         await inspector.close();
+      });
+
+      after(async () => {
+        const timezone = await kibanaServer.uiSettings.get('dateFormat:tz');
+
+        // make sure the timezone was set to default correctly to avoid further failures
+        // for details see https://github.com/elastic/kibana/issues/63037
+        if (timezone !== 'UTC') {
+          log.debug("set 'dateFormat:tz': 'UTC'");
+          await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        }
       });
     });
   });

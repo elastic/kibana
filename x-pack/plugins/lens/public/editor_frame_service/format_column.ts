@@ -68,7 +68,7 @@ export const formatColumn: ExpressionFunctionDefinition<
   fn(input, { format, columnId, decimals }: FormatColumn) {
     return {
       ...input,
-      columns: input.columns.map(col => {
+      columns: input.columns.map((col) => {
         if (col.id === columnId) {
           if (supportedFormats[format]) {
             return {

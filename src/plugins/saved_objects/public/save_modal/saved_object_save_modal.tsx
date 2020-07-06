@@ -53,14 +53,15 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
-  options?: React.ReactNode;
+  options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
 }
 
-interface State {
+export interface SaveModalState {
   title: string;
   copyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
@@ -71,11 +72,11 @@ interface State {
 
 const generateId = htmlIdGenerator();
 
-export class SavedObjectSaveModal extends React.Component<Props, State> {
+export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
     title: this.props.title,
-    copyOnSave: false,
+    copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
     isLoading: false,
@@ -139,7 +140,9 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
 
                 {this.renderViewDescription()}
 
-                {this.props.options}
+                {typeof this.props.options === 'function'
+                  ? this.props.options(this.state)
+                  : this.props.options}
               </EuiForm>
             </EuiModalBody>
 

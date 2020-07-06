@@ -22,7 +22,7 @@ const initialState: IndexPatternPrivateState = {
   ],
   existingFields: {},
   currentIndexPatternId: '1',
-  showEmptyFields: false,
+  isFirstExistenceFetch: false,
   layers: {
     first: {
       indexPatternId: '1',
@@ -183,17 +183,13 @@ describe('Layer Data Panel', () => {
   });
 
   function getIndexPatternPickerList(instance: ShallowWrapper) {
-    return instance
-      .find(ChangeIndexPattern)
-      .first()
-      .dive()
-      .find(EuiSelectable);
+    return instance.find(ChangeIndexPattern).first().dive().find(EuiSelectable);
   }
 
   function selectIndexPatternPickerOption(instance: ShallowWrapper, selectedLabel: string) {
     const options: Array<{ label: string; checked?: 'on' | 'off' }> = getIndexPatternPickerOptions(
       instance
-    ).map(option =>
+    ).map((option) =>
       option.label === selectedLabel
         ? { ...option, checked: 'on' }
         : { ...option, checked: undefined }
@@ -202,16 +198,13 @@ describe('Layer Data Panel', () => {
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-    return getIndexPatternPickerList(instance)
-      .dive()
-      .find(EuiSelectableList)
-      .prop('options');
+    return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
   }
 
   it('should list all index patterns', () => {
     const instance = shallow(<LayerPanel {...defaultProps} />);
 
-    expect(getIndexPatternPickerOptions(instance)!.map(option => option.label)).toEqual([
+    expect(getIndexPatternPickerOptions(instance)!.map((option) => option.label)).toEqual([
       'my-fake-index-pattern',
       'my-fake-restricted-pattern',
       'my-compatible-pattern',

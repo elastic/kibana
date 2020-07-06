@@ -17,6 +17,7 @@ import {
   ChildFieldName,
   ParameterName,
   ComboBoxOption,
+  GenericObject,
 } from '../types';
 
 import {
@@ -26,17 +27,15 @@ import {
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
   TYPE_DEFINITION,
+  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
-import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
-export const getUniqueId = () => {
-  return uuid.v4();
-};
+export const getUniqueId = () => uuid.v4();
 
-const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
+export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {
     return 'fields';
   } else if (dataType === 'object' || dataType === 'nested') {
@@ -75,7 +74,10 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
 export const getTypeLabelFromType = (type: DataType) =>
   TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
 
-export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
+export const getFieldConfig = <T = unknown>(
+  param: ParameterName,
+  prop?: string
+): FieldConfig<any, T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -108,7 +110,7 @@ const replaceAliasPathByAliasId = (
   Object.entries(byId).forEach(([id, field]) => {
     if (field.source.type === 'alias') {
       const aliasTargetField = Object.values(byId).find(
-        _field => _field.path.join('.') === field.source.path
+        (_field) => _field.path.join('.') === field.source.path
       );
 
       if (aliasTargetField) {
@@ -125,8 +127,31 @@ const replaceAliasPathByAliasId = (
   return { aliases, byId };
 };
 
-export const getMainTypeFromSubType = (subType: SubType): MainType =>
+const getMainTypeFromSubType = (subType: SubType): MainType =>
   (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
+
+/**
+ * Read the field source type and decide if it is a SubType of a MainType
+ * A SubType is for example the "float" datatype. It is the SubType of the "numeric" MainType
+ *
+ * @param sourceType The type declared on the mappings field
+ */
+export const getTypeMetaFromSource = (
+  sourceType: string
+): { mainType: MainType; subType?: SubType } => {
+  if (!MAIN_DATA_TYPE_DEFINITION[sourceType as MainType]) {
+    // If the sourceType provided if **not** one of the MainType, it is probably a SubType type
+    const mainType = getMainTypeFromSubType(sourceType as SubType);
+    if (!mainType) {
+      throw new Error(
+        `Property type "${sourceType}" not recognized and no subType was found for it.`
+      );
+    }
+    return { mainType, subType: sourceType as SubType };
+  }
+
+  return { mainType: sourceType as MainType };
+};
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
@@ -266,7 +291,7 @@ const replaceAliasIdByAliasPath = (
   Object.entries(aliases).forEach(([targetId, aliasesIds]) => {
     const path = updatedById[targetId] ? updatedById[targetId].path.join('.') : '';
 
-    aliasesIds.forEach(id => {
+    aliasesIds.forEach((id) => {
       const aliasField = updatedById[id];
       if (!aliasField) {
         return;
@@ -287,7 +312,7 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
   const serializedFieldsById = replaceAliasIdByAliasPath(aliases, byId);
 
   const deNormalizePaths = (ids: string[], to: Fields = {}) => {
-    ids.forEach(id => {
+    ids.forEach((id) => {
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
@@ -330,8 +355,8 @@ export const updateFieldsPathAfterFieldNameChange = (
 
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           updateFieldPath(childField, [..._paths, name]);
         });
     }
@@ -355,8 +380,8 @@ export const getAllChildFields = (
   const getChildFields = (_field: NormalizedField, to: NormalizedField[] = []) => {
     if (_field.hasChildFields || _field.hasMultiFields) {
       _field
-        .childFields!.map(fieldId => byId[fieldId])
-        .forEach(childField => {
+        .childFields!.map((fieldId) => byId[fieldId])
+        .forEach((childField) => {
           to.push(childField);
           getChildFields(childField, to);
         });
@@ -385,13 +410,13 @@ export const getAllDescendantAliases = (
   }
 
   if (hasAliases) {
-    fields.aliases[field.id].forEach(id => {
+    fields.aliases[field.id].forEach((id) => {
       aliasesIds.push(id);
     });
   }
 
   if (field.childFields) {
-    field.childFields.forEach(id => {
+    field.childFields.forEach((id) => {
       if (!fields.byId[id]) {
         return;
       }
@@ -429,14 +454,14 @@ export const filterTypesForMultiField = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
+    (option) => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
   );
 
 export const filterTypesForNonRootFields = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>
   options.filter(
-    option => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
+    (option) => TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL.includes(option.value as MainType) === false
   );
 
 /**
@@ -458,7 +483,7 @@ export const buildFieldTreeFromIds = (
   byId: NormalizedFields['byId'],
   render: (field: NormalizedField) => JSX.Element | string
 ): TreeItem[] =>
-  fieldsIds.map(id => {
+  fieldsIds.map((id) => {
     const field = byId[id];
     const children = field.childFields
       ? buildFieldTreeFromIds(field.childFields, byId, render)
@@ -491,20 +516,38 @@ export const shouldDeleteChildFieldsAfterTypeChange = (
 export const canUseMappingsEditor = (maxNestedDepth: number) =>
   maxNestedDepth < MAX_DEPTH_DEFAULT_EDITOR;
 
-const stateWithValidity: Array<keyof State> = ['configuration', 'fieldsJsonEditor', 'fieldForm'];
+/**
+ * This helper removes all the keys on an object with an "undefined" value.
+ * To avoid sending updates from the mappings editor with this type of object:
+ *
+ *```
+ * {
+ *   "dyamic": undefined,
+ *   "date_detection": undefined,
+ *   "dynamic": undefined,
+ *   "dynamic_date_formats": undefined,
+ *   "dynamic_templates": undefined,
+ *   "numeric_detection": undefined,
+ *   "properties": {
+ *     "title": { "type": "text" }
+ *   }
+ * }
+ *```
+ *
+ * @param obj The object to retrieve the undefined values from
+ * @param recursive A flag to strip recursively into children objects
+ */
+export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recursive = true): T =>
+  Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value === undefined) {
+      return acc;
+    }
 
-export const isStateValid = (state: State): boolean | undefined =>
-  Object.entries(state)
-    .filter(([key]) => stateWithValidity.includes(key as keyof State))
-    .reduce((isValid, { 1: value }) => {
-      if (value === undefined) {
-        return isValid;
-      }
+    if (Array.isArray(value) || value instanceof Date || value === null) {
+      return { ...acc, [key]: value };
+    }
 
-      // If one section validity of the state is "undefined", the mappings validity is also "undefined"
-      if (isValid === undefined || value.isValid === undefined) {
-        return undefined;
-      }
-
-      return isValid && value.isValid;
-    }, true as undefined | boolean);
+    return recursive && typeof value === 'object'
+      ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
+      : { ...acc, [key]: value };
+  }, {} as T);

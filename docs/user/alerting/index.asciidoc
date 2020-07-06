@@ -160,7 +160,7 @@ If you are using an *on-premises* Elastic Stack deployment:
 
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
-* Transport Layer Security (TLS) must be configured for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
+* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
 
 [float]
 [[alerting-security]]

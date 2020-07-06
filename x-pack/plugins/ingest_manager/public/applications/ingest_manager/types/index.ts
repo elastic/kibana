@@ -8,30 +8,39 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
   EnrollmentAPIKey,
-  Datasource,
-  NewDatasource,
-  DatasourceInput,
-  DatasourceInputStream,
-  DatasourceConfigRecordEntry,
+  PackageConfig,
+  NewPackageConfig,
+  UpdatePackageConfig,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  PackageConfigConfigRecordEntry,
   Output,
   DataStream,
+  // API schema - misc setup, status
+  GetFleetStatusResponse,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
+  GetFullAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
-  // API schemas - Datasource
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
+  CopyAgentConfigRequest,
+  CopyAgentConfigResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
+  // API schemas - Package config
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  UpdatePackageConfigRequest,
+  UpdatePackageConfigResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -57,6 +66,8 @@ export {
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,
+  // API schemas - app
+  CheckPermissionsResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,
@@ -71,7 +82,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  RegistryDatasource,
+  RegistryConfigTemplate,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -87,4 +98,7 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';
+
+export * from './intra_app_route_state';

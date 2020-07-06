@@ -30,7 +30,7 @@ export class CMTagsDomain {
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
     const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
-    if (beats.filter(b => b.active).length > 0) {
+    if (beats.filter((b) => b.active).length > 0) {
       return false;
     }
     await this.configurationBlocksAdapter.deleteForTags(user, tagIds);
@@ -46,7 +46,7 @@ export class CMTagsDomain {
         }
         return existingUniqueTypes;
       }, [] as string[])
-    ).filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type));
+    ).filter((type) => UNIQUENESS_ENFORCING_TYPES.includes(type));
 
     const safeTags = await this.adapter.getWithoutConfigTypes(user, existingUniqueBlockTypes);
     return safeTags;

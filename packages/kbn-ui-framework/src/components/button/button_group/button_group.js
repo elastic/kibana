@@ -22,7 +22,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-const KuiButtonGroup = props => {
+const KuiButtonGroup = (props) => {
   const classes = classNames('kuiButtonGroup', {
     'kuiButtonGroup--united': props.isUnited,
   });

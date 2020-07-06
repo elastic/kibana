@@ -16,6 +16,7 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -36,15 +37,23 @@ export function initPushCaseUserActionApi({
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const actionsClient = await context.actions?.getActionsClient();
+
         const caseId = request.params.case_id;
         const query = pipe(
           CaseExternalServiceRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
+        if (actionsClient == null) {
+          throw Boom.notFound('Action client have not been found');
+        }
+
         const { username, full_name, email } = await caseService.getUser({ request, response });
+
         const pushedDate = new Date().toISOString();
 
-        const [myCase, myCaseConfigure, totalCommentsFindByCases] = await Promise.all([
+        const [myCase, myCaseConfigure, totalCommentsFindByCases, connectors] = await Promise.all([
           caseService.getCase({
             client,
             caseId: request.params.case_id,
@@ -59,6 +68,7 @@ export function initPushCaseUserActionApi({
               perPage: 1,
             },
           }),
+          actionsClient.getAll(),
         ]);
 
         if (myCase.attributes.status === 'closed') {
@@ -83,12 +93,24 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+
+        // old case may not have new attribute connector_id, so we default to the configured system
+        const updateConnectorId = {
+          connector_id: myCase.attributes.connector_id ?? caseConfigureConnectorId,
+        };
+
+        if (!connectors.some((connector) => connector.id === updateConnectorId.connector_id)) {
+          throw Boom.notFound('Connector not found or set to none');
+        }
+
         const [updatedCase, updatedComments] = await Promise.all([
           caseService.patchCase({
             client,
             caseId,
             updatedAttributes: {
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
                     status: 'closed',
                     closed_at: pushedDate,
@@ -98,14 +120,15 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
+              ...updateConnectorId,
             },
             version: myCase.version,
           }),
           caseService.patchComments({
             client,
             comments: comments.saved_objects
-              .filter(comment => comment.attributes.pushed_at == null)
-              .map(comment => ({
+              .filter((comment) => comment.attributes.pushed_at == null)
+              .map((comment) => ({
                 commentId: comment.id,
                 updatedAttributes: {
                   pushed_at: pushedDate,
@@ -117,7 +140,8 @@ export function initPushCaseUserActionApi({
           userActionService.postUserActions({
             client,
             actions: [
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? [
                     buildCaseUserActionItem({
                       action: 'update',
@@ -143,16 +167,16 @@ export function initPushCaseUserActionApi({
         ]);
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments.saved_objects.map(origComment => {
+              comments: comments.saved_objects.map((origComment) => {
                 const updatedComment = updatedComments.saved_objects.find(
-                  c => c.id === origComment.id
+                  (c) => c.id === origComment.id
                 );
                 return {
                   ...origComment,
@@ -164,8 +188,8 @@ export function initPushCaseUserActionApi({
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],
                 };
-              })
-            )
+              }),
+            })
           ),
         });
       } catch (error) {

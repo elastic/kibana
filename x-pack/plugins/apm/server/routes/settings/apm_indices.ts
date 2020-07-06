@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { createRoute } from '../create_route';
 import {
   getApmIndices,
-  getApmIndexSettings
+  getApmIndexSettings,
 } from '../../lib/settings/apm_indices/get_apm_indices';
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
 
@@ -18,7 +18,7 @@ export const apmIndexSettingsRoute = createRoute(() => ({
   path: '/api/apm/settings/apm-index-settings',
   handler: async ({ context }) => {
     return await getApmIndexSettings({ context });
-  }
+  },
 }));
 
 // get apm indices configuration object
@@ -28,17 +28,17 @@ export const apmIndicesRoute = createRoute(() => ({
   handler: async ({ context }) => {
     return await getApmIndices({
       savedObjectsClient: context.core.savedObjects.client,
-      config: context.config
+      config: context.config,
     });
-  }
+  },
 }));
 
 // save ui indices
-export const saveApmIndicesRoute = createRoute(core => ({
+export const saveApmIndicesRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/apm-indices/save',
   options: {
-    tags: ['access:apm', 'access:apm_write']
+    tags: ['access:apm', 'access:apm_write'],
   },
   params: {
     body: t.partial({
@@ -47,12 +47,12 @@ export const saveApmIndicesRoute = createRoute(core => ({
       'apm_oss.onboardingIndices': t.string,
       'apm_oss.spanIndices': t.string,
       'apm_oss.transactionIndices': t.string,
-      'apm_oss.metricsIndices': t.string
-    })
+      'apm_oss.metricsIndices': t.string,
+    }),
   },
-  handler: async ({ context, request }) => {
+  handler: async ({ context }) => {
     const { body } = context.params;
     const savedObjectsClient = context.core.savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
-  }
+  },
 }));

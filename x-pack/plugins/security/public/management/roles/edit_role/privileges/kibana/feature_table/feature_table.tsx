@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import React, { Component } from 'react';
 import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
@@ -64,7 +63,9 @@ export class FeatureTable extends Component<Props, State> {
   public render() {
     const { role, kibanaPrivileges } = this.props;
 
-    const featurePrivileges = kibanaPrivileges.getSecuredFeatures();
+    const featurePrivileges = kibanaPrivileges
+      .getSecuredFeatures()
+      .filter((feature) => feature.privileges != null || feature.reserved != null);
 
     const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {
@@ -78,7 +79,7 @@ export class FeatureTable extends Component<Props, State> {
 
         return 0;
       })
-      .map(feature => {
+      .map((feature) => {
         return {
           featureId: feature.id,
           feature,
@@ -98,7 +99,7 @@ export class FeatureTable extends Component<Props, State> {
             ...acc,
             [featureId]: (
               <FeatureTableExpandedRow
-                feature={featurePrivileges.find(f => f.id === featureId)!}
+                feature={featurePrivileges.find((f) => f.id === featureId)!}
                 privilegeIndex={this.props.privilegeIndex}
                 onChange={this.props.onChange}
                 privilegeCalculator={this.props.privilegeCalculator}
@@ -193,11 +194,15 @@ export class FeatureTable extends Component<Props, State> {
         render: (roleEntry: Role, record: TableRow) => {
           const { feature } = record;
 
-          if (feature.reserved) {
-            return <EuiText size={'s'}>{feature.reserved.description}</EuiText>;
-          }
-
           const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
+
+          if (feature.reserved && primaryFeaturePrivileges.length === 0) {
+            return (
+              <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+                {feature.reserved.description}
+              </EuiText>
+            );
+          }
 
           if (primaryFeaturePrivileges.length === 0) {
             return null;
@@ -208,7 +213,7 @@ export class FeatureTable extends Component<Props, State> {
             this.props.privilegeIndex
           );
 
-          const options = primaryFeaturePrivileges.map(privilege => {
+          const options = primaryFeaturePrivileges.map((privilege) => {
             return {
               id: `${feature.id}_${privilege.id}`,
               label: privilege.name,
@@ -268,7 +273,7 @@ export class FeatureTable extends Component<Props, State> {
   private toggleExpandedFeature = (featureId: string) => {
     if (this.state.expandedFeatures.includes(featureId)) {
       this.setState({
-        expandedFeatures: this.state.expandedFeatures.filter(ef => ef !== featureId),
+        expandedFeatures: this.state.expandedFeatures.filter((ef) => ef !== featureId),
       });
     } else {
       this.setState({

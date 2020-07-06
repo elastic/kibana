@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import Boom from 'boom';
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
@@ -28,7 +29,7 @@ export async function listEnrollmentApiKeys(
     page,
     perPage,
     sortField: 'created_at',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     filter:
       kuery && kuery !== ''
         ? kuery.replace(
@@ -106,6 +107,9 @@ export async function generateEnrollmentAPIKey(
 ) {
   const id = uuid.v4();
   const { name: providedKeyName } = data;
+  if (data.configId) {
+    await validateConfigId(soClient, data.configId);
+  }
   const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
   const key = await createAPIKey(soClient, name, {
@@ -141,6 +145,17 @@ export async function generateEnrollmentAPIKey(
   );
 
   return getEnrollmentAPIKey(soClient, so.id);
+}
+
+async function validateConfigId(soClient: SavedObjectsClientContract, configId: string) {
+  try {
+    await agentConfigService.get(soClient, configId);
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      throw Boom.badRequest(`Agent config ${configId} does not exist`);
+    }
+    throw e;
+  }
 }
 
 function savedObjectToEnrollmentApiKey({

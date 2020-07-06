@@ -18,14 +18,20 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes that are common to various authentication mechanisms.
  */
-export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDefinitionParams) {
+export function defineCommonRoutes({
+  router,
+  authc,
+  basePath,
+  license,
+  logger,
+}: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/logout', '/api/security/v1/logout']) {
     router.get(
       {
         path,
         // Allow unknown query parameters as this endpoint can be hit by the 3rd-party with any
-        // set of query string parameters (e.g. SAML/OIDC logout request parameters).
+        // set of query string parameters (e.g. SAML/OIDC logout request/response parameters).
         validate: { query: schema.object({}, { unknowns: 'allow' }) },
         options: { authRequired: false },
       },
@@ -133,6 +139,28 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
         logger.error(err);
         return response.internalError();
       }
+    })
+  );
+
+  router.post(
+    { path: '/internal/security/access_agreement/acknowledge', validate: false },
+    createLicensedRouteHandler(async (context, request, response) => {
+      // If license doesn't allow access agreement we shouldn't handle request.
+      if (!license.getFeatures().allowAccessAgreement) {
+        logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
+        return response.forbidden({
+          body: { message: `Current license doesn't support access agreement.` },
+        });
+      }
+
+      try {
+        await authc.acknowledgeAccessAgreement(request);
+      } catch (err) {
+        logger.error(err);
+        return response.internalError();
+      }
+
+      return response.noContent();
     })
   );
 }

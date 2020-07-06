@@ -55,7 +55,7 @@ function getTopTermsResult(response: TopTermsAggResponse, fieldName: string) {
     return [];
   }
   return response.aggregations.sample[createTopTermsAggName(fieldName)].buckets.map(
-    bucket => bucket.key
+    (bucket) => bucket.key
   );
 }
 
@@ -91,7 +91,7 @@ export async function fetchTopNodes(
 ) {
   const aggs = fields
     .map(({ name }) => name)
-    .map(fieldName => createTopTermsSubAgg(fieldName))
+    .map((fieldName) => createTopTermsSubAgg(fieldName))
     .reduce((allAggs, subAgg) => ({ ...allAggs, ...subAgg }));
   const body = createSamplerSearchBody(aggs);
 
@@ -105,7 +105,7 @@ export async function fetchTopNodes(
 
   fields.forEach(({ name }) => {
     const topTerms = getTopTermsResult(response, name);
-    const fieldNodes = topTerms.map(term => createServerResultNode(name, term, fields));
+    const fieldNodes = topTerms.map((term) => createServerResultNode(name, term, fields));
 
     nodes.push(...fieldNodes);
   });

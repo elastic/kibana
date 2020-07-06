@@ -48,7 +48,7 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-envoyproxy.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/envoyproxy.svg',
+    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
     artifacts: {
       dashboards: [],
       exportedFields: {
@@ -56,7 +56,6 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/envoyproxy_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),

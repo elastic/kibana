@@ -27,7 +27,7 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
-  const statsList = Object.keys(stats).map(k => stats[k as StatsKey]);
+  const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (
     <div className="transformStatsBar" data-test-subj={dataTestSub}>
       {statsList

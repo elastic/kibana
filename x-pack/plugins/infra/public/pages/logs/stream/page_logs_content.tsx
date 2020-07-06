@@ -5,32 +5,30 @@
  */
 
 import React, { useContext } from 'react';
-
 import { euiStyled } from '../../../../../observability/public';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
 import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { PageContent } from '../../../components/page';
-
-import { WithSummary } from '../../../containers/logs/log_summary';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
+import { LogHighlightsState } from '../../../containers/logs/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { WithSummary } from '../../../containers/logs/log_summary';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { WithLogTextviewUrlState } from '../../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../../containers/logs/with_stream_items';
-import { Source } from '../../../containers/source';
-
 import { LogsToolbar } from './page_toolbar';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { PageViewLogInContext } from './page_view_log_in_context';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { source, sourceId, version } = useContext(Source.Context);
+  const { sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -64,6 +62,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
+      <PageViewLogInContext />
       {flyoutVisible ? (
         <LogEntryFlyout
           setFilter={applyLogFilterQuery}
@@ -77,7 +76,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           loading={isLoading}
         />
       ) : null}
-      <PageContent key={`${sourceId}-${version}`}>
+      <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <WithStreamItems>
           {({
             currentHighlightKey,
@@ -91,7 +90,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             checkForNewEntries,
           }) => (
             <ScrollableLogTextStreamView
-              columnConfigurations={(source && source.configuration.logColumns) || []}
+              columnConfigurations={
+                (sourceConfiguration && sourceConfiguration.configuration.logColumns) || []
+              }
               hasMoreAfterEnd={hasMoreAfterEnd}
               hasMoreBeforeStart={hasMoreBeforeStart}
               isLoadingMore={isLoadingMore}

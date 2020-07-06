@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -35,7 +35,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   describe('saved queries saved objects', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -47,8 +47,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('saved query management component functionality', function() {
-      before(async function() {
+    describe('saved query management component functionality', function () {
+      before(async function () {
         // set up a query with filters and a time filter
         log.debug('set up a query with filters to save');
         await queryBar.setQuery('response:200');

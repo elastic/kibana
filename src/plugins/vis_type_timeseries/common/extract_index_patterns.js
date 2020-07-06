@@ -25,7 +25,7 @@ export function extractIndexPatterns(panel, excludedFields = {}) {
     patterns.push(panel.index_pattern);
   }
 
-  panel.series.forEach(series => {
+  panel.series.forEach((series) => {
     const indexPattern = series.series_index_pattern;
     if (indexPattern && series.override_index_pattern && !excludedFields[indexPattern]) {
       patterns.push(indexPattern);
@@ -33,7 +33,7 @@ export function extractIndexPatterns(panel, excludedFields = {}) {
   });
 
   if (panel.annotations) {
-    panel.annotations.forEach(item => {
+    panel.annotations.forEach((item) => {
       const indexPattern = item.index_pattern;
       if (indexPattern && !excludedFields[indexPattern]) {
         patterns.push(indexPattern);

@@ -9,7 +9,7 @@ interface NestedBooleanObject {
 }
 
 export const assertDeeplyFalse = (obj: NestedBooleanObject, path: string[] = []) => {
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     const value = obj[key];
     if (typeof value === 'object' && value !== null) {
       assertDeeplyFalse(value, [...path, key]);

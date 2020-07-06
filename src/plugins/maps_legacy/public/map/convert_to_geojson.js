@@ -36,7 +36,7 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
       const geocentroidColumn = geocentroid ? table.columns[geocentroid.accessor] : null;
 
       features = table.rows
-        .map(row => {
+        .map((row) => {
           const geohashValue = row[geohashColumn.id];
           if (!geohashValue) return false;
           const geohashLocation = decodeGeoHash(geohashValue);
@@ -92,7 +92,7 @@ export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metri
             },
           };
         })
-        .filter(row => row);
+        .filter((row) => row);
     }
   } else {
     features = [];

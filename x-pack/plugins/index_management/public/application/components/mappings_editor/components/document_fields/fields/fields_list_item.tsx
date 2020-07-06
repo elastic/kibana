@@ -17,11 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields } from '../../../types';
 import { getTypeLabelFromType } from '../../../lib';
-import {
-  TYPE_DEFINITION,
-  CHILD_FIELD_INDENT_SIZE,
-  LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
-} from '../../../constants';
+import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
@@ -69,6 +65,7 @@ function FieldListItemComponent(
     canHaveMultiFields,
     hasMultiFields,
     isExpanded,
+    path,
   } = field;
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
@@ -174,7 +171,7 @@ function FieldListItemComponent(
 
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
-            {deleteField => (
+            {(deleteField) => (
               <EuiToolTip content={deleteButtonLabel}>
                 <EuiButtonIcon
                   iconType="trash"
@@ -191,12 +188,14 @@ function FieldListItemComponent(
     );
   };
 
+  const dataTestSubj = `${path.join('')}Field`;
+
   return (
     <li
       className={classNames('mappingsEditor__fieldsListItem', {
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
-      data-test-subj="fieldsListItem"
+      data-test-subj={`fieldsListItem ${dataTestSubj}`}
       ref={ref}
     >
       <div
@@ -229,6 +228,7 @@ function FieldListItemComponent(
                   color="text"
                   onClick={toggleExpand}
                   iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  data-test-subj="toggleExpandButton"
                   aria-label={
                     isExpanded
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
@@ -257,18 +257,22 @@ function FieldListItemComponent(
             <EuiFlexItem
               grow={false}
               className="mappingsEditor__fieldsListItem__name"
-              data-test-subj="fieldName"
+              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
             >
               {source.name}
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">
+              <EuiBadge
+                color="hollow"
+                data-test-subj={`${dataTestSubj}-datatype`}
+                data-type-value={source.type}
+              >
                 {isMultiField
                   ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
                       defaultMessage: '{dataType} multi-field',
                       values: {
-                        dataType: TYPE_DEFINITION[source.type].label,
+                        dataType: getTypeLabelFromType(source.type),
                       },
                     })
                   : getTypeLabelFromType(source.type)}

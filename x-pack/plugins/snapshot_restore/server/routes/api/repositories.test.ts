@@ -268,7 +268,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const pluginNames = Object.keys(REPOSITORY_PLUGINS_MAP);
       const pluginTypes = Object.entries(REPOSITORY_PLUGINS_MAP).map(([key, value]) => value);
 
-      const mockEsResponse = [...pluginNames.map(key => ({ component: key }))];
+      const mockEsResponse = [...pluginNames.map((key) => ({ component: key }))];
       router.callAsCurrentUserResponses = [mockEsResponse];
 
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES, ...pluginTypes];
@@ -277,7 +277,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should not return non-repository plugins returned from ES', async () => {
       const pluginNames = ['foo-plugin', 'bar-plugin'];
-      const mockEsResponse = [...pluginNames.map(key => ({ component: key }))];
+      const mockEsResponse = [...pluginNames.map((key) => ({ component: key }))];
       router.callAsCurrentUserResponses = [mockEsResponse];
 
       const expectedResponse = [...DEFAULT_REPOSITORY_TYPES];
@@ -391,7 +391,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
       const expectedResponse = {
         itemsDeleted: [],
-        errors: names.map(name => ({
+        errors: names.map((name) => ({
           name,
           error: { cause: mockEsError.message, statusCode: 500 },
         })),

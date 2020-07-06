@@ -89,7 +89,7 @@ export default new Chainable('yaxis', {
           formatters: _.values(tickFormatters).join(', '),
         },
       }),
-      suggestions: _.keys(tickFormatters).map(key => {
+      suggestions: _.keys(tickFormatters).map((key) => {
         return { name: key, help: tickFormatters[key] };
       }),
     },
@@ -106,7 +106,7 @@ export default new Chainable('yaxis', {
       'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   }),
   fn: function yaxisFn(args) {
-    return alter(args, function(
+    return alter(args, function (
       eachSeries,
       yaxis,
       min,

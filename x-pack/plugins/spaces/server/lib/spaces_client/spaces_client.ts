@@ -19,8 +19,8 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
   (authorization: SecurityPluginSetup['authz']) => string
 > = {
-  any: authorization => authorization.actions.login,
-  copySavedObjectsIntoSpace: authorization =>
+  any: (authorization) => authorization.actions.login,
+  copySavedObjectsIntoSpace: (authorization) =>
     authorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
 };
 
@@ -76,7 +76,7 @@ export class SpacesClient {
 
       const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      const authorized = privileges.filter(x => x.authorized).map(x => x.resource);
+      const authorized = privileges.filter((x) => x.authorized).map((x) => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
@@ -96,7 +96,7 @@ export class SpacesClient {
       const filteredSpaces: Space[] = spaces.filter((space: any) => authorized.includes(space.id));
       this.debugLogger(
         `SpacesClient.getAll(), using RBAC. returning spaces: ${filteredSpaces
-          .map(s => s.id)
+          .map((s) => s.id)
           .join(',')}`
       );
       return filteredSpaces;

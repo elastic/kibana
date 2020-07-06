@@ -45,7 +45,7 @@ export function groupAndSortBy<
   TLabelName extends string = 'title'
 >(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
   const groupedOptions = objects.reduce((array, obj) => {
-    const group = array.find(element => element.label === obj[groupBy]);
+    const group = array.find((element) => element.label === obj[groupBy]);
     const option = {
       label: obj[labelName],
       target: obj,
@@ -62,7 +62,7 @@ export function groupAndSortBy<
 
   groupedOptions.sort(sortByLabel);
 
-  groupedOptions.forEach(group => {
+  groupedOptions.forEach((group) => {
     if (Array.isArray(group.options)) {
       group.options.sort(sortByLabel);
     }

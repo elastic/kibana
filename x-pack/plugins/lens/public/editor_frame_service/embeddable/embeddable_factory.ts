@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Capabilities,
-  HttpSetup,
-  RecursiveReadonly,
-  SavedObjectsClientContract,
-} from 'kibana/public';
+import { Capabilities, HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   IndexPatternsContract,
   IndexPattern,
@@ -26,6 +22,7 @@ import {
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../common';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -34,6 +31,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
+  uiActions?: UiActionsStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -74,6 +72,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       timefilter,
       expressionRenderer,
+      uiActions,
     } = await this.getStartServices();
     const store = new SavedObjectIndexStore(savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
@@ -99,9 +98,11 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       timefilter,
       expressionRenderer,
+      uiActions?.getTrigger,
       {
         savedVis,
-        editUrl: coreHttp.basePath.prepend(getEditPath(savedObjectId)),
+        editPath: getEditPath(savedObjectId),
+        editUrl: coreHttp.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
         editable: await this.isEditable(),
         indexPatterns,
       },

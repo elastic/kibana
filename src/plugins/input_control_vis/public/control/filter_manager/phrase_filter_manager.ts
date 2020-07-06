@@ -63,10 +63,10 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     const values = kbnFilters
-      .map(kbnFilter => {
+      .map((kbnFilter) => {
         return this.getValueFromFilter(kbnFilter);
       })
-      .filter(value => value != null);
+      .filter((value) => value != null);
 
     if (values.length === 0) {
       return;
@@ -86,11 +86,11 @@ export class PhraseFilterManager extends FilterManager {
   private getValueFromFilter(kbnFilter: PhraseFilter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get<PhraseFilter[]>(kbnFilter, 'query.bool.should')
-        .map(kbnQueryFilter => {
+      return _.get(kbnFilter, 'query.bool.should')
+        .map((kbnQueryFilter: PhraseFilter) => {
           return this.getValueFromFilter(kbnQueryFilter);
         })
-        .filter(value => {
+        .filter((value: any) => {
           if (value) {
             return true;
           }

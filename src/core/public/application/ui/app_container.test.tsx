@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
 import { AppContainer } from './app_container';
@@ -28,16 +29,22 @@ import { ScopedHistory } from '../scoped_history';
 describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
+  const setIsMounting = jest.fn();
+
+  beforeEach(() => {
+    setAppLeaveHandler.mockClear();
+    setIsMounting.mockClear();
+  });
 
   const flushPromises = async () => {
-    await new Promise(async resolve => {
+    await new Promise(async (resolve) => {
       setImmediate(() => resolve());
     });
   };
 
   const createResolver = (): [Promise<void>, () => void] => {
     let resolve: () => void | undefined;
-    const promise = new Promise<void>(r => {
+    const promise = new Promise<void>((r) => {
       resolve = r;
     });
     return [promise, resolve!];
@@ -47,6 +54,8 @@ describe('AppContainer', () => {
     appBasePath: '/base-path',
     appRoute: '/some-route',
     unmountBeforeMounting: false,
+    legacy: false,
+    exactRoute: false,
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -67,6 +76,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
@@ -86,10 +96,88 @@ describe('AppContainer', () => {
 
     expect(wrapper.text()).toEqual('');
 
-    resolvePromise();
-    await flushPromises();
-    wrapper.update();
+    await act(async () => {
+      resolvePromise();
+      await flushPromises();
+      wrapper.update();
+    });
 
     expect(wrapper.text()).toContain('some-content');
+  });
+
+  it('should call setIsMounting while mounting', async () => {
+    const [waitPromise, resolvePromise] = createResolver();
+    const mounter = createMounter(waitPromise);
+
+    const wrapper = mount(
+      <AppContainer
+        appPath={`/app/${appId}`}
+        appId={appId}
+        appStatus={AppStatus.accessible}
+        mounter={mounter}
+        setAppLeaveHandler={setAppLeaveHandler}
+        setIsMounting={setIsMounting}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
+      />
+    );
+
+    expect(setIsMounting).toHaveBeenCalledTimes(1);
+    expect(setIsMounting).toHaveBeenLastCalledWith(true);
+
+    await act(async () => {
+      resolvePromise();
+      await flushPromises();
+      wrapper.update();
+    });
+
+    expect(setIsMounting).toHaveBeenCalledTimes(2);
+    expect(setIsMounting).toHaveBeenLastCalledWith(false);
+  });
+
+  it('should call setIsMounting(false) if mounting throws', async () => {
+    const [waitPromise, resolvePromise] = createResolver();
+    const mounter = {
+      appBasePath: '/base-path/some-route',
+      appRoute: '/some-route',
+      unmountBeforeMounting: false,
+      legacy: false,
+      exactRoute: false,
+      mount: async ({ element }: AppMountParameters) => {
+        await waitPromise;
+        throw new Error(`Mounting failed!`);
+      },
+    };
+
+    const wrapper = mount(
+      <AppContainer
+        appPath={`/app/${appId}`}
+        appId={appId}
+        appStatus={AppStatus.accessible}
+        mounter={mounter}
+        setAppLeaveHandler={setAppLeaveHandler}
+        setIsMounting={setIsMounting}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
+      />
+    );
+
+    expect(setIsMounting).toHaveBeenCalledTimes(1);
+    expect(setIsMounting).toHaveBeenLastCalledWith(true);
+
+    // await expect(
+    await act(async () => {
+      resolvePromise();
+      await flushPromises();
+      wrapper.update();
+    });
+    // ).rejects.toThrow();
+
+    expect(setIsMounting).toHaveBeenCalledTimes(2);
+    expect(setIsMounting).toHaveBeenLastCalledWith(false);
   });
 });

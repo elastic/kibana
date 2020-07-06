@@ -20,7 +20,13 @@
 import { cloneDeep } from 'lodash';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
+
 jest.mock('../services');
+
+jest.mock('../lib/vega', () => ({
+  vega: jest.requireActual('vega'),
+  vegaLite: jest.requireActual('vega-lite'),
+}));
 
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {
@@ -78,11 +84,27 @@ describe(`VegaParser._setDefaultColors`, () => {
 });
 
 describe('VegaParser._resolveEsQueries', () => {
+  let searchApiStub;
+  const data = [
+    {
+      id: 0,
+      rawResponse: [42],
+    },
+  ];
+
+  beforeEach(() => {
+    searchApiStub = {
+      search: jest.fn(() => ({
+        toPromise: jest.fn(() => Promise.resolve(data)),
+      })),
+    };
+  });
+
   function check(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
+      const vp = new VegaParser(spec, searchApiStub, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }],
-        getUrlForRegionLayer: async layer => {
+        getUrlForRegionLayer: async (layer) => {
           return layer.url;
         },
       });
@@ -130,30 +152,30 @@ describe('VegaParser._parseSchema', () => {
   test('should warn on no vega version specified', () => {
     const vp = new VegaParser({});
     expect(vp._parseSchema()).toBe(false);
-    expect(vp.spec).toEqual({ $schema: 'https://vega.github.io/schema/vega/v3.0.json' });
+    expect(vp.spec).toEqual({ $schema: 'https://vega.github.io/schema/vega/v5.json' });
     expect(vp.warnings).toHaveLength(1);
   });
 
   test(
     'should not warn on current vega version',
-    check('https://vega.github.io/schema/vega/v4.0.json', false, 0)
+    check('https://vega.github.io/schema/vega/v5.json', false, 0)
   );
   test(
     'should not warn on older vega version',
-    check('https://vega.github.io/schema/vega/v3.0.json', false, 0)
+    check('https://vega.github.io/schema/vega/v4.json', false, 0)
   );
   test(
     'should warn on vega version too new to be supported',
-    check('https://vega.github.io/schema/vega/v5.0.json', false, 1)
+    check('https://vega.github.io/schema/vega/v5.99.json', false, 1)
   );
 
   test(
     'should not warn on current vega-lite version',
-    check('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0)
+    check('https://vega.github.io/schema/vega-lite/v4.json', true, 0)
   );
   test(
     'should warn on vega-lite version too new to be supported',
-    check('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1)
+    check('https://vega.github.io/schema/vega-lite/v5.json', true, 1)
   );
 });
 

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 export function timeShift(resp, panel, series) {
-  return next => results => {
+  return (next) => (results) => {
     if (/^([+-]?[\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {
       const matches = series.offset_time.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);
 
@@ -30,7 +30,7 @@ export function timeShift(resp, panel, series) {
         const offsetUnit = matches[2];
         const offset = moment.duration(offsetValue, offsetUnit).valueOf();
 
-        results.forEach(item => {
+        results.forEach((item) => {
           if (_.startsWith(item.id, series.id)) {
             item.data = item.data.map(([time, value]) => [time + offset, value]);
           }

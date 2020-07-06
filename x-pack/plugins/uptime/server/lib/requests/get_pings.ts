@@ -10,7 +10,7 @@ import {
   HttpResponseBody,
   PingsResponse,
   Ping,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+} from '../../../common/runtime_types';
 
 const DEFAULT_PAGE_SIZE = 25;
 

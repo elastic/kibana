@@ -62,7 +62,7 @@ const setup = (config: TestConfig) => {
 };
 
 describe('FeatureTable', () => {
-  [true, false].forEach(canCustomizeSubFeaturePrivileges => {
+  [true, false].forEach((canCustomizeSubFeaturePrivileges) => {
     describe(`with sub feature privileges ${
       canCustomizeSubFeaturePrivileges ? 'allowed' : 'disallowed'
     }`, () => {
@@ -312,7 +312,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: true,
     });
 
-    kibanaFeatures.forEach(feature => {
+    kibanaFeatures.forEach((feature) => {
       const rowExpander = findTestSubject(wrapper, `expandFeaturePrivilegeRow-${feature.id}`);
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
         expect(rowExpander).toHaveLength(0);
@@ -345,9 +345,7 @@ describe('FeatureTable', () => {
 
     expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(0);
 
-    findTestSubject(wrapper, 'expandFeaturePrivilegeRow')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'expandFeaturePrivilegeRow').first().simulate('click');
 
     expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(1);
   });
@@ -744,6 +742,129 @@ describe('FeatureTable', () => {
     const { displayedPrivileges } = setup({
       role,
       features: kibanaFeatures,
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(displayedPrivileges).toEqual({
+      excluded_from_base: {
+        primaryFeaturePrivilege: 'none',
+      },
+      no_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+      with_excluded_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+      with_sub_features: {
+        primaryFeaturePrivilege: 'none',
+      },
+    });
+  });
+
+  it('renders a description for features with only reserved privileges (omitting the primary feature controls)', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const reservedFeature = createFeature({
+      id: 'reserved_feature',
+      name: 'Reserved Feature',
+      privileges: null,
+      reserved: {
+        description: 'this is my reserved feature description',
+        privileges: [
+          {
+            id: 'priv_1',
+            privilege: {
+              api: [],
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const { wrapper } = setup({
+      role,
+      features: [reservedFeature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'reservedFeatureDescription').text()).toMatchInlineSnapshot(
+      `"this is my reserved feature description"`
+    );
+
+    expect(findTestSubject(wrapper, 'primaryFeaturePrivilegeControl')).toHaveLength(0);
+  });
+
+  it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const reservedFeature = createFeature({
+      id: 'reserved_feature',
+      name: 'Reserved Feature with primary feature privileges',
+      reserved: {
+        description: 'this is my reserved feature description',
+        privileges: [
+          {
+            id: 'priv_1',
+            privilege: {
+              api: [],
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        ],
+      },
+    });
+
+    const { displayedPrivileges, wrapper } = setup({
+      role,
+      features: [reservedFeature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+      canCustomizeSubFeaturePrivileges: false,
+    });
+
+    expect(findTestSubject(wrapper, 'reservedFeatureDescription')).toHaveLength(0);
+    expect(displayedPrivileges).toEqual({
+      reserved_feature: {
+        primaryFeaturePrivilege: 'none',
+      },
+    });
+  });
+
+  it('does not render features which lack privileges', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+
+    const featureWithoutPrivileges = createFeature({
+      id: 'no_privs',
+      name: 'No Privileges Feature',
+      privileges: null,
+    });
+
+    const { displayedPrivileges } = setup({
+      role,
+      features: [...kibanaFeatures, featureWithoutPrivileges],
       privilegeIndex: 0,
       calculateDisplayedPrivileges: true,
       canCustomizeSubFeaturePrivileges: false,

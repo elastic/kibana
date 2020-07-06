@@ -12,7 +12,7 @@ export const NumberFromString = new rt.Type<number, string, unknown>(
   'NumberFromString',
   rt.number.is,
   (u, c) =>
-    either.chain(rt.string.validate(u, c), s => {
+    either.chain(rt.string.validate(u, c), (s) => {
       const n = +s;
       return isNaN(n) ? rt.failure(u, c, 'cannot parse to a number') : rt.success(n);
     }),

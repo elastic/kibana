@@ -4,7 +4,7 @@
 
 TIP: Traces link together related transactions to show an end-to-end performance of how a request was served
 and which services were part of it.
-In addition to the Traces overview, you can view your application traces in the <<spans,span timeline waterfall>>.
+In addition to the Traces overview, you can view your application traces in the <<spans,trace sample timeline waterfall>>.
 
 The *Traces* overview displays the entry transaction for all traces in your application.
 If you're using <<distributed-tracing>>, this view is key to finding the critical paths within your application.
@@ -17,25 +17,3 @@ If there's a particular endpoint you're worried about, you can click on it to vi
 
 [role="screenshot"]
 image::apm/images/apm-traces.png[Example view of the Traces overview in APM app in Kibana]
-
-[float]
-[[distributed-tracing]]
-==== Distributed tracing
-
-Elastic APM supports distributed tracing.
-Distributed tracing is a key feature of modern application performance monitoring as application architectures are shifting from monolithic to more distributed,
-service-based architectures.
-
-Distributed tracing allows APM users to automatically trace requests all the way through the service architecture,
-and visualize those traces in one single view in the APM app.
-This is accomplished by tracing all of the requests, from the initial web request to your front-end service,
-to queries made to your back-end services.
-This makes finding possible bottlenecks throughout your application much easier and faster.
-
-By definition, a distributed trace includes more than one transaction.
-You can use the <<spans,span timeline visualization>> to view a waterfall display of all of the transactions from individual services that are connected in a trace.
-
-[role="screenshot"]
-image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
-
-TIP: Distributed tracing is supported by all APM agents, and there's no additional configuration needed.

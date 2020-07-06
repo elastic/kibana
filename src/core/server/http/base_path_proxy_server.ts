@@ -24,7 +24,7 @@ import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request, ResponseToolkit } from 'hapi';
 import HapiProxy from 'h2o2';
-import { sample } from 'lodash';
+import { sampleSize } from 'lodash';
 import BrowserslistUserAgent from 'browserslist-useragent';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -90,7 +90,7 @@ export class BasePathProxyServer {
     httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
     if (!httpConfig.basePath) {
-      httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
+      httpConfig.basePath = `/${sampleSize(alphabet, 3).join('')}`;
     }
   }
 
@@ -180,9 +180,7 @@ export class BasePathProxyServer {
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
             apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
-            await delayUntil()
-              .pipe(take(1))
-              .toPromise();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
@@ -216,9 +214,7 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            await delayUntil()
-              .pipe(take(1))
-              .toPromise();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],

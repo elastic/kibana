@@ -32,7 +32,7 @@ describe('parseEsInterval', () => {
     const intervals = ['4w', '12M', '10y'];
     expect.assertions(intervals.length);
 
-    intervals.forEach(interval => {
+    intervals.forEach((interval) => {
       try {
         parseEsInterval(interval);
       } catch (error) {
@@ -45,7 +45,7 @@ describe('parseEsInterval', () => {
     const intervals = ['1', 'h', '0m', '0.5h'];
     expect.assertions(intervals.length);
 
-    intervals.forEach(interval => {
+    intervals.forEach((interval) => {
       try {
         parseEsInterval(interval);
       } catch (error) {

@@ -15,7 +15,7 @@ exports[`it renders without blowing up 1`] = `
       >
         <h2>
           <EuiIcon
-            className="collapsiblePanel__logo"
+            className="spcSectionPanel__collapsiblePanelLogo"
             size="xl"
             type="logoElasticsearch"
           />

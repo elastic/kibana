@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, Suspense } from 'react';
 import {
   EuiForm,
   EuiCallOut,
@@ -12,10 +12,13 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
 import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { TypeRegistry } from '../../type_registry';
@@ -47,8 +50,9 @@ interface ActionConnectorProps {
     body: { message: string; error: string };
   };
   errors: IErrorObject;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  docLinks: DocLinksStart;
 }
 
 export const ActionConnectorForm = ({
@@ -57,8 +61,9 @@ export const ActionConnectorForm = ({
   actionTypeName,
   serverError,
   errors,
-  actionTypeRegistry,
   http,
+  actionTypeRegistry,
+  docLinks,
 }: ActionConnectorProps) => {
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -94,7 +99,10 @@ export const ActionConnectorForm = ({
                 values={{
                   actionType: actionTypeName,
                   docLink: (
-                    <EuiLink target="_blank">
+                    <EuiLink
+                      href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningHelpLinkText"
                         defaultMessage="Learn more."
@@ -134,7 +142,7 @@ export const ActionConnectorForm = ({
           placeholder="Untitled"
           data-test-subj="nameInput"
           value={connector.name || ''}
-          onChange={e => {
+          onChange={(e) => {
             setActionProperty('name', e.target.value);
           }}
           onBlur={() => {
@@ -146,13 +154,24 @@ export const ActionConnectorForm = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
-        <FieldsComponent
-          action={connector}
-          errors={errors}
-          editActionConfig={setActionConfigProperty}
-          editActionSecrets={setActionSecretsProperty}
-          http={http}
-        />
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <FieldsComponent
+            action={connector}
+            errors={errors}
+            editActionConfig={setActionConfigProperty}
+            editActionSecrets={setActionSecretsProperty}
+            http={http}
+            docLinks={docLinks}
+          />
+        </Suspense>
       ) : null}
     </EuiForm>
   );

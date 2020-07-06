@@ -23,7 +23,7 @@ export const callDeleteJobs = async <JobType extends string>(
     method: 'POST',
     body: JSON.stringify(
       deleteJobsRequestPayloadRT.encode({
-        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });
@@ -53,7 +53,7 @@ export const callStopDatafeeds = async <JobType extends string>(
     method: 'POST',
     body: JSON.stringify(
       stopDatafeedsRequestPayloadRT.encode({
-        datafeedIds: jobTypes.map(jobType => getDatafeedId(spaceId, sourceId, jobType)),
+        datafeedIds: jobTypes.map((jobType) => getDatafeedId(spaceId, sourceId, jobType)),
       })
     ),
   });

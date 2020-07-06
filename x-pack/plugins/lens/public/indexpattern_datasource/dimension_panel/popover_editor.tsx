@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './popover_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSideNav,
+  EuiListGroup,
   EuiCallOut,
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -48,11 +50,36 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
         operationPanels[opType2].displayName
       );
     })
-    .map(operationType => ({
+    .map((operationType) => ({
       operationType,
       compatibleWithCurrentField,
     }));
 }
+
+const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
+
+  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = String(e.target.value);
+    setInputValue(val);
+    onChangeDebounced(val);
+  };
+
+  return (
+    <EuiFieldText
+      compressed
+      data-test-subj="indexPattern-label-edit"
+      value={inputValue}
+      onChange={handleInputChange}
+    />
+  );
+};
 
 export function PopoverEditor(props: PopoverEditorProps) {
   const {
@@ -76,7 +103,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
 
   const fieldMap: Record<string, IndexPatternField> = useMemo(() => {
     const fields: Record<string, IndexPatternField> = {};
-    currentIndexPattern.fields.forEach(field => {
+    currentIndexPattern.fields.forEach((field) => {
       fields[field.name] = field;
     });
     return fields;
@@ -92,7 +119,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
     }
 
-    return _.uniq(
+    return _.uniqBy(
       [
         ...asOperationOptions(validOperationTypes, true),
         ...asOperationOptions(possibleOperationTypes, false),
@@ -101,84 +128,94 @@ export function PopoverEditor(props: PopoverEditorProps) {
     );
   }
 
-  function getSideNavItems() {
-    return [
-      {
-        name: '',
-        id: '0',
-        items: getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => ({
-          name: operationPanels[operationType].displayName,
-          id: operationType as string,
-          className: classNames('lnsIndexPatternDimensionEditor__operation', {
-            'lnsIndexPatternDimensionEditor__operation--selected': Boolean(
-              incompatibleSelectedOperationType === operationType ||
-                (!incompatibleSelectedOperationType &&
-                  selectedColumn &&
-                  selectedColumn.operationType === operationType)
-            ),
-            'lnsIndexPatternDimensionEditor__operation--incompatible': !compatibleWithCurrentField,
-          }),
-          'data-test-subj': `lns-indexPatternDimension${
-            compatibleWithCurrentField ? '' : 'Incompatible'
-          }-${operationType}`,
-          onClick() {
-            if (!selectedColumn || !compatibleWithCurrentField) {
-              const possibleFields = fieldByOperation[operationType] || [];
+  function getSideNavItems(): EuiListGroupItemProps[] {
+    return getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => {
+      const isActive = Boolean(
+        incompatibleSelectedOperationType === operationType ||
+          (!incompatibleSelectedOperationType &&
+            selectedColumn &&
+            selectedColumn.operationType === operationType)
+      );
 
-              if (possibleFields.length === 1) {
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: buildColumn({
-                      columns: props.state.layers[props.layerId].columns,
-                      suggestedPriority: props.suggestedPriority,
-                      layerId: props.layerId,
-                      op: operationType,
-                      indexPattern: currentIndexPattern,
-                      field: fieldMap[possibleFields[0]],
-                      previousColumn: selectedColumn,
-                    }),
-                  })
-                );
-              } else {
-                setInvalidOperationType(operationType);
-              }
-              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-              return;
-            }
-            if (incompatibleSelectedOperationType) {
-              setInvalidOperationType(null);
-            }
-            if (selectedColumn.operationType === operationType) {
-              return;
-            }
-            const newColumn: IndexPatternColumn = buildColumn({
-              columns: props.state.layers[props.layerId].columns,
-              suggestedPriority: props.suggestedPriority,
-              layerId: props.layerId,
-              op: operationType,
-              indexPattern: currentIndexPattern,
-              field: fieldMap[selectedColumn.sourceField],
-              previousColumn: selectedColumn,
-            });
+      let color: EuiListGroupItemProps['color'] = 'primary';
+      if (isActive) {
+        color = 'text';
+      } else if (!compatibleWithCurrentField) {
+        color = 'subdued';
+      }
 
-            trackUiEvent(
-              `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
-            );
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn,
-              })
-            );
-          },
-        })),
-      },
-    ];
+      let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
+      if (isActive) {
+        label = <strong>{operationPanels[operationType].displayName}</strong>;
+      }
+
+      return {
+        id: operationType as string,
+        label,
+        color,
+        isActive,
+        size: 's',
+        className: 'lnsIndexPatternDimensionEditor__operation',
+        'data-test-subj': `lns-indexPatternDimension${
+          compatibleWithCurrentField ? '' : 'Incompatible'
+        }-${operationType}`,
+        onClick() {
+          if (!selectedColumn || !compatibleWithCurrentField) {
+            const possibleFields = fieldByOperation[operationType] || [];
+
+            if (possibleFields.length === 1) {
+              setState(
+                changeColumn({
+                  state,
+                  layerId,
+                  columnId,
+                  newColumn: buildColumn({
+                    columns: props.state.layers[props.layerId].columns,
+                    suggestedPriority: props.suggestedPriority,
+                    layerId: props.layerId,
+                    op: operationType,
+                    indexPattern: currentIndexPattern,
+                    field: fieldMap[possibleFields[0]],
+                    previousColumn: selectedColumn,
+                  }),
+                })
+              );
+            } else {
+              setInvalidOperationType(operationType);
+            }
+            trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
+            return;
+          }
+          if (incompatibleSelectedOperationType) {
+            setInvalidOperationType(null);
+          }
+          if (selectedColumn.operationType === operationType) {
+            return;
+          }
+          const newColumn: IndexPatternColumn = buildColumn({
+            columns: props.state.layers[props.layerId].columns,
+            suggestedPriority: props.suggestedPriority,
+            layerId: props.layerId,
+            op: operationType,
+            indexPattern: currentIndexPattern,
+            field: fieldMap[selectedColumn.sourceField],
+            previousColumn: selectedColumn,
+          });
+
+          trackUiEvent(
+            `indexpattern_dimension_operation_from_${selectedColumn.operationType}_to_${operationType}`
+          );
+          setState(
+            changeColumn({
+              state,
+              layerId,
+              columnId,
+              newColumn,
+            })
+          );
+        },
+      };
+    });
   }
 
   return (
@@ -188,7 +225,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <FieldSelect
             currentIndexPattern={currentIndexPattern}
             existingFields={state.existingFields}
-            showEmptyFields={state.showEmptyFields}
             fieldMap={fieldMap}
             operationFieldSupportMatrix={operationFieldSupportMatrix}
             selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
@@ -205,7 +241,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 })
               );
             }}
-            onChoose={choice => {
+            onChoose={(choice) => {
               let column: IndexPatternColumn;
               if (
                 !incompatibleSelectedOperationType &&
@@ -259,7 +295,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={null} className={classNames('lnsIndexPatternDimensionEditor__left')}>
-              <EuiSideNav items={getSideNavItems()} />
+              <EuiListGroup gutterSize="none" listItems={getSideNavItems()} />
             </EuiFlexItem>
             <EuiFlexItem grow={true} className="lnsIndexPatternDimensionEditor__right">
               {incompatibleSelectedOperationType && selectedColumn && (
@@ -309,22 +345,26 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   })}
                   display="rowCompressed"
                 >
-                  <EuiFieldText
-                    compressed
-                    data-test-subj="indexPattern-label-edit"
+                  <LabelInput
                     value={selectedColumn.label}
-                    onChange={e => {
-                      setState(
-                        changeColumn({
-                          state,
-                          layerId,
-                          columnId,
-                          newColumn: {
-                            ...selectedColumn,
-                            label: e.target.value,
+                    onChange={(value) => {
+                      setState({
+                        ...state,
+                        layers: {
+                          ...state.layers,
+                          [layerId]: {
+                            ...state.layers[layerId],
+                            columns: {
+                              ...state.layers[layerId].columns,
+                              [columnId]: {
+                                ...selectedColumn,
+                                label: value,
+                                customLabel: true,
+                              },
+                            },
                           },
-                        })
-                      );
+                        },
+                      });
                     }}
                   />
                 </EuiFormRow>
@@ -334,7 +374,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 <BucketNestingEditor
                   layer={state.layers[props.layerId]}
                   columnId={props.columnId}
-                  setColumns={columnOrder => {
+                  setColumns={(columnOrder) => {
                     setState({
                       ...state,
                       layers: {
@@ -352,7 +392,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
               {selectedColumn && selectedColumn.dataType === 'number' ? (
                 <FormatSelector
                   selectedColumn={selectedColumn}
-                  onChange={newFormat => {
+                  onChange={(newFormat) => {
                     setState(
                       updateColumnParam({
                         state,

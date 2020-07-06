@@ -55,14 +55,17 @@ core.chrome.setHelpExtension(elem => {
 |  [getBadge$()](./kibana-plugin-core-public.chromestart.getbadge_.md) | Get an observable of the current badge |
 |  [getBrand$()](./kibana-plugin-core-public.chromestart.getbrand_.md) | Get an observable of the current brand information. |
 |  [getBreadcrumbs$()](./kibana-plugin-core-public.chromestart.getbreadcrumbs_.md) | Get an observable of the current list of breadcrumbs |
+|  [getCustomNavLink$()](./kibana-plugin-core-public.chromestart.getcustomnavlink_.md) | Get an observable of the current custom nav link |
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
+|  [getNavType$()](./kibana-plugin-core-public.chromestart.getnavtype_.md) | Get the navigation type TODO \#64541 Can delete |
 |  [removeApplicationClass(className)](./kibana-plugin-core-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-core-public.chromestart.setapptitle.md) | Sets the current app's title |
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBrand(brand)](./kibana-plugin-core-public.chromestart.setbrand.md) | Set the brand configuration. |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
+|  [setCustomNavLink(newCustomNavLink)](./kibana-plugin-core-public.chromestart.setcustomnavlink.md) | Override the current set of custom nav link |
 |  [setHelpExtension(helpExtension)](./kibana-plugin-core-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
 |  [setHelpSupportUrl(url)](./kibana-plugin-core-public.chromestart.sethelpsupporturl.md) | Override the default support URL shown in the help menu |
 |  [setIsVisible(isVisible)](./kibana-plugin-core-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |

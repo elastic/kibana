@@ -8,8 +8,8 @@ import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource } from './indexpattern';
 import { renameColumns } from './rename_columns';
-import { getAutoDate } from './auto_date';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -20,6 +20,7 @@ export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   editorFrame: EditorFrameSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface IndexPatternDatasourceStartPlugins {
@@ -31,10 +32,9 @@ export class IndexPatternDatasource {
 
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { data: dataSetup, expressions, editorFrame }: IndexPatternDatasourceSetupPlugins
+    { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     expressions.registerFunction(renameColumns);
-    expressions.registerFunction(getAutoDate({ data: dataSetup }));
 
     editorFrame.registerDatasource(
       core.getStartServices().then(([coreStart, { data }]) =>
@@ -42,6 +42,7 @@ export class IndexPatternDatasource {
           core: coreStart,
           storage: new Storage(localStorage),
           data,
+          charts,
         })
       ) as Promise<Datasource>
     );

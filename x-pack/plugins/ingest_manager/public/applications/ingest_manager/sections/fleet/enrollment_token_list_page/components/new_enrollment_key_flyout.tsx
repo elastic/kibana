@@ -80,7 +80,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
-  const configDefaultValue = agentConfigs.find(config => config.is_default)?.id;
+  const configDefaultValue = agentConfigs.find((config) => config.is_default)?.id;
   const form = useCreateApiKeyForm(configDefaultValue, () => {
     onClose();
   });
@@ -110,7 +110,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
             required={true}
             defaultValue={configDefaultValue}
             {...form.configIdInput.props}
-            options={agentConfigs.map(config => ({ value: config.id, text: config.name }))}
+            options={agentConfigs.map((config) => ({ value: config.id, text: config.name }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>

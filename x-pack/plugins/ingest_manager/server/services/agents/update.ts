@@ -31,7 +31,7 @@ export async function updateAgentsForConfigId(
       hasMore = false;
       break;
     }
-    const agentUpdate = agents.map(agent => ({
+    const agentUpdate = agents.map((agent) => ({
       id: agent.id,
       type: AGENT_SAVED_OBJECT_TYPE,
       attributes: { config_newest_revision: config.revision },

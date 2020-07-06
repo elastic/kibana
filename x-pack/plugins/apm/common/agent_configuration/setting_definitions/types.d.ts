@@ -7,6 +7,9 @@
 import * as t from 'io-ts';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
+// TODO: is it possible to get rid of `any`?
+export type SettingValidation = t.Type<any, string, unknown>;
+
 interface BaseSetting {
   /**
    * UI: unique key to identify setting
@@ -25,7 +28,7 @@ interface BaseSetting {
   category?: string;
 
   /**
-   * UI:
+   * UI: Default value set by agent
    */
   defaultValue?: string;
 
@@ -40,16 +43,6 @@ interface BaseSetting {
   placeholder?: string;
 
   /**
-   * runtime validation of the input
-   */
-  validation?: t.Type<any, string, unknown>;
-
-  /**
-   * UI: error shown when the runtime validation fails
-   */
-  validationError?: string;
-
-  /**
    * Limits the setting to no agents, except those specified in `includeAgents`
    */
   includeAgents?: AgentName[];
@@ -62,6 +55,21 @@ interface BaseSetting {
 
 interface TextSetting extends BaseSetting {
   type: 'text';
+  validation?: SettingValidation;
+}
+
+interface SelectSetting extends BaseSetting {
+  type: 'select';
+  options: Array<{ text: string; value: string }>;
+  validation?: SettingValidation;
+}
+
+interface BooleanSetting extends BaseSetting {
+  type: 'boolean';
+}
+
+interface FloatSetting extends BaseSetting {
+  type: 'float';
 }
 
 interface IntegerSetting extends BaseSetting {
@@ -70,28 +78,18 @@ interface IntegerSetting extends BaseSetting {
   max?: number;
 }
 
-interface FloatSetting extends BaseSetting {
-  type: 'float';
-}
-
-interface SelectSetting extends BaseSetting {
-  type: 'select';
-  options: Array<{ text: string; value: string }>;
-}
-
-interface BooleanSetting extends BaseSetting {
-  type: 'boolean';
-}
-
 interface BytesSetting extends BaseSetting {
   type: 'bytes';
+  min?: string;
+  max?: string;
   units?: string[];
 }
 
 interface DurationSetting extends BaseSetting {
   type: 'duration';
+  min?: string;
+  max?: string;
   units?: string[];
-  min?: number;
 }
 
 export type RawSettingDefinition =
@@ -104,5 +102,8 @@ export type RawSettingDefinition =
   | DurationSetting;
 
 export type SettingDefinition = RawSettingDefinition & {
-  validation: NonNullable<RawSettingDefinition['validation']>;
+  /**
+   * runtime validation of input
+   */
+  validation: SettingValidation;
 };

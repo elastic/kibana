@@ -7,7 +7,10 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, forceNow?: Date): import("../..").RangeFilter | undefined;
+export declare function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
+    forceNow?: Date;
+    fieldName?: string;
+}): import("../..").RangeFilter | undefined;
 ```
 
 ## Parameters
@@ -16,7 +19,7 @@ export declare function getTime(indexPattern: IIndexPattern | undefined, timeRan
 |  --- | --- | --- |
 |  indexPattern | <code>IIndexPattern &#124; undefined</code> |  |
 |  timeRange | <code>TimeRange</code> |  |
-|  forceNow | <code>Date</code> |  |
+|  options | <code>{</code><br/><code>    forceNow?: Date;</code><br/><code>    fieldName?: string;</code><br/><code>}</code> |  |
 
 <b>Returns:</b>
 

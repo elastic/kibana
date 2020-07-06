@@ -9,26 +9,22 @@ exports[`TOCEntry is rendered 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <LayerTocActions
-      cloneLayer={[Function]}
+    <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
-      fitToBounds={[Function]}
       layer={
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
-      removeLayer={[Function]}
-      toggleVisible={[Function]}
-      zoom={0}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -76,26 +72,22 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <LayerTocActions
-      cloneLayer={[Function]}
+    <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
-      fitToBounds={[Function]}
       layer={
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
-      removeLayer={[Function]}
-      toggleVisible={[Function]}
-      zoom={0}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -143,26 +135,22 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <LayerTocActions
-      cloneLayer={[Function]}
+    <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
-      fitToBounds={[Function]}
       layer={
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
-      removeLayer={[Function]}
-      toggleVisible={[Function]}
-      zoom={0}
     />
     <div
       className="mapTocEntry__layerIcons"
@@ -210,27 +198,22 @@ exports[`TOCEntry props isReadOnly 1`] = `
   <div
     className="mapTocEntry-visible"
   >
-    <LayerTocActions
-      cloneLayer={[Function]}
+    <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
-      fitToBounds={[Function]}
-      isReadOnly={true}
       layer={
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
-      removeLayer={[Function]}
-      toggleVisible={[Function]}
-      zoom={0}
     />
   </div>
   <span
@@ -261,26 +244,22 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   <div
     className="mapTocEntry-visible"
   >
-    <LayerTocActions
-      cloneLayer={[Function]}
+    <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
-      fitToBounds={[Function]}
       layer={
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
+          "isPreviewLayer": [Function],
           "isVisible": [Function],
           "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
-      removeLayer={[Function]}
-      toggleVisible={[Function]}
-      zoom={0}
     />
     <div
       className="mapTocEntry__layerIcons"

@@ -21,7 +21,7 @@ import { statSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export default function list(settings, logger) {
-  readdirSync(settings.pluginDir).forEach(filename => {
+  readdirSync(settings.pluginDir).forEach((filename) => {
     const stat = statSync(join(settings.pluginDir, filename));
 
     if (stat.isDirectory() && filename[0] !== '.') {

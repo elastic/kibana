@@ -27,6 +27,9 @@ export function indicesRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: indicesSchema,
       },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {

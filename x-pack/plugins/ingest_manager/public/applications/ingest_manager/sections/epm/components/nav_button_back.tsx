@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 export function NavButtonBack({ href, text }: { href: string; text: string }) {
   const ButtonEmpty = styled(EuiButtonEmpty)`
-    margin-right: ${props => props.theme.eui.spacerSizes.xl};
+    margin-right: ${(props) => props.theme.eui.spacerSizes.xl};
   `;
   return (
     <ButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>

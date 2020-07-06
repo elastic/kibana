@@ -21,7 +21,7 @@ import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
-import { loadPluginBundle } from './plugin_loader';
+import { read } from './plugin_reader';
 import { CoreStart, CoreSetup } from '..';
 
 /**
@@ -69,7 +69,6 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -84,18 +83,6 @@ export class PluginWrapper<
     this.configPath = discoveredPlugin.configPath;
     this.requiredPlugins = discoveredPlugin.requiredPlugins;
     this.optionalPlugins = discoveredPlugin.optionalPlugins;
-  }
-
-  /**
-   * Loads the plugin's bundle into the browser. Should be called in parallel with all plugins
-   * using `Promise.all`. Must be called before `setup`.
-   * @param addBasePath Function that adds the base path to a string for plugin bundle path.
-   */
-  public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TStart, TPluginsSetup, TPluginsStart>(
-      addBasePath,
-      this.name
-    );
   }
 
   /**
@@ -146,11 +133,14 @@ export class PluginWrapper<
   }
 
   private async createPluginInstance() {
-    if (this.initializer === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be setup since its bundle isn't loaded.`);
-    }
+    const initializer = read(this.name) as PluginInitializer<
+      TSetup,
+      TStart,
+      TPluginsSetup,
+      TPluginsStart
+    >;
 
-    const instance = this.initializer(this.initializerContext);
+    const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);

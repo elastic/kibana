@@ -853,7 +853,7 @@ if (doc['task.runAt'].size()!=0) {
         type,
         attributes: {
           ..._.omit(task, 'id'),
-          ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+          ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
         },
         references: [],
         version: '123',
@@ -881,7 +881,7 @@ if (doc['task.runAt'].size()!=0) {
     test('returns the task status if the task exists ', async () => {
       expect.assertions(4);
       return Promise.all(
-        Object.values(TaskStatus).map(async status => {
+        Object.values(TaskStatus).map(async (status) => {
           const id = `id-${_.random(1, 20)}`;
           const task = {
             runAt: mockedDate,
@@ -904,7 +904,7 @@ if (doc['task.runAt'].size()!=0) {
             type,
             attributes: {
               ..._.omit(task, 'id'),
-              ..._.mapValues(_.pick(task, 'params', 'state'), value => JSON.stringify(value)),
+              ..._.mapValues(_.pick(task, ['params', 'state']), (value) => JSON.stringify(value)),
             },
             references: [],
             version: '123',
@@ -1024,7 +1024,7 @@ if (doc['task.runAt'].size()!=0) {
       return { taskManagerId, runAt, tasks };
     }
 
-    test('emits an event when a task is succesfully claimed by id', async done => {
+    test('emits an event when a task is succesfully claimed by id', async (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1081,7 +1081,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('emits an event when a task is succesfully by scheduling', async done => {
+    test('emits an event when a task is succesfully by scheduling', async (done) => {
       const { taskManagerId, runAt, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
@@ -1138,7 +1138,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('emits an event when the store fails to claim a required task by id', async done => {
+    test('emits an event when the store fails to claim a required task by id', async (done) => {
       const { taskManagerId, tasks } = generateTasks();
       const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'

@@ -14,13 +14,13 @@ describe('timeseriesFetcher', () => {
   beforeEach(async () => {
     clientSpy = jest.fn().mockResolvedValueOnce({
       hits: {
-        total: 100
+        total: 100,
       },
       aggregations: {
         distribution: {
-          buckets: []
-        }
-      }
+          buckets: [],
+        },
+      },
     });
 
     await getBuckets({
@@ -30,21 +30,21 @@ describe('timeseriesFetcher', () => {
         start: 1528113600000,
         end: 1528977600000,
         client: {
-          search: clientSpy
+          search: clientSpy,
         } as any,
         internalClient: {
-          search: clientSpy
+          search: clientSpy,
         } as any,
         config: new Proxy(
           {},
           {
-            get: () => 'myIndex'
+            get: () => 'myIndex',
           }
         ) as APMConfig,
         uiFiltersES: [
           {
-            term: { 'service.environment': 'prod' }
-          }
+            term: { 'service.environment': 'prod' },
+          },
         ],
         indices: {
           'apm_oss.sourcemapIndices': 'apm-*',
@@ -54,10 +54,9 @@ describe('timeseriesFetcher', () => {
           'apm_oss.transactionIndices': 'apm-*',
           'apm_oss.metricsIndices': 'apm-*',
           apmAgentConfigurationIndex: '.apm-agent-configuration',
-          apmCustomLinkIndex: '.apm-custom-link'
+          apmCustomLinkIndex: '.apm-custom-link',
         },
-        dynamicIndexPattern: null as any
-      }
+      },
     });
   });
 

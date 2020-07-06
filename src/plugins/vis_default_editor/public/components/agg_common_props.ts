@@ -18,7 +18,7 @@
  */
 
 import { VisParams } from 'src/plugins/visualizations/public';
-import { IAggType, IAggConfig, IAggGroupNames } from 'src/plugins/data/public';
+import { IAggType, IAggConfig, AggGroupName } from 'src/plugins/data/public';
 import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
@@ -30,7 +30,7 @@ export type ReorderAggs = (sourceAgg: IAggConfig, destinationAgg: IAggConfig) =>
 
 export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
-  groupName: IAggGroupNames;
+  groupName: AggGroupName;
   metricAggs: IAggConfig[];
   state: EditorVisState;
   setAggParamValue: <T extends keyof AggParams>(

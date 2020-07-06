@@ -18,16 +18,14 @@
  */
 
 import { SavedObjectsType } from '../../saved_objects';
+import { migrations } from './migrations';
 
 export const uiSettingsType: SavedObjectsType = {
   name: 'config',
   hidden: false,
   namespaceType: 'single',
   mappings: {
-    // we don't want to allow `true` in the public `SavedObjectsTypeMappingDefinition` type, however
-    // this is needed for the config that is kinda a special type. To avoid adding additional internal types
-    // just for this, we hardcast to any here.
-    dynamic: true as any,
+    dynamic: false,
     properties: {
       buildNum: {
         type: 'keyword',
@@ -38,7 +36,7 @@ export const uiSettingsType: SavedObjectsType = {
     importableAndExportable: true,
     getInAppUrl() {
       return {
-        path: `/app/kibana#/management/kibana/settings`,
+        path: `/app/management/kibana/settings`,
         uiCapabilitiesPath: 'advancedSettings.show',
       };
     },
@@ -46,4 +44,5 @@ export const uiSettingsType: SavedObjectsType = {
       return `Advanced Settings [${obj.id}]`;
     },
   },
+  migrations,
 };

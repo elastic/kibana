@@ -47,20 +47,20 @@ const MS_METRIC = {
 
 test('general metric', () => {
   const component = shallow(<MetricTile metric={GENERAL_METRIC} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('byte metric', () => {
   const component = shallow(<MetricTile metric={BYTE_METRIC} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('float metric', () => {
   const component = shallow(<MetricTile metric={FLOAT_METRIC} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('millisecond metric', () => {
   const component = shallow(<MetricTile metric={MS_METRIC} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

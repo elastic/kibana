@@ -5,6 +5,3 @@
  */
 
 export { TabSummary } from './tab_summary';
-export { TabMappings } from './tab_mappings';
-export { TabSettings } from './tab_settings';
-export { TabAliases } from './tab_aliases';

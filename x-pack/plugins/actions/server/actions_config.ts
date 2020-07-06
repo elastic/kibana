@@ -66,8 +66,8 @@ function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string
 function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
-    map(url => url.hostname),
-    mapNullable(hostname => isWhitelisted(config, hostname)),
+    map((url) => url.hostname),
+    mapNullable((hostname) => isWhitelisted(config, hostname)),
     getOrElse<boolean>(() => false)
   );
 }

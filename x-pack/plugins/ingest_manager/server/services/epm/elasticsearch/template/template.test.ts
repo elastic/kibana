@@ -24,7 +24,12 @@ expect.addSnapshotSerializer({
 test('get template', () => {
   const templateName = 'logs-nginx-access-abcd';
 
-  const template = getTemplate('logs', templateName, { properties: {} });
+  const template = getTemplate({
+    type: 'logs',
+    templateName,
+    packageName: 'nginx',
+    mappings: { properties: {} },
+  });
   expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
 });
 
@@ -35,7 +40,12 @@ test('tests loading base.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('logs', 'foo', mappings);
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'foo',
+    packageName: 'nginx',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
@@ -47,7 +57,12 @@ test('tests loading coredns.logs.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('logs', 'foo', mappings);
+  const template = getTemplate({
+    type: 'logs',
+    templateName: 'foo',
+    packageName: 'coredns',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
@@ -59,7 +74,12 @@ test('tests loading system.yml', () => {
 
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  const template = getTemplate('metrics', 'whatsthis', mappings);
+  const template = getTemplate({
+    type: 'metrics',
+    templateName: 'whatsthis',
+    packageName: 'system',
+    mappings,
+  });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
 });
@@ -93,7 +113,7 @@ test('tests processing text field with multi fields', () => {
   const fields: Field[] = safeLoad(textWithMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(textWithMultiFieldsMapping));
+  expect(mappings).toEqual(textWithMultiFieldsMapping);
 });
 
 test('tests processing keyword field with multi fields', () => {
@@ -127,7 +147,7 @@ test('tests processing keyword field with multi fields', () => {
   const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithMultiFieldsMapping));
+  expect(mappings).toEqual(keywordWithMultiFieldsMapping);
 });
 
 test('tests processing keyword field with multi fields with analyzed text field', () => {
@@ -159,7 +179,7 @@ test('tests processing keyword field with multi fields with analyzed text field'
   const fields: Field[] = safeLoad(keywordWithAnalyzedMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithAnalyzedMultiFieldsMapping));
+  expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
 });
 
 test('tests processing object field with no other attributes', () => {
@@ -177,7 +197,7 @@ test('tests processing object field with no other attributes', () => {
   const fields: Field[] = safeLoad(objectFieldLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldMapping));
+  expect(mappings).toEqual(objectFieldMapping);
 });
 
 test('tests processing object field with enabled set to false', () => {
@@ -197,7 +217,7 @@ test('tests processing object field with enabled set to false', () => {
   const fields: Field[] = safeLoad(objectFieldEnabledFalseLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldEnabledFalseMapping));
+  expect(mappings).toEqual(objectFieldEnabledFalseMapping);
 });
 
 test('tests processing object field with dynamic set to false', () => {
@@ -217,7 +237,7 @@ test('tests processing object field with dynamic set to false', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicFalseLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicFalseMapping));
+  expect(mappings).toEqual(objectFieldDynamicFalseMapping);
 });
 
 test('tests processing object field with dynamic set to true', () => {
@@ -237,7 +257,7 @@ test('tests processing object field with dynamic set to true', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicTrueLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicTrueMapping));
+  expect(mappings).toEqual(objectFieldDynamicTrueMapping);
 });
 
 test('tests processing object field with dynamic set to strict', () => {
@@ -257,5 +277,159 @@ test('tests processing object field with dynamic set to strict', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicStrictLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicStrictMapping));
+  expect(mappings).toEqual(objectFieldDynamicStrictMapping);
+});
+
+test('tests processing object field with property', () => {
+  const objectFieldWithPropertyLiteralYml = `
+- name: a
+  type: object
+- name: a.b
+  type: keyword
+  `;
+  const objectFieldWithPropertyMapping = {
+    properties: {
+      a: {
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldWithPropertyLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(objectFieldWithPropertyMapping);
+});
+
+test('tests processing object field with property, reverse order', () => {
+  const objectFieldWithPropertyReversedLiteralYml = `
+- name: a.b
+  type: keyword
+- name: a
+  type: object
+  dynamic: false
+  `;
+  const objectFieldWithPropertyReversedMapping = {
+    properties: {
+      a: {
+        dynamic: false,
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+});
+
+test('tests processing nested field with property', () => {
+  const nestedYaml = `
+  - name: a.b
+    type: keyword
+  - name: a
+    type: nested
+    dynamic: false
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        dynamic: false,
+        type: 'nested',
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
+});
+
+test('tests processing nested field with property, nested field first', () => {
+  const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+  - name: a.b
+    type: keyword
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        include_in_parent: true,
+        type: 'nested',
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
+});
+
+test('tests processing nested leaf field with properties', () => {
+  const nestedYaml = `
+  - name: a
+    type: object
+    dynamic: false
+  - name: a.b
+    type: nested
+    enabled: false
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        dynamic: false,
+        properties: {
+          b: {
+            enabled: false,
+            type: 'nested',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
+});
+
+test('tests constant_keyword field type handling', () => {
+  const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  `;
+  const constantKeywordMapping = {
+    properties: {
+      constantKeyword: {
+        type: 'constant_keyword',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
 });

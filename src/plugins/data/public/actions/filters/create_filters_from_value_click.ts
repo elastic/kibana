@@ -21,7 +21,7 @@ import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { deserializeAggConfig } from '../../search/expressions';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
-import { ValueClickTriggerContext } from '../../../../embeddable/public';
+import { ValueClickContext } from '../../../../embeddable/public';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -42,16 +42,16 @@ const getOtherBucketFilterTerms = (
   }
 
   // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => {
+  const rows = table.rows.filter((row) => {
     return table.columns.every((column, i) => {
       return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
     });
   });
-  const terms: any[] = rows.map(row => row[table.columns[columnIndex].id]);
+  const terms: any[] = rows.map((row) => row[table.columns[columnIndex].id]);
 
   return [
     ...new Set(
-      terms.filter(term => {
+      terms.filter((term) => {
         const notOther = term !== '__other__';
         const notMissing = term !== '__missing__';
         return notOther && notMissing;
@@ -114,17 +114,17 @@ const createFilter = async (
 export const createFiltersFromValueClickAction = async ({
   data,
   negate,
-}: ValueClickTriggerContext['data']) => {
+}: ValueClickContext['data']) => {
   const filters: Filter[] = [];
 
   await Promise.all(
     data
-      .filter(point => point)
-      .map(async val => {
+      .filter((point) => point)
+      .map(async (val) => {
         const { table, column, row } = val;
         const filter: Filter[] = (await createFilter(table, column, row)) || [];
         if (filter) {
-          filter.forEach(f => {
+          filter.forEach((f) => {
             if (negate) {
               f = esFilters.toggleFilterNegated(f);
             }

@@ -26,9 +26,15 @@ import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
+export interface InputControlSettings {
+  autocompleteTimeout: number;
+  autocompleteTerminateAfter: number;
+}
+
 export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
   data: DataPublicPluginSetup;
+  getSettings: () => Promise<InputControlSettings>;
 }
 
 /** @internal */
@@ -47,15 +53,26 @@ export interface InputControlVisPluginStartDependencies {
 
 /** @internal */
 export class InputControlVisPlugin implements Plugin<void, void> {
+  private cachedSettings: InputControlSettings | undefined = undefined;
+
   constructor(public initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: InputControlVisCoreSetup,
     { expressions, visualizations, data }: InputControlVisPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<InputControlVisDependencies> = {
       core,
       data,
+      getSettings: async () => {
+        if (!this.cachedSettings) {
+          this.cachedSettings = await core.http.get<InputControlSettings>(
+            '/api/input_control_vis/settings'
+          );
+        }
+
+        return this.cachedSettings;
+      },
     };
 
     expressions.registerFunction(createInputControlVisFn);

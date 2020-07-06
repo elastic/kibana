@@ -26,7 +26,7 @@ export function openSourceModal(
     <SourceModal
       uiSettings={uiSettings}
       savedObjects={savedObjects}
-      onIndexPatternSelected={indexPattern => {
+      onIndexPatternSelected={(indexPattern) => {
         onSelected(indexPattern);
         modalRef.close();
       }}

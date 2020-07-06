@@ -79,14 +79,14 @@ export class JobDetailsPane extends Component {
         <div className="row" time={time} data-test-subj={this.props['data-test-subj']}>
           <div className="col-md-6">
             {sections
-              .filter(s => s.position === 'left')
+              .filter((s) => s.position === 'left')
               .map((s, i) => (
                 <Section section={s} key={i} />
               ))}
           </div>
           <div className="col-md-6">
             {sections
-              .filter(s => s.position === 'right')
+              .filter((s) => s.position === 'right')
               .map((s, i) => (
                 <Section section={s} key={i} />
               ))}

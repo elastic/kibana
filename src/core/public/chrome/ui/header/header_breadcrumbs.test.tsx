@@ -19,26 +19,23 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import * as Rx from 'rxjs';
-
-import { ChromeBreadcrumb } from '../../chrome_service';
+import { act } from 'react-dom/test-utils';
+import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
-    const breadcrumbs$ = new Rx.Subject<ChromeBreadcrumb[]>();
-    const wrapper = mount(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const wrapper = mount(
+      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
+    );
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
-    breadcrumbs$.next([{ text: 'First' }]);
-    // Unfortunately, enzyme won't update the wrapper until we call update.
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
-    breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]);
-    wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-
-    breadcrumbs$.next([]);
+    act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
   });

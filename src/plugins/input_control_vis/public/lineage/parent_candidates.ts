@@ -25,7 +25,7 @@ export function getParentCandidates(
   lineageMap: Map<string, string[]>
 ) {
   return controlParamsList
-    .filter(controlParams => {
+    .filter((controlParams) => {
       // Ignore controls that do not have index pattern and field set
       if (!controlParams.indexPattern || !controlParams.fieldName) {
         return false;

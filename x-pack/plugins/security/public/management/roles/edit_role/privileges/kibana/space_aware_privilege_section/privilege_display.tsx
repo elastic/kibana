@@ -40,7 +40,7 @@ function getDisplayValue(privilege: string | string[] | undefined) {
   if (isPrivilegeMissing) {
     displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;
   } else {
-    displayValue = privileges.map(p => _.capitalize(p)).join(', ');
+    displayValue = privileges.map((p) => _.upperFirst(p)).join(', ');
   }
 
   return displayValue;

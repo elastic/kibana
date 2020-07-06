@@ -10,7 +10,7 @@
  */
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
-import { padLeft } from 'lodash';
+import { padStart } from 'lodash';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
@@ -95,7 +95,7 @@ export class TaskPool {
       performance.mark('attemptToRun_start');
       await Promise.all(
         tasksToRun.map(
-          async taskRunner =>
+          async (taskRunner) =>
             await taskRunner
               .markTaskAsRunning()
               .then((hasTaskBeenMarkAsRunning: boolean) =>
@@ -106,7 +106,7 @@ export class TaskPool {
                       message: VERSION_CONFLICT_MESSAGE,
                     })
               )
-              .catch(err => this.handleFailureOfMarkAsRunning(taskRunner, err))
+              .catch((err) => this.handleFailureOfMarkAsRunning(taskRunner, err))
         )
       );
 
@@ -127,7 +127,7 @@ export class TaskPool {
     this.running.add(taskRunner);
     taskRunner
       .run()
-      .catch(err => {
+      .catch((err) => {
         // If a task Saved Object can't be found by an in flight task runner
         // we asssume the underlying task has been deleted while it was running
         // so we will log this as a debug, rather than a warn
@@ -154,11 +154,7 @@ export class TaskPool {
           `Cancelling task ${task.toString()} as it expired at ${task.expiration.toISOString()}${
             task.startedAt
               ? ` after running for ${durationAsString(
-                  moment.duration(
-                    moment(new Date())
-                      .utc()
-                      .diff(task.startedAt)
-                  )
+                  moment.duration(moment(new Date()).utc().diff(task.startedAt))
                 )}`
               : ``
           }${task.definition.timeout ? ` (with timeout set at ${task.definition.timeout})` : ``}.`
@@ -185,6 +181,8 @@ function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
 }
 
 function durationAsString(duration: Duration): string {
-  const [m, s] = [duration.minutes(), duration.seconds()].map(value => padLeft(`${value}`, 2, '0'));
+  const [m, s] = [duration.minutes(), duration.seconds()].map((value) =>
+    padStart(`${value}`, 2, '0')
+  );
   return `${m}m ${s}s`;
 }

@@ -11,7 +11,6 @@ const createSetup = (): jest.Mocked<PluginSetupContract> => {
     getFeatures: jest.fn(),
     getFeaturesUICapabilities: jest.fn(),
     registerFeature: jest.fn(),
-    registerLegacyAPI: jest.fn(),
   };
 };
 

@@ -1,8 +1,14 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Elastic Maps
+== Get started with Maps
 
-You work with *Elastic Maps* by adding layers. The data for a layer can come from
+++++
+<titleabbrev>Get started</titleabbrev>
+++++
+
+
+
+You work with Maps by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map
 services, and more. You can symbolize the data in different ways.
 For example, you might show which airports have the longest flight
@@ -25,7 +31,7 @@ image::maps/images/read-only-badge.png[Example of Maps' read only access indicat
 [float]
 === Prerequisites
 Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
-sample data set includes a map to go along with the data. Once you've added the data, open *Elastic Maps* and
+sample data set includes a map to go along with the data. Once you've added the data, open Maps and
 explore the different layers of the *[Logs] Total Requests and Bytes* map.
 You'll re-create this map in this tutorial.
 
@@ -40,11 +46,11 @@ In this tutorial, you'll learn to:
 
 [role="xpack"]
 [[maps-create]]
-=== Creating a new map
+=== Create a map
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open *Elastic Maps*.
+. If you haven't already, open the menu, then click *{kib} > Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +
@@ -55,17 +61,17 @@ image::maps/images/gs_create_new_map.png[]
 
 [role="xpack"]
 [[maps-add-choropleth-layer]]
-=== Adding a choropleth layer
+=== Add a choropleth layer
 
 Now that you have a map, you'll want to add layers to it.
 The first layer you'll add is a choropleth layer to shade world countries
 by web log traffic. Darker shades symbolize countries with more web log traffic,
 and lighter shades symbolize countries with less traffic.
 
-==== Add a vector layer from the Elastic Maps Service source
+==== Add a vector layer to display world country boundaries
 
-. In the map legend, click *Add layer*.
-. Click the *EMS Boundaries* data source.
+. Click *Add layer*.
+. Select the *EMS Boundaries* layer.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests by Country`.
@@ -106,22 +112,22 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 [role="xpack"]
 [[maps-add-elasticsearch-layer]]
-=== Adding layers for {es} data
+=== Add layers for the {es} data
 
 To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
 
 * The first layer will display individual documents.
 The layer will appear when the user zooms in the map to show smaller regions.
-* The second layer will show aggregated data that represents many documents.
+* The second layer will display aggregated data that represents many documents.
 The layer will appear when the user zooms out the map to show larger amounts of the globe.
 
-==== Add a vector layer from the document source
+==== Add a vector layer to display individual documents
 
 This layer displays web log documents as points.
 The layer is only visible when users zoom in the map past zoom level 9.
 
-. In the map legend, click *Add layer*.
-. Click the *Documents* data source.
+. Click *Add layer*.
+. Click the *Documents* layer.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Actual Requests`.
@@ -137,7 +143,7 @@ Your map now looks like this between zoom levels 9 and 24:
 [role="screenshot"]
 image::maps/images/gs_add_es_document_layer.png[]
 
-==== Add a vector layer from the grid aggregation source
+==== Add a vector layer to display aggregated data
 
 Aggregations group {es} documents into grids. You can calculate metrics
 for each gridded cell.
@@ -154,10 +160,9 @@ image::maps/images/grid_metrics_both.png[]
 
 ===== Add the layer
 
-. In the map legend, click *Add layer*.
-. Click the *Grid aggregation* data source.
+. Click *Add layer*.
+. Click the *Clusters and grids* layer.
 . Set *Index pattern* to *kibana_sample_data_logs*.
-. Set *Show as* to *clusters*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests and Bytes`.
 . Set *Visibility* to the range [0, 9].
@@ -184,7 +189,7 @@ image::maps/images/sample_data_web_logs.png[]
 
 [role="xpack"]
 [[maps-save]]
-=== Saving the map
+=== Save the map
 Now that your map is complete, you'll want to save it so others can use it.
 
 . In the application toolbar, click *Save*.
@@ -203,11 +208,11 @@ You have completed the steps for re-creating the sample data map.
 
 [role="xpack"]
 [[maps-embedding]]
-=== Adding the map to a dashboard
+=== Add the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
-. In the side navigation, click *Dashboard*.
-. Click *Create new dashboard*.
+. Open the menu, then go to *Dashboard*.
+. Click *Create dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.
 +
@@ -225,7 +230,7 @@ Your dashboard should look like this:
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-==== Exploring your data using filters
+==== Explore your data using filters
 
 You can apply filters to your dashboard to hone in on the data that you are most interested in.
 The dashboard is interactive--you can quickly create filters by clicking on the desired data in the map and visualizations.

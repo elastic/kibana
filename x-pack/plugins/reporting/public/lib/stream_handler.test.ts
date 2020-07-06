@@ -6,7 +6,7 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { SourceJob, JobSummary } from '../../index.d';
+import { JobSummary, SourceJob } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
@@ -77,16 +77,16 @@ describe('stream handler', () => {
   });
 
   describe('findChangedStatusJobs', () => {
-    it('finds no changed status jobs from empty', done => {
+    it('finds no changed status jobs from empty', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([]);
-      findJobs.subscribe(data => {
+      findJobs.subscribe((data) => {
         expect(data).toEqual({ completed: [], failed: [] });
         done();
       });
     });
 
-    it('finds changed status jobs', done => {
+    it('finds changed status jobs', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([
         'job-source-mock1',
@@ -94,7 +94,7 @@ describe('stream handler', () => {
         'job-source-mock3',
       ]);
 
-      findJobs.subscribe(data => {
+      findJobs.subscribe((data) => {
         expect(data).toMatchSnapshot();
         done();
       });
@@ -102,7 +102,7 @@ describe('stream handler', () => {
   });
 
   describe('showNotifications', () => {
-    it('show success', done => {
+    it('show success', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
@@ -123,7 +123,7 @@ describe('stream handler', () => {
       });
     });
 
-    it('show max length warning', done => {
+    it('show max length warning', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
@@ -145,7 +145,7 @@ describe('stream handler', () => {
       });
     });
 
-    it('show csv formulas warning', done => {
+    it('show csv formulas warning', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
@@ -167,7 +167,7 @@ describe('stream handler', () => {
       });
     });
 
-    it('show failed job toast', done => {
+    it('show failed job toast', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [],
@@ -188,7 +188,7 @@ describe('stream handler', () => {
       });
     });
 
-    it('show multiple toast', done => {
+    it('show multiple toast', (done) => {
       const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [

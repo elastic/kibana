@@ -38,7 +38,7 @@ function serializeError(err = {}) {
   };
 }
 
-const levelColor = function(code) {
+const levelColor = function (code) {
   if (code < 299) return chalk.green(code);
   if (code < 399) return chalk.yellow(code);
   if (code < 499) return chalk.magentaBright(code);
@@ -128,7 +128,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message += ' ';
       data.message += chalk.gray('load: [');
       data.message += get(data, 'os.load', [])
-        .map(function(val) {
+        .map(function (val) {
           return numeral(val).format('0.00');
         })
         .join(' ');
@@ -144,7 +144,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message = message || 'Unknown error (no message)';
     } else if (event.error instanceof Error) {
       data.type = 'error';
-      data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
+      data.level = _.includes(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.error);
       const message = get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';

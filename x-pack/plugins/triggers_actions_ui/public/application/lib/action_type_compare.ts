@@ -31,7 +31,7 @@ const getIsEnabledValue = (actionType: ActionType, preconfiguredConnectors?: Act
     preconfiguredConnectors.length > 0
   ) {
     isEnabled =
-      preconfiguredConnectors.find(connector => connector.actionTypeId === actionType.id) !==
+      preconfiguredConnectors.find((connector) => connector.actionTypeId === actionType.id) !==
       undefined;
   }
   return isEnabled;

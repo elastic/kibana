@@ -150,7 +150,7 @@ function migrate610PanelToLatest(
   useMargins: boolean,
   uiState?: { [key: string]: { [key: string]: unknown } }
 ): RawSavedDashboardPanel730ToLatest {
-  (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach(key => {
+  (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach((key) => {
     if (panel.gridData[key] === undefined) {
       throw new Error(
         i18n.translate('dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
@@ -285,7 +285,7 @@ export function migratePanelsTo730(
   useMargins: boolean,
   uiState?: { [key: string]: { [key: string]: unknown } }
 ): RawSavedDashboardPanel730ToLatest[] {
-  return panels.map(panel => {
+  return panels.map((panel) => {
     if (isPre61Panel(panel)) {
       return migratePre61PanelToLatest(panel, version, useMargins, uiState);
     }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -21,7 +21,7 @@ function isReservedSystemTemplate(templateName: string, indexPatterns: string[])
   return (
     templateName.startsWith('kibana_index_template') ||
     (templateName.startsWith('.') &&
-      indexPatterns.every(pattern => {
+      indexPatterns.every((pattern) => {
         return !pattern.includes('*');
       }))
   );
@@ -49,7 +49,7 @@ function filterAndFormatTemplates(templates: any): any {
   return formattedTemplates;
 }
 
-async function fetchTemplates(callAsCurrentUser: APICaller): Promise<any> {
+async function fetchTemplates(callAsCurrentUser: LegacyAPICaller): Promise<any> {
   const params = {
     method: 'GET',
     path: '/_template',
@@ -66,7 +66,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
     license.guardApiRoute(async (context, request, response) => {
       try {
         const templates = await fetchTemplates(
-          context.core.elasticsearch.dataClient.callAsCurrentUser
+          context.core.elasticsearch.legacy.client.callAsCurrentUser
         );
         const okResponse = { body: filterAndFormatTemplates(templates) };
         return response.ok(okResponse);

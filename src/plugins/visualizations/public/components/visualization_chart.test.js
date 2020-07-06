@@ -32,7 +32,7 @@ class VisualizationStub {
   }
 
   render() {
-    renderPromise = new Promise(resolve => {
+    renderPromise = new Promise((resolve) => {
       this.el.textContent = this.vis.params.markdown;
       resolve();
     });
@@ -55,7 +55,7 @@ describe('<VisualizationChart/>', () => {
 
   it('should render initial html', () => {
     const wrapper = render(<VisualizationChart vis={vis} listenOnChange={true} />);
-    expect(wrapper.text()).toBe('Test Visualization visualization, not yet accessible');
+    expect(wrapper.text()).toBe('');
   });
 
   it('should render visualization', async () => {

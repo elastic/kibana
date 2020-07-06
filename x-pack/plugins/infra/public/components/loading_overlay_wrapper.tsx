@@ -10,10 +10,12 @@ import React from 'react';
 
 import { euiStyled } from '../../../observability/public';
 
-export const LoadingOverlayWrapper: React.FC<React.HTMLAttributes<HTMLDivElement> & {
-  isLoading: boolean;
-  loadingChildren?: React.ReactNode;
-}> = ({ children, isLoading, loadingChildren, ...rest }) => {
+export const LoadingOverlayWrapper: React.FC<
+  React.HTMLAttributes<HTMLDivElement> & {
+    isLoading: boolean;
+    loadingChildren?: React.ReactNode;
+  }
+> = ({ children, isLoading, loadingChildren, ...rest }) => {
   return (
     <RelativeDiv {...rest}>
       {children}
@@ -32,7 +34,7 @@ const RelativeDiv = euiStyled.div`
 
 const OverlayDiv = euiStyled.div`
   align-items: center;
-  background-color: ${props => transparentize(0.3, props.theme.eui.euiColorEmptyShade)};
+  background-color: ${(props) => transparentize(0.3, props.theme.eui.euiColorEmptyShade)};
   display: flex;
   height: 100%;
   justify-content: center;
@@ -40,5 +42,5 @@ const OverlayDiv = euiStyled.div`
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.eui.euiZLevel1};
 `;

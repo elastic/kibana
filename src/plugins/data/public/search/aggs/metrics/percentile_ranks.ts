@@ -22,8 +22,14 @@ import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsPercentileRanks extends BaseAggParams {
+  field: string;
+  values?: number[];
+}
 
 // required by the values editor
 export type IPercentileRanksAggConfig = IResponseAggConfig;
@@ -90,12 +96,10 @@ export const getPercentileRanksMetricAgg = ({
 
         return values.map((value: any) => new ValueAggConfig(value));
       },
-      getFormat() {
-        const { fieldFormats } = getInternalStartServices();
-        return (
-          fieldFormats.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
-          fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
-        );
+      getSerializedFormat(agg) {
+        return {
+          id: 'percent',
+        };
       },
       getValue(agg, bucket) {
         return getPercentileValue(agg, bucket) / 100;

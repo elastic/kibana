@@ -12,10 +12,10 @@ function getJobIds() {
   return new Promise((resolve, reject) => {
     ml.jobs
       .jobsSummary()
-      .then(resp => {
-        resolve(resp.map(job => job.id));
+      .then((resp) => {
+        resolve(resp.map((job) => job.id));
       })
-      .catch(err => {
+      .catch((err) => {
         const errorMessage = i18n.translate(
           'xpack.ml.calendarsEdit.errorWithFetchingJobSummariesErrorMessage',
           {
@@ -33,10 +33,10 @@ function getGroupIds() {
   return new Promise((resolve, reject) => {
     ml.jobs
       .groups()
-      .then(resp => {
-        resolve(resp.map(group => group.id));
+      .then((resp) => {
+        resolve(resp.map((group) => group.id));
       })
-      .catch(err => {
+      .catch((err) => {
         const errorMessage = i18n.translate(
           'xpack.ml.calendarsEdit.errorWithLoadingGroupsErrorMessage',
           {
@@ -53,10 +53,10 @@ function getGroupIds() {
 function getCalendars() {
   return new Promise((resolve, reject) => {
     ml.calendars()
-      .then(resp => {
+      .then((resp) => {
         resolve(resp);
       })
-      .catch(err => {
+      .catch((err) => {
         const errorMessage = i18n.translate(
           'xpack.ml.calendarsEdit.errorWithLoadingCalendarsErrorMessage',
           {
@@ -104,7 +104,5 @@ export function validateCalendarId(calendarId) {
 }
 
 export function generateTempId() {
-  return Math.random()
-    .toString(36)
-    .substr(2, 9);
+  return Math.random().toString(36).substr(2, 9);
 }

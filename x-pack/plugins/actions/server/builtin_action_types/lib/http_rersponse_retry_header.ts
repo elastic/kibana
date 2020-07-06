@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 export function getRetryAfterIntervalFromHeaders(headers: Record<string, string>): Option<number> {
   return pipe(
     fromNullable(headers['retry-after']),
-    map(retryAfter => parseInt(retryAfter, 10)),
-    filter(retryAfter => !isNaN(retryAfter))
+    map((retryAfter) => parseInt(retryAfter, 10)),
+    filter((retryAfter) => !isNaN(retryAfter))
   );
 }

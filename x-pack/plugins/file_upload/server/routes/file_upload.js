@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
@@ -86,7 +85,7 @@ const finishValidationAndProcessReq = () => {
     let resp;
     try {
       const validIdReqData = idConditionalValidation(body, boolHasId);
-      const callWithRequest = callWithRequestFactory(req);
+      const callWithRequest = con.core.elasticsearch.legacy.client.callAsCurrentUser;
       const { importData: importDataFunc } = importDataProvider(callWithRequest);
 
       const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
@@ -115,7 +114,7 @@ const finishValidationAndProcessReq = () => {
   };
 };
 
-export const initRoutes = router => {
+export const initRoutes = (router) => {
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,

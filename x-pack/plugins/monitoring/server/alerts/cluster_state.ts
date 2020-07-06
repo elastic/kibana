@@ -6,9 +6,9 @@
 
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { Logger, ICustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
+import { Logger, ILegacyCustomClusterClient, UiSettingsServiceStart } from 'src/core/server';
 import { ALERT_TYPE_CLUSTER_STATE } from '../../common/constants';
-import { AlertType } from '../../../alerting/server';
+import { AlertType } from '../../../alerts/server';
 import { executeActions, getUiMessage } from '../lib/alerts/cluster_state.lib';
 import {
   AlertCommonExecutorOptions,
@@ -22,7 +22,7 @@ import { fetchClusterState } from '../lib/alerts/fetch_cluster_state';
 
 export const getClusterState = (
   getUiSettingsService: () => Promise<UiSettingsServiceStart>,
-  monitoringCluster: ICustomClusterClient,
+  monitoringCluster: ILegacyCustomClusterClient,
   getLogger: (...scopes: string[]) => Logger,
   ccsEnabled: boolean
 ): AlertType => {
@@ -38,6 +38,7 @@ export const getClusterState = (
         }),
       },
     ],
+    producer: 'monitoring',
     defaultActionGroupId: 'default',
     async executor({
       services,

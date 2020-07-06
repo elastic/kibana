@@ -32,8 +32,8 @@ function readShimNames(shimDirectory) {
   }
 
   return readdirSync(shimDirectory)
-    .filter(name => !name.startsWith('.') && !name.startsWith('_'))
-    .map(name => (name.endsWith('.js') ? name.slice(0, -3) : name));
+    .filter((name) => !name.startsWith('.') && !name.startsWith('_'))
+    .map((name) => (name.endsWith('.js') ? name.slice(0, -3) : name));
 }
 
 function findRelativeWebpackShims(directory) {
@@ -53,7 +53,7 @@ function findRelativeWebpackShims(directory) {
   return allShims;
 }
 
-exports.isProbablyWebpackShim = function(source, file) {
+exports.isProbablyWebpackShim = function (source, file) {
   const shims = findRelativeWebpackShims(dirname(file));
-  return shims.some(shim => source === shim || source.startsWith(shim + '/'));
+  return shims.some((shim) => source === shim || source.startsWith(shim + '/'));
 };

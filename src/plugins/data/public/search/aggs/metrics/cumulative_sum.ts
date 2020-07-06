@@ -22,7 +22,14 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 import { GetInternalStartServicesFn } from '../../../types';
+
+export interface AggParamsCumulativeSum extends BaseAggParams {
+  buckets_path: string;
+  customMetric?: AggConfigSerialized;
+  metricAgg?: string;
+}
 
 export interface CumulativeSumMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
@@ -39,14 +46,16 @@ const cumulativeSumTitle = i18n.translate('data.search.aggs.metrics.cumulativeSu
 export const getCumulativeSumMetricAgg = ({
   getInternalStartServices,
 }: CumulativeSumMetricAggDependencies) => {
+  const { subtype, params, getSerializedFormat } = parentPipelineAggHelper;
+
   return new MetricAggType(
     {
       name: METRIC_TYPES.CUMULATIVE_SUM,
       title: cumulativeSumTitle,
-      subtype: parentPipelineAggHelper.subtype,
-      makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
-      params: [...parentPipelineAggHelper.params()],
-      getFormat: parentPipelineAggHelper.getFormat,
+      makeLabel: (agg) => makeNestedLabel(agg, cumulativeSumLabel),
+      subtype,
+      params: [...params()],
+      getSerializedFormat,
     },
     {
       getInternalStartServices,

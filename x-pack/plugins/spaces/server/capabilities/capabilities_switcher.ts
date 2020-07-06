@@ -55,8 +55,8 @@ function toggleDisabledFeatures(
   const disabledFeatureKeys = activeSpace.disabledFeatures;
 
   const disabledFeatures = disabledFeatureKeys
-    .map(key => features.find(feature => feature.id === key))
-    .filter(feature => typeof feature !== 'undefined') as Feature[];
+    .map((key) => features.find((feature) => feature.id === key))
+    .filter((feature) => typeof feature !== 'undefined') as Feature[];
 
   const navLinks = capabilities.navLinks;
   const catalogueEntries = capabilities.catalogue;
@@ -68,16 +68,22 @@ function toggleDisabledFeatures(
       navLinks[feature.navLinkId] = false;
     }
 
+    feature.app.forEach((app) => {
+      if (navLinks.hasOwnProperty(app)) {
+        navLinks[app] = false;
+      }
+    });
+
     // Disable associated catalogue entries
     const privilegeCatalogueEntries = feature.catalogue || [];
-    privilegeCatalogueEntries.forEach(catalogueEntryId => {
+    privilegeCatalogueEntries.forEach((catalogueEntryId) => {
       catalogueEntries[catalogueEntryId] = false;
     });
 
     // Disable associated management items
     const privilegeManagementSections = feature.management || {};
     Object.entries(privilegeManagementSections).forEach(([sectionId, sectionItems]) => {
-      sectionItems.forEach(item => {
+      sectionItems.forEach((item) => {
         if (
           managementItems.hasOwnProperty(sectionId) &&
           managementItems[sectionId].hasOwnProperty(item)
@@ -90,7 +96,7 @@ function toggleDisabledFeatures(
     // Disable "sub features" that match the disabled feature
     if (capabilities.hasOwnProperty(feature.id)) {
       const capability = capabilities[feature.id];
-      Object.keys(capability).forEach(featureKey => {
+      Object.keys(capability).forEach((featureKey) => {
         capability[featureKey] = false;
       });
     }

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { capitalize } from 'lodash';
+import { upperFirst } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCard, EuiLink } from '@elastic/eui';
@@ -30,7 +30,7 @@ const getLicenseCheckResult = (actionType: ActionType) => {
       {
         defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
         values: {
-          minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
+          minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
         },
       }
     ),
@@ -42,7 +42,7 @@ const getLicenseCheckResult = (actionType: ActionType) => {
           {
             defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
             values: {
-              minimumLicenseRequired: capitalize(actionType.minimumLicenseRequired),
+              minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
             },
           }
         )}
@@ -110,7 +110,7 @@ export function checkActionFormActionTypeEnabled(
     actionType?.enabledInConfig === false &&
     // do not disable action type if it contains preconfigured connectors (is preconfigured)
     !preconfiguredConnectors.find(
-      preconfiguredConnector => preconfiguredConnector.actionTypeId === actionType.id
+      (preconfiguredConnector) => preconfiguredConnector.actionTypeId === actionType.id
     )
   ) {
     return configurationCheckResult;

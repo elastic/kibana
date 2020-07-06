@@ -4,6 +4,11 @@
 
 .visEditorSidebar {
   min-width: $vis-editor-sidebar-min-width;
+
+  // a hack for IE, issue: https://github.com/elastic/kibana/issues/66586
+  > .visEditorSidebar__formWrapper {
+    flex-basis: auto;
+  }
 }
 
 .visEditorSidebar__form {

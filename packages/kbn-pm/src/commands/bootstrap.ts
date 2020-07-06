@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import chalk from 'chalk';
-
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
+import { Project } from '../utils/project';
 import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
@@ -42,12 +41,10 @@ export const BootstrapCommand: ICommand = {
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
     ];
 
-    log.write(chalk.bold('\nRunning installs in topological order:'));
-
     for (const batch of batchedProjectsByWorkspace) {
       for (const project of batch) {
         if (project.isWorkspaceProject) {
-          log.write(`Skipping workspace project: ${project.name}`);
+          log.verbose(`Skipping workspace project: ${project.name}`);
           continue;
         }
 
@@ -57,7 +54,6 @@ export const BootstrapCommand: ICommand = {
       }
     }
 
-    log.write(chalk.bold('\nInstalls completed, linking package executables:\n'));
     await linkProjectExecutables(projects, projectGraph);
 
     /**
@@ -66,22 +62,38 @@ export const BootstrapCommand: ICommand = {
      * transpiled before they can be used. Ideally we shouldn't do this unless we
      * have to, as it will slow down the bootstrapping process.
      */
-    log.write(chalk.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
 
-    const checksums = options.cache ? await getAllChecksums(kbn, log) : false;
-    await parallelizeBatches(batchedProjects, async project => {
+    const checksums = await getAllChecksums(kbn, log);
+    const caches = new Map<Project, { file: BootstrapCacheFile; valid: boolean }>();
+    let cachedProjectCount = 0;
+
+    for (const project of projects.values()) {
       if (project.hasScript('kbn:bootstrap')) {
-        const cacheFile = new BootstrapCacheFile(kbn, project, checksums);
-        if (cacheFile.isValid()) {
-          log.success(`[${project.name}] cache up to date`);
-        } else {
-          cacheFile.delete();
-          await project.runScriptStreaming('kbn:bootstrap');
-          cacheFile.write();
+        const file = new BootstrapCacheFile(kbn, project, checksums);
+        const valid = options.cache && file.isValid();
+
+        if (valid) {
+          log.debug(`[${project.name}] cache up to date`);
+          cachedProjectCount += 1;
         }
+
+        caches.set(project, { file, valid });
+      }
+    }
+
+    if (cachedProjectCount > 0) {
+      log.success(`${cachedProjectCount} bootstrap builds are cached`);
+    }
+
+    await parallelizeBatches(batchedProjects, async (project) => {
+      const cache = caches.get(project);
+      if (cache && !cache.valid) {
+        log.info(`[${project.name}] running [kbn:bootstrap] script`);
+        cache.file.delete();
+        await project.runScriptStreaming('kbn:bootstrap');
+        cache.file.write();
+        log.success(`[${project.name}] bootstrap complete`);
       }
     });
-
-    log.write(chalk.green.bold('\nBootstrapping completed!\n'));
   },
 };

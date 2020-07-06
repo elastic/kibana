@@ -99,7 +99,7 @@ export async function resolveSavedObjectsImportErrors({
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite),
     ];
-    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
+    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
@@ -109,7 +109,7 @@ export async function resolveSavedObjectsImportErrors({
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
     ];
-    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
+    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
   }
 
   return {

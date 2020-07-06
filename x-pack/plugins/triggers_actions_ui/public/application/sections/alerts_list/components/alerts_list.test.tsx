@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -15,7 +17,7 @@ import { ValidationResult } from '../../../../types';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -44,6 +46,7 @@ const alertType = {
     return { errors: {} };
   },
   alertParamsExpression: () => null,
+  requiresAppContext: false,
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
@@ -94,12 +97,13 @@ describe('alerts_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': true,
           'alerting:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -212,12 +216,13 @@ describe('alerts_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': true,
           'alerting:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -244,10 +249,6 @@ describe('alerts_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-  });
-  it('renders edit button for registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
   });
 });
 
@@ -297,12 +298,13 @@ describe('alerts_list component empty with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': false,
           'alerting:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -411,12 +413,13 @@ describe('alerts_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
+        securitySolution: {
           'alerting:show': true,
           'alerting:save': false,
           'alerting:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -441,9 +444,5 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
-  });
-  it('not renders edit button for non registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
   });
 });

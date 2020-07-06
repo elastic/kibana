@@ -115,10 +115,7 @@ export default function indicesEndpointTests({ getService }: FtrProviderContext)
 
   async function runQueryExpect(requestBody: any, status: number): Promise<any> {
     const url = `${getUrlPrefix(Spaces.space1.id)}/${API_URI}`;
-    const res = await supertest
-      .post(url)
-      .set('kbn-xsrf', 'foo')
-      .send(requestBody);
+    const res = await supertest.post(url).set('kbn-xsrf', 'foo').send(requestBody);
 
     if (res.status !== status) {
       // good place to put a console log for debugging unexpected results

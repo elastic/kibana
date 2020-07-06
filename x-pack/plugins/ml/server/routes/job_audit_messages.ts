@@ -33,6 +33,9 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
         params: jobAuditMessagesJobIdSchema,
         query: jobAuditMessagesQuerySchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -66,6 +69,9 @@ export function jobAuditMessagesRoutes({ router, mlLicense }: RouteInitializatio
       path: '/api/ml/job_audit_messages/messages',
       validate: {
         query: jobAuditMessagesQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

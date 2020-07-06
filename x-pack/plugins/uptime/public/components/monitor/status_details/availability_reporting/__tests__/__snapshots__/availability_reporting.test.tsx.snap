@@ -1,0 +1,384 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AvailabilityReporting component renders correctly against snapshot 1`] = `
+Array [
+  @media (max-width:1042px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--s"
+  />,
+  .c0 {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@media (max-width:1042px) {
+  .c0 {
+    display: inline-block;
+    margin-right: 16px;
+  }
+}
+
+<div
+    class="euiBasicTable"
+  >
+    <div>
+      <table
+        class="euiTable euiTable--compressed"
+      >
+        <caption
+          class="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_label_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Location
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_availability_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Availability
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_timestamp_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Last check
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c0"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#d3dae6;color:#000"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--default"
+                        >
+                          <h4>
+                            au-heartbeat
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  36m ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c0"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#d3dae6;color:#000"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            nyc-heartbeat
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  36m ago
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Location
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="c0"
+                >
+                  <span
+                    class="euiBadge euiBadge--iconLeft"
+                    style="background-color:#d3dae6;color:#000"
+                  >
+                    <span
+                      class="euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text"
+                      >
+                        <span
+                          class="euiTextColor euiTextColor--ghost"
+                        >
+                          <h4>
+                            spa-heartbeat
+                          </h4>
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Availability
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class=""
+                >
+                  100.00 %
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Last check
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  36m ago
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>,
+]
+`;
+
+exports[`AvailabilityReporting component shallow renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "label",
+          "name": "Location",
+          "render": [Function],
+          "truncateText": true,
+        },
+        Object {
+          "align": "right",
+          "field": "availability",
+          "name": "Availability",
+          "render": [Function],
+        },
+        Object {
+          "align": "right",
+          "field": "timestamp",
+          "name": "Last check",
+        },
+      ]
+    }
+    compressed={true}
+    items={
+      Array [
+        Object {
+          "availability": 100,
+          "color": "#d3dae6",
+          "label": "au-heartbeat",
+          "status": "up",
+          "timestamp": "36m ago",
+        },
+        Object {
+          "availability": 100,
+          "color": "#d3dae6",
+          "label": "nyc-heartbeat",
+          "status": "down",
+          "timestamp": "36m ago",
+        },
+        Object {
+          "availability": 100,
+          "color": "#d3dae6",
+          "label": "spa-heartbeat",
+          "status": "down",
+          "timestamp": "36m ago",
+        },
+      ]
+    }
+    noItemsMessage="No items found"
+    onChange={[Function]}
+    responsive={false}
+    tableLayout="fixed"
+  />
+</Fragment>
+`;

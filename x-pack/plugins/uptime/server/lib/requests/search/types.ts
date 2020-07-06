@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CursorDirection,
-  SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export interface CursorPagination {
   cursorKey?: any;

@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions, TabbedRangeFilterParams } from './types';
+import { TabbedResponseWriterOptions } from './types';
 import { AggResponseBucket } from './types';
 import { AggGroupNames, IAggConfigs } from '../aggs';
 
@@ -54,7 +54,7 @@ export function tabifyAggResponse(
       switch (agg.type.type) {
         case AggGroupNames.Buckets:
           const aggBucket = get(bucket, agg.id);
-          const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, timeRange);
+          const tabifyBuckets = new TabifyBuckets(aggBucket, agg.params, respOpts?.timeRange);
 
           if (tabifyBuckets.length) {
             tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {
@@ -152,20 +152,6 @@ export function tabifyAggResponse(
     ...esResponse.aggregations,
     doc_count: esResponse.hits.total,
   };
-
-  let timeRange: TabbedRangeFilterParams | undefined;
-
-  // Extract the time range object if provided
-  if (respOpts && respOpts.timeRange) {
-    const [timeRangeKey] = Object.keys(respOpts.timeRange);
-
-    if (timeRangeKey) {
-      timeRange = {
-        name: timeRangeKey,
-        ...respOpts.timeRange[timeRangeKey],
-      };
-    }
-  }
 
   collectBucket(aggConfigs, write, topLevelBucket, '', 1);
 

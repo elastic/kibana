@@ -28,8 +28,5 @@ function escapeNot(str: string) {
 
 // See the Space rule in kuery.peg
 function escapeWhitespace(str: string) {
-  return str
-    .replace(/\t/g, '\\t')
-    .replace(/\r/g, '\\r')
-    .replace(/\n/g, '\\n');
+  return str.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 }

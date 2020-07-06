@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from '../../../../src/core/server';
+import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import {
-  GetBasePathFunction,
-  RawAction,
-  ActionTypeRegistryContract,
-  PreConfiguredAction,
-} from './types';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
-  getBasePath: GetBasePathFunction;
   isESOUsingEphemeralEncryptionKey: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
@@ -29,45 +22,27 @@ export interface ExecuteOptions {
   apiKey: string | null;
 }
 
-export function createExecuteFunction({
-  getBasePath,
+export type ExecutionEnqueuer = (
+  savedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions
+) => Promise<void>;
+
+export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  getScopedSavedObjectsClient,
   isESOUsingEphemeralEncryptionKey,
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+  return async function execute(
+    savedObjectsClient: SavedObjectsClientContract,
+    { id, params, spaceId, apiKey }: ExecuteOptions
+  ) {
     if (isESOUsingEphemeralEncryptionKey === true) {
       throw new Error(
         `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
       );
     }
 
-    const requestHeaders: Record<string, string> = {};
-
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-    }
-
-    // Since we're using API keys and accessing elasticsearch can only be done
-    // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: unknown = {
-      headers: requestHeaders,
-      getBasePath: () => getBasePath(spaceId),
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
-
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest as KibanaRequest);
     const actionTypeId = await getActionTypeId(id);
 
     if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
@@ -91,7 +66,7 @@ export function createExecuteFunction({
     });
 
     async function getActionTypeId(actionId: string): Promise<string> {
-      const pcAction = preconfiguredActions.find(action => action.id === actionId);
+      const pcAction = preconfiguredActions.find((action) => action.id === actionId);
       if (pcAction) {
         return pcAction.actionTypeId;
       }

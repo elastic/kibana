@@ -41,7 +41,7 @@ const log = new ToolingLog({
 });
 
 if (unknownFlags.length) {
-  log.error(`Unknown flags ${unknownFlags.map(f => `"${f}"`).join(',')}`);
+  log.error(`Unknown flags ${unknownFlags.map((f) => `"${f}"`).join(',')}`);
   process.exitCode = 1;
   opts.help = true;
 }
@@ -90,7 +90,7 @@ if (opts.help) {
     'NOTICE.txt is out of date, run `node scripts/notice` to update and commit the results.'
   );
   process.exit(1);
-})().catch(error => {
+})().catch((error) => {
   log.error(error);
   process.exit(1);
 });

@@ -21,7 +21,7 @@ export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDe
       },
     },
     async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
+      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       try {
         return res.ok({
           body: await putLicense({

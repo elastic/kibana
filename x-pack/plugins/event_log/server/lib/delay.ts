@@ -5,5 +5,5 @@
  */
 
 export async function delay(millis: number) {
-  await new Promise(resolve => setTimeout(resolve, millis));
+  await new Promise((resolve) => setTimeout(resolve, millis));
 }

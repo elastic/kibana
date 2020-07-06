@@ -37,7 +37,7 @@ const mockMBMap = {
   on: (eventName, callback) => {
     mockMbMapHandlers[eventName] = callback;
   },
-  off: eventName => {
+  off: (eventName) => {
     delete mockMbMapHandlers[eventName];
   },
   getLayer: () => {},
@@ -236,7 +236,7 @@ describe('TooltipControl', () => {
 
       sinon.assert.notCalled(closeOnClickTooltipStub);
       sinon.assert.calledWith(openOnClickTooltipStub, {
-        features: [{ id: 1, layerId: 'tfi3f' }],
+        features: [{ id: 1, layerId: 'tfi3f', mbProperties: { __kbn__feature_id__: 1 } }],
         location: [100, 30],
       });
     });

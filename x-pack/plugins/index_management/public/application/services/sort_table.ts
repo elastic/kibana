@@ -14,7 +14,8 @@ type SortField =
   | 'replica'
   | 'documents'
   | 'size'
-  | 'primary_size';
+  | 'primary_size'
+  | 'data_stream';
 
 type Unit = 'kb' | 'mb' | 'gb' | 'tb' | 'pb';
 
@@ -55,6 +56,7 @@ const sorters = {
   documents: numericSort('documents'),
   size: byteSort('size'),
   primary_size: byteSort('primary_size'),
+  data_stream: stringSort('data_stream'),
 };
 
 export const sortTable = (array = [], sortField: SortField, isSortAscending: boolean) => {

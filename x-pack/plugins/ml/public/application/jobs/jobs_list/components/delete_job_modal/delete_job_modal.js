@@ -56,7 +56,7 @@ export class DeleteJobModal extends Component {
     this.setState({ isModalVisible: false });
   };
 
-  showModal = jobs => {
+  showModal = (jobs) => {
     this.setState({
       jobs,
       isModalVisible: true,
@@ -74,7 +74,7 @@ export class DeleteJobModal extends Component {
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
   };
 
-  setEL = el => {
+  setEL = (el) => {
     if (el) {
       this.el = el;
     }

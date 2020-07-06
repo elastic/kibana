@@ -18,34 +18,37 @@
  */
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { AggTypeFieldFilters } from './aggs/param_types/filter';
-import { ISearchStart } from './types';
+import { ISearchSetup, ISearchStart } from './types';
 import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
 
-const searchSetupMock = {
-  aggs: searchAggsSetupMock(),
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-};
+export * from './search_source/mocks';
 
-const searchStartMock: jest.Mocked<ISearchStart> = {
-  aggs: searchAggsStartMock(),
-  setInterceptor: jest.fn(),
-  search: jest.fn(),
-  searchSource: searchSourceMock,
-  __LEGACY: {
-    AggConfig: jest.fn() as any,
-    AggType: jest.fn(),
-    aggTypeFieldFilters: new AggTypeFieldFilters(),
-    FieldParamType: jest.fn(),
-    MetricAggType: jest.fn(),
-    parentPipelineAggHelper: jest.fn() as any,
-    siblingPipelineAggHelper: jest.fn() as any,
-    esClient: {
-      search: jest.fn(),
-      msearch: jest.fn(),
+function createSetupContract(): jest.Mocked<ISearchSetup> {
+  return {
+    aggs: searchAggsSetupMock(),
+    registerSearchStrategy: jest.fn(),
+  };
+}
+
+function createStartContract(): jest.Mocked<ISearchStart> {
+  return {
+    aggs: searchAggsStartMock(),
+    setInterceptor: jest.fn(),
+    getSearchStrategy: jest.fn(),
+    search: jest.fn(),
+    searchSource: searchSourceMock,
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
     },
-  },
+  };
+}
+
+export const searchServiceMock = {
+  createSetupContract,
+  createStartContract,
 };
 
-export { searchSetupMock, searchStartMock, createSearchSourceMock };
+export { createSearchSourceMock };

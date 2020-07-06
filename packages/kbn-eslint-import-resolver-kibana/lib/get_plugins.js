@@ -21,8 +21,8 @@ const { dirname, resolve } = require('path');
 
 const glob = require('glob-all');
 
-exports.getPlugins = function(config, kibanaPath, projectRoot) {
-  const resolveToRoot = path => resolve(projectRoot, path);
+exports.getPlugins = function (config, kibanaPath, projectRoot) {
+  const resolveToRoot = (path) => resolve(projectRoot, path);
 
   const pluginDirs = [
     ...(config.pluginDirs || []).map(resolveToRoot),
@@ -39,11 +39,11 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   ];
 
   const globPatterns = [
-    ...pluginDirs.map(dir => resolve(dir, '*/package.json')),
-    ...pluginPaths.map(path => resolve(path, 'package.json')),
+    ...pluginDirs.map((dir) => resolve(dir, '*/package.json')),
+    ...pluginPaths.map((path) => resolve(path, 'package.json')),
   ];
 
-  const pluginsFromMap = Object.keys(config.pluginMap || {}).map(name => {
+  const pluginsFromMap = Object.keys(config.pluginMap || {}).map((name) => {
     const directory = resolveToRoot(config.pluginMap[name]);
     return {
       name,
@@ -53,7 +53,7 @@ exports.getPlugins = function(config, kibanaPath, projectRoot) {
   });
 
   return pluginsFromMap.concat(
-    glob.sync(globPatterns).map(pkgJsonPath => {
+    glob.sync(globPatterns).map((pkgJsonPath) => {
       const path = dirname(pkgJsonPath);
       const pkg = require(pkgJsonPath); // eslint-disable-line import/no-dynamic-require
       return {

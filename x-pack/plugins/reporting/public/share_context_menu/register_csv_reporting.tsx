@@ -25,7 +25,7 @@ export const csvReportingProvider = ({ apiClient, toasts, license$ }: ReportingP
   let disabled = true;
   let hasCSVReporting = false;
 
-  license$.subscribe(license => {
+  license$.subscribe((license) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'basic'));
 
     toolTipContent = message;

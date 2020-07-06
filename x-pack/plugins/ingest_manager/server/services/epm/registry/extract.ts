@@ -22,7 +22,7 @@ export async function untarBuffer(
   const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
     const path = entry.header.path || '';
     if (!filter({ path })) return;
-    streamToBuffer(entry).then(entryBuffer => onEntry({ buffer: entryBuffer, path }));
+    streamToBuffer(entry).then((entryBuffer) => onEntry({ buffer: entryBuffer, path }));
   });
 
   return new Promise((resolve, reject) => {

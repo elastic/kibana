@@ -1,7 +1,20 @@
 {
   "name": "aad-fixtures",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "kibana": {
-    "version": "kibana"
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "main": "target/test/plugin_api_integration/plugins/aad",
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "3.9.5"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "joi": "^13.5.2"
   }
 }

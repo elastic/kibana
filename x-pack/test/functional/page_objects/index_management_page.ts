@@ -29,35 +29,26 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('indexTableRow')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
-            indexName: $(row)
-              .findTestSubject('indexTableIndexNameLink')
-              .text(),
-            indexHealth: $(row)
-              .findTestSubject('indexTableCell-health')
-              .text(),
-            indexStatus: $(row)
-              .findTestSubject('indexTableCell-status')
-              .text(),
-            indexPrimary: $(row)
-              .findTestSubject('indexTableCell-primary')
-              .text(),
-            indexReplicas: $(row)
-              .findTestSubject('indexTableCell-replica')
-              .text(),
+            indexName: $(row).findTestSubject('indexTableIndexNameLink').text(),
+            indexHealth: $(row).findTestSubject('indexTableCell-health').text(),
+            indexStatus: $(row).findTestSubject('indexTableCell-status').text(),
+            indexPrimary: $(row).findTestSubject('indexTableCell-primary').text(),
+            indexReplicas: $(row).findTestSubject('indexTableCell-replica').text(),
             indexDocuments: $(row)
               .findTestSubject('indexTableCell-documents')
               .text()
               .replace('documents', ''),
-            indexSize: $(row)
-              .findTestSubject('indexTableCell-size')
-              .text(),
+            indexSize: $(row).findTestSubject('indexTableCell-size').text(),
           };
         });
     },
-    async changeTabs(tab: 'indicesTab' | 'templatesTab') {
-      return await testSubjects.click(tab);
+
+    async changeTabs(
+      tab: 'indicesTab' | 'data_streamsTab' | 'templatesTab' | 'component_templatesTab'
+    ) {
+      await testSubjects.click(tab);
     },
   };
 }

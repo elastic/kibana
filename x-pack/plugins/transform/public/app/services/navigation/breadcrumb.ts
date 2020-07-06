@@ -5,7 +5,6 @@
  */
 
 import { textService } from '../text';
-import { linkToHome } from './links';
 
 import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
 
@@ -41,7 +40,7 @@ class BreadcrumbService {
     this.breadcrumbs.home = [
       {
         text: textService.breadcrumbs.home,
-        href: linkToHome(),
+        href: '/',
       },
     ];
     this.breadcrumbs.cloneTransform = [

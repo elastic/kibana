@@ -28,10 +28,12 @@ export {
   copyAll,
   getFileHash,
   untar,
+  gunzip,
   deleteAll,
   deleteEmptyFolders,
   compress,
   isFileAccessible,
 } from './fs';
+export { download } from './download';
 export { scanDelete } from './scan_delete';
 export { scanCopy } from './scan_copy';

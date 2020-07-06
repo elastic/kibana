@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
   Check,
   Histogram,
+  HistogramPoint,
   MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+} from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
+import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
   queryContext: QueryContext,
@@ -137,11 +137,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
+                         if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.certificate_not_valid_after"][0];
                         }
-                        if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
+                         if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.certificate_not_valid_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
@@ -244,17 +244,17 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const items = await queryContext.search(params);
 
-  const monitorBuckets = get(items, 'aggregations.monitors.buckets', []);
+  const monitorBuckets = items?.aggregations?.monitors?.buckets ?? [];
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    const monitorId = get<string>(monitor, 'key.monitor_id');
+    const monitorId = monitor.key.monitor_id;
     monitorIds.push(monitorId);
     const state: any = monitor.state?.value;
     state.timestamp = state['@timestamp'];
     const { checks } = state;
-    if (checks) {
-      state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
+    if (Array.isArray(checks)) {
+      checks.sort(sortChecksBy);
       state.checks = state.checks.map((check: any) => ({
         ...check,
         timestamp: check['@timestamp'],
@@ -270,12 +270,16 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const histogramMap = await getHistogramForMonitors(queryContext, monitorIds);
 
-  const resItems = summaries.map(summary => ({
+  const resItems = summaries.map((summary) => ({
     ...summary,
     histogram: histogramMap[summary.monitor_id],
   }));
 
-  const sortedResItems: any = sortBy(resItems, 'monitor_id');
+  const sortedResItems: any = resItems.sort((a, b) => {
+    if (a.monitor_id === b.monitor_id) return 0;
+    return a.monitor_id > b.monitor_id ? 1 : -1;
+  });
+
   if (queryContext.pagination.sortOrder === SortOrder.DESC) {
     sortedResItems.reverse();
   }
@@ -295,6 +299,11 @@ const getHistogramForMonitors = async (
         bool: {
           filter: [
             {
+              range: {
+                'summary.down': { gt: 0 },
+              },
+            },
+            {
               terms: {
                 'monitor.id': monitorIds,
               },
@@ -311,25 +320,25 @@ const getHistogramForMonitors = async (
         },
       },
       aggs: {
-        by_id: {
-          terms: {
-            field: 'monitor.id',
-            size: STATES.LEGACY_STATES_QUERY_SIZE,
+        histogram: {
+          date_histogram: {
+            field: '@timestamp',
+            // 12 seems to be a good size for performance given
+            // long monitor lists of up to 100 on the overview page
+            fixed_interval:
+              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
+              'ms',
+            missing: 0,
           },
           aggs: {
-            histogram: {
-              auto_date_histogram: {
-                field: '@timestamp',
-                buckets: QUERY.DEFAULT_BUCKET_COUNT,
-                missing: 0,
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+                size: Math.max(monitorIds.length, 1),
               },
               aggs: {
-                status: {
-                  terms: {
-                    field: 'monitor.status',
-                    size: 2,
-                    shard_size: 2,
-                  },
+                totalDown: {
+                  sum: { field: 'summary.down' },
                 },
               },
             },
@@ -340,40 +349,61 @@ const getHistogramForMonitors = async (
   };
   const result = await queryContext.search(params);
 
-  const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
-  return buckets.reduce((map: { [key: string]: any }, item: any) => {
-    const points = get(item, 'histogram.buckets', []).map((histogram: any) => {
-      const status = get(histogram, 'status.buckets', []).reduce(
-        (statuses: { up: number; down: number }, bucket: any) => {
-          if (bucket.key === 'up') {
-            statuses.up = bucket.doc_count;
-          } else if (bucket.key === 'down') {
-            statuses.down = bucket.doc_count;
-          }
-          return statuses;
-        },
-        { up: 0, down: 0 }
-      );
-      return {
-        timestamp: histogram.key,
-        ...status,
-      };
+  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
+    const byId: { [key: string]: number } = {};
+    histoBucket.by_id.buckets.forEach((idBucket: any) => {
+      byId[idBucket.key] = idBucket.totalDown.value;
     });
-
-    map[item.key] = {
-      count: item.doc_count,
-      points,
+    return {
+      timestamp: parseInt(histoBucket.key, 10),
+      byId,
     };
-    return map;
-  }, {});
+  });
+
+  const histosById: { [key: string]: Histogram } = {};
+  monitorIds.forEach((id: string) => {
+    const points: HistogramPoint[] = [];
+    simplified.forEach((simpleHisto) => {
+      points.push({
+        timestamp: simpleHisto.timestamp,
+        up: undefined,
+        down: simpleHisto.byId[id],
+      });
+    });
+    histosById[id] = { points };
+  });
+
+  return histosById;
 };
 
 const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
   return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };
 
-type SortChecks = (check: Check) => string[];
-const checksSortBy = (check: Check) => [
-  get<string>(check, 'observer.geo.name'),
-  get<string>(check, 'monitor.ip'),
-];
+const getStringValue = (value: string | Array<string | null> | null | undefined): string => {
+  if (Array.isArray(value)) {
+    value.sort();
+    return value[0] ?? '';
+  }
+  return value ?? '';
+};
+
+export const sortChecksBy = (
+  a: Pick<Check, 'observer' | 'monitor'>,
+  b: Pick<Check, 'observer' | 'monitor'>
+) => {
+  const nameA: string = a.observer?.geo?.name ?? '';
+  const nameB: string = b.observer?.geo?.name ?? '';
+
+  if (nameA === nameB) {
+    const ipA = getStringValue(a.monitor.ip);
+    const ipB = getStringValue(b.monitor.ip);
+
+    if (ipA === ipB) {
+      return 0;
+    }
+    return ipA > ipB ? 1 : -1;
+  }
+  return nameA > nameB ? 1 : -1;
+};

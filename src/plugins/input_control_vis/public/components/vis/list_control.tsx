@@ -114,6 +114,10 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     if (this.props.disableMsg) {
       return (
         <EuiFieldText
+          aria-label={intl.formatMessage({
+            id: 'inputControl.vis.listControl.selectTextPlaceholder',
+            defaultMessage: 'Select...',
+          })}
           placeholder={intl.formatMessage({
             id: 'inputControl.vis.listControl.selectTextPlaceholder',
             defaultMessage: 'Select...',
@@ -124,7 +128,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     }
 
     const options = this.props.options
-      ?.map(option => {
+      ?.map((option) => {
         return {
           label: this.props.formatOptionLabel(option).toString(),
           value: option,
@@ -135,7 +139,7 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
         return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
       });
 
-    const selectedOptions = this.props.selectedOptions.map(selectedOption => {
+    const selectedOptions = this.props.selectedOptions.map((selectedOption) => {
       return {
         label: this.props.formatOptionLabel(selectedOption).toString(),
         value: selectedOption,

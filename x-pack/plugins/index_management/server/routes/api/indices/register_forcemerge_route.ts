@@ -34,7 +34,7 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
       }
 
       try {
-        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.forcemerge', params);
+        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.forcemerge', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

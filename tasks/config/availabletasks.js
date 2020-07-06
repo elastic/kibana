@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   const config = {
     availabletasks: {
       tasks: {

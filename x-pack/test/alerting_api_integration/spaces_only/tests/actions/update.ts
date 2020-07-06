@@ -19,7 +19,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
     it('should handle update action request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -32,10 +32,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}`)
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action updated',
@@ -67,7 +67,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't update action from another space`, async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -80,10 +80,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       await supertest
-        .put(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
+        .put(`${getUrlPrefix(Spaces.other.id)}/api/actions/action/${createdAction.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action updated',
@@ -103,7 +103,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't update action from preconfigured list`, async () => {
       await supertest
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/custom-system-abc-connector`)
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/custom-system-abc-connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action updated',

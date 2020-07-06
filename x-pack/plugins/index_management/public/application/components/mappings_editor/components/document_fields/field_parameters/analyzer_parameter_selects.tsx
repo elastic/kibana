@@ -36,6 +36,7 @@ interface Props {
   config: FieldConfig;
   options: Options;
   mapOptionsToSubOptions: MapOptionsToSubOptions;
+  'data-test-subj'?: string;
 }
 
 export const AnalyzerParameterSelects = ({
@@ -45,11 +46,12 @@ export const AnalyzerParameterSelects = ({
   config,
   options,
   mapOptionsToSubOptions,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
   const { form } = useForm({ defaultValue: { main: mainDefaultValue, sub: subDefaultValue } });
 
   useEffect(() => {
-    const subscription = form.subscribe(updateData => {
+    const subscription = form.subscribe((updateData) => {
       const formData = updateData.data.raw;
       const value = formData.sub ? formData.sub : formData.main;
       onChange(value);
@@ -76,11 +78,16 @@ export const AnalyzerParameterSelects = ({
     const isSuperSelect = areOptionsSuperSelect(opts);
 
     return isSuperSelect ? (
-      <SuperSelectField field={field} euiFieldProps={{ options: opts }} />
+      <SuperSelectField
+        field={field}
+        euiFieldProps={{ options: opts }}
+        data-test-subj={dataTestSubj}
+      />
     ) : (
       <SelectField
         field={field}
         euiFieldProps={{ options: opts as any, hasNoInitialSelection: false }}
+        data-test-subj={dataTestSubj}
       />
     );
   };
@@ -95,20 +102,20 @@ export const AnalyzerParameterSelects = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <UseField path="main" config={config} onChange={onMainValueChange}>
-                  {field => renderSelect(field, options)}
+                  {(field) => renderSelect(field, options)}
                 </UseField>
               </EuiFlexItem>
               {subOptions && (
                 <EuiFlexItem>
                   <UseField
                     path="sub"
-                    defaultValue={subOptions.options[0].value}
                     config={{
                       ...config,
+                      defaultValue: subOptions.options[0].value,
                       label: subOptions.label,
                     }}
                   >
-                    {field => renderSelect(field, subOptions.options)}
+                    {(field) => renderSelect(field, subOptions.options)}
                   </UseField>
                 </EuiFlexItem>
               )}

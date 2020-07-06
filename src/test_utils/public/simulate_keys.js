@@ -52,7 +52,7 @@ const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
  * @param  {[type]} sequence - an array of events
  * @async
  */
-export default function($el, sequence) {
+export default function ($el, sequence) {
   const modifierState = {
     ctrlKey: false,
     shiftKey: false,
@@ -70,7 +70,7 @@ export default function($el, sequence) {
   }
 
   function doList(list) {
-    return Bluebird.try(function() {
+    return Bluebird.try(function () {
       if (!list || !list.length) return;
 
       let event = list[0];
@@ -102,7 +102,7 @@ export default function($el, sequence) {
         default:
           throw new TypeError('invalid event type "' + event.type + '"');
       }
-    }).then(function() {
+    }).then(function () {
       if (_.size(list) > 1) return doList(list.slice(1));
     });
   }

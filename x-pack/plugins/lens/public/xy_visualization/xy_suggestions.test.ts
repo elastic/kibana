@@ -11,7 +11,7 @@ import {
   DataType,
   TableSuggestion,
 } from '../types';
-import { State, XYState } from './types';
+import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
@@ -100,13 +100,74 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table =>
+      ] as TableSuggestion[]).map((table) =>
         expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
       )
     );
   });
 
-  test('suggests a basic x y chart with date on x', () => {
+  test('suggests all basic x y charts when switching from another vis', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+      'bar_stacked',
+      'area_stacked',
+      'area',
+      'line',
+      'bar_horizontal_stacked',
+      'bar_horizontal',
+      'bar',
+    ]);
+  });
+
+  test('suggests all basic x y charts when switching from another x y chart', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'bar',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+      'line',
+      'bar',
+      'bar_horizontal',
+      'bar_stacked',
+      'bar_horizontal_stacked',
+      'area',
+      'area_stacked',
+    ]);
+  });
+
+  test('suggests all basic x y chart with date on x', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -118,7 +179,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -164,7 +225,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -186,7 +247,7 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
         layerId: 'first',
-        changeType: 'unchanged',
+        changeType: 'extended',
         label: 'Datasource title',
       },
       keptLayerIds: [],
@@ -194,6 +255,34 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestion.title).toEqual('Datasource title');
+  });
+
+  test('suggests only stacked bar chart when xy chart is inactive', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+        label: 'Datasource title',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(suggestion.title).toEqual('Stacked bar');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        layers: [
+          expect.objectContaining({
+            seriesType: 'bar_stacked',
+            xAccessor: 'date',
+            accessors: ['price'],
+            splitAccessor: undefined,
+          }),
+        ],
+      })
+    );
   });
 
   test('hides reduced suggestions if there is a current state', () => {
@@ -224,7 +313,7 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
-  test('does not hide reduced suggestions if xy visualization is not active', () => {
+  test('hides reduced suggestions if xy visualization is not active', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -236,12 +325,13 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(0);
-    expect(suggestion.hide).toBeFalsy();
+    expect(suggestion.hide).toBeTruthy();
   });
 
-  test('only makes a seriesType suggestion for unchanged table without split', () => {
+  test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -264,8 +354,9 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
     });
 
-    expect(suggestions).toHaveLength(1);
+    expect(suggestions).toHaveLength(visualizationTypes.length);
 
+    expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
@@ -278,6 +369,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -299,7 +391,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 2);
     expect(seriesSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
@@ -318,6 +410,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -340,9 +433,9 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
-    expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
+    expect(suggestion.state.layers.every((l) => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 
@@ -350,6 +443,7 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price'],
@@ -371,20 +465,20 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    const suggestion = suggestions[suggestions.length - 1];
-
-    expect(suggestion.state).toEqual({
-      ...currentState,
-      preferredSeriesType: 'bar_stacked',
-      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
-    });
-    expect(suggestion.title).toEqual('Stacked');
+    const visibleSuggestions = suggestions.filter((suggestion) => !suggestion.hide);
+    expect(visibleSuggestions).toContainEqual(
+      expect.objectContaining({
+        title: 'Stacked',
+        state: expect.objectContaining({ preferredSeriesType: 'bar_stacked' }),
+      })
+    );
   });
 
   test('keeps column to dimension mappings on extended tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -419,11 +513,51 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('changes column mappings when suggestion is reorder', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'category',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [strCol('category'), strCol('product'), numCol('price')],
+        layerId: 'first',
+        changeType: 'reorder',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'category',
+          splitAccessor: 'product',
+        },
+      ],
+    });
+  });
+
   test('overwrites column to dimension mappings if a date dimension is added', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
+      fittingFunction: 'None',
       layers: [
         {
           accessors: ['price', 'quantity'],

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects, updateBaselines }) {
+export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
@@ -28,8 +28,9 @@ export default function({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('dashboard snapshots', function describeIndexTests() {
-    before(async function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/52854
+  describe.skip('dashboard snapshots', function describeIndexTests() {
+    before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -41,7 +42,7 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    after(async function() {
+    after(async function () {
       await browser.setWindowSize(1300, 900);
     });
 
@@ -64,7 +65,6 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
 
@@ -87,7 +87,6 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
   });

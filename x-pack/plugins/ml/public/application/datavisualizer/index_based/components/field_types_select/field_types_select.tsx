@@ -31,7 +31,7 @@ export const FieldTypesSelect: FC<Props> = ({
       }),
     },
   ];
-  fieldTypes.forEach(fieldType => {
+  fieldTypes.forEach((fieldType) => {
     options.push({
       value: fieldType,
       text: i18n.translate('xpack.ml.datavisualizer.fieldTypesSelect.typeOptionLabel', {
@@ -47,7 +47,7 @@ export const FieldTypesSelect: FC<Props> = ({
     <EuiSelect
       options={options}
       value={selectedFieldType}
-      onChange={e => setSelectedFieldType(e.target.value as ML_JOB_FIELD_TYPES | '*')}
+      onChange={(e) => setSelectedFieldType(e.target.value as ML_JOB_FIELD_TYPES | '*')}
       aria-label={i18n.translate('xpack.ml.datavisualizer.fieldTypesSelect.selectAriaLabel', {
         defaultMessage: 'Select field types to display',
       })}

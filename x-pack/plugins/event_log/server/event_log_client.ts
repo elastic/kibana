@@ -5,13 +5,13 @@
  */
 
 import { Observable } from 'rxjs';
-import { ClusterClient, SavedObjectsClientContract } from 'src/core/server';
+import { LegacyClusterClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export type PluginClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
+export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {
@@ -36,6 +36,7 @@ export const findOptionsSchema = schema.object({
   end: optionalDateFieldSchema,
   sort_field: schema.oneOf(
     [
+      schema.literal('@timestamp'),
       schema.literal('event.start'),
       schema.literal('event.end'),
       schema.literal('event.provider'),
@@ -44,7 +45,7 @@ export const findOptionsSchema = schema.object({
       schema.literal('message'),
     ],
     {
-      defaultValue: 'event.start',
+      defaultValue: '@timestamp',
     }
   ),
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {

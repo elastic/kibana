@@ -21,19 +21,19 @@ import React from 'react';
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
-import mappings from '../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
 const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
-  return Object.keys(newSettings.autocomplete).filter(key => {
+  return Object.keys(newSettings.autocomplete).filter((key) => {
     // @ts-ignore
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
   });
 };
 
 const refreshAutocompleteSettings = (settings: SettingsService, selectedSettings: any) => {
-  mappings.retrieveAutoCompleteInfo(settings, selectedSettings);
+  retrieveAutoCompleteInfo(settings, selectedSettings);
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
@@ -61,10 +61,10 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      mappings.retrieveAutoCompleteInfo(settings, changedSettings);
+      retrieveAutoCompleteInfo(settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      mappings.retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+      retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
     }
   }
 };

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
-import { routing } from '../../services/routing';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
@@ -74,7 +74,7 @@ export class FollowerIndexEdit extends PureComponent {
 
     selectFollowerIndex(decodedId);
 
-    setBreadcrumbs([listBreadcrumb, editBreadcrumb]);
+    setBreadcrumbs([listBreadcrumb('/follower_indices'), editBreadcrumb]);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -151,7 +151,7 @@ export class FollowerIndexEdit extends PureComponent {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              {...routing.getRouterLinkProps('/follower_indices')}
+              {...reactRouterNavigate(this.props.history, `/follower_indices`)}
               iconType="arrowLeft"
               flush="left"
               data-test-subj="viewListFollowerIndexButton"

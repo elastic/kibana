@@ -36,7 +36,7 @@ export class ContextMenu extends PureComponent {
   };
 
   onButtonClick = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -47,15 +47,15 @@ export class ContextMenu extends PureComponent {
     });
   };
 
-  editFollowerIndex = id => {
-    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+  editFollowerIndex = (id) => {
+    const uri = routing.getFollowerIndexPath(id);
     routing.navigate(uri);
   };
 
   render() {
     const { followerIndices } = this.props;
     const followerIndicesLength = followerIndices.length;
-    const followerIndexNames = followerIndices.map(index => index.name);
+    const followerIndexNames = followerIndices.map((index) => index.name);
     const {
       iconSide = 'right',
       iconType = 'arrowDown',
@@ -84,7 +84,7 @@ export class ContextMenu extends PureComponent {
 
     const pausedFollowerIndexNames = followerIndices
       .filter(({ isPaused }) => isPaused)
-      .map(index => index.name);
+      .map((index) => index.name);
     const activeFollowerIndices = followerIndices.filter(({ isPaused }) => !isPaused);
 
     return (
@@ -107,7 +107,7 @@ export class ContextMenu extends PureComponent {
         <EuiContextMenuPanel data-test-subj="contextMenu">
           {activeFollowerIndices.length ? (
             <FollowerIndexPauseProvider onConfirm={this.closePopover}>
-              {pauseFollowerIndex => (
+              {(pauseFollowerIndex) => (
                 <EuiContextMenuItem
                   icon="pause"
                   onClick={() => pauseFollowerIndex(activeFollowerIndices)}
@@ -124,7 +124,7 @@ export class ContextMenu extends PureComponent {
 
           {pausedFollowerIndexNames.length ? (
             <FollowerIndexResumeProvider onConfirm={this.closePopover}>
-              {resumeFollowerIndex => (
+              {(resumeFollowerIndex) => (
                 <EuiContextMenuItem
                   icon="play"
                   onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
@@ -156,7 +156,7 @@ export class ContextMenu extends PureComponent {
           )}
 
           <FollowerIndexUnfollowProvider onConfirm={this.closePopover}>
-            {unfollowLeaderIndex => (
+            {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
                 icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}

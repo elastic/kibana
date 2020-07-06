@@ -14,11 +14,11 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../typings/lodash.topath/*.ts",
     "../typings/elastic__node_crypto.d.ts",
     "typings/**/*"
   ],
   "exclude": [
-    "plugin_functional/plugins/**/*"
+    "plugin_functional/plugins/**/*",
+    "interpreter_functional/plugins/**/*"
   ]
 }

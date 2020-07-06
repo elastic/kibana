@@ -71,7 +71,7 @@ const getEmptyFollowerIndex = (remoteClusterName = '') => ({
 /**
  * State transitions: fields update
  */
-export const updateFields = fields => ({ followerIndex }) => ({
+export const updateFields = (fields) => ({ followerIndex }) => ({
   followerIndex: {
     ...followerIndex,
     ...fields,
@@ -81,7 +81,7 @@ export const updateFields = fields => ({ followerIndex }) => ({
 /**
  * State transitions: errors update
  */
-export const updateFormErrors = errors => ({ fieldsErrors }) => ({
+export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   fieldsErrors: {
     ...fieldsErrors,
     ...errors,
@@ -147,7 +147,7 @@ export class FollowerIndexForm extends PureComponent {
     }));
   };
 
-  onFieldsChange = fields => {
+  onFieldsChange = (fields) => {
     this.setState(updateFields(fields));
 
     const newFields = {
@@ -162,7 +162,7 @@ export class FollowerIndexForm extends PureComponent {
     }
   };
 
-  getFieldsErrors = newFields => {
+  getFieldsErrors = (newFields) => {
     return Object.keys(newFields).reduce((errors, field) => {
       const validator = fieldToValidatorMap[field];
       const value = newFields[field];
@@ -201,10 +201,10 @@ export class FollowerIndexForm extends PureComponent {
     this.validateIndexName(name);
   };
 
-  validateIndexName = async name => {
+  validateIndexName = async (name) => {
     try {
       const indices = await loadIndices();
-      const doesExist = indices.some(index => index.name === name);
+      const doesExist = indices.some((index) => index.name === name);
       if (doesExist) {
         const error = {
           message: (
@@ -252,7 +252,7 @@ export class FollowerIndexForm extends PureComponent {
     }
   };
 
-  onClusterChange = remoteCluster => {
+  onClusterChange = (remoteCluster) => {
     this.onFieldsChange({ remoteCluster });
   };
 
@@ -260,7 +260,7 @@ export class FollowerIndexForm extends PureComponent {
     return this.state.followerIndex;
   };
 
-  toggleAdvancedSettings = event => {
+  toggleAdvancedSettings = (event) => {
     // If the user edits the advanced settings but then hides them, we need to make sure the
     // edited values don't get sent to the API when the user saves, but we *do* want to restore
     // these values to the form when the user re-opens the advanced settings.
@@ -298,7 +298,7 @@ export class FollowerIndexForm extends PureComponent {
 
   isFormValid() {
     return Object.values(this.state.fieldsErrors).every(
-      error => error === undefined || error === null
+      (error) => error === undefined || error === null
     );
   }
 
@@ -440,7 +440,7 @@ export class FollowerIndexForm extends PureComponent {
             defaultMessage="Replication requires a leader index on a remote cluster."
           />
         ),
-        remoteClusterNotConnectedNotEditable: name => ({
+        remoteClusterNotConnectedNotEditable: (name) => ({
           title: (
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutTitle"
@@ -455,7 +455,7 @@ export class FollowerIndexForm extends PureComponent {
             />
           ),
         }),
-        remoteClusterDoesNotExist: name => (
+        remoteClusterDoesNotExist: (name) => (
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
             defaultMessage="To edit this follower index, you must add a remote cluster
@@ -492,7 +492,7 @@ export class FollowerIndexForm extends PureComponent {
             isEditable={isNew}
             areErrorsVisible={areErrorsVisible}
             onChange={this.onClusterChange}
-            onError={error => {
+            onError={(error) => {
               this.setState(updateFormErrors({ remoteCluster: error }));
             }}
             errorMessages={errorMessages}
@@ -614,7 +614,7 @@ export class FollowerIndexForm extends PureComponent {
           {areAdvancedSettingsVisible && (
             <Fragment>
               <EuiSpacer size="s" />
-              {advancedSettingsFields.map(advancedSetting => {
+              {advancedSettingsFields.map((advancedSetting) => {
                 const {
                   field,
                   testSubject,
