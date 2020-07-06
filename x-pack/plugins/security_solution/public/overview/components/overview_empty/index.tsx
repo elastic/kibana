@@ -39,7 +39,7 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage="To begin using security  and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. For additional information, you can view our "
+            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Elastic Endpoint to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, view our "
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
             {i18nCommon.EMPTY_ACTION_SECONDARY}
@@ -59,7 +59,7 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage={i18nCommon.EMPTY_MESSAGE}
+            defaultMessage="Elastic Security integrates the free and open Elastic SIEM with Elastic Endpoint to prevent, detect, and respond to threats. To begin, you’ll need to add security solution related data to the Elastic Stack. For additional information, view our "
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
             {i18nCommon.EMPTY_ACTION_SECONDARY}

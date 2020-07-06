@@ -20,7 +20,7 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate(
 export const EMPTY_ACTION_SECONDARY = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionSecondary',
   {
-    defaultMessage: 'getting started guide',
+    defaultMessage: 'getting started guide.',
   }
 );
 
