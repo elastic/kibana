@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../shared_imports';
+import { ComponentTemplateListItem, ComponentTemplateDeserialized, Error } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DELETE_MANY, UIM_COMPONENT_TEMPLATE_DELETE } from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
 
@@ -15,7 +15,7 @@ export const getApi = (
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void
 ) => {
   function useLoadComponentTemplates() {
-    return useRequest<ComponentTemplateListItem[]>({
+    return useRequest<ComponentTemplateListItem[], Error>({
       path: `${apiBasePath}/component_templates`,
       method: 'get',
     });
