@@ -44,14 +44,14 @@ export const IndicesConfigurationPanel = ({
         <h4>
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.metricIndicesTitle"
-            defaultMessage="Metric indices"
+            defaultMessage="Metrics indices"
           />
         </h4>
       }
       description={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.metricIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain Metricbeat data"
+          defaultMessage="Index pattern for matching indices that contain metrics data"
         />
       }
     >
@@ -71,7 +71,7 @@ export const IndicesConfigurationPanel = ({
         label={
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.metricIndicesLabel"
-            defaultMessage="Metric indices"
+            defaultMessage="Metrics indices"
           />
         }
       >
