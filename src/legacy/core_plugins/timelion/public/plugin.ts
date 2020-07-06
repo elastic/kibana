@@ -68,6 +68,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
   public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
     kibanaLegacy.loadFontAwesome();
+    kibanaLegacy.loadStyles();
   }
 
   public stop(): void {}

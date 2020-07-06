@@ -100,6 +100,7 @@ export const renderApp = (
   });
 
   deps.kibanaLegacy.loadFontAwesome();
+  deps.kibanaLegacy.loadStyles();
 
   appMountParams.onAppLeave((actions) => actions.default());
 

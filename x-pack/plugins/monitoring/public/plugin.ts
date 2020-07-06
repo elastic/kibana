@@ -80,6 +80,7 @@ export class MonitoringPlugin
         };
 
         pluginsStart.kibanaLegacy.loadFontAwesome();
+        pluginsStart.kibanaLegacy.loadStyles();
         this.setInitialTimefilter(deps);
         this.overrideAlertingEmailDefaults(deps);
 
