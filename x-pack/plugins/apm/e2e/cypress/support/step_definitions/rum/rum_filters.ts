@@ -5,8 +5,6 @@
  */
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
-import { DEFAULT_TIMEOUT } from './rum_dashboard';
-
 import { DEFAULT_TIMEOUT } from '../apm';
 
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
