@@ -5,12 +5,15 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CoreSetup } from 'kibana/server';
+import { getIsFleetEnabled } from './config_collectors';
+import { AgentUsage, getAgentUsage } from './agent_collectors';
+import { getInternalSavedObjectsClient } from './helpers';
+import { IngestManagerConfigType } from '..';
 
 interface Usage {
   fleet_enabled: boolean;
-  agents: {
-    enrolled: number;
-  };
+  agents: AgentUsage;
   packages: Array<{
     name: string;
     version: string;
@@ -18,8 +21,13 @@ interface Usage {
   }>;
 }
 
-export function registerIngestManagerUsageCollector(usageCollection?: UsageCollectionSetup): void {
+export function registerIngestManagerUsageCollector(
+  core: CoreSetup,
+  config: IngestManagerConfigType,
+  usageCollection: UsageCollectionSetup | undefined
+): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.
+  // if for any reason the saved objects client is not available, also return
   if (!usageCollection) {
     return;
   }
@@ -32,11 +40,10 @@ export function registerIngestManagerUsageCollector(usageCollection?: UsageColle
       // query ES and get some data
       // summarize the data into a model
       // return the modeled object that includes whatever you want to track
+      const soClient = await getInternalSavedObjectsClient(core);
       return {
-        fleet_enabled: true,
-        agents: {
-          enrolled: 42,
-        },
+        fleet_enabled: getIsFleetEnabled(config),
+        agents: await getAgentUsage(soClient),
         packages: [
           {
             name: 'system',
@@ -49,7 +56,11 @@ export function registerIngestManagerUsageCollector(usageCollection?: UsageColle
     // schema: { // temporarily disabled because of type errors
     //   fleet_enabled: { type: 'boolean' },
     //   agents: {
-    //     enrolled: { type: 'number' },
+    //    events: { type: 'number' },
+    //    total: { type: 'number' },
+    //    online: { type: 'number' },
+    //    error: { type: 'number' },
+    //    offline: { type: 'number' },
     //   },
     //   packages: {
     //     name: { type: 'keyword' },

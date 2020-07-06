@@ -166,9 +166,6 @@ export class IngestManagerPlugin
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    // Register usage collection
-    registerIngestManagerUsageCollector(deps.usageCollection);
-
     // Register feature
     // TODO: Flesh out privileges
     if (deps.features) {
@@ -203,6 +200,9 @@ export class IngestManagerPlugin
 
     const router = core.http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
+
+    // Register usage collection
+    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
 
     // Always register app routes for permissions checking
     registerAppRoutes(router);
