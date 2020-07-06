@@ -341,7 +341,11 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
     workers.ci(config) {
       withCiTaskQueue(parallel: 24) {
         parallel([
-          docker: { buildDocker() },
+          docker: {
+            retry(2) {
+              buildDocker()
+            }
+          },
 
           // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
           ossPlugins: { buildOssPlugins() },
