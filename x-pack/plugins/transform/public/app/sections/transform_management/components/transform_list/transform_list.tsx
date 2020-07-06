@@ -5,7 +5,6 @@
  */
 
 import React, { MouseEventHandler, FC, useContext, useState } from 'react';
-import { pick } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
@@ -382,24 +381,8 @@ export const TransformList: FC<Props> = ({
   return (
     <div data-test-subj="transformListTableContainer">
       {/* Bulk Action Modals */}
-      <StartButtonModal
-        {...pick(bulkStartAction, ['closeModal', 'isModalVisible', 'items', 'startAndCloseModal'])}
-      />
-      <DeleteButtonModal
-        {...pick(bulkDeleteAction, [
-          'closeModal',
-          'deleteAndCloseModal',
-          'deleteDestIndex',
-          'deleteIndexPattern',
-          'indexPatternExists',
-          'isModalVisible',
-          'items',
-          'shouldForceDelete',
-          'toggleDeleteIndex',
-          'toggleDeleteIndexPattern',
-          'userCanDeleteIndex',
-        ])}
-      />
+      {bulkStartAction.isModalVisible && <StartButtonModal {...bulkStartAction} />}
+      {bulkDeleteAction.isModalVisible && <DeleteButtonModal {...bulkDeleteAction} />}
 
       {/* Single Action Modals */}
       {singleActionModals}

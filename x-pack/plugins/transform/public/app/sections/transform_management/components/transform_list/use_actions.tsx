@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { pick } from 'lodash';
 
 import { EuiTableComputedColumnType } from '@elastic/eui';
 
@@ -32,27 +31,11 @@ export const useActions = ({
   return {
     modals: (
       <>
-        <StartButtonModal
-          {...pick(startAction, ['closeModal', 'isModalVisible', 'items', 'startAndCloseModal'])}
-        />
+        {startAction.isModalVisible && <StartButtonModal {...startAction} />}
         {editAction.config && editAction.isFlyoutVisible && (
           <EditTransformFlyout closeFlyout={editAction.closeFlyout} config={editAction.config} />
         )}
-        <DeleteButtonModal
-          {...pick(deleteAction, [
-            'closeModal',
-            'deleteAndCloseModal',
-            'deleteDestIndex',
-            'deleteIndexPattern',
-            'indexPatternExists',
-            'isModalVisible',
-            'items',
-            'shouldForceDelete',
-            'toggleDeleteIndex',
-            'toggleDeleteIndexPattern',
-            'userCanDeleteIndex',
-          ])}
-        />
+        {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
       </>
     ),
     actions: [

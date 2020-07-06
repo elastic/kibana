@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { pick } from 'lodash';
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
@@ -37,23 +36,8 @@ export const useActions = (
   if (isManagementTable === false) {
     modals = (
       <>
-        <StartButtonModal
-          {...pick(startAction, ['closeModal', 'isModalVisible', 'item', 'startAndCloseModal'])}
-        />
-        <DeleteButtonModal
-          {...pick(deleteAction, [
-            'closeModal',
-            'deleteAndCloseModal',
-            'deleteTargetIndex',
-            'deleteIndexPattern',
-            'indexPatternExists',
-            'isModalVisible',
-            'item',
-            'toggleDeleteIndex',
-            'toggleDeleteIndexPattern',
-            'userCanDeleteIndex',
-          ])}
-        />
+        {startAction.isModalVisible && <StartButtonModal {...startAction} />}
+        {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
       </>
     );
     actions.push(

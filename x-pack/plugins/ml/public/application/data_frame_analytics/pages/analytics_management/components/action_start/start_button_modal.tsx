@@ -10,19 +10,10 @@ import { EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elas
 
 import { StartAction } from './use_start_action';
 
-type StartButtonModalProps = Pick<
-  StartAction,
-  'closeModal' | 'isModalVisible' | 'item' | 'startAndCloseModal'
->;
-export const StartButtonModal: FC<StartButtonModalProps> = ({
-  closeModal,
-  isModalVisible,
-  item,
-  startAndCloseModal,
-}) => {
+export const StartButtonModal: FC<StartAction> = ({ closeModal, item, startAndCloseModal }) => {
   return (
     <>
-      {isModalVisible && item !== undefined && (
+      {item !== undefined && (
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate('xpack.ml.dataframe.analyticsList.startModalTitle', {

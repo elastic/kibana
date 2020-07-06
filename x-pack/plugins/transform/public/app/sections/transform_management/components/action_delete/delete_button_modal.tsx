@@ -20,27 +20,12 @@ import { TRANSFORM_STATE } from '../../../../../../common';
 
 import { DeleteAction } from './use_delete_action';
 
-type DeleteButtonModalProps = Pick<
-  DeleteAction,
-  | 'closeModal'
-  | 'deleteAndCloseModal'
-  | 'deleteDestIndex'
-  | 'deleteIndexPattern'
-  | 'indexPatternExists'
-  | 'isModalVisible'
-  | 'items'
-  | 'shouldForceDelete'
-  | 'toggleDeleteIndex'
-  | 'toggleDeleteIndexPattern'
-  | 'userCanDeleteIndex'
->;
-export const DeleteButtonModal: FC<DeleteButtonModalProps> = ({
+export const DeleteButtonModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,
   deleteIndexPattern,
   indexPatternExists,
-  isModalVisible,
   items,
   shouldForceDelete,
   toggleDeleteIndex,
@@ -167,32 +152,22 @@ export const DeleteButtonModal: FC<DeleteButtonModalProps> = ({
   );
 
   return (
-    <>
-      {isModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
-            onCancel={closeModal}
-            onConfirm={deleteAndCloseModal}
-            cancelButtonText={i18n.translate(
-              'xpack.transform.transformList.deleteModalCancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.transform.transformList.deleteModalDeleteButton',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            buttonColor="danger"
-          >
-            {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      )}
-    </>
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={isBulkAction === true ? bulkDeleteModalTitle : deleteModalTitle}
+        onCancel={closeModal}
+        onConfirm={deleteAndCloseModal}
+        cancelButtonText={i18n.translate('xpack.transform.transformList.deleteModalCancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('xpack.transform.transformList.deleteModalDeleteButton', {
+          defaultMessage: 'Delete',
+        })}
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        buttonColor="danger"
+      >
+        {isBulkAction ? bulkDeleteModalContent : deleteModalContent}
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 };

@@ -18,26 +18,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteAction } from './use_delete_action';
 
-type DeleteButtonModalProps = Pick<
-  DeleteAction,
-  | 'closeModal'
-  | 'deleteAndCloseModal'
-  | 'deleteTargetIndex'
-  | 'deleteIndexPattern'
-  | 'indexPatternExists'
-  | 'isModalVisible'
-  | 'item'
-  | 'toggleDeleteIndex'
-  | 'toggleDeleteIndexPattern'
-  | 'userCanDeleteIndex'
->;
-export const DeleteButtonModal: FC<DeleteButtonModalProps> = ({
+export const DeleteButtonModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteTargetIndex,
   deleteIndexPattern,
   indexPatternExists,
-  isModalVisible,
   item,
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
@@ -50,77 +36,73 @@ export const DeleteButtonModal: FC<DeleteButtonModalProps> = ({
   const indexName = item.config.dest.index;
 
   return (
-    <>
-      {isModalVisible && (
-        <EuiOverlayMask data-test-subj="mlAnalyticsJobDeleteOverlay">
-          <EuiConfirmModal
-            data-test-subj="mlAnalyticsJobDeleteModal"
-            title={i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalTitle', {
-              defaultMessage: 'Delete {analyticsId}',
-              values: { analyticsId: item.config.id },
-            })}
-            onCancel={closeModal}
-            onConfirm={deleteAndCloseModal}
-            cancelButtonText={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.deleteModalCancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.deleteModalDeleteButton',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            buttonColor="danger"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.dataframe.analyticsList.deleteModalBody"
-                defaultMessage="Are you sure you want to delete this analytics job?"
-              />
-            </p>
+    <EuiOverlayMask data-test-subj="mlAnalyticsJobDeleteOverlay">
+      <EuiConfirmModal
+        data-test-subj="mlAnalyticsJobDeleteModal"
+        title={i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalTitle', {
+          defaultMessage: 'Delete {analyticsId}',
+          values: { analyticsId: item.config.id },
+        })}
+        onCancel={closeModal}
+        onConfirm={deleteAndCloseModal}
+        cancelButtonText={i18n.translate(
+          'xpack.ml.dataframe.analyticsList.deleteModalCancelButton',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.ml.dataframe.analyticsList.deleteModalDeleteButton',
+          {
+            defaultMessage: 'Delete',
+          }
+        )}
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        buttonColor="danger"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analyticsList.deleteModalBody"
+            defaultMessage="Are you sure you want to delete this analytics job?"
+          />
+        </p>
 
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                {userCanDeleteIndex && (
-                  <EuiSwitch
-                    data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
-                    style={{ paddingBottom: 10 }}
-                    label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
-                      {
-                        defaultMessage: 'Delete destination index {indexName}',
-                        values: { indexName },
-                      }
-                    )}
-                    checked={deleteTargetIndex}
-                    onChange={toggleDeleteIndex}
-                  />
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem>
+            {userCanDeleteIndex && (
+              <EuiSwitch
+                data-test-subj="mlAnalyticsJobDeleteIndexSwitch"
+                style={{ paddingBottom: 10 }}
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
+                  {
+                    defaultMessage: 'Delete destination index {indexName}',
+                    values: { indexName },
+                  }
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {userCanDeleteIndex && indexPatternExists && (
-                  <EuiSwitch
-                    data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
-                    label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexPatternTitle',
-                      {
-                        defaultMessage: 'Delete index pattern {indexPattern}',
-                        values: { indexPattern: indexName },
-                      }
-                    )}
-                    checked={deleteIndexPattern}
-                    onChange={toggleDeleteIndexPattern}
-                  />
+                checked={deleteTargetIndex}
+                onChange={toggleDeleteIndex}
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {userCanDeleteIndex && indexPatternExists && (
+              <EuiSwitch
+                data-test-subj="mlAnalyticsJobDeleteIndexPatternSwitch"
+                label={i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.deleteTargetIndexPatternTitle',
+                  {
+                    defaultMessage: 'Delete index pattern {indexPattern}',
+                    values: { indexPattern: indexName },
+                  }
                 )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      )}
-    </>
+                checked={deleteIndexPattern}
+                onChange={toggleDeleteIndexPattern}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 };

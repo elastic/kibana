@@ -10,11 +10,7 @@ import { EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elas
 
 import { StartAction } from './use_start_action';
 
-type StartButtonModalProps = Pick<
-  StartAction,
-  'closeModal' | 'isModalVisible' | 'items' | 'startAndCloseModal'
->;
-export const StartButtonModal: FC<StartButtonModalProps> = ({
+export const StartButtonModal: FC<StartAction> = ({
   closeModal,
   isModalVisible,
   items,
@@ -32,38 +28,28 @@ export const StartButtonModal: FC<StartButtonModalProps> = ({
   });
 
   return (
-    <>
-      {isModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
-            onCancel={closeModal}
-            onConfirm={startAndCloseModal}
-            cancelButtonText={i18n.translate(
-              'xpack.transform.transformList.startModalCancelButton',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            confirmButtonText={i18n.translate(
-              'xpack.transform.transformList.startModalStartButton',
-              {
-                defaultMessage: 'Start',
-              }
-            )}
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            buttonColor="primary"
-          >
-            <p>
-              {i18n.translate('xpack.transform.transformList.startModalBody', {
-                defaultMessage:
-                  'A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
-                values: { count: items.length },
-              })}
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      )}
-    </>
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={isBulkAction === true ? bulkStartModalTitle : startModalTitle}
+        onCancel={closeModal}
+        onConfirm={startAndCloseModal}
+        cancelButtonText={i18n.translate('xpack.transform.transformList.startModalCancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('xpack.transform.transformList.startModalStartButton', {
+          defaultMessage: 'Start',
+        })}
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        buttonColor="primary"
+      >
+        <p>
+          {i18n.translate('xpack.transform.transformList.startModalBody', {
+            defaultMessage:
+              'A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. Are you sure you want to start {count, plural, one {this} other {these}} {count} {count, plural, one {transform} other {transforms}}?',
+            values: { count: items.length },
+          })}
+        </p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
   );
 };
