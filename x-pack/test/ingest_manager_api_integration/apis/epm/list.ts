@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { warnAndSkipTest } from '../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { warnAndSkipTest } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('list', async function () {
+  describe('EPM - list', async function () {
     it('lists all packages from the registry', async function () {
       if (server.enabled) {
         const fetchPackageList = async () => {
