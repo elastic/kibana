@@ -277,4 +277,12 @@ export class VectorTileLayer extends TileLayer {
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
     });
   }
+
+  areLabelsOnTop() {
+    return !!this._descriptor.areLabelsOnTop;
+  }
+
+  supportsLabelsOnTop() {
+    return true;
+  }
 }

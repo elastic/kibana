@@ -23,6 +23,7 @@ import { Schemas } from '../../vis_default_editor/public';
 import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { TableOptions, TableVisualization } from './components';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
 export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {
   return {
@@ -35,6 +36,9 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
     description: i18n.translate('visTypeTable.tableVisDescription', {
       defaultMessage: 'Display values in a table',
     }),
+    getSupportedTriggers: () => {
+      return [VIS_EVENT_TO_TRIGGER.filter];
+    },
     visConfig: {
       component: TableVisualization,
       defaults: {

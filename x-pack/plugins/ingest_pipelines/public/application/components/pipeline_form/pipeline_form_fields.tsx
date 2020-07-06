@@ -6,17 +6,27 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
-import { FormDataProvider } from '../../../shared_imports';
-import { PipelineProcessorsEditor, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { getUseField, getFormRow, Field, useKibana } from '../../../shared_imports';
 
+import {
+  PipelineProcessorsContextProvider,
+  GlobalOnFailureProcessorsEditor,
+  ProcessorsEditor,
+  OnUpdateHandler,
+  OnDoneLoadJsonHandler,
+} from '../pipeline_processors_editor';
+
+import { ProcessorsHeader } from './processors_header';
+import { OnFailureProcessorsTitle } from './on_failure_processors_title';
+
 interface Props {
-  initialProcessors: Processor[];
-  initialOnFailureProcessors?: Processor[];
+  processors: Processor[];
+  onFailure?: Processor[];
+  onLoadJson: OnDoneLoadJsonHandler;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
   isTestButtonDisabled: boolean;
@@ -29,8 +39,9 @@ const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
-  initialProcessors,
-  initialOnFailureProcessors,
+  processors,
+  onFailure,
+  onLoadJson,
   onProcessorsUpdate,
   isEditing,
   hasVersion,
@@ -113,30 +124,37 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       </FormRow>
 
       {/* Pipeline Processors Editor */}
-      <FormDataProvider pathsToWatch={['processors', 'on_failure']}>
-        {({ processors, on_failure: onFailure }) => {
-          const processorProp =
-            typeof processors === 'string' && processors
-              ? JSON.parse(processors)
-              : initialProcessors ?? [];
 
-          const onFailureProp =
-            typeof onFailure === 'string' && onFailure
-              ? JSON.parse(onFailure)
-              : initialOnFailureProcessors ?? [];
-
-          return (
-            <PipelineProcessorsEditor
-              onFlyoutOpen={onEditorFlyoutOpen}
-              esDocsBasePath={services.documentation.getEsDocsBasePath()}
-              isTestButtonDisabled={isTestButtonDisabled}
-              onTestPipelineClick={onTestPipelineClick}
-              onUpdate={onProcessorsUpdate}
-              value={{ processors: processorProp, onFailure: onFailureProp }}
-            />
-          );
-        }}
-      </FormDataProvider>
+      <PipelineProcessorsContextProvider
+        onFlyoutOpen={onEditorFlyoutOpen}
+        links={{ esDocsBasePath: services.documentation.getEsDocsBasePath() }}
+        onUpdate={onProcessorsUpdate}
+        value={{ processors, onFailure }}
+      >
+        <div className="pipelineProcessorsEditor">
+          <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
+            <EuiFlexItem grow={false}>
+              <ProcessorsHeader
+                onLoadJson={onLoadJson}
+                onTestPipelineClick={onTestPipelineClick}
+                isTestButtonDisabled={isTestButtonDisabled}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ProcessorsEditor />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OnFailureProcessorsTitle />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <GlobalOnFailureProcessorsEditor />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </PipelineProcessorsContextProvider>
     </>
   );
 };
