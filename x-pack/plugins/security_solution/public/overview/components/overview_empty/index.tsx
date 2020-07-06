@@ -39,7 +39,7 @@ const OverviewEmptyComponent: React.FC = () => {
         <>
           <FormattedMessage
             id="xpack.securitySolution.emptyMessage"
-            defaultMessage={i18nCommon.EMPTY_MESSAGE}
+            defaultMessage="To begin using security  and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. For additional information, you can view our "
           />
           <EuiLink href={docLinks.links.siem.gettingStarted} target="_blank">
             {i18nCommon.EMPTY_ACTION_SECONDARY}

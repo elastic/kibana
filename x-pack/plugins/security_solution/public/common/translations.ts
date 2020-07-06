@@ -10,9 +10,6 @@ export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.pages.common.e
   defaultMessage: 'Welcome to Security Solution. Let’s get you started.',
 });
 
-export const EMPTY_MESSAGE =
-  'To begin using security  and event management (Security Solution), you’ll need to add security solution related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. For additional information, you can view our ';
-
 export const EMPTY_ACTION_PRIMARY = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionPrimary',
   {
