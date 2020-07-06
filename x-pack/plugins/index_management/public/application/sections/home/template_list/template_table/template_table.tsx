@@ -7,7 +7,7 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiBadge } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
@@ -49,19 +49,28 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
-          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-          <EuiLink
-            {...reactRouterNavigate(
-              history,
-              {
-                pathname: `/templates/${encodePathForReactRouter(name)}`,
-              },
-              () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+          <>
+            <EuiLink
+              {...reactRouterNavigate(
+                history,
+                {
+                  pathname: `/templates/${encodePathForReactRouter(name)}`,
+                },
+                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              )}
+              data-test-subj="templateDetailsLink"
+            >
+              {name}
+            </EuiLink>
+            &nbsp;
+            {item._kbnMeta.isManaged ? (
+              <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                Managed
+              </EuiBadge>
+            ) : (
+              ''
             )}
-            data-test-subj="templateDetailsLink"
-          >
-            {name}
-          </EuiLink>
+          </>
         );
       },
     },
@@ -73,27 +82,6 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
-    },
-    {
-      field: 'ilmPolicy',
-      name: i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnTitle', {
-        defaultMessage: 'ILM policy',
-      }),
-      truncateText: true,
-      sortable: true,
-      render: (ilmPolicy: { name: string }) =>
-        ilmPolicy && ilmPolicy.name ? (
-          <span
-            title={i18n.translate('xpack.idxMgmt.templateList.table.ilmPolicyColumnDescription', {
-              defaultMessage: "'{policyName}' index lifecycle policy",
-              values: {
-                policyName: ilmPolicy.name,
-              },
-            })}
-          >
-            {ilmPolicy.name}
-          </span>
-        ) : null,
     },
     {
       field: 'composedOf',
