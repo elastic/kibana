@@ -14,13 +14,6 @@
         }
       }
     },
-    "ingest_manager": {
-      "properties": {
-        "fleet_enabled": {
-          "type": "boolean"
-        }
-      }
-    },
     "mlTelemetry": {
       "properties": {
         "file_data_visualizer": {
