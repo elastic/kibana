@@ -31,6 +31,7 @@ import {
   memoryInputValidator,
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DataFrameAnalyticsListRow, DATA_FRAME_TASK_STATE } from './common';
 import {
   useRefreshAnalyticsList,
@@ -45,9 +46,13 @@ interface EditAnalyticsJobFlyoutProps {
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
 export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyout, item }) => {
-  const [allowLazyStart, setAllowLazyStart] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [modelMemoryLimit, setModelMemoryLimit] = useState<string>('');
+  const { id: jobId, config } = item;
+  const { state } = item.stats;
+  const initialAllowLazyStart = config.allow_lazy_start ? String(config.allow_lazy_start) : '';
+
+  const [allowLazyStart, setAllowLazyStart] = useState<string>(initialAllowLazyStart);
+  const [description, setDescription] = useState<string>(config.description || '');
+  const [modelMemoryLimit, setModelMemoryLimit] = useState<string>(config.model_memory_limit);
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
 
   const {
@@ -55,13 +60,8 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
 
-  const { id: jobId, config } = item;
-  const { state } = item.stats;
-
   // Disable if all fields are empty or mml is not valid
-  const updateButtonDisabled =
-    (allowLazyStart === '' && description === '' && modelMemoryLimit === '') ||
-    mmlValidationError !== undefined;
+  const updateButtonDisabled = mmlValidationError !== undefined;
 
   useEffect(() => {
     if (mmLValidator === undefined) {
@@ -86,10 +86,11 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
   }, [modelMemoryLimit]);
 
   const onSubmit = async () => {
-    const updateConfig: UpdateDataFrameAnalyticsConfig | {} = Object.assign(
-      {},
-      allowLazyStart && { allow_lazy_start: allowLazyStart },
-      description && { description },
+    const updateConfig: UpdateDataFrameAnalyticsConfig = Object.assign(
+      {
+        allow_lazy_start: allowLazyStart,
+        description,
+      },
       modelMemoryLimit && { model_memory_limit: modelMemoryLimit }
     );
 
@@ -107,14 +108,15 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
       // eslint-disable-next-line
       console.error(e);
 
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.ml.dataframe.analyticsList.editFlyoutErrorMessage', {
           defaultMessage: 'Could not save changes to analytics job {jobId}',
           values: {
             jobId,
           },
-        })
-      );
+        }),
+        text: extractErrorMessage(e),
+      });
     }
   };
 
@@ -177,7 +179,6 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
                   },
                 ]}
                 value={allowLazyStart}
-                hasNoInitialSelection={true}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setAllowLazyStart(e.target.value)
                 }
@@ -193,7 +194,6 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
             >
               <EuiFieldText
                 data-test-subj="mlAnalyticsEditFlyoutDescriptionInput"
-                placeholder={config.description}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 aria-label={i18n.translate(
@@ -222,7 +222,6 @@ export const EditAnalyticsFlyout: FC<EditAnalyticsJobFlyoutProps> = ({ closeFlyo
             >
               <EuiFieldText
                 data-test-subj="mlAnalyticsEditFlyoutmodelMemoryLimitInput"
-                placeholder={config.model_memory_limit}
                 isInvalid={mmlValidationError !== undefined}
                 readOnly={state !== DATA_FRAME_TASK_STATE.STOPPED}
                 value={modelMemoryLimit}
