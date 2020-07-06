@@ -47,6 +47,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     <EuiPopover
       button={
         <EuiButtonIcon
+          id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
