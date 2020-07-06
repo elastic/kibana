@@ -10,7 +10,11 @@ import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { AtomicStatusCheckParamsType, StatusCheckParamsType } from '../../../common/runtime_types';
+import {
+  AtomicStatusCheckParamsType,
+  StatusCheckParamsType,
+  UniversalStatusCheckParamsType,
+} from '../../../common/runtime_types';
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
@@ -21,6 +25,7 @@ export const validate = (alertParams: unknown) => {
   const errors: Record<string, any> = {};
   const decoded = AtomicStatusCheckParamsType.decode(alertParams);
   const oldDecoded = StatusCheckParamsType.decode(alertParams);
+  const universalDecoded = UniversalStatusCheckParamsType.decode(alertParams);
 
   if (!isRight(decoded) && !isRight(oldDecoded)) {
     return {
@@ -30,7 +35,18 @@ export const validate = (alertParams: unknown) => {
       },
     };
   }
-  if (isRight(decoded)) {
+  if (
+    isRight(universalDecoded) &&
+    !universalDecoded.right.shouldCheckAvailability &&
+    !universalDecoded.right.shouldCheckStatus
+  ) {
+    return {
+      errors: {
+        noAlertSelected: 'Alert must check for monitor status or monitor availability.',
+      },
+    };
+  }
+  if (isRight(decoded) && isRight(universalDecoded) && universalDecoded.right.shouldCheckStatus) {
     const { numTimes, timerangeCount } = decoded.right;
     if (numTimes < 1) {
       errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
