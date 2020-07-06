@@ -50,6 +50,13 @@ export const LogEntryRatePageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
+  // Open flyout if there are no ML jobs
+  useEffect(() => {
+    if (jobStatus['log-entry-rate'] === 'missing') {
+      openFlyout();
+    }
+  }, [jobStatus, openFlyout]);
+
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
