@@ -23,7 +23,7 @@ import {
   EuiGlobalToastList,
   EuiGlobalToastListToast,
   EuiPageContent,
-  EuiSwitchEvent,
+  // EuiSwitchEvent,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,7 +49,7 @@ interface CreateIndexPatternWizardState {
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
-  isIncludingSystemIndices: boolean;
+  // isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
@@ -77,7 +77,7 @@ export class CreateIndexPatternWizard extends Component<
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
-      isIncludingSystemIndices: false,
+      // isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -111,12 +111,14 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
+    /*
     this.setState({
-      allIndices: [],
-      isInitiallyLoadingIndices: true,
+      // allIndices: [],
+      // isInitiallyLoadingIndices: true,
       remoteClustersExist: false,
     });
 
+    */
     const indicesFailMsg = (
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
@@ -134,12 +136,7 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(
-          this.context.services.http,
-          this.state.indexPatternCreationType,
-          `*`,
-          this.state.isIncludingSystemIndices
-        ),
+        getIndices(this.context.services.http, this.state.indexPatternCreationType, `*`, false),
         [],
         indicesFailMsg
       )
@@ -150,12 +147,7 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(
-        this.context.services.http,
-        this.state.indexPatternCreationType,
-        `*:*`,
-        this.state.isIncludingSystemIndices
-      ),
+      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, false),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedItem[]) =>
@@ -218,21 +210,16 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
+  /*
   onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
     this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
+  */
 
   renderHeader() {
-    const { isIncludingSystemIndices } = this.state;
-
     return (
       <Header
         prompt={this.state.indexPatternCreationType.renderPrompt()}
-        showSystemIndices={
-          this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
-        }
-        isIncludingSystemIndices={isIncludingSystemIndices}
-        onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
         docLinks={this.state.docLinks}
@@ -244,7 +231,7 @@ export class CreateIndexPatternWizard extends Component<
     const {
       allIndices,
       isInitiallyLoadingIndices,
-      isIncludingSystemIndices,
+      //      isIncludingSystemIndices,
       step,
       indexPattern,
       remoteClustersExist,
@@ -255,7 +242,8 @@ export class CreateIndexPatternWizard extends Component<
     }
 
     const hasDataIndices = allIndices.some(({ name }: MatchedItem) => !name.startsWith('.'));
-    if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
+    //     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
+    if (!hasDataIndices && !remoteClustersExist) {
       return (
         <EmptyState
           onRefresh={this.fetchData}
@@ -277,9 +265,13 @@ export class CreateIndexPatternWizard extends Component<
           <StepIndexPattern
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
-            isIncludingSystemIndices={isIncludingSystemIndices}
+            // isIncludingSystemIndices={isIncludingSystemIndices}
             indexPatternCreationType={this.state.indexPatternCreationType}
             goToNextStep={this.goToTimeFieldStep}
+            showSystemIndices={
+              this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
+            }
+            // onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
           />
         </EuiPageContent>
       );

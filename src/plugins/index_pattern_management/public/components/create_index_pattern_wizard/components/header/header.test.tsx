@@ -35,12 +35,7 @@ describe('Header', () => {
 
   it('should render normally', () => {
     const component = mount(
-      <Header
-        indexPatternName={indexPatternName}
-        isIncludingSystemIndices={true}
-        onChangeIncludingSystemIndices={() => {}}
-        docLinks={mockedDocLinks}
-      />,
+      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
         wrappingComponent: KibanaContextProvider,
         wrappingComponentProps: {
@@ -54,12 +49,7 @@ describe('Header', () => {
 
   it('should render without including system indices', () => {
     const component = mount(
-      <Header
-        indexPatternName={indexPatternName}
-        isIncludingSystemIndices={false}
-        onChangeIncludingSystemIndices={() => {}}
-        docLinks={mockedDocLinks}
-      />,
+      <Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />,
       {
         wrappingComponent: KibanaContextProvider,
         wrappingComponentProps: {
@@ -74,8 +64,6 @@ describe('Header', () => {
   it('should render a different name, prompt, and beta tag if provided', () => {
     const component = mount(
       <Header
-        isIncludingSystemIndices={false}
-        onChangeIncludingSystemIndices={() => {}}
         prompt={<div>Test prompt</div>}
         indexPatternName={indexPatternName}
         isBeta={true}

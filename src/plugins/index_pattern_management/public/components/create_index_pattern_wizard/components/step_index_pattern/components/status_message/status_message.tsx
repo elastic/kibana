@@ -44,7 +44,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
 }) => {
   let statusIcon: EuiIconType | undefined;
   let statusMessage;
-  let statusColor: 'primary' | 'success' | undefined;
+  let statusColor: 'primary' | 'success' | 'warning' | undefined;
 
   const allIndicesLength = allIndices.length;
 
@@ -122,7 +122,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     );
   } else if (allIndicesLength) {
     statusIcon = undefined;
-    statusColor = 'primary';
+    statusColor = 'warning';
     statusMessage = (
       <span>
         <FormattedMessage

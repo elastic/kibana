@@ -19,16 +19,7 @@
 
 import React from 'react';
 
-import {
-  EuiBetaBadge,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiCode,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -39,17 +30,11 @@ import { IndexPatternManagmentContext } from '../../../../types';
 export const Header = ({
   prompt,
   indexPatternName,
-  showSystemIndices = false,
-  isIncludingSystemIndices,
-  onChangeIncludingSystemIndices,
   isBeta = false,
   docLinks,
 }: {
   prompt?: React.ReactNode;
   indexPatternName: string;
-  showSystemIndices?: boolean;
-  isIncludingSystemIndices: boolean;
-  onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isBeta?: boolean;
   docLinks: DocLinksStart;
 }) => {
@@ -102,23 +87,6 @@ export const Header = ({
           </EuiLink>
         </p>
       </EuiText>
-      {showSystemIndices ? (
-        <>
-          <EuiSpacer />
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                defaultMessage="Include system and hidden indices"
-              />
-            }
-            id="checkboxShowSystemIndices"
-            checked={isIncludingSystemIndices}
-            onChange={onChangeIncludingSystemIndices}
-          />
-        </>
-      ) : null}
-
       {prompt ? (
         <>
           <EuiSpacer size="m" />

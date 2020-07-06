@@ -25,7 +25,7 @@ exports[`StatusMessage should render with exact matches 1`] = `
 
 exports[`StatusMessage should render with no partial matches 1`] = `
 <EuiCallOut
-  color="primary"
+  color="warning"
   data-test-subj="createIndexPatternStatusMessage"
   size="s"
   title={

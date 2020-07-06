@@ -11,8 +11,6 @@ exports[`Header should render a different name, prompt, and beta tag if provided
   }
   indexPatternName="test index pattern"
   isBeta={true}
-  isIncludingSystemIndices={false}
-  onChangeIncludingSystemIndices={[Function]}
   prompt={
     <div>
       Test prompt
@@ -146,8 +144,6 @@ exports[`Header should render normally 1`] = `
     }
   }
   indexPatternName="test index pattern"
-  isIncludingSystemIndices={true}
-  onChangeIncludingSystemIndices={[Function]}
 >
   <div>
     <EuiTitle>
@@ -255,8 +251,6 @@ exports[`Header should render without including system indices 1`] = `
     }
   }
   indexPatternName="test index pattern"
-  isIncludingSystemIndices={false}
-  onChangeIncludingSystemIndices={[Function]}
 >
   <div>
     <EuiTitle>
