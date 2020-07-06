@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { capabilitiesProvider } from './check_capabilities';
+export {
+  capabilitiesProvider,
+  hasMlCapabilitiesProvider,
+  HasMlCapabilities,
+} from './check_capabilities';
 export { setupCapabilitiesSwitcher } from './capabilities_switcher';
