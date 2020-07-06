@@ -168,76 +168,82 @@ const EndpointsEmptyState = React.memo<{
     () => [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepOneTitle', {
-          defaultMessage: 'Select a policy you created from the list below.',
+          defaultMessage: 'Select a policy you created from the list below',
         }),
         children: (
-          <>
-            <EuiText color="subdued" size="xs">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.endpointList.stepOne"
-                defaultMessage="These are existing policies."
-              />
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiSelectable
-              options={selectionOptions}
-              singleSelection="always"
-              isLoading={loading}
-              height={100}
-              listProps={{ bordered: true, singleSelection: true }}
-              onChange={handleSelectableOnChange}
-              data-test-subj="onboardingPolicySelect"
-            >
-              {(list) => {
-                return loading ? (
-                  <EuiSelectableMessage>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
-                      defaultMessage="Loading policy configs"
-                    />
-                  </EuiSelectableMessage>
-                ) : selectionOptions.length ? (
-                  list
-                ) : (
+          <EuiSelectable
+            options={selectionOptions}
+            singleSelection="always"
+            isLoading={loading}
+            height={100}
+            listProps={{ bordered: true, singleSelection: true }}
+            onChange={handleSelectableOnChange}
+            data-test-subj="onboardingPolicySelect"
+          >
+            {(list) => {
+              return loading ? (
+                <EuiSelectableMessage>
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.endpointList.noPolicies"
-                    defaultMessage="There are no policies."
+                    id="xpack.securitySolution.endpoint.endpointList.loadingPolicies"
+                    defaultMessage="Loading policy configs"
                   />
-                );
-              }}
-            </EuiSelectable>
-          </>
+                </EuiSelectableMessage>
+              ) : selectionOptions.length ? (
+                list
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.endpointList.noPolicies"
+                  defaultMessage="There are no policies."
+                />
+              );
+            }}
+          </EuiSelectable>
         ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.endpointList.stepTwoTitle', {
-          defaultMessage:
-            'Head over to Ingest to deploy your Agent with Endpoint Security enabled.',
+          defaultMessage: 'Head over to Ingest to deploy your Agent with Endpoint Security enabled',
         }),
+        status: actionDisabled ? 'disabled' : '',
         children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.endpointList.stepTwo"
-              defaultMessage="You'll be given a command in Ingest to get you started."
-            />
-          </EuiText>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiText color="subdued" size="m" grow={false}>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.endpointList.stepTwo"
+                  defaultMessage="You'll be given a command in Ingest to get you started"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onActionClick}
+                isDisabled={actionDisabled}
+                data-test-subj="onboardingStartButton"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
+                  defaultMessage="Enroll Agent"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
     ],
-    [selectionOptions, handleSelectableOnChange, loading]
+    [selectionOptions, handleSelectableOnChange, loading, actionDisabled, onActionClick]
   );
 
   return (
     <ManagementEmptyState
       loading={loading}
-      onActionClick={onActionClick}
-      actionDisabled={actionDisabled}
       dataTestSubj="emptyEndpointsTable"
       steps={policySteps}
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.endpointList.noEndpointsPrompt"
-          defaultMessage="You have a policy, but no Endpoints are deployed!"
+          defaultMessage="You have a policy, but no Agents with Endpoint Security are deployed"
         />
       }
       bodyComponent={
@@ -252,80 +258,45 @@ const EndpointsEmptyState = React.memo<{
 
 const ManagementEmptyState = React.memo<{
   loading: boolean;
-  onActionClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
-  actionDisabled?: boolean;
-  actionButton?: JSX.Element;
   dataTestSubj: string;
   steps?: ManagementStep[];
   headerComponent: JSX.Element;
   bodyComponent: JSX.Element;
-}>(
-  ({
-    loading,
-    onActionClick,
-    actionDisabled,
-    dataTestSubj,
-    steps,
-    actionButton,
-    headerComponent,
-    bodyComponent,
-  }) => {
-    return (
-      <div data-test-subj={dataTestSubj}>
-        {loading ? (
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" className="essentialAnimation" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <>
-            <EuiSpacer size="xxl" />
-            <EuiTitle size="m">
-              <h2 style={TEXT_ALIGN_CENTER}>{headerComponent}</h2>
-            </EuiTitle>
-            <EuiSpacer size="xxl" />
-            <EuiText textAlign="center" color="subdued" size="s">
-              {bodyComponent}
-            </EuiText>
-            <EuiSpacer size="xxl" />
-            {steps && (
-              <EuiFlexGroup alignItems="center" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSteps steps={steps} data-test-subj={'onboardingSteps'} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+}>(({ loading, dataTestSubj, steps, headerComponent, bodyComponent }) => {
+  return (
+    <div data-test-subj={dataTestSubj}>
+      {loading ? (
+        <EuiFlexGroup alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>
+          <EuiSpacer size="xxl" />
+          <EuiTitle size="m">
+            <h2 style={TEXT_ALIGN_CENTER}>{headerComponent}</h2>
+          </EuiTitle>
+          <EuiSpacer size="xxl" />
+          <EuiText textAlign="center" color="subdued" size="m">
+            {bodyComponent}
+          </EuiText>
+          <EuiSpacer size="xxl" />
+          {steps && (
             <EuiFlexGroup alignItems="center" justifyContent="center">
               <EuiFlexItem grow={false}>
-                <>
-                  {actionButton ? (
-                    actionButton
-                  ) : (
-                    <EuiButton
-                      fill
-                      onClick={onActionClick}
-                      isDisabled={actionDisabled}
-                      data-test-subj="onboardingStartButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
-                        defaultMessage="Click here to get started"
-                      />
-                    </EuiButton>
-                  )}
-                </>
+                <EuiSteps steps={steps} data-test-subj={'onboardingSteps'} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
-        )}
-      </div>
-    );
-  }
-);
+          )}
+        </>
+      )}
+    </div>
+  );
+});
 
 PolicyEmptyState.displayName = 'PolicyEmptyState';
 EndpointsEmptyState.displayName = 'EndpointsEmptyState';
 ManagementEmptyState.displayName = 'ManagementEmptyState';
 
-export { PolicyEmptyState, EndpointsEmptyState, ManagementEmptyState };
+export { PolicyEmptyState, EndpointsEmptyState };

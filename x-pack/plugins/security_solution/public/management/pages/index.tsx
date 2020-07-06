@@ -29,7 +29,7 @@ const NoPermissions = memo(() => {
         iconColor="danger"
         title={
           <FormattedMessage
-            id="xpack.securitySolution.endpointManagemnet.noPermissions"
+            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
             defaultMessage="You do not have permission to use Elastic Endpoint Secuirty."
           />
         }
@@ -37,7 +37,7 @@ const NoPermissions = memo(() => {
           <p>
             <EuiText color="subdued">
               <FormattedMessage
-                id="xpack.securitySolution.endpointManagemnet.noPermissions"
+                id="xpack.securitySolution.endpointManagemnet.noPermissionsSubText"
                 defaultMessage="It looks like Ingest Mananger is disabled which is required for this feature.  If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
               />
             </EuiText>
