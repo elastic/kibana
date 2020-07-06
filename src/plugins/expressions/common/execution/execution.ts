@@ -383,7 +383,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput, {
+          const output = await this.interpret(item, subInput, {
             debug: this.params.debug,
           });
           if (isExpressionValueError(output)) throw output.error;
