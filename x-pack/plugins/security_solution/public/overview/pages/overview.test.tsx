@@ -20,6 +20,11 @@ import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enable
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
+jest.mock('../../common/containers/use_global_time', () => ({
+  useGlobalTime: jest
+    .fn()
+    .mockReturnValue({ from: 0, isInitializing: false, to: 0, setQuery: jest.fn() }),
+}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
