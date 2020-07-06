@@ -19,8 +19,6 @@
 
 import 'jest-canvas-mock';
 
-import { ExprVis } from '../../../visualizations/public/expressions/vis';
-
 import { createTagCloudVisTypeDefinition } from '../tag_cloud_type';
 import { createTagCloudVisualization } from './tag_cloud_visualization';
 import { setFormatService } from '../services';
@@ -87,14 +85,16 @@ describe('TagCloudVisualizationTest', () => {
       const visType = createTagCloudVisTypeDefinition({ colors: seedColors });
       setupDOM(512, 512);
 
-      vis = new ExprVis({
+      vis = {
         type: visType,
         params: {
           bucket: { accessor: 0, format: {} },
           metric: { accessor: 0, format: {} },
+          scale: 'linear',
+          orientation: 'single',
         },
         data: {},
-      });
+      };
     });
 
     test('simple draw', async () => {
