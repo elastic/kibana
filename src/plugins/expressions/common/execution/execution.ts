@@ -18,7 +18,7 @@
  */
 
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
@@ -31,6 +31,7 @@ import {
   parse,
   formatExpression,
   parseExpression,
+  ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, ExpressionValue } from '../expression_types';
@@ -414,5 +415,29 @@ export class Execution<
     // Return an object here because the arguments themselves might actually have a 'then'
     // function which would be treated as a promise
     return { resolvedArgs };
+  }
+
+  public async interpret<T>(
+    ast: ExpressionAstNode,
+    input: T,
+    options?: ExpressionExecOptions
+  ): Promise<unknown> {
+    switch (getType(ast)) {
+      case 'expression':
+        const execution = this.params.executor.createExecution(
+          ast as ExpressionAstExpression,
+          undefined,
+          options
+        );
+        execution.start(input);
+        return await execution.result;
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
   }
 }

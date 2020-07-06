@@ -154,34 +154,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return this.state.selectors.getContext();
   }
 
-  public async interpret<T>(
-    ast: ExpressionAstNode,
-    input: T,
-    options?: ExpressionExecOptions
-  ): Promise<unknown> {
-    switch (getType(ast)) {
-      case 'expression':
-        return await this.interpretExpression(ast as ExpressionAstExpression, input, options);
-      case 'string':
-      case 'number':
-      case 'null':
-      case 'boolean':
-        return ast;
-      default:
-        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
-    }
-  }
-
-  public async interpretExpression<T>(
-    ast: string | ExpressionAstExpression,
-    input: T,
-    options?: ExpressionExecOptions
-  ): Promise<unknown> {
-    const execution = this.createExecution(ast, undefined, options);
-    execution.start(input);
-    return await execution.result;
-  }
-
   /**
    * Execute expression and return result.
    *
