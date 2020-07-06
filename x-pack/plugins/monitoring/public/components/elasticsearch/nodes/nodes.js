@@ -427,7 +427,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     return (
       <Fragment>
         <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
+          <ClusterStatus stats={clusterStatus} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
       </Fragment>

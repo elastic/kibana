@@ -22,6 +22,9 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
+      if (!alert) {
+        return;
+      }
       const serialized = alert.serialize();
       if (!serialized) {
         return;

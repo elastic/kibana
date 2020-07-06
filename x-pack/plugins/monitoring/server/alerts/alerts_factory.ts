@@ -41,6 +41,9 @@ export class AlertsFactory {
     alertsClient: AlertsClient | undefined
   ): Promise<BaseAlert> {
     const alertCls = (BY_TYPE[type] as unknown) as any;
+    if (!alertCls) {
+      return null;
+    }
     if (alertsClient) {
       const alertClientAlerts = await alertsClient.find({
         options: {

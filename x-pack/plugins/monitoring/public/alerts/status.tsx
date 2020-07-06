@@ -15,9 +15,10 @@ import { AlertsBadge } from './badge';
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
+  showOnlyCount: boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const { alerts, showBadge } = props;
+  const { alerts, showBadge = false, showOnlyCount = false } = props;
 
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
@@ -41,7 +42,14 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
         position="bottom"
       >
         <EuiHealth color="success" data-test-subj="alertIcon">
-          <FormattedMessage id="xpack.monitoring.alerts.status.clearText" defaultMessage="Clear" />
+          {showOnlyCount ? (
+            count
+          ) : (
+            <FormattedMessage
+              id="xpack.monitoring.alerts.status.clearText"
+              defaultMessage="Clear"
+            />
+          )}
         </EuiHealth>
       </EuiToolTip>
     );
@@ -74,10 +82,14 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   return (
     <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
       <EuiHealth color={severity} data-test-subj="alertIcon">
-        <FormattedMessage
-          id="xpack.monitoring.alerts.status.alertsTooltip"
-          defaultMessage="Alerts"
-        />
+        {showOnlyCount ? (
+          count
+        ) : (
+          <FormattedMessage
+            id="xpack.monitoring.alerts.status.alertsTooltip"
+            defaultMessage="Alerts"
+          />
+        )}
       </EuiHealth>
     </EuiToolTip>
   );
