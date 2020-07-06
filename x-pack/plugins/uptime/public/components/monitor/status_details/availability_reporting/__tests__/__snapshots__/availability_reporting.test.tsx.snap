@@ -111,13 +111,13 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor"
                         >
                           <h4>
                             au-heartbeat
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -188,13 +188,13 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor"
                         >
                           <h4>
                             nyc-heartbeat
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
@@ -265,13 +265,13 @@ Array [
                       <span
                         class="euiBadge__text"
                       >
-                        <div
-                          class="euiText euiText--small"
+                        <span
+                          class="euiTextColor"
                         >
                           <h4>
                             spa-heartbeat
                           </h4>
-                        </div>
+                        </span>
                       </span>
                     </span>
                   </span>
