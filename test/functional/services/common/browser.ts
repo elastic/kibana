@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
@@ -471,7 +471,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     ): Promise<R> {
       return await driver.executeScript(
         fn,
-        ...cloneDeep<any>(args, (arg) => {
+        ...cloneDeepWith<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -501,7 +501,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     ): Promise<T> {
       return await driver.executeAsyncScript<T>(
         fn,
-        ...cloneDeep<any>(args, (arg) => {
+        ...cloneDeepWith<any>(args, (arg) => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
