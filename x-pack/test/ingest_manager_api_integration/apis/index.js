@@ -13,7 +13,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./epm/file'));
     //loadTestFile(require.resolve('./epm/template'));
     loadTestFile(require.resolve('./epm/ilm'));
-    loadTestFile(require.resolve('./install'));
+    loadTestFile(require.resolve('./epm/install'));
 
     // Package configs
     loadTestFile(require.resolve('./package_config/create'));
