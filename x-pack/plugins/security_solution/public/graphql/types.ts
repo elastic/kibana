@@ -1044,6 +1044,8 @@ export interface RuleField {
   version?: Maybe<string[]>;
 
   note?: Maybe<string[]>;
+
+  threshold?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -2182,6 +2184,12 @@ export interface ResponseFavoriteTimeline {
   version: string;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+}
+
+export interface Threshold {
+  field?: Maybe<string>;
+
+  value?: Maybe<number>;
 }
 
 export interface EcsEdges {
@@ -5032,6 +5040,10 @@ export namespace GetTimelineQuery {
     filters: Maybe<ToAny>;
 
     note: Maybe<string[]>;
+
+    type: Maybe<string[]>;
+
+    threshold: Maybe<ToAny>;
   };
 
   export type Suricata = {

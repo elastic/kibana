@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
@@ -65,10 +66,29 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
 };
 
-const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<EcsAnomaly> => {
-  const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
-    ...rest,
-    _source: transformAnomalyFieldsToEcs(_source),
+const transformThresholdResultsToEcs = (
+  results: ThresholdResults,
+  filter,
+  threshold
+): SearchResponse<EcsAnomaly> => {
+  console.log(
+    'transformThresholdResultsToEcs',
+    JSON.stringify(results),
+    JSON.stringify(filter),
+    JSON.stringify(threshold)
+  );
+
+  const transformedHits = results.aggregations.threshold.buckets.map(({ key, doc_count }) => ({
+    // ...rest,
+    _index: '',
+    _id: uuid.v4(),
+    _source: {
+      '@timestamp': new Date().toISOString(),
+      [threshold.field.split('.')[0]]: {
+        [threshold.field.split('.')[1]]: key,
+      },
+      threshold_count: doc_count,
+    },
   }));
 
   return {
@@ -80,11 +100,17 @@ const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<E
   };
 };
 
-export const bulkCreateMlSignals = async (
+export const bulkCreateThresholdSignals = async (
   params: BulkCreateMlSignalsParams
 ): Promise<SingleBulkCreateResponse> => {
-  const anomalyResults = params.someResult;
-  const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
+  const thresholdResults = params.someResult;
+  const ecsResults = transformThresholdResultsToEcs(
+    thresholdResults,
+    params.filter,
+    params.threshold
+  );
+
+  console.log('ecsResults', JSON.stringify(ecsResults, null, 2));
 
   return singleBulkCreate({ ...params, filteredEvents: ecsResults });
 };

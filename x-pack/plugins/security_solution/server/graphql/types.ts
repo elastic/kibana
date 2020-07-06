@@ -1046,6 +1046,8 @@ export interface RuleField {
   version?: Maybe<string[] | string>;
 
   note?: Maybe<string[] | string>;
+
+  threshold?: Maybe<ToAny>;
 }
 
 export interface SuricataEcsFields {
@@ -2184,6 +2186,12 @@ export interface ResponseFavoriteTimeline {
   version: string;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
+}
+
+export interface Threshold {
+  field?: Maybe<string>;
+
+  value?: Maybe<number>;
 }
 
 export interface EcsEdges {
@@ -4907,6 +4915,8 @@ export namespace RuleFieldResolvers {
     version?: VersionResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
+
+    threshold?: ThresholdResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
   export type IdResolver<
@@ -5061,6 +5071,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ThresholdResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -8975,6 +8990,25 @@ export namespace ResponseFavoriteTimelineResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace ThresholdResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = Threshold> {
+    field?: FieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    value?: ValueResolver<Maybe<number>, TypeParent, TContext>;
+  }
+
+  export type FieldResolver<
+    R = Maybe<string>,
+    Parent = Threshold,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ValueResolver<
+    R = Maybe<number>,
+    Parent = Threshold,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace EcsEdgesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = EcsEdges> {
     node?: NodeResolver<Ecs, TypeParent, TContext>;
@@ -9329,6 +9363,7 @@ export type IResolvers<TContext = SiemContext> = {
   ResponseNote?: ResponseNoteResolvers.Resolvers<TContext>;
   ResponseTimeline?: ResponseTimelineResolvers.Resolvers<TContext>;
   ResponseFavoriteTimeline?: ResponseFavoriteTimelineResolvers.Resolvers<TContext>;
+  Threshold?: ThresholdResolvers.Resolvers<TContext>;
   EcsEdges?: EcsEdgesResolvers.Resolvers<TContext>;
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;

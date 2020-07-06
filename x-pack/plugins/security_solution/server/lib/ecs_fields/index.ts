@@ -322,6 +322,7 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.updated_by': 'signal.rule.updated_by',
   'signal.rule.version': 'signal.rule.version',
   'signal.rule.note': 'signal.rule.note',
+  'signal.rule.threshold': 'signal.rule.threshold',
 };
 
 export const ruleFieldsMap: Readonly<Record<string, string>> = {

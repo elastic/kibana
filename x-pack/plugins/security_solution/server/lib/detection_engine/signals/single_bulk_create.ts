@@ -82,7 +82,9 @@ export const singleBulkCreate = async ({
   tags,
   throttle,
 }: SingleBulkCreateParams): Promise<SingleBulkCreateResponse> => {
+  // console.log('singleBulkCreate', ruleParams.threshold);
   filteredEvents.hits.hits = filterDuplicateRules(id, filteredEvents);
+  // console.log('filterDuplicateRules', filteredEvents.hits.hits.length);
   if (filteredEvents.hits.hits.length === 0) {
     logger.debug(`all events were duplicates`);
     return { success: true, createdItemsCount: 0 };
@@ -96,6 +98,7 @@ export const singleBulkCreate = async ({
   // while preventing duplicates from being added to the
   // signals index if rules are re-run over the same time
   // span. Also allow for versioning.
+  // console.log('singleBulkCreate2', JSON.stringify(ruleParams, null, 2));
   const bulkBody = filteredEvents.hits.hits.flatMap((doc) => [
     {
       create: {
@@ -124,12 +127,14 @@ export const singleBulkCreate = async ({
       throttle,
     }),
   ]);
+  // console.log('singleBulkCreate3');
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
     index: signalsIndex,
     refresh,
     body: bulkBody,
   });
+  // console.log('singleBulkCreate4');
   const end = performance.now();
   logger.debug(`individual bulk process time took: ${makeFloatString(end - start)} milliseconds`);
   logger.debug(`took property says bulk took: ${response.took} milliseconds`);

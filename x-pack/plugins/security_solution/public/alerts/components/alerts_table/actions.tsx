@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import dateMath from '@elastic/datemath';
-import { getOr, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
@@ -98,6 +100,8 @@ export const sendAlertToTimelineAction = async ({
   ecsData,
   updateTimelineIsLoading,
 }: SendAlertToTimelineActionProps) => {
+  console.error('sendAlertToTimelineAction', ecsData);
+
   let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
@@ -168,7 +172,76 @@ export const sendAlertToTimelineAction = async ({
     }
   }
 
-  if (openAlertInBasicTimeline) {
+  if (
+    ecsData.signal?.rule?.type?.length &&
+    ecsData.signal?.rule?.type[0] === 'threshold' &&
+    openAlertInBasicTimeline
+  ) {
+    createTimeline({
+      from,
+      timeline: {
+        ...timelineDefaults,
+        dataProviders: [
+          {
+            and: [],
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            name: ecsData._id,
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: '_id',
+              value: ecsData._id,
+              operator: ':',
+            },
+          },
+          {
+            and: [],
+            id: `event-details-value-default-draggable-plain-column-renderer-formatted-field-value-timeline-1-cc2e514d80f3d7abad5b167f6a9efb2761efea2bae4a54834ef807d69daefefd-host_name-${get(
+              ecsData.signal?.rule?.threshold.field,
+              ecsData
+            )}`,
+            name: ecsData.signal?.rule?.threshold.field,
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: ecsData.signal?.rule?.threshold.field,
+              value: get(ecsData.signal?.rule?.threshold.field, ecsData),
+              operator: ':',
+            },
+          },
+        ],
+        id: 'timeline-1',
+        dateRange: {
+          start: from,
+          end: to,
+        },
+        eventType: 'all',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              kind: ecsData.signal?.rule?.language?.length
+                ? ecsData.signal?.rule?.language[0]
+                : 'kuery',
+              expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+            },
+            serializedQuery: ecsData.signal?.rule?.query?.length
+              ? ecsData.signal?.rule?.query[0]
+              : '',
+          },
+          filterQueryDraft: {
+            kind: ecsData.signal?.rule?.language?.length
+              ? ecsData.signal?.rule?.language[0]
+              : 'kuery',
+            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+          },
+        },
+      },
+      to,
+      ruleNote: noteContent,
+    });
+  } else {
     createTimeline({
       from,
       timeline: {

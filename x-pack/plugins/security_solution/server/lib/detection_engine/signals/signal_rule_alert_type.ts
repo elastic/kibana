@@ -29,6 +29,7 @@ import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
+import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -262,34 +263,37 @@ export const signalRulesAlertType = ({
             logger.info(buildRuleMessage(`Found ${thresholdCount} signals from Threshold aggs.`));
           }
 
-          // const {
-          //   success,
-          //   bulkCreateDuration,
-          //   createdItemsCount,
-          // } = await bulkCreateThresholdSignals({
-          //   actions,
-          //   throttle,
-          //   someResult: thresholdResults,
-          //   ruleParams: params,
-          //   services,
-          //   logger,
-          //   id: alertId,
-          //   signalsIndex: outputIndex,
-          //   name,
-          //   createdBy,
-          //   createdAt,
-          //   updatedBy,
-          //   updatedAt,
-          //   interval,
-          //   enabled,
-          //   refresh,
-          //   tags,
-          // });
-          // result.success = success;
-          // result.createdSignalsCount = createdItemsCount;
-          // if (bulkCreateDuration) {
-          //   result.bulkCreateTimes.push(bulkCreateDuration);
-          // }
+          const {
+            success,
+            bulkCreateDuration,
+            createdItemsCount,
+          } = await bulkCreateThresholdSignals({
+            actions,
+            throttle,
+            threshold,
+            someResult: thresholdResults,
+            ruleParams: params,
+            filter: esFilter,
+            services,
+            logger,
+            id: alertId,
+            signalsIndex: outputIndex,
+            name,
+            createdBy,
+            createdAt,
+            updatedBy,
+            updatedAt,
+            interval,
+            enabled,
+            refresh,
+            tags,
+          });
+          result.success = success;
+          result.createdSignalsCount = createdItemsCount;
+          if (bulkCreateDuration) {
+            result.bulkCreateTimes.push(bulkCreateDuration);
+          }
+          console.log('resulttttt', result);
         } else {
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({

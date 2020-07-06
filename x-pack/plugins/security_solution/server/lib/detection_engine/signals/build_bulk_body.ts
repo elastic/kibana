@@ -57,7 +57,9 @@ export const buildBulkBody = ({
     tags,
     throttle,
   });
+  // console.log('buildRule', JSON.stringify(rule, null, 2));
   const signal = buildSignal(doc, rule);
+  // console.log('buildSignal', JSON.stringify(signal, null, 2));
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,

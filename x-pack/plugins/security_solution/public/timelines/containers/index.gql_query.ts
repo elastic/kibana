@@ -210,6 +210,8 @@ export const timelineQuery = gql`
                   to
                   filters
                   note
+                  type
+                  threshold
                 }
               }
               suricata {
