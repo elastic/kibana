@@ -29,7 +29,7 @@ import {
   SEARCH_SIZE,
   defaultSearchQuery,
 } from '../../../../common';
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { ExplorationTitle } from '../exploration_title';
 import { ExplorationQueryBar } from '../exploration_query_bar';

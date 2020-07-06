@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CloneButton } from './clone_button';
+export {
+  extractCloningConfig,
+  isAdvancedConfig,
+  CloneButton,
+  CloneDataFrameAnalyticsConfig,
+} from './clone_button';
