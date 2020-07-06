@@ -101,10 +101,12 @@ export const filterEventsAgainstList = async ({
             const filteredEvents = eventSearchResult.hits.hits.filter((item) => {
               const eventItem = get(entry.field, item._source);
               if (operator === 'included') {
+                // only create a signal if the event is not in the value list
                 if (eventItem != null) {
                   return !matchedListItemsSet.has(eventItem);
                 }
               } else if (operator === 'excluded') {
+                // only create a signal if the event is in the value list
                 if (eventItem != null) {
                   return matchedListItemsSet.has(eventItem);
                 }
