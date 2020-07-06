@@ -294,7 +294,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     <Portal
                       containerInfo={
                         <div
-                          class="euiOverlayMask"
+                          class="euiOverlayMask euiOverlayMask--aboveHeader"
                         >
                           <div
                             data-focus-guard="true"
