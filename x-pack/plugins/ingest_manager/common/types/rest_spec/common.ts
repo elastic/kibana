@@ -5,7 +5,9 @@
  */
 
 export interface ListWithKuery {
-  page: number;
-  perPage: number;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: 'desc' | 'asc';
   kuery?: string;
 }

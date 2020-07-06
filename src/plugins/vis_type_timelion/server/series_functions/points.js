@@ -105,7 +105,7 @@ export default new Chainable('points', {
       }
 
       symbol = symbol || defaultSymbol;
-      if (!_.contains(validSymbols, symbol)) {
+      if (!_.includes(validSymbols, symbol)) {
         throw new Error(
           i18n.translate('timelion.serverSideErrors.pointsFunction.notValidSymbolErrorMessage', {
             defaultMessage: 'Valid symbols are: {validSymbols}',
