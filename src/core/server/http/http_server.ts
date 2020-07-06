@@ -66,7 +66,11 @@ export interface HttpServerSetup {
 /** @internal */
 export type LifecycleRegistrar = Pick<
   HttpServerSetup,
-  'registerAuth' | 'registerOnPreRouting' | 'registerOnPostAuth' | 'registerOnPreResponse'
+  | 'registerOnPreRouting'
+  | 'registerOnPreAuth'
+  | 'registerAuth'
+  | 'registerOnPostAuth'
+  | 'registerOnPreResponse'
 >;
 
 export class HttpServer {

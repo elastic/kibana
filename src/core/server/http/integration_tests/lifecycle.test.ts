@@ -1169,11 +1169,11 @@ describe('run interceptors in the right order', () => {
 
     const executionOrder: string[] = [];
     registerOnPreRouting((req, res, t) => {
-      executionOrder.push('onOpeRouting');
+      executionOrder.push('onPreRouting');
       return t.next();
     });
     registerOnPreAuth((req, res, t) => {
-      executionOrder.push('onOpeAuth');
+      executionOrder.push('onPreAuth');
       return t.next();
     });
     registerAuth((req, res, t) => {
@@ -1195,8 +1195,8 @@ describe('run interceptors in the right order', () => {
 
     await supertest(innerServer.listener).get('/').expect(200);
     expect(executionOrder).toEqual([
-      'onOpeRouting',
-      'onOpeAuth',
+      'onPreRouting',
+      'onPreAuth',
       'auth',
       'onPostAuth',
       'onPreResponse',
@@ -1217,11 +1217,11 @@ describe('run interceptors in the right order', () => {
 
     const executionOrder: string[] = [];
     registerOnPreRouting((req, res, t) => {
-      executionOrder.push('onOpeRouting');
+      executionOrder.push('onPreRouting');
       return t.next();
     });
     registerOnPreAuth((req, res, t) => {
-      executionOrder.push('onOpeAuth');
+      executionOrder.push('onPreAuth');
       return t.next();
     });
     registerOnPostAuth((req, res, t) => {
@@ -1238,7 +1238,7 @@ describe('run interceptors in the right order', () => {
     await server.start();
 
     await supertest(innerServer.listener).get('/').expect(200);
-    expect(executionOrder).toEqual(['onOpeRouting', 'onOpeAuth', 'onPostAuth', 'onPreResponse']);
+    expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'onPostAuth', 'onPreResponse']);
   });
 
   it('when a user failed auth', async () => {
@@ -1256,11 +1256,11 @@ describe('run interceptors in the right order', () => {
 
     const executionOrder: string[] = [];
     registerOnPreRouting((req, res, t) => {
-      executionOrder.push('onOpeRouting');
+      executionOrder.push('onPreRouting');
       return t.next();
     });
     registerOnPreAuth((req, res, t) => {
-      executionOrder.push('onOpeAuth');
+      executionOrder.push('onPreAuth');
       return t.next();
     });
     registerAuth((req, res, t) => {
@@ -1281,6 +1281,6 @@ describe('run interceptors in the right order', () => {
     await server.start();
 
     await supertest(innerServer.listener).get('/').expect(403);
-    expect(executionOrder).toEqual(['onOpeRouting', 'onOpeAuth', 'auth', 'onPreResponse']);
+    expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'auth', 'onPreResponse']);
   });
 });
