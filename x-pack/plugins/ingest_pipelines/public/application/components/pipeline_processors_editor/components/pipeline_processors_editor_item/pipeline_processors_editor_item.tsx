@@ -93,6 +93,25 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+              <EuiFlexItem className={actionElementClasses} grow={false}>
+                {!isInMoveMode && (
+                  <EuiToolTip content={i18nTexts.moveButtonLabel}>
+                    <EuiButtonIcon
+                      data-test-subj="moveItemButton"
+                      size="s"
+                      disabled={isDisabled}
+                      aria-label={i18nTexts.moveButtonLabel}
+                      onClick={onMove}
+                      iconType="sortable"
+                    />
+                  </EuiToolTip>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
+                <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
+                  {i18nTexts.cancelMoveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
                   className="pipelineProcessorsEditor__item__processorTypeLabel"
@@ -148,25 +167,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     />
                   </EuiToolTip>
                 )}
-              </EuiFlexItem>
-              <EuiFlexItem className={actionElementClasses} grow={false}>
-                {!isInMoveMode && (
-                  <EuiToolTip content={i18nTexts.moveButtonLabel}>
-                    <EuiButtonIcon
-                      data-test-subj="moveItemButton"
-                      size="s"
-                      disabled={isDisabled}
-                      aria-label={i18nTexts.moveButtonLabel}
-                      onClick={onMove}
-                      iconType="sortable"
-                    />
-                  </EuiToolTip>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
-                <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
-                  {i18nTexts.cancelMoveButtonLabel}
-                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
