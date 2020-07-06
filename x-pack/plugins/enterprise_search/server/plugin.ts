@@ -120,22 +120,14 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       const telemetryRouteDependencies = {
         ...dependencies,
-        getSavedObjectsService: () => savedObjectsStarted
+        getSavedObjectsService: () => savedObjectsStarted,
       };
       registerASTelemetryRoute(telemetryRouteDependencies);
       registerWSTelemetryRoute(telemetryRouteDependencies);
 
       if (usageCollection) {
-        registerASTelemetryUsageCollector(
-          usageCollection,
-          savedObjectsStarted,
-          this.logger
-        );
-        registerWSTelemetryUsageCollector(
-          usageCollection,
-          savedObjectsStarted,
-          this.logger
-        );
+        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
       }
     });
   }

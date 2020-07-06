@@ -12,10 +12,23 @@ import {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
-import {
-  WS_TELEMETRY_NAME,
-  ITelemetrySavedObject,
-} from '../../saved_objects/workplace_search/telemetry';
+interface ITelemetry {
+  ui_viewed: {
+    setup_guide: number;
+    overview: number;
+  };
+  ui_error: {
+    cannot_connect: number;
+  };
+  ui_clicked: {
+    header_launch_button: number;
+    org_name_change_button: number;
+    onboarding_card_button: number;
+    recent_activity_source_details_link: number;
+  };
+}
+
+export const WS_TELEMETRY_NAME = 'workplace_search_telemetry';
 
 /**
  * Register the telemetry collector
@@ -25,10 +38,25 @@ export const registerTelemetryUsageCollector = (
   usageCollection: UsageCollectionSetup,
   savedObjects: SavedObjectsServiceStart
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
     type: 'workplace_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),
     isReady: () => true,
+    schema: {
+      ui_viewed: {
+        setup_guide: { type: 'long' },
+        overview: { type: 'long' },
+      },
+      ui_error: {
+        cannot_connect: { type: 'long' },
+      },
+      ui_clicked: {
+        header_launch_button: { type: 'long' },
+        org_name_change_button: { type: 'long' },
+        onboarding_card_button: { type: 'long' },
+        recent_activity_source_details_link: { type: 'long' },
+      },
+    },
   });
   usageCollection.registerCollector(telemetryUsageCollector);
 };
@@ -43,14 +71,13 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
     savedObjectsRepository
   )) as SavedObjectAttributes;
 
-  const defaultTelemetrySavedObject: ITelemetrySavedObject = {
+  const defaultTelemetrySavedObject: ITelemetry = {
     ui_viewed: {
       setup_guide: 0,
       overview: 0,
     },
     ui_error: {
       cannot_connect: 0,
-      no_ws_account: 0,
     },
     ui_clicked: {
       header_launch_button: 0,
@@ -72,7 +99,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
     set(telemetryObj, key, savedObjectAttributes[key]);
   });
 
-  return telemetryObj as ITelemetrySavedObject;
+  return telemetryObj as ITelemetry;
 };
 
 /**
