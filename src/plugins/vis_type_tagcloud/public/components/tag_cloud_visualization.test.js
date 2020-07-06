@@ -25,7 +25,7 @@ import { createTagCloudVisTypeDefinition } from '../tag_cloud_type';
 import { createTagCloudVisualization } from './tag_cloud_visualization';
 import { setFormatService } from '../services';
 import { dataPluginMock } from '../../../data/public/mocks';
-import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
+import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
 
 const seedColors = ['#00a69b', '#57c17b', '#6f87d8', '#663db8', '#bc52bc', '#9e3533', '#daa05d'];
 

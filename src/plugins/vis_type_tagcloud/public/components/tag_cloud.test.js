@@ -23,7 +23,7 @@ import 'jest-canvas-mock';
 
 import { fromNode, delay } from 'bluebird';
 import { TagCloud } from './tag_cloud';
-import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public/helpers';
+import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
 
 describe('tag cloud tests', () => {
   let SVGElementGetBBoxSpyInstance;
