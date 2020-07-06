@@ -7,11 +7,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import {
-  LegacyAPICaller,
-  ILegacyScopedClusterClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
@@ -108,8 +104,8 @@ interface SaveResults {
 }
 
 export class DataRecognizer {
-  private _callAsCurrentUser: LegacyAPICaller;
-  private _callAsInternalUser: LegacyAPICaller;
+  private _callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'];
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   private _mlClusterClient: ILegacyScopedClusterClient;
   private _authorizationHeader: any;
   private _modulesDir = `${__dirname}/modules`;
@@ -518,7 +514,7 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const jobStats: MlJobStats = await this._callAsCurrentUser('ml.jobStats', {
+        const jobStats: MlJobStats = await this._callAsInternalUser('ml.jobStats', {
           jobId: jobIds,
         });
         const jobStatsJobs: JobStat[] = [];
@@ -1050,7 +1046,7 @@ export class DataRecognizer {
       }
     }
 
-    const { limits } = await this._callAsInternalUser<MlInfoResponse>('ml.info');
+    const { limits } = (await this._callAsInternalUser('ml.info')) as MlInfoResponse;
     const maxMml = limits.max_model_memory_limit;
 
     if (!maxMml) {

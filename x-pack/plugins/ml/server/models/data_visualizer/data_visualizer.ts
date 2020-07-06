@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, ILegacyScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import _ from 'lodash';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
@@ -107,7 +107,7 @@ type BatchStats =
   | FieldExamples;
 
 export class DataVisualizer {
-  private _callAsCurrentUser: LegacyAPICaller;
+  private _callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'];
 
   constructor({ callAsCurrentUser }: ILegacyScopedClusterClient) {
     this._callAsCurrentUser = callAsCurrentUser;

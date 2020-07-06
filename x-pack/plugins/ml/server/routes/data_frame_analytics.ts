@@ -40,7 +40,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     if (!mlLicense.isSecurityEnabled()) {
       return true;
     }
-    const privilege = await context.ml!.mlClient.callAsInternalUser('ml.privilegeCheck', {
+    const privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
       body: {
         index: [
           {

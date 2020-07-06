@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('data frame analytics', function () {
+    this.tags(['mlqa', 'james']);
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./delete'));
   });

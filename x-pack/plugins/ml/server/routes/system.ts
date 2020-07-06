@@ -180,7 +180,7 @@ export function systemRoutes(
             'cluster:monitor/xpack/ml/datafeeds/stats/get',
           ];
           const body = { cluster: requiredPrivileges };
-          const resp = await context.ml!.mlClient.callAsInternalUser('ml.privilegeCheck', { body });
+          const resp = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', { body });
 
           if (resp.has_all_requested) {
             return response.ok({

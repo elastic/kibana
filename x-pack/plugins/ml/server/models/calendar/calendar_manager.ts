@@ -5,7 +5,7 @@
  */
 
 import { difference } from 'lodash';
-import { LegacyAPICaller, ILegacyScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {
@@ -23,7 +23,7 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _callAsInternalUser: LegacyAPICaller;
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   private _eventManager: EventManager;
 
   constructor(mlClusterClient: ILegacyScopedClusterClient) {

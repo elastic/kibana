@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { LegacyAPICaller, ILegacyScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
@@ -58,7 +58,7 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _callAsInternalUser: LegacyAPICaller;
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   constructor({ callAsInternalUser }: ILegacyScopedClusterClient) {
     this._callAsInternalUser = callAsInternalUser;
   }

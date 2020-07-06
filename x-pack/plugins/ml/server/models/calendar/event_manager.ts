@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, ILegacyScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 
 export interface CalendarEvent {
@@ -16,7 +16,7 @@ export interface CalendarEvent {
 }
 
 export class EventManager {
-  private _callAsInternalUser: LegacyAPICaller;
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   constructor({ callAsInternalUser }: ILegacyScopedClusterClient) {
     this._callAsInternalUser = callAsInternalUser;
   }
