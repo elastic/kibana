@@ -180,17 +180,15 @@ export class ManifestManager {
       this.logger.info(`Dispatching new manifest with diffs: ${showDiffs(wrappedManifest.diffs)}`);
 
       let paging = true;
+      let page = 1;
       let success = true;
 
       while (paging) {
-        const { items, total, page } = await this.packageConfigService.list(
-          this.savedObjectsClient,
-          {
-            page: 1,
-            perPage: 20,
-            kuery: 'ingest-package-configs.package.name:endpoint',
-          }
-        );
+        const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
+          page,
+          perPage: 20,
+          kuery: 'ingest-package-configs.package.name:endpoint',
+        });
 
         for (const packageConfig of items) {
           const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
@@ -222,6 +220,7 @@ export class ManifestManager {
         }
 
         paging = page * items.length < total;
+        page++;
       }
 
       return success ? wrappedManifest : null;

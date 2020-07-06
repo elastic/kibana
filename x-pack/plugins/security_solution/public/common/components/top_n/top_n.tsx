@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -67,6 +67,7 @@ export interface Props {
     refetch: inputsModel.Refetch;
   }) => void;
   to: number;
+  timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -89,11 +90,16 @@ const TopNComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  timelineId,
   to,
   toggleTopN,
 }) => {
   const [view, setView] = useState<EventType>(defaultView);
   const onViewSelected = useCallback((value: string) => setView(value as EventType), [setView]);
+
+  useEffect(() => {
+    setView(defaultView);
+  }, [defaultView]);
 
   const headerChildren = useMemo(
     () => (
@@ -132,6 +138,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            timelineId={timelineId}
             to={to}
           />
         ) : (
@@ -145,6 +152,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
+            timelineId={timelineId}
             to={to}
           />
         )}
