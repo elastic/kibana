@@ -26,8 +26,7 @@ import { Execution, ExecutionParams } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
-import { getType } from '../expression_types';
-import { ExpressionAstExpression, ExpressionAstNode } from '../ast';
+import { ExpressionAstExpression } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 
