@@ -5,10 +5,9 @@
  */
 
 import { readFileSync, truncateSync, writeFileSync } from 'fs';
-import produce from 'immer';
 import { resolve } from 'path';
 import { argv } from 'yargs';
-import { getApmTelemetryMapping } from '../../common/apm_telemetry';
+import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 
 function errorExit(error?: Error) {
   console.error(`usage: ${argv.$0} /path/to/xpack-phone-home.json`); // eslint-disable-line no-console
@@ -22,10 +21,7 @@ try {
   const filename = resolve(argv._[0]);
   const xpackPhoneHomeMapping = JSON.parse(readFileSync(filename, 'utf-8'));
 
-  const newMapping = produce(xpackPhoneHomeMapping, (draft) => {
-    draft.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = getApmTelemetryMapping();
-    return draft;
-  });
+  const newMapping = mergeApmTelemetryMapping(xpackPhoneHomeMapping);
 
   truncateSync(filename);
   writeFileSync(filename, JSON.stringify(newMapping, null, 2));

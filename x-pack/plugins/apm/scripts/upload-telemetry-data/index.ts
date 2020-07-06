@@ -20,7 +20,7 @@ import { stampLogger } from '../shared/stamp-logger';
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from '../shared/download-telemetry-template';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getApmTelemetryMapping } from '../../server/saved_objects/apm_telemetry';
+import { mergeApmTelemetryMapping } from '../../common/apm_telemetry';
 import { generateSampleDocuments } from './generate-sample-documents';
 import { readKibanaConfig } from '../shared/read-kibana-config';
 import { getHttpAuth } from '../shared/get-http-auth';
@@ -39,7 +39,6 @@ async function uploadData() {
   const telemetryTemplate = await downloadTelemetryTemplate({
     githubToken,
   });
-  const kibanaMapping = getApmTelemetryMapping();
 
   const config = readKibanaConfig();
 
@@ -54,14 +53,13 @@ async function uploadData() {
       : {}),
   });
 
-  const newTemplate = merge(telemetryTemplate, {
-    settings: {
-      index: { mapping: { total_fields: { limit: 10000 } } },
-    },
-  });
-
-  // override apm mapping instead of merging
-  newTemplate.mappings.properties.stack_stats.properties.kibana.properties.plugins.properties.apm = kibanaMapping;
+  const newTemplate = mergeApmTelemetryMapping(
+    merge(telemetryTemplate, {
+      settings: {
+        index: { mapping: { total_fields: { limit: 10000 } } },
+      },
+    })
+  );
 
   await createOrUpdateIndex({
     indexName: xpackTelemetryIndexName,
