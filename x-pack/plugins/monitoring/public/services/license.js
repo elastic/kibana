@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { contains } from 'lodash';
+import { includes } from 'lodash';
 import { ML_SUPPORTED_LICENSES } from '../../common/constants';
 
 export function licenseProvider() {
@@ -27,7 +27,7 @@ export function licenseProvider() {
     }
 
     mlIsSupported() {
-      return contains(ML_SUPPORTED_LICENSES, this.license.type);
+      return includes(ML_SUPPORTED_LICENSES, this.license.type);
     }
 
     doesExpire() {
