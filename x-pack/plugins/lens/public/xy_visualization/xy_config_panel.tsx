@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -30,7 +31,6 @@ import {
   VisualizationToolbarProps,
 } from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
-import { Position } from '@elastic/charts';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
