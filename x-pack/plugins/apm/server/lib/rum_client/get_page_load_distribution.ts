@@ -12,6 +12,12 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 
+export const MICRO_TO_SEC = 1000000;
+
+export function microToSec(val: number) {
+  return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
+}
+
 export async function getPageLoadDistribution({
   setup,
   minPercentile,
@@ -62,20 +68,29 @@ export async function getPageLoadDistribution({
     return null;
   }
 
-  const minDuration = aggregations?.minDuration.value ?? 0;
+  const { durPercentiles, minDuration } = aggregations ?? {};
 
-  const minPerc = minPercentile ? +minPercentile : minDuration;
+  const minPerc = minPercentile
+    ? +minPercentile * MICRO_TO_SEC
+    : minDuration?.value ?? 0;
 
-  const maxPercQuery = aggregations?.durPercentiles.values['99.0'] ?? 10000;
+  const maxPercQuery = durPercentiles?.values['99.0'] ?? 10000;
 
-  const maxPerc = maxPercentile ? +maxPercentile : maxPercQuery;
+  const maxPerc = maxPercentile ? +maxPercentile * MICRO_TO_SEC : maxPercQuery;
 
   const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
+
+  Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
+    if (durPercentiles?.values?.[key]) {
+      durPercentiles.values[key] = microToSec(val as number);
+    }
+  });
+
   return {
     pageLoadDistribution: pageDist,
-    percentiles: aggregations?.durPercentiles.values,
-    minDuration: minPerc,
-    maxDuration: maxPerc,
+    percentiles: durPercentiles?.values,
+    minDuration: microToSec(minPerc),
+    maxDuration: microToSec(maxPerc),
   };
 }
 
@@ -123,7 +138,7 @@ const getPercentilesDistribution = async (
 
   return pageDist.map(({ key, value }, index: number, arr) => {
     return {
-      x: Math.round(key / 1000),
+      x: microToSec(key),
       y: index === 0 ? value : value - arr[index - 1].value,
     };
   });
