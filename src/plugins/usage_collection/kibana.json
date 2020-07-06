@@ -1,6 +1,6 @@
 {
   "id": "usageCollection",
-  "configPath": ["usageCollection"],
+  "configPath": ["usageCollection.uiMetric"],
   "version": "kibana",
   "server": true,
   "ui": true

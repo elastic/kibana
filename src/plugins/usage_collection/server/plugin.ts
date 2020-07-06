@@ -18,8 +18,6 @@
  */
 
 import {
-  PluginInitializerContext,
-  Logger,
   CoreSetup,
   CoreStart,
   ISavedObjectsRepository,
@@ -28,26 +26,26 @@ import {
 } from 'kibana/server';
 import { setupRoutes } from './routes';
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
-  private readonly logger: Logger;
-  private savedObjects?: ISavedObjectsRepository;
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
-  }
+/**
+ * @deprecated Use core's usageCollection service instead.
+ */
+export type UsageCollectionPluginSetup = UsageCollectionSetup;
+
+export class UsageCollectionPlugin implements Plugin<UsageCollectionPluginSetup> {
+  private savedObjectsInternalRepository?: ISavedObjectsRepository;
 
   public async setup(core: CoreSetup) {
+    // Keeping the ui-metrics and application_usage on the plugin for now
     const router = core.http.createRouter();
-    setupRoutes(router, () => this.savedObjects);
+    setupRoutes(router, () => this.savedObjectsInternalRepository);
 
+    // Pass-through to keep backwards compatibility for now
     return core.usageCollection;
   }
 
-  public start({ savedObjects, elasticsearch }: CoreStart) {
-    this.logger.debug('Starting plugin');
-    this.savedObjects = savedObjects.createInternalRepository();
+  public start({ savedObjects }: CoreStart) {
+    this.savedObjectsInternalRepository = savedObjects.createInternalRepository();
   }
 
-  public stop() {
-    this.logger.debug('Stopping plugin');
-  }
+  public stop() {}
 }

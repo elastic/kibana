@@ -316,10 +316,6 @@ export class Server {
       uiSettingsConfig.path,
       uiSettingsConfig.deprecations!
     );
-    this.configService.addDeprecationProvider(
-      usageCollectionConfig.path,
-      usageCollectionConfig.deprecations!
-    );
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

@@ -25,10 +25,8 @@ import { createReporter } from './services';
 import { reportApplicationUsage } from './services/application_usage';
 
 interface PublicConfigType {
-  uiMetric: {
-    enabled: boolean;
-    debug: boolean;
-  };
+  enabled: boolean;
+  debug: boolean;
 }
 
 export interface UsageCollectionSetup {
@@ -60,14 +58,14 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
   private readonly legacyAppId$ = new Subject<string>();
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
-  private config: PublicConfigType = { uiMetric: { debug: true, enabled: true } };
+  private config: PublicConfigType;
   constructor(initializerContext: PluginInitializerContext) {
-    // this.config = initializerContext.config.get<PublicConfigType>();
+    this.config = initializerContext.config.get<PublicConfigType>();
   }
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiMetric.debug;
+    const debug = this.config.debug;
 
     this.reporter = createReporter({
       localStorage,
@@ -92,7 +90,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       throw new Error('Usage collection reporter not set up correctly');
     }
 
-    if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
+    if (this.config.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
     }
 

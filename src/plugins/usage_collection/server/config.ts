@@ -21,11 +21,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 
 export const configSchema = schema.object({
-  uiMetric: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
-  }),
-  maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
+  enabled: schema.boolean({ defaultValue: true }),
+  debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;
@@ -37,6 +34,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     renameFromRoot('ui_metric.debug', 'usageCollection.uiMetric.debug'),
   ],
   exposeToBrowser: {
-    uiMetric: true,
+    enabled: true,
+    debug: true,
   },
 };

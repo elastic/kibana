@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import {
-  PluginInitializerContext,
-  UsageCollectionSetup,
-  UsageCollectionCollectorOptions,
-  UsageCollectionCollector,
-} from '../../../core/server';
-import { UsageCollectionPlugin } from './plugin';
+import { UsageCollectionCollectorOptions, UsageCollectionCollector } from '../../../core/server';
+import { UsageCollectionPlugin, UsageCollectionPluginSetup } from './plugin';
 
 export {
-  UsageCollectionSetup,
+  UsageCollectionPluginSetup as UsageCollectionSetup,
   UsageCollectionCollectorOptions as CollectorOptions,
   UsageCollectionCollector as Collector,
 };
-// export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+
+export { config } from './config';
+export const plugin = () => new UsageCollectionPlugin();
