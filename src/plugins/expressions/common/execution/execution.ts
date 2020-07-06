@@ -18,7 +18,7 @@
  */
 
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { Executor } from '../executor';
+import { Executor, ExpressionExecOptions } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
@@ -31,6 +31,7 @@ import {
   parse,
   formatExpression,
   parseExpression,
+  ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
 import { getType, ExpressionValue } from '../expression_types';
@@ -91,7 +92,6 @@ export class Execution<
    * to every function.
    */
   public readonly context: ExecutionContext<Input, InspectorAdapters> & ExtraContext;
-  private readonly extraContext: ExtraContext;
 
   /**
    * AbortController to cancel this Execution.
@@ -158,8 +158,6 @@ export class Execution<
       state: 'not-started',
       ast,
     });
-
-    this.extraContext = params.context || ({} as ExtraContext);
 
     this.context = {
       getInitialInput: () => this.input,
@@ -385,7 +383,7 @@ export class Execution<
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
-          const output = await this.params.executor.interpret(item, subInput, this.extraContext, {
+          const output = await this.interpret(item, subInput, {
             debug: this.params.debug,
           });
           if (isExpressionValueError(output)) throw output.error;
@@ -417,5 +415,29 @@ export class Execution<
     // Return an object here because the arguments themselves might actually have a 'then'
     // function which would be treated as a promise
     return { resolvedArgs };
+  }
+
+  public async interpret<T>(
+    ast: ExpressionAstNode,
+    input: T,
+    options?: ExpressionExecOptions
+  ): Promise<unknown> {
+    switch (getType(ast)) {
+      case 'expression':
+        const execution = this.params.executor.createExecution(
+          ast as ExpressionAstExpression,
+          this.context,
+          options
+        );
+        execution.start(input);
+        return await execution.result;
+      case 'string':
+      case 'number':
+      case 'null':
+      case 'boolean':
+        return ast;
+      default:
+        throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
+    }
   }
 }
