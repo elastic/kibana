@@ -7,18 +7,27 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
+
 import { TemplateListItem } from '../../../../../../common';
 import { TemplateDeleteModal } from '../../../../components';
-import { SendRequestResponse } from '../../../../../shared_imports';
-import { TemplateContentIndicator } from '../components';
+import { SendRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import { TemplateContentIndicator } from '../../../../components/shared';
 
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
+  editTemplate: (name: string) => void;
+  history: ScopedHistory;
 }
 
-export const TemplateTable: React.FunctionComponent<Props> = ({ templates, reload }) => {
+export const TemplateTable: React.FunctionComponent<Props> = ({
+  templates,
+  reload,
+  history,
+  editTemplate,
+}) => {
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -80,19 +89,39 @@ export const TemplateTable: React.FunctionComponent<Props> = ({ templates, reloa
       sortable: true,
     },
     {
-      field: 'hasMappings',
       name: i18n.translate('xpack.idxMgmt.templateList.table.overridesColumnTitle', {
         defaultMessage: 'Overrides',
       }),
       truncateText: true,
-      sortable: false,
-      render: (_, item) => (
+      render: (item: TemplateListItem) => (
         <TemplateContentIndicator
           mappings={item.hasMappings}
           settings={item.hasSettings}
           aliases={item.hasAliases}
         />
       ),
+    },
+    {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.actionColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
+            defaultMessage: 'Edit',
+          }),
+          isPrimary: true,
+          description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
+            defaultMessage: 'Edit this template',
+          }),
+          icon: 'pencil',
+          type: 'icon',
+          onClick: ({ name }: TemplateListItem) => {
+            editTemplate(name);
+          },
+          enabled: ({ _kbnMeta: { isManaged } }: TemplateListItem) => !isManaged,
+        },
+      ],
     },
   ];
 
@@ -112,6 +141,20 @@ export const TemplateTable: React.FunctionComponent<Props> = ({ templates, reloa
     box: {
       incremental: true,
     },
+    toolsRight: [
+      <EuiButton
+        iconType="plusInCircle"
+        data-test-subj="createTemplateButton"
+        key="createTemplateButton"
+        fill
+        {...reactRouterNavigate(history, '/create_template')}
+      >
+        <FormattedMessage
+          id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
+          defaultMessage="Create template"
+        />
+      </EuiButton>,
+    ],
   };
 
   return (

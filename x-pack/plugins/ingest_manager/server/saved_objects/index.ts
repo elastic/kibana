@@ -54,6 +54,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
+        unenrolled_at: { type: 'date' },
+        unenrollment_started_at: { type: 'date' },
         access_api_key_id: { type: 'keyword' },
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
@@ -119,8 +121,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
     },
     mappings: {
       properties: {
-        id: { type: 'keyword' },
-        name: { type: 'text' },
+        name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
@@ -314,6 +315,9 @@ export function registerEncryptedSavedObjects(
       'config_newest_revision',
       'updated_at',
       'current_error_events',
+      'unenrolled_at',
+      'unenrollment_started_at',
+      'packages',
     ]),
   });
   encryptedSavedObjects.registerType({
