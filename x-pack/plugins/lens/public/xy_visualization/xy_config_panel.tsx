@@ -8,8 +8,14 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperSelect,
   EuiFormRow,
+  EuiPopover,
+  EuiText,
   htmlIdGenerator,
   EuiForm,
   EuiColorPicker,
@@ -17,10 +23,17 @@ import {
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
+import {
+  VisualizationLayerWidgetProps,
+  VisualizationDimensionEditorProps,
+  VisualizationToolbarProps,
+} from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
-import { VisualizationDimensionEditorProps, VisualizationLayerWidgetProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import { fittingFunctionDefinitions } from './fitting_functions';
+
+import './xy_config_panel.scss';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -78,6 +91,75 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
+export function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const [open, setOpen] = useState(false);
+  const hasNonBarSeries = props.state?.layers.some(
+    (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
+  );
+  return (
+    <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          panelClassName="lnsXyToolbar__popover"
+          button={
+            <EuiButtonEmpty
+              color="text"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={() => {
+                setOpen(!open);
+              }}
+            >
+              {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
+            </EuiButtonEmpty>
+          }
+          isOpen={open}
+          closePopover={() => {
+            setOpen(false);
+          }}
+          anchorPosition="downRight"
+        >
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+              defaultMessage: 'Fill missing values',
+            })}
+            helpText={
+              !hasNonBarSeries &&
+              i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+                defaultMessage:
+                  'This setting only applies to line charts and unstacked area charts.',
+              })
+            }
+          >
+            <EuiSuperSelect
+              compressed
+              disabled={!hasNonBarSeries}
+              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                return {
+                  value: id,
+                  dropdownDisplay: (
+                    <>
+                      <strong>{title}</strong>
+                      <EuiText size="xs" color="subdued">
+                        <p>{description}</p>
+                      </EuiText>
+                    </>
+                  ),
+                  inputDisplay: title,
+                };
+              })}
+              valueOfSelected={props.state?.fittingFunction || 'None'}
+              onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
+              itemLayoutAlign="top"
+              hasDividers
+            />
+          </EuiFormRow>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 const idPrefix = htmlIdGenerator()();
 
 export function DimensionEditor(props: VisualizationDimensionEditorProps<State>) {
