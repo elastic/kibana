@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-// import { resolve, normalize } from 'path';
 import buildState from './build_state';
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
