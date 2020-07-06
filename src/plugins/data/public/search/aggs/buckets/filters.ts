@@ -72,7 +72,7 @@ export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies
 
           const outFilters = transform(
             inFilters,
-            function (filters, filter) {
+            function (filters: Record<string, any>, filter) {
               const input = cloneDeep(filter.input);
 
               if (!input) {

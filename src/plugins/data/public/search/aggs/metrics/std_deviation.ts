@@ -35,8 +35,8 @@ interface ValProp {
 }
 
 export interface IStdDevAggConfig extends IResponseAggConfig {
-  keyedDetails: (customLabel: string, fieldDisplayName?: string) => { [key: string]: ValProp };
-  valProp: () => ValProp;
+  keyedDetails: (customLabel: string, fieldDisplayName?: string) => Record<string, ValProp>;
+  valProp: () => string[];
 }
 
 const responseAggConfigProps = {
