@@ -2,7 +2,7 @@
 == Explore data underlying visualizations
 
 Dashboard panels have "Explore underlying data" actions that will redirect
-you to Discover app narrowing down Discover documents to ones likely used in
+you to *Discover* narrowing down documents to ones likely used in
 the visualization.
 
 "Explore underlying data" actions are available for visualizations which are
@@ -16,7 +16,7 @@ the chart.
 [[explore-data-from-panel-context-menu]]
 === Explore data from panel context menu
 
-Context menu "Explore underlying data" action will navigate you to Discover app,
+Context menu "Explore underlying data" action will navigate you to *Discover*,
 to the index pattern used in the visualization and will carry over all filters,
 query, and time range applied to the visualization.
 
@@ -27,12 +27,12 @@ image::images/explore_data_context_menu.png[Explore underlying data from panel c
 [[explore-data-from-chart]]
 === Explore data from chart action
 
-In-chart "Explore underlying data" action will also navigate you to Discover app,
+In-chart "Explore underlying data" action will also navigate you to *Discover*,
 to the index pattern used in the visualization and will carry over all
 filters, query and time range, but it will also apply the filters and time range
 created from the click or brush events that triggered this action. For example,
 if you will brush a chart the time range associated
-with that brush event will be carried over to Discover app.
+with that brush event will be carried over to *Discover*.
 
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
