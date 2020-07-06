@@ -52,7 +52,7 @@ export const deprecations = ({
       const legacyKey = get(config, `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
       if (emailNotificationsEnabled && !updatedKey && !legacyKey) {
         logger(
-          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 7.0."`
+          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`
         );
       }
       return config;
