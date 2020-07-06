@@ -2,9 +2,9 @@
   "id": "enterpriseSearch",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["home", "licensing"],
+  "requiredPlugins": ["home", "features", "licensing"],
   "configPath": ["enterpriseSearch"],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "security"],
   "server": true,
   "ui": true
 }

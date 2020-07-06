@@ -13,9 +13,14 @@ import {
   Logger,
   SavedObjectsServiceStart,
   IRouter,
+  KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UICapabilities } from 'ui/capabilities';
+import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
+import { checkAccess } from './lib/check_access';
 import { registerEnginesRoute } from './routes/app_search/engines';
 import { registerTelemetryRoute } from './routes/app_search/telemetry';
 import { registerTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -23,10 +28,15 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface ServerConfigType {
   host?: string;
+  enabled: boolean;
+  accessCheckTimeout: number;
+  accessCheckTimeoutWarning: number;
 }
 
 export interface IRouteDependencies {
@@ -46,11 +56,61 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public async setup(
-    { http, savedObjects, getStartServices }: CoreSetup,
-    { usageCollection }: PluginsSetup
+    { capabilities, http, savedObjects, getStartServices }: CoreSetup,
+    { usageCollection, security, features }: PluginsSetup
   ) {
-    const router = http.createRouter();
     const config = await this.config.pipe(first()).toPromise();
+
+    /**
+     * Register space/feature control
+     */
+    features.registerFeature({
+      id: 'enterprise_search',
+      name: 'Enterprise Search',
+      order: 0,
+      icon: 'logoEnterpriseSearch',
+      app: ['enterprise_search', 'app_search', 'workplace_search'],
+      catalogue: ['enterprise_search', 'app_search', 'workplace_search'],
+      privileges: null,
+    });
+
+    /**
+     * Register user access to the Enterprise Search plugins
+     */
+    capabilities.registerProvider(() => ({
+      navLinks: {
+        app_search: true,
+      },
+      catalogue: {
+        app_search: true,
+      },
+    }));
+
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
+        const dependencies = { config, security, request, log: this.logger };
+
+        const { hasAppSearchAccess } = await checkAccess(dependencies);
+        // TODO: hasWorkplaceSearchAccess
+
+        return {
+          ...uiCapabilities,
+          navLinks: {
+            ...uiCapabilities.navLinks,
+            app_search: hasAppSearchAccess,
+          },
+          catalogue: {
+            ...uiCapabilities.catalogue,
+            app_search: hasAppSearchAccess,
+          },
+        };
+      }
+    );
+
+    /**
+     * Register routes
+     */
+    const router = http.createRouter();
     const dependencies = { router, config, log: this.logger };
 
     registerEnginesRoute(dependencies);

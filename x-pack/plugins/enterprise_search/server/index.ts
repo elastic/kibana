@@ -14,6 +14,9 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 
 export const configSchema = schema.object({
   host: schema.maybe(schema.string()),
+  enabled: schema.boolean({ defaultValue: true }),
+  accessCheckTimeout: schema.number({ defaultValue: 5000 }),
+  accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;
