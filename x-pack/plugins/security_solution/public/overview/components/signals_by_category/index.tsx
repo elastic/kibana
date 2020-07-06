@@ -29,6 +29,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   query?: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
+  timelineId?: string;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
@@ -41,6 +42,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
+  timelineId,
   to,
 }) => {
   const { signalIndexName } = useSignalIndex();
@@ -74,6 +76,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       showLinkToAlerts={onlyField == null ? true : false}
       stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
       legendPosition={'right'}
+      timelineId={timelineId}
       to={to}
       title={i18n.ALERT_COUNT}
       updateDateRange={updateDateRangeCallback}

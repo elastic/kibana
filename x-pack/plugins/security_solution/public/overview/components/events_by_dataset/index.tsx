@@ -52,6 +52,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showSpacer?: boolean;
+  timelineId?: string;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -72,6 +73,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showSpacer = true,
+  timelineId,
   to,
 }) => {
   // create a unique, but stable (across re-renders) query id
@@ -168,6 +170,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       showSpacer={showSpacer}
       sourceId="default"
       startDate={from}
+      timelineId={timelineId}
       type={HostsType.page}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
