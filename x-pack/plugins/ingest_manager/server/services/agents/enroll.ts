@@ -90,9 +90,7 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
 }
 
 export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
-  const kibanaVersion = semver.parse(appContextService.getKibanaVersion(), {
-    includePrerelease: true,
-  });
+  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
   if (!kibanaVersion) {
     throw Boom.badRequest('Kibana version is not set');
   }
