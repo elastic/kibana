@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+.activity-feed {
+  td:last-child {
+    text-align: right;
+  }
+}
+
+.activity {
+  &__error {
+    color: #f95e5b !important;
+    background: #ffefeb;
+    border-bottom-color: transparent;
+
+    a,
+    td {
+      color: #f95e5b;
+      font-weight: 600;
+    }
+
+    span {
+      font-weight: 400;
+      border-bottom: 1px solid #f95e5b;
+      margin-left: 14px;
+      opacity: 0.7;
+    }
+  }
+}
