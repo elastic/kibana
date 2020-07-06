@@ -236,7 +236,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '100px',
+      width: '120px',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),

@@ -35,7 +35,7 @@ import {
 } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart } from './state_helpers';
+import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
@@ -445,6 +445,7 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
+            color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
