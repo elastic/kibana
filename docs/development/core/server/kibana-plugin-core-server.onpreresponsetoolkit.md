@@ -4,7 +4,7 @@
 
 ## OnPreResponseToolkit interface
 
-A tool set defining an outcome of OnPreAuth interceptor for incoming request.
+A tool set defining an outcome of OnPreRouting interceptor for incoming request.
 
 <b>Signature:</b>
 
