@@ -37,6 +37,7 @@ interface Props {
     loading: boolean;
     refetch: inputsModel.Refetch;
   }) => void;
+  timelineId?: string;
   to: number;
 }
 
@@ -50,6 +51,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
+  timelineId,
   to,
 }) => {
   const { signalIndexName } = useSignalIndex();
@@ -83,6 +85,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       showLinkToAlerts={onlyField == null ? true : false}
       stackByOptions={onlyField == null ? alertsHistogramOptions : undefined}
       legendPosition={'right'}
+      timelineId={timelineId}
       to={to}
       title={i18n.ALERT_COUNT}
       updateDateRange={updateDateRangeCallback}

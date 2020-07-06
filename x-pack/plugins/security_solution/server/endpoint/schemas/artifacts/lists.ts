@@ -20,6 +20,9 @@ export const translatedEntryMatchAny = t.exact(
 );
 export type TranslatedEntryMatchAny = t.TypeOf<typeof translatedEntryMatchAny>;
 
+export const translatedEntryMatchAnyMatcher = translatedEntryMatchAny.type.props.type;
+export type TranslatedEntryMatchAnyMatcher = t.TypeOf<typeof translatedEntryMatchAnyMatcher>;
+
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
@@ -33,11 +36,23 @@ export const translatedEntryMatch = t.exact(
 );
 export type TranslatedEntryMatch = t.TypeOf<typeof translatedEntryMatch>;
 
+export const translatedEntryMatchMatcher = translatedEntryMatch.type.props.type;
+export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
+
+export const translatedEntryMatcher = t.union([
+  translatedEntryMatchMatcher,
+  translatedEntryMatchAnyMatcher,
+]);
+export type TranslatedEntryMatcher = t.TypeOf<typeof translatedEntryMatcher>;
+
+export const translatedEntryNestedEntry = t.union([translatedEntryMatch, translatedEntryMatchAny]);
+export type TranslatedEntryNestedEntry = t.TypeOf<typeof translatedEntryNestedEntry>;
+
 export const translatedEntryNested = t.exact(
   t.type({
     field: t.string,
     type: t.keyof({ nested: null }),
-    entries: t.array(t.union([translatedEntryMatch, translatedEntryMatchAny])),
+    entries: t.array(translatedEntryNestedEntry),
   })
 );
 export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
