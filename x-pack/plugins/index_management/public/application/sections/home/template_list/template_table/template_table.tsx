@@ -101,8 +101,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       sortable: true,
     },
     {
-      name: i18n.translate('xpack.idxMgmt.templateList.table.overridesColumnTitle', {
-        defaultMessage: 'Overrides',
+      name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {
+        defaultMessage: 'Content',
       }),
       truncateText: true,
       render: (item: TemplateListItem) => (
@@ -110,6 +110,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           mappings={item.hasMappings}
           settings={item.hasSettings}
           aliases={item.hasAliases}
+          contentWhenEmpty={
+            <em>
+              {i18n.translate('xpack.idxMgmt.templateList.table.noneDescriptionText', {
+                defaultMessage: 'None',
+              })}
+            </em>
+          }
         />
       ),
     },
