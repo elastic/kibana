@@ -175,7 +175,15 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
 
   return (
     <EuiForm>
-      <ColorPicker {...props} />
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.palette.label', {
+          defaultMessage: 'Palette',
+        })}
+      >
+        <ColorPicker {...props} />
+      </EuiFormRow>
 
       <EuiFormRow
         display="columnCompressed"
