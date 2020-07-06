@@ -15,6 +15,7 @@ export {
   EnrollmentAPIKey,
   PackageConfig,
   NewPackageConfig,
+  UpdatePackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
   PackageConfigConfigRecordEntry,
