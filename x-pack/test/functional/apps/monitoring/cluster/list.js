@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
         await clusterList.assertDefaults();
       });
 
-      after(async function clusterListingAfterAll() {
+      after(async () => {
         await tearDown();
       });
 
