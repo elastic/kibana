@@ -55,7 +55,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
   const [rangeUnit, setRangeUnit] = useState<string>(
     alertParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT
   );
-  const [threshold, setThreshold] = useState<number>(
+  const [threshold, setThreshold] = useState<string>(
     alertParams?.availability?.threshold ?? DEFAULT_THRESHOLD
   );
   const [isEnabled, setIsEnabled] = useState<boolean>(
@@ -67,7 +67,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
     )
   );
 
-  const thresholdIsInvalid = isThresholdInvalid(threshold);
+  const thresholdIsInvalid = isThresholdInvalid(Number(threshold));
 
   useEffect(() => {
     if (thresholdIsInvalid) {
@@ -100,10 +100,10 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({ alertParams, set
           aria-label={labels.ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL}
           content={
             <EuiFieldText
-              isInvalid={isThresholdInvalid(threshold)}
+              isInvalid={thresholdIsInvalid}
               value={threshold}
               onChange={(e) => {
-                setThreshold(Number(e.target.value));
+                setThreshold(e.target.value);
               }}
             />
           }
