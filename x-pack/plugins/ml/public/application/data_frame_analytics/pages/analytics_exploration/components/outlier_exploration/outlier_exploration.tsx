@@ -84,11 +84,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
       {jobConfig !== undefined && needsDestIndexPattern && (
-        <IndexPatternPrompt
-          destIndex={
-            Array.isArray(jobConfig.dest?.index) ? jobConfig.dest.index[0] : jobConfig.dest.index
-          }
-        />
+        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
       )}
       <EuiFlexGroup
         alignItems="center"

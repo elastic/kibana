@@ -71,9 +71,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     title,
   }) => {
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
-    const destIndex = Array.isArray(jobConfig.dest.index)
-      ? jobConfig.dest.index[0]
-      : jobConfig.dest.index;
 
     useEffect(() => {
       setEvaluateSearchQuery(searchQuery);
@@ -131,7 +128,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
         id="mlDataFrameAnalyticsTableResultsPanel"
         data-test-subj="mlDFAnalyticsExplorationTablePanel"
       >
-        {needsDestIndexPattern && <IndexPatternPrompt destIndex={destIndex} />}
+        {needsDestIndexPattern && <IndexPatternPrompt destIndex={jobConfig.dest.index} />}
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">

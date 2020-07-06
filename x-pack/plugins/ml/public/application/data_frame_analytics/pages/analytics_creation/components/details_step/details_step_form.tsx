@@ -5,7 +5,15 @@
  */
 
 import React, { FC, Fragment, useRef } from 'react';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -202,13 +210,15 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             : []),
           ...(!createIndexPattern
             ? [
-                i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
-                  {
-                    defaultMessage:
-                      'You may not be able to view job results if an index pattern is not created for the destination index.',
-                  }
-                ),
+                <EuiText size="xs" color="warning">
+                  {i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.shouldCreateIndexPatternMessage',
+                    {
+                      defaultMessage:
+                        'You may not be able to view job results if an index pattern is not created for the destination index.',
+                    }
+                  )}
+                </EuiText>,
               ]
             : []),
         ]}
