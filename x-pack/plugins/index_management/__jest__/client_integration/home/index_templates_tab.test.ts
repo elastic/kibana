@@ -63,6 +63,7 @@ describe('Index Templates tab', () => {
         },
       },
     });
+    (template1 as any).hasSettings = true;
 
     const template2 = fixtures.getTemplate({
       name: `b${getRandomString()}`,
@@ -122,9 +123,10 @@ describe('Index Templates tab', () => {
 
       // Test composable table content
       tableCellsValues.forEach((row, i) => {
-        const template = templates[i];
-        const { name, indexPatterns, priority, ilmPolicy, composedOf } = template;
+        const indexTemplate = templates[i];
+        const { name, indexPatterns, priority, ilmPolicy, composedOf, template } = indexTemplate;
 
+        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
         const composedOfString = composedOf ? composedOf.join(',') : '';
         const priorityFormatted = priority ? priority.toString() : '';
@@ -136,7 +138,7 @@ describe('Index Templates tab', () => {
           ilmPolicyName,
           composedOfString,
           priorityFormatted,
-          'M S A', // Mappings Settings Aliases badges
+          hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
           '', // Column of actions
         ]);
       });
