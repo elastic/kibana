@@ -10,7 +10,7 @@ export default function ({ loadTestFile }) {
 
     // EPM
     loadTestFile(require.resolve('./epm/list'));
-    loadTestFile(require.resolve('./epm/list'));
+    loadTestFile(require.resolve('./epm/file'));
     //loadTestFile(require.resolve('./epm/template'));
     loadTestFile(require.resolve('./epm/ilm'));
 

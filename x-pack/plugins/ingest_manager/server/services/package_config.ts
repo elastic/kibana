@@ -46,16 +46,18 @@ class PackageConfigService {
   ): Promise<PackageConfig> {
     // Make sure the associated package is installed
     if (packageConfig.package?.name) {
-      await ensureInstalledPackage({
-        savedObjectsClient: soClient,
-        pkgName: packageConfig.package.name,
-        callCluster,
-      });
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packageConfig.package.name,
-        pkgVersion: packageConfig.package.version,
-      });
+      const [, pkgInfo] = await Promise.all([
+        ensureInstalledPackage({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          callCluster,
+        }),
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packageConfig.package.name,
+          pkgVersion: packageConfig.package.version,
+        }),
+      ]);
 
       // Check if it is a limited package, and if so, check that the corresponding agent config does not
       // already contain a package config for this package

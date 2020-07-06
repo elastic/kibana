@@ -61,7 +61,7 @@ export async function getLimitedPackages(options: {
     (pkg) => (pkg.status = InstallationStatus.installed)
   );
   const installedPackagesInfo = await Promise.all(
-    installedPackages.map(async (pkgInstall) => {
+    installedPackages.map((pkgInstall) => {
       return getPackageInfo({
         savedObjectsClient,
         pkgName: pkgInstall.name,
@@ -69,9 +69,7 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo
-    .filter((pkgInfo) => isPackageLimited(pkgInfo))
-    .map((pkgInfo) => pkgInfo.name);
+  return installedPackagesInfo.filter((pkgInfo) => isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
