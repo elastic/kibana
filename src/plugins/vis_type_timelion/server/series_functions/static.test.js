@@ -26,7 +26,7 @@ import invoke from './helpers/invoke_series_fn.js';
 describe('static.js', () => {
   it('returns a series in which all numbers are the same', () => {
     return invoke(fn, [5]).then((r) => {
-      expect(_.unique(_.map(r.output.list[0].data, 1))).to.eql([5]);
+      expect(_.uniq(_.map(r.output.list[0].data, 1))).to.eql([5]);
     });
   });
 
