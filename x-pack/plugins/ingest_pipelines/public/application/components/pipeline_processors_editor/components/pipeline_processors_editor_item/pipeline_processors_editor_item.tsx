@@ -107,11 +107,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   </EuiToolTip>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
-                <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
-                  {i18nTexts.cancelMoveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText
                   className="pipelineProcessorsEditor__item__processorTypeLabel"
@@ -149,6 +144,11 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   text={description}
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className={cancelMoveButtonClasses}>
+                <EuiButton data-test-subj="cancelMoveItemButton" size="s" onClick={onCancelMove}>
+                  {i18nTexts.cancelMoveButtonLabel}
+                </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem className={actionElementClasses} grow={false}>
                 {!isInMoveMode && (
