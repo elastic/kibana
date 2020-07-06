@@ -48,10 +48,10 @@ interface Props {
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(({ componentTemplate }) => {
-  const { name, version } = componentTemplate!;
+  const { name, version } = componentTemplate;
 
   const serializedComponentTemplate = serializeComponentTemplate(
-    stripEmptyFields(componentTemplate!, {
+    stripEmptyFields(componentTemplate, {
       types: ['string', 'object'],
     }) as ComponentTemplateDeserialized
   );
@@ -73,7 +73,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
         <EuiFlexItem>
           <EuiDescriptionList textStyle="reverse">
             {/* Version */}
-            {version && (
+            {version !== '' && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage

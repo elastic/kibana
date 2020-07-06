@@ -49,7 +49,9 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    history.push(`/component_templates/${encodeURIComponent(name)}`);
+    history.push({
+      pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
+    });
   };
 
   const clearSaveError = () => {

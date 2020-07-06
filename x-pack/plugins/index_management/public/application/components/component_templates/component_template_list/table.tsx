@@ -150,7 +150,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             {...reactRouterNavigate(
               history,
               {
-                pathname: `/component_templates/${encodeURIComponent(name)}`,
+                pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
               },
               () => trackMetric('click', UIM_COMPONENT_TEMPLATE_DETAILS)
             )}

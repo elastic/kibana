@@ -20,16 +20,13 @@ export interface Params {
 
 export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
-  const decodedSourceComponentTemplateName = attemptToDecodeURI(sourceComponentTemplateName);
+  const decodedSourceName = attemptToDecodeURI(sourceComponentTemplateName);
 
   const { toasts, api } = useComponentTemplatesContext();
 
-  const {
-    error,
-    data: componentTemplateToClone,
-    isLoading,
-    isInitialRequest,
-  } = api.useLoadComponentTemplate(decodedSourceComponentTemplateName);
+  const { error, data: componentTemplateToClone, isLoading } = api.useLoadComponentTemplate(
+    decodedSourceName
+  );
 
   useEffect(() => {
     if (error && !isLoading) {
@@ -43,7 +40,7 @@ export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Param
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isLoading]);
 
-  if (isLoading && isInitialRequest) {
+  if (isLoading) {
     return (
       <SectionLoading>
         <FormattedMessage

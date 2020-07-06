@@ -12,6 +12,7 @@ import { ScopedHistory } from 'kibana/public';
 
 import { SectionLoading, ComponentTemplateDeserialized } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplateDetailsFlyout } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
@@ -35,15 +36,21 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
   const goToComponentTemplateList = () => {
-    return history.push('component_templates');
+    return history.push({
+      pathname: 'component_templates',
+    });
   };
 
   const goToEditComponentTemplate = (name: string) => {
-    return history.push(`edit_component_template/${encodeURIComponent(name)}`);
+    return history.push({
+      pathname: encodeURI(`edit_component_template/${encodeURIComponent(name)}`),
+    });
   };
 
   const goToCloneComponentTemplate = (name: string) => {
-    return history.push(`create_component_template/${encodeURIComponent(name)}`);
+    return history.push({
+      pathname: encodeURI(`create_component_template/${encodeURIComponent(name)}`),
+    });
   };
 
   // Track component loaded
@@ -110,14 +117,16 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
                 defaultMessage: 'Edit',
               }),
               icon: 'pencil',
-              handleActionClick: () => goToEditComponentTemplate(componentTemplateName),
+              handleActionClick: () =>
+                goToEditComponentTemplate(attemptToDecodeURI(componentTemplateName)),
             },
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
                 defaultMessage: 'Clone',
               }),
               icon: 'copy',
-              handleActionClick: () => goToCloneComponentTemplate(componentTemplateName),
+              handleActionClick: () =>
+                goToCloneComponentTemplate(attemptToDecodeURI(componentTemplateName)),
             },
             {
               name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
@@ -128,7 +137,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
                 details._kbnMeta.usedBy.length > 0,
               closePopoverOnClick: true,
               handleActionClick: () => {
-                setComponentTemplatesToDelete([componentTemplateName]);
+                setComponentTemplatesToDelete([attemptToDecodeURI(componentTemplateName)]);
               },
             },
           ]}

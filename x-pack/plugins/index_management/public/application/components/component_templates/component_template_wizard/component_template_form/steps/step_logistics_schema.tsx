@@ -87,19 +87,15 @@ export const logisticsFormSchema: FormSchema = {
     deserializer: stringifyJson,
     validations: [
       {
-        validator: (validationArg) => {
-          if (!validationArg.value) {
-            return;
-          }
-          return isJsonField(
-            i18n.translate(
-              'xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError',
-              {
-                defaultMessage: 'The input is not valid.',
-              }
-            )
-          )(validationArg);
-        },
+        validator: isJsonField(
+          i18n.translate(
+            'xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError',
+            {
+              defaultMessage: 'The input is not valid.',
+            }
+          ),
+          { allowEmptyString: true }
+        ),
       },
     ],
   },
