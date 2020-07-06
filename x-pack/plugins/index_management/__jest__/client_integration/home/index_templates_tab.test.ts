@@ -157,7 +157,7 @@ describe('Index Templates tab', () => {
           '',
           '',
           '',
-          '',
+          'EditDelete', // Column of actions
         ]);
       });
     });
