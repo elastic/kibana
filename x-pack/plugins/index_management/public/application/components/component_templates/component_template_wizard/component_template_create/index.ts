@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-
-export * from './request';
-
-export * from './documentation';
-
-export * from './breadcrumbs';
-
-export { attemptToDecodeURI } from './utils';
+export { ComponentTemplateCreate } from './component_template_create';

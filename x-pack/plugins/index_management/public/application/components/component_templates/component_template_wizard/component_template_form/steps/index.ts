@@ -4,12 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-
-export * from './request';
-
-export * from './documentation';
-
-export * from './breadcrumbs';
-
-export { attemptToDecodeURI } from './utils';
+export { StepLogisticsContainer } from './step_logistics_container';
+export { StepReviewContainer } from './step_review_container';
