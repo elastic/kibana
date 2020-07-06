@@ -5,6 +5,7 @@
  */
 
 import { createHash } from 'crypto';
+import { deflateRaw } from 'zlib';
 import { validate } from '../../../../common/validate';
 
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
@@ -32,6 +33,7 @@ export async function buildArtifact(
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
+  // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
     identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
@@ -169,4 +171,16 @@ function translateEntry(
         : undefined;
     }
   }
+}
+
+export function compressExceptionList(buffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    deflateRaw(buffer, function (err, buf) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buf);
+      }
+    });
+  });
 }

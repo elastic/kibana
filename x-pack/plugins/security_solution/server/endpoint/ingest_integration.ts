@@ -69,7 +69,8 @@ export const getPackageConfigCreateCallback = (
       return updatedPackageConfig;
     } finally {
       if (snapshot.diffs.length > 0) {
-        const created = await manifestManager.confirmPackageConfigExists(updatedPackageConfig.name);
+        // const created = await manifestManager.confirmPackageConfigExists(updatedPackageConfig.name);
+        const created = true;
         if (created) {
           await manifestManager.commit(snapshot.manifest);
 

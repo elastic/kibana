@@ -5,6 +5,7 @@
  */
 
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { createHash } from 'crypto';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -20,6 +21,7 @@ import {
 import { InternalArtifactSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
+import { compressExceptionList } from '../../../lib/artifacts/lists';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -176,6 +178,14 @@ export class ManifestManager {
       try {
         if (diff.type === 'add' && (diffType === undefined || diffType === 'add')) {
           const artifact = snapshot.manifest.getArtifact(diff.id);
+          const compressedArtifact = await compressExceptionList(
+            Buffer.from(artifact.body, 'base64')
+          );
+          artifact.body = compressedArtifact.toString('base64');
+          artifact.compressedSize = compressedArtifact.length;
+          artifact.compressionAlgorithm = 'zlib';
+          artifact.compressedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
+
           await this.artifactClient.createArtifact(artifact);
           // Cache the body of the artifact
           this.cache.set(diff.id, artifact.body);
