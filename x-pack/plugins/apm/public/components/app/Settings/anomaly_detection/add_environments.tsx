@@ -44,8 +44,9 @@ export const AddEnvironments = ({
     { preservePreviousData: false }
   );
 
-  const availableEnvironmentOptions = data.map((env) => ({
-    label: env,
+  const environments = [...data, ENVIRONMENT_NOT_DEFINED];
+  const environmentOptions = environments.map((env) => ({
+    label: env === ENVIRONMENT_NOT_DEFINED ? NOT_DEFINED_OPTION_LABEL : env,
     value: env,
     disabled: currentEnvironments.includes(env),
   }));
@@ -74,7 +75,7 @@ export const AddEnvironments = ({
           'xpack.apm.settings.anomalyDetection.addEnvironments.descriptionText',
           {
             defaultMessage:
-              'Choose the service environments that you want to enable anomaly detection for. Anomalies will surface for all the services and their transaction types.',
+              'Select the service environments that you want to enable anomaly detection in. Anomalies will surface for all services and transaction types within the selected environments.',
           }
         )}
       </EuiText>
@@ -96,7 +97,7 @@ export const AddEnvironments = ({
               defaultMessage: 'Select or add environments',
             }
           )}
-          options={[...availableEnvironmentOptions, NOT_DEFINED_OPTION]}
+          options={environmentOptions}
           selectedOptions={selectedOptions}
           onChange={(nextSelectedOptions) => {
             setSelected(nextSelectedOptions);
@@ -156,9 +157,9 @@ export const AddEnvironments = ({
   );
 };
 
-const NOT_DEFINED_OPTION = {
-  value: ENVIRONMENT_NOT_DEFINED,
-  label: i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+const NOT_DEFINED_OPTION_LABEL = i18n.translate(
+  'xpack.apm.filter.environment.notDefinedLabel',
+  {
     defaultMessage: 'Not defined',
-  }),
-};
+  }
+);

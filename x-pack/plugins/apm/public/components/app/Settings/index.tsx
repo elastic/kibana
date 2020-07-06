@@ -49,12 +49,15 @@ export const Settings: React.FC = (props) => {
                     ),
                   },
                   {
-                    name: i18n.translate('xpack.apm.settings.indices', {
-                      defaultMessage: 'Indices',
-                    }),
-                    id: '2',
-                    href: getAPMHref('/settings/apm-indices', search),
-                    isSelected: pathname === '/settings/apm-indices',
+                    name: i18n.translate(
+                      'xpack.apm.settings.anomalyDetection',
+                      {
+                        defaultMessage: 'Anomaly detection',
+                      }
+                    ),
+                    id: '4',
+                    href: getAPMHref('/settings/anomaly-detection', search),
+                    isSelected: pathname === '/settings/anomaly-detection',
                   },
                   {
                     name: i18n.translate('xpack.apm.settings.customizeApp', {
@@ -65,15 +68,12 @@ export const Settings: React.FC = (props) => {
                     isSelected: pathname === '/settings/customize-ui',
                   },
                   {
-                    name: i18n.translate(
-                      'xpack.apm.settings.anomalyDetection',
-                      {
-                        defaultMessage: 'Anomaly detection',
-                      }
-                    ),
-                    id: '4',
-                    href: getAPMHref('/settings/anomaly-detection', search),
-                    isSelected: pathname === '/settings/anomaly-detection',
+                    name: i18n.translate('xpack.apm.settings.indices', {
+                      defaultMessage: 'Indices',
+                    }),
+                    id: '2',
+                    href: getAPMHref('/settings/apm-indices', search),
+                    isSelected: pathname === '/settings/apm-indices',
                   },
                 ],
               },

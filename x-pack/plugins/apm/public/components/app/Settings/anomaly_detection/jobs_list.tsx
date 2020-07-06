@@ -101,15 +101,14 @@ export const JobsList = ({
       <EuiText>
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="You can {mlJobsLink}."
+          defaultMessage="Manage existing anomaly detection jobs in {mlJobsLink}."
           values={{
             mlJobsLink: (
               <MLLink path="jobs">
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
-                    defaultMessage:
-                      'manage the anomaly detection jobs in Machine Learning',
+                    defaultMessage: 'Machine Learning',
                   }
                 )}
               </MLLink>
