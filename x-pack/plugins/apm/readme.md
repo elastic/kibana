@@ -93,7 +93,7 @@ node scripts/functional_tests_server --config x-pack/test/apm_api_integration/ba
 node scripts/functional_test_runner --config x-pack/test/apm_api_integration/basic/config.ts
 ```
 
-The API tests tests for "basic" are located in `x-pack/test/apm_api_integration/basic/tests`.
+The API tests for "basic" are located in `x-pack/test/apm_api_integration/basic/tests`.
 
 **Trial**
 
