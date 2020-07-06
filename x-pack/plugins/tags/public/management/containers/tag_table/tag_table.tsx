@@ -69,7 +69,7 @@ export const TagTable: React.FC = () => {
           actions: [
             {
               render: (tag) => (
-                <Link to={`/tag/${tag.id}`}>
+                <Link to={`/edit/${tag.id}`}>
                   <EuiButtonIcon
                     aria-label={txtEditSomething(tag.title)}
                     color={'primary'}

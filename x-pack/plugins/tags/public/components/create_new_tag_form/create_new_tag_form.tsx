@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
-import { txtTitle, txtColor, txtDescription, txtCreate, txtCancel } from './i18n';
+import { txtTitle, txtColor, txtDescription, txtSubmit, txtCancel } from './i18n';
 import { Tag } from '../../components/tag';
 import { parseTag } from '../../../common';
 
@@ -30,6 +30,7 @@ export interface Props {
   color?: string;
   description?: string;
   disabled?: boolean;
+  submitText?: string;
   onTitleChange: (title: string) => void;
   onColorChange?: (color: string) => void;
   onDescriptionChange?: (description: string) => void;
@@ -41,6 +42,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
   color,
   description,
   disabled,
+  submitText = txtSubmit,
   onTitleChange,
   onColorChange,
   onDescriptionChange,
@@ -126,7 +128,7 @@ export const CreateNewTagForm: React.FC<Props> = ({
             disabled={disabled || !title}
             isLoading={disabled}
           >
-            {txtCreate}
+            {submitText}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

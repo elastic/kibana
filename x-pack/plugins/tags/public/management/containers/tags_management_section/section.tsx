@@ -8,17 +8,15 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { LandingPage } from '../landing_page';
 import { CreateNewPage } from '../create_new_page';
+import { UpdateTagPage } from '../update_tag_page';
 
 export const Section: React.FC = () => {
   return (
     <div data-test-subj="TagsManagementSection">
       <Switch>
-        <Route path={['', '/']} exact>
-          <LandingPage />
-        </Route>
-        <Route path="/create">
-          <CreateNewPage />
-        </Route>
+        <Route path={['', '/']} exact component={LandingPage} />
+        <Route path="/create" component={CreateNewPage} />
+        <Route path="/edit/:id" component={UpdateTagPage} />
       </Switch>
     </div>
   );
