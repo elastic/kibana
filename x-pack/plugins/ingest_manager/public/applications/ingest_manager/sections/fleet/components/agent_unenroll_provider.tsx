@@ -74,7 +74,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
       const successMessage = i18n.translate(
         'xpack.ingestManager.unenrollAgents.successSingleNotificationTitle',
         {
-          defaultMessage: "Unenrolled agent '{id}'",
+          defaultMessage: "Unenrolling agent '{id}'",
           values: { id: agentId },
         }
       );
