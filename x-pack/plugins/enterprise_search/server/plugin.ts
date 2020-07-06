@@ -136,14 +136,13 @@ export class EnterpriseSearchPlugin implements Plugin {
     getStartServices().then(([coreStart]) => {
       const savedObjectsStarted = coreStart.savedObjects as SavedObjectsServiceStart;
 
-      registerASTelemetryRoute({
+      const telemetryRouteDependencies = {
         ...dependencies,
         getSavedObjectsService: () => savedObjectsStarted,
-      });
-      registerWSTelemetryRoute({
-        ...dependencies,
-        getSavedObjectsService: () => savedObjectsStarted,
-      });
+      };
+      registerASTelemetryRoute(telemetryRouteDependencies);
+      registerWSTelemetryRoute(telemetryRouteDependencies);
+
       if (usageCollection) {
         registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted);
         registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted);
