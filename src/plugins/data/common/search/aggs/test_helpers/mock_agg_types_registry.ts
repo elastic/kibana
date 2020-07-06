@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { fieldFormatsMock } from '../../../field_formats/mocks';
+
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { InternalStartServices } from '../../../types';
 import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
 
 // Mocked uiSettings shared among aggs unit tests
-const mockUiSettings = jest.fn().mockImplementation((key: string) => {
+const mockGetConfig = jest.fn().mockImplementation((key: string) => {
   const config: TimeBucketsConfig = {
     'histogram:maxBars': 4,
     'histogram:barTarget': 3,
@@ -43,6 +42,15 @@ const mockUiSettings = jest.fn().mockImplementation((key: string) => {
   };
   return config[key] ?? key;
 });
+
+/** @internal */
+export function mockGetFieldFormatsStart() {
+  const { deserialize, getDefaultInstance } = fieldFormatsMock;
+  return {
+    deserialize,
+    getDefaultInstance,
+  };
+}
 
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
@@ -71,16 +79,11 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
       }
     });
   } else {
-    const coreSetup = coreMock.createSetup();
-    coreSetup.uiSettings.get = mockUiSettings;
-
     const aggTypes = getAggTypes({
       calculateBounds: jest.fn(),
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
-      uiSettings: coreSetup.uiSettings,
+      getFieldFormatsStart: mockGetFieldFormatsStart,
+      getConfig: mockGetConfig,
+      isDefaultTimezone: () => true,
     });
 
     aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));

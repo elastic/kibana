@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { functionWrapper } from './function_wrapper';
-export { mockAggTypesRegistry } from './mock_agg_types_registry';
+export * from './function_wrapper';
+export * from './mock_agg_types_registry';

@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
-import { TimeRange, TimeRangeBounds } from '../../../common';
-import { GetInternalStartServicesFn } from '../../types';
+import { AggsServiceSetupDependencies } from './aggs_service';
 
 import { getCountMetricAgg } from './metrics/count';
 import { getAvgMetricAgg } from './metrics/avg';
@@ -55,16 +53,17 @@ import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
 import { getBucketMinMetricAgg } from './metrics/bucket_min';
 import { getBucketMaxMetricAgg } from './metrics/bucket_max';
 
-export interface AggTypesDependencies {
-  calculateBounds: (timeRange: TimeRange) => TimeRangeBounds;
-  getInternalStartServices: GetInternalStartServicesFn;
-  uiSettings: IUiSettingsClient;
-}
+/** @internal */
+export type AggTypesDependencies = Pick<
+  AggsServiceSetupDependencies,
+  'calculateBounds' | 'getFieldFormatsStart' | 'getConfig' | 'isDefaultTimezone'
+>;
 
 export const getAggTypes = ({
   calculateBounds,
-  getInternalStartServices,
-  uiSettings,
+  getConfig,
+  getFieldFormatsStart,
+  isDefaultTimezone,
 }: AggTypesDependencies) => ({
   metrics: [
     getCountMetricAgg(),
@@ -76,7 +75,7 @@ export const getAggTypes = ({
     getStdDeviationMetricAgg(),
     getCardinalityMetricAgg(),
     getPercentilesMetricAgg(),
-    getPercentileRanksMetricAgg({ getInternalStartServices }),
+    getPercentileRanksMetricAgg({ getFieldFormatsStart }),
     getTopHitMetricAgg(),
     getDerivativeMetricAgg(),
     getCumulativeSumMetricAgg(),
@@ -90,14 +89,14 @@ export const getAggTypes = ({
     getGeoCentroidMetricAgg(),
   ],
   buckets: [
-    getDateHistogramBucketAgg({ calculateBounds, uiSettings }),
-    getHistogramBucketAgg({ uiSettings, getInternalStartServices }),
-    getRangeBucketAgg({ getInternalStartServices }),
-    getDateRangeBucketAgg({ uiSettings }),
+    getDateHistogramBucketAgg({ calculateBounds, getConfig, isDefaultTimezone }),
+    getHistogramBucketAgg({ getConfig, getFieldFormatsStart }),
+    getRangeBucketAgg({ getFieldFormatsStart }),
+    getDateRangeBucketAgg({ getConfig, isDefaultTimezone }),
     getIpRangeBucketAgg(),
     getTermsBucketAgg(),
     getFilterBucketAgg(),
-    getFiltersBucketAgg({ uiSettings }),
+    getFiltersBucketAgg({ getConfig }),
     getSignificantTermsBucketAgg(),
     getGeoHashBucketAgg(),
     getGeoTitleBucketAgg(),

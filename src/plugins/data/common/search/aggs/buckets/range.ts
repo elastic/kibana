@@ -18,20 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BucketAggType } from './bucket_agg_type';
+
 import { KBN_FIELD_TYPES } from '../../../../common';
+import { AggTypesDependencies } from '../agg_types';
+import { BaseAggParams } from '../types';
+
+import { BucketAggType } from './bucket_agg_type';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { GetInternalStartServicesFn } from '../../../types';
-import { BaseAggParams } from '../types';
 
 const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {
   defaultMessage: 'Range',
 });
 
 export interface RangeBucketAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+  getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart'];
 }
 
 export interface AggParamsRange extends BaseAggParams {
@@ -42,13 +44,13 @@ export interface AggParamsRange extends BaseAggParams {
   }>;
 }
 
-export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) => {
+export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDependencies) => {
   const keyCaches = new WeakMap();
 
   return new BucketAggType({
     name: BUCKET_TYPES.RANGE,
     title: rangeTitle,
-    createFilter: createFilterRange(getInternalStartServices),
+    createFilter: createFilterRange(getFieldFormatsStart),
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.aggTypesLabel', {
         defaultMessage: '{fieldName} ranges',

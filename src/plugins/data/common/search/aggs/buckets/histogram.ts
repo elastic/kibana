@@ -19,14 +19,14 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/public';
+
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { AggTypesDependencies } from '../agg_types';
+import { BaseAggParams } from '../types';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
-import { BaseAggParams } from '../types';
 import { ExtendedBounds } from './lib/extended_bounds';
 
 export interface AutoBounds {
@@ -35,8 +35,8 @@ export interface AutoBounds {
 }
 
 export interface HistogramBucketAggDependencies {
-  uiSettings: IUiSettingsClient;
-  getInternalStartServices: GetInternalStartServicesFn;
+  getConfig: <T = any>(key: string) => T;
+  getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart'];
 }
 
 export interface IBucketHistogramAggConfig extends IBucketAggConfig {
@@ -54,8 +54,8 @@ export interface AggParamsHistogram extends BaseAggParams {
 }
 
 export const getHistogramBucketAgg = ({
-  uiSettings,
-  getInternalStartServices,
+  getConfig,
+  getFieldFormatsStart,
 }: HistogramBucketAggDependencies) =>
   new BucketAggType<IBucketHistogramAggConfig>({
     name: BUCKET_TYPES.HISTOGRAM,
@@ -66,7 +66,7 @@ export const getHistogramBucketAgg = ({
     makeLabel(aggConfig) {
       return aggConfig.getFieldDisplayName();
     },
-    createFilter: createFilterHistogram(getInternalStartServices),
+    createFilter: createFilterHistogram(getFieldFormatsStart),
     decorateAggConfig() {
       let autoBounds: AutoBounds;
 
@@ -154,8 +154,8 @@ export const getHistogramBucketAgg = ({
             const range = autoBounds.max - autoBounds.min;
             const bars = range / interval;
 
-            if (bars > uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)) {
-              const minInterval = range / uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+            if (bars > getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS)) {
+              const minInterval = range / getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
               // Round interval by order of magnitude to provide clean intervals
               // Always round interval up so there will always be less buckets than histogram:maxBars

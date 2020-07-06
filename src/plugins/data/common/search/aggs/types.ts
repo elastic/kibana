@@ -71,13 +71,13 @@ export { IpRangeKey } from './buckets/lib/ip_range';
 export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
-export interface SearchAggsSetup {
+export interface AggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
 }
 
 /** @internal */
-export interface SearchAggsStart {
+export interface AggsStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: IndexPattern,

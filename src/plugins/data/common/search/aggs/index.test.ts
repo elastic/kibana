@@ -17,26 +17,17 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getAggTypes } from './index';
+import { mockGetFieldFormatsStart } from './test_helpers';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
-import { FieldFormatsStart } from '../../field_formats';
-import { InternalStartServices } from '../../types';
 
 describe('AggTypesComponent', () => {
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createSetup();
-
   const aggTypes = getAggTypes({
     calculateBounds: jest.fn(),
-    getInternalStartServices: () =>
-      (({
-        notifications: coreStart.notifications,
-        fieldFormats: {} as FieldFormatsStart,
-      } as unknown) as InternalStartServices),
-    uiSettings: coreSetup.uiSettings,
+    getConfig: jest.fn(),
+    getFieldFormatsStart: mockGetFieldFormatsStart,
   });
 
   const { buckets, metrics } = aggTypes;

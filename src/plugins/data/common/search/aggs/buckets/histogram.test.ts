@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import {
   IBucketHistogramAggConfig,
@@ -28,21 +27,14 @@ import {
   HistogramBucketAggDependencies,
 } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { InternalStartServices } from '../../../types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: HistogramBucketAggDependencies;
 
   beforeEach(() => {
-    const { uiSettings } = coreMock.createSetup();
-
     aggTypesDependencies = {
-      uiSettings,
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
+      getConfig: (key: string) => key,
+      getFieldFormatsStart: mockGetFieldFormatsStart,
     };
   });
 
@@ -167,10 +159,7 @@ describe('Histogram Agg', () => {
         ) => {
           aggTypesDependencies = {
             ...aggTypesDependencies,
-            uiSettings: {
-              ...aggTypesDependencies.uiSettings,
-              get: () => maxBars as any,
-            },
+            getConfig: () => maxBars as any,
           };
 
           const aggConfigs = getAggConfigs({

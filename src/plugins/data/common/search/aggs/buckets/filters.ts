@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { size, transform, cloneDeep } from 'lodash';
-import { IUiSettingsClient } from 'src/core/public';
 
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
@@ -41,7 +40,7 @@ interface FilterValue {
 }
 
 export interface FiltersBucketAggDependencies {
-  uiSettings: IUiSettingsClient;
+  getConfig: <T = any>(key: string) => any;
 }
 
 export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
@@ -51,7 +50,7 @@ export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
   }>;
 }
 
-export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies) =>
+export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.FILTERS,
     title: filtersTitle,
@@ -62,7 +61,7 @@ export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies
         name: 'filters',
         default: [
           {
-            input: { query: '', language: uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
+            input: { query: '', language: getConfig(UI_SETTINGS.SEARCH_QUERY_LANGUAGE) },
             label: '',
           },
         ],
@@ -80,7 +79,7 @@ export const getFiltersBucketAgg = ({ uiSettings }: FiltersBucketAggDependencies
                 return;
               }
 
-              const esQueryConfigs = getEsQueryConfig(uiSettings);
+              const esQueryConfigs = getEsQueryConfig({ get: getConfig });
               const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], esQueryConfigs);
 
               if (!query) {

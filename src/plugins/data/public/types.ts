@@ -82,15 +82,3 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }
-
-/** @internal **/
-export interface InternalStartServices {
-  readonly fieldFormats: FieldFormatsStart;
-  readonly notifications: CoreStart['notifications'];
-  readonly uiSettings: CoreStart['uiSettings'];
-  readonly searchService: DataPublicPluginStart['search'];
-  readonly injectedMetadata: CoreStart['injectedMetadata'];
-}
-
-/** @internal **/
-export type GetInternalStartServicesFn = () => InternalStartServices;

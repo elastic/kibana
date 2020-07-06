@@ -23,6 +23,7 @@ export * from './agg_groups';
 export * from './agg_type';
 export * from './agg_types';
 export * from './agg_types_registry';
+export * from './aggs_service';
 export * from './buckets';
 export * from './metrics';
 export * from './param_types';

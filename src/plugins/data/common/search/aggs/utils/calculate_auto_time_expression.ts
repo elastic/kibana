@@ -17,11 +17,10 @@
  * under the License.
  */
 import moment from 'moment';
-import { IUiSettingsClient } from 'src/core/public';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates, TimeRange, UI_SETTINGS } from '../../../../common';
 
-export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
+export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
   return function calculateAutoTimeExpression(range: TimeRange) {
     const dates = toAbsoluteDates(range);
     if (!dates) {
@@ -29,10 +28,10 @@ export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
     }
 
     const buckets = new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+      'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: getConfig('dateFormat'),
+      'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });
 
     buckets.setInterval('auto');

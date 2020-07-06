@@ -23,9 +23,10 @@ import {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   getCalculateAutoTimeExpression,
-} from './';
-import { SearchAggsSetup, SearchAggsStart } from './types';
-import { mockAggTypesRegistry } from './test_helpers';
+  AggsSetup,
+  AggsStart,
+} from '../../../common';
+import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -61,12 +62,12 @@ export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
   })),
 });
 
-export const searchAggsSetupMock = (): SearchAggsSetup => ({
+export const searchAggsSetupMock = (): AggsSetup => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
   types: aggTypesRegistrySetupMock(),
 });
 
-export const searchAggsStartMock = (): SearchAggsStart => ({
+export const searchAggsStartMock = (): AggsStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {

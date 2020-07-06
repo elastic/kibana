@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
-import { GetInternalStartServicesFn } from '../../../../types';
+import { AggTypesDependencies } from '../../agg_types';
+import { IBucketAggConfig } from '../bucket_agg_type';
 
 /** @internal */
-export const createFilterHistogram = (getInternalStartServices: GetInternalStartServicesFn) => {
+export const createFilterHistogram = (
+  getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart']
+) => {
   return (aggConfig: IBucketAggConfig, key: string) => {
-    const { fieldFormats } = getInternalStartServices();
+    const { deserialize } = getFieldFormatsStart();
     const value = parseInt(key, 10);
     const params: RangeFilterParams = { gte: value, lt: value + aggConfig.params.interval };
 
@@ -32,7 +34,7 @@ export const createFilterHistogram = (getInternalStartServices: GetInternalStart
       aggConfig.params.field,
       params,
       aggConfig.getIndexPattern(),
-      fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
+      deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
     );
   };
 };

@@ -17,19 +17,21 @@
  * under the License.
  */
 
-import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildRangeFilter } from '../../../../../common';
-import { GetInternalStartServicesFn } from '../../../../types';
+import { AggTypesDependencies } from '../../agg_types';
+import { IBucketAggConfig } from '../bucket_agg_type';
 
 /** @internal */
-export const createFilterRange = (getInternalStartServices: GetInternalStartServicesFn) => {
+export const createFilterRange = (
+  getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart']
+) => {
   return (aggConfig: IBucketAggConfig, params: any) => {
-    const { fieldFormats } = getInternalStartServices();
+    const { deserialize } = getFieldFormatsStart();
     return buildRangeFilter(
       aggConfig.params.field,
       params,
       aggConfig.getIndexPattern(),
-      fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
+      deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
     );
   };
 };

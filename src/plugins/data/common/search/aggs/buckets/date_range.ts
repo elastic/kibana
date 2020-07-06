@@ -20,7 +20,6 @@
 import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/public';
 
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
@@ -35,7 +34,8 @@ const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle',
 });
 
 export interface DateRangeBucketAggDependencies {
-  uiSettings: IUiSettingsClient;
+  isDefaultTimezone: () => boolean;
+  getConfig: <T = any>(key: string) => T;
 }
 
 export interface AggParamsDateRange extends BaseAggParams {
@@ -44,7 +44,10 @@ export interface AggParamsDateRange extends BaseAggParams {
   time_zone?: string;
 }
 
-export const getDateRangeBucketAgg = ({ uiSettings }: DateRangeBucketAggDependencies) =>
+export const getDateRangeBucketAgg = ({
+  isDefaultTimezone,
+  getConfig,
+}: DateRangeBucketAggDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
     title: dateRangeTitle,
@@ -100,9 +103,8 @@ export const getDateRangeBucketAgg = ({ uiSettings }: DateRangeBucketAggDependen
           if (!tz) {
             const detectedTimezone = moment.tz.guess();
             const tzOffset = moment().format('Z');
-            const isDefaultTimezone = uiSettings.isDefault('dateFormat:tz');
 
-            tz = isDefaultTimezone ? detectedTimezone || tzOffset : uiSettings.get('dateFormat:tz');
+            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
           }
           output.params.time_zone = tz;
         },

@@ -20,7 +20,6 @@
 import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/public';
 
 import { TimeBuckets } from './lib/time_buckets';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
@@ -40,7 +39,8 @@ import {
 import { BaseAggParams } from '../types';
 import { ExtendedBounds } from './lib/extended_bounds';
 
-type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
+/** @internal */
+export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
 
 const updateTimeBuckets = (
   agg: IBucketDateHistogramAggConfig,
@@ -58,7 +58,8 @@ const updateTimeBuckets = (
 
 export interface DateHistogramBucketAggDependencies {
   calculateBounds: CalculateBoundsFn;
-  uiSettings: IUiSettingsClient;
+  isDefaultTimezone: () => boolean;
+  getConfig: <T = any>(key: string) => T;
 }
 
 export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
@@ -84,7 +85,8 @@ export interface AggParamsDateHistogram extends BaseAggParams {
 
 export const getDateHistogramBucketAgg = ({
   calculateBounds,
-  uiSettings,
+  isDefaultTimezone,
+  getConfig,
 }: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
@@ -122,10 +124,10 @@ export const getDateHistogramBucketAgg = ({
             if (buckets) return buckets;
 
             buckets = new TimeBuckets({
-              'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-              'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-              dateFormat: uiSettings.get('dateFormat'),
-              'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+              'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+              'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+              dateFormat: getConfig('dateFormat'),
+              'dateFormat:scaled': getConfig('dateFormat:scaled'),
             });
             updateTimeBuckets(this, calculateBounds, buckets);
 
@@ -252,10 +254,9 @@ export const getDateHistogramBucketAgg = ({
           }
           if (!tz) {
             // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-            const isDefaultTimezone = uiSettings.isDefault('dateFormat:tz');
             const detectedTimezone = moment.tz.guess();
             const tzOffset = moment().format('Z');
-            tz = isDefaultTimezone ? detectedTimezone || tzOffset : uiSettings.get('dateFormat:tz');
+            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
           }
           output.params.time_zone = tz;
         },

@@ -18,13 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
+import { KBN_FIELD_TYPES } from '../../../../common';
+import { AggTypesDependencies } from '../agg_types';
+import { BaseAggParams } from '../types';
+
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
-import { BaseAggParams } from '../types';
 
 export interface AggParamsPercentileRanks extends BaseAggParams {
   field: string;
@@ -35,16 +37,17 @@ export interface AggParamsPercentileRanks extends BaseAggParams {
 export type IPercentileRanksAggConfig = IResponseAggConfig;
 
 export interface PercentileRanksMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
+  getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart'];
 }
 
-const getValueProps = (getInternalStartServices: GetInternalStartServicesFn) => {
+const getValueProps = (
+  getFieldFormatsStart: PercentileRanksMetricAggDependencies['getFieldFormatsStart']
+) => {
   return {
     makeLabel(this: IPercentileRanksAggConfig) {
-      const { fieldFormats } = getInternalStartServices();
+      const { getDefaultInstance } = getFieldFormatsStart();
       const field = this.getField();
-      const format =
-        (field && field.format) || fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      const format = (field && field.format) || getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       const customLabel = this.getParam('customLabel');
       const label = customLabel || this.getFieldDisplayName();
 
@@ -57,7 +60,7 @@ const getValueProps = (getInternalStartServices: GetInternalStartServicesFn) => 
 };
 
 export const getPercentileRanksMetricAgg = ({
-  getInternalStartServices,
+  getFieldFormatsStart,
 }: PercentileRanksMetricAggDependencies) => {
   return new MetricAggType<IPercentileRanksAggConfig>({
     name: METRIC_TYPES.PERCENTILE_RANKS,
@@ -87,10 +90,7 @@ export const getPercentileRanksMetricAgg = ({
       },
     ],
     getResponseAggs(agg) {
-      const ValueAggConfig = getResponseAggConfigClass(
-        agg,
-        getValueProps(getInternalStartServices)
-      );
+      const ValueAggConfig = getResponseAggConfigClass(agg, getValueProps(getFieldFormatsStart));
       const values = agg.getParam('values');
 
       return values.map((value: any) => new ValueAggConfig(value));
