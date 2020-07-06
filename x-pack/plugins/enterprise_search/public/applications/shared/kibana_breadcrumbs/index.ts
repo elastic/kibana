@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { enterpriseSearchBreadcrumbs } from './generate_breadcrumbs';
-export { appSearchBreadcrumbs } from './generate_breadcrumbs';
-export { SetAppSearchBreadcrumbs } from './set_breadcrumbs';
+export {
+  enterpriseSearchBreadcrumbs,
+  appSearchBreadcrumbs,
+  workplaceSearchBreadcrumbs,
+} from './generate_breadcrumbs';
+export { SetAppSearchBreadcrumbs, SetWorkplaceSearchBreadcrumbs } from './set_breadcrumbs';
