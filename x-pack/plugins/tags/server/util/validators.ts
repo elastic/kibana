@@ -7,12 +7,6 @@
 import Boom from 'boom';
 import { parseKID } from '../../common/kid';
 
-export const validateTagId = (id: string) => {
-  if (typeof id !== 'string') throw Boom.badRequest('ID must be a string');
-  if (id.length < 10) throw Boom.badRequest('ID is too short.');
-  if (id.length > 256) throw Boom.badRequest('ID is too long.');
-};
-
 export const validateTagIds = (ids: string[]) => {
   if (!Array.isArray(ids)) throw Boom.badRequest('Expected tags IDs to be an array.');
   ids.forEach(validateTagId);
@@ -68,3 +62,13 @@ export const validatePage = (page: number) => {
   if (page < 1 || page > 1000) throw Boom.badRequest('Invalid page.');
   if (page !== Math.round(page)) throw Boom.badRequest('Invalid page parameter.');
 };
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export const validateUUID = (uuid: string) => {
+  if (typeof uuid !== 'string') throw Boom.badRequest('UUID must be a string.');
+  if (uuid.length !== 36) throw Boom.badRequest('Invalid UUID string length.');
+  if (!UUID_REGEX.test(uuid)) throw Boom.badRequest('Invalid UUID.');
+};
+
+export const validateTagId = (tagId: string) => validateUUID(tagId);

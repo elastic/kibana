@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateTagTitle, validateTagDescription, validateTagColor } from './validators';
+import {
+  validateTagTitle,
+  validateTagDescription,
+  validateTagColor,
+  validateTagId,
+} from './validators';
 
 describe('validateTagTitle()', () => {
   test('succeeds on valid title', () => {
@@ -74,5 +79,26 @@ describe('validateTagColor()', () => {
     expect(() => validateTagColor('#faAABz')).toThrowErrorMatchingInlineSnapshot(
       `"Invalid digit in tag color."`
     );
+  });
+});
+
+describe('validateTagId()', () => {
+  test('validates UUID', () => {
+    validateTagId('09fd1de9-5ca5-47d0-9124-7724c97b6267');
+  });
+
+  test('throws on invalid UUID', () => {
+    expect(() => validateTagId(123 as any)).toThrowErrorMatchingInlineSnapshot(
+      `"UUID must be a string."`
+    );
+    expect(() => validateTagId('adsf')).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid UUID string length."`
+    );
+    expect(() =>
+      validateTagId('09fd1de9-5ca5-47d0-9124-7724c97b6267XXX')
+    ).toThrowErrorMatchingInlineSnapshot(`"Invalid UUID string length."`);
+    expect(() =>
+      validateTagId('09fd1de9a5ca5d47d049124d7724c97b6267')
+    ).toThrowErrorMatchingInlineSnapshot(`"Invalid UUID."`);
   });
 });
