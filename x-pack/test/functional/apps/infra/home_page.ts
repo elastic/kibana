@@ -104,6 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('records telemetry for kubernetes', async () => {
       await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      await pageObjects.infraHome.getWaffleMap();
       await pageObjects.infraHome.goToPods();
 
       const resp = await supertest
