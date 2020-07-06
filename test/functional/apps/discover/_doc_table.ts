@@ -21,12 +21,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const queryBar = getService('queryBar');
+  const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -70,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(finalRows.length).to.be.below(initialRows.length);
     });
 
-    it(`should load up to ${rowsHardLimit} rows whin scrolling at the end of the table`, async function () {
+    it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
       const initialRows = await PageObjects.discover.getDocTableRows();
       // click the Skip to the end of the table
       await PageObjects.discover.skipToEndOfDocTable();
@@ -90,14 +89,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('expand a document row', function () {
+      const rowToInspect = 1;
       beforeEach(async function () {
-        await PageObjects.discover.expandToggleDocTableRow(1);
+        // close the toggle if open
+        if (await PageObjects.discover.getDocTableRowDetails(rowToInspect)) {
+          await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+        }
       });
 
       it('should expand the detail row when the toggle arrow is clicked', async function () {
         await retry.try(async function () {
-          await PageObjects.discover.expandToggleDocTableRow(1);
-          const detailsEl = await PageObjects.discover.getDocTableRowDetails(1);
+          await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+          const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
           const defaultMessageEl = await detailsEl.findByTestSubject('docTableRowDetailsTitle');
           expect(defaultMessageEl).to.be.ok();
         });
@@ -105,8 +108,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show the detail panel actions', async function () {
         await retry.try(async function () {
-          await PageObjects.discover.expandToggleDocTableRow(1);
-          const detailsEl = await PageObjects.discover.getDocTableRowDetails(1);
+          await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+          const detailsEl = await PageObjects.discover.getDocTableRowDetails(rowToInspect);
           const [surroundingActionEl, singleActionEl] = await detailsEl.findAllByTestSubject(
             'docTableRowAction'
           );

@@ -198,23 +198,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     /**
-     * Expanding a row has the side effect to increase the number of raw rows in the table.
-     * So be careful to manipulate the DOM here.
-     * Use getDocTableRows() to have the clean list of rows.
-     */
-    public async expandToggleDocTableRow(index: number) {
-      const rows = await this.getDocTableRows();
-      // The index above was meant to work with CSS nth-child, but here we deal with JS arrays :)
-      const indexWithOffset = Math.max(0, index - 1);
-      const toggleEl = await testSubjects.findDescendant(
-        `docTableExpandToggleColumn`,
-        rows[indexWithOffset]
-      );
-      await toggleEl.click();
-      await header.waitUntilLoadingHasFinished();
-    }
-
-    /**
      * Mind that originalRowIndex here refers to the original table index.
      * Use getDocTableRows() to have the clean list of rows.
      */
@@ -222,12 +205,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const detailsEl = await find.byCssSelector(
         `tr.kbnDocTable__row:nth-child(${originalRowIndex}) + [data-test-subj='docTableDetailsRow']`
       );
-      if (!detailsEl) {
-        // somebody forgot to expand the row? :)
-        await this.expandToggleDocTableRow(originalRowIndex);
-        // Try again!
-        return await this.getDocTableRowDetails(originalRowIndex);
-      }
       return detailsEl;
     }
 
