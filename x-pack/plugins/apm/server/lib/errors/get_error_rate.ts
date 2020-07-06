@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mean } from 'lodash.mean';
+import { mean } from 'lodash';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
