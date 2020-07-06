@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Draggable,
   DraggableProvided,
@@ -22,7 +22,7 @@ import { DataProvider } from '../../../timelines/components/timeline/data_provid
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
 
-import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
+import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
 import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
@@ -90,6 +90,7 @@ interface Props {
   disabled?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
+  timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
@@ -115,26 +116,42 @@ export const getStyle = (
 
 const DraggableWrapperComponent: React.FC<Props> = ({
   dataProvider,
+  disabled,
   onFilterAdded,
   render,
+  timelineId,
   truncate,
-  disabled,
 }) => {
+  const draggableRef = useRef<HTMLDivElement | null>(null);
+  const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
-  const toggleTopN = useCallback(() => {
-    setShowTopN(!showTopN);
-  }, [setShowTopN, showTopN]);
-
+  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
+  const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
   const [providerRegistered, setProviderRegistered] = useState(false);
 
   const dispatch = useDispatch();
 
+  const handleClosePopOverTrigger = useCallback(
+    () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
+    []
+  );
+
+  const toggleTopN = useCallback(() => {
+    setShowTopN((prevShowTopN) => {
+      const newShowTopN = !prevShowTopN;
+      if (newShowTopN === false) {
+        handleClosePopOverTrigger();
+      }
+      return newShowTopN;
+    });
+  }, [handleClosePopOverTrigger]);
+
   const registerProvider = useCallback(() => {
-    if (!providerRegistered) {
+    if (!disabled && !providerRegistered) {
       dispatch(dragAndDropActions.registerProvider({ provider: dataProvider }));
       setProviderRegistered(true);
     }
-  }, [dispatch, providerRegistered, dataProvider]);
+  }, [disabled, providerRegistered, dispatch, dataProvider]);
 
   const unRegisterProvider = useCallback(
     () => dispatch(dragAndDropActions.unRegisterProvider({ id: dataProvider.id })),
@@ -143,19 +160,23 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   useEffect(
     () => () => {
-      unRegisterProvider();
+      if (!disabled) {
+        unRegisterProvider();
+      }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [disabled, unRegisterProvider]
   );
 
   const hoverContent = useMemo(
     () => (
       <DraggableWrapperHoverContent
+        closePopOver={handleClosePopOverTrigger}
         draggableId={getDraggableId(dataProvider.id)}
         field={dataProvider.queryMatch.field}
+        goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
         showTopN={showTopN}
+        timelineId={timelineId ?? timelineIdFind}
         toggleTopN={toggleTopN}
         value={
           typeof dataProvider.queryMatch.value !== 'number'
@@ -164,12 +185,20 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         }
       />
     ),
-    [dataProvider, onFilterAdded, showTopN, toggleTopN]
+    [
+      dataProvider,
+      handleClosePopOverTrigger,
+      onFilterAdded,
+      showTopN,
+      timelineId,
+      timelineIdFind,
+      toggleTopN,
+    ]
   );
 
   const renderContent = useCallback(
     () => (
-      <Wrapper data-test-subj="draggableWrapperDiv" disabled>
+      <Wrapper data-test-subj="draggableWrapperDiv">
         <DragDropErrorBoundary>
           <Droppable
             isDropDisabled={true}
@@ -198,13 +227,16 @@ const DraggableWrapperComponent: React.FC<Props> = ({
                   draggableId={getDraggableId(dataProvider.id)}
                   index={0}
                   key={getDraggableId(dataProvider.id)}
-                  isDragDisabled={true}
+                  isDragDisabled={disabled}
                 >
                   {(provided, snapshot) => (
                     <ProviderContainer
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      ref={provided.innerRef}
+                      ref={(e: HTMLDivElement) => {
+                        provided.innerRef(e);
+                        draggableRef.current = e;
+                      }}
                       data-test-subj="providerContainer"
                       isDragging={snapshot.isDragging}
                       registerProvider={registerProvider}
@@ -230,17 +262,20 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         </DragDropErrorBoundary>
       </Wrapper>
     ),
-    [dataProvider, render, registerProvider, truncate]
+    [dataProvider, registerProvider, render, disabled, truncate]
   );
 
   if (disabled) return <>{renderContent()}</>;
 
   return (
-    <WithHoverActions alwaysShow={showTopN} hoverContent={hoverContent} render={renderContent} />
+    <WithHoverActions
+      alwaysShow={showTopN}
+      closePopOverTrigger={closePopOverTrigger}
+      hoverContent={hoverContent}
+      render={renderContent}
+    />
   );
 };
-
-DraggableWrapperComponent.displayName = 'DraggableWrapperComponent';
 
 export const DraggableWrapper = React.memo(
   DraggableWrapperComponent,

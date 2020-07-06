@@ -26,7 +26,6 @@ import {
 import { StatefulFieldsBrowser } from '../../fields_browser';
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../fields_browser/helpers';
 import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
-// import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../row_renderers_browser/helpers';
 import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
@@ -176,6 +175,7 @@ export const Body = React.memo<BodyProps>(
           )}
           <TimelineBody
             data-test-subj="timeline-body"
+            data-timeline-id={id}
             bodyHeight={height}
             ref={containerElementRef}
             visible={show && !showGraphView(graphEventId)}
@@ -183,6 +183,7 @@ export const Body = React.memo<BodyProps>(
             <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
               <ColumnHeaders
                 actionsColumnWidth={actionsColumnWidth}
+                browserFields={browserFields}
                 columnHeaders={columnHeaders}
                 isEventViewer={isEventViewer}
                 isSelectAllChecked={isSelectAllChecked}
@@ -191,10 +192,12 @@ export const Body = React.memo<BodyProps>(
                 onColumnSorted={onColumnSorted}
                 onFilterChange={onFilterChange}
                 onSelectAll={onSelectAll}
+                onUpdateColumns={onUpdateColumns}
                 showEventsSelect={false}
                 showSelectAllCheckbox={showCheckboxes}
                 sort={sort}
                 timelineId={id}
+                toggleColumn={toggleColumn}
               />
 
               <Events
