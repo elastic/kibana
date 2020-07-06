@@ -38,9 +38,13 @@ describe('manifest_manager', () => {
         schema_version: '1.0.0',
         artifacts: {
           [artifact.identifier]: {
-            sha256: artifact.sha256,
-            size: artifact.size,
-            url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.sha256}`,
+            compression_algorithm: 'none',
+            encryption_algorithm: 'none',
+            precompress_sha256: artifact.decompressedSha256,
+            postcompress_sha256: artifact.compressedSha256,
+            precompress_size: artifact.decompressedSize,
+            postcompress_size: artifact.compressedSize,
+            relative_url: `/api/endpoint/artifacts/download/${artifact.identifier}/${artifact.compressedSha256}`,
           },
         },
       });

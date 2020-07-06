@@ -6,6 +6,15 @@
 
 import * as t from 'io-ts';
 
+export const compressionAlgorithm = t.keyof({
+  none: null,
+  zlib: null,
+});
+
+export const encryptionAlgorithm = t.keyof({
+  none: null,
+});
+
 export const identifier = t.string;
 
 export const manifestVersion = t.string;
@@ -15,8 +24,8 @@ export const manifestSchemaVersion = t.keyof({
 });
 export type ManifestSchemaVersion = t.TypeOf<typeof manifestSchemaVersion>;
 
+export const relativeUrl = t.string;
+
 export const sha256 = t.string;
 
 export const size = t.number;
-
-export const url = t.string;
