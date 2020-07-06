@@ -68,6 +68,12 @@ function toggleDisabledFeatures(
       navLinks[feature.navLinkId] = false;
     }
 
+    feature.app.forEach((app) => {
+      if (navLinks.hasOwnProperty(app)) {
+        navLinks[app] = false;
+      }
+    });
+
     // Disable associated catalogue entries
     const privilegeCatalogueEntries = feature.catalogue || [];
     privilegeCatalogueEntries.forEach((catalogueEntryId) => {
