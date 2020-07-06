@@ -11,6 +11,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -37,6 +38,10 @@ export function RumOverview() {
     urlParams: { start, end },
   } = useUrlParams();
 
+  const isRumServiceRoute = useRouteMatch(
+    '/services/:serviceName/rum-overview'
+  );
+
   const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -61,13 +66,17 @@ export function RumOverview() {
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-            <ServiceNameFilter
-              serviceNames={
-                data?.items?.map((service) => service.serviceName) ?? []
-              }
-            />
-            <EuiSpacer size="xl" />
-            <EuiHorizontalRule margin="none" />
+            {!isRumServiceRoute && (
+              <>
+                <ServiceNameFilter
+                  serviceNames={
+                    data?.items?.map((service) => service.serviceName) ?? []
+                  }
+                />
+                <EuiSpacer size="xl" />
+                <EuiHorizontalRule margin="none" />{' '}
+              </>
+            )}
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }) {
   const screenshot = getService('screenshots');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
-  describe('dls', function () {
+  // Skipped as failing on ES Promotion: https://github.com/elastic/kibana/issues/70818
+  describe.skip('dls', function () {
     before('initialize tests', async () => {
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('security/dlstest');
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
           global: ['all'],
         },
       });
-      const roles = indexBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
+      const roles = keyBy(await PageObjects.security.getElasticsearchRoles(), 'rolename');
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('myroleEast');
       expect(roles.myroleEast.reserved).to.be(false);
@@ -61,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
         save: true,
         roles: ['kibana_admin', 'myroleEast'],
       });
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       expect(users.userEast.roles).to.eql(['kibana_admin', 'myroleEast']);
       expect(users.userEast.reserved).to.be(false);
