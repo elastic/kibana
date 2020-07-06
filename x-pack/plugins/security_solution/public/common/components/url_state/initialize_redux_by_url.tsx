@@ -120,6 +120,9 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
         get('timeline.timerange', timerangeStateData)
       );
+      if (isNumber(absoluteRange.to)) {
+        absoluteRange.to = new Date(absoluteRange.to).toISOString();
+      }
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           ...absoluteRange,

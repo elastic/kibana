@@ -218,7 +218,7 @@ export const formatDate = (
   }
 ) => {
   const momentDate = dateMath.parse(date, options);
-  return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
+  return momentDate != null && momentDate.isValid() ? momentDate.toISOString() : 0;
 };
 
 export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({

@@ -11,9 +11,9 @@ export const sharedSchema = gql`
     "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
     interval: String!
     "The end of the timerange"
-    to: Float!
+    to: String!
     "The beginning of the timerange"
-    from: Float!
+    from: String!
   }
 
   type CursorType {

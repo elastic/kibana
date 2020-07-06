@@ -13,16 +13,16 @@ export interface AbsoluteTimeRange {
   kind: 'absolute';
   fromStr: undefined;
   toStr: undefined;
-  from: number;
-  to: number;
+  from: number | string;
+  to: number | string;
 }
 
 export interface RelativeTimeRange {
   kind: 'relative';
   fromStr: string;
   toStr: string;
-  from: number;
-  to: number;
+  from: number | string;
+  to: number | string;
 }
 
 export const isRelativeTimeRange = (

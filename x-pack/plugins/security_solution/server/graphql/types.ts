@@ -26,9 +26,9 @@ export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
   /** The end of the timerange */
-  to: number;
+  to: string;
   /** The beginning of the timerange */
-  from: number;
+  from: string;
 }
 
 export interface PaginationInputPaginated {

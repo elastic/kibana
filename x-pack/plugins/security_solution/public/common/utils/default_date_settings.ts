@@ -49,8 +49,8 @@ export const getTimeRangeSettings = (uiSettings = true) => {
 
   const fromStr = (isString(timeRange?.from) && timeRange?.from) || DEFAULT_FROM;
   const toStr = (isString(timeRange?.to) && timeRange?.to) || DEFAULT_TO;
-  const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).valueOf();
-  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT).valueOf();
+  const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
+  const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT).toISOString();
 
   return { from, fromStr, to, toStr };
 };
