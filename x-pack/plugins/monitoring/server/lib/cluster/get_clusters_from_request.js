@@ -142,12 +142,18 @@ export async function getClustersFromRequest(
         if (prodLicenseInfo.clusterAlerts.enabled) {
           cluster.alerts = {
             list: await fetchStatus(alertsClient, undefined, cluster.cluster_uuid, start, end, []),
+            alertsMeta: {
+              enabled: true,
+            },
           };
           continue;
         }
 
         cluster.alerts = {
           list: {},
+          alertsMeta: {
+            enabled: true,
+          },
           clusterMeta: {
             enabled: false,
             message: i18n.translate(

@@ -279,11 +279,14 @@ export function ElasticsearchPanel(props) {
                   defaultMessage="Health"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="esUptime">
-                <EuiHealth
-                  color={statusColorMap[clusterStats.status]}
-                  data-test-subj="statusIcon"
-                />
+              <EuiDescriptionListDescription>
+                <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.healthStatusDescription"
+                    defaultMessage="Health is {status}"
+                    values={{ status: clusterStats.status || 'n/a' }}
+                  />
+                </EuiHealth>
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage

@@ -128,7 +128,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
       defaultMessage: 'Alerts',
     }),
-    field: 'isOnline',
+    field: 'alerts',
     width: '175px',
     sortable: true,
     render: () => {
@@ -152,7 +152,16 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
           });
       return (
         <EuiToolTip content={status} position="bottom" trigger="hover">
-          <EuiHealth color={value ? 'success' : 'subdued'} data-test-subj="statusIcon">
+          <EuiHealth
+            color={value ? 'success' : 'subdued'}
+            data-test-subj="statusIcon"
+            alt={i18n.translate('xpack.monitoring.elasticsearch.nodes.healthAltIcon', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status,
+              },
+            })}
+          >
             {status}
           </EuiHealth>
         </EuiToolTip>
