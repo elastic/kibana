@@ -6,5 +6,7 @@
   "severity": "high",
   "type": "query",
   "query": "user.name: root or user.name: admin",
-  "exceptions_list": [{ "id": "some_updated_fake_id", "namespace_type": "single" }]
+  "exceptions_list": [
+    { "id": "some_updated_fake_id", "namespace_type": "single", "type": "detection" }
+  ]
 }

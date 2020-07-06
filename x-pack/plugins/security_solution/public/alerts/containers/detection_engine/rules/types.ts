@@ -7,6 +7,10 @@
 import * as t from 'io-ts';
 
 import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
+import {
+  listArray,
+  listArrayOrUndefined,
+} from '../../../../../common/detection_engine/schemas/types';
 /* eslint-disable @typescript-eslint/camelcase */
 import {
   author,
@@ -64,6 +68,7 @@ export const NewRuleSchema = t.intersection([
     to: t.string,
     updated_by: t.string,
     note: t.string,
+    exceptions_list: listArrayOrUndefined,
   }),
 ]);
 
@@ -136,6 +141,7 @@ export const RuleSchema = t.intersection([
     timestamp_override,
     note: t.string,
     version: t.number,
+    exceptions_list: listArray,
   }),
 ]);
 

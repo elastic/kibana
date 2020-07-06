@@ -11,9 +11,15 @@ import {
   Entry,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  NamespaceType,
   OperatorTypeEnum,
   OperatorEnum,
 } from '../../../lists_plugin_deps';
+
+export interface ExceptionListItemIdentifiers {
+  id: string;
+  namespaceType: NamespaceType;
+}
 
 export interface FormattedEntry {
   fieldName: string;

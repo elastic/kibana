@@ -73,6 +73,7 @@ import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
 import { ExceptionListType } from '../../../../../common/components/exceptions/types';
+import { ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -253,6 +254,18 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
 
+  const exceptionLists = useMemo((): ExceptionIdentifiers[] => {
+    if (rule != null && rule.exceptions_list != null) {
+      return rule.exceptions_list.map(({ id, namespace_type, type }) => ({
+        id,
+        namespaceType: namespace_type,
+        type,
+      }));
+    } else {
+      return [];
+    }
+  }, [rule]);
+
   if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
     history.replace(getDetectionEngineUrl());
     return null;
@@ -418,7 +431,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       ExceptionListType.ENDPOINT,
                     ]}
                     commentsAccordionId={'ruleDetailsTabExceptions'}
-                    exceptionListsMeta={[]}
+                    exceptionListsMeta={exceptionLists}
                   />
                 )}
                 {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}

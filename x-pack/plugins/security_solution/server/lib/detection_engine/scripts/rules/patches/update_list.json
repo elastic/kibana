@@ -3,7 +3,8 @@
   "exceptions_list": [
     {
       "id": "some_updated_fake_id",
-      "namespace_type": "single"
+      "namespace_type": "single",
+      "type": "detection"
     }
   ]
 }
